@@ -159,7 +159,6 @@ public class ProfileStore {
 	 * @return Returns the collection of profiles currently stored in the preference store or
 	 * <code>null</code> if the loading failed. The elements are of type {@link ProfileManager.CustomProfile}
 	 * and are all updated to the latest version.
-	 * @throws CoreException
 	 */
 	public List<Profile> readProfiles(IScopeContext scope) throws CoreException {
 		return readProfilesFromString(scope.getNode(JavaUI.ID_PLUGIN).get(fProfilesKey, null));
@@ -213,7 +212,6 @@ public class ProfileStore {
 	 * as collection or <code>null</code> if the file is not a profile file.
 	 * @param file The file to read from
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
-	 * @throws CoreException
 	 */
 	public List<Profile> readProfilesFromFile(File file) throws CoreException {
 		try {
@@ -232,7 +230,6 @@ public class ProfileStore {
 	 * Load profiles from a XML stream and add them to a map or <code>null</code> if the source is not a profile store.
 	 * @param inputSource The input stream
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
-	 * @throws CoreException
 	 */
 	public static List<Profile> readProfilesFromStream(InputSource inputSource) throws CoreException {
 
@@ -252,7 +249,6 @@ public class ProfileStore {
 	 * @param profiles List of <code>CustomProfile</code>
 	 * @param file File to write
 	 * @param encoding the encoding to use
-	 * @throws CoreException
 	 */
 	public void writeProfilesToFile(Collection<Profile> profiles, File file, String encoding) throws CoreException {
 		final OutputStream stream;
@@ -273,7 +269,6 @@ public class ProfileStore {
 	 * @param profiles the list of <code>CustomProfile</code>
 	 * @param stream the stream to write to
 	 * @param encoding the encoding to use
-	 * @throws CoreException
 	 */
 	public static void writeProfilesToStream(Collection<Profile> profiles, OutputStream stream, String encoding, IProfileVersioner profileVersioner) throws CoreException {
 

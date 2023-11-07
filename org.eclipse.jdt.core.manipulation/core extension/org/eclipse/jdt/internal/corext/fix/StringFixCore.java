@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
  * Supported:
  * 		Add missing $NON-NLS$ tag
  * 		Remove unnecessary $NON-NLS$ tag
- *
  */
 public class StringFixCore implements IProposableFix, ICleanUpFixCore {
 

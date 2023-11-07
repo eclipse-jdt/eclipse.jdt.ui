@@ -17,9 +17,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 
-/**
- *
- */
 public abstract class ASTAttribute {
 
 	protected static final Object[] EMPTY= new Object[0];

@@ -17,9 +17,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-/**
- *
- */
 public class TreeInfoCollector {
 
 	public static class NodeCounter extends ASTVisitor {

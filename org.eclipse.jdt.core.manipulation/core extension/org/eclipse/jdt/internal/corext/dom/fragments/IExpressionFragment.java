@@ -42,7 +42,6 @@ public interface IExpressionFragment extends IASTFragment {
 	 * the copied node.
 	 * @return a copy of this IExpressionFragment, ready for use in the given
 	 *         rewrite
-	 * @throws JavaModelException
 	 */
 	Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) throws JavaModelException;
 }

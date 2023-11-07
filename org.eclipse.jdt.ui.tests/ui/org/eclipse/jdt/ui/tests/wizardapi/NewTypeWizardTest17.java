@@ -64,9 +64,6 @@ import org.eclipse.jdt.ui.wizards.NewRecordWizardPage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
- *
- */
 public class NewTypeWizardTest17 {
 	private IJavaProject fJProject1, fJProject2;
 

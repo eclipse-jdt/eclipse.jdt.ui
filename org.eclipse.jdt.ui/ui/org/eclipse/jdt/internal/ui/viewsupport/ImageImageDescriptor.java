@@ -18,8 +18,6 @@ import org.eclipse.swt.graphics.ImageData;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-/**
-  */
 public class ImageImageDescriptor extends ImageDescriptor {
 
 	private Image fImage;

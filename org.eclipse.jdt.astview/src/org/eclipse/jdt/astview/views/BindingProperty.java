@@ -20,9 +20,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.dom.IBinding;
 
-/**
- *
- */
 public class BindingProperty extends ASTAttribute {
 
 	private final String fName;

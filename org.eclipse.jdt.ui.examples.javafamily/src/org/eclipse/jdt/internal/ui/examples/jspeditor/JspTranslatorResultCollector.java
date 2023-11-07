@@ -33,14 +33,6 @@ public class JspTranslatorResultCollector implements ITranslatorResultCollector 
 	private ArrayList fDeclarationLines= new ArrayList();
 	private ArrayList fLocalDeclarationLines= new ArrayList();
 
-	/**
-	 * @param declarations
-	 * @param localDeclarations
-	 * @param content
-	 * @param declarationLines
-	 * @param localDeclarationLines
-	 * @param contentLines
-	 */
 	public JspTranslatorResultCollector(StringBuffer declarations, StringBuffer localDeclarations, StringBuffer content, ArrayList declarationLines, ArrayList localDeclarationLines, ArrayList contentLines) {
 		fDeclarations= declarations;
 		fLocalDeclarations= localDeclarations;

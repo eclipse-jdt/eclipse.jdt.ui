@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Tests generation of getters and setters.
  *
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
- *
  */
 public class GenerateGettersSettersTest extends SourceTestCase {
 	@Rule
@@ -78,8 +77,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	 * @param sort enable sort
 	 * @param visibility visibility for new methods
 	 * @param sibling element to insert before
-	 * @throws CoreException
-	 *
 	 */
 	private void runOperation(IType type, IField[] getters, IField[] setters, IField[] gettersAndSetters, boolean sort, int visibility, IJavaElement sibling) throws CoreException {
 
@@ -113,8 +110,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test0() throws Exception {
@@ -146,8 +141,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void doneWithSmartIs() throws Exception {
@@ -179,8 +172,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void isDoneWithSmartIs() throws Exception {
@@ -212,8 +203,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void doneWithoutSmartIs() throws Exception {
@@ -250,8 +239,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests normal getter/setter generation for one field.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void isDoneWithoutSmartIs() throws Exception {
@@ -288,7 +275,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * No setter for final fields (if skipped by user, as per parameter)
-	 * @throws Exception
 	 */
 	@Test
 	public void test1() throws Exception {
@@ -320,7 +306,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests if full-qualified field declaration type is also full-qualified in setter parameter.
-	 * @throws Exception
 	 */
 	@Test
 	public void test2() throws Exception {
@@ -354,7 +339,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Test parameterized types in field declarations
-	 * @throws Exception
 	 */
 	@Test
 	public void test3() throws Exception {
@@ -399,7 +383,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests enum typed fields
-	 * @throws Exception
 	 */
 	@Test
 	public void test4() throws Exception {
@@ -434,7 +417,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Test generation for more than one field
-	 * @throws Exception
 	 */
 	@Test
 	public void test5() throws Exception {
@@ -520,7 +502,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Some more fields, this time sorted
-	 * @throws Exception
 	 */
 	@Test
 	public void test6() throws Exception {
@@ -579,7 +560,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Test getter/setter generation in anonymous type
-	 * @throws Exception
 	 */
 	@Test
 	public void test7() throws Exception {
@@ -630,7 +610,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests other modifiers for the generated getters
-	 * @throws Exception
 	 */
 	@Test
 	public void test8() throws Exception {
@@ -655,7 +634,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Verify existing getters are not overwritten, and setters are created
-	 * @throws Exception
 	 */
 	@Test
 	public void test9() throws Exception {
@@ -703,7 +681,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	/**
 	 * Test creation for combined field declarations; creating a pair of accessors for
 	 * one variable and only a setter for another.
-	 * @throws Exception
 	 */
 	@Test
 	public void test10() throws Exception {
@@ -752,7 +729,6 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 	/**
 	 * Tests insertion of members before a certain method.
-	 * @throws Exception
 	 */
 	@Test
 	public void test11() throws Exception {

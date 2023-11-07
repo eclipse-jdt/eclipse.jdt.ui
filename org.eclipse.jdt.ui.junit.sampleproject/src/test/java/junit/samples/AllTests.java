@@ -18,7 +18,6 @@ import junit.framework.*;
 
 /**
  * TestSuite that runs all the sample tests
- *
  */
 public class AllTests {
 

@@ -129,7 +129,6 @@ public interface IRefactoringProcessorIdsCore {
 	 * (and of other Java elements or resources) are available
 	 * through the interfaces {@link IJavaElementMapper} and {@link IResourceMapper}, which can be retrieved from the
 	 * processor using the getAdapter() method.</p>
-	 *
 	 */
 	String RENAME_TYPE_PROCESSOR= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
 

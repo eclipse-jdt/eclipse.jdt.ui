@@ -87,7 +87,6 @@ public class JavaUIHelp {
 
 		/*
 		 * @see HelpListener#helpRequested(HelpEvent)
-		 *
 		 */
 		@Override
 		public void helpRequested(HelpEvent e) {

@@ -71,8 +71,6 @@ public class JavaExpandSelectionTest extends TextPerformanceTestCase {
 	/**
 	 * Measures the time to semantically expand the selection in a large
 	 * file in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());

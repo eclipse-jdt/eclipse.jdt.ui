@@ -56,7 +56,6 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  * Tests generation of constructors using fields
  *
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation
- *
  */
 public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	@Rule
@@ -125,8 +124,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Tests simple constructor generation with one field
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test01() throws Exception {
@@ -158,8 +155,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Tests adding two fields with identically named classes from different packages
-	 *
-	 * @throws Exception
 	 */
 	@Ignore("see bug 113052 (import issue)")
 	@Test
@@ -214,8 +209,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Ensure field ordering stays constant
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test03() throws Exception {
@@ -256,8 +249,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Test insertion between two methods
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test04() throws Exception {
@@ -295,8 +286,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Without comments
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test05() throws Exception {
@@ -325,8 +314,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * With a different modifier
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test06() throws Exception {
@@ -355,8 +342,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Omitting the super constructor
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test07() throws Exception {
@@ -384,8 +369,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Type variables; generic types in fields
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test08() throws Exception {
@@ -433,8 +416,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Enums
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test09() throws Exception {
@@ -464,8 +445,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Final uninitialized fields
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test10() throws Exception {
@@ -494,8 +473,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Verify JDT code conventions are followed, see bug 111801
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test11() throws Exception {
@@ -532,8 +509,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Name clashing fun with super constructors
-	 * @throws Exception
-	 *
 	 */
 	@Test
 	public void test12() throws Exception {
@@ -582,8 +557,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Generic types in parameters of super constructor
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test13() throws Exception {
@@ -634,7 +607,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
 	/**
 	 * Inner types
-	 * @throws Exception
 	 */
 	@Test
 	public void test14() throws Exception {

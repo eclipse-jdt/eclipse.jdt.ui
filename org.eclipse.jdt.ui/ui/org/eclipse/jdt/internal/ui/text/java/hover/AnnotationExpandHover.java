@@ -125,10 +125,6 @@ public class AnnotationExpandHover implements IAnnotationHover, IAnnotationHover
 
 	/**
 	 * Creates a new hover instance.
-	 *
-	 * @param ruler
-	 * @param access
-	 * @param doubleClickListener
 	 */
 	public AnnotationExpandHover(CompositeRuler ruler, IAnnotationAccess access, IDoubleClickListener doubleClickListener) {
 		fCompositeRuler= ruler;

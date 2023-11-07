@@ -101,9 +101,6 @@ public class Checks {
 
 	/**
 	 * Checks if method will have a constructor name after renaming.
-	 * @param method
-	 * @param newMethodName
-	 * @param newTypeName
 	 * @return <code>RefactoringStatus</code> with <code>WARNING</code> severity if
 	 * the give method will have a constructor name after renaming
 	 * <code>null</code> otherwise.
@@ -322,9 +319,6 @@ public class Checks {
 
 	/**
 	 * Checks if the new method is already used in the given type.
-	 * @param type
-	 * @param methodName
-	 * @param parameters
 	 * @return the status
 	 */
 	public static RefactoringStatus checkMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
@@ -350,10 +344,6 @@ public class Checks {
 	 *   <li> if the new method overrides a method defined in the given type or in one of its
 	 * 		super classes. </li>
 	 * </ul>
-	 * @param type
-	 * @param methodName
-	 * @param returnType
-	 * @param parameters
 	 * @return the status
 	 */
 	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters) {
@@ -483,12 +473,7 @@ public class Checks {
 	 * Finds a method in a type
 	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * @param name
-	 * @param parameterCount
-	 * @param isConstructor
-	 * @param type
 	 * @return The first found method or null, if nothing found
-	 * @throws JavaModelException
 	 */
 	public static IMethod findMethod(String name, int parameterCount, boolean isConstructor, IType type) throws JavaModelException {
 		return findMethod(name, parameterCount, isConstructor, type.getMethods());
@@ -498,10 +483,7 @@ public class Checks {
 	 * Finds a method in a type.
 	 * Searches for a method with the same name and the same parameter count.
 	 * Parameter types are <b>not</b> compared.
-	 * @param method
-	 * @param type
 	 * @return The first found method or null, if nothing found
-	 * @throws JavaModelException
 	 */
 	public static IMethod findMethod(IMethod method, IType type) throws JavaModelException {
 		return findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), type.getMethods());
@@ -511,10 +493,7 @@ public class Checks {
 	 * Finds a method in an array of methods.
 	 * Searches for a method with the same name and the same parameter count.
 	 * Parameter types are <b>not</b> compared.
-	 * @param method
-	 * @param methods
 	 * @return The first found method or null, if nothing found
-	 * @throws JavaModelException
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] methods) throws JavaModelException {
 		return findMethod(method.getElementName(), method.getParameterTypes().length, method.isConstructor(), methods);
@@ -538,10 +517,7 @@ public class Checks {
 	 * Finds a method in a type.
 	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * @param method
-	 * @param type
 	 * @return The first found method or null, if nothing found
-	 * @throws JavaModelException
 	 */
 	public static IMethod findSimilarMethod(IMethod method, IType type) throws JavaModelException {
 		return findSimilarMethod(method, type.getMethods());
@@ -551,10 +527,7 @@ public class Checks {
 	 * Finds a method in an array of methods.
 	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done
-	 * @param method
-	 * @param methods
 	 * @return The first found method or null, if nothing found
-	 * @throws JavaModelException
 	 */
 	public static IMethod findSimilarMethod(IMethod method, IMethod[] methods) throws JavaModelException {
 		boolean isConstructor= method.isConstructor();
@@ -603,7 +576,6 @@ public class Checks {
 	 *  units are to be removed.
 	 * @param status a refactoring status to collect errors and problems
 	 * @return the array of search result groups
-	 * @throws JavaModelException
 	 */
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
 		List<SearchResultGroup> result= new ArrayList<>();
@@ -788,7 +760,6 @@ public class Checks {
 	 * Moreover, if it is a <code>IMember</code> it must not be binary.
 	 * The returned <code>RefactoringStatus</code> has <code>ERROR</code> severity if
 	 * it is not possible to modify the element.
-	 * @param javaElement
 	 * @return the status
 	 * @throws JavaModelException
 	 *
@@ -896,7 +867,6 @@ public class Checks {
 	}
 
 	/**
-	 * @param e
 	 * @return int
 	 *          Checks.IS_RVALUE			if e is an rvalue
 	 *          Checks.IS_RVALUE_GUESSED	if e is guessed as an rvalue

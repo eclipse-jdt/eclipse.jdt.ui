@@ -69,7 +69,6 @@ public class ClasspathModifierQueries {
          * <li><code>IPackageFragment</code></li>
          * <li><code>IFolder</code></li>
          * @param project the Java project
-         * @throws JavaModelException
          */
         public OutputFolderValidator(List<?> newElements, IJavaProject project) throws JavaModelException {
             fEntries= project.getRawClasspath();
@@ -194,7 +193,6 @@ public class ClasspathModifierQueries {
          *
          * @param element the element to get the
          * information from
-         * @param focusOnExcluded
          * @return <code>true</code> if changes
          * have been accepted and <code>getInclusionPatter</code>
          * or <code>getExclusionPattern</code> can
@@ -257,8 +255,6 @@ public class ClasspathModifierQueries {
          * @param outputLocation desired output location for the
          * project
          * @return query giving information about output and source folders
-         * @throws JavaModelException
-         *
          */
         OutputFolderQuery getOutputFolderQuery(IPath outputLocation) throws JavaModelException;
     }

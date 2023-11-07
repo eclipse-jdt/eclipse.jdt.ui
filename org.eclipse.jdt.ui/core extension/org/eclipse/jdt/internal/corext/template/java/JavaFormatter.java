@@ -84,8 +84,6 @@ public class JavaFormatter {
 		 * Creates a new tracker.
 		 *
 		 * @param buffer the buffer to track
-		 * @throws MalformedTreeException
-		 * @throws BadLocationException
 		 */
 		public VariableTracker(TemplateBuffer buffer, IJavaProject project) throws MalformedTreeException, BadLocationException {
 			Assert.isLegal(buffer != null);
@@ -138,8 +136,6 @@ public class JavaFormatter {
 		 * Restores any decorated regions and updates the buffer's variable offsets.
 		 *
 		 * @return the buffer.
-		 * @throws MalformedTreeException
-		 * @throws BadLocationException
 		 */
 		public TemplateBuffer updateBuffer() throws MalformedTreeException, BadLocationException {
 			checkState();
@@ -252,9 +248,6 @@ public class JavaFormatter {
 
 	/**
 	 * Formats the template buffer.
-	 * @param buffer
-	 * @param context
-	 * @throws BadLocationException
 	 */
 	public void format(TemplateBuffer buffer, TemplateContext context) throws BadLocationException {
 		try {
@@ -272,11 +265,6 @@ public class JavaFormatter {
 		}
 	}
 
-	/**
-	 * @param document
-	 * @param context
-	 * @throws BadLocationException
-	 */
 	private void internalFormat(IDocument document, TemplateContext context) throws BadLocationException {
 		if (fUseCodeFormatter) {
 			// try to format and fall back to indenting

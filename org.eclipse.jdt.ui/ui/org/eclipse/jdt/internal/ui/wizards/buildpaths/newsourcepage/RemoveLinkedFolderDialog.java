@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 
 /**
  * Dialog to prompt whether a linked folder should be deleted.
- *
  */
 class RemoveLinkedFolderDialog extends MessageDialog {
 

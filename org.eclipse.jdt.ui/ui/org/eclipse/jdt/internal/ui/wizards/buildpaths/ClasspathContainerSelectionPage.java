@@ -35,8 +35,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
-  */
 public class ClasspathContainerSelectionPage extends WizardPage {
 
 	private static final String DIALOGSTORE_SECTION= "ClasspathContainerSelectionPage"; //$NON-NLS-1$

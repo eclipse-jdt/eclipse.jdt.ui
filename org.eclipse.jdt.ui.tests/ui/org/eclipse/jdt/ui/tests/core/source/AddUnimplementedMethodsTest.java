@@ -380,7 +380,6 @@ public class AddUnimplementedMethodsTest {
 	}
 
 	/**
-	 * @throws Exception
 	 * @deprecated tests deprecated API
 	 */
 	@Deprecated
@@ -390,7 +389,6 @@ public class AddUnimplementedMethodsTest {
 	}
 
 	/**
-	 * @throws Exception
 	 * @deprecated tests deprecated API
 	 */
 	@Deprecated
@@ -406,7 +404,6 @@ public class AddUnimplementedMethodsTest {
 
 	/**
 	 * @param astLevel AST.JLS*
-	 * @throws Exception
 	 * @deprecated tests deprecated API
 	 */
 	@Deprecated

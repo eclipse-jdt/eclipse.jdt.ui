@@ -456,7 +456,6 @@ public class JavadocOptionsManager {
 	 * absolute it returns the path. If it encounters any difficulties in
 	 * creating the absolute path, the method returns null.
 	 *
-	 * @param path
 	 * @return IPath
 	 */
 	private IPath makeAbsolutePathFromRelative(IPath path) {

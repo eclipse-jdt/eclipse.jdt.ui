@@ -355,7 +355,6 @@ public class ChkpiiTests {
 
 	/**
 	 * Constructor for EmptyDirectoriesTest.
-	 *
 	 */
 	public ChkpiiTests() {
 		fLogDirectoryName= getPluginDirectory() + "chkpiiResults" + File.separator; //$NON-NLS-1$

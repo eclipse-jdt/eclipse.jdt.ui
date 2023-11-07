@@ -211,8 +211,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionPr
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-/**
-  */
 public class LocalCorrectionsSubProcessor {
 	private static final String RAW_TYPE_REFERENCE_ID= "org.eclipse.jdt.ui.correction.rawTypeReference"; //$NON-NLS-1$
 

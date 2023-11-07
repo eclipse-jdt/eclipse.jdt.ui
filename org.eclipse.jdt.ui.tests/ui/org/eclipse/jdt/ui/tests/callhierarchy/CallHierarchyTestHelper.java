@@ -616,37 +616,22 @@ public class CallHierarchyTestHelper {
         return thirdLevelMethodWrapper;
     }
 
-    /**
-     * @return
-     */
     public IJavaProject getJavaProject2() {
         return fJavaProject2;
     }
 
-    /**
-     * @return
-     */
     public IPackageFragment getPackage1() {
         return fPack1;
     }
 
-    /**
-     * @return
-     */
     public IPackageFragment getPackage2() {
         return fPack2;
     }
 
-    /**
-     * @return
-     */
 	public IType getType1() {
         return fType1;
     }
 
-    /**
-     * @return
-     */
     public IType getType2() {
         return fType2;
     }

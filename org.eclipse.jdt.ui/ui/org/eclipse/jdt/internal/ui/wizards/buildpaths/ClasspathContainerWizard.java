@@ -34,8 +34,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 
-/**
-  */
 public class ClasspathContainerWizard extends Wizard {
 
 	private final ClasspathContainerDescriptor fPageDesc;

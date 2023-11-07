@@ -4642,8 +4642,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	/**
 	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/109
-	 *
-	 * @throws CoreException
 	 */
 	@Test
 	public void testWhileIssue109_EntrySet() throws CoreException {
@@ -4684,8 +4682,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	/**
 	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/109
-	 *
-	 * @throws CoreException
 	 */
 	@Test
 	public void testWhileIssue109_EntrySet_2() throws CoreException {
@@ -4724,8 +4720,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	/**
 	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/109
-	 *
-	 * @throws CoreException
 	 */
 	@Test
 	public void testWhileIssue109_EntrySet_3() throws CoreException {
@@ -4764,8 +4758,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	/**
 	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/120
-	 *
-	 * @throws CoreException
 	 */
 	@Test
 	public void testWhileIssue120_CollectionTypeResolution() throws CoreException {
@@ -4805,8 +4797,6 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 	/**
 	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/190
-	 *
-	 * @throws CoreException
 	 */
 	@Test
 	public void testWhileIssue190_MultipleWhileLoops() throws CoreException {

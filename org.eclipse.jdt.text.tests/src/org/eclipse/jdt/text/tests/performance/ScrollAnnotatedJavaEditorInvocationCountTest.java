@@ -54,8 +54,6 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 	/**
 	 * Measure the number of invocations of {@link org.eclipse.jface.text.source.AnnotationPainter#paintControl(PaintEvent)}
 	 * while scrolling page wise with error annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testPageWise() throws Exception {
 		measure(PAGE_WISE, createInvocationCountPerformanceMeter(), 0, 1);
@@ -64,8 +62,6 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 	/**
 	 * Measure the number of invocations of {@link org.eclipse.jface.text.source.AnnotationPainter#paintControl(PaintEvent)}
 	 * while scrolling line wise with error annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testLineWise() throws Exception {
 		measure(LINE_WISE, createInvocationCountPerformanceMeter(), 0, 1);
@@ -75,8 +71,6 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 	 * Measure the number of invocations of {@link org.eclipse.jface.text.source.AnnotationPainter#paintControl(PaintEvent)}
 	 * while scrolling and selecting line wise with error annotations in the
 	 * Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testLineWiseSelect() throws Exception {
 		measure(LINE_WISE_SELECT, createInvocationCountPerformanceMeter(), 0, 1);
@@ -86,8 +80,6 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 	 * Measure the number of invocations of {@link org.eclipse.jface.text.source.AnnotationPainter#paintControl(PaintEvent)}
 	 * while scrolling line wise without moving the caret with error
 	 * annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testLineWiseNoCaretMove() throws Exception {
 		measure(LINE_WISE_NO_CARET_MOVE, createInvocationCountPerformanceMeter(), 0, 1);

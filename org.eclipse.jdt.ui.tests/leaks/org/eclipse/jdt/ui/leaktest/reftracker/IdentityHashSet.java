@@ -16,9 +16,6 @@ package org.eclipse.jdt.ui.leaktest.reftracker;
 
 import java.util.Arrays;
 
-/**
- *
- */
 public class IdentityHashSet {
 
 	private Object[] fObjects;

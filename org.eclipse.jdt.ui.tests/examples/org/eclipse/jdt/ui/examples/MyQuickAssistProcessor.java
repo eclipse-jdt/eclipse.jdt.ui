@@ -53,9 +53,6 @@ import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-/**
- *
- */
 public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private boolean getConvertProposal(IInvocationContext context, List<ChangeCorrectionProposal> result) {

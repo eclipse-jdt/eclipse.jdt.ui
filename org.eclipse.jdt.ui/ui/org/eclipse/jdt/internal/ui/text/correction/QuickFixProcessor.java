@@ -62,8 +62,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TaskMarkerProposal;
 
-/**
-  */
 public class QuickFixProcessor implements IQuickFixProcessor {
 
 

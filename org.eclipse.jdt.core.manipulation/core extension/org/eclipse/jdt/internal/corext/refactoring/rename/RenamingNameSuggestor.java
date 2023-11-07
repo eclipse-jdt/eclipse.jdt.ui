@@ -99,7 +99,6 @@ import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
  *
  *
  * @since 3.2
- *
  */
 public class RenamingNameSuggestor {
 
@@ -136,7 +135,6 @@ public class RenamingNameSuggestor {
 	 *    type name, for example "handies" for "Handy" or "phones" for "MobilePhone".
 	 *    The target name will be transformed as well, i.e. conversion like
 	 *    "fHandies" -> "fPhones" are supported.
-	 *
 	 */
 
 	public static final int STRATEGY_EXACT= 1;
@@ -448,7 +446,6 @@ public class RenamingNameSuggestor {
 	 * "JavaElementName" => { "Java", "Element", "Name }
 	 *
 	 * "ASTNode" => { "AST", "Node" }
-	 *
 	 */
 	private String[] getSuffixes(String typeName) {
 		List<String> suffixes= new ArrayList<>();

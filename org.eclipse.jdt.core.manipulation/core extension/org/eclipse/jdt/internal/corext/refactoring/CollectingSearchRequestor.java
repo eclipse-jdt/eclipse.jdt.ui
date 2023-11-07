@@ -75,7 +75,6 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	 *
 	 * @param match the match to test
 	 * @return <code>true</code> iff the given match should <em>not</em> be collected
-	 * @throws CoreException
 	 */
 	public boolean filterMatch(SearchMatch match) throws CoreException {
 		if (fBinaryRefs == null)

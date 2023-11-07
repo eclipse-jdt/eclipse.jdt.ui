@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageCache;
 
 /**
  * Tests for {@link PackageCache}.
- *
  */
 public class PackageCacheTest {
 

@@ -262,16 +262,11 @@ public class MultiVariableGuess {
 		}
 	}
 
-	/**
-	 * @param position
-	 */
 	public void addSlave(VariablePosition position) {
 		fPositions.put(position.getVariable(), position);
 	}
 
 	/**
-	 * @param master
-	 * @param slave
 	 * @since 3.3
 	 */
 	public void addDependency(MultiVariable master, MultiVariable slave) {

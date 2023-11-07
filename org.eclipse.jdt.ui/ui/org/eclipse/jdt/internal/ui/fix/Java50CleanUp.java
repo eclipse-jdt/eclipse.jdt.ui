@@ -39,7 +39,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
 /**
  * Create fixes which can transform pre Java50 code to Java50 code
  * @see org.eclipse.jdt.internal.corext.fix.Java50FixCore
- *
  */
 public class Java50CleanUp extends AbstractMultiFix {
 

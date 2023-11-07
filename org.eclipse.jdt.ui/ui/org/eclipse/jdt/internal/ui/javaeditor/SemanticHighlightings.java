@@ -1919,9 +1919,6 @@ public class SemanticHighlightings {
 		}
 	}
 
-	/**
-	 *
-	 */
 	static final class RestrictedIdentifiersHighlighting extends SemanticHighlighting {
 
 		@Override

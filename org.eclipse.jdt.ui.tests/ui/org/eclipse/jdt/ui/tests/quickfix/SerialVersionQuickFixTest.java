@@ -47,9 +47,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
- *
- */
 public class SerialVersionQuickFixTest extends QuickFixTest {
 
 	@Rule

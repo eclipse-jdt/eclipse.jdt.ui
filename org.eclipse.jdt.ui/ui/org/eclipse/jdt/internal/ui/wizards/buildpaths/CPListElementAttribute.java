@@ -29,8 +29,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess;
 
 
-/**
-  */
 public class CPListElementAttribute {
 
 	private CPListElement fParent;

@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
  * A dialog to configure the external annotations attachment of any classpath entry.
- *
  */
 public class ExternalAnnotationsAttachmentDialog extends StatusDialog {
 

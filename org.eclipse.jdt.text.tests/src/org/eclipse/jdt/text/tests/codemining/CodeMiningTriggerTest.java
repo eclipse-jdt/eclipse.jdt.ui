@@ -149,11 +149,6 @@ public class CodeMiningTriggerTest {
 	/**
 	 * Disables Java reconciler (after AST is parsed) but keeps the default code mining
 	 * mechanics working.
-	 * @param editor
-	 * @throws NoSuchMethodException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 *
 	 */
 	private void disableCodeMiningReconciler(JavaEditor editor) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		Method method = JavaEditor.class.getDeclaredMethod("uninstallJavaCodeMining");

@@ -50,9 +50,6 @@ public abstract class BlockCommentAction extends TextEditorAction {
 
 	/**
 	 * Creates a new instance.
-	 * @param bundle
-	 * @param prefix
-	 * @param editor
 	 */
 	public BlockCommentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);

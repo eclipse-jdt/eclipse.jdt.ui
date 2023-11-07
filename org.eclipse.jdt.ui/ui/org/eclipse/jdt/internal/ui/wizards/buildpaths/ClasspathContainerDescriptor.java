@@ -32,8 +32,6 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
-/**
-  */
 public class ClasspathContainerDescriptor {
 
 	private IConfigurationElement fConfigElement;

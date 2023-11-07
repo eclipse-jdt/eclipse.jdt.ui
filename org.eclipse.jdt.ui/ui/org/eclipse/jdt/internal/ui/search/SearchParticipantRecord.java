@@ -16,8 +16,6 @@ package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.jdt.ui.search.IQueryParticipant;
 
-/**
- */
 public class SearchParticipantRecord {
 	private SearchParticipantDescriptor fDescriptor;
 	private IQueryParticipant fParticipant;

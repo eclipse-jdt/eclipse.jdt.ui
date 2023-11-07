@@ -98,7 +98,6 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 /**
  * Note: this class KeyReference has a natural ordering that is inconsistent with equals
- *
  */
 	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter, Comparable<KeyReference> {
 

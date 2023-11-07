@@ -107,7 +107,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * </p>
  *
  * @since 3.2
- *
  */
 public abstract class DelegateCreator {
 
@@ -122,7 +121,6 @@ public abstract class DelegateCreator {
 	 * 	  ASTRewrite (add or replace).
 	 *
 	 * 2) A new CuRewrite from which we'll only use the ASTRewrite to build the new delegate.
-	 *
 	 */
 	private CompilationUnitRewrite fOriginalRewrite;
 	private CompilationUnitRewrite fDelegateRewrite;
@@ -237,7 +235,6 @@ public abstract class DelegateCreator {
 	/**
 	 * Initializes the creator. Must set the "new" name of the element if not
 	 * already set.
-	 *
 	 */
 	protected abstract void initialize();
 
@@ -247,7 +244,6 @@ public abstract class DelegateCreator {
 	 *
 	 * @param declaration the member declaration
 	 * @return the body of the delegate
-	 * @throws JavaModelException
 	 */
 	protected abstract ASTNode createBody(BodyDeclaration declaration) throws JavaModelException;
 
@@ -259,7 +255,6 @@ public abstract class DelegateCreator {
 	 *
 	 * @param declaration the member declaration
 	 * @return the javadoc link node
-	 * @throws JavaModelException
 	 */
 	protected abstract ASTNode createDocReference(BodyDeclaration declaration) throws JavaModelException;
 
@@ -313,7 +308,6 @@ public abstract class DelegateCreator {
 	 *
 	 * All references to the new member will contain the new name of the member
 	 * and/or new declaring type, if any.
-	 *
 	 */
 	public void prepareDelegate() throws JavaModelException {
 		Assert.isNotNull(fDelegateRewrite);
@@ -343,8 +337,6 @@ public abstract class DelegateCreator {
 
 	/**
 	 * Creates the javadoc for the delegate.
-	 *
-	 * @throws JavaModelException
 	 */
 	private void createJavadoc() throws JavaModelException {
 		TagElement tag= getDelegateJavadocTag(fDeclaration);
@@ -361,8 +353,6 @@ public abstract class DelegateCreator {
 	/**
 	 * Performs the actual rewriting and adds an edit to the ASTRewrite set with
 	 * {@link #setSourceRewrite(CompilationUnitRewrite)}.
-	 *
-	 * @throws JavaModelException
 	 */
 	public void createEdit() throws JavaModelException {
 		try {

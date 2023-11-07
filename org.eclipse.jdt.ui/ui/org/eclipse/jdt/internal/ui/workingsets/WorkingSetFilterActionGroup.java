@@ -46,7 +46,6 @@ import org.eclipse.ui.actions.ActionGroup;
  * Working set filter actions (set / clear)
  *
  * @since 2.0
- *
  */
 public class WorkingSetFilterActionGroup extends ActionGroup implements IWorkingSetActionGroup {
 

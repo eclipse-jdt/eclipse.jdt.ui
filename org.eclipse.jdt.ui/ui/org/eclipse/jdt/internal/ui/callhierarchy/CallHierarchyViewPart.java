@@ -131,7 +131,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 /**
  * This is the main view for the callers plugin. It builds a tree of callers/callees
  * and allows the user to double click an entry to go to the selected method.
- *
  */
 public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart, ISelectionChangedListener {
 
@@ -757,9 +756,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fMemento = memento;
     }
 
-    /**
-     *
-     */
     public void refresh() {
         setCalleeRoots(null);
         setCallerRoots(null);

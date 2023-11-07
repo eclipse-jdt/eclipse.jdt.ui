@@ -402,9 +402,6 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	 */
 	private final class HoverManager extends AbstractInformationControlManager {
 
-		/**
-		 *
-		 */
 		public HoverManager() {
 			super(DefaultInformationControl::new);
 

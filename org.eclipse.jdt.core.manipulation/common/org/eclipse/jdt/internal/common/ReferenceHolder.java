@@ -29,16 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ReferenceHolder<V, T> extends ConcurrentHashMap<V, T> implements HelperVisitorProvider<V, T, ReferenceHolder<V, T>> {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID= 1L;
 
 	HelperVisitor<ReferenceHolder<V, T>, V, T> hv;
 
-	/**
-	 *
-	 */
 	public ReferenceHolder() {
 	}
 

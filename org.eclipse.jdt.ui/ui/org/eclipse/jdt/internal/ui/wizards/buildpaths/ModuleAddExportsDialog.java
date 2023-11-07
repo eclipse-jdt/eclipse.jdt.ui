@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.
 
 /**
  * A dialog to configure add-exports of a library.
- *
  */
 public class ModuleAddExportsDialog extends StatusDialog {
 

@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  * @author Jen's account
- *
  */
 public class TestDelta implements IJavaElementDelta {
 

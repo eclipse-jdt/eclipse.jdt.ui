@@ -105,7 +105,6 @@ public class RefactoringSaveHelper {
 	}
 
 	/**
-	 * @param shell
 	 * @return <code>true</code> if save was successful and refactoring can proceed;
 	 * 		false if the refactoring must be cancelled
 	 */

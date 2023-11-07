@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
- *
  */
 public class InlineConstantAction extends SelectionDispatchAction {
 
@@ -122,7 +121,6 @@ public class InlineConstantAction extends SelectionDispatchAction {
 
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
-	 * @param selection
 	 */
 	@Override
 	public void selectionChanged(JavaTextSelection selection) {

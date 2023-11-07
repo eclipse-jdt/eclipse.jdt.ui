@@ -69,7 +69,6 @@ public enum UpdateProperty {
 	 * <code>System.getProperty("file.encoding");</code>
 	 * to
 	 * <code>Charset.defaultCharset().displayName();</code> since Java 1.5
-	 *
 	 */
 	FILE_ENCODING("file.encoding", //$NON-NLS-1$
 			Charset.class,
@@ -86,7 +85,6 @@ public enum UpdateProperty {
 	 * <code>System.getProperty("path.separator");</code>
 	 * to
 	 * <code>File.pathSeparator;</code>
-	 *
 	 */
 	PATH_SEPARATOR("path.separator", //$NON-NLS-1$
 			null,
@@ -215,7 +213,6 @@ public enum UpdateProperty {
 				 * <code>System.getProperty("path.separator");</code>
 				 * <code>System.getProperty("file.separator");</code>
 				 * <code>System.getProperty("line.separator");</code>
-				 *
 				 */
 				if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName())) {
 					Expression expression= (Expression) visited.arguments().get(0);

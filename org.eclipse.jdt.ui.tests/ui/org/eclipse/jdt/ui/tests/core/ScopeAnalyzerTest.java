@@ -40,8 +40,6 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-/**
-  */
 public class ScopeAnalyzerTest extends CoreTests {
 
 	@Rule

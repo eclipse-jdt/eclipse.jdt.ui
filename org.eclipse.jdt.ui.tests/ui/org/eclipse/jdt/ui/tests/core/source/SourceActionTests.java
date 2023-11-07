@@ -22,7 +22,6 @@ import org.junit.runners.Suite;
 /**
  *
  * Tests for the actions in the source menu
- *
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({

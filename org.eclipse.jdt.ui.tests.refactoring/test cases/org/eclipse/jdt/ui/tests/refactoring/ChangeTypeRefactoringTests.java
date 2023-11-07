@@ -43,7 +43,6 @@ import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
 /**
  * @author rfuhrer, tip
- *
  */
 public class ChangeTypeRefactoringTests extends GenericRefactoringTest {
 	private static final String REFACTORING_PATH= "ChangeTypeRefactoring/";

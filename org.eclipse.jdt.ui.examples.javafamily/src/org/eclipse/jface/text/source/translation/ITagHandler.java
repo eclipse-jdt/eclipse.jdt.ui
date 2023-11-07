@@ -75,7 +75,6 @@ public interface ITagHandler {
 	 *
 	 * @param resultCollector the translator's result collector
 	 * @param sourceLineNumber the line number of the attribute in the source or <code>-1</code> if unknown
-	 * @throws IOException
 	 */
 	void processEndTag(ITranslatorResultCollector resultCollector, int sourceLineNumber) throws IOException;
 

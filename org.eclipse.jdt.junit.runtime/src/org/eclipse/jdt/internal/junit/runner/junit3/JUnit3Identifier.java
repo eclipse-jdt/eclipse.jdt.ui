@@ -14,9 +14,6 @@
  *             (bug 102632: [JUnit] Support for JUnit 4.)
  *******************************************************************************/
 
-/**
- *
- */
 package org.eclipse.jdt.internal.junit.runner.junit3;
 
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;

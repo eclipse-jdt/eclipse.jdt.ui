@@ -19,8 +19,6 @@ import org.junit.runners.model.InitializationError;
 
 public class CustomBaseRunner extends BlockJUnit4ClassRunner {
 	/**
-	 * @param klass
-	 * @throws InitializationError
 	 * @since
 	 */
 	public CustomBaseRunner(Class<?> klass) throws InitializationError {

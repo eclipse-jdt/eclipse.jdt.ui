@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * sub-fragments (fragments contained within a
  * parent fragment, including the parent itself)
  * which 'match' another given fragment.
- *
  */
 public interface IASTFragment {
 

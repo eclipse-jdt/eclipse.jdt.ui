@@ -703,7 +703,6 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 	 *            <code>java.lang.Object</code>) is available
 	 * @param declaringDeclaration
 	 *            the declaration of the declaring type
-	 * @param declaringRewrite
 	 * @param status
 	 *            the refactoring status
 	 * @param monitor

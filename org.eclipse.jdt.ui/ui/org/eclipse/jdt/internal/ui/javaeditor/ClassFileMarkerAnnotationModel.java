@@ -32,9 +32,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.JavaCore;
 
 
-/**
- *
- */
 public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationModel implements IResourceChangeListener {
 
 	protected IClassFile fClassFile;

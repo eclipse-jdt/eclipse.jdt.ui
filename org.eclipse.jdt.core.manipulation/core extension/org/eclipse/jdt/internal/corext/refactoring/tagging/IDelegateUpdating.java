@@ -18,7 +18,6 @@ package org.eclipse.jdt.internal.corext.refactoring.tagging;
  * appropriate delegates for the refactored elements.
  *
  * @since 3.2
- *
  */
 public interface IDelegateUpdating {
 

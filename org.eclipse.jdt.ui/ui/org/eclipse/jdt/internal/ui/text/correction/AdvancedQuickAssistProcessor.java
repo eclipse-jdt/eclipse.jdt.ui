@@ -139,8 +139,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
-/**
- */
 public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	public AdvancedQuickAssistProcessor() {
 		super();

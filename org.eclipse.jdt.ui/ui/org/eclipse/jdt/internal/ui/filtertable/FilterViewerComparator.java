@@ -24,7 +24,6 @@ import org.eclipse.ui.model.WorkbenchViewerComparator;
 /**
  * Comparator for {@link Filter} objects.
  * @since 3.26
- *
  */
 public class FilterViewerComparator extends WorkbenchViewerComparator {
 	@Override

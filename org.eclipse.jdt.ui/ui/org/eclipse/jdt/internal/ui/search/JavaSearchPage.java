@@ -287,9 +287,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private int fMatchLocations;
 	private Link fMatchLocationsLink;
 
-	/**
-	 *
-	 */
 	public JavaSearchPage() {
 		fPreviousSearchPatterns= new ArrayList<>();
 	}

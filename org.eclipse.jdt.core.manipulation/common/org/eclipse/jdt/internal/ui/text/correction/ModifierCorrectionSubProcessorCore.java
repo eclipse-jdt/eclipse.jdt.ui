@@ -43,8 +43,6 @@ import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore;
 
-/**
-  */
 public class ModifierCorrectionSubProcessorCore {
 
 	public static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$

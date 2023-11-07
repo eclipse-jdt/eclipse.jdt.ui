@@ -2005,7 +2005,6 @@ public class PreferenceConstants {
 	 * </p>
 	 *
 	 * @since 3.1
-	 *
 	 */
 	public final static String EDITOR_JAVADOC_KEYWORD_STRIKETHROUGH= IJavaColorConstants.JAVADOC_KEYWORD + EDITOR_STRIKETHROUGH_SUFFIX;
 
@@ -3306,7 +3305,6 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 *
 	 */
 	public static final String BROWSING_LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
 

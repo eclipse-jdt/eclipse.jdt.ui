@@ -124,8 +124,6 @@ public class TTypes {
 	}
 
 	/**
-	 * @param rhs
-	 * @param lhs
 	 * @return <code>true</code> iff an expression of type 'rhs' can be assigned to a variable of type 'lhs'.
 	 * Type arguments of generic / raw / parameterized types are <b>not</b> considered.
 	 */

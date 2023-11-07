@@ -91,7 +91,6 @@ public class MockPluginView extends PackagesView {
 
 	/**
 	 * Set the view is in flat or hierarchical state.
-	 * @param state
 	 */
 	static void setListState(boolean state){
 		fgListState= state;

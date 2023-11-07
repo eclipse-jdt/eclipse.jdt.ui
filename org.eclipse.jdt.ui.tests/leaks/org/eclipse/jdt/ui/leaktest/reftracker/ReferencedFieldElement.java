@@ -17,9 +17,6 @@ package org.eclipse.jdt.ui.leaktest.reftracker;
 import java.lang.reflect.Field;
 
 
-/**
- *
- */
 public class ReferencedFieldElement extends ReferencedObject {
 
 	private final ReferencedObject fPrevious;

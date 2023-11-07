@@ -53,9 +53,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
-/**
- *
- */
 public class QuickAssistLightBulbUpdater {
 
 	public static class AssistAnnotation extends Annotation implements IAnnotationPresentation {

@@ -72,10 +72,6 @@ public class IntroduceIndirectionTests extends GenericRefactoringTest {
 	 * @param shouldWarn if true, warnings will be expected in the result
 	 * @param shouldError if true, errors will be expected in the result
 	 * @param shouldFail if true, fatal errors will be expected in the result
-	 * @throws Exception
-	 * @throws JavaModelException
-	 * @throws CoreException
-	 * @throws IOException
 	 */
 	private void helper(String[] topLevelName, String newName, String qTypeName, int startLine, int startColumn, int endLine, int endColumn, boolean updateReferences, boolean shouldWarn,
 			boolean shouldError, boolean shouldFail) throws Exception, JavaModelException, CoreException, IOException {

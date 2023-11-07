@@ -84,9 +84,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 
-/**
- *
- */
 public class JavadocTagsSubProcessor {
 
 	private static final class AddJavadocCommentProposal extends CUCorrectionProposal {

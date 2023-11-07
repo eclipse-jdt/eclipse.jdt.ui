@@ -40,7 +40,6 @@ public class ManifestProvider implements IManifestProvider {
 	 *
 	 * @param	jarPackage	the JAR package specification
 	 * @return the manifest
-	 * @throws CoreException
 	 */
 	@Override
 	public Manifest create(JarPackageData jarPackage) throws CoreException {

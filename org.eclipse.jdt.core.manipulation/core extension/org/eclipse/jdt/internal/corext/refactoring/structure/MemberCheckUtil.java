@@ -154,7 +154,6 @@ public class MemberCheckUtil {
 	 * @param method the method to find
 	 * @param allMethods the methods to look at
 	 * @return The found method or <code>null</code>, if nothing found
-	 * @throws JavaModelException
 	 */
 	public static IMethod findMethod(IMethod method, IMethod[] allMethods) throws JavaModelException {
 		String name= method.getElementName();

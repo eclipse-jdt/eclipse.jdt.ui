@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaCodeMiningReconciler;
  * Java code mining provider to show method parameters code minings.
  *
  * @since 3.14
- *
  */
 public class JavaMethodParameterCodeMiningProvider extends AbstractCodeMiningProvider {
 

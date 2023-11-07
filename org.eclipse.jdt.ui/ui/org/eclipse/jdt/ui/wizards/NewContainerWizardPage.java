@@ -477,7 +477,6 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	 *
 	 * @return the IPackageFragmentRoot or <code>null</code> if the current source
 	 * folder value is not a valid package fragment root
-	 *
 	 */
 	public IPackageFragmentRoot getPackageFragmentRoot() {
 		return fCurrRoot;

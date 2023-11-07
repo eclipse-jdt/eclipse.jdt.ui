@@ -50,9 +50,6 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
- *
- */
 public class UtilitiesTest extends QuickFixTest {
 
 	@Rule

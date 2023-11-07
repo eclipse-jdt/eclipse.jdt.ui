@@ -110,7 +110,6 @@ class SWTFactory {
 	 * @param hspan the horizontal span to take up in the parent composite
 	 * @return the new label
 	 * @since 3.25
-	 *
 	 */
 	static Label createLabel(Composite parent, String text, int hspan) {
 		Label l = new Label(parent, SWT.NONE);

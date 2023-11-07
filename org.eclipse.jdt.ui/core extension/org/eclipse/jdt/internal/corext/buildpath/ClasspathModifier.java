@@ -309,7 +309,6 @@ public class ClasspathModifier {
 	 * @param project the Java project to get it's build path entries from
 	 * @return a list of <code>CPListElement</code>s corresponding to the
 	 * build path entries of the project
-	 * @throws JavaModelException
 	 */
 	public static List<CPListElement> getExistingEntries(IJavaProject project) throws JavaModelException {
 		ArrayList<CPListElement> newClassPath= new ArrayList<>();
@@ -330,7 +329,6 @@ public class ClasspathModifier {
 	 * a <code>CPListElement</code>
 	 * @return the <code>CPListElement</code> found in the list (matching by using the path) or
 	 * the roots own <code>IClasspathEntry</code> converted to a <code>CPListElement</code>.
-	 * @throws JavaModelException
 	 */
 	public static CPListElement getClasspathEntry(List<CPListElement> elements, IPackageFragmentRoot root) throws JavaModelException {
 		IClasspathEntry entry= root.getRawClasspathEntry();
@@ -369,7 +367,6 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return resolved fragment root, or <code>null</code> the resource is not (in) a source folder
-	 * @throws JavaModelException
 	 */
 	public static IPackageFragmentRoot getFragmentRoot(IResource resource, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		IJavaElement javaElem= null;
@@ -402,11 +399,9 @@ public class ClasspathModifier {
 	 *
 	 * @param path the path to find a build path entry for
 	 * @param project the Java project
-	 * @param entryKind
 	 * @return the <code>IClasspathEntry</code> corresponding
 	 * to the <code>path</code> or <code>null</code> if there
 	 * is no such entry
-	 * @throws JavaModelException
 	 */
 	public static IClasspathEntry getClasspathEntryFor(IPath path, IJavaProject project, int entryKind) throws JavaModelException {
 		for (IClasspathEntry entry : project.getRawClasspath()) {
@@ -438,7 +433,6 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return <code>true</code> if the current selection is included,
 	 * <code>false</code> otherwise.
-	 * @throws JavaModelException
 	 */
 	public static boolean isIncluded(IJavaElement selection, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -462,7 +456,6 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @return <code>true</code> if the resource is excluded, <code>
 	 * false</code> otherwise
-	 * @throws JavaModelException
 	 */
 	public static boolean isExcluded(IResource resource, IJavaProject project) throws JavaModelException {
 		IPackageFragmentRoot root= getFragmentRoot(resource, project, null);
@@ -483,7 +476,6 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @return <code>true</code> if there is an excluded parent,
 	 * <code>false</code> otherwise
-	 * @throws JavaModelException
 	 */
 	public static boolean parentExcluded(IResource resource, IJavaProject project) throws JavaModelException {
 		if (resource.getFullPath().equals(project.getPath()))
@@ -512,7 +504,6 @@ public class ClasspathModifier {
 	 * @param root the root to examine the output location for
 	 * @return <code>true</code> if the root uses the default output folder, <code>false
 	 * </code> otherwise.
-	 * @throws JavaModelException
 	 */
 	public static boolean hasDefaultOutputFolder(IPackageFragmentRoot root) throws JavaModelException {
 		return root.getRawClasspathEntry().getOutputLocation() == null;
@@ -526,7 +517,6 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return <code>true</code> if at least one outputfolder
 	 * is set, <code>false</code> otherwise
-	 * @throws JavaModelException
 	 */
 	public static boolean hasOutputFolders(IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -586,7 +576,6 @@ public class ClasspathModifier {
 	 * @param project the project to test
 	 * @return <code>true</code> if <code>project</code> is a source folder
 	 * <code>false</code> otherwise.
-	 * @throws JavaModelException
 	 */
 	public static boolean isSourceFolder(IJavaProject project) throws JavaModelException {
 		return ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) != null;
@@ -607,12 +596,8 @@ public class ClasspathModifier {
 	/**
 	 * Determines whether the inclusion filter of the element's source folder is empty
 	 * or not
-	 * @param resource
-	 * @param project
-	 * @param monitor
 	 * @return <code>true</code> if the inclusion filter is empty,
 	 * <code>false</code> otherwise.
-	 * @throws JavaModelException
 	 */
 	public static boolean includeFiltersEmpty(IResource resource, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -639,7 +624,6 @@ public class ClasspathModifier {
 	 * @param root the fragment root to be inspected
 	 * @return <code>true</code> inclusion or exclusion filter set,
 	 * <code>false</code> otherwise.
-	 * @throws JavaModelException
 	 */
 	public static boolean filtersSet(IPackageFragmentRoot root) throws JavaModelException {
 		if (root == null)
@@ -658,13 +642,9 @@ public class ClasspathModifier {
 	 * Add a resource to the build path.
 	 *
 	 * @param resource the resource to be added to the build path
-	 * @param existingEntries
-	 * @param newEntries
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
-	 * @throws CoreException
-	 * @throws OperationCanceledException
 	 */
 	public static CPListElement addToClasspath(IResource resource, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (monitor == null)
@@ -686,7 +666,6 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @return <code>true</code> if the file is an archive, <code>false</code>
 	 * otherwise
-	 * @throws JavaModelException
 	 */
 	public static boolean isArchive(IFile file, IJavaProject project) throws JavaModelException {
 		if (!ArchiveFileFilter.isArchivePath(file.getFullPath(), true))
@@ -700,13 +679,9 @@ public class ClasspathModifier {
 	 * Add a Java element to the build path.
 	 *
 	 * @param javaElement element to be added to the build path
-	 * @param existingEntries
-	 * @param newEntries
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
-	 * @throws CoreException
-	 * @throws OperationCanceledException
 	 */
 	public static CPListElement addToClasspath(IJavaElement javaElement, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (monitor == null)
@@ -799,7 +774,6 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return a <code>IResource</code> corresponding to the excluded element
-	 * @throws JavaModelException
 	 */
 	private static IResource exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -842,7 +816,6 @@ public class ClasspathModifier {
 	 * @param newEntries a list of new build path entries
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
-	 * @throws JavaModelException
 	 */
 	public static void exclude(IPath path, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -886,7 +859,6 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 *
 	 * @return the resulting <code>IResource<code>
-	 * @throws JavaModelException
 	 */
 	public static IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -912,8 +884,6 @@ public class ClasspathModifier {
 	 * <code>IClasspathEntry</code> of the resource's root.
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
-	 * @throws JavaModelException
-	 *
 	 */
 	public static void unExclude(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -937,7 +907,6 @@ public class ClasspathModifier {
 	 * @param entry the <code>CPListElement</code> to reset its filters for
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
-	 * @throws JavaModelException
 	 */
 	public static void resetFilters(IJavaElement element, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null)
@@ -968,7 +937,6 @@ public class ClasspathModifier {
 	 * @param entry the <code>CPListElement</code> to be edited
 	 * @param project the Java project
 	 * @return an attribute representing the modified output folder
-	 * @throws JavaModelException
 	 */
 	public static CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) throws JavaModelException {
 		entry.setAttribute(CPListElement.OUTPUT, null);
@@ -1204,7 +1172,6 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return an array of paths which belong to subfolders
 	 * of <code>path</code> and which are on the build path
-	 * @throws JavaModelException
 	 */
 	private static List<Path> getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 		List<Path> srcFolders= new ArrayList<>();

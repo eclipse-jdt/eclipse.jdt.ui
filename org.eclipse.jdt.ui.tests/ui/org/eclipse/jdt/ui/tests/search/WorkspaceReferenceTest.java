@@ -20,8 +20,6 @@ import org.junit.Test;
 
 import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
 
-/**
- */
 public class WorkspaceReferenceTest {
 
 	@Rule

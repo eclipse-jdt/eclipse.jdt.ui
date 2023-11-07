@@ -72,21 +72,18 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 
 	/**
 	 * Resets the template set.
-	 * @throws CoreException
 	 */
 	public void reset() throws CoreException {
 	}
 
 	/**
 	 * Resets the template set with the default templates.
-	 * @throws CoreException
 	 */
 	public void restoreDefaults() throws CoreException {
 	}
 
 	/**
 	 * Saves the template set.
-	 * @throws CoreException
 	 */
 	public void save() throws CoreException {
 	}

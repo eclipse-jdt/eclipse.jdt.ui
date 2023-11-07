@@ -23,8 +23,6 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-/**
- */
 public class UseIteratorToForLoopCleanUp extends AbstractCleanUp {
 	private final UseIteratorToForLoopCleanUpCore coreCleanUp= new UseIteratorToForLoopCleanUpCore();
 	public UseIteratorToForLoopCleanUp(final Map<String, String> options) {

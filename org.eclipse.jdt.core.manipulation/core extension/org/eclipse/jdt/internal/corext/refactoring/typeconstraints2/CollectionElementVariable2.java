@@ -32,7 +32,6 @@ public final class CollectionElementVariable2 extends ConstraintVariable2 {
 	/**
 	 * @param parentCv the parent constraint variable
 	 * @param typeVariable the type variable for this constraint
-	 * @param declarationTypeVariableIndex
 	 */
 	public CollectionElementVariable2(ConstraintVariable2 parentCv, ITypeBinding typeVariable, int declarationTypeVariableIndex) {
 		super(null);

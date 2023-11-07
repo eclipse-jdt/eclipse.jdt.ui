@@ -26,18 +26,12 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-/**
- *
- */
 public class RenameKeysDialog extends StatusDialog {
 
 	private StringDialogField fNameField;
 	private List<NLSSubstitution> fSelectedSubstitutions;
 	private int fCommonPrefixLength;
 
-	/**
-	 * @param parent
-	 */
 	public RenameKeysDialog(Shell parent, List<NLSSubstitution> selectedSubstitutions) {
 		super(parent);
 		setTitle(NLSUIMessages.RenameKeysDialog_title);

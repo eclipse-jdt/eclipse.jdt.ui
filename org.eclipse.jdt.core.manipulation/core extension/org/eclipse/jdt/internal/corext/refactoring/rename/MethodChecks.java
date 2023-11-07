@@ -50,7 +50,6 @@ public class MethodChecks {
 	 *
 	 * @param method a method
 	 * @return <code>true</code> iff the method could a virtual method
-	 * @throws JavaModelException
 	 */
 	public static boolean isVirtual(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
@@ -145,7 +144,6 @@ public class MethodChecks {
 	 * @param typeHierarchy a ITypeHierarchy of the declaring type of the method. May be null
 	 * @param monitor an IProgressMonitor
 	 * @return the topmost method of the ripple, or null if none
-	 * @throws JavaModelException
 	 */
 	public static IMethod getTopmostMethod(IMethod method, ITypeHierarchy typeHierarchy, IProgressMonitor monitor) throws JavaModelException {
 

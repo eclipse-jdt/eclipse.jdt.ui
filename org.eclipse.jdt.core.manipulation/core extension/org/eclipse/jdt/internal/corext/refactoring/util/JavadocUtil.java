@@ -81,11 +81,6 @@ public class JavadocUtil {
 
 	/**
 	 * Adds a "param" javadoc tag for a new last parameter if necessary.
-	 * @param parameterName
-	 * @param methodDeclaration
-	 * @param astRewrite
-	 * @param javaProject
-	 * @param groupDescription
 	 */
 	public static void addParamJavadoc(String parameterName, MethodDeclaration methodDeclaration,
 			ASTRewrite astRewrite, IJavaProject javaProject, TextEditGroup groupDescription) {

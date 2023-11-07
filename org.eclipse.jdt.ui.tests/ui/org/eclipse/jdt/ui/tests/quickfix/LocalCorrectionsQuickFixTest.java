@@ -12076,8 +12076,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	/**
 	 * Tests if the quick fix to loop over a variable name is added correctly. The complete
 	 * functionality of the for loop generation is tested in {@link AssistQuickFixTest}
-	 *
-	 * @throws Exception
 	 */
 	@Ignore("Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.")
 	@Test
@@ -12140,8 +12138,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	/**
 	 * Tests if the quick fix to loop over a method invocation is added correctly. The complete
 	 * functionality of the for loop generation is tested in {@link AssistQuickFixTest}
-	 *
-	 * @throws Exception
 	 */
 	@Ignore("Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.")
 	@Test
@@ -12204,8 +12200,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	/**
 	 * Tests if the quick fix to loop over a method invocation is added correctly. The complete
 	 * functionality of the for loop generation is tested in {@link AssistQuickFixTest}
-	 *
-	 * @throws Exception
 	 */
 	@Ignore("Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.")
 	@Test

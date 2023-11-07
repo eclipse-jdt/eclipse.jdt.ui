@@ -33,8 +33,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 
-/**
-  */
 public class CodeTemplateContextType extends TemplateContextType {
 
 	/* context types */

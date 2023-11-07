@@ -112,9 +112,6 @@ public class RenameNonPrivateFieldTests extends GenericRefactoringTest {
 
 	/**
 	 * Configure options by setting instance fields to non-default values.
-	 * @param fieldName
-	 * @param newFieldName
-	 * @throws Exception
 	 */
 	private void helper2(String fieldName, String newFieldName) throws Exception {
 		helper2(fieldName, newFieldName, false);

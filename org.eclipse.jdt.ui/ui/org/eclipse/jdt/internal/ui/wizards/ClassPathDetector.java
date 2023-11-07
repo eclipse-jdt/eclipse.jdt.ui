@@ -64,8 +64,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
-  */
 public class ClassPathDetector implements IResourceProxyVisitor {
 
 	private HashMap<IPath, List<IPath>> fSourceFolders;

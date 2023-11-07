@@ -321,8 +321,6 @@ public class ContentProviderTests4{
 
 	/**
 	 * Method compareArrays. Both arrays must be of IPackageFragments or compare will fail.
-	 * @param children
-	 * @param expectedChildren
 	 * @return boolean
 	 */
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {
@@ -344,8 +342,6 @@ public class ContentProviderTests4{
 	}
 	/**
 	 * Method contains.
-	 * @param res
-	 * @param expectedChildren
 	 * @return boolean
 	 */
 	private boolean contains(IResource res, Object[] expectedChildren) {
@@ -361,8 +357,6 @@ public class ContentProviderTests4{
 
 	/**
 	 * Method contains.
-	 * @param fragment
-	 * @param expectedChildren
 	 * @return boolean
 	 */
 	private boolean contains(IJavaElement fragment, Object[] expectedChildren) {

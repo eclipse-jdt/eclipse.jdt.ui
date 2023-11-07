@@ -38,8 +38,6 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling page wise in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorPageWise() throws Exception {
 		measure(PAGE_WISE);
@@ -47,8 +45,6 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 
 	/**
 	 * Measure the time spent while scrolling line wise in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseMoveCaret2() throws Exception {
 		measure(LINE_WISE);
@@ -57,8 +53,6 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling and selecting line wise in the
 	 * Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelect2() throws Exception {
 		measure(LINE_WISE_SELECT);
@@ -67,8 +61,6 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWise2() throws Exception {
 		measure(LINE_WISE_NO_CARET_MOVE);
@@ -77,8 +69,6 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret in the Java editor, holding the key combination down.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelectHoldKeys() throws Exception {
 		if (BUG_HOLDING_SCROLL_TESTS_DISABLED) {
@@ -91,8 +81,6 @@ public class ScrollJavaEditorTest extends ScrollEditorTest {
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret in the Java editor, holding the key combination down.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseHoldKeys() throws Exception {
 		if (BUG_HOLDING_SCROLL_TESTS_DISABLED) {

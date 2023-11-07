@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.dom.*;
  * exactly analogous to the dispatching behaviour obtained when method implementations are added to
  * the same ASTNode descendant classes.
  * </p>
- *
  */
 // @see JDTUIHelperClasses
 /*
@@ -63,7 +62,6 @@ import org.eclipse.jdt.core.dom.*;
  * The structure and behaviour of this class is
  * verified reflectively by
  * org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest
- *
  */
 public abstract class HierarchicalASTVisitor extends ASTVisitor {
 //TODO: check callers for handling of comments

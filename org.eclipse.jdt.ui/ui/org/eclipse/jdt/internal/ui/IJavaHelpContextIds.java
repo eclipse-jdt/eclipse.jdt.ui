@@ -25,7 +25,6 @@ import org.eclipse.jdt.ui.JavaUI;
  * This interface contains constants only; it is not intended to be implemented
  * or extended.
  * </p>
- *
  */
 public interface IJavaHelpContextIds {
 	String PREFIX= JavaUI.ID_PLUGIN + '.';

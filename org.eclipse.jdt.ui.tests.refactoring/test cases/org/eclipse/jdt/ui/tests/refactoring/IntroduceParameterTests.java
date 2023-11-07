@@ -55,9 +55,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	/**
 	 * get names from comment in source "//name: guessedName -> nameToUse"
 	 * <br>relies on tabwidth == 4
-	 * @param cu
 	 * @return {"guessedName", "nameToUse"} or null iff no name comment found
-	 * @throws Exception
 	 */
 	private String[] getNames(ICompilationUnit cu) throws Exception {
 		String source= cu.getSource();

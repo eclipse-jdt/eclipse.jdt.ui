@@ -51,7 +51,6 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
  * Tests generation of delegate methods
- *
  */
 public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Rule
@@ -107,8 +106,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Tests normal delegate method generation.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test01() throws Exception {
@@ -196,8 +193,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Test insertion in-between two existing methods (before foo3).
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test02() throws Exception {
@@ -300,8 +295,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Test insertion of imports
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test03() throws Exception {
@@ -360,8 +353,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Tests generic types
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test04() throws Exception {
@@ -419,8 +410,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Tests generic methods
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test05() throws Exception {
@@ -468,8 +457,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	/**
 	 *
 	 * Test enum types
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test06() throws Exception {
@@ -519,8 +506,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Test generation in inner types.
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test07() throws Exception {
@@ -569,8 +554,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	 * Test generation in anonymous types
 	 *
 	 * See also bug 112440 (bug only affects gui, however).
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test08() throws Exception {
@@ -611,8 +594,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Test delegate generation on type variable typed field
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test09() throws Exception {
@@ -658,8 +639,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Test delegate generation in secondary types
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test10() throws Exception {
@@ -702,8 +681,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	/**
 	 * Test delegate generation in secondary types with final methods
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test11() throws Exception {
@@ -762,7 +739,6 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	 * Test generation from interface both with and without default methods
 	 *
 	 * @throws Exception CoreException, JavaModelException or IOException
-	 *
 	 */
 	@Test
 	public void test12() throws Exception {

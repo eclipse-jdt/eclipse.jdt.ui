@@ -116,7 +116,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 
 	/**
 	 * Field ID of the junit5 toggle field.
-	 *
 	 */
 	private final static String JUNIT5TOGGLE= PAGE_NAME + ".junit5toggle"; //$NON-NLS-1$
 

@@ -26,9 +26,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
-/**
- *
- */
 public class AccessorDescription {
 
 	private final static String KEY_ACCESSOR_NAME= "accessorName"; //$NON-NLS-1$

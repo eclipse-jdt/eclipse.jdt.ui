@@ -146,7 +146,6 @@ import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
  * enclosing types as well. However, the latter is only possible if the target method is from source.
  *
  * @since 3.2
- *
  */
 public class IntroduceIndirectionRefactoring extends Refactoring {
 
@@ -1027,7 +1026,6 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * @param enclosing the enclosing member of the original method invocation
 	 * @param unitRewriter the rewrite
 	 * @return resulting status
-	 *
 	 */
 	private RefactoringStatus qualifyThisExpression(ThisExpression expr, MethodInvocation originalInvocation, IMember enclosing, CompilationUnitRewrite unitRewriter) {
 

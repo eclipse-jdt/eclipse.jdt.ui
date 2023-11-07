@@ -16,7 +16,6 @@ package junit.samples.money;
 
 /**
  * The common interface for simple Monies and MoneyBags
- *
  */
 public interface IMoney {
 	/**

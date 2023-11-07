@@ -47,8 +47,6 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
 import org.eclipse.jdt.internal.ui.search.LevelTreeContentProvider;
 
-/**
- */
 public class TreeContentProviderTest {
 
 	@Rule

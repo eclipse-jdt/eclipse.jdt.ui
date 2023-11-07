@@ -95,7 +95,6 @@ public class MainMethodSearchEngine{
 	 * @param scope the search scope
 	 * @param style search style constants (see {@link IJavaElementSearchConstants})
 	 * @return the types found
-	 * @throws CoreException
 	 */
 	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
 		List<IType> typesFound= new ArrayList<>(200);
@@ -118,8 +117,6 @@ public class MainMethodSearchEngine{
 	 * @param scope the search scope
 	 * @param style style search style constants (see {@link IJavaElementSearchConstants})
 	 * @return the types found
-	 * @throws InvocationTargetException
-	 * @throws InterruptedException
 	 */
 	public IType[] searchMainMethods(IRunnableContext context, final IJavaSearchScope scope, final int style) throws InvocationTargetException, InterruptedException  {
 		int allFlags=  IJavaElementSearchConstants.CONSIDER_EXTERNAL_JARS | IJavaElementSearchConstants.CONSIDER_BINARIES;

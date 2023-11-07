@@ -368,7 +368,6 @@ public abstract class ProfileManager extends Observable {
 	/**
 	 * Create and initialize a new profile manager.
 	 * @param profiles Initial custom profiles (List of type <code>CustomProfile</code>)
-	 * @param profileVersioner
 	 */
 	public ProfileManager(
 			List<Profile> profiles,
@@ -535,10 +534,6 @@ public abstract class ProfileManager extends Observable {
 	}
 
 
-	/**
-	 * @param uiPrefs
-	 * @param allOptions
-	 */
 	private void addAll(IEclipsePreferences uiPrefs, Map<String, String> allOptions) {
 		try {
 			for (String key : uiPrefs.keys()) {

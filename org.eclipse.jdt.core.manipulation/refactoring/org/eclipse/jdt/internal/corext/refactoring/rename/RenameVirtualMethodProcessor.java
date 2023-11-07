@@ -81,7 +81,6 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 * Protected constructor; only called from RenameTypeProcessor. Initializes
 	 * the method processor with an already resolved top level and ripple
 	 * methods.
-	 *
 	 */
 	public RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);

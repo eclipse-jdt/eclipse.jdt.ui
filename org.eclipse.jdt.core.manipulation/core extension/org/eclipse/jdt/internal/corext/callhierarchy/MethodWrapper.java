@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 /**
  * This class represents the general parts of a method call (either to or from a
  * method).
- *
  */
 public abstract class MethodWrapper extends PlatformObject {
 
