@@ -43,8 +43,6 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 
 
-/**
- */
 public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeListener {
 
 	/**

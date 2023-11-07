@@ -70,9 +70,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
- *
- */
 public class NewTypeWizardTest {
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;

@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchEditorOpener;
 
-/**
- */
 public class NLSSearchEditorOpener extends JavaSearchEditorOpener {
 	@Override
 	protected Object getElementToOpen(Match match) {

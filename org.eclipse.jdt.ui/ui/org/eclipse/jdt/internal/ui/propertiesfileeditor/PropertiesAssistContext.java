@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IType;
  * The properties file quick assist context.
  *
  * @since 3.8
- *
  */
 public class PropertiesAssistContext extends TextInvocationContext {
 

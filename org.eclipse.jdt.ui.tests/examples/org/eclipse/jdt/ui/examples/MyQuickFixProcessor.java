@@ -26,9 +26,6 @@ import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 
-/**
- *
- */
 public class MyQuickFixProcessor implements IQuickFixProcessor {
 /* Active on files with the name A.java
 

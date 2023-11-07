@@ -37,8 +37,6 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling page wise with error
 	 * annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorPageWise() throws Exception {
 		measure(PAGE_WISE);
@@ -47,8 +45,6 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling line wise with error
 	 * annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseMoveCaret1() throws Exception {
 		measure(LINE_WISE);
@@ -57,8 +53,6 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling and selecting line wise with
 	 * error annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWiseSelect1() throws Exception {
 		measure(LINE_WISE_SELECT);
@@ -67,8 +61,6 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	/**
 	 * Measure the time spent while scrolling line wise without moving the
 	 * caret with error annotations in the Java editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollJavaEditorLineWise1() throws Exception {
 		measure(LINE_WISE_NO_CARET_MOVE);

@@ -84,11 +84,7 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 	}
 
 	/**
-	 * @param elements
-	 * @param expectedInitialStatus
-	 * @param expectedFinalStatus
 	 * @return <code>true</code> iff performed
-	 * @throws CoreException
 	 */
 	private boolean perform(IJavaElement[] elements, int expectedInitialStatus, int expectedFinalStatus) throws CoreException {
 		InferTypeArgumentsRefactoring refactoring= ((RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) ? new InferTypeArgumentsRefactoring(elements) : null);

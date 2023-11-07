@@ -113,7 +113,6 @@ public class TestDelta implements IJavaElementDelta {
 
 	/**
 	 * Set the affected children of this Delta.
-	 * @param children
 	 */
 	public void setAffectedChildren(IJavaElementDelta[] children) {
 		fAffectedChildren= children;
@@ -122,8 +121,6 @@ public class TestDelta implements IJavaElementDelta {
 	/**
 	 * Create the parent deltas for an IPackageFragment.
 	 *
-	 * @param frag
-	 * @param delta
 	 * @return TestDelta
 	 */
 	public static TestDelta createParentDeltas(IPackageFragment frag, TestDelta delta) {
@@ -147,9 +144,6 @@ public class TestDelta implements IJavaElementDelta {
 	 * Create a delta for a list of ICompilationUnits, all the parent deltas
 	 * from the JavaModel down are created as well.
 	 *
-	 * @param cu
-	 * @param parent
-	 * @param action
 	 * @return IJavaElementDelta
 	 */
 	public static IJavaElementDelta createCUDelta(ICompilationUnit[] cu, IPackageFragment parent, int action) {
@@ -167,8 +161,6 @@ public class TestDelta implements IJavaElementDelta {
 	/**
 	 * Creates a delta for a PackageFragment from the JavaModel down.
 	 *
-	 * @param frag
-	 * @param action
 	 * @return IJavaElementDelta
 	 */
 	public static IJavaElementDelta createDelta(IPackageFragment frag, int action) {

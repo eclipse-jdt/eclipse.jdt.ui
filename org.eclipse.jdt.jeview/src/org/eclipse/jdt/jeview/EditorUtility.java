@@ -29,9 +29,6 @@ import org.eclipse.jdt.core.IOpenable;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-/**
- *
- */
 public class EditorUtility {
 	private EditorUtility() {
 		super();

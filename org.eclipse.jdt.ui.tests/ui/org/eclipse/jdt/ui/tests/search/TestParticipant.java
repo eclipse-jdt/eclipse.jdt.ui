@@ -36,8 +36,6 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-/**
- */
 public class TestParticipant implements IQueryParticipant {
 	private static final Random fgRandom= new Random();
 	private final IMatchPresentation fUIParticipant;

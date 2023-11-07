@@ -70,7 +70,6 @@ class CallSearchResultCollector {
 
     /**
      * Method isIgnored.
-     * @param enclosingElement
      * @return boolean
      */
     private boolean isIgnored(IMember enclosingElement) {

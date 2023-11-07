@@ -442,7 +442,6 @@ public class WorkingSetModel {
 	 * </p>
 	 *
 	 * @param workingSets the active working sets to be set
-	 *
 	 */
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
 		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(workingSets)));

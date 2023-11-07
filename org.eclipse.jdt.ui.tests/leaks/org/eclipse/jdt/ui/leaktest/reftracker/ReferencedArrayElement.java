@@ -15,9 +15,6 @@
 package org.eclipse.jdt.ui.leaktest.reftracker;
 
 
-/**
- *
- */
 public class ReferencedArrayElement extends ReferencedObject {
 
 	private final ReferencedObject fPrevious;

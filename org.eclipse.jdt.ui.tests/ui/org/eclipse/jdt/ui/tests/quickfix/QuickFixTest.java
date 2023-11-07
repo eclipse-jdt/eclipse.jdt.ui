@@ -85,8 +85,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardPro
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
 
-/**
- */
 public class QuickFixTest {
 
 	protected static String MODULE_INFO_FILE_CONTENT = ""
@@ -197,11 +195,6 @@ public class QuickFixTest {
 
 	/**
 	 * Bad design: only collects corrections for the <b>first</b> problem!
-	 * @param cu
-	 * @param astRoot
-	 * @param nProblems
-	 * @return
-	 * @throws CoreException
 	 */
 	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, null);
@@ -213,12 +206,6 @@ public class QuickFixTest {
 
 	/**
 	 * Bad design: only collects corrections for the <b>first</b> problem!
-	 * @param cu
-	 * @param astRoot
-	 * @param nProblems
-	 * @param context
-	 * @return
-	 * @throws CoreException
 	 */
 	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, 0, context);
@@ -257,10 +244,6 @@ public class QuickFixTest {
 
 	/**
 	 * Bad design: only collects corrections for the <b>first</b> problem!
-	 * @param cu
-	 * @param nProblems
-	 * @return
-	 * @throws CoreException
 	 */
 	protected static final ArrayList<IJavaCompletionProposal> collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
 
@@ -636,13 +619,6 @@ public class QuickFixTest {
 	 * Computes the number of warnings the java file "filename" has.
 	 * Then check if the "preview" source code has the same number of warnings.
 	 * Throw error if the number changes.
-	 *
-	 * @param pack
-	 * @param preview
-	 * @param className
-	 * @param filename
-	 * @param fSourceFolder
-	 * @throws JavaModelException
 	 */
 	protected void assertNoAdditionalProblems(IPackageFragment pack, String preview, String className, String filename, IPackageFragmentRoot fSourceFolder) throws JavaModelException {
 		Hashtable<String, String> options= JavaCore.getOptions();

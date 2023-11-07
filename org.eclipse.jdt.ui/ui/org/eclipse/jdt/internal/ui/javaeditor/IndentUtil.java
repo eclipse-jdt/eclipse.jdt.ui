@@ -177,7 +177,6 @@ public final class IndentUtil {
 	 * @param document the document
 	 * @param line the line
 	 * @param indent the indentation to insert
-	 * @param commentlines
 	 * @throws BadLocationException on concurrent document modification
 	 */
 	private static void addIndent(IDocument document, int line, CharSequence indent, boolean[] commentlines, int relative) throws BadLocationException {
@@ -438,7 +437,6 @@ public final class IndentUtil {
 	 * @param scanner the scanner
 	 * @param partition the comment partition
 	 * @return the indent, or <code>null</code> if not computable
-	 * @throws BadLocationException
 	 */
 	private static String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner, ITypedRegion partition) throws BadLocationException {
 		if (line == 0) // impossible - the first line is never inside a javadoc comment

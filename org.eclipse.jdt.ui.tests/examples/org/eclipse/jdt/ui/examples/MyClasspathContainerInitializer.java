@@ -23,9 +23,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-/**
- *
- */
 public class MyClasspathContainerInitializer extends ClasspathContainerInitializer {
 
 	public static ClasspathContainerInitializer initializerDelegate;

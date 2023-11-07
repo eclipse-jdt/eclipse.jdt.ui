@@ -919,26 +919,22 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 	/**
 	 * This method is called after all controls have been allocated, including the preview.
 	 * It can be used to set the preview text and to create listeners.
-	 *
 	 */
 	protected abstract void initializePage();
 
 	/**
 	 * This method is called when the deselect/select all buttons are pressed.
 	 * @param value true if set all, false if deselect all
-	 *
 	 */
 	public void doSetAll(boolean value) {}
 
 	/**
 	 * This method is called when the reset button is pressed.
-	 *
 	 */
 	public void resetValues() {}
 
 	/**
 	 * This method is called when the defaults buttons is pressed.
-	 *
 	 */
 	public void setDefaults() {}
 

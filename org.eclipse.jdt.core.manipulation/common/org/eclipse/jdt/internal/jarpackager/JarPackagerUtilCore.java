@@ -61,7 +61,6 @@ public class JarPackagerUtilCore {
 	 * @throws IOException If an I/O error occurred
 	 *
 	 * @since 1.14
-	 *
 	 */
 	public static void addEntry(JarEntry entry, InputStream content, JarOutputStream jarOutputStream) throws IOException {
 		byte[] readBuffer= new byte[4096];
@@ -98,7 +97,6 @@ public class JarPackagerUtilCore {
 	 * @param progressMonitor the progressMonitor
 	 *
 	 * @since 1.14
-	 *
 	 */
 	public static void writeArchive(ZipFile zipFile, boolean areDirectoryEntriesIncluded,
 			boolean isCompressed, JarOutputStream jarOutputStream,
@@ -145,7 +143,6 @@ public class JarPackagerUtilCore {
 	 * @param status the <code>MultiStatus</code> saving the warnings during the process
 	 *
 	 * @since 1.14
-	 *
 	 */
 	private static void addFile(String destinationPath, ZipEntry jarEntry, ZipFile zipFile,
 			boolean areDirectoryEntriesIncluded, boolean isCompressed,
@@ -184,7 +181,6 @@ public class JarPackagerUtilCore {
 	 * @throws IOException If an I/O error occurred
 	 *
 	 * @since 1.14
-	 *
 	 */
 	public static void addZipEntry(ZipEntry zipEntry, ZipFile zipFile, String path,
 			boolean areDirectoryEntriesIncluded, boolean isCompressed,
@@ -261,7 +257,6 @@ public class JarPackagerUtilCore {
 	 * @throws CoreException if an error has occurred
 	 *
 	 * @since 1.14
-	 *
 	 */
 	public static void write(File file, IPath destinationPath, boolean areDirectoryEntriesIncluded,
 			boolean isCompressed, JarOutputStream jarOutputStream, Set<String> directories) throws CoreException {
@@ -294,7 +289,6 @@ public class JarPackagerUtilCore {
 	 * @throws IOException if an I/O error has occurred
 	 *
 	 * @since 1.14
-	 *
 	 */
 	private static void addFile(File file, IPath path, boolean areDirectoryEntriesIncluded,
 			boolean isCompressed, JarOutputStream jarOutputStream, Set<String> directories) throws IOException {

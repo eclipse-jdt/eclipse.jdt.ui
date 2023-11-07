@@ -35,8 +35,6 @@ public class ScrollVerticalRuler5000Test extends ScrollVerticalRulerTest {
 
 	/**
 	 * Measure the time spent while scrolling page wise in the text editor.
-	 *
-	 * @throws Exception
 	 */
 	public void testScrollTextEditorPageWise() throws Exception {
 		measure(PAGE_WISE);
@@ -44,8 +42,6 @@ public class ScrollVerticalRuler5000Test extends ScrollVerticalRulerTest {
 
 	/**
 	 * Measure the time spent while scrolling line wise in the text editor.
-	 *
-	 * @throws Exception
 	 */
 //	This test is too slow
 //	public void testScrollTextEditorLineWiseMoveCaret2() throws Exception {

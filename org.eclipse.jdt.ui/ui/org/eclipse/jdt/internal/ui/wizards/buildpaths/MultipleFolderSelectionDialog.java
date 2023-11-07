@@ -52,8 +52,6 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
-  */
 public class MultipleFolderSelectionDialog extends SelectionStatusDialog implements ISelectionChangedListener {
 
 	private CheckboxTreeViewer fViewer;
@@ -194,9 +192,6 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 
 
 
-	/**
-	 *
-	 */
 	protected void updateOKStatus() {
 		computeResult();
 		if (getResult() != null) {

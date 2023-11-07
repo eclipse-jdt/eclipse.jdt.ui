@@ -53,9 +53,6 @@ public class CallLocation implements IAdaptable {
         return fCalledMember;
     }
 
-    /**
-     *
-     */
     public int getEnd() {
         return fEnd;
     }
@@ -64,9 +61,6 @@ public class CallLocation implements IAdaptable {
         return fMember;
     }
 
-    /**
-     *
-     */
     public int getStart() {
         return fStart;
     }

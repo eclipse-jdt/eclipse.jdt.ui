@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * Tests generation of getters and setters.
  *
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
- *
  */
 public class SourceTestCase16 {
 	@Rule

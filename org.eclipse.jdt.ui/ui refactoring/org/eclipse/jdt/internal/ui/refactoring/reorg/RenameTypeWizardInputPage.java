@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.ui.util.RowLayouter;
  * Wizard page for renaming a type (with similarly named elements)
  *
  * @since 3.2
- *
  */
 class RenameTypeWizardInputPage extends RenameInputWizardPage {
 

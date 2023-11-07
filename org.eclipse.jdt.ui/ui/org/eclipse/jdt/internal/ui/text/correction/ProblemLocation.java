@@ -22,9 +22,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
-/**
- *
- */
 public class ProblemLocation extends ProblemLocationCore implements IProblemLocation {
 
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {

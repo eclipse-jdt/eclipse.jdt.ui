@@ -325,8 +325,6 @@ public class ParametricStructureComputer {
 	/**
 	 * Updates the structure of the parent container variable of the given
 	 * CollectionElementVariable2 from the structure of 'v1'.
-	 * @param elemVar
-	 * @param v1
 	 */
 	private void updateParentContainerStructureFrom(CollectionElementVariable2 elemVar, ConstraintVariable2 v1) {
 		ConstraintVariable2 elemContainer= elemVar.getParentConstraintVariable();

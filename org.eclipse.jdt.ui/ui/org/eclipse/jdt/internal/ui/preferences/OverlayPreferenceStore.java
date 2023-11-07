@@ -503,7 +503,6 @@ public class OverlayPreferenceStore  implements IPreferenceStore {
 	 * Note: This method must be called before {@link #load()} is called.
 	 * </p>
 	 *
-	 * @param keys
 	 * @since 3.0
 	 */
 	public void addKeys(OverlayKey[] keys) {

@@ -35,7 +35,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.
 
 /**
  * A dialog to configure add-reads of a library.
- *
  */
 public class ModuleAddReadsDialog extends StatusDialog {
 

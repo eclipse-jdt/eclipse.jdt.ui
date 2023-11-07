@@ -23,9 +23,6 @@ import org.junit.Assert;
 
 
 public class StringAsserts {
-	/**
-	 *
-	 */
 	public StringAsserts() {
 		super();
 	}

@@ -240,12 +240,8 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 
 	/**
 	 * Creates a place holder ASTNode for the given element.
-	 * @param rewriter
-	 * @param element
 	 * @param delimiter the line delimiter
-	 * @param project
 	 * @return a ASTNode or null
-	 * @throws CoreException
 	 */
 	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter, IJavaProject project) throws CoreException {
 		if (element instanceof IStreamContentAccessor) {

@@ -46,9 +46,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
-/**
- *
- */
 public class JavaElementLightweightDecorator extends LabelProvider implements ILightweightLabelDecorator {
 
 	private class FileBufferListener implements IFileBufferListener {

@@ -50,9 +50,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
- *
- */
 public class BuildPathSupport {
 
 	public static final String JRE_PREF_PAGE_ID= "org.eclipse.jdt.debug.ui.preferences.VMPreferencePage"; //$NON-NLS-1$

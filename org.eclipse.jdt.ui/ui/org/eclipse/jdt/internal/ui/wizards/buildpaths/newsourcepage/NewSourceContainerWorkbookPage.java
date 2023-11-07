@@ -90,10 +90,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * containing hyperlinks that perform the same actions as those in the toolbar but
      * additionally with some short description.
      *
-     * @param classPathList
-     * @param outputLocationField
      * @param context a runnable context, can be <code>null</code>
-     * @param buildPathsBlock
      */
     public NewSourceContainerWorkbookPage(ListDialogField<CPListElement> classPathList, StringDialogField outputLocationField, IRunnableContext context, BuildPathsBlock buildPathsBlock) {
         fClassPathList= classPathList;

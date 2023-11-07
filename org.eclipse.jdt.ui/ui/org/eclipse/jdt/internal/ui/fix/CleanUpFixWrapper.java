@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
 
 /**
  * Class to wrap an ICleanUpFixCore and be used as an ICleanUpFix
- *
  */
 public class CleanUpFixWrapper implements ICleanUpFix {
 

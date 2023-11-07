@@ -61,7 +61,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      *
      * @param provider a information provider to pass necessary information
      * to the operations
-     * @param context
      * @param dialogPackageExplorer the package explorer for which to contribute the actions to
      * @param page the page showing the package explorer
      */

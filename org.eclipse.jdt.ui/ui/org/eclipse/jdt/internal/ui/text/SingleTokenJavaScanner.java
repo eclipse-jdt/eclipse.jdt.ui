@@ -24,9 +24,6 @@ import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jdt.ui.text.IColorManager;
 
 
-/**
- *
- */
 public final class SingleTokenJavaScanner extends AbstractJavaScanner{
 
 

@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 /**
  * Create fixes which can solve problems in connection with Strings
  * @see org.eclipse.jdt.internal.corext.fix.StringFixCore
- *
  */
 public class StringCleanUp extends AbstractMultiFix {
 

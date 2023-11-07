@@ -18,7 +18,6 @@ import junit.framework.*;
 
 /**
  * Some simple tests.
- *
  */
 public class SimpleTest extends TestCase {
 	protected int fValue1;

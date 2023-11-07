@@ -57,7 +57,6 @@ public class JavadocWriter {
 	 * Create a JavadocWriter.
 	 * @param basePath The base path to which all path will be made relative (if
 	 * possible). If <code>null</code>, paths are not made relative.
-	 * @param projects
 	 */
 	public JavadocWriter(IPath basePath, IJavaProject[] projects) {
 		fBasePath= basePath;

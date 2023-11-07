@@ -41,8 +41,6 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-/**
-  */
 public class BindingsNameTest {
 	@Rule
 	public ProjectTestSetup pts= new ProjectTestSetup();

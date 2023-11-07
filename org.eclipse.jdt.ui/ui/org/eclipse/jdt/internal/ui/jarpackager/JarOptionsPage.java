@@ -95,7 +95,6 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 
 	/**
 	 *	Create an instance of this class
-	 * @param jarPackage
 	 */
 	public JarOptionsPage(JarPackageData jarPackage) {
 		super(PAGE_NAME);

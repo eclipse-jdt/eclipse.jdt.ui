@@ -27,9 +27,6 @@ import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 
-/**
- *
- */
 public class PreferencesAccess {
 
 	public static PreferencesAccess getOriginalPreferences() {

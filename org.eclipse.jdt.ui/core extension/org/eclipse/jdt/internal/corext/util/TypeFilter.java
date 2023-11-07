@@ -28,9 +28,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
-/**
- *
- */
 public class TypeFilter implements IPropertyChangeListener {
 
 	public static TypeFilter getDefault() {
@@ -75,9 +72,6 @@ public class TypeFilter implements IPropertyChangeListener {
 
 	private StringMatcher[] fStringMatchers;
 
-	/**
-	 *
-	 */
 	public TypeFilter() {
 		fStringMatchers= null;
 		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);

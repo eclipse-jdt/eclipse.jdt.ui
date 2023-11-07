@@ -38,8 +38,6 @@ import org.eclipse.jdt.internal.ui.search.SearchParticipantDescriptor;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantRecord;
 import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
 
-/**
- */
 public class ParticipantTest {
 
 	@Rule

@@ -16,9 +16,6 @@ package org.eclipse.jdt.ui.tests.core.rules;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.intro.IIntroManager;
 
-/**
- *
- */
 public class LeakTestSetup extends JUnitSourceSetup {
 
 	private static LeakTestSetup fgCurrentSetup= null;

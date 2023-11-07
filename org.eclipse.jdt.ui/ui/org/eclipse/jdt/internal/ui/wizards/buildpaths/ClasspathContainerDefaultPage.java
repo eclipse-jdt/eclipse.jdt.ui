@@ -41,8 +41,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
-/**
-  */
 public class ClasspathContainerDefaultPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension {
 
 	private StringDialogField fEntryField;

@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
  * See the documentation of the factory methods.
  *
  * @see IASTFragment
- *
  */
 public class ASTFragmentFactory {
 
@@ -76,7 +75,6 @@ public class ASTFragmentFactory {
 	 * @return IASTFragment	A fragment whose source range is <code>range</code> within
 	 * 							compilation unit <code>cu</code>, residing somewhere within the
 	 * 							AST subtree identified by <code>scope</code>.
-	 * @throws JavaModelException
 	 */
 	public static IASTFragment createFragmentForSourceRange(ISourceRange range, ASTNode scope, ICompilationUnit cu) throws JavaModelException {
 		SelectionAnalyzer sa= new SelectionAnalyzer(Selection.createFromStartLength(range.getOffset(), range.getLength()), false);

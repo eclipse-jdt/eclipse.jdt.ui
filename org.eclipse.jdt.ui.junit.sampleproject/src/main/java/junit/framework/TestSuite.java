@@ -248,8 +248,6 @@ public class TestSuite implements Test {
 		return fTests.elements();
 	}
 
-	/**
-	 */
 	public String toString() {
 		if (getName() != null)
 			return getName();

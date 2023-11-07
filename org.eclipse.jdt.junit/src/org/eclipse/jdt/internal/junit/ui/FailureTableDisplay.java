@@ -11,9 +11,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/**
- *
- */
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.swt.SWT;

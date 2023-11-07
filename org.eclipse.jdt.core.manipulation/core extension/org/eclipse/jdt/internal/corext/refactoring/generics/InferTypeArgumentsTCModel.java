@@ -109,8 +109,6 @@ public class InferTypeArgumentsTCModel {
 	 * their constituent ConstraintVariables and ConstraintOperators. Can be used to e.g.
 	 * avoid creation of constraints for assignments between built-in types.
 	 *
-	 * @param cv1
-	 * @param cv2
 	 * @return <code>true</code> iff the type constraint should really be created
 	 */
 	protected boolean keep(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
@@ -140,7 +138,6 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	/**
-	 * @param cv
 	 * @return a List of ITypeConstraint2s where cv is used
 	 */
 	@SuppressWarnings("unchecked")
@@ -429,9 +426,6 @@ public class InferTypeArgumentsTCModel {
 	/**
 	 * Make a ParameterTypeVariable2 from a method declaration.
 	 * The constraint variable is always stored if it passes the type filter.
-	 * @param methodBinding
-	 * @param parameterIndex
-	 * @param cu
 	 * @return the ParameterTypeVariable2, or <code>null</code>
 	 */
 	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
@@ -688,7 +682,6 @@ public class InferTypeArgumentsTCModel {
 	 * the type variable E in referenceCV.
 	 *
 	 * @param expressionCv the type constraint variable of an expression
-	 * @param methodTypeVariables
 	 * @param referenceCv the type constraint variable of a type reference
 	 * @param reference the declared type reference
 	 */

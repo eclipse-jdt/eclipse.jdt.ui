@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.Signature;
  * The returned handle exists in the target model state.
  *
  * @since 3.2
- *
  */
 public class RefactoringHandleTransplanter {
 
@@ -64,7 +63,6 @@ public class RefactoringHandleTransplanter {
 	 * Converts the handle. Handle need not exist, but must be a source
 	 * reference.
 	 *
-	 * @param handle
 	 * @return the new handle
 	 */
 	public IMember transplantHandle(IMember handle) {

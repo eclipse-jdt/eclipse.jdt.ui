@@ -21,9 +21,6 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.ProposalPosition;
 
 
-/**
- *
- */
 public class VariablePosition extends ProposalPosition {
 
 	private MultiVariableGuess fGuess;

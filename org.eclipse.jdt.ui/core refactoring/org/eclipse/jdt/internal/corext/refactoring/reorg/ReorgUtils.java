@@ -30,7 +30,6 @@ public class ReorgUtils extends ReorgUtilsCore {
 	 * @param element the element to test
 	 * @return <code>true</code> if the element is a working set, <code>false</code> otherwise
 	 * @since 3.5
-	 *
 	 */
 
 	public static boolean isWorkingSet(Object element){

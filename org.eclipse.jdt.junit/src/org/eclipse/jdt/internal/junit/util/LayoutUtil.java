@@ -133,7 +133,6 @@ public class LayoutUtil {
 	 * Sets the vertical grabbing of a control to true. Assumes that GridData is used.
 	 *
 	 * @param control the control
-	 *
 	 */
 	public static void setVerticalGrabbing(Control control) {
 		Object ld= control.getLayoutData();

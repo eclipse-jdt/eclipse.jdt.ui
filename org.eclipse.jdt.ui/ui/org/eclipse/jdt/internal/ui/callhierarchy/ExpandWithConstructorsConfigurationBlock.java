@@ -86,7 +86,6 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 
 		/**
 		 * The change listener class for the dialog field and the string button dialog field.
-		 *
 		 */
 		private class StringButtonAdapter implements IDialogFieldListener, IStringButtonAdapter {
 			/*

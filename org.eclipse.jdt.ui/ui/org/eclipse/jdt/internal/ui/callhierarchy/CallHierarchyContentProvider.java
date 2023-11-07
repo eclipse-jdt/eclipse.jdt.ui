@@ -462,18 +462,12 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         }
     }
 
-    /**
-     *
-     */
     public void doneFetching() {
         if (fPart != null) {
             fPart.setCancelEnabled(false);
         }
     }
 
-    /**
-     *
-     */
     public void startFetching() {
         if (fPart != null) {
             fPart.setCancelEnabled(true);

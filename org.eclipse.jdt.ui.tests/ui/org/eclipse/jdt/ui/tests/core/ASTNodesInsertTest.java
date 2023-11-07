@@ -47,8 +47,6 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-/**
-  */
 public class ASTNodesInsertTest extends CoreTests {
 
 	@Rule

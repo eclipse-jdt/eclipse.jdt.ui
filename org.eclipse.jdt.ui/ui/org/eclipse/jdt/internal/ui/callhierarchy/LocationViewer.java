@@ -134,9 +134,6 @@ class LocationViewer extends TableViewer {
         return copyAction;
     }
 
-    /**
-     *
-     */
     void clearViewer() {
         setInput(""); //$NON-NLS-1$
     }

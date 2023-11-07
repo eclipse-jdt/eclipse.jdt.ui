@@ -214,9 +214,6 @@ public class MockPluginView extends PackageExplorerPart {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 	}
 
-	/**
-	 *
-	 */
 	public void clear() {
 		fRefreshedObjects.clear();
 		fRemovedObjects.clear();

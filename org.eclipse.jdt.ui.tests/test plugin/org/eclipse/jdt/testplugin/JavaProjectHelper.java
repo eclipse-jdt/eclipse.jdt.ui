@@ -187,9 +187,6 @@ public class JavaProjectHelper {
 	 * @param srcContainerName the source container name
 	 * @param outputFolderName the output folder name
 	 * @return the IJavaProject
-	 * @throws CoreException
-	 * @throws IOException
-	 * @throws InvocationTargetException
 	 * @since 3.1
 	 */
 	public static IJavaProject createJavaProjectWithJUnitSource(String projectName, String srcContainerName, String outputFolderName) throws CoreException, IOException, InvocationTargetException {
@@ -839,7 +836,6 @@ public class JavaProjectHelper {
 	 * @param jproject The parent project
 	 * @param path The path of the library to add
 	 * @return The handle of the created root
-	 * @throws JavaModelException
 	 */
 	public static IPackageFragmentRoot addLibrary(IJavaProject jproject, IPath path) throws JavaModelException {
 		return addLibrary(jproject, path, null, null);
@@ -852,7 +848,6 @@ public class JavaProjectHelper {
 	 * @param sourceAttachPath The source attachment path
 	 * @param sourceAttachRoot The source attachment root path
 	 * @return The handle of the created root
-	 * @throws JavaModelException
 	 */
 	public static IPackageFragmentRoot addLibrary(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
 		IClasspathEntry cpe= JavaCore.newLibraryEntry(path, sourceAttachPath, sourceAttachRoot);
@@ -868,12 +863,9 @@ public class JavaProjectHelper {
 	/**
 	 * Copies the library into the project and adds it as library entry.
 	 * @param jproject The parent project
-	 * @param jarPath
 	 * @param sourceAttachPath The source attachment path
 	 * @param sourceAttachRoot The source attachment root path
 	 * @return The handle of the created root
-	 * @throws IOException
-	 * @throws CoreException
 	 */
 	public static IPackageFragmentRoot addLibraryWithImport(IJavaProject jproject, IPath jarPath, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
 		IProject project= jproject.getProject();
@@ -893,11 +885,9 @@ public class JavaProjectHelper {
 	/**
 	 * Creates and adds a class folder to the class path.
 	 * @param jproject The parent project
-	 * @param containerName
 	 * @param sourceAttachPath The source attachment path
 	 * @param sourceAttachRoot The source attachment root path
 	 * @return The handle of the created root
-	 * @throws CoreException
 	 */
 	public static IPackageFragmentRoot addClassFolder(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot) throws CoreException {
 		IProject project= jproject.getProject();
@@ -920,14 +910,9 @@ public class JavaProjectHelper {
 	 * Creates and adds a class folder to the class path and imports all files
 	 * contained in the given ZIP file.
 	 * @param jproject The parent project
-	 * @param containerName
 	 * @param sourceAttachPath The source attachment path
 	 * @param sourceAttachRoot The source attachment root path
-	 * @param zipFile
 	 * @return The handle of the created root
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws InvocationTargetException
 	 */
 	public static IPackageFragmentRoot addClassFolderWithImport(IJavaProject jproject, String containerName, IPath sourceAttachPath, IPath sourceAttachRoot, File zipFile) throws IOException, CoreException, InvocationTargetException {
 		try (ZipFile file= new ZipFile(zipFile)) {
@@ -944,7 +929,6 @@ public class JavaProjectHelper {
 	 *
 	 * @param jproject target
 	 * @return the new package fragment root
-	 * @throws CoreException
 	 */
 	public static IPackageFragmentRoot addRTJar(IJavaProject jproject) throws CoreException {
 		return addRTJar15(jproject);
@@ -1040,7 +1024,6 @@ public class JavaProjectHelper {
 	 * @param sourceAttachPath The source attachment path (variable path)
 	 * @param sourceAttachRoot The source attachment root path (variable path)
 	 * @return The added package fragment root
-	 * @throws JavaModelException
 	 */
 	public static IPackageFragmentRoot addVariableEntry(IJavaProject jproject, IPath path, IPath sourceAttachPath, IPath sourceAttachRoot) throws JavaModelException {
 		IClasspathEntry cpe= JavaCore.newVariableEntry(path, sourceAttachPath, sourceAttachRoot);
@@ -1159,7 +1142,6 @@ public class JavaProjectHelper {
 	/**
 	 * @param rtStubsPath the path to the RT stubs
 	 * @return a rt.jar (stubs only)
-	 * @throws CoreException
 	 */
 	public static IPath[] findRtJar(IPath rtStubsPath) throws CoreException {
 		File rtStubs= JavaTestPlugin.getDefault().getFileInPlugin(rtStubsPath);

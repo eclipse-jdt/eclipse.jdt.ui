@@ -19,9 +19,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-/**
- *
- */
 public class ProblemsProperty extends ASTAttribute {
 
 	private final CompilationUnit fRoot;

@@ -397,7 +397,6 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 *
 	 * @param parent
 	 *            the parent control
-	 * @throws JavaModelException
 	 */
 	protected void createSuperTypeList(final Composite parent) throws JavaModelException {
 		createSpacer(parent);

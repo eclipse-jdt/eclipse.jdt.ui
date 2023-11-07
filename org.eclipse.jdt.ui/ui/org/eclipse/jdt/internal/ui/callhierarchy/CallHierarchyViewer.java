@@ -78,9 +78,6 @@ class CallHierarchyViewer extends TreeViewer {
         return fPart;
     }
 
-    /**
-     *
-     */
     void setFocus() {
         getControl().setFocus();
     }

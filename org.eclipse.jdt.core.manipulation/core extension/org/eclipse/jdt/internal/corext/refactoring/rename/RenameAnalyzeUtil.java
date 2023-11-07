@@ -307,8 +307,6 @@ public class RenameAnalyzeUtil {
 
 	/**
 	 *
-	 * @param change
-	 * @param oldMatches
 	 * @return Map &lt;Integer updatedOffset, SearchMatch oldMatch&gt;
 	 */
 	private static Map<Integer, SearchMatch> getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
@@ -325,7 +323,6 @@ public class RenameAnalyzeUtil {
 
 	/**
 	 *
-	 * @param change
 	 * @return Map &lt;Integer oldOffset, Integer updatedOffset&gt;
 	 */
 	private static Map<Integer, Integer> getEditChangeOffsetUpdates(TextChange change) {

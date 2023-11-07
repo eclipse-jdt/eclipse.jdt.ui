@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * Copy of org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler
- *
  */
 public class ChangeExceptionHandler {
 

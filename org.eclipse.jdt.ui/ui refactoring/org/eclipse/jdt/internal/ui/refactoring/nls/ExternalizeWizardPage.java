@@ -1003,9 +1003,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		return false;
 	}
 
-	/**
-	 *
-	 */
 	protected void doFilterCheckBoxPressed() {
 		fTableViewer.refresh();
 	}
@@ -1096,9 +1093,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 
-	/**
-	 *
-	 */
 	private void openRenameDialog() {
 		IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
 		List<NLSSubstitution> elementsToRename= getExternalizedElements(sel);

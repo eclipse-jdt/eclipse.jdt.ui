@@ -572,7 +572,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/*
 	 * Changes the input to a new type
-	 * @param inputElement
 	 */
 	private void updateInput(IJavaElement[] inputElements) {
 		IJavaElement[] prevInput= fInputElements;

@@ -16,8 +16,6 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
-/**
-  */
 public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
 
 	private final TypeHierarchyLifeCycle fHierarchy;

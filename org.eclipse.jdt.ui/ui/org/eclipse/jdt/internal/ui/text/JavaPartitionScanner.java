@@ -67,7 +67,6 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		private IToken fSuccessToken;
 		/**
 		 * Constructor for EmptyCommentRule.
-		 * @param successToken
 		 */
 		public EmptyCommentRule(IToken successToken) {
 			super(new EmptyCommentDetector());

@@ -39,8 +39,6 @@ public class JavaElementHistoryPageSource extends ElementLocalHistoryPageSource 
 	 * @param je the Java element
 	 * @return <code>true</code> if there are editions available for the given Java element,
 	 *         <code>false</code> otherwise
-	 *
-	 *
 	 */
 	public static boolean hasEdition(IJavaElement je) {
 

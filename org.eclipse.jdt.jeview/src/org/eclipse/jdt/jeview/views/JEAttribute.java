@@ -14,9 +14,6 @@
 package org.eclipse.jdt.jeview.views;
 
 
-/**
- *
- */
 public abstract class JEAttribute {
 
 	protected static final JEAttribute[] EMPTY= new JEAttribute[0];

@@ -19,7 +19,6 @@ import java.util.Vector;
 
 /**
  * A sample test case, testing <code>java.util.Vector</code>.
- *
  */
 public class VectorTest extends TestCase {
 	protected Vector<?> fEmpty;

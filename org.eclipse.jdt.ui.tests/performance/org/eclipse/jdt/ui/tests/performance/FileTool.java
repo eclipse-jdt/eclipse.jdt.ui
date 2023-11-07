@@ -48,7 +48,6 @@ public class FileTool {
 	 *
 	 * @param zipFile the zip file to unzip
 	 * @param dstDir the destination directory
-	 * @throws IOException
 	 */
 	public static void unzip(ZipFile zipFile, File dstDir) throws IOException {
 
@@ -113,7 +112,6 @@ public class FileTool {
 	 *
 	 * @param source the given source file
 	 * @param destination the given destination file
-	 * @throws IOException
 	 */
 	public static void transferData(File source, File destination) throws IOException {
 		destination.getParentFile().mkdirs();
@@ -146,7 +144,6 @@ public class FileTool {
 	 *
 	 * @param source the given source stream
 	 * @param destination the given destination stream
-	 * @throws IOException
 	 */
 	public static void transferData(InputStream source, OutputStream destination) throws IOException {
 		int bytesRead = 0;
@@ -163,7 +160,6 @@ public class FileTool {
 	 *
 	 * @param src the given source file
 	 * @param dst the given destination file
-	 * @throws IOException
 	 */
 	public static void copy(File src, File dst) throws IOException {
 		if(src.isDirectory()){

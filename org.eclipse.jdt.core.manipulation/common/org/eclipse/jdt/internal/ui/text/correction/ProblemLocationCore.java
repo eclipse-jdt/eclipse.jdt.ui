@@ -21,9 +21,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.NodeFinder;
 
-/**
- *
- */
 public class ProblemLocationCore implements IProblemLocationCore {
 
 	private final int fId;

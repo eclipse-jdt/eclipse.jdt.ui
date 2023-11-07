@@ -503,7 +503,6 @@ public class IndentAction extends TextEditorAction {
 	 * @param document the document to inspect
 	 * @param offset the offset where to start looking for slash pairs
 	 * @return the number of slash pairs.
-	 * @throws BadLocationException
 	 * @since 3.4
 	 */
 	private static int countLeadingSlashPairs(IDocument document, int offset) throws BadLocationException {
@@ -577,7 +576,6 @@ public class IndentAction extends TextEditorAction {
 	 * @param scanner the scanner
 	 * @param partition the javadoc partition
 	 * @return the indent, or <code>null</code> if not computable
-	 * @throws BadLocationException
 	 * @since 3.1
 	 */
 	private static String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner, ITypedRegion partition) throws BadLocationException {

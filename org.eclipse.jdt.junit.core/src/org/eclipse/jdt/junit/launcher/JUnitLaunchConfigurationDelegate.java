@@ -680,7 +680,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	 *             launch(...)} has been replaced with the call to
 	 *             {@link JUnitLaunchConfigurationDelegate#getClasspathAndModulepath(ILaunchConfiguration)
 	 *             getClasspathAndModulepath(ILaunchConfiguration)}.
-	 *
 	 */
 	@Override
 	@Deprecated

@@ -35,8 +35,6 @@ public interface ITranslator {
 	 *
 	 * @param reader the reader to access the source
 	 * @param name the name of the translated source or <code>null</code> if none
-	 * @return
-	 * @throws IOException
 	 */
 	String translate(Reader reader, String name) throws IOException;
 

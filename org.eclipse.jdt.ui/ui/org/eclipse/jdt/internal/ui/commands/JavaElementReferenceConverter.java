@@ -129,7 +129,6 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 	 *
 	 * @param assertion
 	 *            a boolean check for well-formedness
-	 * @throws ParameterValueConversionException
 	 */
 	private void assertWellFormed(boolean assertion) throws ParameterValueConversionException {
 		if (!assertion) {
@@ -143,7 +142,6 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 	 *
 	 * @param javaElement
 	 *            an element to check for existence
-	 * @throws ParameterValueConversionException
 	 */
 	private void assertExists(IJavaElement javaElement) throws ParameterValueConversionException {
 		if ((javaElement == null) || (!javaElement.exists())) {

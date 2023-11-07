@@ -20,9 +20,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-/**
- *
- */
 public class CommentsProperty extends ASTAttribute {
 
 	private final CompilationUnit fRoot;

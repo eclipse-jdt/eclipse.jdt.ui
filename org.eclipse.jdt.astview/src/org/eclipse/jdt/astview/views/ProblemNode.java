@@ -23,9 +23,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-/**
- *
- */
 public class ProblemNode extends ASTAttribute {
 
 	private final IProblem fProblem;

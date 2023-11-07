@@ -110,7 +110,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * type.
  *
  * @since 3.2
- *
  */
 class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 

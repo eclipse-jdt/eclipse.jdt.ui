@@ -93,7 +93,6 @@ public class SnippetFinder extends GenericVisitor {
 		 * Tests whether the node to be replaced is invalid.
 		 *
 		 * @return true if the node is invalid, false otherwise
-		 *
 		 */
 		public boolean isInvalidNode() {
 			ASTNode first= fNodes.get(0);

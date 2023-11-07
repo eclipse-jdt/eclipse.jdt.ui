@@ -171,7 +171,6 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 	/**
 	 * Removes the unused type parameter.
-	 *
 	 */
 	public static class RemoveUnusedTypeParameterOperation extends CompilationUnitRewriteOperation {
 		private final SimpleName fUnusedName;

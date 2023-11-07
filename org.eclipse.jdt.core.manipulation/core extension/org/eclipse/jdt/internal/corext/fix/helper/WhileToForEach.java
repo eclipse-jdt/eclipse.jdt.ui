@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
  * Find: while (it.hasNext()){ System.out.println(it.next()); }
  *
  * Rewrite: for(Object o:collection) { System.out.println(o); });
- *
  */
 public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 

@@ -16,9 +16,6 @@ package org.eclipse.jdt.internal.ui.util;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/**
- *
- */
 public class PatternConstructor {
 
 
@@ -33,7 +30,6 @@ public class PatternConstructor {
 	 * @param isCaseSensitive Set to <code>true</code> to create a case insensitive pattern
 	 * @param isRegexSearch <code>true</code> if the passed string already is a reg-ex pattern
 	 * @return The created pattern
-	 * @throws PatternSyntaxException
 	 */
 	public static Pattern createPattern(String pattern, boolean isCaseSensitive, boolean isRegexSearch) throws PatternSyntaxException {
 		if (!isRegexSearch) {
@@ -53,7 +49,6 @@ public class PatternConstructor {
 	 * @param isCaseSensitive Set to <code>true</code> to create a case insensitive pattern
 	 * @param isRegexSearch <code>true</code> if the passed string already is a reg-ex pattern
 	 * @return The created pattern
-	 * @throws PatternSyntaxException
 	 */
 	public static Pattern createPattern(String[] patterns, boolean isCaseSensitive, boolean isRegexSearch) throws PatternSyntaxException {
 		StringBuffer pattern= new StringBuffer();

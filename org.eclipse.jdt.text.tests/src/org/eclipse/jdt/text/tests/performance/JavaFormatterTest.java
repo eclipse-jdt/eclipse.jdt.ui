@@ -64,8 +64,6 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to format a large compilation unit.
-	 *
-	 * @throws Exception
 	 */
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());

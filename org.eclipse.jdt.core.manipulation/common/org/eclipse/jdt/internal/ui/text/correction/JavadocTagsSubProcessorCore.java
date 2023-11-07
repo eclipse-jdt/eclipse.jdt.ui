@@ -32,9 +32,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
-/**
- *
- */
 public class JavadocTagsSubProcessorCore {
 	static Set<String> getPreviousExceptionNames(List<Type> list, ASTNode missingNode) {
 		Set<String> previousNames=  new HashSet<>();

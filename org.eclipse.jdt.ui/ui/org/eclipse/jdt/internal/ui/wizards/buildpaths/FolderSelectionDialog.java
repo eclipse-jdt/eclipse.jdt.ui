@@ -40,8 +40,6 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-/**
-  */
 public class FolderSelectionDialog extends ElementTreeSelectionDialog implements ISelectionChangedListener {
 
 	private Button fNewFolderButton;

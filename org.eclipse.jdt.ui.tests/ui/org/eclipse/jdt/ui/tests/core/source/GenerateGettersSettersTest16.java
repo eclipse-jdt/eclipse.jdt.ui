@@ -37,7 +37,6 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  * Tests generation of getters and setters.
  *
  * @see org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation
- *
  */
 public class GenerateGettersSettersTest16 extends SourceTestCase16 {
 	@Rule
@@ -55,8 +54,6 @@ public class GenerateGettersSettersTest16 extends SourceTestCase16 {
 	 * @param sort enable sort
 	 * @param visibility visibility for new methods
 	 * @param sibling element to insert before
-	 * @throws CoreException
-	 *
 	 */
 	private void runOperation(IType type, IField[] getters, IField[] setters, IField[] gettersAndSetters, boolean sort, int visibility, IJavaElement sibling) throws CoreException {
 
@@ -82,7 +79,6 @@ public class GenerateGettersSettersTest16 extends SourceTestCase16 {
 
 	/**
 	 * No setter for final fields (if skipped by user, as per parameter)
-	 * @throws Exception
 	 */
 	@Test
 	public void testBug561413() throws Exception {

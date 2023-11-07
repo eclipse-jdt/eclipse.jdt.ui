@@ -30,8 +30,6 @@ import org.eclipse.jdt.ui.tests.core.rules.JUnitSourceSetup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 
-/**
- */
 public class FileAdapterTest {
 
 	@Rule

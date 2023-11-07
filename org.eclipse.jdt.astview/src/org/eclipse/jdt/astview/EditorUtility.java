@@ -27,9 +27,6 @@ import org.eclipse.jdt.core.ITypeRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-/**
- *
- */
 public class EditorUtility {
 	private EditorUtility() {
 		super();

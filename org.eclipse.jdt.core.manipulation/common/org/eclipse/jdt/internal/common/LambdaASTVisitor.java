@@ -28,9 +28,6 @@ import org.eclipse.jdt.core.dom.*;
  */
 @SuppressWarnings("unchecked")
 public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> extends ASTVisitor {
-	/**
-	 *
-	 */
 	private final HelperVisitor<E,V,T> helperVisitor;
 
 	/**

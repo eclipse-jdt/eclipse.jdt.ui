@@ -76,7 +76,6 @@ class DeleteChangeCreator {
 	 *        <code>javaElements</code>, or <code>null</code> iff
 	 *        <code>javaElements</code> does not contain package fragments
 	 * @return the created change
-	 * @throws CoreException
 	 */
 	static Change createDeleteChange(TextChangeManager manager, IResource[] resources,
 			IJavaElement[] javaElements, String changeName, List<IResource> packageDeletes) throws CoreException {

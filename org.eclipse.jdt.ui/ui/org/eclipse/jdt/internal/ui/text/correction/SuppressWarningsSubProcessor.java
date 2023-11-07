@@ -60,9 +60,6 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-/**
- *
- */
 public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCore {
 
 	static final String ADD_SUPPRESSWARNINGS_ID= SuppressWarningsSubProcessorCore.ADD_SUPPRESSWARNINGS_ID;

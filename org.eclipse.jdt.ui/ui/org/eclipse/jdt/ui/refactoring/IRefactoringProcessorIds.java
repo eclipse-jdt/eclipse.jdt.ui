@@ -130,7 +130,6 @@ public interface IRefactoringProcessorIds {
 	 * (and of other Java elements or resources) are available
 	 * through the interfaces {@link IJavaElementMapper} and {@link IResourceMapper}, which can be retrieved from the
 	 * processor using the getAdapter() method.</p>
-	 *
 	 */
 	String RENAME_TYPE_PROCESSOR= IRefactoringProcessorIdsCore.RENAME_TYPE_PROCESSOR;
 

@@ -239,8 +239,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectio
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-/**
-  */
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static final String SPLIT_JOIN_VARIABLE_DECLARATION_ID= "org.eclipse.jdt.ui.correction.splitJoinVariableDeclaration.assist"; //$NON-NLS-1$

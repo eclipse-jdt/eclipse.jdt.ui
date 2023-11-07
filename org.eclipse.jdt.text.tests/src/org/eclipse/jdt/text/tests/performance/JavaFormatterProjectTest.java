@@ -62,8 +62,6 @@ public class JavaFormatterProjectTest extends TextPerformanceTestCase {
 
 	/**
 	 * Measures the time to convert line delimiters of a project.
-	 *
-	 * @throws Exception
 	 */
 	public void test() throws Exception {
 		measure(getNullPerformanceMeter(), getWarmUpRuns());

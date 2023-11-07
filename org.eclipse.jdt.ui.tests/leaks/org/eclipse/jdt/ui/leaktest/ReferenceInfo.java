@@ -22,7 +22,6 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
 
 /**
  * Result element with information to the link to the root element
- *
  */
 
 public class ReferenceInfo {

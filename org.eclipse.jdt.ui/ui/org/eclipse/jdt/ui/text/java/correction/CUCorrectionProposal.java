@@ -262,7 +262,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 
 	/**
 	 * @since 3.31
-	 * @return
 	 */
 	protected boolean useDelegateToCreateTextChange() {
 		return true;
@@ -271,7 +270,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	/**
 	 * @since 3.31
 	 * @return the text change
-	 * @throws CoreException
 	 */
 	protected TextChange createTextChangeLocal() throws CoreException {
 		TextChange change = fProposalCore.getNewChange();
@@ -284,7 +282,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	/**
 	 * @since 3.31
 	 * @return a text change created via the delegate
-	 * @throws CoreException
 	 */
 	protected TextChange createTextChangeViaDelegate() throws CoreException {
 		if ((getDelegate()).getCurrentChange() instanceof TextChange change) {

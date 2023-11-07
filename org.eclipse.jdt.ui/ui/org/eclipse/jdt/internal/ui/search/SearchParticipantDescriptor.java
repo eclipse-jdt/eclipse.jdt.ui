@@ -25,8 +25,6 @@ import org.eclipse.jdt.ui.search.IQueryParticipant;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-/**
- */
 public class SearchParticipantDescriptor {
 		private static final String CLASS= "class"; //$NON-NLS-1$
 		private static final String NATURE= "nature"; //$NON-NLS-1$

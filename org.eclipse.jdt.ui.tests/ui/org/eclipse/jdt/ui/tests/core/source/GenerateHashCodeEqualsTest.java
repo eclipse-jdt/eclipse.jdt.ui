@@ -54,7 +54,6 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
  * Tests generation of delegate methods
- *
  */
 public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Rule
@@ -102,8 +101,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test non-reference types (and Enum) in a direct subclass of Object
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test01() throws Exception {
@@ -190,8 +187,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test non-reference types in an indrect subclass of Object
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test02() throws Exception {
@@ -251,8 +246,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test reference types in a direct subclass of Object
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test03() throws Exception {
@@ -321,8 +314,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test reference types in an indirect subclass of Object
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test04() throws Exception {
@@ -391,8 +382,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test arrays
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test05() throws Exception {
@@ -450,8 +439,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test insertion in-between two methods
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test06() throws Exception {
@@ -508,8 +495,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Some enums and generic field types...
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test07() throws Exception {
@@ -582,8 +567,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Two double fields
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test08() throws Exception {
@@ -637,8 +620,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * "this" qualification for fields with the
 	 * same name as a newly introduced temporary
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test09() throws Exception {
@@ -704,8 +685,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test non-reference types in a direct subclass of Object, using 'instanceof' comparison
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test10() throws Exception {
@@ -785,8 +764,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test non-reference types in an indrect subclass of Object, using 'instanceof' comparison
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test11() throws Exception {
@@ -844,8 +821,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test reference types in a direct subclass of Object, using 'instanceof' comparison
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test12() throws Exception {
@@ -913,8 +888,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test that multiple applications yield same result (without super calls)
 	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=154417)
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void test13() throws Exception {
@@ -985,8 +958,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using non-array instance variables and Enum
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsIn17() throws Exception {
@@ -1053,8 +1024,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using unique non-array instance variables
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsUniqueFieldIn17() throws Exception {
@@ -1102,8 +1071,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using non-array instance variables with 'instanceof' comparison
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsInstanceOfIn17() throws Exception {
@@ -1164,8 +1131,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim array amongst other instance variables
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsArrayIn17() throws Exception {
@@ -1235,7 +1200,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim Cloneable array amongst other instance variables
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsCloneableArrayIn17() throws Exception {
@@ -1305,7 +1269,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim Serializable array amongst other instance variables
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsSerializableArrayIn17() throws Exception {
@@ -1377,7 +1340,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim Object array amongst other instance variables
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsObjectArrayIn17() throws Exception {
@@ -1447,7 +1409,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using 1-dim type variable arrays extending Serializable and Number
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsTypeVariableArrayIn17() throws Exception {
@@ -1500,7 +1461,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using multidimensional array amongst other instance variables
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsMultiArrayIn17() throws Exception {
@@ -1570,8 +1530,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using both multidimensional and 1-dimensional primitive arrays amongst other instance variables
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsVariousArraysIn17() throws Exception {
@@ -1644,8 +1602,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls
 	 * Using ONLY multidimensional and 1-dimensional arrays as instance variables
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void hashCodeEqualsOnlyArraysIn17() throws Exception {
@@ -1696,8 +1652,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test member types
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void enclosingInstance() throws Exception {
@@ -1756,8 +1710,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test member types with J7+ Objects.hash and Objects.equals method calls
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void enclosingInstanceIn17() throws Exception {
@@ -1818,8 +1770,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test non-reference types in a direct subclass of Object
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void thenWithBlocks() throws Exception {
@@ -1883,8 +1833,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test reference types in an subclass
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void subTypeAndArraysIn14() throws Exception {
@@ -1992,8 +1940,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls Using sub-type
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void subTypeIn17() throws Exception {
@@ -2059,8 +2005,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	/**
 	 * Test with J7+ Objects.hash and Objects.equals method calls with class with "other" field
 	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=561517)
-	 *
-	 * @throws Exception
 	 */
 	public void otherFieldIn17() throws Exception {
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
@@ -2104,8 +2048,6 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	/**
 	 * Test implementation based only on super class
-	 *
-	 * @throws Exception
 	 */
 	@Test
 	public void subTypeNoFields() throws Exception {

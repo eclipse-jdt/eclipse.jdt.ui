@@ -22,8 +22,6 @@ import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCom
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-/**
- */
 public class MembersOrderPreferenceCache extends MembersOrderPreferenceCacheCommon implements IPropertyChangeListener {
 
 	private IPreferenceStore fPreferenceStore;

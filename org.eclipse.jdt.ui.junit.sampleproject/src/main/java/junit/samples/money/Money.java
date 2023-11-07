@@ -16,7 +16,6 @@ package junit.samples.money;
 
 /**
  * A simple Money.
- *
  */
 public class Money implements IMoney {
 

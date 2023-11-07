@@ -35,7 +35,6 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 	 *
 	 * @param editor the java editor the occurrences markers of which will be
 	 *        synchronized with the linked mode
-	 *
 	 */
 	public EditorHighlightingSynchronizer(JavaEditor editor) {
 		Assert.isLegal(editor != null);

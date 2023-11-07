@@ -59,8 +59,6 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 	/**
 	 * This is an internal method. Do not call from subclasses!
 	 * Use {@link #collectMatch(SearchMatch)} instead.
-	 * @param match
-	 * @throws CoreException
 	 * @deprecated
 	 */
 	@Deprecated

@@ -76,7 +76,6 @@ public class LogicalPackage extends PlatformObject {
 	 * resides inside the same project as the other fragments in
 	 * the LogicalPackage.
 	 *
-	 * @param fragment
 	 * @return boolean
 	 */
 	public boolean belongs(IPackageFragment fragment) {

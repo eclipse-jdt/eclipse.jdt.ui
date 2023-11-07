@@ -25,9 +25,6 @@ public class MethodCall {
     private List<CallLocation> fCallLocations;
     private boolean potential;
 
-    /**
-     * @param enclosingElement
-     */
     public MethodCall(IMember enclosingElement) {
     	this(enclosingElement, false);
     }
@@ -44,9 +41,6 @@ public class MethodCall {
 	}
 
 
-    /**
-     *
-     */
     public Collection<CallLocation> getCallLocations() {
         return fCallLocations;
     }
@@ -70,16 +64,10 @@ public class MethodCall {
         return getMember().getHandleIdentifier();
     }
 
-    /**
-     *
-     */
     public IMember getMember() {
         return fMember;
     }
 
-    /**
-     * @param location
-     */
     public void addCallLocation(CallLocation location) {
         if (fCallLocations == null) {
             fCallLocations = new ArrayList<>();

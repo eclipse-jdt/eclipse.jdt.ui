@@ -92,9 +92,6 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 
 	private IConsole fConsole;
 
-	/**
-	 *
-	 */
 	public JavadocConsoleLineTracker() {
 	}
 

@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * capable of creating delegates.
  *
  * @since 3.2
- *
  */
 public class DelegateUIHelper {
 

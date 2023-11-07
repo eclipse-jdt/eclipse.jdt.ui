@@ -56,7 +56,6 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	 * Content provider for the generate hashCode() and equals() tree viewer.
 	 *
 	 * @since 3.2
-	 *
 	 */
 	private static class GenerateHashCodeEqualsContentProvider implements ITreeContentProvider {
 
@@ -100,7 +99,6 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 	 * Validator for the input of the generate hashCode() and equals() dialog.
 	 *
 	 * @since 3.2
-	 *
 	 */
 	private static class GenerateHashCodeEqualsValidator implements ISelectionStatusValidator {
 

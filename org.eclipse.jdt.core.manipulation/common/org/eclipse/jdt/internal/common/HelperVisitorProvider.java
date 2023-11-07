@@ -19,7 +19,6 @@ package org.eclipse.jdt.internal.common;
  * @param <V> - type of key in HelperVisitor mapping
  * @param <T> - type of value in HelperVisitor mapping
  * @param <E> - type that extends HelperVisitorProvider providing HelperVisitor mapping V -> T
- *
  */
 public interface HelperVisitorProvider<V, T, E extends HelperVisitorProvider<V, T, E>> {
 	/**

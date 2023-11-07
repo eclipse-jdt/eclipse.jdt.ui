@@ -594,7 +594,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * @return initialization status
 	 * @throws JavaModelException some fundamental error with the underlying model
 	 * @throws OperationCanceledException if user canceled the task
-	 *
 	 */
 	public RefactoringStatus initializeReferences(IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
 
@@ -733,7 +732,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * false if not. In other words: If this method returns true, the match is
 	 * the declared type (or return type) of the enclosing element.
 	 * @throws JavaModelException should not happen
-	 *
 	 */
 	private boolean isInDeclaredType(int matchOffset, IJavaElement parentElement) throws JavaModelException {
 		if (parentElement != null) {

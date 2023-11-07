@@ -30,9 +30,6 @@ public final class JavadocContentAssistInvocationContext extends JavaContentAssi
 	private final int fFlags;
 
 	/**
-	 * @param viewer
-	 * @param offset
-	 * @param editor
 	 * @param flags see {@link org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor#RESTRICT_TO_MATCHING_CASE}
 	 */
 	public JavadocContentAssistInvocationContext(ITextViewer viewer, int offset, IEditorPart editor, int flags) {

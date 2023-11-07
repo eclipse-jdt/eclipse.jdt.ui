@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 /**
  * A dialog to configure the source attachment of a library (class folder, archives
  * and variable entries).
- *
  */
 public class SourceAttachmentDialog extends StatusDialog {
 

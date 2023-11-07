@@ -29,8 +29,6 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 
 import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
 
-/**
-  */
 public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 
 	private static final int OTHER= 1;

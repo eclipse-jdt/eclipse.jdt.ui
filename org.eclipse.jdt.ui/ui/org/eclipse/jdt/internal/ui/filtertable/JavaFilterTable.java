@@ -88,7 +88,6 @@ public class JavaFilterTable {
 	 * Interface for encapsulating the storage of the {@link Filter}s
 	 *
 	 * @since 3.26
-	 *
 	 */
 	public interface FilterStorage {
 		/**

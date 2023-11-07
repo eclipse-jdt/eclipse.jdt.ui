@@ -89,10 +89,6 @@ public class SearchEngine {
 	private SearchEngine() {
 	}
 
-	/**
-	 *
-	 * @return
-	 */
 	public static SearchEngine getSearchEngine() {
 		if (fgSearchEngine == null)
 			fgSearchEngine= new SearchEngine();
