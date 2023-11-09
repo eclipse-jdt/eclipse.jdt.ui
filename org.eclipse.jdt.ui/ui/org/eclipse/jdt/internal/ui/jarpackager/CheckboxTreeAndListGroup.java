@@ -714,8 +714,6 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 	/**
 	 * Returns the result of running the given elements through the filters.
-	 * @param filters
-	 *
 	 * @param elements the elements to filter
 	 * @return only the elements which all filters accept
 	 */

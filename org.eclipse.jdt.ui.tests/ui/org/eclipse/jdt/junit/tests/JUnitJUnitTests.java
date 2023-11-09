@@ -43,10 +43,6 @@ JUnit4TestFinderTest.class,
 JUnit4TestFinderTest16.class,
 
 TestSorting.class
-/**
- * @param suite the suite
- * @deprecated to hide deprecation warning
- */
 //LegacyTestRunListenerTest.class
 })
 public class JUnitJUnitTests {

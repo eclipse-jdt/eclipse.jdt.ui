@@ -80,7 +80,7 @@ public final class SemanticToken {
 	/**
 	 * Update this token with the given AST node.
 	 * <p>
-	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
+	 * Only to be used by org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler
 	 * </p>
 	 *
 	 * @param node the AST simple name
@@ -93,7 +93,7 @@ public final class SemanticToken {
 	/**
 	 * Update this token with the given AST node.
 	 * <p>
-	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
+	 * Only to be used by org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler
 	 * </p>
 	 *
 	 * @param literal the AST literal
@@ -106,7 +106,7 @@ public final class SemanticToken {
 	/**
 	 * Clears this token.
 	 * <p>
-	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
+	 * Only to be used by org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingReconciler
 	 * </p>
 	 */
 	public void clear() {

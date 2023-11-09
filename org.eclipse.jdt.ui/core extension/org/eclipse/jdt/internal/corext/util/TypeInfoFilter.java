@@ -196,7 +196,7 @@ public class TypeInfoFilter {
 	 * <p>
 	 * <i>WARNING: This is the <b>reverse</b> interpretation compared to
 	 * {@link org.eclipse.ui.dialogs.SearchPattern#isSubPattern(org.eclipse.ui.dialogs.SearchPattern)}
-	 * and {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter}. </i>
+	 * and {@code org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter}. </i>
 	 * </p>
 	 *
 	 * @param text another filter text

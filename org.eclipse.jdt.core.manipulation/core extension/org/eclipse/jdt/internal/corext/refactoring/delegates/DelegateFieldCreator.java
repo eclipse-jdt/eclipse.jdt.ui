@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
 /**
  * Delegate creator for static fields. Note that this implementation assumes a
  * field <strong>with only one fragment</strong>. See
- * {@link MoveStaticMembersProcessor#getASTMembers(org.eclipse.ltk.core.refactoring.RefactoringStatus)}
+ * {@link MoveStaticMembersProcessor#getMembersToMove()}
  * for more information.
  *
  * @since 3.2
@@ -100,7 +100,7 @@ public class DelegateFieldCreator extends DelegateCreator {
 
 	// ******************* INTERNAL HELPERS ***************************
 
-	private Expression createDelegateFieldInitializer(final FieldDeclaration declaration) throws JavaModelException {
+	private Expression createDelegateFieldInitializer(final FieldDeclaration declaration) {
 		Assert.isNotNull(declaration);
 
 		Expression qualification= getAccess();

@@ -50,7 +50,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 
 	/**
 	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
-	 * @deprecated
+	 * @deprecated use {@link IInformationProviderExtension#getInformation2(ITextViewer, IRegion)}
 	 */
 	@Deprecated
 	@Override

@@ -128,11 +128,11 @@ public class JspPluginImages {
 	 *		This may mean the same package directory as the package holding this class.
 	 *		The images are declared using this.getClass() to ensure they are looked up via
 	 *		this plugin class.
-	 *	@see JFace's ImageRegistry
+	 *	see JFace's ImageRegistry
 	 */
 	public static ImageRegistry initializeImageRegistry() {
 		imageRegistry= new ImageRegistry(JspUIPlugin.getStandardDisplay());
-		imageDescriptors = new HashMap(30);
+		imageDescriptors = new HashMap<>(30);
 		declareImages();
 		return imageRegistry;
 	}

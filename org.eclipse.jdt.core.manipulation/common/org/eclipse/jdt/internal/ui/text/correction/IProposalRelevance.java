@@ -19,7 +19,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 /**
  * Interface defining relevance values for quick fixes/assists.
  *
- * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
+ * see org.eclipse.jdt.ui.text.java.IJavaCompletionProposall#getRelevance()
  * @since 3.9
  */
 public interface IProposalRelevance {

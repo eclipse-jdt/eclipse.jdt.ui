@@ -54,8 +54,6 @@ public class Implementors {
      * instances are searched for. Also, only the first element of the elements
      * parameter is taken into consideration.
      *
-     * @param elements
-     *
      * @return An array of found implementing Java elements (currently only IMethod
      *         instances)
      */
@@ -93,8 +91,6 @@ public class Implementors {
      * specified Java elements. Currently, only IMethod instances are searched for.
      * Also, only the first element of the elements parameter is taken into
      * consideration.
-     *
-     * @param elements
      *
      * @return An array of found interfaces implemented by the declaring classes of the
      *         specified Java elements (currently only IMethod instances)
