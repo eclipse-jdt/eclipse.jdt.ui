@@ -77,7 +77,6 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 		this.showReferencesAtLeastOne= showReferencesAtLeastOne;
 	}
 
-	@SuppressWarnings("boxing")
 	@Override
 	protected CompletableFuture<Void> doResolve(ITextViewer viewer, IProgressMonitor monitor) {
 		return CompletableFuture.runAsync(() -> {

@@ -261,7 +261,6 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	public void createPartControl(Composite parent) {
 		fViewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		fDrillDownAdapter = new DrillDownAdapter(fViewer) {
-			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void updateNavigationButtons() {
 				super.updateNavigationButtons();

@@ -708,7 +708,7 @@ public class BuildPathsBlock {
 	}
 
 	public static void addJavaNature(IProject project, IProgressMonitor monitor) throws CoreException {
-		JavaProjectUtilities.addJavaNature(project, monitor);;
+		JavaProjectUtilities.addJavaNature(project, monitor);
 	}
 
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {

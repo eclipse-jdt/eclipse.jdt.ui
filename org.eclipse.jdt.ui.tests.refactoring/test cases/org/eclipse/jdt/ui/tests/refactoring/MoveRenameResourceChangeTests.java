@@ -81,7 +81,6 @@ public class MoveRenameResourceChangeTests extends GenericRefactoringTest {
 		assertFalse("after: old should not exist", folder.getFile(oldName).exists());
 	}
 
-	@SuppressWarnings("null")
 	@Test
 	public void testFile2() throws Exception{
 		IFolder folder= (IFolder)getPackageP().getCorrespondingResource();
@@ -107,7 +106,6 @@ public class MoveRenameResourceChangeTests extends GenericRefactoringTest {
 		assertFalse("after undo: old should not exist", folder.getFile(newName).exists());
 	}
 
-	@SuppressWarnings("null")
 	@Test
 	public void testFile3() throws Exception{
 		IFolder folder= (IFolder)getPackageP().getCorrespondingResource();
@@ -204,7 +202,6 @@ public class MoveRenameResourceChangeTests extends GenericRefactoringTest {
 		assertFalse("after undo: old should not exist", folder.getFolder(newName).exists());
 	}
 
-	@SuppressWarnings("null")
 	@Test
 	public void testFolder3() throws Exception{
 		IFolder folder= (IFolder)getPackageP().getCorrespondingResource();
