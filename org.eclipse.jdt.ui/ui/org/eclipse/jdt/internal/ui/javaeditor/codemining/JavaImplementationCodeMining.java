@@ -72,7 +72,6 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 		this.showImplementationsAtLeastOne= showImplementationsAtLeastOne;
 	}
 
-	@SuppressWarnings("boxing")
 	@Override
 	protected CompletableFuture<Void> doResolve(ITextViewer viewer, IProgressMonitor monitor) {
 		return CompletableFuture.runAsync(() -> {

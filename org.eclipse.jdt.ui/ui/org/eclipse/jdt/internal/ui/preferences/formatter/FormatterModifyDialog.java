@@ -22,26 +22,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
-import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SectionBuilder;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.FocusAdapter;
@@ -66,6 +46,32 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
+import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SectionBuilder;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
 
 public class FormatterModifyDialog extends ModifyDialog {
 
@@ -73,7 +79,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 		private static final String DATA_IMAGE_DISABLED= "image_disabled"; //$NON-NLS-1$
 
-		@SuppressWarnings("boxing")
 		private static final Object[][] WRAP_STYLE= {
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_do_not_split, JavaPluginImages.DESC_ELCL_WRAP_NOT, JavaPluginImages.DESC_DLCL_WRAP_NOT, DefaultCodeFormatterConstants.WRAP_NO_SPLIT },
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_when_necessary, JavaPluginImages.DESC_ELCL_WRAP_NECESSARY, JavaPluginImages.DESC_DLCL_WRAP_NECESSARY, DefaultCodeFormatterConstants.WRAP_COMPACT },
@@ -83,7 +88,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always_except_first_only_if_necessary, JavaPluginImages.DESC_ELCL_WRAP_ALL_NOT_FIRST, JavaPluginImages.DESC_DLCL_WRAP_ALL_NOT_FIRST, DefaultCodeFormatterConstants.WRAP_NEXT_PER_LINE },
 		};
 
-		@SuppressWarnings("boxing")
 		private static final Object[][] INDENT_STYLE= {
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_default, JavaPluginImages.DESC_ELCL_INDENT_DEFAULT, JavaPluginImages.DESC_DLCL_INDENT_DEFAULT, DefaultCodeFormatterConstants.INDENT_DEFAULT },
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_by_one, JavaPluginImages.DESC_ELCL_INDENT_ONE, JavaPluginImages.DESC_DLCL_INDENT_ONE, DefaultCodeFormatterConstants.INDENT_BY_ONE },
@@ -96,7 +100,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 		private static final List<String> WRAP_BEFORE_PREF_VALUES= Arrays.asList(DefaultCodeFormatterConstants.TRUE, DefaultCodeFormatterConstants.FALSE);
 
-		@SuppressWarnings("boxing")
 		private static final Object[][] WRAP_BEFORE_AFTER= {
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_before_operators, JavaPluginImages.DESC_ELCL_WRAP_BEFORE, JavaPluginImages.DESC_DLCL_WRAP_BEFORE, VALUE_WRAP_BEFORE },
 				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_after_operators, JavaPluginImages.DESC_ELCL_WRAP_AFTER, JavaPluginImages.DESC_DLCL_WRAP_AFTER, VALUE_WRAP_AFTER },

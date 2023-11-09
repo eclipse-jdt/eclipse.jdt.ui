@@ -485,6 +485,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private IDialogSettings fDialogSettings;
 
 
+	@SuppressWarnings("incomplete-switch")
 	public ASTView() {
 		fSuperListener= null;
 		fDialogSettings= ASTViewPlugin.getDefault().getDialogSettings();

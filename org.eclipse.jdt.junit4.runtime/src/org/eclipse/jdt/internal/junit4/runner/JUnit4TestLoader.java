@@ -112,7 +112,9 @@ public class JUnit4TestLoader implements ITestLoader {
 			if (setup.getReturnType() == Test.class && Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers))
 				return true;
 		} catch (SecurityException e1) {
+			// ignore
 		} catch (NoSuchMethodException e) {
+			// ignore
 		}
 		return false;
 	}

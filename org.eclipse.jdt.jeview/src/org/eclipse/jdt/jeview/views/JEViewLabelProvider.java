@@ -48,6 +48,7 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 		return super.getText(element);
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof JavaElement) {

@@ -237,7 +237,6 @@ public class StubCreator {
 		}
 	}
 
-	@SuppressWarnings("boxing")
 	protected void appendMethodBody(final IMethod method) throws JavaModelException {
 		if (method.isConstructor()) {
 			final IType declaringType= method.getDeclaringType();

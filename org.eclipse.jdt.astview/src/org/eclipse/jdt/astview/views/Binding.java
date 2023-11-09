@@ -341,6 +341,7 @@ public class Binding extends ASTAttribute {
 		return REF_TYPE;
 	}
 
+	@SuppressWarnings("incomplete-switch")
 	@Override
 	public String getLabel() {
 		StringBuffer buf= new StringBuffer(fLabel);
