@@ -22,17 +22,38 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.RGB;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
+
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
+
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
+
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer;
 import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
@@ -44,18 +65,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.JFacePreferences;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 /**
@@ -2980,7 +2989,7 @@ public class PreferenceConstants {
 	 * A named preference that controls whether completion processors should be called from the non-UI thread,
 	 * when they declare ability to work from non-UI Thread.
 	 * <p>Completion processors can declare whether they
-	 * require UI Thread or not in their extension description, see {@link org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerDescriptor#requiresUIThread()}.</p>
+	 * require UI Thread or not in their extension description, see {@link org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry#computingCompletionRequiresUIThread()}.</p>
 	 * <p>Value is of type <code>Boolean</code></p>
 	 *
 	 * @since 3.21

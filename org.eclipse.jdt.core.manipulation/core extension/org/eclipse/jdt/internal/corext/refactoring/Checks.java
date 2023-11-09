@@ -761,7 +761,6 @@ public class Checks {
 	 * The returned <code>RefactoringStatus</code> has <code>ERROR</code> severity if
 	 * it is not possible to modify the element.
 	 * @return the status
-	 * @throws JavaModelException
 	 *
 	 * @see IJavaElement#exists
 	 * @see IJavaElement#isReadOnly

@@ -232,7 +232,6 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 11 for the given project.
 	 *
 	 * @param project the java project
-	 * @param enable_preview_feature sets enable-preview compliance project option based on the value specified.
 	 * @since 4.18
 	 */
 	public static void set11CompilerOptions(IJavaProject project) {

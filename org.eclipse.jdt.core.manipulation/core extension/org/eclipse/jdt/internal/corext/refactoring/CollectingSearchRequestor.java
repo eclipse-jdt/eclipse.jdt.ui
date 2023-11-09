@@ -53,7 +53,6 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	 * all matches that make it through {@link #filterMatch(SearchMatch)}.
 	 *
 	 * @param match the found match
-	 * @throws CoreException
 	 *
 	 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
 	 */
