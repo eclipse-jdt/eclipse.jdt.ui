@@ -63,7 +63,11 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	private boolean fIsFromSource;
 
 	public BindingLinkedLabelComposer(IJavaElement enclosingElement, StringBuffer buffer, boolean isFromSource) {
-		super(enclosingElement, buffer);
+		this(enclosingElement, buffer, isFromSource, null);
+	}
+
+	public BindingLinkedLabelComposer(IJavaElement enclosingElement, StringBuffer buffer, boolean isFromSource, String stylingPreferenceKeysPrefix) {
+		super(enclosingElement, buffer, stylingPreferenceKeysPrefix);
 		fEnclosingElement= enclosingElement;
 		fIsFromSource= isFromSource;
 	}
@@ -437,14 +441,14 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			}
 		} else if (typeBinding.isParameterizedType()) {
 			fBuffer.append(getTypeLink(typeBinding.getTypeDeclaration(), flags));
-			fBuffer.append(getLT());
+			appendLT();
 			ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
 			for (int i= 0; i < typeArguments.length; i++) {
 				if (i > 0)
 					fBuffer.append(JavaElementLabels.COMMA_STRING);
 				appendTypeBindingLabel(typeArguments[i], typeRefFlags);
 			}
-			fBuffer.append(getGT());
+			appendGT();
 		} else if (typeBinding.isTypeVariable()) {
 			appendNameLink(typeBinding, typeBinding);
 			if (getFlag(flags, TP_BOUNDS)) {
@@ -506,13 +510,13 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		if (parameters.length > 0) {
 			if (separator != null)
 				fBuffer.append(separator);
-			fBuffer.append(getLT());
+			appendLT();
 			for (int i = 0; i < parameters.length; i++) {
 				if (i > 0)
 					fBuffer.append(JavaElementLabels.COMMA_STRING);
 				appendTypeBindingLabel(parameters[i], flags);
 			}
-			fBuffer.append(getGT());
+			appendGT();
 		}
 	}
 

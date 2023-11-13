@@ -36,6 +36,53 @@ em	         { font-style: italic; }
 var	         { font-style: italic; }
 th	         { font-weight: bold; }
 
+/* Styling enhancements */
+div#previewWatermark	{ background-color: white; display: none; position: fixed; bottom: 2px; right: 2px; border: 2px solid black; color: black; border-radius: 5px; padding: 4px 4px 4px 4px; }
+
+div#previewFormatting,
+div#previewWrapping,
+div#previewTypeParamsLevelsColoring,
+div#previewTypeParamsRefsColoring											{ display: inline; opacity: 0.3; margin-left: 3px; margin-right: 3px; font-weight: normal; }
+
+input#previewSwitch:checked ~ .styleSwitchParent div#previewWatermark		{ display: inline; }
+input#previewSwitch:checked ~input#formattingSwitch:checked ~ .styleSwitchParent div#previewFormatting,
+input#previewSwitch:checked ~input#wrappingSwitch:checked ~ .styleSwitchParent div#previewWrapping,
+input#previewSwitch:checked ~input#typeParamsLevelsColoringSwitch:checked ~ .styleSwitchParent div#previewTypeParamsLevelsColoring,
+input#previewSwitch:checked ~input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent div#previewTypeParamsRefsColoring		{ opacity: 1; color: red; }
+
+input#previewSwitch,
+input#formattingSwitch,
+input#wrappingSwitch,
+input#typeParamsRefsColoringSwitch,
+input#typeParamsLevelsColoringSwitch										{ display: none; }
+
+input#wrappingSwitch:checked ~ .styleSwitchParent .methodPrependTypeParams	{ display: block}
+input#wrappingSwitch:checked ~ .styleSwitchParent .methodParam				{ display: block; text-indent: 1em; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .typeParamsLevelNo1 .typeBracketsStart:before,
+input#formattingSwitch:checked ~ .styleSwitchParent .methodParams:before	{ content: " "; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .methodQualifier		{ opacity: 0.6; }
+input#formattingSwitch:checked ~ .styleSwitchParent .methodParamName		{ font-style: italic; }
+input#formattingSwitch:checked ~ .styleSwitchParent .methodReturn			{ font-style: italic; }
+input#formattingSwitch:checked ~ .styleSwitchParent .methodName				{ font-weight: bold; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .typeParamsLevel		{ font-weight: 200; }
+input#formattingSwitch:checked ~ .styleSwitchParent .typeBrackets			{ font-weight: bold; }
+
+/* Start of dynamic type parameters levels styling section (do not edit this line) */
+input#typeParamsLevelsColoringSwitch:checked ~ .styleSwitchParent .typeParamsLevelNo-INDEX-,
+input#typeParamsLevelsColoringSwitch:checked ~ .styleSwitchParent .typeParamsLevelNo-INDEX- a.header
+{ color: -COLOR-; }
+/* End of dynamic type parameters levels styling section (do not edit this line) */
+
+/* Start of dynamic type parameters references styling section (do not edit this line) */
+input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsReferenceNo-INDEX-,
+input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsReferenceNo-INDEX- a.header
+{ color: -COLOR-; }
+/* End of dynamic type parameters references styling section (do not edit this line) */
+
+
 /* Workarounds for new Javadoc stylesheet (1.7) */ 
 ul.blockList li.blockList, ul.blockListLast li.blockList {
     list-style:none;

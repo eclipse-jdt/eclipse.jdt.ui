@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin <eclipse@genady.org> - [hovering] tooltip for constant string does not show constant value - https://bugs.eclipse.org/bugs/show_bug.cgi?id=85382
  *     Stephan Herrmann - Contribution for Bug 403917 - [1.8] Render TYPE_USE annotations in Javadoc hover/view
+ *     Jozef Tomek - add styling enhancements (issue 1073)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
@@ -31,6 +32,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -47,6 +50,7 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -131,6 +135,9 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
+import org.eclipse.jdt.internal.ui.viewsupport.MouseListeningToolItemsConfigurer;
+import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
+import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolbarAction;
 
 
 /**
@@ -141,6 +148,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	public static final String CONSTANT_VALUE_SEPARATOR= " : "; //$NON-NLS-1$
+
+	/**
+	 * Preference keys prefix for all preferences related to styling of HTML content for element labels
+	 * inside Javadoc hover. Postfixes are declared as constants in {@link JavaElementLinks}.
+	 *
+	 * @see JavaElementLinks
+	 */
+	private static final String HTML_STYLING_PREFERENCE_KEY_PREFIX= "javadocElementsStyling.javadocHover."; //$NON-NLS-1$
 
 	public static class FallbackInformationPresenter extends HTMLTextPresenter {
 		public FallbackInformationPresenter() {
@@ -358,6 +373,25 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					tbm.add(openAttachedJavadocAction);
 				}
 
+				var toolbarComposite= tbm.getControl().getParent();
+				GridLayout layout= new GridLayout(4, false);
+				layout.marginHeight= 0;
+				layout.marginWidth= 0;
+				layout.horizontalSpacing= 0;
+				layout.verticalSpacing= 0;
+				toolbarComposite.setLayout(layout);
+
+				ToolBarManager tbmSecondary= new ToolBarManager(SWT.FLAT);
+				tbmSecondary.createControl(toolbarComposite).setLayoutData(new GridData(SWT.END, SWT.BEGINNING, false, false));
+				BrowserTextAccessor browserAccessor= new BrowserTextAccessor(iControl);
+				var stylingMenuAction= new SignatureStylingMenuToolbarAction(parent, browserAccessor, HTML_STYLING_PREFERENCE_KEY_PREFIX,
+						() -> iControl.getInput() == null ? null : iControl.getInput().getHtml());
+				tbmSecondary.add(stylingMenuAction);
+				tbmSecondary.update(true);
+				stylingMenuAction.setupMenuReopen(tbmSecondary.getControl());
+				MouseListeningToolItemsConfigurer.registerForToolBarManager(tbmSecondary.getControl(), browserAccessor::applyChanges);
+				tbmSecondary.getControl().moveAbove(toolbarComposite.getChildren()[2]); // move to be before resizeCanvas
+
 				IInputChangedListener inputChangeListener= newInput -> {
 					backAction.update();
 					forwardAction.update();
@@ -530,6 +564,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator(getSite());
 		return fPresenterControlCreator;
+	}
+
+	public static void initDefaults(IPreferenceStore store) {
+		JavaElementLinks.initDefaultPreferences(store, HTML_STYLING_PREFERENCE_KEY_PREFIX);
 	}
 
 	private IWorkbenchSite getSite() {
@@ -785,7 +823,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$
 			RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$
 
-			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet());
+			HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, JavadocHover.getStyleSheet(buffer));
 			if (base != null) {
 				int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -806,9 +844,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 		StringBuilder label;
 		if (binding != null) {
-			label= new StringBuilder(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource));
+			label= new StringBuilder(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource, HTML_STYLING_PREFERENCE_KEY_PREFIX));
 		} else {
-			label= new StringBuilder(JavaElementLinks.getElementLabel(element, flags));
+			label= new StringBuilder(JavaElementLinks.getElementLabel(element, flags, false, HTML_STYLING_PREFERENCE_KEY_PREFIX));
 		}
 
 		if (element.getElementType() == IJavaElement.FIELD) {
@@ -1027,10 +1065,12 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the Javadoc hover style sheet with the current Javadoc font from the preferences.
+	 *
+	 * @param content html content which will use the style sheet
 	 * @return the updated style sheet
 	 * @since 3.4
 	 */
-	private static String getStyleSheet() {
+	private static String getStyleSheet(StringBuilder content) {
 		if (fgStyleSheet == null) {
 			fgStyleSheet= loadStyleSheet("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 		}
@@ -1039,6 +1079,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			FontData fontData= JFaceResources.getFontRegistry().getFontData(PreferenceConstants.APPEARANCE_JAVADOC_FONT)[0];
 			css= HTMLPrinter.convertTopLevelFont(css, fontData);
 		}
+		css= JavaElementLinks.modifyCssStyleSheet(css, content);
 
 		return css;
 	}

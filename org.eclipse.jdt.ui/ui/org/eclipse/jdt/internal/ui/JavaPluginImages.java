@@ -59,7 +59,9 @@ public class JavaPluginImages {
 	private static final String T_ELCL= "elcl16"; 	//$NON-NLS-1$
 	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
 	private static final String T_ETOOL= "etool16"; 	//$NON-NLS-1$
+	private static final String T_DTOOL= "dtool16"; 	//$NON-NLS-1$
 	private static final String T_EVIEW= "eview16"; //$NON-NLS-1$
+	private static final String T_DVIEW= "dview16"; //$NON-NLS-1$
 
 	/*
 	 * Keys for images available from the Java-UI plug-in image registry.
@@ -210,6 +212,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_VIEW_ERRORWARNING_TAB= createUnManaged(T_EVIEW, "errorwarning_tab.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_CLASSFILEGENERATION_TAB= createUnManaged(T_EVIEW, "classfilegeneration_tab.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= createUnManaged(T_EVIEW, "jdkcompliance_tab.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_MEMBERS= createUnManaged(T_EVIEW, "members.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DVIEW_MEMBERS= createUnManaged(T_DVIEW, "members.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_VIEW_TYPES= createUnManaged(T_EVIEW, "types.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DVIEW_TYPES= createUnManaged(T_DVIEW, "types.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_FILTER= createUnManaged(T_ELCL, "filter_ps.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_FILTER= createUnManaged(T_DLCL, "filter_ps.png"); //$NON-NLS-1$
@@ -466,6 +472,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_OPENS= createUnManagedCached(T_OVR, "opens_pkg_ovr.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_READS= createUnManagedCached(T_OVR, "reads_mod_ovr.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_PATCH= createUnManagedCached(T_OVR, "patch_ovr.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_MOUSE_CURSOR= createUnManagedCached(T_OVR, "mouse_cursor_ovr.png"); //$NON-NLS-1$
 
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.png");              //$NON-NLS-1$
@@ -549,6 +556,13 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_DLCL_WRAP_NECESSARY= createUnManaged(T_DLCL, "wrap_necessary.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_NOT= createUnManaged(T_ELCL, "wrap_not.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_WRAP_NOT= createUnManaged(T_DLCL, "wrap_not.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_HIERARCHICAL_LAYOUT= createUnManaged(T_ELCL, "hierarchicalLayout.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_HIERARCHICAL_LAYOUT= createUnManaged(T_DLCL, "hierarchicalLayout.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_TEMPLATE= createUnManaged(T_ELCL, "templateprop_co.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_TEMPLATE= createUnManaged(T_DLCL, "templateprop_co.png"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_ETOOL_JDOC_HOVER_EDIT= createUnManaged(T_ETOOL, "jdoc_hover_edit.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DTOOL_JDOC_HOVER_EDIT= createUnManaged(T_DTOOL, "jdoc_hover_edit.png"); //$NON-NLS-1$
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no chance to dispose icons.

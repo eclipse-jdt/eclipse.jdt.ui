@@ -97,6 +97,7 @@ IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute 
 		'semanticHighlighting.restrictedKeywords.color=204,108,29'
 		'semanticHighlighting.restrictedKeywords.bold=false'
 		'sourceHoverBackgroundColor=68,68,68'
+		'javadocElementsStyling.darkModeDefaultColors=true'
 }
 
 
