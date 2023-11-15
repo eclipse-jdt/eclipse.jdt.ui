@@ -532,7 +532,7 @@ public class QuickAssistProcessorUtil {
 					}
 					List<TagElement> tags= javadoc.tags();
 					for (TagElement tag : tags) {
-						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
+						if ("@deprecated".equals(tag.getTagName())) { //$NON-NLS-1$
 							List<IDocElement> fragments= tag.fragments();
 							if (fragments.size() < 2) {
 								return false;
@@ -541,7 +541,7 @@ public class QuickAssistProcessorUtil {
 								String text= textElement.getText().toLowerCase().trim();
 								if (text.endsWith("use") || text.endsWith("replace by")) { //$NON-NLS-1$ //$NON-NLS-2$
 									if (fragments.get(1) instanceof TagElement tagElement) {
-										if (tagElement.getTagName().equals("@link")) { //$NON-NLS-1$
+										if ("@link".equals(tagElement.getTagName())) { //$NON-NLS-1$
 											List<IDocElement> linkFragments= tagElement.fragments();
 											if (linkFragments.size() == 1) {
 												IDocElement linkFragment= linkFragments.get(0);
