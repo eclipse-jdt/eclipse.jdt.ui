@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -512,6 +513,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private CompilationUnit fASTRoot;
 
 	private final boolean fAllowSyntaxErrors;
+	private Collection<String> fResolvedStaticFavoriteImports;
 
 	/**
 	 * Creates a new OrganizeImportsOperation operation.
@@ -537,6 +539,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsRemoved= 0;
 
 		fParsingError= null;
+		fResolvedStaticFavoriteImports = new HashSet<>();
 	}
 
 	/**
@@ -673,8 +676,20 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			Collection<SimpleName> staticReferences,
 			ImportRewrite importRewrite,
 			UnresolvableImportMatcher unresolvableImportMatcher) {
+
+		String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, importRewrite.getCompilationUnit().getJavaProject());
+		String[] favourites= new String [0];
+		if (pref != null && !pref.isBlank()) {
+			favourites= pref.split(";"); //$NON-NLS-1$
+		}
+
+		ICompilationUnit cu= importRewrite.getCompilationUnit().getPrimary();
+		StaticImportFavoritesCompletionInvoker ex= new StaticImportFavoritesCompletionInvoker(cu, favourites);
+
 		for (SimpleName name : staticReferences) {
+			boolean isMethod= name.getParent() instanceof MethodInvocation;
 			IBinding binding= name.resolveBinding();
+
 			if (binding != null) {
 				importRewrite.addStaticImport(binding);
 			} else {
@@ -693,19 +708,19 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					}
 				}
 				if (unresolvableImports.isEmpty()) {
-					String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, importRewrite.getCompilationUnit().getJavaProject());
 					if (pref == null  || pref.isBlank()) {
 						continue;
 					}
-					String[] favourites= pref.split(";"); //$NON-NLS-1$
 					if (favourites.length == 0) {
 						continue;
 					}
 					try {
 						// check favourite static imports
-						boolean isMethod= name.getParent() instanceof MethodInvocation;
-						ICompilationUnit cu= importRewrite.getCompilationUnit().getPrimary();
-						String[] staticFavourites= JavaModelUtil.getStaticImportFavorites(cu, identifier, isMethod, favourites);
+						if (fResolvedStaticFavoriteImports.contains(identifier)) {
+							continue;
+						}
+						String[] staticFavourites= ex.getStaticImportFavorites(identifier, isMethod);
+						fResolvedStaticFavoriteImports.add(identifier);
 						if (staticFavourites.length > 0) {
 							String qualifiedTypeName= Signature.getQualifier(staticFavourites[0]);
 							importRewrite.addStaticImport(qualifiedTypeName, identifier, !isMethod);
@@ -715,6 +730,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					}
 				}
 			}
+		}
+		try {
+			ex.destroy();
+		} catch (JavaModelException e) {
+			// ignore
 		}
 	}
 
