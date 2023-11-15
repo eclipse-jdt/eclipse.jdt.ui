@@ -541,7 +541,7 @@ public class QuickAssistProcessorUtil {
 								String text= textElement.getText().toLowerCase().trim();
 								if (text.endsWith("use") || text.endsWith("replace by")) { //$NON-NLS-1$ //$NON-NLS-2$
 									if (fragments.get(1) instanceof TagElement tagElement) {
-										if (tagElement.getTagName().equals("@link")) { //$NON-NLS-1$
+										if ("@link".equals(tagElement.getTagName())) { //$NON-NLS-1$
 											List<IDocElement> linkFragments= tagElement.fragments();
 											if (linkFragments.size() == 1) {
 												IDocElement linkFragment= linkFragments.get(0);
