@@ -532,7 +532,7 @@ public class QuickAssistProcessorUtil {
 					}
 					List<TagElement> tags= javadoc.tags();
 					for (TagElement tag : tags) {
-						if (tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
+						if (tag.getTagName() != null && tag.getTagName().equals("@deprecated")) { //$NON-NLS-1$
 							List<IDocElement> fragments= tag.fragments();
 							if (fragments.size() < 2) {
 								return false;
