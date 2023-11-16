@@ -88,4 +88,25 @@ public class NLSHintStripQuotesTest {
     	String expected= "abc \ndef\n";
     	assertEquals(expected, y);
     }
+    @Test
+    public void test06() throws Exception {
+    	String x="\"\"\" \nabc  \\s\ndef\n\"\"\"";
+    	String y= NLSHint.stripQuotes(x, javaProject15.getJavaProject());
+    	String expected= "abc   \ndef\n";
+    	assertEquals(expected, y);
+    }
+    @Test
+    public void test07() throws Exception {
+    	String x="\"\"\" \nabc  \\\ndef\n\"\"\"";
+    	String y= NLSHint.stripQuotes(x, javaProject15.getJavaProject());
+    	String expected= "abc  def\n";
+    	assertEquals(expected, y);
+    }
+    @Test
+    public void test08() throws Exception {
+    	String x="\"\"\" \n   abc\ndef\n\"\"\"";
+    	String y= NLSHint.stripQuotes(x, javaProject15.getJavaProject());
+    	String expected= "   abc\ndef\n";
+    	assertEquals(expected, y);
+    }
 }
