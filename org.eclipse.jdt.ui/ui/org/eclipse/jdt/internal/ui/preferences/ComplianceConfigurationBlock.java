@@ -863,6 +863,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private String addsExportToSystemModule() {
+		if (fProject == null) {
+			return null;
+		}
 		try {
 			for (IClasspathEntry cpe : JavaCore.create(fProject).getRawClasspath()) {
 				if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER && LibrariesWorkbookPage.isJREContainer(cpe.getPath())) {
