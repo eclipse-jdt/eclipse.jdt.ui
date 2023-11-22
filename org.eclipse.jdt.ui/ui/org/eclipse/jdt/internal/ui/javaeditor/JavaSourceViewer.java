@@ -157,6 +157,10 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	@Override
 	public void doOperation(int operation) {
+		JavaCore.runReadOnly(()->doOperationCached(operation));
+	}
+
+	private void doOperationCached(int operation) {
 		if (getTextWidget() == null)
 			return;
 

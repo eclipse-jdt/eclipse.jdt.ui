@@ -45,8 +45,13 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 	@Override
 	public IAdaptable createElement(IMemento memento) {
 		String identifier= memento.getString(KEY);
-		if (identifier == null)
+		if (identifier == null) {
 			return null;
+		}
+		return JavaCore.callReadOnly(() -> createElementCached(identifier));
+	}
+
+	private IAdaptable createElementCached(String identifier) {
 
 		IJavaElement element= JavaCore.create(identifier);
 		try {

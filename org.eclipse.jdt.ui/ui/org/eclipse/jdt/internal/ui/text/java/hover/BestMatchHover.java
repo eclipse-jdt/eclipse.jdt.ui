@@ -26,6 +26,8 @@ import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
@@ -127,7 +129,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	 */
 	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
-		return getHoverInfo2(textViewer, hoverRegion, false);
+		return JavaCore.callReadOnly(() -> getHoverInfo2(textViewer, hoverRegion, false));
 	}
 
 	/**

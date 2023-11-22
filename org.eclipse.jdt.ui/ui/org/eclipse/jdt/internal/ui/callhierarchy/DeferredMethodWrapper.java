@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 import org.eclipse.ui.progress.IElementCollector;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -75,7 +77,7 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
     	final DeferredMethodWrapper deferredMethodWrapper= (DeferredMethodWrapper)object;
     	try {
             fProvider.startFetching();
-            collector.add((Object[]) deferredMethodWrapper.getCalls(monitor), monitor);
+            JavaCore.runReadOnly(() -> collector.add((Object[]) deferredMethodWrapper.getCalls(monitor), monitor));
             collector.done();
         } catch (OperationCanceledException e) {
         	final MethodWrapper methodWrapper= deferredMethodWrapper.getMethodWrapper();

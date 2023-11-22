@@ -930,6 +930,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	@Override
 	public void createControl(Composite parent) {
+		JavaCore.runReadOnly(() -> createControlCached(parent));
+	}
+
+	private void createControlCached(Composite parent) {
 
 		Tree tree= new Tree(parent, SWT.MULTI);
 

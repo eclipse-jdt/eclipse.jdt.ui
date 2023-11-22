@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -87,8 +88,13 @@ public class JavaElementPropertyTester extends PropertyTester {
 	public static final String PROJECT_OPTION = "projectOption"; //$NON-NLS-1$
 
 
+	@SuppressWarnings("boxing")
 	@Override
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
+		return JavaCore.callReadOnly(() -> testCached(receiver, method, args, expectedValue));
+	}
+
+	private boolean testCached(Object receiver, String method, Object[] args, Object expectedValue) {
 		if (!(receiver instanceof IJavaElement)) {
 			return false;
 		}

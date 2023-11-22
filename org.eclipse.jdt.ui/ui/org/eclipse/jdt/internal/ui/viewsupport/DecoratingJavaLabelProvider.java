@@ -14,8 +14,11 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.jface.viewers.DecorationContext;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
@@ -71,5 +74,8 @@ public class DecoratingJavaLabelProvider extends ColoringLabelProvider {
 			setDecorationContext(HierarchicalDecorationContext.getContext());
 		}
 	}
-
+	@Override
+	protected void fireLabelProviderChanged(LabelProviderChangedEvent event) {
+		JavaCore.runReadOnly(() -> super.fireLabelProviderChanged(event));
+	}
 }

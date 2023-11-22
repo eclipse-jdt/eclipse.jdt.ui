@@ -16,11 +16,13 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.swt.events.TreeEvent;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 
 /**
  * A TypeHierarchyViewer that looks like the type hierarchy view of VA/Java:
@@ -175,5 +177,10 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			return null;
 		}
 
+	}
+
+	@Override
+	protected void handleTreeExpand(TreeEvent event) {
+		JavaCore.runReadOnly(()->super.handleTreeExpand(event));
 	}
 }

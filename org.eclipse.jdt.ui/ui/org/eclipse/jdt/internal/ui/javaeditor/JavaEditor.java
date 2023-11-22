@@ -21,6 +21,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.StackWalker.StackFrame;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,8 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-
-import java.text.BreakIterator;
 
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -1210,15 +1209,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		@Override
 		public void windowActivated(IWorkbenchWindow window) {
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
-				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
-				ITypeRoot inputJavaElement= getInputJavaElement();
-				if (inputJavaElement != null) {
-					IProgressMonitor monitor = getProgressMonitor();
-					try {
-						updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProviderCore.getAST(inputJavaElement, SharedASTProviderCore.WAIT_NO, monitor));
-					} finally {
-						monitor.done();
-					}
+				JavaCore.runReadOnly(this::windowActivatedCached);
+			}
+		}
+
+		private void windowActivatedCached() {
+			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
+			ITypeRoot inputJavaElement= getInputJavaElement();
+			if (inputJavaElement != null) {
+				IProgressMonitor monitor = getProgressMonitor();
+				try {
+					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProviderCore.getAST(inputJavaElement, SharedASTProviderCore.WAIT_NO, monitor));
+				} finally {
+					monitor.done();
 				}
 			}
 		}
@@ -2174,9 +2177,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		synchronizeOutlinePage(computeHighlightRangeSourceReference());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> required) {
+		return JavaCore.callReadOnly(() -> getAdapterCached(required));
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T getAdapterCached(Class<T> required) {
 
 		if (IContentOutlinePage.class.equals(required)) {
 			if (fOutlinePage == null && getSourceViewer() != null && isCalledByOutline())
@@ -3070,8 +3077,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	@Override
 	protected void doSetSelection(ISelection selection) {
-		super.doSetSelection(selection);
-		synchronizeOutlinePageSelection();
+		JavaCore.runReadOnly(() -> {
+			super.doSetSelection(selection);
+			synchronizeOutlinePageSelection();
+		});
 	}
 
 	boolean isFoldingEnabled() {

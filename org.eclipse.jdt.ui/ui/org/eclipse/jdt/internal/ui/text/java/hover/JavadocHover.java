@@ -664,7 +664,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private JavadocBrowserInformationControlInput internalGetHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		IJavaElement[] elements= getJavaElementsAt(textViewer, hoverRegion);
+		IJavaElement[] elements= JavaCore.callReadOnly(() -> getJavaElementsAt(textViewer, hoverRegion));
 		if (elements == null || elements.length == 0)
 			return null;
 
