@@ -350,7 +350,7 @@ public class ClasspathModifier {
 	 * fragment root could be created.
 	 *
 	 * @param resource the resource to be converted
-	 * @return the <code>resource<code> as
+	 * @return the <code>resource</code> as
 	 * <code>IPackageFragment</code>,or <code>null</code>
 	 * if failed to convert
 	 */

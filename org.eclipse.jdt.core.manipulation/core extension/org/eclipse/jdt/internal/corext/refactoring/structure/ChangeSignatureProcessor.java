@@ -2534,7 +2534,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		/**
 		 * @param tags existing tags
 		 * @param tagName name of tag to add
-		 * @return the <code>TagElement<code> just before a new <code>TagElement</code> with name
+		 * @return the <code>TagElement</code> just before a new <code>TagElement</code> with name
 		 *         <code>tagName</code>, or <code>null</code>.
 		 */
 		private TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
