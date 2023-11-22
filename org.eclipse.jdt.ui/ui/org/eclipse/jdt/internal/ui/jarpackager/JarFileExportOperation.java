@@ -813,7 +813,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * or an extension defined as Java source.
 	 *
 	 * @param file the file to test
-	 * @return a <code>true<code> if the given resource is a Java file
+	 * @return a <code>true</code> if the given resource is a Java file
 	 */
 	private boolean isJavaFile(IResource file) {
 		return file != null
@@ -827,7 +827,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * The resource must be a file whose file name ends with ".class".
 	 *
 	 * @param file the file to test
-	 * @return a <code>true<code> if the given resource is a class file
+	 * @return a <code>true</code> if the given resource is a class file
 	 */
 	private boolean isClassFile(IResource file) {
 		return file != null

@@ -121,7 +121,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 
 	/**
 	 * Performs input validation. Returns a <code>RefactoringStatus</code> which
-	 * describes the result of input validation. <code>Null<code> is interpreted
+	 * describes the result of input validation. <code>Null</code> is interpreted
 	 * as no error.
 	 */
 	protected RefactoringStatus validateTextField(String text){

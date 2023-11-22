@@ -451,7 +451,7 @@ public class BuildPathsBlock {
 	// -------- public api --------
 
 	/**
-	 * @return Returns the Java project. Can return <code>null<code> if the page has not
+	 * @return Returns the Java project. Can return <code>null</code> if the page has not
 	 * been initialized.
 	 */
 	public IJavaProject getJavaProject() {

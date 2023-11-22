@@ -61,7 +61,7 @@ public interface ISpellEvent {
 	/**
 	 * Does the incorrectly spelled word start a new sentence?
 	 *
-	 * @return <code>true<code> iff the word starts a new sentence, <code>false</code> otherwise
+	 * @return <code>true</code> iff the word starts a new sentence, <code>false</code> otherwise
 	 */
 	boolean isStart();
 }

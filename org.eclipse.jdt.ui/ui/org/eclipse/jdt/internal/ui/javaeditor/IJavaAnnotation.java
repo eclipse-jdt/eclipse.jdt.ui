@@ -130,11 +130,11 @@ public interface IJavaAnnotation {
 	int getId();
 
 	/**
-	 * Returns the marker type associated to this problem or <code>null<code> if no marker type
+	 * Returns the marker type associated to this problem or <code>null</code> if no marker type
 	 * can be evaluated. See also {@link CategorizedProblem#getMarkerType()}.
 	 *
 	 * @return the type of the marker which would be associated to the problem or
-	 * <code>null<code> if no marker type can be evaluated.
+	 * <code>null</code> if no marker type can be evaluated.
 	 */
 	String getMarkerType();
 }

@@ -1202,7 +1202,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	/*
 	 * When the input changed or the hierarchy pane becomes visible,
-	 * <code>updateHierarchyViewer<code> brings up the correct view and refreshes
+	 * <code>updateHierarchyViewer</code> brings up the correct view and refreshes
 	 * the current tree
 	 */
 	private void updateHierarchyViewer(final boolean doExpand) {
