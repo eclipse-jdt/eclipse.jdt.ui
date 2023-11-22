@@ -29,6 +29,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -126,7 +127,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 			fStore= null;
 		}
 
-		update();
+		JavaCore.runReadOnly(() -> update());
 	}
 
 	/**

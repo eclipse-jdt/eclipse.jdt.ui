@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -124,28 +125,31 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@SuppressWarnings("boxing")
 	public int computeAdornmentFlags(Object element) {
-		if (element instanceof IMethod) {
-			try {
-				IMethod method= (IMethod) element;
-				if (!method.getJavaProject().isOnClasspath(method)) {
-					return 0;
-				}
-				int flags= method.getFlags();
-				if (!method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
-					int res= getOverrideIndicators(method);
-					if (res != 0 && Flags.isSynchronized(flags)) {
-						return res | JavaElementImageDescriptor.SYNCHRONIZED;
+		return JavaCore.callReadOnly(() -> {
+			if (element instanceof IMethod) {
+				try {
+					IMethod method= (IMethod) element;
+					if (!method.getJavaProject().isOnClasspath(method)) {
+						return 0;
 					}
-					return res;
-				}
-			} catch (JavaModelException e) {
-				if (!e.isDoesNotExist()) {
-					JavaPlugin.log(e);
+					int flags= method.getFlags();
+					if (!method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
+						int res= getOverrideIndicators(method);
+						if (res != 0 && Flags.isSynchronized(flags)) {
+							return res | JavaElementImageDescriptor.SYNCHRONIZED;
+						}
+						return res;
+					}
+				} catch (JavaModelException e) {
+					if (!e.isDoesNotExist()) {
+						JavaPlugin.log(e);
+					}
 				}
 			}
-		}
-		return 0;
+			return 0;
+		});
 	}
 
 	/**

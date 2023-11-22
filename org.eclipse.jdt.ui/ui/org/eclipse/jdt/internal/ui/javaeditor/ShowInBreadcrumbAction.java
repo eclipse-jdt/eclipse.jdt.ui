@@ -18,6 +18,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
@@ -48,9 +50,10 @@ public class ShowInBreadcrumbAction extends Action {
 		IBreadcrumb breadcrumb= fEditor.getBreadcrumb();
 		if (breadcrumb == null)
 			return;
-
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(getPreferenceKey(), true);
+		JavaCore.runReadOnly(() -> {
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			store.setValue(getPreferenceKey(), true);
+		});
 
 		breadcrumb.activate();
 	}

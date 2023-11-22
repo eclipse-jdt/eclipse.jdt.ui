@@ -60,8 +60,10 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
@@ -649,11 +651,18 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		return input;
 	}
 
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		JavaCore.runReadOnly(() -> super.init(site, input));
+	}
 	/*
 	 * @see AbstractTextEditor#doSetInput(IEditorInput)
 	 */
 	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
+		JavaCore.runReadOnly(() -> doSetInputCached(input));
+	}
+	private void doSetInputCached(IEditorInput input) throws CoreException {
 		uninstallOccurrencesFinder();
 
 		input= transformEditorInput(input);
@@ -736,11 +745,19 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		job.schedule();
 	}
 
+	@Override
+	protected void selectionChanged() {
+		JavaCore.runReadOnly(() -> super.selectionChanged());
+	}
 	/*
 	 * @see IWorkbenchPart#createPartControl(Composite)
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		JavaCore.runReadOnly(() -> createPartControlCached(parent));
+	}
+
+	private void createPartControlCached(Composite parent) {
 		fParent= new Composite(parent, SWT.NONE);
 		fStackLayout= new StackLayout();
 		fParent.setLayout(fStackLayout);
@@ -949,7 +966,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	public void setFocus() {
-		super.setFocus();
+		JavaCore.runReadOnly(super::setFocus);
 
 		if (fSourceAttachmentForm != null && !fSourceAttachmentForm.isDisposed()) {
 			fSourceAttachmentForm.setFocus();

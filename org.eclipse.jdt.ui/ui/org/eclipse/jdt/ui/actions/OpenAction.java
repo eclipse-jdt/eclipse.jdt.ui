@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
@@ -251,7 +252,7 @@ public class OpenAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))
 			return;
-		run(selection.toArray());
+		JavaCore.runReadOnly(() -> run(selection.toArray()));
 	}
 
 	/**

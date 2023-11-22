@@ -21,6 +21,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.MenuManager;
@@ -29,6 +30,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPartSite;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
@@ -197,4 +200,10 @@ class CallHierarchyViewer extends TreeViewer {
 			fConstructorToExpand= null;
 		}
 	}
+
+	@Override
+	protected void internalAdd(Widget widget, Object parentElement, Object[] childElements) {
+		JavaCore.runReadOnly(() -> super.internalAdd(widget, parentElement, childElements));
+	}
+
 }
