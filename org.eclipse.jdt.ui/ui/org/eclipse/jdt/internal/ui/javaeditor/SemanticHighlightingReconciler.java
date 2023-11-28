@@ -541,7 +541,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				((CompilationUnitEditor)fEditor).addReconcileListener(this);
 			}
 		} else if (fEditor != null) {
-			fSourceViewer.addTextInputListener(this);
+			if (registerAsSourceViewerTextInputListener()) {
+				fSourceViewer.addTextInputListener(this);
+			}
 			scheduleJob();
 		}
 	}
@@ -551,6 +553,14 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @return whether this instance should register itself as a reconciling listener on the editor
 	 */
 	protected boolean registerAsEditorReconcilingListener() {
+		return true;
+	}
+
+	/**
+	 * Decides if this reconciler should also register itself as a text input listener on the source viewer as part of {@link #install} process.
+	 * @return whether this instance should register itself as a text input listener on the source viewer
+	 */
+	protected boolean registerAsSourceViewerTextInputListener() {
 		return true;
 	}
 

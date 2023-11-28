@@ -726,11 +726,16 @@ public class SourceViewerInformationControl
 
 				@Override
 				protected ITypeRoot getElement() {
-					return fInput.fRootElement;
+					return fInput == null ? null : fInput.fRootElement;
 				}
 
 				@Override
 				protected boolean registerAsEditorReconcilingListener() {
+					return false;
+				}
+
+				@Override
+				protected boolean registerAsSourceViewerTextInputListener() {
 					return false;
 				}
 			};
