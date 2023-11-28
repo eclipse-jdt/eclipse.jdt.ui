@@ -34,7 +34,8 @@ import org.junit.runners.Suite;
 		PropertyFileDocumentModellTest.class,
 		SimpleLineReaderTest.class,
 		NLSHolderTest.class,
-		NLSSubstitutionTest.class
+		NLSSubstitutionTest.class,
+		NLSHintStripQuotesTest.class,
 })
 public class NLSTestSuite {
 }
