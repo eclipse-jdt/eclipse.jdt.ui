@@ -15,6 +15,7 @@
 package org.eclipse.jdt.internal.junit.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.junit.model.ITestElement;
@@ -47,7 +48,8 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	@Override
 	public ITestElement[] getChildren() {
-		return fChildren.toArray(new ITestElement[fChildren.size()]);
+		TestElement[] elements= fChildren.toArray(new TestElement[fChildren.size()]); // copy list to avoid concurrency problems
+		return Arrays.stream(elements).filter(e -> !isSingleDynamicTest(e)).toArray(ITestElement[]::new);
 	}
 
 	public void addChild(TestElement child) {
@@ -154,4 +156,14 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		return "TestSuite: " + getTestName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
+	private static boolean isSingleDynamicTest(TestElement element) {
+		if (element instanceof TestCaseElement) {
+			TestCaseElement testCase = (TestCaseElement) element;
+			TestSuiteElement suite = testCase.getParent();
+			if (testCase.isDynamicTest() && suite.fChildren.size() == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
