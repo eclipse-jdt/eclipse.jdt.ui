@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.IRegion;
 
@@ -53,20 +54,25 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 
-		IRegion[] regions;
-		if (context instanceof MultiLineCleanUpContext) {
-			regions= ((MultiLineCleanUpContext)context).getRegions();
-		} else {
-			regions= null;
+		try {
+			IRegion[] regions;
+			if (context instanceof MultiLineCleanUpContext) {
+				regions= ((MultiLineCleanUpContext)context).getRegions();
+			} else {
+				regions= null;
+			}
+			boolean removeWhitespaces= isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
+			return CodeFormatFix.createCleanUp(compilationUnit,
+					regions,
+					isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE),
+					removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL),
+					removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY),
+					isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION));
+		} catch (CoreException e) {
+			throw new CoreException(Status.error("Error formating " + compilationUnit.getPath(), e)); //$NON-NLS-1$
+		} catch (RuntimeException e) {
+			throw new RuntimeException("Error formating " + compilationUnit.getPath(), e); //$NON-NLS-1$
 		}
-
-		boolean removeWhitespaces= isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES);
-		return CodeFormatFix.createCleanUp(compilationUnit,
-				regions,
-				isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE),
-				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_ALL),
-				removeWhitespaces && isEnabled(CleanUpConstants.FORMAT_REMOVE_TRAILING_WHITESPACES_IGNORE_EMPTY),
-				isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION));
 	}
 
 	@Override
