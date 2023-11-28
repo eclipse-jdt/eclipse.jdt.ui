@@ -430,6 +430,62 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConcatToTextBlock8() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuilder buf3= new StringBuilder();\n");
+		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
+		buf.append("        buf3.append(\"    return null;\\n\"); //$NON-NLS-1$\n");
+		buf.append("        buf3.append(\"}\\n\"); //$NON-NLS-1$\n");
+		buf.append("        buf3.append(\"\\n\"); //$NON-NLS-1$\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String k = buf3.toString();\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int index= buf.indexOf("StringBuilder");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String str = \"\"\"\n");
+		buf.append("		\tpublic void foo() {\n");
+		buf.append("		\t    return null;\n");
+		buf.append("		\t}\n");
+		buf.append("		\t\n");
+		buf.append("		\t\"\"\"; //$NON-NLS-1$\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String k = str;\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
 	public void testNoConcatToTextBlock1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);

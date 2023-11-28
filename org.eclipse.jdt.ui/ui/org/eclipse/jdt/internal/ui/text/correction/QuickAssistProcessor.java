@@ -3832,6 +3832,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (node instanceof Assignment
 				|| node instanceof VariableDeclarationFragment
 				|| node instanceof FieldDeclaration
+				|| node instanceof VariableDeclarationStatement
 				|| node instanceof InfixExpression) {
 			exp= node;
 		} else {
@@ -3839,10 +3840,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (parent instanceof Assignment
 					|| parent instanceof VariableDeclarationFragment
 					|| parent instanceof FieldDeclaration
+					|| parent instanceof VariableDeclarationStatement
 					|| parent instanceof InfixExpression) {
 				exp= parent;
 			}
 		}
+
+		if (exp == null) {
+			exp= ASTNodes.getFirstAncestorOrNull(node, FieldDeclaration.class, VariableDeclarationStatement.class);
+		}
+
 		if (exp == null)
 			return false;
 
@@ -3856,6 +3863,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.TRUE);
+		options.put(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new StringConcatToTextBlockCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_TO_TEXT_BLOCK, image, context);
 		resultingCollections.add(proposal);
