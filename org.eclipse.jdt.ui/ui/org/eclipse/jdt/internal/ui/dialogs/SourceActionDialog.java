@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -131,9 +131,14 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private boolean fHasUserChangedPositionIndex;
 	private List<Integer> fAllowedVisibilities;
 
+	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor,
+			IType type, boolean isConstructor) throws JavaModelException {
+		this(parent, labelProvider, contentProvider, editor, type, isConstructor, false);
+	}
 
-	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
-		super(parent, labelProvider, contentProvider);
+	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor,
+			IType type, boolean isConstructor, boolean allowEmptyTree) throws JavaModelException {
+		super(parent, labelProvider, contentProvider, allowEmptyTree);
 		fEditor= editor;
 		fContentProvider= contentProvider;
 		fType= type;
