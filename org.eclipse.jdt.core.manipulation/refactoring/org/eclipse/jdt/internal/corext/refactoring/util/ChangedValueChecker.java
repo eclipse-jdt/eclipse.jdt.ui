@@ -369,10 +369,15 @@ public class ChangedValueChecker extends AbstractChecker {
 						|| temp instanceof ForStatement || temp instanceof DoStatement) {
 					int offset= temp.getStartPosition();
 					int length= temp.getLength();
-					if (offset < startOffset && offset + length > startOffset)
-						;
-					else if (offset <= endOffset && offset + length >= endOffset) {
-						endOffset= offset + length;
+					int newEndOffset= offset + length;
+
+					// the current offset is too low (< startOffset) and the new one could fall inside it
+					boolean cond1= offset < startOffset && newEndOffset > startOffset;
+
+					// the current offset could be inside the range and the new one would fall outside of it (>= endOffset)
+					boolean cond2= offset <= endOffset && newEndOffset >= endOffset;
+					if (!cond1 && cond2) {
+						endOffset= newEndOffset;
 					}
 				}
 				temp= temp.getParent();
