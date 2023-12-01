@@ -107,6 +107,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private Selection fSelection;
 	private SurroundWithTryCatchAnalyzer fAnalyzer;
 	private boolean fLeaveDirty;
+	private boolean fExcludeRethrown;
 
 	private ICompilationUnit fCUnit;
 	private CompilationUnit fRootNode;
@@ -120,11 +121,17 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	private final boolean fIsMultiCatch;
 
 	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, boolean isMultiCatch) {
+		this(cu, selection, isMultiCatch, false);
+	}
+
+	private SurroundWithTryCatchRefactoring(ICompilationUnit cu, Selection selection, boolean isMultiCatch, boolean excludeRethrown) {
 		fCUnit= cu;
 		fSelection= selection;
 		fIsMultiCatch= isMultiCatch;
 		fLeaveDirty= false;
+		fExcludeRethrown= excludeRethrown;
 	}
+
 
 	public static SurroundWithTryCatchRefactoring create(ICompilationUnit cu, int offset, int length) {
 		return create(cu, offset, length, false);
@@ -161,7 +168,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		fRootNode= rootNode;
 
-		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
+		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection, fExcludeRethrown);
 		fRootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
@@ -251,7 +258,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAnalyzer.getEnclosingBodyDeclaration(), fImportRewrite);
-
 		if (!fIsMultiCatch) {
 			for (int i= 0; i < exceptions.length; i++) {
 				ITypeBinding exception= exceptions[i];

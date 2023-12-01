@@ -128,14 +128,19 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				IMethod topmost= getMethod();
 				if (MethodChecks.isVirtual(topmost))
 					topmost= MethodChecks.getTopmostMethod(getMethod(), hierarchy, monitor);
-				if (topmost != null)
-					initialize(topmost);
+				if (topmost != null) {
+					initializeWithTopMostImplementation(topmost);
+				}
 				fActivationChecked= true;
 			}
 		} finally{
 			monitor.done();
 		}
 		return result;
+	}
+
+	protected void initializeWithTopMostImplementation(IMethod topmost) {
+		initialize(topmost);
 	}
 
 	@Override

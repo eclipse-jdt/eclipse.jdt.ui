@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -126,8 +127,6 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
@@ -1084,27 +1083,43 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					((TextFileChange) textChange).setSaveMode(TextFileChange.FORCE_SAVE);
 				}
 			}
-			result.addAll(fChangeManager.getAllChanges());
 			if (willRenameCU()) {
-				IResource resource= fType.getCompilationUnit().getResource();
-				if (resource != null && resource.isLinked()) {
-					String ext= resource.getFileExtension();
-					String renamedResourceName;
-					if (ext == null)
-						renamedResourceName= getNewElementName();
-					else
-						renamedResourceName= getNewElementName() + '.' + ext;
-					result.add(new RenameResourceChange(fType.getCompilationUnit().getPath(), renamedResourceName));
-				} else {
-					String renamedCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), getNewElementName());
-					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), renamedCUName));
-				}
+				createChangeForRenamedCU(fType, fChangeManager, result);
+			} else {
+				result.addAll(fChangeManager.getAllChanges());
 			}
 			monitor.worked(1);
 			return result;
 		} finally {
 			fChangeManager= null;
 		}
+	}
+
+	protected void createChangeForRenamedCU(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) throws CoreException {
+		IResource resource= type.getCompilationUnit().getResource();
+		if (resource != null && resource.isLinked()) {
+			createChangeForRenamedCUNullOrLinkedResource(type, changeManager, resource, result);;
+		} else {
+			createChangeForRenamedCUStandardResource(type, changeManager, resource, result);
+		}
+	}
+
+	protected void createChangeForRenamedCUStandardResource(IType type, TextChangeManager changeManager, IResource resource, DynamicValidationRefactoringChange result) throws CoreException {
+		result.addAll(changeManager.getAllChanges());
+
+		String renamedCUName = JavaModelUtil.getRenamedCUName(type.getCompilationUnit(), getNewElementName());
+		result.add(new RenameCompilationUnitChange(type.getCompilationUnit(), renamedCUName));
+	}
+
+	protected void createChangeForRenamedCUNullOrLinkedResource(IType type, TextChangeManager changeManager, IResource resource, DynamicValidationRefactoringChange result) {
+		result.addAll(changeManager.getAllChanges());
+		String ext= resource.getFileExtension();
+		String renamedResourceName;
+		if (ext == null)
+			renamedResourceName= getNewElementName();
+		else
+			renamedResourceName= getNewElementName() + '.' + ext;
+		result.add(new RenameResourceChange(type.getCompilationUnit().getPath(), renamedResourceName));
 	}
 
 	@Override
@@ -1168,14 +1183,14 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 
-	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException {
+	protected void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException {
 		String name= RefactoringCoreMessages.RenameTypeRefactoring_update;
 		int typeNameLength= fType.getElementName().length();
 		ICompilationUnit cu= fType.getCompilationUnit();
 		TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(fType.getNameRange().getOffset(), typeNameLength, getNewElementName()));
 	}
 
-	private void addConstructorRenames(TextChangeManager manager) throws CoreException {
+	protected void addConstructorRenames(TextChangeManager manager) throws CoreException {
 		ICompilationUnit cu= fType.getCompilationUnit();
 		int typeNameLength= fType.getElementName().length();
 		for (IMethod method : fType.getMethods()) {

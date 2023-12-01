@@ -570,7 +570,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		ChangeMethodSignatureDescriptor extended= (ChangeMethodSignatureDescriptor) fChangeSignatureProcessor.createDescriptor();
 		RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(IJavaRefactorings.CHANGE_METHOD_SIGNATURE);
 
-		Map<String, String> argumentsMap= contribution.retrieveArgumentMap(extended);
+		Map<String, String> argumentsMap= contribution == null ? Collections.emptyMap() : contribution.retrieveArgumentMap(extended);
 
 		final Map<String, String> arguments= new HashMap<>();
 		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());

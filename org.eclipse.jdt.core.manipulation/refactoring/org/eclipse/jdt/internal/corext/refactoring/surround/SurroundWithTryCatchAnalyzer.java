@@ -41,9 +41,15 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SurroundWithAnalyzer;
 
 public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 	private ITypeBinding[] fExceptions;
+	private boolean excludeRethrown;
 
 	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
+		this(unit, selection, false);
+	}
+
+	public SurroundWithTryCatchAnalyzer(ICompilationUnit unit, Selection selection, boolean excludeRethrown) throws CoreException {
 		super(unit, selection, true);
+		this.excludeRethrown = excludeRethrown;
 	}
 
 	public ITypeBinding[] getExceptions() {
@@ -58,7 +64,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 
 		super.endVisit(node);
 		if (enclosingNode != null && !getStatus().hasFatalError()) {
-			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection(), false);
+			fExceptions= ExceptionAnalyzer.perform(enclosingNode, getSelection(), excludeRethrown);
 			if (fExceptions == null || fExceptions.length == 0) {
 				if (enclosingNode instanceof MethodReference) {
 					invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotContain);
