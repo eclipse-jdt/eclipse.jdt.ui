@@ -69,9 +69,9 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 			return (TextChange) o;
 		if( o instanceof CompositeChange) {
 			CompositeChange cc = (CompositeChange)o;
-			Change[] kids = cc.getChildren();
-			if( kids != null && kids.length == 1 && kids[0] instanceof TextChange) {
-				return ((TextChange)kids[0]);
+			Change[] children = cc.getChildren();
+			if( children != null && children.length == 1 && children[0] instanceof TextChange) {
+				return ((TextChange)children[0]);
 			}
 		}
 		return null;
