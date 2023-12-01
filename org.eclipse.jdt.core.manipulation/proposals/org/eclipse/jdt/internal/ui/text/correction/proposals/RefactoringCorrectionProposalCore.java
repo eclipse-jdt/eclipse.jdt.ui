@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.text.edits.InsertEdit;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -62,7 +64,17 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 			dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
 			return dummyChange;
 		}
-		return (TextChange) fRefactoring.createChange(new NullProgressMonitor());
+		Change o = fRefactoring.createChange(new NullProgressMonitor());;
+		if(o instanceof TextChange)
+			return (TextChange) o;
+		if( o instanceof CompositeChange) {
+			CompositeChange cc = (CompositeChange)o;
+			Change[] children = cc.getChildren();
+			if( children != null && children.length == 1 && children[0] instanceof TextChange) {
+				return ((TextChange)children[0]);
+			}
+		}
+		return null;
 	}
 
 	/*
