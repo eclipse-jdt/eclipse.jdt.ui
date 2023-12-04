@@ -496,11 +496,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	protected void notifyListenersOfTestEnd(TestExecution execution,
-			long testStartTime) {
-		if (execution == null || execution.shouldStop())
-			notifyTestRunStopped(System.currentTimeMillis() - testStartTime);
-		else
-			notifyTestRunEnded(System.currentTimeMillis() - testStartTime);
+			long elapsedTime) {
+		if (execution == null || execution.shouldStop()) {
+			notifyTestRunStopped(elapsedTime);
+		} else
+			notifyTestRunEnded(elapsedTime);
 	}
 
 	/**
@@ -525,9 +525,10 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 		sendTrees(suites);
 
-		long testStartTime= System.currentTimeMillis();
+		long testStartTime= System.nanoTime();
 		execution.run(suites);
-		notifyListenersOfTestEnd(execution, testStartTime);
+		long elapsedTime= (System.nanoTime() - testStartTime) / 1_000_000L;
+		notifyListenersOfTestEnd(execution, elapsedTime);
 	}
 
 	private void sendTrees(ITestReference[] suites) {
