@@ -465,11 +465,11 @@ public class TestViewer {
 
 	private void handleSelected() {
 		IStructuredSelection selection= (IStructuredSelection) fSelectionProvider.getSelection();
-		TestElement testElement= null;
-		if (selection.size() == 1) {
-			testElement= (TestElement) selection.getFirstElement();
+		if (selection.size() == 1 && selection.getFirstElement() instanceof TestElement testElement) {
+			fTestRunnerPart.handleTestSelected(testElement);
+		} else {
+			fTestRunnerPart.handleTestSelected(null);
 		}
-		fTestRunnerPart.handleTestSelected(testElement);
 	}
 
 	public synchronized void setShowTime(boolean showTime) {
