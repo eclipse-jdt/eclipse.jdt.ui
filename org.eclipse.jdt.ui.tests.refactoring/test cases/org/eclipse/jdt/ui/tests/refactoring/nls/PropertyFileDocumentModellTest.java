@@ -70,9 +70,11 @@ public class PropertyFileDocumentModellTest {
 		insert(props, "org.eclipse.nls.2", "value");
 
 		assertEquals(
-				"org.eclipse.nls.1=value\n" +
-				"org.eclipse.nls.2=value\n" +
-				"org.eclipse=value\n", props.get());
+				"""
+					org.eclipse.nls.1=value
+					org.eclipse.nls.2=value
+					org.eclipse=value
+					""", props.get());
 	}
 
 	@Test
@@ -84,9 +86,11 @@ public class PropertyFileDocumentModellTest {
 		insert(props, "arg.1", "value");
 
 		assertEquals(
-				"arg.1=value\n" +
-				"org.1=value\n" +
-				"org.2=value\n", props.get());
+				"""
+					arg.1=value
+					org.1=value
+					org.2=value
+					""", props.get());
 	}
 
 	@Test
@@ -98,9 +102,11 @@ public class PropertyFileDocumentModellTest {
 		insert(props, "Test_B_2", "value");
 
 		assertEquals(
-				"Test_B_1=value\n" +
-				"Test_B_2=value\n" +
-				"Test_A_1=value\n", props.get());
+				"""
+					Test_B_1=value
+					Test_B_2=value
+					Test_A_1=value
+					""", props.get());
 	}
 
 	@Test
@@ -114,13 +120,14 @@ public class PropertyFileDocumentModellTest {
 
 		insert(props, new KeyValuePair[] {new KeyValuePair("Test_Ba", ""), new KeyValuePair("Test_Az", "")});
 
-		assertEquals("Test_Aa=value\n" +
-				"Test_Ab=value\n" +
-				"Test_Az=\n" +
-				"\n" +
-				"Test_Ba=\n" +
-				"Test_Bb=\n" +
-				"Test_Bc=", props.get());
+		assertEquals("""
+			Test_Aa=value
+			Test_Ab=value
+			Test_Az=
+			
+			Test_Ba=
+			Test_Bb=
+			Test_Bc=""", props.get());
 	}
 
 	@Test
@@ -139,15 +146,17 @@ public class PropertyFileDocumentModellTest {
 				new KeyValuePair("org.eclipse.xyzblabla.pipapo", "value")});
 
 		assertEquals(
-				"org.apache=value\n" +
-				"org.eclipse.nls=value\n" +
-				"org.eclipse.nls.1=value\n" +
-				"org.eclipse.nls.2=value\n" +
-				"\n" +
-				"org.eclipse=value\n" +
-				"org.eclipse.2=value\n" +
-				"org.eclipse.xyzblabla.pipapo=value\n" +
-				"org.xenon=value\n",
+				"""
+					org.apache=value
+					org.eclipse.nls=value
+					org.eclipse.nls.1=value
+					org.eclipse.nls.2=value
+					
+					org.eclipse=value
+					org.eclipse.2=value
+					org.eclipse.xyzblabla.pipapo=value
+					org.xenon=value
+					""",
 				props.get());
 	}
 
@@ -161,12 +170,14 @@ public class PropertyFileDocumentModellTest {
 		insert(props, new KeyValuePair[] {new KeyValuePair("key_c", "value"), new KeyValuePair("key_a", "value"), new KeyValuePair("key_z", "value")});
 
 		assertEquals(
-				"key_a=value\n" +
-				"key_b=value\n" +
-				"key_c=value\n" +
-				"\n" +
-				"key_y=value\n" +
-				"key_z=value\n", props.get());
+				"""
+					key_a=value
+					key_b=value
+					key_c=value
+					
+					key_y=value
+					key_z=value
+					""", props.get());
 	}
 
 	@Test
@@ -179,11 +190,13 @@ public class PropertyFileDocumentModellTest {
 		insert(props, new KeyValuePair[] {new KeyValuePair("key_b_1", "value"), new KeyValuePair("key_b_0", "value")});
 
 		assertEquals(
-				"key_a=value\n" +
-				"\n" +
-				"key_b_0=value\n" +
-				"key_b_1=value\n" +
-				"key_b_2=value\n", props.get());
+				"""
+					key_a=value
+					
+					key_b_0=value
+					key_b_1=value
+					key_b_2=value
+					""", props.get());
 	}
 
 	@Test
@@ -197,10 +210,12 @@ public class PropertyFileDocumentModellTest {
 				new KeyValuePair("Clazz.Posers", "value")});
 
 		assertEquals(
-				"Clazz.Pong=Pong\n" +
-				"Clazz.Posers=value\n" +
-				"Clazz.Ping=Ping\n" +
-				"Clazz.Pizza=value\n", props.get());
+				"""
+					Clazz.Pong=Pong
+					Clazz.Posers=value
+					Clazz.Ping=Ping
+					Clazz.Pizza=value
+					""", props.get());
 	}
 
 	@Test
@@ -214,10 +229,12 @@ public class PropertyFileDocumentModellTest {
 				new KeyValuePair("Clazz.PosersWithAVeryLongName", "p")});
 
 		assertEquals(
-				"Clazz.P=p\n" +
-				"Clazz.Pong=Pong\n" +
-				"Clazz.PosersWithAVeryLongName=p\n" +
-				"Clazz.Ping=Ping\n", props.get());
+				"""
+					Clazz.P=p
+					Clazz.Pong=Pong
+					Clazz.PosersWithAVeryLongName=p
+					Clazz.Ping=Ping
+					""", props.get());
 	}
 
 	@Test
@@ -229,10 +246,12 @@ public class PropertyFileDocumentModellTest {
 		insert(props, new KeyValuePair[] {new KeyValuePair("org.eclipse.nls.1", "value"), new KeyValuePair("org.eclipse.nls.2", "value")});
 
 		assertEquals(
-				"org.eclipse.1=value\n" +
-				"org.eclipse.2=value\n" +
-				"org.eclipse.nls.1=value\n" +
-				"org.eclipse.nls.2=value\n", props.get());
+				"""
+					org.eclipse.1=value
+					org.eclipse.2=value
+					org.eclipse.nls.1=value
+					org.eclipse.nls.2=value
+					""", props.get());
 	}
 
 	@Test
@@ -245,10 +264,12 @@ public class PropertyFileDocumentModellTest {
 		insert(props, "org.eclipse.test", "value2");
 
 		assertEquals(
-				"org.eclipse=value\n" +
-				"\n" +
-				"org.eclipse.test=value\n" +
-				"org.eclipse.test=value2\n", props.get());
+				"""
+					org.eclipse=value
+					
+					org.eclipse.test=value
+					org.eclipse.test=value2
+					""", props.get());
 	}
 
 	@Test
@@ -261,10 +282,12 @@ public class PropertyFileDocumentModellTest {
 		insert(props, "a.c", "v");
 
 		assertEquals(
-				"a.b=v\n" +
-				"a.c=v\n" +
-				"\n" +
-				"org.eclipse.test=value\n", props.get());
+				"""
+					a.b=v
+					a.c=v
+					
+					org.eclipse.test=value
+					""", props.get());
 	}
 
 	@Test
@@ -276,9 +299,11 @@ public class PropertyFileDocumentModellTest {
 		insert(props, "org.eclipse.nix", "value");
 
 		assertEquals(
-				"org.eclipse.nix=value\n" +
-				"org.eclipse.ok:value\n" +
-				"org.eclipse.what value\n", props.get());
+				"""
+					org.eclipse.nix=value
+					org.eclipse.ok:value
+					org.eclipse.what value
+					""", props.get());
 	}
 
 	@Test
@@ -322,7 +347,11 @@ public class PropertyFileDocumentModellTest {
 		ReplaceEdit replaceEdit= modell.replace(new KeyValuePair("org.eclipse.2", "value\n"), new KeyValuePair("org.1", "value\n"));
 		replaceEdit.apply(props);
 
-		assertEquals("org.eclipse.1=value1\n" + "org.1=value\n" + "org.eclipse.3=value3\n", props.get());
+		assertEquals("""
+			org.eclipse.1=value1
+			org.1=value
+			org.eclipse.3=value3
+			""", props.get());
 	}
 
 	// Escaping stuff
