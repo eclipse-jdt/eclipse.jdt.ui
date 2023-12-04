@@ -51,6 +51,9 @@ public class StaticImportFavoritesCompletionInvoker {
 		}
 
 		String[] res = createNewCompilationUnit(elementName);
+		if (res.length != 2) {
+			return new String[0];
+		}
 		String dummyCuContent = res[0];
 		int offset= Integer.parseInt(res[1]);
 		fNewCU.getBuffer().setContents(dummyCuContent);
@@ -85,7 +88,7 @@ public class StaticImportFavoritesCompletionInvoker {
 		String packName= fCu.getParent().getElementName();
 		IType type= fCu.findPrimaryType();
 		if (type == null)
-			return null;
+			return new String[0];
 
 		if (packName.length() > 0) {
 			dummyCU.append("package ").append(packName).append(';'); //$NON-NLS-1$
