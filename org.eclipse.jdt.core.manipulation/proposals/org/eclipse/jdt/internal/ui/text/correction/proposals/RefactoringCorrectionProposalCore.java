@@ -64,7 +64,7 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 			dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
 			return dummyChange;
 		}
-		Change o = fRefactoring.createChange(new NullProgressMonitor());;
+		Change o = fRefactoring.createChange(new NullProgressMonitor());
 		if(o instanceof TextChange)
 			return (TextChange) o;
 		if( o instanceof CompositeChange) {
