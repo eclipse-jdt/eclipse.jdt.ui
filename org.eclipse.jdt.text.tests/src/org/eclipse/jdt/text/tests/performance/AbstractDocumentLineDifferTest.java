@@ -14,7 +14,8 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,14 +74,7 @@ public abstract class AbstractDocumentLineDifferTest extends TextPerformanceTest
 	protected static final String SMALL_FAUST_MANY_CHANGES_SAME_SIZE;
 
 	static {
-		String faust;
-		try {
-			faust= FileTool.read(new InputStreamReader(AbstractDocumentLineDifferTest.class.getResourceAsStream("faust1.txt"))).toString();
-		} catch (IOException x) {
-			faust= "";
-			x.printStackTrace();
-		}
-		FAUST1= faust;
+		FAUST1= AbstractDocumentLineDifferTest.getFaust();
 
 		FAUST_FEW_CHANGES= FAUST1.replaceAll("MARGARETE", "GRETCHEN");
 
@@ -120,6 +114,14 @@ public abstract class AbstractDocumentLineDifferTest extends TextPerformanceTest
 
 	protected final void setUpDiffer(DocumentLineDiffer differ) {
 		differ.setReferenceProvider(fReferenceProvider);
+	}
+
+	static String getFaust() {
+		try (InputStream resourceAsStream= AbstractDocumentLineDifferTest.class.getResourceAsStream("faust1.txt")) {
+			return new String(resourceAsStream.readAllBytes(), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

@@ -13,13 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -27,6 +22,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  *
@@ -38,15 +35,9 @@ public class LineTrackerPerformanceTest extends TextPerformanceTestCase {
 	protected static final String FAUST500;
 
 	static {
-		String faust;
-		try {
-			faust= FileTool.read(new InputStreamReader(AbstractDocumentLineDifferTest.class.getResourceAsStream("faust1.txt"))).toString();
-		} catch (IOException x) {
-			faust= "";
-			x.printStackTrace();
-		}
-		FAUST1= faust;
-		FAUST500= faust.substring(0, 500);
+		FAUST1 = AbstractDocumentLineDifferTest.getFaust();
+
+		FAUST500= FAUST1.substring(0, 500);
 	}
 
 

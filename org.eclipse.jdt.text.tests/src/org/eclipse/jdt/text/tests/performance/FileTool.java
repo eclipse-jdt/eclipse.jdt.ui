@@ -17,12 +17,10 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.Enumeration;
@@ -152,37 +150,9 @@ public class FileTool {
 		}
 	}
 
-	public static StringBuffer read(String fileName) throws IOException {
-		return read(new FileReader(fileName));
-	}
-
-	public static StringBuffer read(Reader reader) throws IOException {
-		StringBuffer s= new StringBuffer();
-		try {
-			char[] buffer= new char[8196];
-			int chars= reader.read(buffer);
-			while (chars != -1) {
-				s.append(buffer, 0, chars);
-				chars= reader.read(buffer);
-			}
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-			}
-		}
-		return s;
-	}
-
 	public static void write(String fileName, StringBuffer content) throws IOException {
-		Writer writer= new FileWriter(fileName);
-		try {
+		try (Writer writer= new FileWriter(fileName)) {
 			writer.write(content.toString());
-		} finally {
-			try {
-				writer.close();
-			} catch (IOException e) {
-			}
 		}
 	}
 }

@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,17 +39,9 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 	protected static final Map<String, String> LOCAL_FINGERPRINTS= new HashMap<>();
 
 	static {
-		String faust;
-		try {
-			faust = FileTool.read(new InputStreamReader(TextStorePerformanceTest.class.getResourceAsStream("faust1.txt"))).toString();
-		} catch (IOException x) {
-			faust = "";
-			x.printStackTrace();
-		}
-
-		FAUST1 = faust;
-		FAUST100 = faust.substring(0, 100).intern();
-		FAUST500 = faust.substring(0, 500).intern();
+		FAUST1 = AbstractDocumentLineDifferTest.getFaust();
+		FAUST100 = FAUST1.substring(0, 100).intern();
+		FAUST500 = FAUST1.substring(0, 500).intern();
 	}
 
 	abstract protected ITextStore createTextStore();
