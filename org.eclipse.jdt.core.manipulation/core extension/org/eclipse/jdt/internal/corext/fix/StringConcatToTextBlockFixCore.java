@@ -510,8 +510,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			}
 			Statement endStatement= stmtList.get(i - 1);
 			int lastStatementEnd= endStatement.getStartPosition() + endStatement.getLength();
-			IBinding varBinding= originalVarName.resolveBinding();
-			if (varBinding == null) {
+			IBinding varBinding= null;
+			if (originalVarName == null || (varBinding= originalVarName.resolveBinding()) == null) {
 				return false;
 			}
 			CheckValidityVisitor checkValidityVisitor= new CheckValidityVisitor(lastStatementEnd, varBinding);
