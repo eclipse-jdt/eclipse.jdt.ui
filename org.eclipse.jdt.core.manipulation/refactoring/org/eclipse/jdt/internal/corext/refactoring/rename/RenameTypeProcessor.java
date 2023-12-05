@@ -1098,7 +1098,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	protected void createChangeForRenamedCU(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) throws CoreException {
 		IResource resource= type.getCompilationUnit().getResource();
 		if (resource != null && resource.isLinked()) {
-			createChangeForRenamedCUNullOrLinkedResource(type, changeManager, resource, result);;
+			createChangeForRenamedCUNullOrLinkedResource(type, changeManager, resource, result);
 		} else {
 			createChangeForRenamedCUStandardResource(type, changeManager, resource, result);
 		}
