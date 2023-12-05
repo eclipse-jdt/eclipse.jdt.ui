@@ -91,6 +91,22 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf.append(\"ghijkl\\n\");\n" //
     	        + "        String k = buf.toString();\n" //
     	        + "    }\n" //
+    	        + "    public Integer foo(String x) {\n" //
+    	        + "        return Integer.valueOf(x.length());\n" //
+    	        + "    }\n" //
+    	        + "    public void testParameter() {\n" //
+    	        + "        Integer k = foo(\"\" + \n" //
+    	        + "                  \"abcdef\\n\" + \n" //
+    	        + "                  \"123456\\n\" + \n" //
+    	        + "                  \"klm\");\n" //
+    	        + "    }\n" //
+    	        + "    public void testAssignment() {\n" //
+    	        + "        Integer k = null;\n" //
+    	        + "        k = foo(\"\" + \n" //
+    	        + "                  \"abcdef\\n\" + \n" //
+    	        + "                  \"123456\\n\" + \n" //
+    	        + "                  \"klm\");\n" //
+    	        + "    }\n" //
 				+ "}\n";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -140,6 +156,22 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf.append(\"123456\\n\");\n" //
     	        + "        buf.append(\"ghijkl\\n\");\n" //
     	        + "        String k = buf.toString();\n" //
+    	        + "    }\n" //
+    	        + "    public Integer foo(String x) {\n" //
+    	        + "        return Integer.valueOf(x.length());\n" //
+    	        + "    }\n" //
+    	        + "    public void testParameter() {\n" //
+    	        + "        Integer k = foo(\"\"\"\n" //
+    	        + "        \tabcdef\n" //
+    	        + "        \t123456\n" //
+    	        + "        \tklm\"\"\");\n" //
+    	        + "    }\n" //
+    	        + "    public void testAssignment() {\n" //
+    	        + "        Integer k = null;\n" //
+    	        + "        k = foo(\"\"\"\n" //
+    	        + "        \tabcdef\n" //
+    	        + "        \t123456\n" //
+    	        + "        \tklm\"\"\");\n" //
     	        + "    }\n" //
 				+ "}\n";
 
