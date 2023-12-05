@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Andrey Loskutov (loskutov@gmx.de) and others.
+ * Copyright (c) 2023, 2024 Andrey Loskutov (loskutov@gmx.de) and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 
@@ -100,6 +102,36 @@ public class SmokeViewsTest {
 	@Test
 	public void testOpenBytecodeReferenceView() throws Exception {
 		smokeTest("org.eclipse.jdt.bcoview.views.BytecodeReferenceView");
+	}
+
+	@Test
+	public void testOpenJavadocView() throws Exception {
+		smokeTest(JavaUI.ID_JAVADOC_VIEW);
+	}
+
+	@Test
+	public void testOpenPackagesView() throws Exception {
+		smokeTest(JavaUI.ID_PACKAGES_VIEW);
+	}
+
+	@Test
+	public void testOpenTypesView() throws Exception {
+		smokeTest(JavaUI.ID_TYPES_VIEW);
+	}
+
+	@Test
+	public void testOpenMembersView() throws Exception {
+		smokeTest(JavaUI.ID_MEMBERS_VIEW);
+	}
+
+	@Test
+	public void testOpenProjectsView() throws Exception {
+		smokeTest(JavaUI.ID_PROJECTS_VIEW);
+	}
+
+	@Test
+	public void testOpenSourceView() throws Exception {
+		smokeTest(JavaUI.ID_SOURCE_VIEW);
 	}
 
 	private void smokeTest(String viewId) throws PartInitException {
