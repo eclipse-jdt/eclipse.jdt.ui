@@ -16,9 +16,9 @@ package org.eclipse.jdt.text.tests.performance;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipException;
@@ -132,7 +132,9 @@ public class ResourceTestHelper {
 	}
 
 	public static StringBuffer read(String src) throws IOException, CoreException {
-		return FileTool.read(new InputStreamReader(getFile(src).getContents()));
+		try (InputStream contents= getFile(src).getContents()){
+			return new StringBuffer(new String(contents.readAllBytes(), StandardCharsets.UTF_8));
+		}
 	}
 
 	public static void write(String dest, final String content) throws CoreException {

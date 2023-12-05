@@ -476,7 +476,8 @@ public abstract class GenericRefactoringTest {
 	}
 
 	//-----------------------
-	public static InputStream getStream(String content){
+	/* return ByteArrayInputStream because that does not need to be closed */
+	public static ByteArrayInputStream getStream(String content){
 		return new ByteArrayInputStream(content.getBytes(ENCODING));
 	}
 
