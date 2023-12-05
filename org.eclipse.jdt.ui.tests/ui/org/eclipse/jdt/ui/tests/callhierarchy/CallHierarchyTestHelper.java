@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
-@SuppressWarnings("javadoc")
 public class CallHierarchyTestHelper {
     private static final String[] EMPTY= new String[0];
 

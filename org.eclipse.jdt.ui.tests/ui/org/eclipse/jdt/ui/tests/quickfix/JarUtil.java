@@ -45,7 +45,6 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 /**
  * This is a reduced and marginally adjusted copy from org.eclipse.jdt.core.tests.util.Util
  */
-@SuppressWarnings("javadoc")
 public class JarUtil {
 
 	// Trace for delete operation

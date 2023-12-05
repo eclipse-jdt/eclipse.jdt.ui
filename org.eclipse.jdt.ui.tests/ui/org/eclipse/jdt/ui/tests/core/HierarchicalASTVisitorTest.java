@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 
-@SuppressWarnings("javadoc")
 public class HierarchicalASTVisitorTest {
 	private static class TestHierarchicalASTVisitor extends HierarchicalASTVisitor {
 

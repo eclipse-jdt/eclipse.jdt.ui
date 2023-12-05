@@ -101,7 +101,6 @@ public class RefactoringAnalyzeUtil {
 	/**
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	@SuppressWarnings("javadoc")
 	public static MethodDeclaration getRecordDeclarationCompactConstructor(TextEdit edit, TextChange change, CompilationUnit cuNode){
 		RecordDeclaration recDecl = getRecordDeclaration(edit, change, cuNode);
 		MethodDeclaration compConst= null;

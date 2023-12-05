@@ -404,7 +404,6 @@ public class RenameAnalyzeUtil {
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	@SuppressWarnings("javadoc")
 	public static RefactoringStatus analyzeCompactConstructorLocalRenames(LocalAnalyzePackage[] analyzePackages, TextChange cuChange, CompilationUnit oldCUNode, boolean recovery) throws CoreException {
 		return analyzeLocalRenames(analyzePackages, cuChange, oldCUNode, true, recovery);
 	}
