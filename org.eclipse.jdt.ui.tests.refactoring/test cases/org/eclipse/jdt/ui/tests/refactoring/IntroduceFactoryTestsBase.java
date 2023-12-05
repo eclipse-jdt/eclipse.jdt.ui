@@ -101,7 +101,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * Test files are assumed to be located in the resources directory.
 	 * @return the ICompilationUnit created from the specified test file
 	 */
-	@SuppressWarnings("javadoc")
 	private ICompilationUnit createCUForSimpleTest(IPackageFragment pack,
 												  boolean positive, boolean input)
 		throws Exception
@@ -141,7 +140,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * @param project can be null if only 1 project exists in the test workspace
 	 * @return the ICompilationUnit created from the specified test file
 	 */
-	@SuppressWarnings("javadoc")
 	private ICompilationUnit createCUForBugTestCase(IJavaProject project,
 													IPackageFragment pack, String baseName, boolean input)
 		throws Exception
@@ -162,7 +160,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * markers is not present in the source string.
 	 * @return an ISourceRange representing the marked selection
 	 */
-	@SuppressWarnings("javadoc")
 	private ISourceRange findSelectionInSource(String source) throws Exception {
 		int		begin= source.indexOf(SELECTION_START_HERALD) + SELECTION_START_HERALD.length();
 		int		end= source.indexOf(SELECTION_END_HERALD);
@@ -234,7 +231,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * Test files are assumed to be located in the resources directory.
 	 * @param protectConstructor true iff IntroduceFactoryRefactoring should make the constructor private
 	 */
-	@SuppressWarnings("javadoc")
 	void singleUnitHelper(boolean protectConstructor)
 		throws Exception
 	{
@@ -252,7 +248,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * @param baseFileName the base file name
 	 * @param protectConstructor true iff IntroduceFactoryRefactoring should make the constructor private
 	 */
-	@SuppressWarnings("javadoc")
 	protected void singleUnitBugHelper(String baseFileName, boolean protectConstructor)
 		throws Exception
 	{
@@ -275,7 +270,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * @param factoryMethodName the name to use for the generated factory method
 	 * @param factoryClassName the name of the factory class
 	 */
-	@SuppressWarnings("javadoc")
 	void namesHelper(String factoryMethodName, String factoryClassName)
 		throws Exception
 	{
@@ -312,7 +306,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * @param pack an IPackageFragment for the containing package
 	 * @return the ICompilationUnit for the newly-created unit
 	 */
-	@SuppressWarnings("javadoc")
 	private ICompilationUnit createCUFromFileName(String fileName, IPackageFragment pack) throws Exception {
 		String fullName = TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + "_in.java";
 
@@ -358,7 +351,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
 	 * @param inputFileBaseNames an array of input source file base names
 	 */
-	@SuppressWarnings("javadoc")
 	void multiUnitHelper(boolean staticFactoryMethod, String[] inputFileBaseNames)
 		throws Exception
 	{
@@ -384,7 +376,6 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 	 * @param factoryClassName the fully-qualified name of the class to receive the factory method, or null
 	 * if the factory method is to be placed on the class defining the given constructor
 	 */
-	@SuppressWarnings("javadoc")
 	void multiUnitBugHelper(boolean staticFactoryMethod, String[] inputFileBaseNames, String factoryClassName)
 		throws Exception
 	{
