@@ -55,7 +55,6 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -67,7 +66,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
-public class InlineMethodFixCore implements IProposableFix, ICleanUpFixCore {
+public class InlineMethodFixCore implements IProposableFix {
 
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
