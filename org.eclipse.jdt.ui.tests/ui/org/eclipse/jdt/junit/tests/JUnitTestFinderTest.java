@@ -17,11 +17,19 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -29,6 +37,7 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -44,18 +53,36 @@ import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 
-public class JUnit4TestFinderTest {
+@RunWith(Parameterized.class)
+public class JUnitTestFinderTest {
+	private static record TestScenario(String name, IPath containerEntry, Consumer<IJavaProject> setCompilerOptions, String testKindId) {
+
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
+
+	@Parameters(name = "{0}")
+	public static Collection<TestScenario> getTestScenarios() {
+		return List.of(new TestScenario("JUnit4", JUnitCore.JUNIT4_CONTAINER_PATH, JavaProjectHelper::set15CompilerOptions, TestKindRegistry.JUNIT4_TEST_KIND_ID), //
+				new TestScenario("JUnit5", JUnitCore.JUNIT5_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT5_TEST_KIND_ID));
+	}
+
+	@Parameter
+	public TestScenario fScenario;
 
 	@Before
 	public void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar(fProject);
-		IClasspathEntry cpe= JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH);
+		IClasspathEntry cpe= JavaCore.newContainerEntry(fScenario.containerEntry());
 		JavaProjectHelper.addToClasspath(fProject, cpe);
-		JavaProjectHelper.set15CompilerOptions(fProject);
+
+		fScenario.setCompilerOptions().accept(fProject);
 
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
@@ -127,6 +154,8 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest4, new String[] { "p.Outer.InnerTest" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.Outer.InnerTest" });
 
+		// Only private classes are invisible for JUnit5
+		String innerClassVisibility= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fScenario.testKindId()) ? "private" : "";
 		buf= new StringBuilder();
 		buf.append("package p;\n");
 		buf.append("import junit.framework.TestCase;\n");
@@ -136,7 +165,7 @@ public class JUnit4TestFinderTest {
 		buf.append("        public void testFoo() {\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
-		buf.append("    static class NonVisibleInnerTest extends TestCase {\n");
+		buf.append("    " + innerClassVisibility + " static class NonVisibleInnerTest extends TestCase {\n");
 		buf.append("        public void testFoo() {\n");
 		buf.append("            class LocalTest extends TestCase {\n");
 		buf.append("                public void testFoo() {\n");
@@ -447,10 +476,34 @@ public class JUnit4TestFinderTest {
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.Test1" });
 	}
 
+	@Test
+	public void testInnerClassWithNestedAnnotationIsFound() throws Exception {
+
+		Assume.assumeTrue("@Nested only works with JUnit5", fScenario.testKindId().equals(TestKindRegistry.JUNIT5_TEST_KIND_ID));
+
+		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
+		String content= """
+				package p;
+
+				import org.junit.jupiter.api.Test;
+				import org.junit.jupiter.api.Nested;
+
+				class Test1 {
+					@Nested class NestedClass {
+						@Test void myTest() {}
+					}
+				}
+							""";
+
+		IType validTest1= p.createCompilationUnit("Test1.java", content, false, null).getType("Test1");
+
+		assertTestFound(validTest1, new String[] { "p.Test1" });
+		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.Test1",  "p.Test1.NestedClass" });
+	}
 
 	private void assertTestFound(IJavaElement container, String[] expectedTypes) throws CoreException {
 		ITestKind testKind= TestKindRegistry.getContainerTestKind(container);
-		assertEquals(TestKindRegistry.JUNIT4_TEST_KIND_ID, testKind.getId());
+		assertEquals(fScenario.testKindId(), testKind.getId());
 
 		ITestFinder finder= testKind.getFinder();
 
