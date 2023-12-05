@@ -15,7 +15,6 @@ package org.eclipse.jdt.junit.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -43,7 +42,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.launcher.JUnit5TestFinder;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
 
 /**
@@ -112,6 +113,14 @@ public class JUnit5TestFinderJupiterTest {
 	}
 
 	@Test
+	public void testTestKindRegistryGetContainerTestKind_isJUnit5TestFinder() throws Exception {
+		IType type= findTypeWithName(scenario.testClass());
+
+		ITestFinder finder= TestKindRegistry.getContainerTestKind(type).getFinder();
+		assertThat(finder).isInstanceOf(JUnit5TestFinder.class);
+	}
+
+	@Test
 	public void testFindTestsInContainer() throws Exception {
 		IType type= findTypeWithName(scenario.testClass());
 		Set<IType> foundTestTypes= new HashSet<>();
@@ -131,14 +140,8 @@ public class JUnit5TestFinderJupiterTest {
 		return null;
 	}
 
-	private static ICompilationUnit createCompilationUnit(IPackageFragment packageFragment) throws IOException {
+	private static ICompilationUnit createCompilationUnit(IPackageFragment packageFragment) throws Exception {
 		String content= Files.readString(TEST_CLASS_FILE);
-
-		try {
-			return packageFragment.createCompilationUnit(JAVA_FILE_NAME, content, false, null);
-		} catch (JavaModelException e) {
-			// let the test fail
-			throw new RuntimeException(e);
-		}
+		return packageFragment.createCompilationUnit(JAVA_FILE_NAME, content, false, null);
 	}
 }

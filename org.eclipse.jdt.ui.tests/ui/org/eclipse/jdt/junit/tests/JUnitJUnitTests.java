@@ -39,7 +39,7 @@ TestRunSessionSerializationTests3.class,
 TestRunSessionSerializationTests4.class,
 
 JUnit3TestFinderTest.class,
-JUnit4TestFinderTest.class,
+JUnitTestFinderTest.class,
 JUnit4TestFinderTest16.class,
 JUnit5TestFinderJupiterTest.class,
 
