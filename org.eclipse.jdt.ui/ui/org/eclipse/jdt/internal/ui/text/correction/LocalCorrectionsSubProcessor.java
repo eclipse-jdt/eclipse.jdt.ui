@@ -2711,8 +2711,8 @@ public class LocalCorrectionsSubProcessor {
 						JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)));
 			} else {
 				// no-arg constructor does not exist, need to create it
-				String[] args= new String[] { org.eclipse.jdt.internal.ui.text.correction.ASTResolving
-						.getMethodSignature(org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(targetBinding), new ITypeBinding[0], false) };
+				String[] args= new String[] { ASTResolving
+						.getMethodSignature(ASTResolving.getTypeSignature(targetBinding), new ITypeBinding[0], false) };
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, args);
 				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 				proposals.add(new NewMethodCorrectionProposal(label, targetCU, targetRoot, new ArrayList<>(), targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR, image));

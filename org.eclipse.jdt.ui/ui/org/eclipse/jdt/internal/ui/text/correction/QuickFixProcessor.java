@@ -342,7 +342,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalFallthroughToPattern:
 				return true;
 			default:
-				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
+				return SuppressWarningsSubProcessorCore.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
 						|| ConfigureProblemSeveritySubProcessor.hasConfigureProblemSeverityProposal(problemId);
 		}
 	}
