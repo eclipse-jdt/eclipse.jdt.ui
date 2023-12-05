@@ -48,9 +48,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.core.BufferManager;
-
-
 /**
  * This reconcile step has a Java source document as
  * input model and maintains a Java working copy as its model.
@@ -65,19 +62,6 @@ import org.eclipse.jdt.internal.core.BufferManager;
 public class JavaReconcileStep extends AbstractReconcileStep {
 
 	private final AnnotationTypeLookup fAnnotationTypeLookup= EditorsUI.getAnnotationTypeLookup();
-
-	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
-
-
-		/*
-		 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse.jdt.core.ICompilationUnit)
-		 */
-		@Override
-		public IBuffer createBuffer(ICompilationUnit workingCopy) {
-			// FIXME: Don't know how to get a buffer without using internal API.
-			return BufferManager.createBuffer(workingCopy);
-		}
-	}
 
 	private class ProblemAdapter extends AnnotationAdapter  {
 
@@ -241,7 +225,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	 */
 	public JavaReconcileStep(IFile jspFile) {
 		Assert.isNotNull(jspFile);
-		fTemporaryWorkingCopyOwner= new TemporaryWorkingCopyOwner();
+		fTemporaryWorkingCopyOwner= new WorkingCopyOwner() {};
 		try {
 			fWorkingCopy= new CompilationUnitAdapter(createTemporaryWorkingCopy(jspFile));
 		} catch (JavaModelException e) {
@@ -256,7 +240,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 	public JavaReconcileStep(IReconcileStep step, IFile jspFile) {
 		super(step);
 		Assert.isNotNull(jspFile);
-		fTemporaryWorkingCopyOwner= new TemporaryWorkingCopyOwner();
+		fTemporaryWorkingCopyOwner= new WorkingCopyOwner() {};
 		try {
 			fWorkingCopy= new CompilationUnitAdapter(createTemporaryWorkingCopy(jspFile));
 		} catch (JavaModelException e) {
@@ -292,7 +276,7 @@ public class JavaReconcileStep extends AbstractReconcileStep {
 		try {
 			synchronized (cu) {
 				fProblemRequestor.setIsActive(true);
-				cu.reconcile(true, getProgressMonitor());
+				cu.reconcile(ICompilationUnit.NO_AST, true, null, getProgressMonitor());
 			}
 		} catch (JavaModelException ex) {
 			ex.printStackTrace();
