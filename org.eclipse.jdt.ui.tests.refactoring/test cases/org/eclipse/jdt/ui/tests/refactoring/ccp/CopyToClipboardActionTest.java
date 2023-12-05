@@ -47,7 +47,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
@@ -159,7 +159,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	private void checkClipboard(Object[] elementsCopied) throws Exception {
 		IResource[] resourcesCopied= getResources(elementsCopied);
 		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
-		IType[] mainTypesCopied= ReorgUtils.getMainTypes(javaElementsCopied);
+		IType[] mainTypesCopied= ReorgUtilsCore.getMainTypes(javaElementsCopied);
 
 		IResource[] resourcesExpected= computeResourcesExpectedInClipboard(resourcesCopied, mainTypesCopied, javaElementsCopied);
 		IJavaElement[] javaElementsExpected= computeJavaElementsExpectedInClipboard(javaElementsCopied, mainTypesCopied);
@@ -188,12 +188,12 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	}
 
 	private IResource[] computeResourcesExpectedInClipboard(IResource[] resourcesCopied, IType[] mainTypesCopied, IJavaElement[] javaElementsCopied) {
-		IResource[] cuResources= ReorgUtils.getResources(getCompilationUnits(javaElementsCopied));
-		return ReorgUtils.union(cuResources, ReorgUtils.union(resourcesCopied, ReorgUtils.getResources(ReorgUtils.getCompilationUnits(mainTypesCopied))));
+		IResource[] cuResources= ReorgUtilsCore.getResources(getCompilationUnits(javaElementsCopied));
+		return ReorgUtilsCore.union(cuResources, ReorgUtilsCore.union(resourcesCopied, ReorgUtilsCore.getResources(ReorgUtilsCore.getCompilationUnits(mainTypesCopied))));
 	}
 
 	private static IJavaElement[] computeJavaElementsExpectedInClipboard(IJavaElement[] javaElementsExpected, IType[] mainTypesCopied) {
-		return ReorgUtils.union(javaElementsExpected, ReorgUtils.getCompilationUnits(mainTypesCopied));
+		return ReorgUtilsCore.union(javaElementsExpected, ReorgUtilsCore.getCompilationUnits(mainTypesCopied));
 	}
 
 	private String getName(IResource resource){
@@ -243,7 +243,7 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 			assertTrue("name not in set:" + name, stringLines.contains(name));
 		}
 		for (IJavaElement element : javaElementsCopied) {
-			if (! ReorgUtils.isInsideCompilationUnit(element)){
+			if (! ReorgUtilsCore.isInsideCompilationUnit(element)){
 				String name= getName(element);
 				assertTrue("name not in set:" + name, stringLines.contains(name));
 			}
@@ -279,16 +279,16 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 	}
 
 	private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
-		List<?> cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+		List<?> cus= ReorgUtilsCore.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
 		return cus.toArray(new ICompilationUnit[cus.size()]);
 	}
 
 	private static IResource[] getResources(Object[] elements) {
-		return ReorgUtils.getResources(Arrays.asList(elements));
+		return ReorgUtilsCore.getResources(Arrays.asList(elements));
 	}
 
 	private static IJavaElement[] getJavaElements(Object[] elements) {
-		return ReorgUtils.getJavaElements(Arrays.asList(elements));
+		return ReorgUtilsCore.getJavaElements(Arrays.asList(elements));
 	}
 
 	private IJavaElement[] getClipboardJavaElements() {

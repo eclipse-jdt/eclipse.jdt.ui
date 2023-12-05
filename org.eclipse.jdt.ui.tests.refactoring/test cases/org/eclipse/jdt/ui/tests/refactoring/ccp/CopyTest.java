@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtilsCore;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 import org.eclipse.jdt.ui.tests.refactoring.GenericRefactoringTest;
@@ -2482,7 +2482,7 @@ public class CopyTest extends GenericRefactoringTest {
 
 			IPackageFragment newPackage= null;
 			for (IPackageFragmentRoot root : otherProject.getAllPackageFragmentRoots()) {
-				if (ReorgUtils.isSourceFolder(root)) {
+				if (ReorgUtilsCore.isSourceFolder(root)) {
 					newPackage= root.getPackageFragment(getPackageP().getElementName());
 					assertTrue("new package does not exist after copying", newPackage.exists());
 				}
