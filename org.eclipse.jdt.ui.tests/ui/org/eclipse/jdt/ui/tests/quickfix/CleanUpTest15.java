@@ -107,6 +107,9 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                  \"123456\\n\" + \n" //
     	        + "                  \"klm\");\n" //
     	        + "    }\n" //
+    	        + "    public void testConcatInConstructor() {\n" //
+    	        + "        new StringBuffer(\"abc\\n\" + \"def\\n\" + \"ghi\");\n" //
+    	        + "    }\n" //
 				+ "}\n";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -173,6 +176,12 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        \t123456\n" //
     	        + "        \tklm\"\"\");\n" //
     	        + "    }\n" //
+    	        + "    public void testConcatInConstructor() {\n" //
+    	        + "        new StringBuffer(\"\"\"\n" //
+    	        + "        \tabc\n" //
+    	        + "        \tdef\n" //
+    	        + "        \tghi\"\"\");\n" //
+    	        + "    }\n" //
 				+ "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -220,6 +229,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        String x = \"abc\\n\" +\n"
 				+ "            \"def\\n\" +\n" //
 				+ "            \"ghi\\n\";\n" //
+    	        + "        new StringBuffer(\"abc\\n\" + \"def\\n\" + \"ghi\");\n" //
 				+ "    }\n" //
 				+ "}";
 
@@ -274,6 +284,10 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        \tdef\n" //
 				+ "        \tghi\n" //
 				+ "        \t\"\"\";\n" //
+    	        + "        new StringBuffer(\"\"\"\n" //
+    	        + "        \tabc\n" //
+    	        + "        \tdef\n" //
+    	        + "        \tghi\"\"\");\n" //
 				+ "    }\n" //
 				+ "}";
 
