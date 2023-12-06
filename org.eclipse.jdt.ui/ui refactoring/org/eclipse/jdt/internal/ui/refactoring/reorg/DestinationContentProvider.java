@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
@@ -44,6 +46,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class DestinationContentProvider extends StandardJavaElementContentProvider {
 
 	private IReorgDestinationValidator fValidator;
+
+	private String searchString;
+
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
+    }
+
 
 	public DestinationContentProvider(IReorgDestinationValidator validator) {
 		super(true);
@@ -72,14 +81,25 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 	public Object[] getChildren(Object element) {
 		try {
 			if (element instanceof IJavaModel) {
-				return concatenate(getJavaProjects((IJavaModel)element), getOpenNonJavaProjects((IJavaModel)element));
+				Object [] javaProjects = getJavaProjects((IJavaModel)element);
+
+				List<Object> filteredJavaProjectList= getFilteredProjectList(javaProjects);
+
+				return concatenate(filteredJavaProjectList.toArray(), getOpenNonJavaProjects((IJavaModel)element));
 			} else {
 				Object[] children= doGetChildren(element);
 				ArrayList<Object> result= new ArrayList<>(children.length);
 				for (Object child : children) {
 					IReorgDestination destination= ReorgDestinationFactory.createDestination(child);
 					if (fValidator.canElementBeDestination(destination) || fValidator.canChildrenBeDestinations(destination)) {
-						result.add(child);
+
+						if(searchString != null && !searchString.isEmpty()) {
+							if(matchesSearchCriteria(child.toString())) {
+								result.add(child);
+							}
+						} else {
+							result.add(child);
+						}
 					}
 				}
 				return result.toArray();
@@ -88,6 +108,50 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 			JavaPlugin.log(e);
 			return new Object[0];
 		}
+	}
+
+
+	private List<Object> getFilteredProjectList(Object[] javaProjects) throws JavaModelException {
+		boolean packageNameExistInProject= false;
+		List<Object> filteredJavaProjectList = new ArrayList<>();
+		for(Object javaProject : javaProjects) {
+			IJavaProject javaModel = (IJavaProject) javaProject;
+			if(searchString != null && !searchString.isEmpty()) {
+				boolean matchesCriteria = matchesSearchCriteria(javaModel.getElementName());
+
+				if(matchesCriteria) {
+					filteredJavaProjectList.add(javaProject);
+				} else {
+					for(Object children : javaModel.getChildren()){
+						packageNameExistInProject = isPackageNameExists(children);
+						if(packageNameExistInProject) {
+							filteredJavaProjectList.add(javaProject);
+							break;
+						}
+					}
+				}
+			} else {
+				filteredJavaProjectList = Arrays.asList(javaProjects);
+			}
+		}
+		return filteredJavaProjectList;
+	}
+
+	private boolean isPackageNameExists(Object element) {
+		Object[] children= doGetChildren(element);
+		for (Object child : children) {
+			IReorgDestination destination= ReorgDestinationFactory.createDestination(child);
+			if (child.getClass().equals(PackageFragment.class) && (fValidator.canElementBeDestination(destination) || fValidator.canChildrenBeDestinations(destination))) {
+				PackageFragment packageFrag = (PackageFragment) child;
+				if(matchesSearchCriteria(packageFrag.getElementName())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	private boolean matchesSearchCriteria(String text) {
+		return text.toLowerCase().contains(searchString.toLowerCase());
 	}
 
 	private Object[] doGetChildren(Object parentElement) {

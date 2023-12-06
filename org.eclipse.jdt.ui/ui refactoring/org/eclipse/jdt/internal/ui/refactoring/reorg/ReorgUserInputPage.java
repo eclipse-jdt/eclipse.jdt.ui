@@ -20,6 +20,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -49,16 +51,18 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
-abstract class ReorgUserInputPage extends UserInputWizardPage{
+abstract class ReorgUserInputPage extends UserInputWizardPage {
 	private static final long LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
 			| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
+
 	private TreeViewer fViewer;
+
 	public ReorgUserInputPage(String pageName) {
 		super(pageName);
 	}
+
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -109,7 +113,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		ISelection selection= event.getSelection();
 		if (!(selection instanceof IStructuredSelection))
 			return;
-		IStructuredSelection ss= (IStructuredSelection)selection;
+		IStructuredSelection ss= (IStructuredSelection) selection;
 		verifyDestination(ss.getFirstElement(), false);
 	}
 
@@ -125,6 +129,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	protected abstract RefactoringStatus verifyDestination(Object selected) throws JavaModelException;
 
 	protected abstract IResource[] getResources();
+
 	protected abstract IJavaElement[] getJavaElements();
 
 	protected abstract IReorgDestinationValidator getDestinationValidator();
@@ -143,6 +148,12 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	}
 
 	private TreeViewer createViewer(Composite parent) {
+
+
+		// Create Search Text
+		Text searchText= new Text(parent, SWT.BORDER | SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		searchText.setMessage("Search"); //$NON-NLS-1$
+
 		TreeViewer treeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint= convertWidthInCharsToPixels(40);
@@ -151,6 +162,14 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		treeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
 		treeViewer.setContentProvider(new DestinationContentProvider(getDestinationValidator()));
 		treeViewer.setComparator(new JavaElementComparator());
+
+		// Add a ModifyListener to the search text to update the filter
+		searchText.addModifyListener(e -> {
+			String searchString= searchText.getText().trim();
+			((DestinationContentProvider) treeViewer.getContentProvider()).setSearchString(searchString);
+			treeViewer.refresh();
+			treeViewer.expandAll();
+		});
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
 	}
@@ -167,8 +186,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 			if (fViewer.isExpandable(element)) {
 				if (fViewer.getExpandedState(element)) {
 					fViewer.collapseToLevel(element, 1);
-				}
-				else {
+				} else {
 					ITreeContentProvider contentProvider= (ITreeContentProvider) fViewer.getContentProvider();
 					Object[] children= contentProvider.getChildren(element);
 					if (children.length > 0) {
@@ -179,3 +197,4 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		}
 	}
 }
+
