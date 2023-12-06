@@ -2004,6 +2004,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "import java.util.Date;\n" //
 				+ "import java.util.List;\n" //
 				+ "import java.util.Locale;\n" //
+				+ "import java.util.TreeSet;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    private Comparator<Date> refactorField = new Comparator<Date>() {\n" //
@@ -2404,6 +2405,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class FooBar {\n" //
+				+ "        public String value;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private final TreeSet<FooBar> foo = new TreeSet<>((a,b) -> b.value.compareTo(a.value));\n" //
+				+ "\n" //
 				+ "}\n";
 
 		String expected= "" //
@@ -2415,6 +2423,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "import java.util.Date;\n" //
 				+ "import java.util.List;\n" //
 				+ "import java.util.Locale;\n" //
+				+ "import java.util.TreeSet;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    private Comparator<Date> refactorField = Comparator.comparing(Date::toString);\n" //
@@ -2608,6 +2617,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "\n" //
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
+				+ "\n" //
+				+ "    public class FooBar {\n" //
+				+ "        public String value;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private final TreeSet<FooBar> foo = new TreeSet<>(Comparator.comparing((FooBar a) -> a.value).reversed());\n" //
+				+ "\n" //
 				+ "}\n";
 
 		// When
