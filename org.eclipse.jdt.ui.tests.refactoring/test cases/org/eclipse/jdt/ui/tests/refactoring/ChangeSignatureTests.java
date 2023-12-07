@@ -1934,7 +1934,6 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		helperDoAll("A", "textContains", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
-	@Ignore("BUG_83691_CORE_JAVADOC_REF")
 	@Test
 	public void testEnum01() throws Exception {
 		String[] signature= {"I"};
@@ -1971,7 +1970,6 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		helperDoAll("A_testEnum02_in", "A_testEnum02_in", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
-	@Ignore("BUG_83691_CORE_JAVADOC_REF")
 	@Test
 	public void testEnum03() throws Exception {
 		String[] signature= {};
