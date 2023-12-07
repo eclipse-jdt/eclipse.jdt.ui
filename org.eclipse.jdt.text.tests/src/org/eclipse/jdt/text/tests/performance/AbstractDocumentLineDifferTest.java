@@ -23,8 +23,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
-
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.quickdiff.IQuickDiffReferenceProvider;
 
@@ -112,7 +110,8 @@ public abstract class AbstractDocumentLineDifferTest extends TextPerformanceTest
 		super.tearDown();
 	}
 
-	protected final void setUpDiffer(DocumentLineDiffer differ) {
+	@SuppressWarnings("restriction")
+	protected final void setUpDiffer(org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer differ) {
 		differ.setReferenceProvider(fReferenceProvider);
 	}
 

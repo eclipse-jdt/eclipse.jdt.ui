@@ -29,8 +29,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
-
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
@@ -78,7 +76,8 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 
 		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
-		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
+		@SuppressWarnings("restriction")
+		MarkerAnnotationPreferences markerAnnotationPreferences= org.eclipse.ui.internal.editors.text.EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
 		Iterator<AnnotationPreference> iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
 		while (iterator.hasNext()) {
 			AnnotationPreference pref= iterator.next();
@@ -100,7 +99,8 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 
 		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
-		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
+		@SuppressWarnings("restriction")
+		MarkerAnnotationPreferences markerAnnotationPreferences= org.eclipse.ui.internal.editors.text.EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
 		Iterator<AnnotationPreference> iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
 		while (iterator.hasNext()) {
 			AnnotationPreference pref= iterator.next();

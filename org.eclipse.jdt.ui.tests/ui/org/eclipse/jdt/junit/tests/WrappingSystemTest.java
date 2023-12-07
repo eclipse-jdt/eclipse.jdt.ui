@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 /**
  * Disabled unreliable tests driving the event loop in JUnitJUnitTests.
  */
+@SuppressWarnings("restriction") // org.eclipse.debug.internal.ui
 public class WrappingSystemTest implements ILaunchesListener2 {
 	private boolean fLaunchHasTerminated = false;
 

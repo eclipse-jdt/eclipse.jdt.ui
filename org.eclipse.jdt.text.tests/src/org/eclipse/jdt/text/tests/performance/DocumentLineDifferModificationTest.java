@@ -14,9 +14,6 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.Performance;
 
 import org.eclipse.swt.widgets.Display;
@@ -26,7 +23,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class DocumentLineDifferModificationTest extends AbstractDocumentLineDifferTest {
 
@@ -84,8 +82,9 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 			measureReplaceAll(fMeter, originalText, searchExpression, replacementString);
 	}
 
+	@SuppressWarnings("restriction")
 	private void measureReplaceAll(DifferenceMeter meter, String contents, String searchExpression, String replacementString) throws Exception {
-		DocumentLineDiffer differ= null;
+		org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer differ= null;
 		try {
 			// reference measurement
 			fDocument.set(contents);
@@ -116,8 +115,9 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 		}
 	}
 
-	private DocumentLineDiffer ensureInitialized(Document document) {
-		final DocumentLineDiffer differ= new DocumentLineDiffer() {
+	@SuppressWarnings("restriction")
+	private org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer ensureInitialized(Document document) {
+		final org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer differ= new org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer() {
 			/*
 			 * @see org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer#initialize()
 			 */

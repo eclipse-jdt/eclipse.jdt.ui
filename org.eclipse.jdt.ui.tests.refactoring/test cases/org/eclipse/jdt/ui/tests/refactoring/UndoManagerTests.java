@@ -27,6 +27,7 @@ import org.eclipse.ltk.internal.core.refactoring.UndoManager2;
 
 import org.eclipse.jdt.ui.tests.refactoring.rules.RefactoringTestSetup;
 
+@SuppressWarnings("restriction") // org.eclipse.ltk.internal
 public class UndoManagerTests extends GenericRefactoringTest {
 
 	public UndoManagerTests() {

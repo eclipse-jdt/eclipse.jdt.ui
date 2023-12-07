@@ -13,9 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.swt.widgets.Display;
@@ -23,7 +20,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDifferTest {
 	private static final Class<DocumentLineDifferInitializationTest> THIS= DocumentLineDifferInitializationTest.class;
@@ -75,8 +73,9 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 			measureInitialization(meter, document);
 	}
 
+	@SuppressWarnings("restriction")
 	private void measureInitialization(PerformanceMeter meter, IDocument document) {
-		final DocumentLineDiffer differ= new DocumentLineDiffer();
+		final org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer differ= new org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer();
 		setUpDiffer(differ);
 		DisplayHelper helper= new DisplayHelper() {
 			@Override
