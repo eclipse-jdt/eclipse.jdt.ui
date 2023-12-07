@@ -9,13 +9,11 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: 
- org.eclipse.jdt.internal.junit;x-friends:="org.eclipse.jdt.junit,org.eclipse.jdt.ui.unittest.junit",
- org.eclipse.jdt.internal.junit.buildpath;core="split"; mandatory:="core";x-friends:="org.eclipse.jdt.junit",
- org.eclipse.jdt.internal.junit.launcher;core="split"; mandatory:="core";x-friends:="org.eclipse.jdt.junit,
- org.eclipse.jdt.ui.unittest.junit,
- org.eclipse.pde.unittest.junit",
- org.eclipse.jdt.internal.junit.model;x-friends:="org.eclipse.jdt.junit",
- org.eclipse.jdt.internal.junit.util;core="split"; mandatory:="core";x-friends:="org.eclipse.jdt.junit,org.eclipse.jdt.ui.unittest.junit",
+ org.eclipse.jdt.internal.junit;x-friends:="org.eclipse.jdt.junit, org.eclipse.jdt.ui.unittest.junit, org.eclipse.jdt.ui.tests",
+ org.eclipse.jdt.internal.junit.buildpath;core="split"; mandatory:="core";x-friends:="org.eclipse.jdt.junit, org.eclipse.jdt.ui.tests",
+ org.eclipse.jdt.internal.junit.launcher;core="split"; mandatory:="core";x-friends:="org.eclipse.jdt.junit, org.eclipse.jdt.ui.tests, org.eclipse.jdt.ui.unittest.junit, org.eclipse.pde.unittest.junit",
+ org.eclipse.jdt.internal.junit.model;x-friends:="org.eclipse.jdt.junit, org.eclipse.jdt.ui.tests",
+ org.eclipse.jdt.internal.junit.util;core="split"; mandatory:="core";x-friends:="org.eclipse.jdt.junit, org.eclipse.jdt.ui.unittest.junit, org.eclipse.jdt.ui.tests",
  org.eclipse.jdt.junit,
  org.eclipse.jdt.junit.launcher;core="split"; mandatory:="core",
  org.eclipse.jdt.junit.model

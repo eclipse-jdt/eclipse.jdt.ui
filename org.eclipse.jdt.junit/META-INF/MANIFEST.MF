@@ -9,10 +9,10 @@ Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: org.eclipse.jdt.internal.junit.buildpath;x-internal:=true,
- org.eclipse.jdt.internal.junit.launcher;x-friends:="org.eclipse.jdt.ui.unittest.junit,org.eclipse.pde.unittest.junit",
+ org.eclipse.jdt.internal.junit.launcher;x-friends:="org.eclipse.jdt.ui.unittest.junit, org.eclipse.pde.unittest.junit, org.eclipse.jdt.ui.tests",
  org.eclipse.jdt.internal.junit.refactoring;x-internal:=true,
- org.eclipse.jdt.internal.junit.ui;x-internal:=true,
- org.eclipse.jdt.internal.junit.util;x-friends:="org.eclipse.jdt.ui.unittest.junit,org.eclipse.pde.unittest.junit",
+ org.eclipse.jdt.internal.junit.ui;x-friends:="org.eclipse.jdt.ui.tests",
+ org.eclipse.jdt.internal.junit.util;x-friends:="org.eclipse.jdt.ui.unittest.junit, org.eclipse.pde.unittest.junit, org.eclipse.jdt.ui.tests",
  org.eclipse.jdt.internal.junit.wizards;x-internal:=true,
  org.eclipse.jdt.junit.launcher,
  org.eclipse.jdt.junit.wizards

@@ -97,6 +97,7 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 /**
  * @since 3.1
  */
+@SuppressWarnings("restriction") // org.eclipse.core.filebuffers.tests
 public class EditorTestHelper {
 
 	private static class ImportOverwriteQuery implements IOverwriteQuery {

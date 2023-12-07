@@ -55,7 +55,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
 
@@ -396,8 +395,9 @@ public class MarkOccurrenceTest {
 	 *
 	 * @return the occurrence annotation color
 	 */
+	@SuppressWarnings("restriction")
 	private static RGB getHighlightRGB() {
-		AnnotationPreference annotationPref= EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(OCCURRENCE_ANNOTATION);
+		AnnotationPreference annotationPref= org.eclipse.ui.internal.editors.text.EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(OCCURRENCE_ANNOTATION);
 		IPreferenceStore store= EditorsUI.getPreferenceStore();
 		if (store != null)
 			return PreferenceConverter.getColor(store, annotationPref.getColorPreferenceKey());

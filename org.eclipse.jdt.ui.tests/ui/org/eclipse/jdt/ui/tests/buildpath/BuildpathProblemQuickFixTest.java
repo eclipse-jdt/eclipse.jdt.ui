@@ -42,8 +42,6 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.launching.JREContainerInitializer;
-
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 
@@ -174,7 +172,8 @@ public class BuildpathProblemQuickFixTest {
 	@Test
 	public void test3RequiredBinaryLevel() throws CoreException, IOException {
 		IPath container= new Path("org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7");
-		IVMInstall vm= JREContainerInitializer.resolveVM(container);
+		@SuppressWarnings("restriction")
+		IVMInstall vm= org.eclipse.jdt.internal.launching.JREContainerInitializer.resolveVM(container);
 		if (vm == null) {
 			return;
 		}

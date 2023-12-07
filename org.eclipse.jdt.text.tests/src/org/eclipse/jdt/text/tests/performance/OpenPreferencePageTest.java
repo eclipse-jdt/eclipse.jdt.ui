@@ -30,7 +30,6 @@ import org.eclipse.jface.preference.PreferenceDialog;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -53,7 +52,9 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 		Display display= EditorTestHelper.getActiveDisplay();
 
 		PreferenceDialog d= PreferencesUtil.createPreferenceDialogOn(null, null, null, null);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(d.getShell(), IWorkbenchHelpContextIds.PREFERENCE_DIALOG);
+		@SuppressWarnings("restriction")
+		String preferenceDialog= org.eclipse.ui.internal.IWorkbenchHelpContextIds.PREFERENCE_DIALOG;
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(d.getShell(), preferenceDialog);
 		// HACK to get control back instantly
 		d.setBlockOnOpen(false);
 		d.open();

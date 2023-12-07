@@ -20,8 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.internal.expressions.Messages;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -573,7 +572,7 @@ public class QuickFixTest17 extends QuickFixTest {
 				"    \n" +
 				"}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
-		String expectedProposal= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
+		String expectedProposal= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
@@ -600,7 +599,7 @@ public class QuickFixTest17 extends QuickFixTest {
 				"    \n" +
 				"}\n";
 		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
-		String expectedProposal= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
+		String expectedProposal= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
@@ -630,7 +629,7 @@ public class QuickFixTest17 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		String expectedProposal1= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerclass_description;
-		String expectedProposal2= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, "test");
+		String expectedProposal2= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, "test");
 		assertProposalExists(proposals, expectedProposal1);
 		assertProposalExists(proposals, expectedProposal2);
 	}
@@ -658,11 +657,11 @@ public class QuickFixTest17 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 		String expectedProposal1= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerclass_description;
-		String expectedProposal2= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, "test");
+		String expectedProposal2= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, "test");
 		String expectedProposal3= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerrecord_description;
-		String expectedProposal4= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewrecord_inpackage_description, "test");
+		String expectedProposal4= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewrecord_inpackage_description, "test");
 		String expectedProposal5= CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinnerinterface_description;
-		String expectedProposal6= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description, "test");
+		String expectedProposal6= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description, "test");
 
 		assertProposalExists(proposals, expectedProposal1);
 		assertProposalExists(proposals, expectedProposal2);

@@ -23,14 +23,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
-import org.eclipse.core.runtime.ILog;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.swt.custom.StyledText;
+
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.codemining.ICodeMiningProvider;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.jface.text.tests.util.DisplayHelper;
+
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.intro.IIntroManager;
+import org.eclipse.ui.intro.IIntroPart;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -38,24 +64,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaCodeMiningReconciler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaMethodParameterCodeMiningProvider;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.text.codemining.ICodeMiningProvider;
-import org.eclipse.jface.text.source.projection.ProjectionViewer;
-import org.eclipse.jface.text.tests.util.DisplayHelper;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.intro.IIntroManager;
-import org.eclipse.ui.intro.IIntroPart;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 public class ParameterNamesCodeMiningTest {
 	private IJavaProject fProject;
@@ -204,8 +212,7 @@ public class ParameterNamesCodeMiningTest {
 			fParameterNameCodeMiningProvider
 		});
 		waitReconciled(viewer);
-		//
-		ILog log= WorkbenchPlugin.getDefault().getLog();
+
 		AtomicReference<IStatus> errorInLog= new AtomicReference<>();
 		ILogListener logListener= (status, plugin) -> {
 			if (status.getSeverity() == IStatus.ERROR) {
@@ -213,11 +220,11 @@ public class ParameterNamesCodeMiningTest {
 			}
 		};
 		try {
-			log.addLogListener(logListener);
+			Platform.addLogListener(logListener);
 			DisplayHelper.sleep(editor.getViewer().getTextWidget().getDisplay(), 1000);
 			assertNull(errorInLog.get());
 		} finally {
-			log.removeLogListener(logListener);
+			Platform.removeLogListener(logListener);
 		}
 	}
 

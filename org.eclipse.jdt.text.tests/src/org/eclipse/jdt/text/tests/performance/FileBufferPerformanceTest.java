@@ -39,6 +39,7 @@ import junit.framework.Test;
  *
  * @since 3.3
  */
+@SuppressWarnings("restriction") // org.eclipse.core.filebuffers.tests
 public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 
 	private static final int LONG_REPEAT_COUNT= 1000000;

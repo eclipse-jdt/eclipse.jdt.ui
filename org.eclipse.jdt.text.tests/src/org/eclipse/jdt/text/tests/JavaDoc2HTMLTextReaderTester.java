@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.internal.text.html.HTMLPrinter;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.IOpenable;
@@ -44,9 +42,10 @@ public class JavaDoc2HTMLTextReaderTester {
 
 	private static final boolean DEBUG= false;
 
+	@SuppressWarnings("restriction")
 	private String getTransformedJavaDoc(String string) {
 		Reader reader= new JavaDocCommentReader(new MockBuffer(string), 0, string.length());
-		return HTMLPrinter.read(new JavaDoc2HTMLTextReader(reader));
+		return org.eclipse.jface.internal.text.html.HTMLPrinter.read(new JavaDoc2HTMLTextReader(reader));
 	}
 
 	private void verify(String string, String expected){

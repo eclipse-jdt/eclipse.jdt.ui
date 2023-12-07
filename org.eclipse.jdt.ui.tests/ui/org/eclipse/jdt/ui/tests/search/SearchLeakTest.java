@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 /**
  * XXX: Every test in this class needs a delegate method in {@link SearchLeakTestWrapper}!
  */
+@SuppressWarnings("restriction") // org.eclipse.search.internal
 public class SearchLeakTest extends LeakTestCase {
 
 	@Rule

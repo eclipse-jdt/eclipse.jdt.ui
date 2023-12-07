@@ -37,7 +37,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.internal.ErrorViewPart;
 import org.eclipse.ui.intro.IIntroManager;
 import org.eclipse.ui.intro.IIntroPart;
 
@@ -134,11 +133,12 @@ public class SmokeViewsTest {
 		smokeTest(JavaUI.ID_SOURCE_VIEW);
 	}
 
+	@SuppressWarnings("restriction") // org.eclipse.ui.internal.ErrorViewPart
 	private void smokeTest(String viewId) throws PartInitException {
 		view = window.getActivePage().showView(viewId);
 		assertNotNull("View " + viewId + " should be created", view);
 		DisplayHelper.driveEventQueue(Display.getDefault());
-		if(view instanceof ErrorViewPart) {
+		if(view instanceof org.eclipse.ui.internal.ErrorViewPart) {
 			fail("Error happened on opening view " + viewId);
 		}
 	}
