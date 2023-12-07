@@ -26,11 +26,9 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
@@ -231,20 +229,6 @@ public class AbstractTestRunSessionSerializationTests {
 		}
 	}
 
-	public static String getContents(InputStream in) throws IOException {
-		InputStreamReader reader= new InputStreamReader(in);
-		StringBuilder sb= new StringBuilder(8192);
-		char[] cbuf= new char[8192];
-		try {
-			int read= 0;
-			while ((read= reader.read(cbuf)) != -1)
-				sb.append(cbuf, 0, read);
-		} finally {
-			reader.close();
-		}
-		return sb.toString();
-	}
-
 	protected void runCUTest(String test) throws CoreException, IOException, FileNotFoundException, Exception {
 		IPackageFragmentRoot root= JUnitWorkspaceTestSetup.getRoot();
 		IPackageFragment pack= root.getPackageFragment("pack");
@@ -253,7 +237,7 @@ public class AbstractTestRunSessionSerializationTests {
 
 		Path expectedPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "xml/" + test + ".xml");
 		File expectedFile= JavaTestPlugin.getDefault().getFileInPlugin(expectedPath);
-		String expected= getContents(new FileInputStream(expectedFile));
+		String expected=  Files.readString(expectedFile.toPath());
 		runExportImport(aTestCase, expected);
 
 		runImportAntResult(test);
@@ -274,7 +258,7 @@ public class AbstractTestRunSessionSerializationTests {
 
 		Path expectedPath= new Path(JUnitWorkspaceTestSetup.getProjectPath() + "xml/" + testType + "_" + method + ".xml");
 		File expectedFile= JavaTestPlugin.getDefault().getFileInPlugin(expectedPath);
-		String expected= getContents(new FileInputStream(expectedFile));
+		String expected= Files.readString(expectedFile.toPath());
 		runExportImport(testMethod, expected);
 
 		//ant cannot run single test methods

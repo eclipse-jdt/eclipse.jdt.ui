@@ -26,10 +26,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
@@ -63,28 +66,22 @@ public class FatJarManifestProvider implements IManifestProvider {
 				List<Manifest> otherManifests= new ArrayList<>();
 				for (Object element : jarPackage.getElements()) {
 					if (element instanceof IPackageFragmentRoot && ((IPackageFragmentRoot) element).isArchive()) {
-						ZipFile zip= JarPackagerUtil.getArchiveFile(((IPackageFragmentRoot) element).getPath());
-						openZips.add(zip);
-						Enumeration<? extends ZipEntry> entries= zip.entries();
-						while (entries.hasMoreElements()) {
-							ZipEntry entry= entries.nextElement();
-							if ("META-INF/MANIFEST.MF".equalsIgnoreCase(entry.getName())) { //$NON-NLS-1$
-								InputStream inputStream= null;
-								try {
-									inputStream= zip.getInputStream(entry);
-									Manifest otherManifest= new Manifest(inputStream);
-									otherManifests.add(otherManifest);
-								} catch (IOException e) {
-									JavaPlugin.log(e);
-								} finally {
-									if (inputStream != null) {
-										try {
-											inputStream.close();
-										} catch(IOException e){
-										}
+						try (ZipFile zip= JarPackagerUtil.createZipFile(((IPackageFragmentRoot) element).getPath())) {
+							openZips.add(zip);
+							Enumeration<? extends ZipEntry> entries= zip.entries();
+							while (entries.hasMoreElements()) {
+								ZipEntry entry= entries.nextElement();
+								if ("META-INF/MANIFEST.MF".equalsIgnoreCase(entry.getName())) { //$NON-NLS-1$
+									try (InputStream inputStream= zip.getInputStream(entry)) {
+										Manifest otherManifest= new Manifest(inputStream);
+										otherManifests.add(otherManifest);
+									} catch (IOException e) {
+										JavaPlugin.log(e);
 									}
 								}
 							}
+						} catch (IOException e) {
+							throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, e.getLocalizedMessage(), e));
 						}
 					}
 				}
@@ -201,16 +198,9 @@ public class FatJarManifestProvider implements IManifestProvider {
 	}
 
 	private Manifest createSuppliedManifest(JarPackageData jarPackage) throws CoreException, IOException {
-		Manifest manifest;
-		// No need to use buffer here because Manifest(...) does
-		InputStream stream= jarPackage.getManifestFile().getContents(false);
-		try {
-			manifest= new Manifest(stream);
-		} finally {
-			if (stream != null)
-				stream.close();
+		try (InputStream stream= jarPackage.getManifestFile().getContents(false);) {
+			return new Manifest(stream);
 		}
-		return manifest;
 	}
 
 }

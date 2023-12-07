@@ -15,8 +15,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -174,25 +174,16 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	}
 
 	private static IPath writeToTempFile(IClassFile classFile) {
-		FileOutputStream writer= null;
 		try {
 			File file= File.createTempFile(classFile.getElementName(), ".class"); //$NON-NLS-1$
 			file.deleteOnExit();
 			byte[] bytes= classFile.getBytes();
-			writer= new FileOutputStream(file);
-			writer.write(bytes);
+			Files.write(file.toPath(), bytes);
 			return new Path(file.toString());
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
-		} finally {
-			if (writer != null)
-				try {
-					writer.close();
-				} catch (IOException e) {
-					JavaPlugin.log(e);
-				}
 		}
 		throw new IllegalArgumentException("Could not create temporary file."); //$NON-NLS-1$
 	}

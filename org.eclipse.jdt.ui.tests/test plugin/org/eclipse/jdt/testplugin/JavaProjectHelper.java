@@ -869,14 +869,8 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addLibraryWithImport(IJavaProject jproject, IPath jarPath, IPath sourceAttachPath, IPath sourceAttachRoot) throws IOException, CoreException {
 		IProject project= jproject.getProject();
 		IFile newFile= project.getFile(jarPath.lastSegment());
-		InputStream inputStream= null;
-		try {
-			inputStream= new FileInputStream(jarPath.toFile());
+		try (InputStream inputStream= new FileInputStream(jarPath.toFile())) {
 			newFile.create(inputStream, true, null);
-		} finally {
-			if (inputStream != null) {
-				try { inputStream.close(); } catch (IOException e) { }
-			}
 		}
 		return addLibrary(jproject, newFile.getFullPath(), sourceAttachPath, sourceAttachRoot);
 	}
@@ -1195,7 +1189,9 @@ public class JavaProjectHelper {
 			} else {
 				URL url= bundle.getEntry(path);
 				IFile file= importTarget.getFile(name);
-				file.create(url.openStream(), true, null);
+				try (InputStream openStream= url.openStream()) {
+					file.create(openStream, true, null);
+				}
 			}
 		}
 	}

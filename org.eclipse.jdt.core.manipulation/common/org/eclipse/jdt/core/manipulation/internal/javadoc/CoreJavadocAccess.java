@@ -266,7 +266,7 @@ public class CoreJavadocAccess {
 	}
 
 	record SuperclassReferenceMethodData(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) {
-	};
+	}
 
 	static SuperclassReferenceMethodData getSuperclassReferenceMethodData(final IMethod method) throws JavaModelException {
 		IType type= method.getDeclaringType();
@@ -423,9 +423,7 @@ public class CoreJavadocAccess {
 			try (Reader contentReader= CoreJavadocContentAccessUtility.getHTMLContentReader(member, false, false)) {
 				if (contentReader != null)
 					return CoreJavadocContentAccessUtility.getString(contentReader);
-			} catch (JavaModelException e1) {
-				JavaManipulationPlugin.log(e1);
-			} catch (IOException e1) {
+			} catch (JavaModelException | IOException e1) {
 				JavaManipulationPlugin.log(e1);
 			}
 			return null;

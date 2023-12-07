@@ -19,11 +19,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -491,11 +489,15 @@ public abstract class GenericRefactoringTest {
 	}
 
 	public String getFileContents(String fileName) throws IOException {
-		return getContents(getFileInputStream(fileName));
+		try (InputStream fileInputStream= getFileInputStream(fileName)) {
+			return getContents(fileInputStream);
+		}
 	}
 
 	public static String getContents(IFile file) throws IOException, CoreException {
-		return getContents(file.getContents());
+		try (InputStream contents= file.getContents()) {
+			return getContents(contents);
+		}
 	}
 
 	public static ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
@@ -506,13 +508,7 @@ public abstract class GenericRefactoringTest {
 	}
 
 	public static String getContents(InputStream in) throws IOException {
-		StringBuilder sb= new StringBuilder(300);
-		try (BufferedReader br= new BufferedReader(new InputStreamReader(in, ENCODING))){
-			int read= 0;
-			while ((read= br.read()) != -1)
-				sb.append((char) read);
-		}
-		return sb.toString();
+		return new String(in.readAllBytes(), ENCODING);
 	}
 
 	public static InputStream getFileInputStream(String fileName) throws IOException {

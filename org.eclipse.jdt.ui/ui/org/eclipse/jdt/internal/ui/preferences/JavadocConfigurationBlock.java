@@ -68,6 +68,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -76,7 +77,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.FilteredElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -538,19 +538,7 @@ public class JavadocConfigurationBlock {
 	}
 
 	private String internalChooseArchivePath() {
-		ZipFile zipFile= null;
-		try {
-			if (fWorkspaceRadio.isSelected()) {
-				IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(fArchiveField.getText()));
-				if (resource != null) {
-					IPath location= resource.getLocation();
-					if (location != null) {
-						zipFile= new ZipFile(location.toOSString());
-					}
-				}
-			} else {
-				zipFile= new ZipFile(fArchiveField.getText());
-			}
+		try (ZipFile zipFile= createZipFile()) {
 			if (zipFile == null) {
 				return null;
 			}
@@ -580,16 +568,23 @@ public class JavadocConfigurationBlock {
 			}
 		} catch (IOException e) {
 			JavaPlugin.log(e);
-		} finally {
-			if (zipFile != null) {
-				try {
-					zipFile.close();
-				} catch (IOException e1) {
-					// ignore
-				}
-			}
 		}
 		return null;
+	}
+
+	private ZipFile createZipFile() throws IOException {
+		if (fWorkspaceRadio.isSelected()) {
+			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(fArchiveField.getText()));
+			if (resource != null) {
+				IPath location= resource.getLocation();
+				if (location != null) {
+					return new ZipFile(location.toOSString());
+				}
+			}
+			return null;
+		} else {
+			return new ZipFile(fArchiveField.getText());
+		}
 	}
 
 	private String chooseArchive() {

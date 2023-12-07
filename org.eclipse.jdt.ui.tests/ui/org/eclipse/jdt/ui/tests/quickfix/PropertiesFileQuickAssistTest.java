@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -124,19 +123,8 @@ public class PropertiesFileQuickAssistTest {
 
 	private static void checkContentOfFile(String message, IFile file, String content) throws Exception {
 		try (InputStream in= file.getContents()) {
-			assertEqualLines(message, content, copyToString(in));
+			assertEqualLines(message, content, new String(in.readAllBytes()));
 		}
-	}
-
-	private static String copyToString(InputStream in) throws Exception {
-		ByteArrayOutputStream out= new ByteArrayOutputStream();
-		int read= in.read();
-		while (read != -1) {
-			out.write(read);
-			read= in.read();
-		}
-		out.close();
-		return out.toString();
 	}
 
 	private static void assertEqualLines(String message, String expected, String actual) {

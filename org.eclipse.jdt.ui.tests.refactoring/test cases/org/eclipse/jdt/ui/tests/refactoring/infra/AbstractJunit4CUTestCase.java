@@ -13,10 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.infra;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.junit.Rule;
 import org.junit.rules.TestName;
@@ -36,17 +34,7 @@ public abstract class AbstractJunit4CUTestCase {
 	}
 
 	protected String getFileContents(InputStream in) throws IOException {
-		BufferedReader br= new BufferedReader(new InputStreamReader(in));
-
-		StringBuilder sb= new StringBuilder();
-		try {
-			int read= 0;
-			while ((read= br.read()) != -1)
-				sb.append((char) read);
-		} finally {
-			br.close();
-		}
-		return sb.toString();
+		return new String(in.readAllBytes());
 	}
 
 	protected ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
@@ -69,7 +57,9 @@ public abstract class AbstractJunit4CUTestCase {
 
 	protected ICompilationUnit createCU(IPackageFragment pack, String name) throws Exception {
 		name= adaptName(name);
-		return createCU(pack, name, getFileInputStream(getFilePath(pack, name)));
+		try (InputStream fileInputStream= getFileInputStream(getFilePath(pack, name))) {
+			return createCU(pack, name, fileInputStream);
+		}
 	}
 
 	protected String adaptName(String name) {
@@ -78,7 +68,9 @@ public abstract class AbstractJunit4CUTestCase {
 
 	protected String getProofedContent(String folder, String name) throws Exception {
 		name= adaptName(name);
-		return getFileContents(getFileInputStream(getFilePath(folder, name)));
+		try (InputStream fileInputStream= getFileInputStream(getFilePath(folder, name))) {
+			return getFileContents(fileInputStream);
+		}
 	}
 
 	private String getFilePath(String path, String name) {

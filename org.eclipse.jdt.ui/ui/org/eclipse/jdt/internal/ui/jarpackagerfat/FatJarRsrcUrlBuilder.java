@@ -16,10 +16,9 @@
 
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -111,11 +110,12 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 		jarNames.add(jarName);
 		JarEntry newEntry = new JarEntry(jarName);
 		newEntry.setMethod(ZipEntry.STORED);
-		byte[] readBuffer= new byte[4096];
 		try {
-			if (!fJarPackage.isCompressed())
-				JarPackagerUtil.calculateCrcAndSize(newEntry, new FileInputStream(jarPathFile), readBuffer);
-			getJarWriter().addZipEntryStream(newEntry, new FileInputStream(jarPathFile), jarName);
+			byte[] allBytes= Files.readAllBytes(jarPathFile.toPath());
+			if (!fJarPackage.isCompressed()) {
+				JarPackagerUtil.setCrcAndSize(newEntry, allBytes);
+			}
+			getJarWriter().addZipEntryStream(newEntry, allBytes, jarName);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -127,8 +127,8 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 			while (zipEntry != null) {
 				if (!zipEntry.isDirectory()) {
 					String entryName= zipEntry.getName();
-					byte[] content= FatJarPackagerUtil.readInputStream(zis);
-					getJarWriter().addZipEntryStream(zipEntry, new ByteArrayInputStream(content), entryName);
+					byte[] content= zis.readAllBytes();
+					getJarWriter().addZipEntryStream(zipEntry, content, entryName);
 				}
 				zipEntry= zis.getNextEntry();
 			}

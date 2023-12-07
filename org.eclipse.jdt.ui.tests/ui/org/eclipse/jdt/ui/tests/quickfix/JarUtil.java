@@ -21,7 +21,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -263,7 +264,7 @@ public static void createJar(String[] pathsAndContents, String[] extraPathsAndCo
 		for (int i = 0, l = extraPathsAndContents.length; i < l; /* inc in loop */) {
 			File  outputFile = new File(classesPath, extraPathsAndContents[i++]);
 			outputFile.getParentFile().mkdirs();
-			JarUtil.writeToFile(extraPathsAndContents[i++], outputFile.getAbsolutePath());
+			Files.writeString(outputFile.getAbsoluteFile().toPath(), extraPathsAndContents[i++], Charset.defaultCharset());
 		}
 	}
     zip(classesDir, jarPath);
@@ -674,44 +675,20 @@ private static boolean waitUntilFileDeleted(File file) {
     System.out.println();
     return false;
 }
-public static void writeToFile(String contents, String destinationFilePath) {
-    File destFile = new File(destinationFilePath);
-    FileOutputStream output = null;
-    PrintWriter writer = null;
-    try {
-        output = new FileOutputStream(destFile);
-        writer = new PrintWriter(output);
-        writer.print(contents);
-        writer.flush();
-    } catch (IOException e) {
-        e.printStackTrace();
-        return;
-    } finally {
-        if (writer != null) {
-        	writer.close();
-        }
-    }
-}
 public static void zip(File rootDir, String zipPath) throws IOException {
-    ZipOutputStream zip = null;
-    try {
-        File zipFile = new File(zipPath);
-        if (zipFile.exists()) {
-        	if (!delete(zipFile))
-	        	throw new IOException("Could not delete " + zipPath);
-        	 // ensure the new zip file has a different timestamp than the previous one
-        	int timeToWait = 1000; // some platform (like Linux) have a 1s granularity)
-            waitAtLeast(timeToWait);
-        } else {
-        	zipFile.getParentFile().mkdirs();
-        }
-        zip = new ZipOutputStream(new FileOutputStream(zipFile));
-        zip(rootDir, zip, rootDir.getPath().length()+1); // 1 for last slash
-    } finally {
-        if (zip != null) {
-            zip.close();
-        }
-    }
+	File zipFile= new File(zipPath);
+	if (zipFile.exists()) {
+		if (!delete(zipFile))
+			throw new IOException("Could not delete " + zipPath);
+		// ensure the new zip file has a different timestamp than the previous one
+		int timeToWait= 1000; // some platform (like Linux) have a 1s granularity)
+		waitAtLeast(timeToWait);
+	} else {
+		zipFile.getParentFile().mkdirs();
+	}
+	try (ZipOutputStream zip= new ZipOutputStream(new FileOutputStream(zipFile))) {
+		zip(rootDir, zip, rootDir.getPath().length() + 1); // 1 for last slash
+	}
 }
 private static void zip(File dir, ZipOutputStream zip, int rootPathLength) throws IOException {
     File[] files = dir.listFiles();

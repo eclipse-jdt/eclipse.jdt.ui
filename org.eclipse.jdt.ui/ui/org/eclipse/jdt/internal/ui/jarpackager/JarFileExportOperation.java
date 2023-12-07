@@ -217,21 +217,14 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 					if (element instanceof IPackageFragmentRoot) {
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 						if (root.isArchive()) {
-							ZipFile file= null;
-							try {
-								file= JarPackagerUtil.getArchiveFile(root.getPath());
+							try (ZipFile file= JarPackagerUtil.createZipFile(root.getPath())) {
 								if (file != null)
 									count+= file.size();
 							} catch (CoreException e) {
 								JavaPlugin.log(e);
-							} finally {
-								try {
-									if (file != null) {
-										file.close();
-									}
-								} catch (IOException e) {
-									addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message, new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
-								}
+							} catch (IOException e) {
+								addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message,
+										new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
 							}
 						} else if (root.isExternal()) {
 							try {
@@ -400,20 +393,14 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private void exportJavaElement(IProgressMonitor progressMonitor, IJavaElement je) throws InterruptedException {
 		if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot) je).isArchive()) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) je;
-			ZipFile jarFile= null;
-			try {
-				jarFile= JarPackagerUtil.getArchiveFile(root.getPath());
+			try (ZipFile jarFile= JarPackagerUtil.createZipFile(root.getPath())) {
 				fJarBuilder.writeArchive(jarFile, progressMonitor);
 			} catch (CoreException e) {
-				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_OpenZipFileError_message, new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
-			} finally {
-				try {
-					if (jarFile != null) {
-						jarFile.close();
-					}
-				} catch (IOException e) {
-					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message, new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
-				}
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_OpenZipFileError_message,
+						new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
+			} catch (IOException e) {
+				addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_CloseZipFileError_message,
+						new Object[] { JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT), e.getLocalizedMessage() }), e);
 			}
 			return;
 		} else if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot) je).isExternal()) {
@@ -854,19 +841,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				IFile classFile = (IFile) member;
 				URI location= classFile.getLocationURI();
 				if (location != null) {
-					InputStream contents= null;
-					try {
-						contents= EFS.getStore(location).openInputStream(EFS.NONE, monitor);
+					try (InputStream contents= EFS.getStore(location).openInputStream(EFS.NONE, monitor)) {
 						cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.CLASSFILE_ATTRIBUTES);
-					} finally {
-						try {
-							if (contents != null)
-								contents.close();
-						} catch (IOException e) {
-							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
-								Messages.format(JarPackagerMessages.JarFileExportOperation_errorCannotCloseConnection, BasicElementLabels.getURLPart(Resources.getLocationString(classFile))),
-								e));
-						}
+					} catch (IOException e) {
+						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+							Messages.format(JarPackagerMessages.JarFileExportOperation_errorCannotCloseConnection, BasicElementLabels.getURLPart(Resources.getLocationString(classFile))),
+							e));
 					}
 					if (cfReader != null) {
 						ISourceAttribute sourceAttribute= cfReader.getSourceFileAttribute();

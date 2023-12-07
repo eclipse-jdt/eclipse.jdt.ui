@@ -153,16 +153,13 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 
 		public byte[] serialize() throws IOException {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			try (DataOutputStream dataOut = new DataOutputStream(out)) {
+			try (ByteArrayOutputStream out= new ByteArrayOutputStream();
+					DataOutputStream dataOut= new DataOutputStream(out)) {
 				dataOut.writeUTF(fOriginHandle);
 				writeArray(dataOut, fTypeImports);
 				writeArray(dataOut, fStaticImports);
-			} finally {
-				out.close();
+				return out.toByteArray();
 			}
-
-			return out.toByteArray();
 		}
 	}
 

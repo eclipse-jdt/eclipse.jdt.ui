@@ -59,7 +59,10 @@ public class RippleMethodFinderTests extends AbstractJunit4CUTestCase {
 	private void perform() throws Exception {
 		IPackageFragment pack= rts.getPackageP();
 		String name= adaptName("A_" + getName());
-		ICompilationUnit cu= createCU(pack, name, getFileInputStream(getResourceLocation() + "/" + name));
+		ICompilationUnit cu;
+		try (InputStream fileInputStream= getFileInputStream(getResourceLocation() + "/" + name)) {
+			cu= createCU(pack, name, fileInputStream);
+		}
 
 		String contents= cu.getBuffer().getContents();
 

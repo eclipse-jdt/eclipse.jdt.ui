@@ -44,6 +44,8 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -51,7 +53,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -355,9 +356,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			dialogSettings.put(DIALOGSETTING_LASTLOADPATH, dialog.getFilterPath());
 
 			Properties properties= new Properties();
-			FileInputStream fis= null;
-			try {
-				fis= new FileInputStream(fileName);
+			try (FileInputStream fis= new FileInputStream(fileName)) {
 				properties.load(fis);
 				List<ImportOrderEntry> res= loadFromProperties(properties);
 				if (res != null) {
@@ -365,10 +364,6 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				}
 			} catch (IOException e) {
 				JavaPlugin.log(e);
-			} finally {
-				if (fis != null) {
-					try { fis.close(); } catch (IOException e) {}
-				}
 			}
 			String title= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_title;
 			String message= PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_error_message;
@@ -397,19 +392,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 				ImportOrderEntry entry= elements.get(i);
 				properties.setProperty(String.valueOf(i), entry.serialize());
 			}
-			FileOutputStream fos= null;
-			try {
-				fos= new FileOutputStream(fileName);
+			try (FileOutputStream fos= new FileOutputStream(fileName)) {
 				properties.store(fos, "Organize Import Order"); //$NON-NLS-1$
 			} catch (IOException e) {
 				JavaPlugin.log(e);
 				String title= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_title;
 				String message= PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_error_message;
 				MessageDialog.openError(getShell(), title, message);
-			} finally {
-				if (fos != null) {
-					try { fos.close(); } catch (IOException e) {}
-				}
 			}
 		}
 	}

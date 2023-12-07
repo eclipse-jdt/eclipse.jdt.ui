@@ -13,32 +13,38 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.search;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.search.ui.ISearchResultViewPart;
+import org.eclipse.search.ui.NewSearchUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchQuery;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.eclipse.search.ui.ISearchResultViewPart;
-import org.eclipse.search.ui.NewSearchUI;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+
+import org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchQuery;
 
 public class NLSSearchTest {
 
@@ -71,13 +77,7 @@ public class NLSSearchTest {
 	}
 
 	private IFile write(IFolder folder, final String content, final String fileName) throws CoreException {
-		InputStream stream= new InputStream() {
-			private final Reader fReader= new StringReader(content);
-			@Override
-			public int read() throws IOException {
-				return fReader.read();
-			}
-		};
+		ByteArrayInputStream stream= new ByteArrayInputStream(content.getBytes(Charset.defaultCharset()));
 		IFile file= fJProject1.getProject().getFile(folder.getProjectRelativePath().append(fileName));
 		file.create(stream, true, null);
 		return file;

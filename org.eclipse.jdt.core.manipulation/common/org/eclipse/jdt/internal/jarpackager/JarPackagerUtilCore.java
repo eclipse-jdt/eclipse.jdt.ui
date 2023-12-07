@@ -15,7 +15,6 @@
 package org.eclipse.jdt.internal.jarpackager;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,18 +23,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
-import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
@@ -63,24 +58,9 @@ public class JarPackagerUtilCore {
 	 * @since 1.14
 	 */
 	public static void addEntry(JarEntry entry, InputStream content, JarOutputStream jarOutputStream) throws IOException {
-		byte[] readBuffer= new byte[4096];
-		try {
+		try (content) {
 			jarOutputStream.putNextEntry(entry);
-			int count;
-			while ((count= content.read(readBuffer, 0, readBuffer.length)) != -1) {
-				jarOutputStream.write(readBuffer, 0, count);
-			}
-		} finally {
-			if (content != null) {
-				content.close();
-			}
-			/*
-			 * Commented out because some JREs throw an NPE if a stream
-			 * is closed twice. This works because
-			 * a) putNextEntry closes the previous entry
-			 * b) closing the stream closes the last entry
-			 */
-			// fJarOutputStream.closeEntry();
+			content.transferTo(jarOutputStream);
 		}
 	}
 
@@ -203,8 +183,10 @@ public class JarPackagerUtilCore {
 
 		// Set modification time
 		newEntry.setTime(lastModified);
-
-		addEntry(newEntry, zipFile.getInputStream(zipEntry), jarOutputStream);
+		try (InputStream content= zipFile.getInputStream(zipEntry);) {
+			jarOutputStream.putNextEntry(newEntry);
+			content.transferTo(jarOutputStream);
+		}
 	}
 
 	/**
@@ -241,122 +223,6 @@ public class JarPackagerUtilCore {
 		for (int i= entryDirectories.size() - 1; i >= 0; --i) {
 			jarOutputStream.putNextEntry(entryDirectories.get(i));
 		}
-	}
-
-	/**
-	 * Write the single file to the JarOutputStream. Extracted from
-	 * org.eclipse.jdt.internal.ui.jarpackagerfat.JarWriter4
-	 *
-	 * @param file the file to write
-	 * @param destinationPath the destinationPath in the jar file
-	 * @param areDirectoryEntriesIncluded the directory entries are included
-	 * @param isCompressed the jar is compressed
-	 * @param jarOutputStream the destination JarOutputStream
-	 * @param directories the temporary set saves existing directories
-	 *
-	 * @throws CoreException if an error has occurred
-	 *
-	 * @since 1.14
-	 */
-	public static void write(File file, IPath destinationPath, boolean areDirectoryEntriesIncluded,
-			boolean isCompressed, JarOutputStream jarOutputStream, Set<String> directories) throws CoreException {
-		try {
-			addFile(file, destinationPath, areDirectoryEntriesIncluded, isCompressed, jarOutputStream, directories);
-		} catch (IOException ex) {
-			// Ensure full path is visible
-			String message= null;
-			IPath path= new Path(file.getAbsolutePath());
-			if (ex.getLocalizedMessage() != null)
-				message= Messages.format(JarPackagerMessagesCore.JarWriter_writeProblemWithMessage,
-						new Object[] { BasicElementLabels.getPathLabel(path, false), ex.getLocalizedMessage() });
-			else
-				message= Messages.format(JarPackagerMessagesCore.JarWriter_writeProblem, BasicElementLabels.getPathLabel(path, false));
-			throw new CoreException(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IJavaStatusConstants.INTERNAL_ERROR, message, ex));
-		}
-	}
-
-	/**
-	 * Add the single file to the JarOutputStream. Extracted from
-	 * org.eclipse.jdt.internal.ui.jarpackagerfat.JarWriter4
-	 *
-	 * @param file the file to write
-	 * @param path the destinationPath in the jar file
-	 * @param areDirectoryEntriesIncluded the directory entries are included
-	 * @param isCompressed the jar is compressed
-	 * @param jarOutputStream the destination JarOutputStream
-	 * @param directories the temporary set saves existing directories
-	 *
-	 * @throws IOException if an I/O error has occurred
-	 *
-	 * @since 1.14
-	 */
-	private static void addFile(File file, IPath path, boolean areDirectoryEntriesIncluded,
-			boolean isCompressed, JarOutputStream jarOutputStream, Set<String> directories) throws IOException {
-		if (areDirectoryEntriesIncluded) {
-			addDirectories(path, jarOutputStream, directories);
-		}
-		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
-
-		if (isCompressed) {
-			newEntry.setMethod(ZipEntry.DEFLATED);
-			// Entry is filled automatically.
-		} else {
-			newEntry.setMethod(ZipEntry.STORED);
-			calculateCrcAndSize(newEntry, new FileInputStream(file), new byte[4096]);
-		}
-
-		newEntry.setTime(file.lastModified());
-		addEntry(newEntry, new FileInputStream(file), jarOutputStream);
-	}
-
-	/**
-	 * Creates the directory entries for the given path and writes it to the current archive.
-	 * Extracted from org.eclipse.jdt.ui.jarpackager.JarWriter3
-	 *
-	 * @param destinationPath the path to add
-	 * @param jarOutputStream the destination JarOutputStream
-	 * @param directories the temporary set saves existing directories
-	 *
-	 * @throws IOException if an I/O error has occurred
-	 *
-	 * @since 1.14
-	 */
-	private static void addDirectories(IPath destinationPath, JarOutputStream jarOutputStream, Set<String> directories) throws IOException {
-		addDirectories(destinationPath.toString(), jarOutputStream, directories);
-	}
-
-	/**
-	 * Calculates the crc and size of the resource and updates the entry. Extracted from
-	 * org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil
-	 *
-	 * @param entry the jar entry to update
-	 * @param stream the input stream
-	 * @param buffer a shared buffer to store temporary data
-	 *
-	 * @throws IOException if an input/output error occurs
-	 *
-	 * @since 1.14
-	 */
-	public static void calculateCrcAndSize(final ZipEntry entry, final InputStream stream, final byte[] buffer) throws IOException {
-		int size= 0;
-		final CRC32 crc= new CRC32();
-		int count;
-		try {
-			while ((count= stream.read(buffer, 0, buffer.length)) != -1) {
-				crc.update(buffer, 0, count);
-				size+= count;
-			}
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException exception) {
-					// Do nothing
-				}
-			}
-		}
-		entry.setSize(size);
-		entry.setCrc(crc.getValue());
 	}
 
 	/**

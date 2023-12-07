@@ -623,9 +623,11 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 	private String stripJavaComments(String comment) {
 		DocumentAdapter documentAdapter= new DocumentAdapter(null, fCreatedPackageFragment.getPath());
-		try {
-			documentAdapter.setContents(comment);
-			return getString(new JavaDoc2HTMLTextReader(new JavaDocCommentReader(documentAdapter, 0, comment.length())));
+		documentAdapter.setContents(comment);
+		try (JavaDoc2HTMLTextReader reader= new JavaDoc2HTMLTextReader(new JavaDocCommentReader(documentAdapter, 0, comment.length()))) {
+			return getString(reader);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		} finally {
 			documentAdapter.close();
 		}

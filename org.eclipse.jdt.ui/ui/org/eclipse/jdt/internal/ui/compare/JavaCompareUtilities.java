@@ -13,11 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -282,56 +281,24 @@ public class JavaCompareUtilities {
 		PropertiesFileDocumentSetupParticipant.setupDocument(document);
 	}
 
-	/**
-	 * Reads the contents of the given input stream into a string.
-	 * The function assumes that the input stream uses the platform's default encoding
-	 * (<code>ResourcesPlugin.getEncoding()</code>).
-	 * Returns null if an error occurred.
-	 */
-	private static String readString(InputStream is, String encoding) {
-		if (is == null)
-			return null;
-		BufferedReader reader= null;
-		try {
-			StringBuilder buffer= new StringBuilder();
-			char[] part= new char[2048];
-			int read= 0;
-			reader= new BufferedReader(new InputStreamReader(is, encoding));
-
-			while ((read= reader.read(part)) != -1)
-				buffer.append(part, 0, read);
-
-			return buffer.toString();
-
-		} catch (IOException ex) {
-			// NeedWork
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException ex) {
-					// silently ignored
-				}
-			}
-		}
-		return null;
-	}
-
 	public static String readString(IStreamContentAccessor sa) throws CoreException {
-		InputStream is= sa.getContents();
-		if (is != null) {
-			String encoding= null;
-			if (sa instanceof IEncodedStreamContentAccessor) {
-				try {
-					encoding= ((IEncodedStreamContentAccessor) sa).getCharset();
-				} catch (Exception e) {
+		try (InputStream is= sa.getContents()) {
+			if (is != null) {
+				String encoding= null;
+				if (sa instanceof IEncodedStreamContentAccessor) {
+					try {
+						encoding= ((IEncodedStreamContentAccessor) sa).getCharset();
+					} catch (Exception e) {
+					}
 				}
+				if (encoding == null)
+					encoding= ResourcesPlugin.getEncoding();
+				return new String(is.readAllBytes(), Charset.forName(encoding));
 			}
-			if (encoding == null)
-				encoding= ResourcesPlugin.getEncoding();
-			return readString(is, encoding);
+			return null;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		return null;
 	}
 
 	/**

@@ -211,8 +211,7 @@ public class FatJarExportTests {
 		data.setCompress(compressJar);
 
 		//assert archive content as expected
-		try ( //create archive
-			ZipFile generatedArchive = createArchive(data)) {
+		try (ZipFile generatedArchive = createZipFile(data)) {
 			//assert archive content as expected
 			assertNotNull(generatedArchive);
 			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
@@ -241,8 +240,7 @@ public class FatJarExportTests {
 		data.setCompress(compressJar);
 
 		//assert archive content as expected
-		try ( //create archive
-			ZipFile generatedArchive = createArchive(data)) {
+		try (ZipFile generatedArchive = createZipFile(data)) {
 			//assert archive content as expected
 			assertNotNull(generatedArchive);
 			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
@@ -288,8 +286,7 @@ public class FatJarExportTests {
 		data.setCompress(compressJar);
 
 		//assert archive content as expected
-		try ( //create archive
-			ZipFile generatedArchive = createArchive(data)) {
+		try (ZipFile generatedArchive= createZipFile(data)) {
 			//assert archive content as expected
 			assertNotNull(generatedArchive);
 			assertNotNull(generatedArchive.getEntry("org/eclipse/jdt/ui/test/Main.class")); //$NON-NLS-1$
@@ -384,7 +381,7 @@ public class FatJarExportTests {
 		return config;
 	}
 
-	private static ZipFile createArchive(JarPackageData data) throws Exception, CoreException {
+	private static ZipFile createZipFile(JarPackageData data) throws Exception, CoreException {
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 
 		IJarExportRunnable op= data.createJarExportRunnable(window.getShell());
@@ -394,7 +391,7 @@ public class FatJarExportTests {
 		if (status.getSeverity() == IStatus.ERROR)
 			throw new CoreException(status);
 
-		return JarPackagerUtil.getArchiveFile(data.getJarLocation());
+		return JarPackagerUtil.createZipFile(data.getJarLocation());
 	}
 
 	private static String runJar(IJavaProject project, String jarPath) throws CoreException {

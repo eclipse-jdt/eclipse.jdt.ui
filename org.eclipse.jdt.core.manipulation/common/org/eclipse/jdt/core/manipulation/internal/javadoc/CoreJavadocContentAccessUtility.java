@@ -464,9 +464,10 @@ public class CoreJavadocContentAccessUtility {
 	 */
 	public static Reader getHTMLContentReader(IMember member, boolean allowInherited, boolean useAttachedJavadoc) throws JavaModelException {
 		Reader contentReader= internalGetContentReader(member);
-		if (contentReader != null)
-			return new CoreJavaDoc2HTMLTextReader(contentReader);
-
+		if (contentReader != null) {
+			CoreJavaDoc2HTMLTextReader r= new CoreJavaDoc2HTMLTextReader(contentReader);
+			return r;
+		}
 		if (useAttachedJavadoc && member.getOpenable().getBuffer() == null) { // only if no source available
 			String s= member.getAttachedJavadoc(null);
 			if (s != null)
@@ -495,13 +496,15 @@ public class CoreJavadocContentAccessUtility {
 		for (IType curr : hierarchy.getAllSupertypes(type)) {
 			IMethod overridden= tester.findOverriddenMethodInType(curr, method);
 			if (overridden != null) {
-				Reader reader;
-				if (isHTML)
-					reader= getHTMLContentReader(overridden, false, useAttachedJavadoc);
-				else
-					reader= getContentReader(overridden, false);
-				if (reader != null)
-					return reader;
+				if (isHTML) {
+					Reader reader= getHTMLContentReader(overridden, false, useAttachedJavadoc);
+					if (reader != null)
+						return reader;
+				} else {
+					Reader reader= getContentReader(overridden, false);
+					if (reader != null)
+						return reader;
+				}
 			}
 		}
 		return null;

@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
@@ -163,7 +164,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			String fileName= urlFile.substring(urlFile.lastIndexOf('/') + 1);
 
 			IFile file= folder.getFile(new Path(fileName));
-			file.create(classUrl.openStream(), true, null);
+			try (InputStream openStream= classUrl.openStream()) {
+				file.create(openStream, true, null);
+			}
 		}
 	}
 

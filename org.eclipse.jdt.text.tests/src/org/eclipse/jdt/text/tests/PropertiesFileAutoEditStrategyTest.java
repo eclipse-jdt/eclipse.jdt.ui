@@ -16,10 +16,7 @@ package org.eclipse.jdt.text.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -111,14 +108,7 @@ public class PropertiesFileAutoEditStrategyTest {
 	}
 
 	private IFile write(IFolder folder, final String content, final String fileName) throws CoreException {
-		InputStream stream= new InputStream() {
-			private final Reader fReader= new StringReader(content);
-
-			@Override
-			public int read() throws IOException {
-				return fReader.read();
-			}
-		};
+		ByteArrayInputStream stream= new ByteArrayInputStream(content.getBytes());
 		IFile file= fJProject1.getProject().getFile(folder.getProjectRelativePath().append(fileName));
 		file.create(stream, true, null);
 		return file;

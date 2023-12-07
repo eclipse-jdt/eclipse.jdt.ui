@@ -123,15 +123,8 @@ public class ManifestProvider implements IManifestProvider {
 	}
 
 	private Manifest createSuppliedManifest(JarPackageData jarPackage) throws CoreException, IOException {
-		Manifest manifest;
-		// No need to use buffer here because Manifest(...) does
-		InputStream stream= jarPackage.getManifestFile().getContents(false);
-		try {
-			manifest= new Manifest(stream);
-		} finally {
-			if (stream != null)
-				stream.close();
+		try (InputStream stream= jarPackage.getManifestFile().getContents(false);) {
+			return new Manifest(stream);
 		}
-		return manifest;
 	}
 }
