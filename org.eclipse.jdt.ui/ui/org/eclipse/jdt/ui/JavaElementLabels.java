@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -348,7 +348,7 @@ public class JavaElementLabels {
 	public final static long ALL_POST_QUALIFIED= JavaElementLabelsCore.ALL_POST_QUALIFIED;
 
 	/**
-	 *  Default options (M_PARAMETER_TYPES,  M_APP_TYPE_PARAMETERS & T_TYPE_PARAMETERS enabled)
+	 *  Default options (M_PARAMETER_TYPES,  M_APP_TYPE_PARAMETERS &amp; T_TYPE_PARAMETERS enabled)
 	 */
 	public final static long ALL_DEFAULT= JavaElementLabelsCore.ALL_DEFAULT;
 
