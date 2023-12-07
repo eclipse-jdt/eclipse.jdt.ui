@@ -340,33 +340,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	 */
 	private int findPropertyNameStartPosition(String propertyName) {
 		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
-		InputStream stream= null;
-		LineReader lineReader= null;
 		String encoding;
 		try {
 			encoding= fPropertiesFile.getCharset();
 		} catch (CoreException e1) {
 			encoding= "ISO-8859-1";  //$NON-NLS-1$
 		}
-		try {
-			stream= createInputStream(fPropertiesFile);
-			lineReader= new LineReader(stream, encoding);
-		} catch (CoreException cex) {
-			// failed to get input stream
-			JavaPlugin.log(cex);
-			return -1;
-		} catch (IOException e) {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException ce) {
-					JavaPlugin.log(ce);
-				}
-			}
-			return -1;
-		}
-		int start= 0;
-		try {
+		try (InputStream stream= createInputStream(fPropertiesFile); LineReader lineReader= new LineReader(stream, encoding)) {
+			int start= 0;
 			StringBuffer buf= new StringBuffer(80);
 			int eols= lineReader.readLine(buf);
 			int keyLength= propertyName.length();
@@ -376,31 +357,27 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				int charPos= i + keyLength;
 				char terminatorChar= 0;
 				boolean hasNoValue= (charPos >= line.length());
-				if (i > -1 && !hasNoValue)
+				if (i > -1 && !hasNoValue) {
 					terminatorChar= line.charAt(charPos);
+				}
 				if (line.trim().startsWith(propertyName) &&
 						(hasNoValue || Character.isWhitespace(terminatorChar) || terminatorChar == '=')) {
-					start += line.indexOf(propertyName);
+					start+= line.indexOf(propertyName);
 					eols= -17; // found key
 				} else {
-					start += line.length() + eols;
+					start+= line.length() + eols;
 					buf.setLength(0);
 					eols= lineReader.readLine(buf);
 				}
 			}
-			if (eols != -17)
+			if (eols != -17) {
 				start= -1; //key not found in file. See bug 63794. This can happen if the key contains escaped characters.
-		} catch (IOException ex) {
+			}
+			return start;
+		} catch (CoreException | IOException ex) {
 			JavaPlugin.log(ex);
 			return -1;
-		} finally {
-			try {
-				lineReader.close();
-			} catch (IOException ex) {
-				JavaPlugin.log(ex);
-			}
 		}
-		return start;
 	}
 
 	private void loadProperties() {

@@ -165,8 +165,11 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 				return;
 			}
 
-			ZipFile zipFile= getZipFileFromPluginDir(importPath, getContributingPlugin(curr));
-			importFilesFromZip(zipFile, destPath, new SubProgressMonitor(monitor, 1));
+			try (ZipFile zipFile= getZipFileFromPluginDir(importPath, getContributingPlugin(curr))) {
+				importFilesFromZip(zipFile, destPath, new SubProgressMonitor(monitor, 1));
+			} catch (IOException e) {
+				throw new RuntimeException();
+			}
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
 		}

@@ -148,7 +148,9 @@ public class RenameTests18 extends GenericRefactoringTest {
 				System.out.println(fileBuffer.getDocument().get());
 			}
 			System.out.println("--- getContents of File:");
-			System.out.println(getContents(new FileInputStream(cu.getResource().getLocation().toFile())));
+			try (FileInputStream in= new FileInputStream(cu.getResource().getLocation().toFile())) {
+				System.out.println(getContents(in));
+			}
 			System.out.println("--- cu.getSource():");
 			System.out.println(cu.getSource());
 			System.out.println("---");

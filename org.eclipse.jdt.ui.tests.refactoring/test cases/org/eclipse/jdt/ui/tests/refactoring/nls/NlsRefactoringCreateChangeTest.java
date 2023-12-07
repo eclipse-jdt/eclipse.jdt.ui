@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring.nls;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
@@ -780,21 +779,12 @@ public class NlsRefactoringCreateChangeTest {
 
 	private void checkContentOfFile(String message, IFile file, String content) throws Exception {
 		try (InputStream in= file.getContents()) {
-			String realContent= copyToString(in);
+			String realContent= new String(in.readAllBytes());
 			GenericRefactoringTest.assertEqualLines(message, content, realContent);
 		}
 	}
 
-	private String copyToString(InputStream in) throws Exception {
-		ByteArrayOutputStream out= new ByteArrayOutputStream();
-		int read= in.read();
-		while (read != -1) {
-			out.write(read);
-			read= in.read();
-		}
-		out.close();
-		return out.toString();
-	}
+
 
 	private NLSRefactoring createDefaultNls(ICompilationUnit cu) {
 		NLSRefactoring nls= NLSRefactoring.create(cu);

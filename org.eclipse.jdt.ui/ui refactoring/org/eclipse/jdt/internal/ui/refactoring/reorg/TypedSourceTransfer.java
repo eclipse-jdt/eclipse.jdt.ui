@@ -75,19 +75,14 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 		 *  (String) source of the element
 		 */
 
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			DataOutputStream dataOut = new DataOutputStream(out);
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+			DataOutputStream dataOut = new DataOutputStream(out)) {
 
 			dataOut.writeInt(sources.length);
 
 			for (TypedSource source : sources) {
 				writeJavaElement(dataOut, source);
 			}
-
-			dataOut.close();
-			out.close();
-
 			super.javaToNative(out.toByteArray(), transferData);
 		} catch (IOException e) {
 			//it's best to send nothing if there were problems
@@ -96,19 +91,17 @@ public class TypedSourceTransfer extends ByteArrayTransfer {
 
 	@Override
 	protected Object nativeToJava(TransferData transferData) {
-
-		byte[] bytes = (byte[]) super.nativeToJava(transferData);
+		byte[] bytes= (byte[]) super.nativeToJava(transferData);
 		if (bytes == null)
 			return null;
-		DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
-		try {
-			int count = in.readInt();
-			TypedSource[] results = new TypedSource[count];
-			for (int i = 0; i < count; i++) {
-				results[i] = readJavaElement(in);
+
+		try (DataInputStream in= new DataInputStream(new ByteArrayInputStream(bytes))) {
+			int count= in.readInt();
+			TypedSource[] results= new TypedSource[count];
+			for (int i= 0; i < count; i++) {
+				results[i]= readJavaElement(in);
 				Assert.isNotNull(results[i]);
 			}
-			in.close();
 			return results;
 		} catch (IOException e) {
 			return null;

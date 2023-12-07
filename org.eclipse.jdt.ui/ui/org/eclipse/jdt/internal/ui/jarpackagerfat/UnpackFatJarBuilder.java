@@ -16,6 +16,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
+import java.util.jar.JarOutputStream;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -63,8 +64,10 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 	public void writeArchive(ZipFile zipFile, IProgressMonitor progressMonitor) {
 		JarWriter4 JarWriter= getJarWriter();
 		JarPackageData JarPackage= JarWriter.getJarPackage();
+		@SuppressWarnings("resource")
+		JarOutputStream jarOutputStream= JarWriter.getJarOutputStream();
 		JarPackagerUtilCore.writeArchive(zipFile, JarPackage.areDirectoryEntriesIncluded(),
-				JarPackage.isCompressed(), JarWriter.getJarOutputStream(), JarWriter.getDirectories(), getStatus(), progressMonitor);
+				JarPackage.isCompressed(), jarOutputStream, JarWriter.getDirectories(), getStatus(), progressMonitor);
 	}
 
 }

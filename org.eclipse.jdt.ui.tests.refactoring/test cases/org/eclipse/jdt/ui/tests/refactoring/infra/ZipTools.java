@@ -52,46 +52,41 @@ public class ZipTools {
 	}
 
 	public static void compareWithZipped(IPackageFragmentRoot src, ZipInputStream zipInputStream, String zipFileEncoding) throws IOException, UnsupportedEncodingException, JavaModelException {
-		try {
-			ArrayList<String> zipCus= new ArrayList<>();
-			ZipEntry ze;
-			while ((ze= zipInputStream.getNextEntry()) != null){
-				String fileName = ze.getName();
-				if (fileName.endsWith(".java")){
-					String packageName = getPackageName(fileName);
-					String sourceFileName= getSourceFileName(fileName);
-					zipCus.add(packageName + "/" + sourceFileName);
+		ArrayList<String> zipCus= new ArrayList<>();
+		ZipEntry ze;
+		while ((ze= zipInputStream.getNextEntry()) != null) {
+			String fileName= ze.getName();
+			if (fileName.endsWith(".java")) {
+				String packageName= getPackageName(fileName);
+				String sourceFileName= getSourceFileName(fileName);
+				zipCus.add(packageName + "/" + sourceFileName);
 
-					ByteArrayOutputStream bout = new ByteArrayOutputStream();
-					byte data[] = new byte[10000];
-					int count = -1;
-					while ( (count = zipInputStream.read(data, 0, data.length)) != -1) {
-						bout.write(data, 0, count);
-					}
-			        String zipContents= bout.toString(zipFileEncoding);
-
-					IPackageFragment pack= src.getPackageFragment(packageName);
-					ICompilationUnit cu= pack.getCompilationUnit(sourceFileName);
-					String cuContents= cu.getSource();
-
-					GenericRefactoringTest.assertEqualLines(packageName + "/" + sourceFileName, zipContents, cuContents);
-				} else {
-					//TODO: compare binary files
+				ByteArrayOutputStream bout= new ByteArrayOutputStream();
+				byte data[]= new byte[10000];
+				int count= -1;
+				while ((count= zipInputStream.read(data, 0, data.length)) != -1) {
+					bout.write(data, 0, count);
 				}
-			}
+				String zipContents= bout.toString(zipFileEncoding);
 
-			for (IJavaElement javaelement : src.getChildren()) {
-				IPackageFragment packageFragment= (IPackageFragment) javaelement;
-				for (ICompilationUnit cu : packageFragment.getCompilationUnits()) {
-					String cuDescr= packageFragment.getElementName() + "/" + cu.getElementName();
-					assertTrue(cuDescr, zipCus.remove(cuDescr));
-				}
-			}
-			assertEquals(zipCus.toString(), 0, zipCus.size());
+				IPackageFragment pack= src.getPackageFragment(packageName);
+				ICompilationUnit cu= pack.getCompilationUnit(sourceFileName);
+				String cuContents= cu.getSource();
 
-		} finally {
-			zipInputStream.close();
+				GenericRefactoringTest.assertEqualLines(packageName + "/" + sourceFileName, zipContents, cuContents);
+			} else {
+				//TODO: compare binary files
+			}
 		}
+
+		for (IJavaElement javaelement : src.getChildren()) {
+			IPackageFragment packageFragment= (IPackageFragment) javaelement;
+			for (ICompilationUnit cu : packageFragment.getCompilationUnits()) {
+				String cuDescr= packageFragment.getElementName() + "/" + cu.getElementName();
+				assertTrue(cuDescr, zipCus.remove(cuDescr));
+			}
+		}
+		assertEquals(zipCus.toString(), 0, zipCus.size());
 	}
 
 }

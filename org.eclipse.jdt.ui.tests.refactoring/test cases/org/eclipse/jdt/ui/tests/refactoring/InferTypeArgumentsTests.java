@@ -117,8 +117,9 @@ public class InferTypeArgumentsTests extends GenericRefactoringTest {
 
 	public void compareWithZipFile(IPackageFragmentRoot src, String zipFileName) throws Exception {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + zipFileName;
-		ZipInputStream zis= new ZipInputStream(getFileInputStream(fullName));
-		ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		try (ZipInputStream zis= new ZipInputStream(getFileInputStream(fullName))) {
+			ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		}
 	}
 
 	@Test

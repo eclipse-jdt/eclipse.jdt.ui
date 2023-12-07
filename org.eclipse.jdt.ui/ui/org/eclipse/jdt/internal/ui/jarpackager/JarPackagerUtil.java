@@ -18,12 +18,12 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.jarpackager.JarPackagerUtilCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
@@ -243,21 +242,11 @@ public final class JarPackagerUtil {
 		return false;
 	}
 
-	/**
-	 * Calculates the crc and size of the resource and updates the entry.
-	 *
-	 * @param entry
-	 *            the jar entry to update
-	 * @param stream
-	 *            the input stream
-	 * @param buffer
-	 *            a shared buffer to store temporary data
-	 *
-	 * @throws IOException
-	 *             if an input/output error occurs
-	 */
-	public static void calculateCrcAndSize(final ZipEntry entry, final InputStream stream, final byte[] buffer) throws IOException {
-		JarPackagerUtilCore.calculateCrcAndSize(entry, stream, buffer);
+	public static void setCrcAndSize(final ZipEntry entry, final byte[] bs) {
+		final CRC32 crc= new CRC32();
+		crc.update(bs);
+		entry.setSize(bs.length);
+		entry.setCrc(crc.getValue());
 	}
 
 	/**
@@ -268,10 +257,8 @@ public final class JarPackagerUtil {
 	 * @param location the location of the archive file
 	 * @return the archive or <code>null</code> if it could not be retrieved
 	 * @throws CoreException if the archive could not be read
-	 *
-	 * @since 3.4
 	 */
-	public static ZipFile getArchiveFile(IPath location) throws CoreException {
+	public static ZipFile createZipFile(IPath location) throws CoreException {
 		File localFile= null;
 
 		IResource file= ResourcesPlugin.getWorkspace().getRoot().findMember(location);

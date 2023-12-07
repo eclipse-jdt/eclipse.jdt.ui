@@ -1016,8 +1016,9 @@ public class RenamePackageTests extends GenericRefactoringTest {
 		assertFalse("new package still exists", newPackage.exists());
 		assertTrue("original package does not exist: " + rename.fPackageNames[0], src.getPackageFragment(rename.fPackageNames[0]).exists());
 
-		ZipInputStream zis= new ZipInputStream(new BufferedInputStream(new FileInputStream(junitSrcArchive)));
-		ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		try (ZipInputStream zis= new ZipInputStream(new BufferedInputStream(new FileInputStream(junitSrcArchive)))) {
+			ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		}
 	}
 
 	@Test

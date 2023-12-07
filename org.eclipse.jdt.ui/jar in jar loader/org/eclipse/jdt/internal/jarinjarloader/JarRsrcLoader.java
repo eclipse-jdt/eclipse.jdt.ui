@@ -55,6 +55,7 @@ public class JarRsrcLoader {
 			else
 				rsrcUrls[i] = new URL(JIJConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath + JIJConstants.JAR_INTERNAL_SEPARATOR);
 		}
+		@SuppressWarnings("resource")
 		ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, getParentClassLoader());
 		Thread.currentThread().setContextClassLoader(jceClassLoader);
 		Class<?> c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);

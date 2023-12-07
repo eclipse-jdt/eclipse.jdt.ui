@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -469,19 +468,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 		public String encodeSettings(Map<String, String> settings) throws CoreException {
 			ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
+			CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
+			CustomProfile profile= new ProfileManager.CustomProfile("custom", settings, versioner.getCurrentVersion(), versioner.getProfileKind()); //$NON-NLS-1$
+			ArrayList<Profile> profiles= new ArrayList<>();
+			profiles.add(profile);
+			ProfileStore.writeProfilesToStream(profiles, stream, ENCODING, versioner);
 			try {
-				CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
-				CustomProfile profile= new ProfileManager.CustomProfile("custom", settings, versioner.getCurrentVersion(), versioner.getProfileKind()); //$NON-NLS-1$
-				ArrayList<Profile> profiles= new ArrayList<>();
-				profiles.add(profile);
-				ProfileStore.writeProfilesToStream(profiles, stream, ENCODING, versioner);
-				try {
-					return stream.toString(ENCODING);
-				} catch (UnsupportedEncodingException e) {
-					return stream.toString();
-				}
-			} finally {
-				try { stream.close(); } catch (IOException e) { /* ignore */ }
+				return stream.toString(ENCODING);
+			} catch (UnsupportedEncodingException e) {
+				return stream.toString();
 			}
 		}
 
@@ -493,17 +488,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				bytes= settings.getBytes();
 			}
 			InputStream is= new ByteArrayInputStream(bytes);
-			try {
-				List<Profile> res= ProfileStore.readProfilesFromStream(new InputSource(is));
-				if (res == null || res.isEmpty())
-					return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
+			List<Profile> res= ProfileStore.readProfilesFromStream(new InputSource(is));
+			if (res == null || res.isEmpty())
+				return JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
 
-				CustomProfile profile= (CustomProfile)res.get(0);
-				new CleanUpProfileVersioner().update(profile);
-				return profile.getSettings();
-			} finally {
-				try { is.close(); } catch (IOException e) { /* ignore */ }
-			}
+			CustomProfile profile= (CustomProfile)res.get(0);
+			new CleanUpProfileVersioner().update(profile);
+			return profile.getSettings();
 		}
 
         @Override

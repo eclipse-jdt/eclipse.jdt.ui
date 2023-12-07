@@ -20,7 +20,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 
-class LineReader extends Object {
+class LineReader implements AutoCloseable {
 	protected static final int LF= '\n';
 	protected static final int CR= '\r';
 
@@ -65,6 +65,7 @@ class LineReader extends Object {
 		return -1;
 	}
 
+	@Override
 	public void close() throws IOException {
 		fReader.close();
 	}

@@ -16,19 +16,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * Utility methods for Runnable JAR Import/Export.
@@ -58,17 +54,6 @@ public final class FatJarPackagerUtil {
 		display.syncExec(runnable);
 
 		return returnValue[0];
-	}
-
-	public static byte[] readInputStream(InputStream is) throws IOException {
-		ByteArrayOutputStream result= new ByteArrayOutputStream();
-		byte[] buf= new byte[1024];
-		int cnt= is.read(buf);
-		while (cnt > 0) {
-			result.write(buf, 0, cnt);
-			cnt= is.read(buf);
-		}
-		return result.toByteArray();
 	}
 
 	/**
