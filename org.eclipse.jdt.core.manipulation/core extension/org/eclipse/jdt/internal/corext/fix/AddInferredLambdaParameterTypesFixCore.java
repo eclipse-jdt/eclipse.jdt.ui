@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
@@ -30,10 +31,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class AddInferredLambdaParameterTypesFixCore extends CompilationUnitRewriteOperationsFixCore {

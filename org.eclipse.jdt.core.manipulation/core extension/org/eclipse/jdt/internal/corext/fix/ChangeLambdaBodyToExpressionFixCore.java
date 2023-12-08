@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,14 +14,17 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
 import org.eclipse.jdt.internal.corext.fix.helper.LambdaQueries;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class ChangeLambdaBodyToExpressionFixCore extends CompilationUnitRewriteOperationsFixCore {
