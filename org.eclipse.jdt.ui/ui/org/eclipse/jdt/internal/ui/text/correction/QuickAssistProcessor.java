@@ -34,23 +34,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.osgi.util.NLS;
-
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-
-import org.eclipse.jface.text.link.LinkedPositionGroup;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.preferences.WorkingCopyManager;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -75,12 +61,10 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
@@ -149,7 +133,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -173,6 +156,7 @@ import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
+import org.eclipse.jdt.internal.corext.fix.InvertEqualsExpressionFixCore;
 import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
@@ -238,6 +222,14 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.preferences.WorkingCopyManager;
 
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
@@ -3259,70 +3251,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		if (!(node instanceof MethodInvocation)) {
-			node= node.getParent();
-			if (!(node instanceof MethodInvocation)) {
-				return false;
-			}
-		}
-		MethodInvocation method= (MethodInvocation) node;
-		String identifier= method.getName().getIdentifier();
-		if (!"equals".equals(identifier) && !"equalsIgnoreCase".equals(identifier)) { //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
-		}
-		List<Expression> arguments= method.arguments();
-		if (arguments.size() != 1) { //overloaded equals w/ more than 1 argument
-			return false;
-		}
-		Expression right= arguments.get(0);
-		ITypeBinding binding= right.resolveTypeBinding();
-		if (binding != null
-				&& !binding.isClass()
-				&& !binding.isInterface()
-				&& !binding.isEnum()) { //overloaded equals w/ non-class/interface argument or null
-			return false;
-		}
 		if (resultingCollections == null) {
 			return true;
 		}
-
-		Expression left= method.getExpression();
-
-		AST ast= method.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		if (left == null) { // equals(x) -> x.equals(this)
-			MethodInvocation replacement= ast.newMethodInvocation();
-			replacement.setName((SimpleName) rewrite.createCopyTarget(method.getName()));
-			replacement.arguments().add(ast.newThisExpression());
-			replacement.setExpression((Expression) rewrite.createCopyTarget(right));
-			rewrite.replace(method, replacement, null);
-		} else if (right instanceof ThisExpression) { // x.equals(this) -> equals(x)
-			MethodInvocation replacement= ast.newMethodInvocation();
-			replacement.setName((SimpleName) rewrite.createCopyTarget(method.getName()));
-			replacement.arguments().add(rewrite.createCopyTarget(left));
-			rewrite.replace(method, replacement, null);
-		} else {
-			ASTNode leftExpression= ASTNodes.getUnparenthesedExpression(left);
-			rewrite.replace(right, rewrite.createCopyTarget(leftExpression), null);
-
-			if (right instanceof CastExpression
-					|| right instanceof Assignment
-					|| right instanceof ConditionalExpression
-					|| right instanceof InfixExpression) {
-				ParenthesizedExpression paren= ast.newParenthesizedExpression();
-				paren.setExpression((Expression) rewrite.createCopyTarget(right));
-				rewrite.replace(left, paren, null);
-			} else {
-				rewrite.replace(left, rewrite.createCopyTarget(right), null);
-			}
+		InvertEqualsExpressionFixCore fix= InvertEqualsExpressionFixCore.createInvertEqualsFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.INVERT_EQUALS, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
-
-		String label= CorrectionMessages.QuickAssistProcessor_invertequals_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INVERT_EQUALS, image);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	private static boolean getAddStaticMemberFavoritesProposals(ASTNode node, Collection<ICommandAccess> resultingCollections) {
