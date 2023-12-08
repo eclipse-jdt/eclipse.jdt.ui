@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.dom.TagElement;
  */
 public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 
-	private record Pair(String fTag, String fContent) {
+	protected record Pair(String fTag, String fContent) {
 	}
 
 	private List<String> fParameters;
@@ -129,11 +129,14 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 		return result;
 	}
 
-	private void printDefinitions(StringBuilder buffer, List<String> list, boolean firstword) {
+	protected void printDefinitions(StringBuilder buffer, List<String> list, boolean firstword) {
 		Iterator<String> e= list.iterator();
+		String startTags = getPrintSingleDefinitionStartTags();
+		String endTags = getPrintSingleDefinitionEndTags();
+
 		while (e.hasNext()) {
 			String s= e.next();
-			buffer.append("<dd>"); //$NON-NLS-1$
+			buffer.append(startTags);
 			if (!firstword)
 				buffer.append(s);
 			else {
@@ -141,14 +144,14 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 
 				int i= getParamEndOffset(s);
 				if (i <= s.length()) {
-					buffer.append(HTMLBuilder.convertToHTMLContent(s.substring(0, i)));
+					buffer.append(convertToHTMLContent(s.substring(0, i)));
 					buffer.append("</b>"); //$NON-NLS-1$
 					buffer.append(s.substring(i));
 				} else {
 					buffer.append("</b>"); //$NON-NLS-1$
 				}
 			}
-			buffer.append("</dd>"); //$NON-NLS-1$
+			buffer.append(endTags);
 		}
 	}
 
@@ -176,7 +179,15 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 		return i;
 	}
 
-	private void print(StringBuilder buffer, String tag, List<String> elements, boolean firstword) {
+	protected String getPrintSingleDefinitionStartTags() {
+		return "<dd>"; //$NON-NLS-1$
+	}
+
+	protected String getPrintSingleDefinitionEndTags() {
+		return "</dd>"; //$NON-NLS-1$
+	}
+
+	protected void print(StringBuilder buffer, String tag, List<String> elements, boolean firstword) {
 		if (!elements.isEmpty()) {
 			buffer.append("<dt>"); //$NON-NLS-1$
 			buffer.append(tag);
@@ -185,7 +196,7 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 		}
 	}
 
-	private void print(StringBuilder buffer, String tag, String content) {
+	protected void print(StringBuilder buffer, String tag, String content) {
 		if (content != null) {
 			buffer.append("<dt>"); //$NON-NLS-1$
 			buffer.append(tag);
@@ -196,9 +207,9 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 		}
 	}
 
-	private void printRest(StringBuilder buffer) {
-		if (!fRest.isEmpty()) {
-			Iterator<Pair> e= fRest.iterator();
+	protected void printRest(StringBuilder buffer, List<Pair> rest) {
+		if (!rest.isEmpty()) {
+			Iterator<Pair> e= rest.iterator();
 			while (e.hasNext()) {
 				Pair p= e.next();
 				buffer.append("<dt>"); //$NON-NLS-1$
@@ -213,19 +224,26 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 		}
 	}
 
-	private String printSimpleTag() {
+	protected String printSimpleTag() {
+		return printSimpleTag(fRest);
+	}
+
+	protected String printSimpleTag(List<Pair> rest) {
 		StringBuilder buffer= new StringBuilder();
 		buffer.append("<dl>"); //$NON-NLS-1$
+		printTagAttributes(buffer);
+		printRest(buffer, rest);
+		buffer.append("</dl>"); //$NON-NLS-1$
+		return buffer.toString();
+	}
+
+	protected void printTagAttributes(StringBuilder buffer) {
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_see_section, fSees, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section, fParameters, true);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_returns_section, fReturn);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_throws_section, fExceptions, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_author_section, fAuthors, false);
 		print(buffer, JavaDocMessages.JavaDoc2HTMLTextReader_since_section, fSince, false);
-		printRest(buffer);
-		buffer.append("</dl>"); //$NON-NLS-1$
-
-		return buffer.toString();
 	}
 
 	private void handleTag(String tag, String tagContent) {
@@ -345,7 +363,7 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 		return substituteQualification(tagContent);
 	}
 
-	private String printLiteral(String tagContent) {
+	protected String printLiteral(String tagContent) {
 		int contentStart= 0;
 		for (int i= 0; i < tagContent.length(); i++) {
 			if (!Character.isWhitespace(tagContent.charAt(i))) {
@@ -353,7 +371,12 @@ public class CoreJavaDoc2HTMLTextReader extends SubstitutionReader {
 				break;
 			}
 		}
-		return HTMLBuilder.convertToHTMLContent(tagContent.substring(contentStart));
+		String toConvert = tagContent.substring(contentStart);
+		return convertToHTMLContent(toConvert);
+	}
+
+	protected String convertToHTMLContent(String toConvert) {
+		return HTMLBuilder.convertToHTMLContent(toConvert);
 	}
 
 	/*
