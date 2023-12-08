@@ -20,7 +20,16 @@
   <artifactId>org.eclipse.jdt.ui</artifactId>
   <version>3.31.100-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-  <properties>
-    <code.ignoredWarnings>-warn:-deprecation,unavoidableGenericProblems</code.ignoredWarnings>
-  </properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-compiler-plugin</artifactId>
+				<configuration>
+					<useProjectSettings>true</useProjectSettings>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

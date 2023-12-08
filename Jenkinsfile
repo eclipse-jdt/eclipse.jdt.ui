@@ -17,7 +17,7 @@ pipeline {
 			steps {
 				wrap([$class: 'Xvnc', useXauthority: true]) {
 					sh """
-					mvn -U -e -Dmaven.compiler.failOnWarning=true -DskipTests=false -Dmaven.repo.local=$WORKSPACE/.m2/repository \
+					mvn -U -e -Dmaven.compiler.failOnWarning=false -DskipTests=false -Dmaven.repo.local=$WORKSPACE/.m2/repository \
 						clean verify --batch-mode -Pbuild-individual-bundles -Pbree-libs -Papi-check -Dcompare-version-with-baselines.skip=false
 					"""
 				}
@@ -27,7 +27,7 @@ pipeline {
 					archiveArtifacts artifacts: '*.log,*/target/work/data/.metadata/*.log,*/tests/target/work/data/.metadata/*.log,apiAnalyzer-workspace/.metadata/*.log', allowEmptyArchive: true
 					junit '**/target/surefire-reports/*.xml'
 					discoverGitReferenceBuild referenceJob: 'eclipse.jdt.ui-github/master'
-					recordIssues publishAllIssues: true, tools: [java(), mavenConsole(), javaDoc()]
+					recordIssues tools: [eclipse(), mavenConsole(), javaDoc()], qualityGates: [[threshold: 1, type: 'DELTA', unstable: true]]
 				}
 			}
 		}
