@@ -33,6 +33,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -132,7 +134,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -172,7 +176,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -223,7 +229,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -282,7 +290,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -349,7 +359,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -398,7 +410,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -458,7 +472,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -529,7 +545,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -579,7 +597,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -617,7 +637,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -653,7 +675,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -695,7 +719,9 @@ public class NewTypeWizardTest {
 		wizardPage.setAddComments(true, true);
 		wizardPage.enableCommentControl(true);
 
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
@@ -799,7 +825,9 @@ public class NewTypeWizardTest {
 
 		NewClassWizardPage wizardPage= new NewClassWizardPage();
 		wizardPage.init(new StructuredSelection(cu));
-		wizardPage.createType(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
 
 		// Foo3.java can still be unique in test1
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getElementName();
