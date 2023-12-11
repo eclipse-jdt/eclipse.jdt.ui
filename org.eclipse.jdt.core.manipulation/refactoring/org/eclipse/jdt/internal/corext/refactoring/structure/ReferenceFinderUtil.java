@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -60,11 +60,10 @@ public class ReferenceFinderUtil {
 
 	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List<SearchMatch> referencedTypes= new ArrayList<>();
-		pm.beginTask("", elements.length); //$NON-NLS-1$
+		SubMonitor subMon= SubMonitor.convert(pm,"", elements.length); //$NON-NLS-1$
 		for (IJavaElement element : elements) {
-			referencedTypes.addAll(getTypeReferencesIn(element, owner, new SubProgressMonitor(pm, 1)));
+			referencedTypes.addAll(getTypeReferencesIn(element, owner, subMon.newChild(1)));
 		}
-		pm.done();
 		return referencedTypes.toArray(new SearchMatch[referencedTypes.size()]);
 	}
 
@@ -91,11 +90,10 @@ public class ReferenceFinderUtil {
 
 	private static SearchMatch[] getFieldReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List<SearchMatch> referencedFields= new ArrayList<>();
-		pm.beginTask("", elements.length); //$NON-NLS-1$
+		SubMonitor subMon= SubMonitor.convert(pm,"", elements.length); //$NON-NLS-1$
 		for (IJavaElement element : elements) {
-			referencedFields.addAll(getFieldReferencesIn(element, owner, new SubProgressMonitor(pm, 1)));
+			referencedFields.addAll(getFieldReferencesIn(element, owner,subMon.newChild(1)));
 		}
-		pm.done();
 		return referencedFields.toArray(new SearchMatch[referencedFields.size()]);
 	}
 
@@ -122,11 +120,10 @@ public class ReferenceFinderUtil {
 
 	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
 		List<SearchMatch> referencedMethods= new ArrayList<>();
-		pm.beginTask("", elements.length); //$NON-NLS-1$
+		SubMonitor subMon= SubMonitor.convert(pm,"", elements.length); //$NON-NLS-1$
 		for (IJavaElement element : elements) {
-			referencedMethods.addAll(getMethodReferencesIn(element, owner, new SubProgressMonitor(pm, 1)));
+			referencedMethods.addAll(getMethodReferencesIn(element, owner, subMon.newChild(1)));
 		}
-		pm.done();
 		return referencedMethods.toArray(new SearchMatch[referencedMethods.size()]);
 	}
 

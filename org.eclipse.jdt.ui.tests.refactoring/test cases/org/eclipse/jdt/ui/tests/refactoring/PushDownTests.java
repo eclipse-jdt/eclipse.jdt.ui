@@ -24,8 +24,9 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -72,7 +73,9 @@ public class PushDownTests extends GenericRefactoringTest {
 		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(selectedMembers);
 		Refactoring ref= new ProcessorBasedRefactoring(processor);
 
-		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		assertTrue("activation", ref.checkInitialConditions(monitor).isOK());
+		monitor.assertUsedUp();
 
 		prepareForInputCheck(processor, selectedMethods, selectedFields, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
 				signaturesOfMethodsToDeclareAbstract);
@@ -110,7 +113,9 @@ public class PushDownTests extends GenericRefactoringTest {
 		Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp,
 				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cuA);
 
-		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(monitor);
+		monitor.assertUsedUp();
 		assertFalse("precondition was supposed to pass but got " + checkInputResult.toString(), checkInputResult.hasError());
 		performChange(ref, false);
 
@@ -164,7 +169,9 @@ public class PushDownTests extends GenericRefactoringTest {
 		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(selectedMembers);
 		Refactoring ref= new ProcessorBasedRefactoring(processor);
 
-		assertEquals("activation was expected to fail", expectedSeverity, ref.checkInitialConditions(new NullProgressMonitor()).getSeverity());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		assertEquals("activation was expected to fail", expectedSeverity, ref.checkInitialConditions(monitor).getSeverity());
+		monitor.assertUsedUp();
 	}
 
 	private void failInputHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
@@ -177,7 +184,9 @@ public class PushDownTests extends GenericRefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		Refactoring ref= createRefactoringPrepareForInputCheck(selectedMethodNames, selectedMethodSignatures, selectedFieldNames, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp,
 				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, cu);
-		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(monitor);
+		monitor.assertUsedUp();
 		assertEquals("precondition was expected to fail", expectedSeverity, checkInputResult.getSeverity());
 	}
 
@@ -191,10 +200,12 @@ public class PushDownTests extends GenericRefactoringTest {
 		assertTrue(RefactoringAvailabilityTester.isPushDownAvailable(members));
 		PushDownRefactoringProcessor processor= new PushDownRefactoringProcessor(members);
 		Refactoring ref= new ProcessorBasedRefactoring(processor);
-
-		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-
-		processor.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
+		FussyProgressMonitor monitor= new FussyProgressMonitor();
+		assertTrue("activation", ref.checkInitialConditions(monitor).isOK());
+		monitor.assertUsedUp();
+		monitor.prepare();
+		processor.computeAdditionalRequiredMembersToPushDown(monitor);
+		monitor.assertUsedUp();
 		List<IMember> required= getMembersToPushDown(processor);
 		processor.getMemberActionInfos();
 		IField[] expectedFields= getFields(type, expectedFieldNames);
