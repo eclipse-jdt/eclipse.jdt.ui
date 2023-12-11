@@ -28,7 +28,7 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -126,7 +126,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 
 		processor.setDelegateUpdating(createDelegate);
 		addInfos(processor.getParameterInfos(), newParamInfos, newIndices);
-		RefactoringStatus initialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus initialConditions= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		assertTrue("precondition was supposed to pass:"+initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
 		JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 		RefactoringStatus result= performRefactoring(descriptor);
@@ -176,7 +179,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		processor.setNewMethodName(newMethodName);
 		processor.setDelegateUpdating(createDelegate);
 		processor.setDeprecateDelegates(markAsDeprecated);
-		ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 		RefactoringStatus result= performRefactoring(descriptor);
 		assertNull("precondition was supposed to pass", result);
@@ -223,7 +229,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		modifyInfos(processor.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
 			processor.setVisibility(newVisibility);
-		RefactoringStatus initialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus initialConditions= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		assertTrue(initialConditions.isOK());
 		JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 		RefactoringStatus result= performRefactoring(descriptor);
@@ -278,7 +287,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 
 		processor.setDelegateUpdating(createDelegate);
 		modifyInfos(processor.getParameterInfos(), newOrder, oldNames, newNames);
-		ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 		RefactoringStatus result= performRefactoring(descriptor);
 		assertNull("precondition was supposed to pass", result);
@@ -379,8 +391,14 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		Refactoring ref= new ProcessorBasedRefactoring(processor);
 
 		modifyInfos(processor.getParameterInfos(), newOrder, null, null);
-		ref.checkInitialConditions(new NullProgressMonitor());
-		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
+		FussyProgressMonitor testMonitor2= new FussyProgressMonitor();
+		RefactoringStatus result= ref.checkInitialConditions(testMonitor2);
+		testMonitor2.assertUsedUp();
+
 		if (result.isOK()) {
 			JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 			result= performRefactoring(descriptor, true);
@@ -398,7 +416,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		Refactoring ref= new ProcessorBasedRefactoring(processor);
 
 		addInfos(processor.getParameterInfos(), newParamInfos, newIndices);
-		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus result= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		if (result.isOK()) {
 			JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 			result= performRefactoring(descriptor, true);
@@ -430,7 +451,10 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		modifyInfos(processor.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
 			processor.setVisibility(newVisibility);
-		RefactoringStatus result= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus result= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		if (result.isOK()) {
 			JavaRefactoringDescriptor descriptor= processor.createDescriptor();
 			result= performRefactoring(descriptor);
@@ -470,12 +494,18 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 			processor.setVisibility(newVisibility);
 
 		// from RefactoringTest#performRefactoring():
-		RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus status= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		assertTrue("checkActivation was supposed to pass", status.isOK());
 
 		mangleExceptions(processor.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
 
-		status= ref.checkFinalConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor2= new FussyProgressMonitor();
+		status= ref.checkFinalConditions(testMonitor2);
+		testMonitor2.assertUsedUp();
+
 		assertTrue("checkInput was supposed to pass", status.isOK());
 		Change undo= performChange(ref, true);
 		assertNotNull(undo);
@@ -500,12 +530,18 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		Refactoring ref= new ProcessorBasedRefactoring(processor);
 
 		// from RefactoringTest#performRefactoring():
-		RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		RefactoringStatus status= ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
 		assertTrue("checkActivation was supposed to pass", status.isOK());
 
 		mangleExceptions(processor.getExceptionInfos(), removeExceptions, addExceptions, method.getCompilationUnit());
 
-		status= ref.checkFinalConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor2= new FussyProgressMonitor();
+		status= ref.checkFinalConditions(testMonitor2);
+		testMonitor2.assertUsedUp();
+
 		assertTrue("checkInput was supposed to pass", status.isOK());
 		Change undo= performChange(ref, true);
 		assertNotNull(undo);
