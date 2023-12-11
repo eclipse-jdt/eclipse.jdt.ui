@@ -39,7 +39,8 @@ Require-Bundle:
  org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench.texteditor,
- org.junit
+ org.junit,
+ org.eclipse.core.tests.harness
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Eclipse-BundleShape: dir
 Import-Package: org.junit.jupiter.api

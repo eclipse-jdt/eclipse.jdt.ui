@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
@@ -120,7 +121,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -310,7 +310,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		IType declaringType= member.getDeclaringType();
 		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { declaringType }));
 		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		engine.searchPattern(pm);
 		Set<IJavaElement> result= new HashSet<>(3);
 		ICompilationUnit cu= member.getCompilationUnit();
 		String source= cu.getSource();
@@ -419,22 +419,16 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private void addAllRequiredPushableMembers(List<IMember> queue, IMember member, IProgressMonitor monitor) throws JavaModelException {
-		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2);
-		IProgressMonitor sub= new SubProgressMonitor(monitor, 1);
-		sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2);
-		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member }, new SubProgressMonitor(sub, 1));
-		sub= new SubProgressMonitor(sub, 1);
-		sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, requiredMethods.length);
+		SubMonitor sub= SubMonitor.convert(monitor,RefactoringCoreMessages.PushDownRefactoring_calculating_required, 2);
+		IMethod[] requiredMethods= ReferenceFinderUtil.getMethodsReferencedIn(new IJavaElement[] { member }, sub.newChild(1));
 		for (IMethod method : requiredMethods) {
 			if (!MethodChecks.isVirtual(method) && (method.getDeclaringType().equals(getDeclaringType()) && !queue.contains(method) && RefactoringAvailabilityTesterCore.isPushDownAvailable(method)))
 				queue.add(method);
 		}
-		sub.done();
-		for (IField field : ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { member }, new SubProgressMonitor(monitor, 1))) {
+		for (IField field : ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { member }, sub.newChild(1))) {
 			if (field.getDeclaringType().equals(getDeclaringType()) && !queue.contains(field) && RefactoringAvailabilityTesterCore.isPushDownAvailable(field))
 				queue.add(field);
 		}
-		monitor.done();
 	}
 
 	private RefactoringStatus checkAbstractMembersInDestinationClasses(IMember[] membersToPushDown, IType[] destinationClassesForAbstract) throws JavaModelException {
@@ -502,11 +496,11 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	private RefactoringStatus checkElementsAccessedByModifiedMembers(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask(RefactoringCoreMessages.PushDownRefactoring_check_references, 3);
-		IType[] subclasses= getAbstractDestinations(new SubProgressMonitor(pm, 1));
-		result.merge(checkAccessedTypes(subclasses, new SubProgressMonitor(pm, 1)));
-		result.merge(checkAccessedFields(subclasses, new SubProgressMonitor(pm, 1)));
-		result.merge(checkAccessedMethods(subclasses, new SubProgressMonitor(pm, 1)));
+		SubMonitor subMon= SubMonitor.convert(pm, RefactoringCoreMessages.PushDownRefactoring_check_references, 4);
+		IType[] subclasses= getAbstractDestinations(subMon.newChild(1));
+		result.merge(checkAccessedTypes(subclasses, subMon.newChild(1)));
+		result.merge(checkAccessedFields(subclasses, subMon.newChild(1)));
+		result.merge(checkAccessedMethods(subclasses, subMon.newChild(1)));
 		pm.done();
 		return result;
 	}
@@ -514,20 +508,20 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor monitor, CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 5);
+			SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_checking, 5);
 			clearCaches();
 			ICompilationUnit unit= getDeclaringType().getCompilationUnit();
 			if (fLayer)
 				unit= unit.findWorkingCopy(fOwner);
 			resetWorkingCopies(unit);
 			final RefactoringStatus result= new RefactoringStatus();
-			result.merge(checkMembersInDestinationClasses(new SubProgressMonitor(monitor, 1)));
-			result.merge(checkElementsAccessedByModifiedMembers(new SubProgressMonitor(monitor, 1)));
-			result.merge(checkReferencesToPushedDownMembers(new SubProgressMonitor(monitor, 1)));
+			result.merge(checkMembersInDestinationClasses(subMon.newChild(1)));
+			result.merge(checkElementsAccessedByModifiedMembers(subMon.newChild(1)));
+			result.merge(checkReferencesToPushedDownMembers(subMon.newChild(1)));
 			if (!JdtFlags.isAbstract(getDeclaringType()) && getAbstractDeclarationInfos().length != 0)
-				result.merge(checkConstructorCalls(getDeclaringType(), new SubProgressMonitor(monitor, 1)));
+				result.merge(checkConstructorCalls(getDeclaringType(), subMon.newChild(1)));
 			else
-				monitor.worked(1);
+				subMon.setWorkRemaining(1);
 			if (result.hasFatalError())
 				return result;
 			List<IMember> members= new ArrayList<>(fMemberInfos.length);
@@ -537,7 +531,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				}
 			}
 			fMembersToMove= members.toArray(new IMember[members.size()]);
-			fChangeManager= createChangeManager(new SubProgressMonitor(monitor, 1), result);
+			fChangeManager= createChangeManager(subMon.newChild(1), result);
 			if (result.hasFatalError())
 				return result;
 
@@ -552,12 +546,12 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 1);
+			SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_checking, 2);
 			RefactoringStatus status= new RefactoringStatus();
-			status.merge(checkPossibleSubclasses(new SubProgressMonitor(monitor, 1)));
+			status.merge(checkPossibleSubclasses(subMon.newChild(1)));
 			if (status.hasFatalError())
 				return status;
-			status.merge(checkDeclaringType(new SubProgressMonitor(monitor, 1)));
+			status.merge(checkDeclaringType(subMon.newChild(1)));
 			if (status.hasFatalError())
 				return status;
 			status.merge(checkIfMembersExist());
@@ -576,13 +570,13 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private RefactoringStatus checkMembersInDestinationClasses(IProgressMonitor monitor) throws JavaModelException {
-		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 2);
+		SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_checking, 2);
 		RefactoringStatus result= new RefactoringStatus();
 		IMember[] membersToPushDown= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
 
-		IType[] destinationClassesForNonAbstract= getAbstractDestinations(new SubProgressMonitor(monitor, 1));
+		IType[] destinationClassesForNonAbstract= getAbstractDestinations(subMon.newChild(1));
 		result.merge(checkNonAbstractMembersInDestinationClasses(membersToPushDown, destinationClassesForNonAbstract));
-		List<IMember> list= Arrays.asList(getAbstractMembers(getAbstractDestinations(new SubProgressMonitor(monitor, 1))));
+		List<IMember> list= Arrays.asList(getAbstractMembers(getAbstractDestinations(subMon.newChild(1))));
 
 		IType[] destinationClassesForAbstract= list.toArray(new IType[list.size()]);
 		result.merge(checkAbstractMembersInDestinationClasses(membersToPushDown, destinationClassesForAbstract));
@@ -619,10 +613,10 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		IMember[] membersToPush= fields.toArray(new IMember[fields.size()]);
 		RefactoringStatus result= new RefactoringStatus();
 		List<IMember> movedMembers= Arrays.asList(MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass()));
-		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_check_references, membersToPush.length);
+		SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_check_references, membersToPush.length);
 		for (IMember member : membersToPush) {
 			String label= createLabel(member);
-			for (IJavaElement element : getReferencingElementsFromSameClass(member, new SubProgressMonitor(monitor, 1), result)) {
+			for (IJavaElement element : getReferencingElementsFromSameClass(member, subMon.newChild(1), result)) {
 				if (movedMembers.contains(element))
 					continue;
 				if (!(element instanceof IMember))
@@ -633,7 +627,6 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				result.addError(msg, JavaStatusContext.create(referencingMember));
 			}
 		}
-		monitor.done();
 		return result;
 	}
 
@@ -699,7 +692,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	private void copyMembers(Collection<MemberVisibilityAdjustor> adjustors, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, Map<ICompilationUnit, CompilationUnitRewrite> rewrites, RefactoringStatus status, MemberActionInfo[] infos, IType[] destinations, CompilationUnitRewrite sourceRewriter, CompilationUnitRewrite unitRewriter, IProgressMonitor monitor) throws JavaModelException {
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 1);
+			SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_checking, destinations.length * infos.length);
 			IType type= null;
 			TypeVariableMaplet[] mapping= null;
 			for (IType destination : destinations) {
@@ -723,7 +716,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 						adjustor.setStatus(status);
 						adjustor.setAdjustments(adjustments);
-						adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
+						adjustor.adjustVisibility(subMon.newChild(1));
 						adjustments.remove(member);
 						adjustors.add(adjustor);
 						status.merge(checkProjectCompliance(getCompilationUnitRewrite(rewrites, getDeclaringType().getCompilationUnit()), type, new IMember[] {infos[offset].getMember()}));
@@ -803,12 +796,12 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		try {
-			monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, 7);
+			SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_checking, 6);
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
 			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(source);
 			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<>(2);
 			rewrites.put(source, sourceRewriter);
-			IType[] types= getHierarchyOfDeclaringClass(new SubProgressMonitor(monitor, 1)).getSubclasses(getDeclaringType());
+			IType[] types= getHierarchyOfDeclaringClass(subMon.newChild(1)).getSubclasses(getDeclaringType());
 			final Set<ICompilationUnit> result= new HashSet<>(types.length + 1);
 			for (IType type : types) {
 				ICompilationUnit cu= type.getCompilationUnit();
@@ -820,9 +813,8 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments= new HashMap<>();
 			final List<MemberVisibilityAdjustor> adjustors= new ArrayList<>();
 			CompilationUnitRewrite rewrite= null;
-			final IProgressMonitor sub= new SubProgressMonitor(monitor, 4);
-			try {
-				sub.beginTask(RefactoringCoreMessages.PushDownRefactoring_checking, result.size() * 4);
+			{
+				final SubMonitor sub= SubMonitor.convert(subMon.newChild(4), result.size() * 4);
 				for (ICompilationUnit unit : result) {
 					rewrite= getCompilationUnitRewrite(rewrites, unit);
 					if (unit.equals(sourceRewriter.getCu())) {
@@ -834,25 +826,23 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 							declareMethodAbstract(method, sourceRewriter, rewrite);
 						}
 					}
-					final IMember[] members= getAbstractMembers(getAbstractDestinations(new SubProgressMonitor(monitor, 1)));
+					final IMember[] members= getAbstractMembers(getAbstractDestinations(sub.newChild(1)));
 					final IType[] classes= new IType[members.length];
 					for (int offset= 0; offset < members.length; offset++) {
 						classes[offset]= (IType) members[offset];
 					}
-					copyMembers(adjustors, adjustments, rewrites, status, getAbstractMemberInfos(), classes, sourceRewriter, rewrite, sub);
-					copyMembers(adjustors, adjustments, rewrites, status, getAffectedMemberInfos(), getAbstractDestinations(new SubProgressMonitor(monitor, 1)), sourceRewriter, rewrite, sub);
+					copyMembers(adjustors, adjustments, rewrites, status, getAbstractMemberInfos(), classes, sourceRewriter, rewrite, sub.newChild(1));
+					IType[] abstractDestinations= getAbstractDestinations(sub.newChild(1));
+					copyMembers(adjustors, adjustments, rewrites, status, getAffectedMemberInfos(), abstractDestinations, sourceRewriter, rewrite, sub.newChild(1));
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}
 				}
 				removeOverrideAnnotation(rewrites);
-
-			} finally {
-				sub.done();
 			}
 			if (!adjustors.isEmpty() && !adjustments.isEmpty()) {
 				final MemberVisibilityAdjustor adjustor= adjustors.get(0);
-				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
+				adjustor.rewriteVisibility(subMon.newChild(1));
 			}
 			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			for (Map.Entry<ICompilationUnit, CompilationUnitRewrite> entry : rewrites.entrySet()) {
@@ -1001,28 +991,21 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 
 	public IMember[] getAdditionalRequiredMembers(IProgressMonitor monitor) throws JavaModelException {
 		IMember[] members= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
-		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, members.length);// not
-		// true,
-		// but
-		// not
-		// easy
-		// to
-		// give
-		// anything
-		// better
-		List<IMember> queue= new ArrayList<>(members.length);
-		queue.addAll(Arrays.asList(members));
+		List<IMember> queue= new ArrayList<>(Arrays.asList(members));
+		SubMonitor submon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_calculating_required, queue.size());
 		if (queue.isEmpty())
 			return new IMember[0];
 		int i= 0;
 		IMember current;
 		do {
 			current= queue.get(i);
-			addAllRequiredPushableMembers(queue, current, new SubProgressMonitor(monitor, 1));
+			addAllRequiredPushableMembers(queue, current, submon.newChild(1));
 			i++;
+			submon.setWorkRemaining(queue.size());
 			if (queue.size() == i)
 				current= null;
 		} while (current != null);
+		submon.worked(queue.size());
 		queue.removeAll(Arrays.asList(members));// report only additional
 		return queue.toArray(new IMember[queue.size()]);
 	}
