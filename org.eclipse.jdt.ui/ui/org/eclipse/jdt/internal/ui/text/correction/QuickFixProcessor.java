@@ -340,6 +340,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.EnhancedSwitchMissingDefault:
 			case IProblem.IllegalTotalPatternWithDefault:
 			case IProblem.IllegalFallthroughToPattern:
+			case IProblem.ParsingErrorInsertToComplete:
 				return true;
 			default:
 				return SuppressWarningsSubProcessorCore.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -968,6 +969,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PotentiallyUnclosedCloseable:
 				LocalCorrectionsSubProcessor.getTryWithResourceProposals(context, problem, proposals);
 			    break;
+			case IProblem.ParsingErrorInsertToComplete:
+				ICompilationUnit cu= context.getCompilationUnit();
+				CompilationUnit astRoot1= context.getASTRoot();
+				ASTNode selectedNode1= problem.getCoveringNode(astRoot1);
+				QuickAssistProcessor.getAssignToVariableProposals(context, selectedNode1, new IProblemLocationCore[] {problem}, proposals);
+				break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
