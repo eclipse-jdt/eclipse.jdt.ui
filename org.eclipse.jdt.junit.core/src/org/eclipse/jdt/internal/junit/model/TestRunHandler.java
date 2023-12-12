@@ -204,6 +204,7 @@ public class TestRunHandler extends DefaultHandler {
 		case IXMLTags.NODE_SYSTEM_OUT:
 		case IXMLTags.NODE_SYSTEM_ERR:
 			break;
+		case IXMLTags.NODE_ABORTED:		// fall through to the skipped
 		case IXMLTags.NODE_SKIPPED:
 			// before Ant 1.9.0: not an Ant JUnit tag, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=276068
 			// later: child of <suite> or <test>, see https://issues.apache.org/bugzilla/show_bug.cgi?id=43969
@@ -291,6 +292,7 @@ public class TestRunHandler extends DefaultHandler {
 		case IXMLTags.NODE_SYSTEM_OUT:
 		case IXMLTags.NODE_SYSTEM_ERR:
 			break;
+		case IXMLTags.NODE_ABORTED:		// fall through to the skipped
 		case IXMLTags.NODE_SKIPPED:
 			{
 				TestElement testElement= fTestCase;
