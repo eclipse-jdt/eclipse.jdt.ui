@@ -2896,7 +2896,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(1, problems);
-		List<IJavaCompletionProposal> proposals= collectCorrections(cu, problems[0], null);
+		List<IJavaCompletionProposal> proposals= collectCorrectionsNoCheck(cu, problems[0], null);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();

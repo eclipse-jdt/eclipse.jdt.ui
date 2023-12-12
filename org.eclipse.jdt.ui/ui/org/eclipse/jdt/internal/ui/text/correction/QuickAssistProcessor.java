@@ -1080,6 +1080,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getAssignToVariableProposals(IInvocationContext context, ASTNode node, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
+		// don't add if already added as quick fix
+		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
+			return false;
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
 			return false;
