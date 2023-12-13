@@ -28,8 +28,6 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 
 /**
@@ -251,7 +249,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 
 	@Override
 	public void run() {
-		JavaCore.runReadOnly(() -> dispatchRun(getSelection()));
+		dispatchRun(getSelection());
 	}
 
 	@Override
