@@ -20,7 +20,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
 
 
@@ -135,7 +135,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 			buf.append(fRangeOffset);
 			buf.append("\n\tfRangeLength= "); //$NON-NLS-1$
 			buf.append(fRangeLength);
-			JavaPlugin.logErrorMessage(buf.toString());
+			JavaManipulationPlugin.logErrorMessage(buf.toString());
 			throw ex;
 		}
 	}

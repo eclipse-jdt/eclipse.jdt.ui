@@ -16,7 +16,9 @@ package org.eclipse.jdt.ui.text;
 /**
  * Definition of Java partitioning and its partitions.
  *
- * @since 3.1
+ * Originally since org.eclipse.jdt.ui version 3.1
+ *
+ * @since 1.21
  */
 public interface IJavaPartitions {
 
