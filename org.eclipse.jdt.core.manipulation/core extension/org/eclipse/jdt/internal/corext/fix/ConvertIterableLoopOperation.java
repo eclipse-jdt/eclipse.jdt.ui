@@ -298,19 +298,20 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				public final boolean visit(final MethodInvocation node) {
 					IMethodBinding binding= node.resolveMethodBinding();
 					if (binding != null && ("next".equals(binding.getName()) || "nextElement".equals(binding.getName()))) { //$NON-NLS-1$ //$NON-NLS-2$
-						List<ASTNode> siblingNodes = Optional.ofNullable(ASTNodes.getParent(node, Statement.class))
-								.map(it -> ASTNodes.getChildren(it))
-								.orElse(new ArrayList<>());
-						if(siblingNodes.stream().allMatch(node::equals)) {
-							Statement parentStatement = ASTNodes.getParent(node, Statement.class);
-							removeorReplaceStatementByTrailingComments(cuRewrite, group, astRewrite, remover, commentList, parentStatement);
-
-						}
 						Expression expression= node.getExpression();
 						if (expression instanceof Name) {
 							IBinding result= ((Name)expression).resolveBinding();
-							if (result != null && result.equals(fIteratorVariable))
-								return replace(node);
+							if (result != null && result.equals(fIteratorVariable)) {
+								List<ASTNode> siblingNodes = Optional.ofNullable(ASTNodes.getParent(node, Statement.class))
+										.map(it -> ASTNodes.getChildren(it))
+										.orElse(new ArrayList<>());
+								if(siblingNodes.stream().allMatch(node::equals)) {
+									Statement parentStatement = ASTNodes.getParent(node, Statement.class);
+									removeorReplaceStatementByTrailingComments(cuRewrite, group, astRewrite, remover, commentList, parentStatement);
+								} else {
+									return replace(node);
+								}
+							}
 						} else if (expression instanceof FieldAccess) {
 							IBinding result= ((FieldAccess)expression).resolveFieldBinding();
 							if (result != null && result.equals(fIteratorVariable))

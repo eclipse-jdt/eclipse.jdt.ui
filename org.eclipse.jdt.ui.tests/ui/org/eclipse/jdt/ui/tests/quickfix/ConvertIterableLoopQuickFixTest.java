@@ -139,6 +139,58 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testNextFromOtherClass() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\r\n" //
+				+ "import java.util.Collection;\r\n" //
+				+ "import java.util.Iterator;\r\n" //
+				+ "public class A {\r\n" //
+				+ "	Collection<String> c;\r\n" //
+				+ "public void foo() {\r\n"
+				+ "    class Other {\r\n"
+				+ "        public Object next() {\r\n"
+				+ "            return null;\r\n"
+				+ "        }\r\n"
+				+ "    }\r\n"
+				+ "    Other i = new Other();\r\n"
+				+ "    for (Iterator<String> iterator = c.iterator(); iterator.hasNext();) {\r\n"
+				+ "        i.next();\r\n"
+				+ "        iterator.next();\r\n"
+				+ "    }\r\n"
+				+ "}"
+				+ "}";
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", sample, false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		String expected = "" //
+				+ "package test;\r\n" //
+				+ "import java.util.Collection;\r\n" //
+				+ "public class A {\r\n" //
+				+ "	Collection<String> c;\r\n" //
+				+ "public void foo() {\r\n"
+				+ "    class Other {\r\n"
+				+ "        public Object next() {\r\n"
+				+ "            return null;\r\n"
+				+ "        }\r\n"
+				+ "    }\r\n"
+				+ "    Other i = new Other();\r\n"
+				+ "    for (String string : c) {\r\n"
+				+ "        i.next();\r\n"
+				+ "    }\r\n"
+				+ "}"
+				+ "}";
+		assertEqualString(preview, expected);
+	}
+
+	@Test
 	public void testIteratorWithoutAssignment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
