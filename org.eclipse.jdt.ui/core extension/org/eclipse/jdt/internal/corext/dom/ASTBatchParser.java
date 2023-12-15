@@ -21,13 +21,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Creates AST from a set of compilation units. Uses the
@@ -79,7 +80,7 @@ public class ASTBatchParser {
 
 			for (ICompilationUnit[] units : splitByProject(compilationUnits)) {
 				if (units.length <= MAX_AT_ONCE) {
-					createParser(units[0].getJavaProject()).createASTs(units, bindingKeys, requestor, new SubProgressMonitor(monitor, units.length));
+					createParser(units[0].getJavaProject()).createASTs(units, bindingKeys, requestor, Progress.subMonitor(monitor, units.length));
 				} else {
 					List<ICompilationUnit> list= Arrays.asList(units);
 					int end= 0;
@@ -89,7 +90,7 @@ public class ASTBatchParser {
 						List<ICompilationUnit> toParse= list.subList(cursor, end);
 
 						createParser(units[0].getJavaProject()).createASTs(toParse.toArray(new ICompilationUnit[toParse.size()]), bindingKeys, requestor,
-							new SubProgressMonitor(monitor, toParse.size()));
+							Progress.subMonitor(monitor, toParse.size()));
 						cursor= end;
 					}
 				}

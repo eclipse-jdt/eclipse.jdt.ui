@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -26,6 +25,8 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public abstract class AbstractJavaElementRenameChange extends ResourceChange {
 
@@ -89,7 +90,7 @@ public abstract class AbstractJavaElementRenameChange extends ResourceChange {
 			IResource resource= getResource();
 			IPath newPath= createNewPath();
 			Change result= createUndoChange(resource.getModificationStamp());
-			doRename(new SubProgressMonitor(pm, 1));
+			doRename(Progress.subMonitor(pm, 1));
 			if (fStampToRestore != IResource.NULL_STAMP) {
 				IResource newResource= ResourcesPlugin.getWorkspace().getRoot().findMember(newPath);
 				newResource.revertModificationStamp(fStampToRestore);

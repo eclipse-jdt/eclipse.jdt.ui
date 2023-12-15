@@ -22,7 +22,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
@@ -67,6 +66,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.LRUMap;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Helper class to adjust the visibilities of members with respect to a reference element.
@@ -524,7 +525,7 @@ public final class MemberVisibilityAdjustor {
 					// check whether the member is still visible from the
 					// destination. As we are moving a type, the destination is
 					// a package or another type.
-					adjustIncomingVisibility(fReferencing, member, new SubProgressMonitor(monitor, 1));
+					adjustIncomingVisibility(fReferencing, member, Progress.subMonitor(monitor, 1));
 				}
 			}
 		}
@@ -559,7 +560,7 @@ public final class MemberVisibilityAdjustor {
 		engine.setOwner(fOwner);
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(member));
-		engine.searchPattern(new SubProgressMonitor(monitor, 1));
+		engine.searchPattern(Progress.subMonitor(monitor, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
@@ -687,7 +688,7 @@ public final class MemberVisibilityAdjustor {
 				IJavaElement element= JavaCore.create(group.getResource());
 				if (element instanceof ICompilationUnit) {
 					for (SearchMatch match : group.getSearchResults())
-						adjustOutgoingVisibility(match, new SubProgressMonitor(monitor, 1));
+						adjustOutgoingVisibility(match, Progress.subMonitor(monitor, 1));
 				} // else if (element != null)
 				// fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.project", new String[] { element.getJavaProject().getElementName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
 				// else if (group.getResource() != null)
@@ -719,14 +720,14 @@ public final class MemberVisibilityAdjustor {
 			if (fIncoming) {
 				// check calls to the referenced (moved) element, adjust element
 				// visibility if necessary.
-				engine.searchPattern(new SubProgressMonitor(monitor, 1));
-				adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
+				engine.searchPattern(Progress.subMonitor(monitor, 1));
+				adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), Progress.subMonitor(monitor, 1));
 				engine.clearResults();
 				// If the moved element is a type: Adjust visibility of members
 				// of the type if they are accessed outside of the moved type
 				if (fReferenced instanceof IType) {
 					final IType type= (IType) fReferenced;
-					adjustMemberVisibility(type, new SubProgressMonitor(monitor, 1));
+					adjustMemberVisibility(type, Progress.subMonitor(monitor, 1));
 				}
 			}
 			if (fOutgoing) {
@@ -737,10 +738,10 @@ public final class MemberVisibilityAdjustor {
 				 * within the referencing element (the destination type (or
 				 * package if move to new type)).
 				 */
-				engine.searchReferencedTypes(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-				engine.searchReferencedFields(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-				engine.searchReferencedMethods(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-				adjustOutgoingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
+				engine.searchReferencedTypes(fReferenced, Progress.subMonitorSupressed(monitor, 1));
+				engine.searchReferencedFields(fReferenced, Progress.subMonitorSupressed(monitor, 1));
+				engine.searchReferencedMethods(fReferenced, Progress.subMonitorSupressed(monitor, 1));
+				adjustOutgoingVisibility((SearchResultGroup[]) engine.getResults(), Progress.subMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
@@ -1015,9 +1016,9 @@ public final class MemberVisibilityAdjustor {
 				hierarchy= fTypeHierarchies.get(type);
 				if (hierarchy == null) {
 					if (fOwner == null) {
-						hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+						hierarchy= type.newSupertypeHierarchy(Progress.subMonitorSupressed(monitor, 1));
 					} else {
-						hierarchy= type.newSupertypeHierarchy(fOwner, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+						hierarchy= type.newSupertypeHierarchy(fOwner, Progress.subMonitorSupressed(monitor, 1));
 					}
 					fTypeHierarchies.put(type, hierarchy);
 				}
@@ -1060,7 +1061,7 @@ public final class MemberVisibilityAdjustor {
 				if (unit.equals(member.getCompilationUnit())) {
 					adjustment= fAdjustments.get(member);
 					if (adjustment != null)
-						adjustment.rewriteVisibility(this, new SubProgressMonitor(monitor, 1));
+						adjustment.rewriteVisibility(this, Progress.subMonitor(monitor, 1));
 				}
 			}
 		} finally {
@@ -1085,7 +1086,7 @@ public final class MemberVisibilityAdjustor {
 				member= iterator.next();
 				adjustment= fAdjustments.get(member);
 				if (adjustment != null)
-					adjustment.rewriteVisibility(this, new SubProgressMonitor(monitor, 1));
+					adjustment.rewriteVisibility(this, Progress.subMonitor(monitor, 1));
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();
 			}
@@ -1228,7 +1229,7 @@ public final class MemberVisibilityAdjustor {
 		if (referenced.getDeclaringType().equals(referencing))
 			keyword= ModifierKeyword.PRIVATE_KEYWORD;
 		else {
-			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, Progress.subMonitor(monitor, 1));
 			for (IType superType : hierarchy.getSupertypes(referencing)) {
 				if (superType.equals(referenced.getDeclaringType())) {
 					keyword= ModifierKeyword.PROTECTED_KEYWORD;
@@ -1263,7 +1264,7 @@ public final class MemberVisibilityAdjustor {
 			}
 			tmp= tmp.getDeclaringType();
 		}
-		final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+		final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, Progress.subMonitor(monitor, 1));
 		for (IType superType : hierarchy.getSupertypes(referencing)) {
 			if (superType.equals(referenced.getDeclaringType())) {
 				return ModifierKeyword.PROTECTED_KEYWORD;
@@ -1295,7 +1296,7 @@ public final class MemberVisibilityAdjustor {
 		if (referencing.equals(referenced.getDeclaringType()))
 			keyword= ModifierKeyword.PRIVATE_KEYWORD;
 		else {
-			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, new SubProgressMonitor(monitor, 1));
+			final ITypeHierarchy hierarchy= getTypeHierarchy(referencing, Progress.subMonitor(monitor, 1));
 			for (IType superType : hierarchy.getSupertypes(referencing)) {
 				if (superType.equals(referenced)) {
 					keyword= null;

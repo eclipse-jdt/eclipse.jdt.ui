@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -88,6 +87,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.util.ResourcesUtility;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -778,7 +778,7 @@ public class BuildPathsBlock {
 			//create and set the output path first
 			if (!fWorkspaceRoot.exists(outputLocation)) {
 				IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
-				CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+				CoreUtility.createDerivedFolder(folder, true, true, Progress.subMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
@@ -800,7 +800,7 @@ public class BuildPathsBlock {
 				IResource res= entry.getResource();
 				//1 tick
 				if (res instanceof IFolder && entry.getLinkTarget() == null && !res.exists()) {
-					CoreUtility.createFolder((IFolder)res, true, true, new SubProgressMonitor(monitor, 1));
+					CoreUtility.createFolder((IFolder)res, true, true, Progress.subMonitor(monitor, 1));
 				} else {
 					monitor.worked(1);
 				}
@@ -810,7 +810,7 @@ public class BuildPathsBlock {
 					IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 					if (folderOutput != null && folderOutput.segmentCount() > 1) {
 						IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
-						CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+						CoreUtility.createDerivedFolder(folder, true, true, Progress.subMonitor(monitor, 1));
 					} else {
 						monitor.worked(1);
 					}
@@ -830,9 +830,9 @@ public class BuildPathsBlock {
 						if (!folder.exists()) {
 							//New source folder needs to be created
 							if (entry.getLinkTarget() == null) {
-								CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 2));
+								CoreUtility.createFolder(folder, true, true, Progress.subMonitor(monitor, 2));
 							} else {
-								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 2));
+								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, Progress.subMonitor(monitor, 2));
 							}
 						}
 					} else {
@@ -850,19 +850,19 @@ public class BuildPathsBlock {
 								if (parentPath.segmentCount() > 0) {
 									IFolder parentFolder= project.getFolder(parentPath);
 									if (!parentFolder.exists()) {
-										CoreUtility.createFolder(parentFolder, true, true, new SubProgressMonitor(monitor, 1));
+										CoreUtility.createFolder(parentFolder, true, true, Progress.subMonitor(monitor, 1));
 									} else {
 										monitor.worked(1);
 									}
 								} else {
 									monitor.worked(1);
 								}
-								orginalFolder.move(entry.getPath(), true, true, new SubProgressMonitor(monitor, 1));
+								orginalFolder.move(entry.getPath(), true, true, Progress.subMonitor(monitor, 1));
 							}
 						} else {
 							if (!folder.exists() || !entry.getLinkTarget().equals(entry.getOrginalLinkTarget())) {
-								orginalFolder.delete(true, new SubProgressMonitor(monitor, 1));
-								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 1));
+								orginalFolder.delete(true, Progress.subMonitor(monitor, 1));
+								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, Progress.subMonitor(monitor, 1));
 							}
 						}
 					}
@@ -890,7 +890,7 @@ public class BuildPathsBlock {
 				}
 			}
 
-			javaProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 2));
+			javaProject.setRawClasspath(classpath, outputLocation, Progress.subMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}

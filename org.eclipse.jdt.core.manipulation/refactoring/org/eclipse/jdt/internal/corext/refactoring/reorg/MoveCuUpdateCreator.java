@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -56,6 +55,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
@@ -71,7 +71,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class MoveCuUpdateCreator {
 
@@ -98,7 +98,7 @@ public class MoveCuUpdateCreator {
 		pm.beginTask("", 5); //$NON-NLS-1$
 		try{
 			TextChangeManager changeManager= new TextChangeManager();
-			addUpdates(changeManager, new SubProgressMonitor(pm, 4), status);
+			addUpdates(changeManager, Progress.subMonitor(pm, 4), status);
 			addImportRewriteUpdates(changeManager);
 			return changeManager;
 		} catch (JavaModelException e){
@@ -126,7 +126,7 @@ public class MoveCuUpdateCreator {
 		for (ICompilationUnit cu : fCus) {
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			addUpdates(changeManager, cu, new SubProgressMonitor(pm, 1), status);
+			addUpdates(changeManager, cu, Progress.subMonitor(pm, 1), status);
 		}
 	}
 
@@ -140,9 +140,9 @@ public class MoveCuUpdateCreator {
 				return;
 			}
 
-		  	addImportToSourcePackageTypes(movedUnit, new SubProgressMonitor(pm, 1));
+		  	addImportToSourcePackageTypes(movedUnit, Progress.subMonitor(pm, 1));
 			removeImportsToDestinationPackageTypes(movedUnit);
-			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 2), status);
+			addReferenceUpdates(changeManager, movedUnit, Progress.subMonitor(pm, 2), status);
 		} finally{
 			pm.done();
 		}
@@ -305,7 +305,7 @@ public class MoveCuUpdateCreator {
 			Collector requestor= new Collector(((IPackageFragment) unit.getParent()), binaryRefs);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(unit, true, false);
 
-			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, new SubProgressMonitor(pm, 1), status);
+			SearchResultGroup[] result= RefactoringSearchEngine.search(pattern, scope, requestor, Progress.subMonitor(pm, 1), status);
 			binaryRefs.addErrorIfNecessary(status);
 			return result;
 		}

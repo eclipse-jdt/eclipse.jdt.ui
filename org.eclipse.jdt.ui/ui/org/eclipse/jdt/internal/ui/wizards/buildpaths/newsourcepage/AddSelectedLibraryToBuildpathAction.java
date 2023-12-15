@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -41,13 +40,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail;
@@ -140,8 +140,8 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 			monitor.worked(1);
 
 			List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
-			ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
-			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, Progress.subMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, project, Progress.subMonitor(monitor, 1));
 
         	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
         	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));

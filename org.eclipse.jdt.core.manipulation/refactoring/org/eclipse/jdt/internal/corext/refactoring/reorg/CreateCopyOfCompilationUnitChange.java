@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -39,6 +38,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -165,14 +165,14 @@ public final class CreateCopyOfCompilationUnitChange extends CreateTextFileChang
 			IPath oldPath= super.getPath();
 			String newTypeName= fNameQuery.getNewName();
 			try {
-				String newSource= getCopiedFileSource(new SubProgressMonitor(monitor, 9), fOldCu, newTypeName);
+				String newSource= getCopiedFileSource(Progress.subMonitor(monitor, 9), fOldCu, newTypeName);
 				setSource(newSource);
 				setPath(fOldCu.getResource().getParent().getFullPath().append(JavaModelUtil.getRenamedCUName(fOldCu, newTypeName)));
-				return super.getOldFile(new SubProgressMonitor(monitor, 1));
+				return super.getOldFile(Progress.subMonitor(monitor, 1));
 			} catch (CoreException e) {
 				setSource(oldSource);
 				setPath(oldPath);
-				return super.getOldFile(new SubProgressMonitor(monitor, 2));
+				return super.getOldFile(Progress.subMonitor(monitor, 2));
 			}
 		} finally {
 			monitor.done();

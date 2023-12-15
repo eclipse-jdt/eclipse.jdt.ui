@@ -17,8 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.SubProgressMonitor;
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -37,6 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Action to remove package fragment roots from the classpath of its parent
@@ -91,7 +90,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 					pm.beginTask(ActionMessages.RemoveFromClasspathAction_Removing, roots.length);
 					for (IPackageFragmentRoot root : roots) {
 						int jCoreFlags= IPackageFragmentRoot.NO_RESOURCE_MODIFICATION | IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH;
-						root.delete(IResource.NONE, jCoreFlags, new SubProgressMonitor(pm, 1));
+						root.delete(IResource.NONE, jCoreFlags, Progress.subMonitor(pm, 1));
 					}
 				} finally {
 					pm.done();

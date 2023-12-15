@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IEncodedStorage;
@@ -169,6 +168,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
@@ -706,7 +706,7 @@ public class PasteAction extends SelectionDispatchAction{
 							pm.beginTask("", 1 + fParsedCus.length); //$NON-NLS-1$
 
 							if (fDestination == null) {
-								fDestination= createNewProject(new SubProgressMonitor(pm, 1));
+								fDestination= createNewProject(Progress.subMonitor(pm, 1));
 							} else {
 								pm.worked(1);
 							}
@@ -714,7 +714,7 @@ public class PasteAction extends SelectionDispatchAction{
 							for (ParsedCu parsedCu : fParsedCus) {
 								if (pm.isCanceled())
 									break;
-								ICompilationUnit cu= pasteCU(parsedCu, new SubProgressMonitor(pm, 1), confirmQuery);
+								ICompilationUnit cu= pasteCU(parsedCu, Progress.subMonitor(pm, 1), confirmQuery);
 								if (cu != null)
 									cus.add(cu);
 							}
@@ -756,7 +756,7 @@ public class PasteAction extends SelectionDispatchAction{
 									packageName= ReorgMessages.PasteAction_snippet_default_package_name;
 								destinationPack= fDestination.getPackageFragment(packageName);
 								if (!destinationPack.exists()) {
-									JavaModelUtil.getPackageFragmentRoot(destinationPack).createPackageFragment(packageName, true, new SubProgressMonitor(pm, 1));
+									JavaModelUtil.getPackageFragmentRoot(destinationPack).createPackageFragment(packageName, true, Progress.subMonitor(pm, 1));
 								} else {
 									pm.worked(1);
 								}
@@ -784,7 +784,7 @@ public class PasteAction extends SelectionDispatchAction{
 							}
 
 							parsedText= parsedText.replaceAll("\r\n?|\n", StubUtility.getLineDelimiterUsed(cu)); //$NON-NLS-1$
-							destinationPack.createCompilationUnit(cuName, parsedText, true, new SubProgressMonitor(pm, 1));
+							destinationPack.createCompilationUnit(cuName, parsedText, true, Progress.subMonitor(pm, 1));
 
 							if (! alreadyExists) {
 								editorPart[0]= openCu(cu);
@@ -793,20 +793,20 @@ public class PasteAction extends SelectionDispatchAction{
 								if (fDestinationPack.getElementName().length() == 0) {
 									removePackageDeclaration(cu);
 								} else {
-									cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+									cu.createPackageDeclaration(fDestinationPack.getElementName(), Progress.subMonitor(pm, 1));
 								}
 							} else {
 								String packageName= destinationPack.getElementName();
 								if (packageName.length() > 0) {
-									cu.createPackageDeclaration(packageName, new SubProgressMonitor(pm, 1));
+									cu.createPackageDeclaration(packageName, Progress.subMonitor(pm, 1));
 								}
 							}
 							if (! alreadyExists && editorPart[0] != null)
-								editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
+								editorPart[0].doSave(Progress.subMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
 							return cu;
 
 						} else if (kind == ASTParser.K_CLASS_BODY_DECLARATIONS || kind == ASTParser.K_STATEMENTS) {
-							return pasteBodyDeclsOrStatements(destinationPack, parsedText, kind, new SubProgressMonitor(pm, 2));
+							return pasteBodyDeclsOrStatements(destinationPack, parsedText, kind, Progress.subMonitor(pm, 2));
 						} else {
 							throw new IllegalStateException("Unexpected kind: " + kind); //$NON-NLS-1$
 						}
@@ -960,7 +960,7 @@ public class PasteAction extends SelectionDispatchAction{
 					return null;
 				}
 
-				private IPackageFragmentRoot createNewProject(SubProgressMonitor pm) throws CoreException {
+				private IPackageFragmentRoot createNewProject(IProgressMonitor pm) throws CoreException {
 					pm.beginTask("", 10); //$NON-NLS-1$
 					IProject project;
 					int i= 1;
@@ -970,8 +970,8 @@ public class PasteAction extends SelectionDispatchAction{
 						i++;
 					} while (project.exists());
 
-					BuildPathsBlock.createProject(project, null, new SubProgressMonitor(pm, 3));
-					BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(pm, 1));
+					BuildPathsBlock.createProject(project, null, Progress.subMonitor(pm, 3));
+					BuildPathsBlock.addJavaNature(project, Progress.subMonitor(pm, 1));
 					IJavaProject javaProject= JavaCore.create(project);
 
 					IResource srcFolder;
@@ -980,7 +980,7 @@ public class PasteAction extends SelectionDispatchAction{
 					if (store.getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ) && sourceFolderName.length() > 0) {
 						IFolder folder= project.getFolder(sourceFolderName);
 						if (! folder.exists()) {
-							folder.create(false, true, new SubProgressMonitor(pm, 1));
+							folder.create(false, true, Progress.subMonitor(pm, 1));
 						}
 						srcFolder= folder;
 					} else {
@@ -997,7 +997,7 @@ public class PasteAction extends SelectionDispatchAction{
 					IClasspathEntry jreEntry= JavaCore.newContainerEntry(fVMPath);
 					IPath outputLocation= BuildPathsBlock.getDefaultOutputLocation(javaProject);
 					IClasspathEntry[] cpes= new IClasspathEntry[] { srcEntry, jreEntry };
-					javaProject.setRawClasspath(cpes, outputLocation, new SubProgressMonitor(pm, 1));
+					javaProject.setRawClasspath(cpes, outputLocation, Progress.subMonitor(pm, 1));
 					return javaProject.getPackageFragmentRoot(srcFolder);
 				}
 

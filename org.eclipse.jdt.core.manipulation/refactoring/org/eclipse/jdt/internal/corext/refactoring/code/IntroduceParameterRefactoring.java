@@ -27,7 +27,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -99,6 +98,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
 import org.eclipse.jdt.internal.ui.util.JavaProjectUtilities;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class IntroduceParameterRefactoring extends Refactoring implements IDelegateUpdating {
@@ -203,7 +203,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				if (!result.hasFatalError()) {
 					fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
 					fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-					result.merge(fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 2)));
+					result.merge(fChangeSignatureProcessor.checkInitialConditions(Progress.subMonitor(pm, 2)));
 					if (result.hasFatalError())
 						return result;
 				} else {
@@ -217,7 +217,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 				fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
 				fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-				result.merge(fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1)));
+				result.merge(fChangeSignatureProcessor.checkInitialConditions(Progress.subMonitor(pm, 1)));
 				if (result.hasFatalError()) {
 					RefactoringStatusEntry entry= result.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
@@ -230,7 +230,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 						}
 						fChangeSignatureRefactoring= new ProcessorBasedRefactoring(fChangeSignatureProcessor);
 						fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-						result= fChangeSignatureProcessor.checkInitialConditions(new SubProgressMonitor(pm, 1));
+						result= fChangeSignatureProcessor.checkInitialConditions(Progress.subMonitor(pm, 1));
 						if (result.hasFatalError())
 							return result;
 					} else {
@@ -248,7 +248,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			initializeSelectedExpression(cuRewrite);
 			pm.worked(1);
 
-			result.merge(checkSelection(cuRewrite, new SubProgressMonitor(pm, 3)));
+			result.merge(checkSelection(cuRewrite, Progress.subMonitor(pm, 3)));
 			if (result.hasFatalError())
 				return result;
 

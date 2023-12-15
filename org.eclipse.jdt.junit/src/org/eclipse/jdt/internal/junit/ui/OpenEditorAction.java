@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -44,6 +43,8 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.core.search.TypeNameMatchRequestor;
 
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Abstract Action for opening a Java editor.
@@ -154,19 +155,19 @@ public abstract class OpenEditorAction extends Action {
 			if (visitedProjects.contains(project))
 				return null;
 			monitor.beginTask("", 2); //$NON-NLS-1$
-			IType type= project.findType(className, new SubProgressMonitor(monitor, 1));
+			IType type= project.findType(className, Progress.subMonitor(monitor, 1));
 			if (type != null)
 				return type;
 			//fix for bug 87492: visit required projects explicitly to also find not exported types
 			visitedProjects.add(project);
 			IJavaModel javaModel= project.getJavaModel();
 			String[] requiredProjectNames= project.getRequiredProjectNames();
-			IProgressMonitor reqMonitor= new SubProgressMonitor(monitor, 1);
+			IProgressMonitor reqMonitor= Progress.subMonitor(monitor, 1);
 			reqMonitor.beginTask("", requiredProjectNames.length); //$NON-NLS-1$
 			for (String requiredProjectName : requiredProjectNames) {
 				IJavaProject requiredProject= javaModel.getJavaProject(requiredProjectName);
 				if (requiredProject.exists()) {
-					type= internalFindType(requiredProject, className, visitedProjects, new SubProgressMonitor(reqMonitor, 1));
+					type= internalFindType(requiredProject, className, visitedProjects, Progress.subMonitor(reqMonitor, 1));
 					if (type != null)
 						return type;
 				}

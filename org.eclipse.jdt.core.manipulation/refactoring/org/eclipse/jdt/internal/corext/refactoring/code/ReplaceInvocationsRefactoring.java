@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -72,6 +71,9 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -87,10 +89,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
-import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class ReplaceInvocationsRefactoring extends Refactoring {
 
@@ -356,7 +355,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		RefactoringStatus searchStatus= new RefactoringStatus();
 		String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(fSourceProvider.getMethodName()));
 		ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
-		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(searchStatus, binaryRefs, new SubProgressMonitor(pm, 1));
+		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(searchStatus, binaryRefs, Progress.subMonitor(pm, 1));
 		binaryRefs.addErrorIfNecessary(searchStatus);
 
 		if (searchStatus.hasFatalError()) {
@@ -367,9 +366,9 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		result.merge(Checks.validateModifiesFiles(filesToBeModified, getValidationContext(), pm));
 		if (result.hasFatalError())
 			return result;
-		result.merge(ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, new SubProgressMonitor(pm, 1)));
-		checkOverridden(result, new SubProgressMonitor(pm, 4));
-		IProgressMonitor sub= new SubProgressMonitor(pm, 15);
+		result.merge(ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, Progress.subMonitor(pm, 1)));
+		checkOverridden(result, Progress.subMonitor(pm, 4));
+		IProgressMonitor sub= Progress.subMonitor(pm, 15);
 		sub.beginTask("", units.length * 3); //$NON-NLS-1$
 		for (ICompilationUnit unit : units) {
 			sub.subTask(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_processing,  BasicElementLabels.getFileName(unit)));
@@ -379,7 +378,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 				MultiTextEdit root= new MultiTextEdit();
 				CompilationUnitChange change= (CompilationUnitChange)fChangeManager.get(unit);
 				change.setEdit(root);
-				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
+				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, Progress.subMonitor(pm, 1));
 				if (bodies.length == 0)
 					continue;
 				inliner= new CallInliner(unit, (CompilationUnit) bodies[0].getRoot(), fSourceProvider);
@@ -387,7 +386,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 					inliner.initialize(body);
 					RefactoringStatus nestedInvocations= new RefactoringStatus();
 					ASTNode[] invocations= removeNestedCalls(nestedInvocations, unit,
-						fTargetProvider.getInvocations(body, new SubProgressMonitor(sub, 2)));
+						fTargetProvider.getInvocations(body, Progress.subMonitor(sub, 2)));
 					for (ASTNode invocation : invocations) {
 						result.merge(inliner.initialize(invocation, fTargetProvider.getStatusSeverity()));
 						if (result.hasFatalError())
@@ -485,10 +484,10 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			return;
 		}
 		IType type= method.getDeclaringType();
-		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 6));
-		checkSubTypes(status, method, hierarchy.getAllSubtypes(type), new SubProgressMonitor(pm, 1));
-		checkSuperClasses(status, method, hierarchy.getAllSuperclasses(type), new SubProgressMonitor(pm, 1));
-		checkSuperInterfaces(status, method, hierarchy.getAllSuperInterfaces(type), new SubProgressMonitor(pm, 1));
+		ITypeHierarchy hierarchy= type.newTypeHierarchy(Progress.subMonitor(pm, 6));
+		checkSubTypes(status, method, hierarchy.getAllSubtypes(type), Progress.subMonitor(pm, 1));
+		checkSuperClasses(status, method, hierarchy.getAllSuperclasses(type), Progress.subMonitor(pm, 1));
+		checkSuperInterfaces(status, method, hierarchy.getAllSuperInterfaces(type), Progress.subMonitor(pm, 1));
 		pm.setTaskName(""); //$NON-NLS-1$
 	}
 

@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -142,6 +141,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public final class MoveInnerToTopRefactoring extends Refactoring {
@@ -602,8 +602,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			}
 			fTypeImports= null;
 			fStaticImports= null;
-			TextEdit edits= rewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
-			JavaModelUtil.applyEdit(targetUnit, edits, false, new SubProgressMonitor(monitor, 1));
+			TextEdit edits= rewrite.rewriteImports(Progress.subMonitor(monitor, 1));
+			JavaModelUtil.applyEdit(targetUnit, edits, false, Progress.subMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -728,7 +728,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			result.merge(Checks.checkCompilationUnitName(newCUName, fType));
 			result.merge(checkConstructorParameterNames());
 			result.merge(checkTypeNameInPackage());
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
+			fChangeManager= createChangeManager(Progress.subMonitor(pm, 1), result);
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getValidationContext(), pm));
 			return result;
 		} finally {
@@ -790,7 +790,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		arguments.put(ATTRIBUTE_MANDATORY, Boolean.toString(fIsInstanceFieldCreationMandatory));
 		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveInnerToTopRefactoring_move_to_Top);
 		result.addAll(fChangeManager.getAllChanges());
-		result.add(createCompilationUnitForMovedType(new SubProgressMonitor(monitor, 1)));
+		result.add(createCompilationUnitForMovedType(Progress.subMonitor(monitor, 1)));
 		return result;
 	}
 
@@ -808,17 +808,17 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setStatus(status);
-			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
+			adjustor.adjustVisibility(Progress.subMonitor(monitor, 1));
 			final Map<String, ITypeBinding> parameters= new LinkedHashMap<>();
 			addTypeParameters(fSourceRewrite.getRoot(), fType, parameters);
 			final ITypeBinding[] bindings= new ITypeBinding[parameters.size()];
 			parameters.values().toArray(bindings);
-			final Map<ICompilationUnit, SearchMatch[]> typeReferences= createTypeReferencesMapping(new SubProgressMonitor(monitor, 1), status);
+			final Map<ICompilationUnit, SearchMatch[]> typeReferences= createTypeReferencesMapping(Progress.subMonitor(monitor, 1), status);
 			Map<ICompilationUnit, SearchMatch[]> constructorReferences= null;
 			if (JdtFlags.isStatic(fType))
 				constructorReferences= new HashMap<>(0);
 			else
-				constructorReferences= createConstructorReferencesMapping(new SubProgressMonitor(monitor, 1), status);
+				constructorReferences= createConstructorReferencesMapping(Progress.subMonitor(monitor, 1), status);
 			if (fCreateInstanceField) {
 				// must increase visibility of all member types up
 				// to the top level type to allow this
@@ -837,7 +837,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				if (unit.equals(inputCU)) {
 					try {
 						adjustor.setStatus(new RefactoringStatus());
-						adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
+						adjustor.rewriteVisibility(targetRewrite.getCu(), Progress.subMonitor(monitor, 1));
 					} finally {
 						adjustor.setStatus(status);
 					}
@@ -845,7 +845,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 					targetRewrite.clearASTAndImportRewrites();
 					createCompilationUnitRewrite(bindings, targetRewrite, typeReferences, constructorReferences, adjustor.getAdjustments().containsKey(fType), inputCU, unit, true, status, monitor);
 				}
-				adjustor.rewriteVisibility(targetRewrite.getCu(), new SubProgressMonitor(monitor, 1));
+				adjustor.rewriteVisibility(targetRewrite.getCu(), Progress.subMonitor(monitor, 1));
 				manager.manage(unit, targetRewrite.createChange(true));
 			}
 			if (fNewSourceOfInputType == null) {
@@ -1130,7 +1130,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				content= buffer.toString();
 			}
 			unit.getBuffer().setContents(content);
-			addImportsToTargetUnit(unit, new SubProgressMonitor(monitor, 1));
+			addImportsToTargetUnit(unit, Progress.subMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -1146,7 +1146,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(fType));
 		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		engine.searchPattern(Progress.subMonitor(pm, 1));
 		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<>();
 		for (SearchResultGroup group : (SearchResultGroup[]) engine.getResults()) {
 			ICompilationUnit cu= group.getCompilationUnit();

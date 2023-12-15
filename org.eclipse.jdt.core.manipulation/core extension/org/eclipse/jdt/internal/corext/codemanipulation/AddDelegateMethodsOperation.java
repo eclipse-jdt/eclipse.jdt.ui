@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -48,6 +47,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.DelegateEntryComparator;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Workspace runnable to add delegate methods.
@@ -195,10 +196,10 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 				}
 				fResultingEdit= new MultiTextEdit();
 				fResultingEdit.addChild(astRewrite.rewriteAST());
-				fResultingEdit.addChild(importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1)));
+				fResultingEdit.addChild(importRewrite.rewriteImports(Progress.subMonitor(monitor, 1)));
 
 				if (fApply) {
-					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, new SubProgressMonitor(monitor, 1));
+					JavaModelUtil.applyEdit(cu, fResultingEdit, fSave, Progress.subMonitor(monitor, 1));
 				}
 			}
 		} finally {

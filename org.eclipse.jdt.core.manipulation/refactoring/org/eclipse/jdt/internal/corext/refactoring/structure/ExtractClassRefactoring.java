@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -86,6 +85,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -107,7 +107,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class ExtractClassRefactoring extends Refactoring {
 
@@ -368,7 +368,7 @@ public class ExtractClassRefactoring extends Refactoring {
 				flags|= RefactoringDescriptor.MULTI_CHANGE;
 			fDescriptor.setFlags(flags);
 
-			result.merge(updateReferences(type, fParameterObjectFactory, new SubProgressMonitor(pm, 65)));
+			result.merge(updateReferences(type, fParameterObjectFactory, Progress.subMonitor(pm, 65)));
 
 		} finally {
 			pm.done();
@@ -544,7 +544,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			}
 			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(validIFields.toArray(new IField[validIFields.size()]), IJavaSearchConstants.ALL_OCCURRENCES);
 			SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, RefactoringScopeFactory.create(type), pm, status);
-			SubProgressMonitor spm= new SubProgressMonitor(pm, 90);
+			IProgressMonitor spm= Progress.subMonitor(pm, 90);
 			spm.beginTask(RefactoringCoreMessages.ExtractClassRefactoring_progress_updating_references, results.length * 10);
 			try {
 				for (SearchResultGroup group : results) {
@@ -559,7 +559,7 @@ public class ExtractClassRefactoring extends Refactoring {
 
 					status.merge(replaceReferences(pof, group, cuRewrite));
 					if (cuRewrite != fBaseCURewrite) //Change for fBaseCURewrite will be generated later
-						fChangeManager.manage(unit, cuRewrite.createChange(true, new SubProgressMonitor(spm, 9)));
+						fChangeManager.manage(unit, cuRewrite.createChange(true, Progress.subMonitor(spm, 9)));
 					if (spm.isCanceled())
 						throw new OperationCanceledException();
 				}

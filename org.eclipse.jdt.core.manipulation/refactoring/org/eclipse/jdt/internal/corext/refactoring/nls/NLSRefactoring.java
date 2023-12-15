@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -50,6 +49,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class NLSRefactoring extends Refactoring {
@@ -232,7 +233,7 @@ public class NLSRefactoring extends Refactoring {
 				createAccessorClass= false;
 			}
 			if (createAccessorClass) {
-				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), fIsEclipseNLS, fSubstitutions, getSubstitutionPattern(), new SubProgressMonitor(pm, 1)));
+				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), fIsEclipseNLS, fSubstitutions, getSubstitutionPattern(), Progress.subMonitor(pm, 1)));
 			}
 			pm.worked(1);
 

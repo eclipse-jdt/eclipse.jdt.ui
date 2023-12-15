@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -57,6 +56,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
@@ -72,7 +72,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 /**
@@ -179,11 +179,11 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			for (Object e : (List<?>)elements) {
 				IJavaElement element=(IJavaElement) e;
 				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
-					l.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
+					l.addAll(analyze((IPackageFragment) element, Progress.subMonitor(pm, 1)));
 				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT)
-					l.addAll(analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1)));
+					l.addAll(analyze((IPackageFragmentRoot) element, Progress.subMonitor(pm, 1)));
 				if (element.getElementType() == IJavaElement.JAVA_PROJECT)
-					l.addAll(analyze((IJavaProject) element, new SubProgressMonitor(pm, 1)));
+					l.addAll(analyze((IJavaProject) element, Progress.subMonitor(pm, 1)));
 			}
 			return l.toArray(new NonNLSElement[l.size()]);
 		} finally{
@@ -251,7 +251,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
 					IPackageFragment pack= (IPackageFragment)iJavaElement;
 					if (! pack.isReadOnly())
-						result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+						result.addAll(analyze(pack, Progress.subMonitor(pm, 1)));
 					else
 						pm.worked(1);
 				} else
@@ -273,7 +273,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			List<NonNLSElement> result= new ArrayList<>();
 			for (IPackageFragment pack : packs) {
 				if (!pack.isReadOnly()) {
-					result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+					result.addAll(analyze(pack, Progress.subMonitor(pm, 1)));
 				} else {
 					pm.worked(1);
 				}

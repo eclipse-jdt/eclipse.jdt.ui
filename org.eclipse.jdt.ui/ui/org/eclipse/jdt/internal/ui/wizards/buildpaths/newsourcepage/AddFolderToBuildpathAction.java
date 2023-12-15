@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -60,6 +59,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -215,7 +215,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 
 			if (!project.getOutputLocation().equals(outputLocation)) {
-				project.setOutputLocation(outputLocation, new SubProgressMonitor(monitor, 1));
+				project.setOutputLocation(outputLocation, Progress.subMonitor(monitor, 1));
 				delta.setDefaultOutputLocation(outputLocation);
 			} else {
 				monitor.worked(1);
@@ -223,7 +223,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 			List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
 			if (removeProjectFromClasspath) {
-				ClasspathModifier.removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1));
+				ClasspathModifier.removeFromClasspath(project, existingEntries, Progress.subMonitor(monitor, 1));
 			} else {
 				monitor.worked(1);
 			}
@@ -232,18 +232,18 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 			for (Object element : elements) {
 				CPListElement entry;
 				if (element instanceof IResource)
-					entry= ClasspathModifier.addToClasspath((IResource) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+					entry= ClasspathModifier.addToClasspath((IResource) element, existingEntries, newEntries, project, Progress.subMonitor(monitor, 1));
 				else
-					entry= ClasspathModifier.addToClasspath((IJavaElement) element, existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+					entry= ClasspathModifier.addToClasspath((IJavaElement) element, existingEntries, newEntries, project, Progress.subMonitor(monitor, 1));
 				newEntries.add(entry);
 			}
 
 			Set<CPListElement> modifiedSourceEntries= new HashSet<>();
 			BuildPathBasePage.fixNestingConflicts(newEntries.toArray(new CPListElement[newEntries.size()]), existingEntries.toArray(new CPListElement[existingEntries.size()]), modifiedSourceEntries);
 
-			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, Progress.subMonitor(monitor, 1));
 
-			ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+			ClasspathModifier.commitClassPath(existingEntries, project, Progress.subMonitor(monitor, 1));
 
 			delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
 			informListeners(delta);
