@@ -24,8 +24,9 @@ import org.junit.Test;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -94,12 +95,16 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	}
 
 	private void assertRefactoringResultAsExpected(CleanUpRefactoring refactoring, String[] expected) throws CoreException {
-		refactoring.checkAllConditions(new NullProgressMonitor());
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		refactoring.checkAllConditions(testMonitor);
+		testMonitor.assertUsedUp();
 		CompositeChange change= (CompositeChange)refactoring.createChange(null);
 		Change[] children= change.getChildren();
 		String[] previews= new String[children.length];
 		for (int i= 0; i < children.length; i++) {
-			previews[i]= ((TextEditBasedChange)children[i]).getPreviewContent(null);
+			FussyProgressMonitor testMonitor2= new FussyProgressMonitor();
+			previews[i]= ((TextEditBasedChange)children[i]).getPreviewContent(testMonitor2);
+			testMonitor2.assertUsedUp();
 		}
 
 		assertEqualStringsIgnoreOrder(previews, expected);

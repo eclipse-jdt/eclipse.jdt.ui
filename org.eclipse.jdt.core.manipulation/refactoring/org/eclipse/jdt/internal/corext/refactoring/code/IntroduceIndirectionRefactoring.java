@@ -27,7 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -233,19 +233,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 */
 	private Map<IMember, IncomingMemberVisibilityAdjustment> fIntermediaryAdjustments;
 
-
-	private static class NoOverrideProgressMonitor extends SubProgressMonitor {
-
-		public NoOverrideProgressMonitor(IProgressMonitor monitor, int ticks) {
-			super(monitor, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
-		}
-
-		@Override
-		public void setTaskName(String name) {
-			// do nothing
-		}
+	public static IProgressMonitor noOverrideSubMonitor(IProgressMonitor pm, int i) {
+		return SubMonitor.convert(pm, 1).newChild(i, SubMonitor.SUPPRESS_SETTASKNAME);
 	}
-
 	// ********* CONSTRUCTORS AND CLASS CREATION ************
 
 	public IntroduceIndirectionRefactoring(ICompilationUnit unit, int offset, int length) {
@@ -524,7 +514,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		if (fUpdateReferences) {
 			pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions + " " + RefactoringCoreMessages.IntroduceIndirectionRefactoring_looking_for_references); //$NON-NLS-1$
-			result.merge(updateReferences(new NoOverrideProgressMonitor(pm, referenceTicks)));
+			result.merge(updateReferences(noOverrideSubMonitor(pm, referenceTicks)));
 			pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions);
 		} else {
 			// only update the declaration and/or a selected method invocation
@@ -539,7 +529,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 				// does call see the intermediary method?
 				// => increase visibility of the type of the intermediary method.
-				result.merge(adjustVisibility(fIntermediaryType, enclosing.getDeclaringType(), new NoOverrideProgressMonitor(pm, 0)));
+				result.merge(adjustVisibility(fIntermediaryType, enclosing.getDeclaringType(), noOverrideSubMonitor(pm, 0))); // XXX 0 ticks?
 			}
 			pm.worked(referenceTicks);
 		}
@@ -565,8 +555,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		pm.worked(creationTicks);
 
 		pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions + " " + RefactoringCoreMessages.IntroduceIndirectionRefactoring_adjusting_visibility); //$NON-NLS-1$
-		result.merge(updateTargetVisibility(new NoOverrideProgressMonitor(pm, 0)));
-		result.merge(updateIntermediaryVisibility(new NoOverrideProgressMonitor(pm, 0)));
+		result.merge(updateTargetVisibility(noOverrideSubMonitor(pm, 0))); // XXX 0 ticks?
+		result.merge(updateIntermediaryVisibility(noOverrideSubMonitor(pm, 0))); // XXX 0 ticks?
 		pm.worked(visibilityTicks);
 		pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions);
 
@@ -617,7 +607,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		return result;
 	}
 
-	private RefactoringStatus updateIntermediaryVisibility(NoOverrideProgressMonitor monitor) throws JavaModelException {
+	private RefactoringStatus updateIntermediaryVisibility(IProgressMonitor monitor) throws JavaModelException {
 		return rewriteVisibility(fIntermediaryAdjustments, fRewrites, monitor);
 	}
 
@@ -630,12 +620,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		if (monitor.isCanceled())
 			throw new OperationCanceledException();
 
-		IMethod[] ripple= RippleMethodFinder2.getRelatedMethods(fTargetMethod, false, new NoOverrideProgressMonitor(monitor, 10), null);
+		IMethod[] ripple= RippleMethodFinder2.getRelatedMethods(fTargetMethod, false, noOverrideSubMonitor(monitor, 10), null);
 
 		if (monitor.isCanceled())
 			throw new OperationCanceledException();
 
-		SearchResultGroup[] references= Checks.excludeCompilationUnits(getReferences(ripple, new NoOverrideProgressMonitor(monitor, 10), result), result);
+		SearchResultGroup[] references= Checks.excludeCompilationUnits(getReferences(ripple, noOverrideSubMonitor(monitor,10), result), result);
 
 		if (result.hasFatalError())
 			return result;
@@ -684,7 +674,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 				// does call see the intermediary method?
 				// => increase visibility of the type of the intermediary method.
-				result.merge(adjustVisibility(fIntermediaryType, enclosingMember.getDeclaringType(), new NoOverrideProgressMonitor(monitor, 0)));
+				result.merge(adjustVisibility(fIntermediaryType, enclosingMember.getDeclaringType(), noOverrideSubMonitor(monitor,0)));
 
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();

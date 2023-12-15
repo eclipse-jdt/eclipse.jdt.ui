@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -107,6 +106,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContex
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -184,16 +184,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				}
 			}
 			return true;
-		}
-	}
-
-	private static class NoOverrideProgressMonitor extends SubProgressMonitor {
-		public NoOverrideProgressMonitor(IProgressMonitor monitor, int ticks) {
-			super(monitor, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
-		}
-		@Override
-		public void setTaskName(String name) {
-			// do nothing
 		}
 	}
 
@@ -1102,11 +1092,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (resource != null && resource.isLinked()) {
 			createChangeForRenamedCUNullOrLinkedResource(type, changeManager, resource, result);
 		} else {
-			createChangeForRenamedCUStandardResource(type, changeManager, resource, result);
+			createChangeForRenamedCUStandardResource(type, changeManager, result);
 		}
 	}
 
-	protected void createChangeForRenamedCUStandardResource(IType type, TextChangeManager changeManager, IResource resource, DynamicValidationRefactoringChange result) throws CoreException {
+	protected void createChangeForRenamedCUStandardResource(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) throws CoreException {
 		result.addAll(changeManager.getAllChanges());
 
 		String renamedCUName = JavaModelUtil.getRenamedCUName(type.getCompilationUnit(), getNewElementName());
@@ -1414,12 +1404,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 			progressMonitor.subTask(Messages.format(RefactoringCoreMessages.RenameTypeProcessor_progress_current_total, new Object[] { String.valueOf(current), String.valueOf(max)}));
 
-			status.merge(processor.checkInitialConditions(new NoOverrideProgressMonitor(progressMonitor, 1)));
+			status.merge(processor.checkInitialConditions(IntroduceIndirectionRefactoring.noOverrideSubMonitor(progressMonitor, 1)));
 
 			if (status.hasFatalError())
 				return status;
 
-			status.merge(processor.checkFinalConditions(new NoOverrideProgressMonitor(progressMonitor, 1), context));
+			status.merge(processor.checkFinalConditions(IntroduceIndirectionRefactoring.noOverrideSubMonitor(progressMonitor, 1), context));
 
 			if (status.hasFatalError())
 				return status;
