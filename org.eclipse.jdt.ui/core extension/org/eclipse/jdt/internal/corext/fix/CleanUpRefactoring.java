@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IFile;
@@ -203,7 +203,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 
-	private final static class CleanUpRefactoringProgressMonitor extends SubProgressMonitor {
+	private final static class CleanUpRefactoringProgressMonitor extends ProgressMonitorWrapper {
 
 		private double fRealWork;
 		private int fFlushCount;
@@ -211,7 +211,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		private final int fIndex;
 
 		private CleanUpRefactoringProgressMonitor(IProgressMonitor monitor, int ticks, int size, int index) {
-			super(monitor, ticks);
+			super(Progress.subMonitor(monitor, ticks));
 			fFlushCount= 0;
 			fSize= size;
 			fIndex= index;
@@ -494,7 +494,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 
-	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 1, 0, 0);
+	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(1, 1, 0, 0);
 
 	/**
 	 * A clean up is considered slow if its execution lasts longer then the value of
