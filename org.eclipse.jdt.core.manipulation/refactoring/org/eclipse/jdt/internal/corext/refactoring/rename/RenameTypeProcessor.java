@@ -128,6 +128,8 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
+import org.eclipse.jdt.internal.ui.util.Progress;
+
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
@@ -547,7 +549,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			// Load references, including similarly named elements
 			if (fUpdateReferences || fUpdateSimilarElements) {
 				pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_searching);
-				result.merge(initializeReferences(new SubProgressMonitor(pm, referenceSearchTicks)));
+				result.merge(initializeReferences(Progress.subMonitor(pm, referenceSearchTicks)));
 			} else {
 				fReferences= new SearchResultGroup[0];
 			}
@@ -557,7 +559,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				throw new OperationCanceledException();
 
 			if (fUpdateReferences || fUpdateSimilarElements) {
-				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, affectedCusTicks)));
+				result.merge(analyzeAffectedCompilationUnits(Progress.subMonitor(pm, affectedCusTicks)));
 			} else {
 				Checks.checkCompileErrorsInAffectedFile(result, fType.getResource());
 				pm.worked(affectedCusTicks);
@@ -567,15 +569,15 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				return result;
 
 			if (fUpdateSimilarElements) {
-				result.merge(initializeSimilarElementsRenameProcessors(new SubProgressMonitor(pm, similarElementTicks), context));
+				result.merge(initializeSimilarElementsRenameProcessors(Progress.subMonitor(pm, similarElementTicks), context));
 				if (result.hasFatalError())
 					return result;
 			}
 
-			createChanges(new SubProgressMonitor(pm, createChangeTicks));
+			createChanges(Progress.subMonitor(pm, createChangeTicks));
 
 			if (fUpdateQualifiedNames)
-				computeQualifiedNameMatches(new SubProgressMonitor(pm, qualifiedNamesTicks));
+				computeQualifiedNameMatches(Progress.subMonitor(pm, qualifiedNamesTicks));
 
 			return result;
 		} finally {
@@ -1152,7 +1154,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			pm.setTaskName(RefactoringCoreMessages.RenameTypeProcessor_creating_changes);
 
 			if (fUpdateReferences)
-				addReferenceUpdates(fChangeManager, new SubProgressMonitor(pm, 3));
+				addReferenceUpdates(fChangeManager, Progress.subMonitor(pm, 3));
 
 			// Similar names updates have already been added.
 
@@ -1173,9 +1175,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 			if (fUpdateTextualMatches) {
 				pm.subTask(RefactoringCoreMessages.RenameTypeRefactoring_searching_text);
-				TextMatchUpdater.perform(new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fType), this, fChangeManager, fReferences);
+				TextMatchUpdater.perform(Progress.subMonitor(pm, 1), RefactoringScopeFactory.create(fType), this, fChangeManager, fReferences);
 				if (fUpdateSimilarElements)
-					addSimilarElementsTextualUpdates(fChangeManager, new SubProgressMonitor(pm, 3));
+					addSimilarElementsTextualUpdates(fChangeManager, Progress.subMonitor(pm, 3));
 			}
 
 		} finally{

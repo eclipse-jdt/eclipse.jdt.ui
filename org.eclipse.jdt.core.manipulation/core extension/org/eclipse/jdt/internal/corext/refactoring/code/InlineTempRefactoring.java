@@ -31,7 +31,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.RangeMarker;
@@ -124,6 +123,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class InlineTempRefactoring extends Refactoring {
 
@@ -333,7 +334,7 @@ public class InlineTempRefactoring extends Refactoring {
 			inlineTemp(cuRewrite);
 			removeTemp(cuRewrite);
 
-			fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, new SubProgressMonitor(pm, 1));
+			fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, Progress.subMonitor(pm, 1));
 
 			return fCheckResultForCompileProblems ? RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fASTRoot, pm) : new RefactoringStatus();
 		} finally {

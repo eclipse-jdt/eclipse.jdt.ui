@@ -20,7 +20,6 @@ import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IOrdinaryClassFile;
@@ -29,6 +28,8 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Operation, which run, creates structurally equivalent stub types for a list
@@ -90,7 +91,7 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 	protected void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 2);
-			SubProgressMonitor subProgressMonitor= new SubProgressMonitor(monitor, 1);
+			IProgressMonitor subProgressMonitor= Progress.subMonitor(monitor, 1);
 			if (file instanceof IOrdinaryClassFile) {
 				final IType type= ((IOrdinaryClassFile) file).getType();
 				if (type.isAnonymous() || type.isLocal() || type.isMember())

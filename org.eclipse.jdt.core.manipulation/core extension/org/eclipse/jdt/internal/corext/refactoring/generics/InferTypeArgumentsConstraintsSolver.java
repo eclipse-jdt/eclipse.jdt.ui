@@ -29,7 +29,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -49,6 +48,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstra
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class InferTypeArgumentsConstraintsSolver {
@@ -123,8 +124,8 @@ public class InferTypeArgumentsConstraintsSolver {
 		if (pm.isCanceled())
 			throw new OperationCanceledException();
 		fWorkList.addAll(Arrays.asList(allConstraintVariables));
-		runSolver(new SubProgressMonitor(pm, 1));
-		chooseTypes(allConstraintVariables, new SubProgressMonitor(pm, 1));
+		runSolver(Progress.subMonitor(pm, 1));
+		chooseTypes(allConstraintVariables, Progress.subMonitor(pm, 1));
 		findCastsToRemove(fTCModel.getCastVariables());
 		return fUpdate;
 	}
@@ -186,7 +187,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private void runSolver(SubProgressMonitor pm) {
+	private void runSolver(IProgressMonitor pm) {
 		pm.beginTask("", fWorkList.size() * 3); //$NON-NLS-1$
 		while (! fWorkList.isEmpty()) {
 			// Get a variable whose type estimate has changed
@@ -261,7 +262,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private void chooseTypes(ConstraintVariable2[] allConstraintVariables, SubProgressMonitor pm) {
+	private void chooseTypes(ConstraintVariable2[] allConstraintVariables, IProgressMonitor pm) {
 		pm.beginTask("", allConstraintVariables.length); //$NON-NLS-1$
 		for (ConstraintVariable2 cv : allConstraintVariables) {
 			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();

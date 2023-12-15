@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
@@ -117,6 +116,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ClasspathVMUtil;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathFixSelectionDialog;
 
@@ -434,12 +434,12 @@ public class ReorgCorrectionsSubProcessor {
 						IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall(); // can be null
 						if (defaultVM != null && !defaultVM.equals(install)) {
 							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER);
-							ClasspathVMUtil.updateClasspath(newPath, fProject, new SubProgressMonitor(monitor, 1));
+							ClasspathVMUtil.updateClasspath(newPath, fProject, Progress.subMonitor(monitor, 1));
 						} else {
 							monitor.worked(1);
 						}
 						if (defaultVM == null || !isRequiredOrGreaterVMInstall(defaultVM)) {
-							JavaRuntime.setDefaultVMInstall(vmInstall, new SubProgressMonitor(monitor, 3), true);
+							JavaRuntime.setDefaultVMInstall(vmInstall, Progress.subMonitor(monitor, 3), true);
 							return false;
 						}
 						return true;

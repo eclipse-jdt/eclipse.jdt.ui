@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -65,6 +64,8 @@ import org.eclipse.jdt.core.util.IMethodInfo;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperationCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Proposal for a hashed serial version id.
@@ -324,28 +325,28 @@ public final class SerialVersionHashOperationCore extends AbstractSerialVersionO
 			final IPath path= fCompilationUnit.getResource().getFullPath();
 			ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 			try {
-				bufferManager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
+				bufferManager.connect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 10));
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 
 				final ITextFileBuffer buffer= bufferManager.getTextFileBuffer(path, LocationKind.IFILE);
 				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.SerialVersionHashOperation_save_caption, CorrectionMessages.SerialVersionHashOperation_save_message))
-					buffer.commit(new SubProgressMonitor(monitor, 20), true);
+					buffer.commit(Progress.subMonitor(monitor, 20), true);
 				else
 					monitor.worked(20);
 
 				if (monitor.isCanceled())
 					throw new InterruptedException();
 			} finally {
-				bufferManager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 10));
+				bufferManager.disconnect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 10));
 			}
-			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
+			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, Progress.subMonitor(monitor, 60));
 			if (monitor.isCanceled())
 				throw new InterruptedException();
 
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
 			if (typeBinding != null) {
-				Long id= calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 100));
+				Long id= calculateSerialVersionId(typeBinding, Progress.subMonitor(monitor, 100));
 				if (id != null)
 					serialVersionID= id;
 			}

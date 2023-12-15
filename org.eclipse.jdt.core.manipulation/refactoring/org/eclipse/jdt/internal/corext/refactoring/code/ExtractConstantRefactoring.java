@@ -28,7 +28,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -107,6 +106,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class ExtractConstantRefactoring extends Refactoring {
 
@@ -293,12 +293,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 			pm.worked(1);
 
 			if (fCuRewrite == null) {
-				CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
+				CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(fCu, true, Progress.subMonitor(pm, 3));
 				fCuRewrite= new CompilationUnitRewrite(null, fCu, cuNode, this.fFormatterOptions);
 			} else {
 				pm.worked(3);
 			}
-			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
+			result.merge(checkSelection(Progress.subMonitor(pm, 3)));
 
 			if (result.hasFatalError())
 				return result;
@@ -475,7 +475,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		try {
 			createConstantDeclaration();
 			replaceExpressionsWithConstant();
-			fChange= fCuRewrite.createChange(RefactoringCoreMessages.ExtractConstantRefactoring_change_name, true, new SubProgressMonitor(pm, 1));
+			fChange= fCuRewrite.createChange(RefactoringCoreMessages.ExtractConstantRefactoring_change_name, true, Progress.subMonitor(pm, 1));
 
 			return fCheckResultForCompileProblems ? RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCuRewrite.getRoot(), pm) : new RefactoringStatus();
 		} finally {

@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 
@@ -81,7 +81,7 @@ public class RefactoringExecutionHelper {
 				pm.beginTask("", fForked && !fForkChangeExecution ? 7 : 11); //$NON-NLS-1$
 				pm.subTask(""); //$NON-NLS-1$
 
-				final RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				final RefactoringStatus status= fRefactoring.checkAllConditions(Progress.subMonitorPrepend(pm, 4));
 				if (status.getSeverity() >= fStopSeverity) {
 					final boolean[] canceled= { false };
 					if (fForked) {
@@ -94,8 +94,8 @@ public class RefactoringExecutionHelper {
 					}
 				}
 
-				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				fChange= fRefactoring.createChange(Progress.subMonitorPrepend(pm, 2));
+				fChange.initializeValidationData(Progress.subMonitorPrepend(pm, 1));
 
 				fPerformChangeOperation= new PerformChangeOperation(fChange);//RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
@@ -103,7 +103,7 @@ public class RefactoringExecutionHelper {
 					fPerformChangeOperation.setSchedulingRule(((IScheduledRefactoring)fRefactoring).getSchedulingRule());
 
 				if (!fForked || fForkChangeExecution)
-					fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+					fPerformChangeOperation.run(Progress.subMonitorPrepend(pm, 4));
 			} finally {
 				pm.done();
 			}

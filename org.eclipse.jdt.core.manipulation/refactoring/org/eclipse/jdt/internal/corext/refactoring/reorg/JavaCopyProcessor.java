@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -53,6 +52,8 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolic
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator {
 
@@ -89,7 +90,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		Assert.isNotNull(fNewNameQueries, "Missing new name queries"); //$NON-NLS-1$
 		Assert.isNotNull(fReorgQueries, "Missing reorg queries"); //$NON-NLS-1$
 		pm.beginTask("", 2); //$NON-NLS-1$
-		return fCopyPolicy.checkFinalConditions(new SubProgressMonitor(pm, 1), context, fReorgQueries);
+		return fCopyPolicy.checkFinalConditions(Progress.subMonitor(pm, 1), context, fReorgQueries);
 	}
 
 	@Override

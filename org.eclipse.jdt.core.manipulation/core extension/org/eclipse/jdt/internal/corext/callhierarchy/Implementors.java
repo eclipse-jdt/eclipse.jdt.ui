@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,6 +29,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -130,8 +131,7 @@ public class Implementors {
 
         for (int i = 0; (i < finders.length) && !progressMonitor.isCanceled(); i++) {
             Collection<IType> types = finders[i].findImplementingTypes(type,
-                    new SubProgressMonitor(progressMonitor, 10,
-                        SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+            		Progress.subMonitorSupressed(progressMonitor, 10));
 
             if (types != null) {
                 implementingTypes.addAll(types);
@@ -148,8 +148,7 @@ public class Implementors {
 
         for (int i = 0; (i < finders.length) && !progressMonitor.isCanceled(); i++) {
             Collection<IType> types = finders[i].findInterfaces(type,
-                    new SubProgressMonitor(progressMonitor, 10,
-                        SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+            		Progress.subMonitorSupressed(progressMonitor, 10));
 
             if (types != null) {
                 interfaces.addAll(types);
@@ -172,8 +171,7 @@ public class Implementors {
         IProgressMonitor progressMonitor) {
         Collection<IMethod> foundMethods = new ArrayList<>();
 
-        SubProgressMonitor subProgressMonitor = new SubProgressMonitor(progressMonitor,
-                10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+        IProgressMonitor subProgressMonitor = Progress.subMonitorSupressed(progressMonitor, 10);
         subProgressMonitor.beginTask("", types.length); //$NON-NLS-1$
 
         try {

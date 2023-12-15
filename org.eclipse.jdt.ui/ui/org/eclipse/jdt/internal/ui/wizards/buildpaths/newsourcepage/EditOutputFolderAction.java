@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
@@ -152,9 +152,9 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 					try {
 				    	monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 50 + (folderToDelete == null?0:10));
 
-				    	ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 50));
+				    	ClasspathModifier.commitClassPath(cpProject, Progress.subMonitor(monitor, 50));
 				    	if (folderToDelete != null)
-				            folderToDelete.delete(true, new SubProgressMonitor(monitor, 10));
+				            folderToDelete.delete(true, Progress.subMonitor(monitor, 10));
 
 				    	informListeners(delta);
 				    	selectAndReveal(new StructuredSelection(JavaCore.create(element.getResource())));

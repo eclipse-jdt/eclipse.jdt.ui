@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -64,6 +63,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -98,7 +98,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIdsCore;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegateUpdating {
 
@@ -348,12 +348,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				return result;
 
 			boolean mustAnalyzeShadowing;
-			IMethod[] newNameMethods= searchForDeclarationsOfClashingMethods(new SubProgressMonitor(pm, 1));
+			IMethod[] newNameMethods= searchForDeclarationsOfClashingMethods(Progress.subMonitor(pm, 1));
 			if (newNameMethods.length == 0) {
 				mustAnalyzeShadowing= false;
 				pm.worked(1);
 			} else {
-				IType[] outerTypes= searchForOuterTypesOfReferences(newNameMethods, new SubProgressMonitor(pm, 1));
+				IType[] outerTypes= searchForOuterTypesOfReferences(newNameMethods, Progress.subMonitor(pm, 1));
 				if (outerTypes.length > 0) {
 					//There exists a reference to a clashing method, where the reference is in a nested type.
 					//That nested type could be a type in a ripple method's hierarchy, which could
@@ -391,9 +391,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getCurrentElementName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-			initializeMethodsToRename(new SubProgressMonitor(pm, 1), binaryRefs);
+			initializeMethodsToRename(Progress.subMonitor(pm, 1), binaryRefs);
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_searchingForReferences);
-			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 3), result, binaryRefs);
+			fOccurrences= getOccurrences(Progress.subMonitor(pm, 3), result, binaryRefs);
 			binaryRefs.addErrorIfNecessary(result);
 
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions);
@@ -407,9 +407,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (result.hasFatalError())
 				return result;
 
-			createChanges(new SubProgressMonitor(pm, 1), result);
+			createChanges(Progress.subMonitor(pm, 1), result);
 			if (fUpdateReferences && mustAnalyzeShadowing)
-				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
+				result.merge(analyzeRenameChanges(Progress.subMonitor(pm, 1)));
 			else
 				pm.worked(1);
 
@@ -546,7 +546,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			RefactoringStatus result= new RefactoringStatus();
 			ICompilationUnit[] declarationCUs= getDeclarationCUs();
 			newDeclarationWCs= RenameAnalyzeUtil.createNewWorkingCopies(declarationCUs,
-					fChangeManager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
+					fChangeManager, fWorkingCopyOwner, Progress.subMonitor(pm, 1));
 
 			IMethod[] wcOldMethods= new IMethod[fMethodsToRename.size()];
 			IMethod[] wcNewMethods= new IMethod[fMethodsToRename.size()];
@@ -566,8 +566,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				wcNewMethods[i]= getMethodInWorkingCopy(method, getNewElementName(), typeWc);
 			}
 
-//			SearchResultGroup[] newOccurrences= findNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3));
-			SearchResultGroup[] newOccurrences= batchFindNewOccurrences(wcNewMethods, wcOldMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3), result);
+//			SearchResultGroup[] newOccurrences= findNewOccurrences(newMethods, newDeclarationWCs, Progress.subMonitor(pm, 3));
+			SearchResultGroup[] newOccurrences= batchFindNewOccurrences(wcNewMethods, wcOldMethods, newDeclarationWCs, Progress.subMonitor(pm, 3), result);
 
 			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, fOccurrences, newOccurrences, getNewElementName()));
 			return result;
@@ -601,9 +601,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 //				ICompilationUnit wc= RenameAnalyzeUtil.findWorkingCopyForCu(newDeclarationWCs, originalCu);
 //				if (wc == null) {
 //					newWc= RenameAnalyzeUtil.createNewWorkingCopy(originalCu, fChangeManager, fWorkingCopyOwner,
-//							new SubProgressMonitor(pm, 1));
+//							Progress.subMonitor(pm, 1));
 //				}
-//				searchEngine.search(refsPattern, searchParticipants, scope,	requestor, new SubProgressMonitor(pm, 1));
+//				searchEngine.search(refsPattern, searchParticipants, scope,	requestor, Progress.subMonitor(pm, 1));
 //			} finally {
 //				if (newWc != null)
 //					newWc.discardWorkingCopy();
@@ -657,8 +657,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		try {
 			otherWCs= RenameAnalyzeUtil.createNewWorkingCopies(
 					needWCs.toArray(new ICompilationUnit[needWCs.size()]),
-					fChangeManager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
-			searchEngine.search(refsPattern, searchParticipants, scope,	requestor, new SubProgressMonitor(pm, 1));
+					fChangeManager, fWorkingCopyOwner, Progress.subMonitor(pm, 1));
+			searchEngine.search(refsPattern, searchParticipants, scope,	requestor, Progress.subMonitor(pm, 1));
 		} finally {
 			pm.done();
 			if (otherWCs != null) {

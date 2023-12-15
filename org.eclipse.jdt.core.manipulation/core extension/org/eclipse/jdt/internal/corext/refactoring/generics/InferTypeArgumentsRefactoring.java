@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -96,6 +95,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 
@@ -178,13 +178,13 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				List<ICompilationUnit> cus= Arrays.asList(JavaModelUtil.getAllCompilationUnits(javaElements));
 				int batchSize= 150;
 				int batches= ((cus.size()-1) / batchSize) + 1;
-				SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
+				IProgressMonitor projectMonitor= Progress.subMonitor(pm, 1);
 				projectMonitor.beginTask("", batches); //$NON-NLS-1$
 				projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building);
 				for (int i= 0; i < batches; i++) {
 					List<ICompilationUnit> batch= cus.subList(i * batchSize, Math.min(cus.size(), (i + 1) * batchSize));
 					ICompilationUnit[] batchCus= batch.toArray(new ICompilationUnit[batch.size()]);
-					final SubProgressMonitor batchMonitor= new SubProgressMonitor(projectMonitor, 1);
+					final IProgressMonitor batchMonitor= Progress.subMonitor(projectMonitor, 1);
 					batchMonitor.subTask(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies);
 					ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 					parser.setProject(project);
@@ -238,11 +238,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_solving);
 			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(fTCModel);
-			InferTypeArgumentsUpdate updates= solver.solveConstraints(new SubProgressMonitor(pm, 1));
+			InferTypeArgumentsUpdate updates= solver.solveConstraints(Progress.subMonitor(pm, 1));
 			solver= null; //free caches
 
 			fChangeManager= new TextChangeManager();
-			rewriteDeclarations(updates, new SubProgressMonitor(pm, 1));
+			rewriteDeclarations(updates, Progress.subMonitor(pm, 1));
 
 			IFile[] filesToModify= ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 			result.merge(Checks.validateModifiesFiles(filesToModify, getValidationContext(), pm));

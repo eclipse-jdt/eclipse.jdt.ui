@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -93,6 +92,7 @@ import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
@@ -971,7 +971,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		progressMonitor.beginTask("", count); //$NON-NLS-1$
 		try {
 			for (int i= 0; i < count; i++) {
-				SubProgressMonitor subProgressMonitor= new SubProgressMonitor(progressMonitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+				IProgressMonitor subProgressMonitor= Progress.subMonitorPrepend(progressMonitor, 1);
 				fJarPackage= fJarPackages[i];
 				if (fJarPackage != null)
 					singleRun(subProgressMonitor);
@@ -992,7 +992,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				int subMonitorTicks= totalWork/10;
 				totalWork += subMonitorTicks;
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
-				SubProgressMonitor subProgressMonitor= new SubProgressMonitor(progressMonitor, subMonitorTicks, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+				IProgressMonitor subProgressMonitor= Progress.subMonitorPrepend(progressMonitor, subMonitorTicks);
 				buildProjects(subProgressMonitor);
 			} else
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$

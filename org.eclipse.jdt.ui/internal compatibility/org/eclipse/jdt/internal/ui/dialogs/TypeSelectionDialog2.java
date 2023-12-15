@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -67,6 +66,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 /**
@@ -311,8 +311,8 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				if (fgFirstTime || history.isEmpty()) {
 					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
 					if (history.needConsistencyCheck()) {
-						refreshSearchIndices(new SubProgressMonitor(monitor, 90));
-						history.checkConsistency(new SubProgressMonitor(monitor, 10));
+						refreshSearchIndices(Progress.subMonitor(monitor, 90));
+						history.checkConsistency(Progress.subMonitor(monitor, 10));
 					} else {
 						refreshSearchIndices(monitor);
 					}

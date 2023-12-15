@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -68,6 +67,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescriptor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -100,11 +100,11 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 					monitor.beginTask(NewWizardMessages.ClasspathFixSelectionDialog_process_fix_description, 4);
 					try {
 						ClasspathFixProposal fix= dialog.getSelectedClasspathFix();
-						Change change= fix.createChange(new SubProgressMonitor(monitor, 1));
+						Change change= fix.createChange(Progress.subMonitor(monitor, 1));
 
 						PerformChangeOperation op= new PerformChangeOperation(change);
 						op.setUndoManager(RefactoringCore.getUndoManager(), change.getName());
-						op.run(new SubProgressMonitor(monitor, 1));
+						op.run(Progress.subMonitor(monitor, 1));
 					} catch (OperationCanceledException e1) {
 						throw new InterruptedException();
 					} catch (CoreException e2) {

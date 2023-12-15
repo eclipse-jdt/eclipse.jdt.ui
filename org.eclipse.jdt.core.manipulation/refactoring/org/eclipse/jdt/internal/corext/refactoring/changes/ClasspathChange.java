@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -33,6 +32,8 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class ClasspathChange extends ResourceChange {
 
@@ -87,7 +88,7 @@ public class ClasspathChange extends ResourceChange {
 				IClasspathEntry[] oldClasspath= fProject.getRawClasspath();
 				IPath oldOutputLocation= fProject.getOutputLocation();
 
-				fProject.setRawClasspath(fNewClasspath, fOutputLocation, new SubProgressMonitor(pm, 1));
+				fProject.setRawClasspath(fNewClasspath, fOutputLocation, Progress.subMonitor(pm, 1));
 
 				return new ClasspathChange(fProject, oldClasspath, oldOutputLocation);
 			} else {
