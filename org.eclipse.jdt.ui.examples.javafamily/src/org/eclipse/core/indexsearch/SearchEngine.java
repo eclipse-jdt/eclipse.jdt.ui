@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
@@ -132,10 +132,10 @@ public class SearchEngine {
 	 * Perform the given query against the index and return results via the resultCollector.
 	 */
 	public void search(IIndexQuery search, ISearchResultCollector resultCollector,
-						IProgressMonitor progressMonitor, int waitingPolicy) {
+						IProgressMonitor progressMonitor, @SuppressWarnings("unused") int waitingPolicy) {
 
 		HashSet pathCollector= new HashSet();
-		IProgressMonitor pm= progressMonitor == null ? null : new SubProgressMonitor(progressMonitor, 5);
+		IProgressMonitor pm= SubMonitor.convert(progressMonitor, 5);
 		execute(search, pathCollector, pm);
 
 		/* TODO_SEARCH */
