@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -90,7 +90,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		int nNatures= (natures == null) ? 0 : natures.length;
 		int nReferences= (references == null) ? 0 : references.length;
 
-		monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 2);
+		SubMonitor subMon= SubMonitor.convert(monitor, ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 1);
 
 		String name= page.getName();
 
@@ -103,10 +103,11 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			referencedProjects[i]= root.getProject(references[i].getAttribute("id")); //$NON-NLS-1$
 		}
 
-		IProject proj= configNewProject(root, name, natureIds, referencedProjects, encoding, monitor);
+		IProject proj= configNewProject(root, name, natureIds, referencedProjects, encoding, subMon.split(1));
+
 
 		for (int i= 0; i < nImports; i++) {
-			doImports(proj, imports[i], new SubProgressMonitor(monitor, 1));
+			doImports(proj, imports[i], subMon.split(1));
 		}
 
 		String open= desc.getAttribute("open"); //$NON-NLS-1$
@@ -132,11 +133,11 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			desc.setLocation(null);
 			desc.setNatureIds(natureIds);
 			desc.setReferencedProjects(referencedProjects);
-
-			project.setDescription(desc, new SubProgressMonitor(monitor, 1));
+			SubMonitor subMon= SubMonitor.convert(monitor,2);
+			project.setDescription(desc, subMon.split(1));
 
 			if (encoding != null) {
-				project.setDefaultCharset(encoding, new SubProgressMonitor(monitor, 1));
+				project.setDefaultCharset(encoding, subMon.split(1));
 			}
 
 			return project;
@@ -166,7 +167,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			}
 
 			try (ZipFile zipFile= getZipFileFromPluginDir(importPath, getContributingPlugin(curr))) {
-				importFilesFromZip(zipFile, destPath, new SubProgressMonitor(monitor, 1));
+				importFilesFromZip(zipFile, destPath, monitor);
 			} catch (IOException e) {
 				throw new RuntimeException();
 			}
