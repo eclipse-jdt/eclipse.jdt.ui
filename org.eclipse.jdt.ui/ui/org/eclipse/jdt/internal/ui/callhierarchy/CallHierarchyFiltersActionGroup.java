@@ -21,10 +21,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -62,15 +61,15 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     	}
     }
 
-    private IViewPart fPart;
+    private CallHierarchyViewPart fPart;
 
     /**
      * Creates a new <code>CustomFiltersActionGroup</code>.
      *
-     * @param part      the view part that owns this action group
-     * @param viewer    the viewer to be filtered
+	 * @param part the call hierarchy view part
+	 * @param viewer the call hierarchy viewer
      */
-    public CallHierarchyFiltersActionGroup(IViewPart part, StructuredViewer viewer) {
+    public CallHierarchyFiltersActionGroup(CallHierarchyViewPart part, CallHierarchyViewer viewer) {
         Assert.isNotNull(part);
         Assert.isNotNull(viewer);
         fPart= part;
@@ -98,7 +97,9 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
         FiltersDialog dialog= new FiltersDialog(
             fPart.getViewSite().getShell());
 
-        dialog.open();
+        if(Window.OK == dialog.open()) {
+        	fPart.refresh();
+        }
     }
 
     private void openExpandWithConstructorsDialog() {
