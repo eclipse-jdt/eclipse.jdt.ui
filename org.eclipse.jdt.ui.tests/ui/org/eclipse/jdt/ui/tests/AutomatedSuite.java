@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import org.eclipse.jdt.junit.launcher.JUnitLauncherTests;
 import org.eclipse.jdt.junit.tests.JUnitJUnitTests;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -73,6 +74,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	RefactoringTests.class,
 
 	SearchTest.class,
+	JUnitLauncherTests.class,
 	JUnitJUnitTests.class,
 
 	BuildpathTestSuite.class,
