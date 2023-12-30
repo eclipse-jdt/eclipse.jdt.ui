@@ -53,6 +53,7 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -458,7 +459,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				programArguments.add("-classNames"); //$NON-NLS-1$
 				programArguments.add(type.getFullyQualifiedName());
 				collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, type, configuration);
-			} else if (testElement instanceof IPackageFragment || testElement instanceof IPackageFragmentRoot || testElement instanceof IJavaProject) {
+			} else if (testElement instanceof IPackageFragment || testElement instanceof IJavaProject) {
 				Set<String> pkgNames= new HashSet<>();
 				String fileName= createPackageNamesFile(testElement, testRunnerKind, pkgNames);
 				programArguments.add("-packageNameFile"); //$NON-NLS-1$
@@ -467,6 +468,15 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					if (!DEFAULT.equals(pkgName)) { // skip --add-opens for default package
 						collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, pkgName, configuration);
 					}
+				}
+			} else if (testElement instanceof IPackageFragmentRoot packageFragmentRoot) {
+				List<IType> typesToExecute= enumerateTypesInPackage(packageFragmentRoot);
+				IJavaElement[] collectedTestElements = typesToExecute.toArray(new IJavaElement[typesToExecute.size()]);
+				String fileName= createTestNamesFile(collectedTestElements);
+				programArguments.add("-testNameFile"); //$NON-NLS-1$
+				programArguments.add(fileName);
+				for (IJavaElement singleTestType : collectedTestElements) {
+					collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, singleTestType, configuration);
 				}
 			} else {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
@@ -519,6 +529,25 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		if (addOpensTargets != null) {
 			vmArguments.addAll(addOpensVmArgs);
 		}
+	}
+
+	private List<IType> enumerateTypesInPackage(IPackageFragmentRoot packageFragmentRoot) throws JavaModelException {
+		List<IType> typesToExecute = new ArrayList<>();
+		for (IJavaElement child : packageFragmentRoot.getChildren()) {
+			if (child instanceof IPackageFragment packageFragment) {
+				if (packageFragment.hasChildren()) {
+					IJavaElement[] children= packageFragment.getChildren();
+					for (IJavaElement ije : children) {
+						if (ije instanceof ICompilationUnit icu) {
+							IType[] allTypes= icu.getAllTypes();
+							IType topLevelType = allTypes[0];
+							typesToExecute.add(topLevelType);
+						}
+					}
+				}
+			}
+		}
+		return typesToExecute;
 	}
 
 	private static boolean isOnModulePath(IJavaProject javaProject, String typeToCheck) {
