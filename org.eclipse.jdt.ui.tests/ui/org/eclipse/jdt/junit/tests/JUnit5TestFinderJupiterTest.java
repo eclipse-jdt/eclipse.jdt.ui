@@ -15,8 +15,8 @@ package org.eclipse.jdt.junit.tests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -61,7 +61,7 @@ public class JUnit5TestFinderJupiterTest {
 
 	private static final String JAVA_FILE_NAME= JAVA_CLASS_NAME + ".java";
 
-	private static final Path TEST_CLASS_FILE= Path.of("testresources").resolve("testClasses").resolve(JAVA_FILE_NAME);
+	private static final String TEST_CLASS_FILE= "/testresources/testClasses/" + JAVA_FILE_NAME;
 
 	private static IJavaProject javaProject;
 
@@ -141,7 +141,9 @@ public class JUnit5TestFinderJupiterTest {
 	}
 
 	private static ICompilationUnit createCompilationUnit(IPackageFragment packageFragment) throws Exception {
-		String content= Files.readString(TEST_CLASS_FILE);
-		return packageFragment.createCompilationUnit(JAVA_FILE_NAME, content, false, null);
+		try (InputStream stream= JUnit5TestFinderJupiterTest.class.getResourceAsStream(TEST_CLASS_FILE);) {
+			String content= new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+			return packageFragment.createCompilationUnit(JAVA_FILE_NAME, content, false, null);
+		}
 	}
 }
