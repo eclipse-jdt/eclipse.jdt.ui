@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Modifies a method with the static keyword and changes all method invocations to properly invoke
  * the refactored method.
  *
- * @since 3.31
+ * @since 3.32
  *
  */
 public final class MakeStaticAction extends SelectionDispatchAction {
