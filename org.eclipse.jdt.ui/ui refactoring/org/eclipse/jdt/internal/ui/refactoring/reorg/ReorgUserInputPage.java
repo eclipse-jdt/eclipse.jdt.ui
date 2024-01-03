@@ -34,6 +34,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -42,6 +44,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -163,10 +166,13 @@ abstract class ReorgUserInputPage extends UserInputWizardPage {
 		treeViewer.setContentProvider(new DestinationContentProvider(getDestinationValidator()));
 		treeViewer.setComparator(new JavaElementComparator());
 
+		TreeViewerFilter viewerFilter = new TreeViewerFilter();
+		treeViewer.addFilter(viewerFilter);
+
 		// Add a ModifyListener to the search text to update the filter
 		searchText.addModifyListener(e -> {
 			String searchString= searchText.getText().trim();
-			((DestinationContentProvider) treeViewer.getContentProvider()).setSearchString(searchString);
+			viewerFilter.setSearchText(searchString);
 			treeViewer.refresh();
 			treeViewer.expandAll();
 		});
@@ -196,5 +202,41 @@ abstract class ReorgUserInputPage extends UserInputWizardPage {
 			}
 		}
 	}
+}
+class TreeViewerFilter extends ViewerFilter {
+
+    private String searchText;
+
+    public void setSearchText(String searchText) {
+        this.searchText = searchText.toLowerCase();
+    }
+
+    @Override
+    public boolean select(Viewer viewer, Object parentElement, Object element) {
+        if (searchText == null || searchText.isEmpty()) {
+            return true; // If search text is empty, show all elements
+        }
+
+        if (element instanceof JavaProject) {
+        	JavaProject treeElement = (JavaProject) element;
+        	Object[] children;
+			try {
+				children= treeElement.getChildren();
+
+	        	for (Object child : children) {
+	        		if(child.toString().contains(searchText)) {
+	        			return true; // short circuit the operation if even one child is matching (to keep the project in the tree view), child filtering is done in else block
+	        		}
+	        	}
+			} catch (JavaModelException e) {
+				e.printStackTrace();
+			}
+	        String elementText = treeElement.getElementName().toLowerCase();
+	        return elementText.contains(searchText);
+        } else {
+        	String childElementName = element.toString();
+        	return childElementName.contains(searchText);
+        }
+    }
 }
 
