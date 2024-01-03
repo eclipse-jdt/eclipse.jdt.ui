@@ -1063,6 +1063,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MakeStaticRefactoring_not_available_for_recursive_methods;
 
+	public static String MakeStaticRefactoring_unexpected_binding_error;
+
 	public static String MakeStaticRefactoring_not_available_for_parametrized_methods;
 
 	public static String MakeStaticRefactoring_not_available_for_wildCardTypes_as_bound;

@@ -82,6 +82,9 @@ public class FinalConditionsChecker {
 		int parameterAmount= methodDeclaration.parameters().size() + 1;
 		String methodName= methodDeclaration.getName().getIdentifier();
 		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+		if (methodBinding == null) {
+			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MakeStaticRefactoring_unexpected_binding_error));
+		}
 		ITypeBinding typeBinding= methodBinding.getDeclaringClass();
 		IType type= (IType) typeBinding.getJavaElement();
 
@@ -186,6 +189,9 @@ public class FinalConditionsChecker {
 	public void checkIsNotRecursive(SimpleName node, MethodDeclaration methodDeclaration) {
 		IMethodBinding nodeMethodBinding= (IMethodBinding) node.resolveBinding();
 		IMethodBinding outerMethodBinding= methodDeclaration.resolveBinding();
+		if (nodeMethodBinding == null || outerMethodBinding == null) {
+			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MakeStaticRefactoring_unexpected_binding_error));
+		}
 
 		if (nodeMethodBinding.isEqualTo(outerMethodBinding)) {
 			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods));
