@@ -395,6 +395,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	String EXTRACT_CLASS= "org.eclipse.jdt.ui.edit.text.java.extract.class"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the refactor -> make static action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.make.static"</code>).
+	 *
+	 * @since 3.32
+	 */
+	String MAKE_STATIC= "org.eclipse.jdt.ui.edit.text.java.make.static"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the refactor -> introduce parameter action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.introduce.parameter"</code>).
 	 *
