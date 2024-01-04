@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Andrey Loskutov (loskutov@gmx.de) and others.
+ * Copyright (c) 2023, 2024 Andrey Loskutov (loskutov@gmx.de) and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.internal.ErrorViewPart;
 import org.eclipse.ui.intro.IIntroManager;
 import org.eclipse.ui.intro.IIntroPart;
 
@@ -47,6 +46,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 
@@ -102,11 +103,42 @@ public class SmokeViewsTest {
 		smokeTest("org.eclipse.jdt.bcoview.views.BytecodeReferenceView");
 	}
 
+	@Test
+	public void testOpenJavadocView() throws Exception {
+		smokeTest(JavaUI.ID_JAVADOC_VIEW);
+	}
+
+	@Test
+	public void testOpenPackagesView() throws Exception {
+		smokeTest(JavaUI.ID_PACKAGES_VIEW);
+	}
+
+	@Test
+	public void testOpenTypesView() throws Exception {
+		smokeTest(JavaUI.ID_TYPES_VIEW);
+	}
+
+	@Test
+	public void testOpenMembersView() throws Exception {
+		smokeTest(JavaUI.ID_MEMBERS_VIEW);
+	}
+
+	@Test
+	public void testOpenProjectsView() throws Exception {
+		smokeTest(JavaUI.ID_PROJECTS_VIEW);
+	}
+
+	@Test
+	public void testOpenSourceView() throws Exception {
+		smokeTest(JavaUI.ID_SOURCE_VIEW);
+	}
+
+	@SuppressWarnings("restriction") // org.eclipse.ui.internal.ErrorViewPart
 	private void smokeTest(String viewId) throws PartInitException {
 		view = window.getActivePage().showView(viewId);
 		assertNotNull("View " + viewId + " should be created", view);
 		DisplayHelper.driveEventQueue(Display.getDefault());
-		if(view instanceof ErrorViewPart) {
+		if(view instanceof org.eclipse.ui.internal.ErrorViewPart) {
 			fail("Error happened on opening view " + viewId);
 		}
 	}

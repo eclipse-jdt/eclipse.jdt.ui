@@ -75,13 +75,10 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -99,7 +96,6 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -113,11 +109,8 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -125,18 +118,14 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -155,27 +144,32 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
-import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.fix.AddInferredLambdaParameterTypesFixCore;
+import org.eclipse.jdt.internal.corext.fix.AddVarLambdaParameterTypesFixCore;
+import org.eclipse.jdt.internal.corext.fix.ChangeLambdaBodyToBlockFixCore;
+import org.eclipse.jdt.internal.corext.fix.ChangeLambdaBodyToExpressionFixCore;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
+import org.eclipse.jdt.internal.corext.fix.ConvertLambdaToMethodReferenceFixCore;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
 import org.eclipse.jdt.internal.corext.fix.DoWhileRatherThanWhileFixCore;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
+import org.eclipse.jdt.internal.corext.fix.InvertEqualsExpressionFixCore;
 import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.RemoveVarOrInferredLambdaParameterTypesFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
@@ -857,443 +851,45 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getChangeLambdaBodyToBlockProposal(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		LambdaExpression lambda;
-		if (covering instanceof LambdaExpression) {
-			lambda= (LambdaExpression) covering;
-		} else if (covering.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
-			lambda= (LambdaExpression) covering.getParent();
-		} else {
-			return false;
-		}
-
-		if (!(lambda.getBody() instanceof Expression))
-			return false;
-		if (lambda.resolveMethodBinding() == null)
-			return false;
-
-		if (resultingCollections == null)
+		if (resultingCollections == null) {
 			return true;
-
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		QuickAssistProcessorUtil.changeLambdaBodyToBlock(lambda, ast, rewrite);
-
-		// add proposal
-		String label= CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_block;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_LAMBDA_BODY_TO_BLOCK, image);
-		resultingCollections.add(proposal);
-		return true;
+		}
+		ChangeLambdaBodyToBlockFixCore fix= ChangeLambdaBodyToBlockFixCore.createChangeLambdaBodyToBlockFix(context.getASTRoot(), covering);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CHANGE_LAMBDA_BODY_TO_BLOCK, image, context);
+			resultingCollections.add(proposal);
+			return true;
+		}
+		return false;
 	}
 
 	private static boolean getChangeLambdaBodyToExpressionProposal(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		LambdaExpression lambda;
-		if (covering instanceof LambdaExpression) {
-			lambda= (LambdaExpression) covering;
-		} else if (covering.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
-			lambda= (LambdaExpression) covering.getParent();
-		} else {
-			return false;
-		}
-
-		if (!(lambda.getBody() instanceof Block))
-			return false;
-
-		Block lambdaBody= (Block) lambda.getBody();
-
-		Expression exprBody= getSingleExpressionFromLambdaBody(lambdaBody);
-		if (exprBody == null)
-			return false;
-
-		if (resultingCollections == null)
-			return true;
-
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		Expression movedBody= (Expression) rewrite.createMoveTarget(exprBody);
-		rewrite.set(lambda, LambdaExpression.BODY_PROPERTY, movedBody, null);
-
-		// add proposal
-		String label= CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_LAMBDA_BODY_TO_EXPRESSION, image);
-		resultingCollections.add(proposal);
-		return true;
-	}
-
-	private static Expression getSingleExpressionFromLambdaBody(Block lambdaBody) {
-		if (lambdaBody.statements().size() != 1)
-			return null;
-		Statement singleStatement= (Statement) lambdaBody.statements().get(0);
-		if (singleStatement instanceof ReturnStatement) {
-			return ((ReturnStatement) singleStatement).getExpression();
-		} else if (singleStatement instanceof ExpressionStatement) {
-			Expression expression= ((ExpressionStatement) singleStatement).getExpression();
-			if (isValidLambdaExpressionBody(expression)) {
-				return expression;
-			}
-		}
-		return null;
-	}
-
-	private static boolean isValidLambdaExpressionBody(Expression expression) {
-		if (expression instanceof Assignment
-				|| expression instanceof ClassInstanceCreation
-				|| expression instanceof MethodInvocation
-				|| expression instanceof PostfixExpression
-				|| expression instanceof SuperMethodInvocation) {
+		if (resultingCollections == null) {
 			return true;
 		}
-		if (expression instanceof PrefixExpression) {
-			Operator operator= ((PrefixExpression) expression).getOperator();
-			if (operator == Operator.INCREMENT || operator == Operator.DECREMENT) {
-				return true;
-			}
+		ChangeLambdaBodyToExpressionFixCore fix= ChangeLambdaBodyToExpressionFixCore.createChangeLambdaBodyToBlockFix(context.getASTRoot(), covering);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CHANGE_LAMBDA_BODY_TO_EXPRESSION, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
 		return false;
 	}
 
 	private static boolean getConvertLambdaToMethodReferenceProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
-		LambdaExpression lambda;
-		if (coveringNode instanceof LambdaExpression) {
-			lambda= (LambdaExpression) coveringNode;
-		} else if (coveringNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
-			lambda= (LambdaExpression) coveringNode.getParent();
-		} else {
-			lambda= ASTResolving.findEnclosingLambdaExpression(coveringNode);
-			if (lambda == null) {
-				return false;
-			}
-		}
-
-		ASTNode lambdaBody= lambda.getBody();
-		Expression exprBody;
-		if (lambdaBody instanceof Block) {
-			exprBody= getSingleExpressionFromLambdaBody((Block) lambdaBody);
-		} else {
-			exprBody= (Expression) lambdaBody;
-		}
-		exprBody= ASTNodes.getUnparenthesedExpression(exprBody);
-		if (exprBody == null || !isValidLambdaReferenceToMethod(exprBody))
-			return false;
-
-		if (!ASTNodes.isParent(exprBody, coveringNode)
-				&& !representsDefiningNode(coveringNode, exprBody)) {
-			return false;
-		}
-
-		List<Expression> lambdaParameters= new ArrayList<>();
-		for (VariableDeclaration param : (List<VariableDeclaration>) lambda.parameters()) {
-			lambdaParameters.add(param.getName());
-		}
-		if (exprBody instanceof ClassInstanceCreation) {
-			ClassInstanceCreation cic= (ClassInstanceCreation) exprBody;
-			if (cic.getExpression() != null || cic.getAnonymousClassDeclaration() != null)
-				return false;
-			if (!matches(lambdaParameters, cic.arguments()))
-				return false;
-		} else if (exprBody instanceof ArrayCreation) {
-			List<Expression> dimensions= ((ArrayCreation) exprBody).dimensions();
-			if (dimensions.size() != 1)
-				return false;
-			if (!matches(lambdaParameters, dimensions))
-				return false;
-		} else if (exprBody instanceof SuperMethodInvocation) {
-			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) exprBody;
-			IMethodBinding methodBinding= superMethodInvocation.resolveMethodBinding();
-			if (methodBinding == null)
-				return false;
-			if (Modifier.isStatic(methodBinding.getModifiers())) {
-				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(superMethodInvocation, methodBinding, superMethodInvocation.getQualifier());
-				if (invocationTypeBinding == null)
-					return false;
-			}
-			if (!matches(lambdaParameters, superMethodInvocation.arguments()))
-				return false;
-		} else if (exprBody instanceof InstanceofExpression) {
-			InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
-			if (instanceofExpression.getRightOperand().resolveBinding() == null)
-				return false;
-			if (!matches(lambdaParameters, List.of(instanceofExpression.getLeftOperand())))
-				return false;
-		} else { // MethodInvocation
-			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
-			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-			if (methodBinding == null)
-				return false;
-
-			Expression invocationExpr= methodInvocation.getExpression();
-			if (Modifier.isStatic(methodBinding.getModifiers())) {
-				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationExpr);
-				if (invocationTypeBinding == null)
-					return false;
-				if (!matches(lambdaParameters, methodInvocation.arguments()))
-					return false;
-			} else if ((lambda.parameters().size() - methodInvocation.arguments().size()) == 1) {
-				if (invocationExpr == null)
-					return false;
-				ITypeBinding invocationTypeBinding= invocationExpr.resolveTypeBinding();
-				if (invocationTypeBinding == null)
-					return false;
-				IMethodBinding lambdaMethodBinding= lambda.resolveMethodBinding();
-				if (lambdaMethodBinding == null)
-					return false;
-				ITypeBinding firstParamType= lambdaMethodBinding.getParameterTypes()[0];
-				if ((!Bindings.equals(invocationTypeBinding, firstParamType) && !Bindings.isSuperType(invocationTypeBinding, firstParamType))
-						|| !JdtASTMatcher.doNodesMatch(lambdaParameters.get(0), invocationExpr)
-						|| !matches(lambdaParameters.subList(1, lambdaParameters.size()), methodInvocation.arguments()))
-					return false;
-			} else if (!matches(lambdaParameters, methodInvocation.arguments())) {
-				return false;
-			}
-		}
-
-		if (resultingCollections == null)
+		if (resultingCollections == null) {
 			return true;
-
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ImportRewrite importRewrite= null;
-		MethodReference replacement;
-
-		if (exprBody instanceof ClassInstanceCreation) {
-			CreationReference creationReference= ast.newCreationReference();
-			replacement= creationReference;
-
-			ClassInstanceCreation cic= (ClassInstanceCreation) exprBody;
-			Type type= cic.getType();
-			if (type.isParameterizedType() && ((ParameterizedType) type).typeArguments().size() == 0) {
-				type= ((ParameterizedType) type).getType();
-			}
-			creationReference.setType((Type) rewrite.createCopyTarget(type));
-			creationReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, cic.typeArguments()));
-		} else if (exprBody instanceof ArrayCreation) {
-			CreationReference creationReference= ast.newCreationReference();
-			replacement= creationReference;
-
-			ArrayType arrayType= ((ArrayCreation) exprBody).getType();
-			Type copiedElementType= (Type) rewrite.createCopyTarget(arrayType.getElementType());
-			creationReference.setType(ast.newArrayType(copiedElementType, arrayType.getDimensions()));
-		} else if (exprBody instanceof SuperMethodInvocation) {
-			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) exprBody;
-			IMethodBinding methodBinding= superMethodInvocation.resolveMethodBinding();
-			Name superQualifier= superMethodInvocation.getQualifier();
-
-			if (Modifier.isStatic(methodBinding.getModifiers())) {
-				TypeMethodReference typeMethodReference= ast.newTypeMethodReference();
-				replacement= typeMethodReference;
-
-				typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
-				importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(superMethodInvocation, methodBinding, superQualifier);
-				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding.getTypeDeclaration(), ast));
-				typeMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
-			} else {
-				SuperMethodReference superMethodReference= ast.newSuperMethodReference();
-				replacement= superMethodReference;
-
-				if (superQualifier != null) {
-					superMethodReference.setQualifier((Name) rewrite.createCopyTarget(superQualifier));
-				}
-				superMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
-				superMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
-			}
-		} else if (exprBody instanceof InstanceofExpression) {
-			InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
-			ExpressionMethodReference expMethodReference= ast.newExpressionMethodReference();
-			TypeLiteral typeLiteral= ast.newTypeLiteral();
-			importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-			ITypeBinding instanceofTypeBinding= instanceofExpression.getRightOperand().resolveBinding();
-			typeLiteral.setType(importRewrite.addImport(instanceofTypeBinding.getTypeDeclaration(), ast));
-			expMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
-			expMethodReference.setExpression(typeLiteral);
-			replacement= expMethodReference;
-		} else { // MethodInvocation
-			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
-			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-			Expression invocationQualifier= methodInvocation.getExpression();
-
-			boolean isStaticMethod= Modifier.isStatic(methodBinding.getModifiers());
-			boolean isTypeRefToInstanceMethod= methodInvocation.arguments().size() != lambda.parameters().size();
-
-			if (isStaticMethod || isTypeRefToInstanceMethod) {
-				TypeMethodReference typeMethodReference= ast.newTypeMethodReference();
-				replacement= typeMethodReference;
-
-				typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-				importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationQualifier);
-				invocationTypeBinding= StubUtility2Core.replaceWildcardsAndCaptures(invocationTypeBinding);
-				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(lambda, importRewrite);
-				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast, importRewriteContext, TypeLocation.OTHER));
-				typeMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
-
-			} else {
-				ExpressionMethodReference exprMethodReference= ast.newExpressionMethodReference();
-				replacement= exprMethodReference;
-
-				exprMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
-				if (invocationQualifier != null) {
-					exprMethodReference.setExpression((Expression) rewrite.createCopyTarget(invocationQualifier));
-				} else {
-					// check if method is in class scope or in super/nested class scope
-					TypeDeclaration lambdaParentType= (TypeDeclaration) ASTResolving.findParentType(lambda);
-					ITypeBinding lambdaMethodInvokingClass= lambdaParentType.resolveBinding();
-					ITypeBinding lambdaMethodDeclaringClass= methodBinding.getDeclaringClass();
-
-					ThisExpression newThisExpression= ast.newThisExpression();
-
-					ITypeBinding nestedRootClass= getNestedRootClass(lambdaMethodInvokingClass);
-					boolean isSuperClass= isSuperClass(lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
-					boolean isNestedClass= isNestedClass(lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
-
-					if (lambdaMethodDeclaringClass == lambdaMethodInvokingClass) {
-						// use this::
-					} else if (Modifier.isDefault(methodBinding.getModifiers())) {
-						boolean nestedInterfaceClass= isNestedInterfaceClass(ast, lambdaMethodDeclaringClass, lambdaMethodInvokingClass);
-						if (isNestedClass
-								|| (nestedInterfaceClass && !isSuperClass)) {
-							// Use this::
-						} else if (!nestedInterfaceClass || (nestedRootClass != lambdaMethodInvokingClass)) {
-							newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
-						}
-					} else if (lambdaMethodDeclaringClass.isInterface()) {
-						if (isSuperClass) {
-							// use this::
-						} else {
-							newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
-						}
-					} else if (isSuperClass) {
-						// use this::
-					} else {
-						newThisExpression.setQualifier(ast.newName(nestedRootClass.getName()));
-					}
-					exprMethodReference.setExpression(newThisExpression);
-				}
-				exprMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
-			}
 		}
-
-		ASTNodes.replaceButKeepComment(rewrite, lambda, replacement, null);
-
-		// add correction proposal
-		String label= CorrectionMessages.QuickAssistProcessor_convert_to_method_reference;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_TO_METHOD_REFERENCE, image);
-		if (importRewrite != null) {
-			proposal.setImportRewrite(importRewrite);
-		}
-		resultingCollections.add(proposal);
-		return true;
-	}
-
-	/*
-	 * return TRUE if method declaration class is super class of lambda declaration class
-	 */
-	private static boolean isSuperClass(ITypeBinding methodDeclarationType, ITypeBinding lambdaDeclarationType) {
-		ITypeBinding parent= lambdaDeclarationType.getSuperclass();
-		while (parent != null) {
-			if (parent == methodDeclarationType) {
-				return true;
-			}
-			parent= parent.getSuperclass();
-		}
-		return false;
-	}
-
-	/*
-	 * return TRUE if method declaration interface is super class of lambda declaration class
-	 */
-	private static boolean isNestedInterfaceClass(AST ast, ITypeBinding lambdaMethodDeclaringClass, ITypeBinding lambdaMethodInvokingClass) {
-		ITypeBinding[] methodNarrowingTypes= ASTResolving.getRelaxingTypes(ast, lambdaMethodDeclaringClass);
-		ITypeBinding[] lambdaNarrowingTypes= ASTResolving.getRelaxingTypes(ast, lambdaMethodInvokingClass);
-
-		if (methodNarrowingTypes.length != 1) {
-			return false;
-		}
-		ITypeBinding methodNarrowingType= methodNarrowingTypes[0];
-		for (ITypeBinding lambdaNarrowingType : lambdaNarrowingTypes) {
-			if (methodNarrowingType == lambdaNarrowingType) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/*
-	 * return TRUE if lambda declaration class is nested class of method declaration class
-	 */
-	private static boolean isNestedClass(ITypeBinding methodDeclarationType, ITypeBinding lambdaDeclarationType) {
-		ITypeBinding parent= lambdaDeclarationType;
-		while (parent.isNested()) {
-			parent= parent.getDeclaringClass();
-			if (parent == methodDeclarationType) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static ITypeBinding getNestedRootClass(ITypeBinding lambdaDeclarationType) {
-		ITypeBinding parent= lambdaDeclarationType;
-		while (parent.isNested()) {
-			parent= parent.getDeclaringClass();
-		}
-		return parent;
-	}
-
-	private static boolean representsDefiningNode(ASTNode innerNode, ASTNode definingNode) {
-		// Example: We want to enable the proposal when the method invocation node or
-		// the method name is near the caret. But not when the caret is on an argument of the method invocation.
-		if (innerNode == definingNode)
+		ConvertLambdaToMethodReferenceFixCore fix= ConvertLambdaToMethodReferenceFixCore.createConvertLambdaToMethodReferenceFix(context.getASTRoot(), coveringNode);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.CONVERT_TO_METHOD_REFERENCE, image, context);
+			resultingCollections.add(proposal);
 			return true;
-
-		switch (definingNode.getNodeType()) {
-			// types from isValidLambdaReferenceToMethod():
-			case ASTNode.CLASS_INSTANCE_CREATION:
-				return representsDefiningNode(innerNode, ((ClassInstanceCreation) definingNode).getType());
-			case ASTNode.ARRAY_CREATION:
-				return representsDefiningNode(innerNode, ((ArrayCreation) definingNode).getType());
-			case ASTNode.SUPER_METHOD_INVOCATION:
-				return innerNode == ((SuperMethodInvocation) definingNode).getName();
-			case ASTNode.METHOD_INVOCATION:
-				return innerNode == ((MethodInvocation) definingNode).getName();
-
-			// subtypes of Type:
-			case ASTNode.NAME_QUALIFIED_TYPE:
-				return innerNode == ((NameQualifiedType) definingNode).getName();
-			case ASTNode.QUALIFIED_TYPE:
-				return innerNode == ((QualifiedType) definingNode).getName();
-			case ASTNode.SIMPLE_TYPE:
-				return innerNode == ((SimpleType) definingNode).getName();
-			case ASTNode.ARRAY_TYPE:
-				return representsDefiningNode(innerNode, ((ArrayType) definingNode).getElementType());
-			case ASTNode.PARAMETERIZED_TYPE:
-				return representsDefiningNode(innerNode, ((ParameterizedType) definingNode).getType());
-
-			default:
-				return false;
 		}
-	}
-
-	private static boolean isValidLambdaReferenceToMethod(Expression expression) {
-		return expression instanceof ClassInstanceCreation
-				|| expression instanceof ArrayCreation
-				|| expression instanceof SuperMethodInvocation
-				|| expression instanceof MethodInvocation
-				|| expression instanceof InstanceofExpression;
-	}
-
-	private static boolean matches(List<Expression> expected, List<Expression> toMatch) {
-		if (toMatch.size() != expected.size())
-			return false;
-		for (int i= 0; i < toMatch.size(); i++) {
-			if (!JdtASTMatcher.doNodesMatch(expected.get(i), toMatch.get(i)))
-				return false;
-		}
-		return true;
+		return false;
 	}
 
 	private static boolean getFixParenthesesInLambdaExpression(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
@@ -1344,259 +940,45 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getAddInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		LambdaExpression lambda= null;
-		boolean isLambdaParamVarType= false;
-		ASTNode parent= covering.getParent();
-		if (covering instanceof LambdaExpression) {
-			lambda= (LambdaExpression) covering;
-		} else if ((covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY
-				|| covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY)
-				&& parent.getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-			lambda= (LambdaExpression) parent.getParent();
-		}
-
-		if (lambda == null) {
-			return false;
-		}
-
-		List<VariableDeclaration> lambdaParameters= lambda.parameters();
-		int noOfLambdaParams= lambdaParameters.size();
-		if (noOfLambdaParams == 0)
-			return false;
-
-		VariableDeclaration firstLambdaParam= lambdaParameters.get(0);
-		if (firstLambdaParam instanceof SingleVariableDeclaration) {
-			CompilationUnit astRoot= context.getASTRoot();
-			IJavaElement root= astRoot.getJavaElement();
-			if (root != null) {
-				IJavaProject javaProject= root.getJavaProject();
-				if (javaProject != null && JavaModelUtil.is11OrHigher(javaProject)) {
-					if (((SingleVariableDeclaration) firstLambdaParam).getType().isVar()) {
-						isLambdaParamVarType= true;
-					}
-				}
-			}
-			if (!isLambdaParamVarType) {
-				return false;
-			}
-		}
-
-		IMethodBinding methodBinding= lambda.resolveMethodBinding();
-		if (methodBinding == null)
-			return false;
-
-		if (resultingCollections == null)
+		if (resultingCollections == null) {
 			return true;
-
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-
-		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.TRUE, null);
-		ContextSensitiveImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(lambda, importRewrite);
-		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-		for (int i= 0; i < noOfLambdaParams; i++) {
-			VariableDeclaration param= lambdaParameters.get(i);
-			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
-			newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
-			ITypeBinding type= StubUtility2Core.replaceWildcardsAndCaptures(parameterTypes[i]);
-			newParam.setType(importRewrite.addImport(type, ast, importRewriteContext, TypeLocation.PARAMETER));
-			rewrite.replace(param, newParam, null);
 		}
-
-		// add proposal
-		String label= CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types;
-		if (isLambdaParamVarType) {
-			label= CorrectionMessages.QuickAssistProcessor_replace_var_with_inferred_lambda_parameter_types;
+		AddInferredLambdaParameterTypesFixCore fix= AddInferredLambdaParameterTypesFixCore.createAddInferredLambdaParameterTypesFix(context.getASTRoot(), covering);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
-		proposal.setImportRewrite(importRewrite);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	public static boolean getAddVarLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		CompilationUnit astRoot= context.getASTRoot();
-		IJavaElement root= astRoot.getJavaElement();
-		ASTNode parent= covering.getParent();
-		if (parent == null || root == null) {
-			return false;
-		}
-		IJavaProject javaProject= root.getJavaProject();
-		if (javaProject == null) {
-			return false;
-		}
-		if (!JavaModelUtil.is11OrHigher(javaProject)) {
-			return false;
-		}
-
-		LambdaExpression lambda= null;
-		boolean isLambdaParamExplicitType= false;
-		if (covering instanceof LambdaExpression) {
-			lambda= (LambdaExpression) covering;
-		} else if ((covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY
-				|| covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY)
-				&& parent.getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-			lambda= (LambdaExpression) parent.getParent();
-		}
-
-		if (lambda == null) {
-			return false;
-		}
-
-		List<VariableDeclaration> lambdaParameters= lambda.parameters();
-		int noOfLambdaParams= lambdaParameters.size();
-		if (noOfLambdaParams == 0)
-			return false;
-
-
-		VariableDeclaration firstLambdaParam= lambdaParameters.get(0);
-		if (firstLambdaParam instanceof SingleVariableDeclaration) {
-			if (!((SingleVariableDeclaration) firstLambdaParam).getType().isVar()) {
-				isLambdaParamExplicitType= true;
-			} else {
-				return false;
-			}
-		}
-
-
-		IMethodBinding methodBinding= lambda.resolveMethodBinding();
-		if (methodBinding == null)
-			return false;
-
-		if (resultingCollections == null)
+		if (resultingCollections == null) {
 			return true;
-
-		String VAR_TYPE= "var"; //$NON-NLS-1$
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
-
-		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-
-		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.TRUE, null);
-		for (int i= 0; i < noOfLambdaParams; i++) {
-			VariableDeclaration param= lambdaParameters.get(i);
-			Type oldType= null;
-			if (param instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration curParent= (SingleVariableDeclaration) param;
-				oldType= curParent.getType();
-				if (oldType != null) {
-					rewrite.replace(oldType, ast.newSimpleType(ast.newName(VAR_TYPE)), null);
-					remover.registerRemovedNode(oldType);
-				}
-			}
-			if (oldType == null) {
-				SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
-				newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
-				newParam.setType(ast.newSimpleType(ast.newName(VAR_TYPE)));
-				rewrite.replace(param, newParam, null);
-			}
 		}
-
-		// add proposal
-		ASTRewriteCorrectionProposal proposal;
-		String label= null;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		if (isLambdaParamExplicitType) {
-			label= CorrectionMessages.QuickAssistProcessor_replace_lambda_parameter_types_with_var;
-			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
-					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
-			newProposal.setImportRemover(remover);
-			proposal= newProposal;
-
-		} else {
-			label= CorrectionMessages.QuickAssistProcessor_add_var_lambda_parameter_types;
-			proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+		AddVarLambdaParameterTypesFixCore fix= AddVarLambdaParameterTypesFixCore.createAddVarLambdaParameterTypesFix(context.getASTRoot(), covering);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
-		proposal.setImportRewrite(importRewrite);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	public static boolean getRemoveVarOrInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		CompilationUnit astRoot= context.getASTRoot();
-		IJavaElement root= astRoot.getJavaElement();
-		ASTNode parent= covering.getParent();
-		if (parent == null || root == null) {
-			return false;
-		}
-		IJavaProject javaProject= root.getJavaProject();
-		if (javaProject == null) {
-			return false;
-		}
-		boolean checkForVarTypes= false;
-		if (JavaModelUtil.is11OrHigher(javaProject)) {
-			checkForVarTypes= true;
-		}
-
-		LambdaExpression lambda;
-		if (covering instanceof LambdaExpression) {
-			lambda= (LambdaExpression) covering;
-		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
-				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-			lambda= (LambdaExpression) covering.getParent().getParent();
-		} else {
-			return false;
-		}
-
-		List<VariableDeclaration> lambdaParameters= lambda.parameters();
-		int noOfLambdaParams= lambdaParameters.size();
-		if (noOfLambdaParams == 0)
-			return false;
-
-		if (!(lambdaParameters.get(0) instanceof SingleVariableDeclaration))
-			return false;
-
-		IMethodBinding methodBinding= lambda.resolveMethodBinding();
-		if (methodBinding == null)
-			return false;
-
-		if (resultingCollections == null)
+		if (resultingCollections == null) {
 			return true;
-
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
-		ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
-
-		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-
-		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.TRUE, null);
-		boolean removeImports= false;
-		for (int i= 0; i < noOfLambdaParams; i++) {
-			VariableDeclaration param= lambdaParameters.get(i);
-			Type oldType= null;
-			if (param instanceof SingleVariableDeclaration) {
-				SingleVariableDeclaration curParent= (SingleVariableDeclaration) param;
-				oldType= curParent.getType();
-				if (oldType != null && (!checkForVarTypes || (checkForVarTypes && !oldType.isVar()))) {
-					remover.registerRemovedNode(oldType);
-					removeImports= true;
-				}
-				VariableDeclarationFragment newParam= ast.newVariableDeclarationFragment();
-				newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
-				rewrite.replace(param, newParam, null);
-			}
 		}
-
-		// add proposal
-		ASTRewriteCorrectionProposal proposal;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		String label= CorrectionMessages.QuickAssistProcessor_remove_lambda_parameter_types;
-		if (removeImports) {
-			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
-					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
-			newProposal.setImportRemover(remover);
-			proposal= newProposal;
-		} else {
-			proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+		RemoveVarOrInferredLambdaParameterTypesFixCore fix= RemoveVarOrInferredLambdaParameterTypesFixCore.createRemoveVarOrInferredLambdaParameterTypesFix(context.getASTRoot(), covering);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
-		proposal.setImportRewrite(importRewrite);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	private static class ReturnType {
@@ -1907,6 +1289,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
 		if (resultingCollections == null) {
 			return true;
@@ -3259,70 +2642,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getInvertEqualsProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
-		if (!(node instanceof MethodInvocation)) {
-			node= node.getParent();
-			if (!(node instanceof MethodInvocation)) {
-				return false;
-			}
-		}
-		MethodInvocation method= (MethodInvocation) node;
-		String identifier= method.getName().getIdentifier();
-		if (!"equals".equals(identifier) && !"equalsIgnoreCase".equals(identifier)) { //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
-		}
-		List<Expression> arguments= method.arguments();
-		if (arguments.size() != 1) { //overloaded equals w/ more than 1 argument
-			return false;
-		}
-		Expression right= arguments.get(0);
-		ITypeBinding binding= right.resolveTypeBinding();
-		if (binding != null
-				&& !binding.isClass()
-				&& !binding.isInterface()
-				&& !binding.isEnum()) { //overloaded equals w/ non-class/interface argument or null
-			return false;
-		}
 		if (resultingCollections == null) {
 			return true;
 		}
-
-		Expression left= method.getExpression();
-
-		AST ast= method.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		if (left == null) { // equals(x) -> x.equals(this)
-			MethodInvocation replacement= ast.newMethodInvocation();
-			replacement.setName((SimpleName) rewrite.createCopyTarget(method.getName()));
-			replacement.arguments().add(ast.newThisExpression());
-			replacement.setExpression((Expression) rewrite.createCopyTarget(right));
-			rewrite.replace(method, replacement, null);
-		} else if (right instanceof ThisExpression) { // x.equals(this) -> equals(x)
-			MethodInvocation replacement= ast.newMethodInvocation();
-			replacement.setName((SimpleName) rewrite.createCopyTarget(method.getName()));
-			replacement.arguments().add(rewrite.createCopyTarget(left));
-			rewrite.replace(method, replacement, null);
-		} else {
-			ASTNode leftExpression= ASTNodes.getUnparenthesedExpression(left);
-			rewrite.replace(right, rewrite.createCopyTarget(leftExpression), null);
-
-			if (right instanceof CastExpression
-					|| right instanceof Assignment
-					|| right instanceof ConditionalExpression
-					|| right instanceof InfixExpression) {
-				ParenthesizedExpression paren= ast.newParenthesizedExpression();
-				paren.setExpression((Expression) rewrite.createCopyTarget(right));
-				rewrite.replace(left, paren, null);
-			} else {
-				rewrite.replace(left, rewrite.createCopyTarget(right), null);
-			}
+		InvertEqualsExpressionFixCore fix= InvertEqualsExpressionFixCore.createInvertEqualsFix(context.getASTRoot(), node);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.INVERT_EQUALS, image, context);
+			resultingCollections.add(proposal);
+			return true;
 		}
-
-		String label= CorrectionMessages.QuickAssistProcessor_invertequals_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INVERT_EQUALS, image);
-		resultingCollections.add(proposal);
-		return true;
+		return false;
 	}
 
 	private static boolean getAddStaticMemberFavoritesProposals(ASTNode node, Collection<ICommandAccess> resultingCollections) {
@@ -3914,7 +3244,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, @SuppressWarnings("unused") IProblemLocationCore[] locations, Collection<ICommandAccess> resultingCollections) {
 //		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
 //			return false;
 

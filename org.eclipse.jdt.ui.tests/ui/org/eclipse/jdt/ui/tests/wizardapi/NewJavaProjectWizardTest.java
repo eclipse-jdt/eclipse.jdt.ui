@@ -20,6 +20,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.eclipse.core.tests.harness.FussyProgressMonitor;
+
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
@@ -140,7 +142,10 @@ public class NewJavaProjectWizardTest {
 		IProject project= fWizardPage.getProjectHandle();
 
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fWizardPage.getRunnable());
-		op.run(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		op.run(testMonitor);
+		testMonitor.assertUsedUp();
+
 
 		IJavaProject jproj= fWizardPage.getNewJavaProject();
 
@@ -167,7 +172,10 @@ public class NewJavaProjectWizardTest {
 		fWizardPage.setProjectHandle(otherProject);
 
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fWizardPage.getRunnable());
-		op.run(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		op.run(testMonitor);
+		testMonitor.assertUsedUp();
+
 
 		IJavaProject jproj= fWizardPage.getNewJavaProject();
 
@@ -232,7 +240,10 @@ public class NewJavaProjectWizardTest {
 		fWizardPage.setDefaultClassPath(entries, true);
 
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fWizardPage.getRunnable());
-		op.run(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		op.run(testMonitor);
+		testMonitor.assertUsedUp();
+
 
 		IJavaProject jproj= fWizardPage.getNewJavaProject();
 
@@ -257,7 +268,10 @@ public class NewJavaProjectWizardTest {
 		fWizardPage.setDefaultClassPath(entries, true);
 
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fWizardPage.getRunnable());
-		op.run(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		op.run(testMonitor);
+		testMonitor.assertUsedUp();
+
 
 		IProject proj= fWizardPage.getNewJavaProject().getProject();
 
@@ -278,7 +292,10 @@ public class NewJavaProjectWizardTest {
 		IProject project= fWizardPage.getProjectHandle();
 
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fWizardPage.getRunnable());
-		op.run(null);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		op.run(testMonitor);
+		testMonitor.assertUsedUp();
+
 
 		IPath folderPath= project.getFolder("dbin").getFullPath();
 		IClasspathEntry[] entries= new IClasspathEntry[] {

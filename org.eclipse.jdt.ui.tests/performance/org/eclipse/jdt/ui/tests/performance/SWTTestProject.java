@@ -16,7 +16,6 @@ package org.eclipse.jdt.ui.tests.performance;
 import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 import org.junit.Assert;
 
@@ -60,7 +59,7 @@ public class SWTTestProject {
 
 	private void setUpProject() throws IOException, ZipException, CoreException {
 		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JavaTestPlugin.getDefault(), new Path(PROJECT_ZIP))), new File(workspacePath));
+		FileTool.unzip(FileTool.getFileInPlugin(JavaTestPlugin.getDefault(), new Path(PROJECT_ZIP)), new File(workspacePath));
 		File oldFile= new File(workspacePath + PROJECT + "/.classpath_win32");
 		File newFile= new File(workspacePath + PROJECT + "/.classpath");
 		Assert.assertTrue(oldFile.renameTo(newFile));

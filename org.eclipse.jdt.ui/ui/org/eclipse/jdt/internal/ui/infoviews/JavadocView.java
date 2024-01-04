@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -79,7 +79,6 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchCommandConstants;
@@ -332,9 +331,6 @@ public class JavadocView extends AbstractInfoView {
 
 		}
 
-		/*
-		 * @see org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction#canEnableFor(org.eclipse.jface.viewers.IStructuredSelection)
-		 */
 		@Override
 		protected boolean canEnableFor(IStructuredSelection selection) {
 			if (selection.size() != 1)
@@ -491,8 +487,8 @@ public class JavadocView extends AbstractInfoView {
 		public SelectionProvider(Control control) {
 			Assert.isNotNull(control);
 			fControl= control;
-			if (fControl instanceof StyledText) {
-				((StyledText)fControl).addSelectionListener(new SelectionAdapter() {
+			if (fControl instanceof StyledText styledText) {
+				styledText.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						fireSelectionChanged();
@@ -519,21 +515,15 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-		 */
 		@Override
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.add(listener);
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
-		 */
 		@Override
 		public ISelection getSelection() {
-			if (fControl instanceof StyledText) {
-				IDocument document= new Document(((StyledText)fControl).getSelectionText());
+			if (fControl instanceof StyledText styledText) {
+				IDocument document= new Document(styledText.getSelectionText());
 				return new TextSelection(document, 0, document.getLength());
 			} else {
 				// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
@@ -541,26 +531,17 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-		 */
 		@Override
 		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.remove(listener);
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
-		 */
 		@Override
 		public void setSelection(ISelection selection) {
 			// not supported
 		}
 	}
 
-	/*
-	 * @see AbstractInfoView#internalCreatePartControl(Composite)
-	 */
 	@Override
 	protected void internalCreatePartControl(Composite parent) {
 		try {
@@ -602,9 +583,6 @@ public class JavadocView extends AbstractInfoView {
 			fPresenter= new FallbackInformationPresenter();
 
 			fText.addControlListener(new ControlAdapter() {
-				/*
-				 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
-				 */
 				@Override
 				public void controlResized(ControlEvent e) {
 					doSetInput(fOriginalInput);
@@ -649,10 +627,6 @@ public class JavadocView extends AbstractInfoView {
 		fgStyleSheet= JavadocHover.loadStyleSheet("/JavadocViewStyleSheet.css"); //$NON-NLS-1$
 	}
 
-
-	/*
-	 * @see AbstractInfoView#createActions()
-	 */
 	@Override
 	protected void createActions() {
 		super.createActions();
@@ -712,10 +686,6 @@ public class JavadocView extends AbstractInfoView {
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenBrowserAction);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
-	 * @since 3.0
-	 */
 	@Override
 	protected IAction getSelectAllAction() {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
@@ -725,10 +695,6 @@ public class JavadocView extends AbstractInfoView {
 		return fSelectAllAction;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getCopyToClipboardAction()
-	 * @since 3.0
-	 */
 	@Override
 	protected IAction getCopyToClipboardAction() {
 		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
@@ -738,9 +704,6 @@ public class JavadocView extends AbstractInfoView {
 		return super.getCopyToClipboardAction();
 	}
 
-	/*
- 	 * @see AbstractInfoView#setForeground(Color)
- 	 */
 	@Override
 	protected void setForeground(Color color) {
 		getControl().setForeground(color);
@@ -748,9 +711,6 @@ public class JavadocView extends AbstractInfoView {
 		refresh();
 	}
 
-	/*
-	 * @see AbstractInfoView#setBackground(Color)
-	 */
 	@Override
 	protected void setBackground(Color color) {
 		getControl().setBackground(color);
@@ -767,10 +727,6 @@ public class JavadocView extends AbstractInfoView {
 		doSetInput(computeInput(getOrignalInput()));
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getBackgroundColorKey()
-	 * @since 3.2
-	 */
 	@Override
 	protected String getBackgroundColorKey() {
 		return "org.eclipse.jdt.ui.Javadoc.backgroundColor";		 //$NON-NLS-1$
@@ -781,9 +737,6 @@ public class JavadocView extends AbstractInfoView {
 		return "org.eclipse.jdt.ui.Javadoc.foregroundColor";		 //$NON-NLS-1$
 	}
 
-	/*
-	 * @see AbstractInfoView#internalDispose()
-	 */
 	@Override
 	protected void internalDispose() {
 		fText= null;
@@ -799,17 +752,11 @@ public class JavadocView extends AbstractInfoView {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
-	 */
 	@Override
 	public void setFocus() {
 		getControl().setFocus();
 	}
 
-	/*
-	 * @see AbstractInfoView#computeInput(Object)
-	 */
 	@Override
 	protected Object computeInput(Object input) {
 		if (getControl() == null || ! (input instanceof IJavaElement))
@@ -861,9 +808,9 @@ public class JavadocView extends AbstractInfoView {
 			case IJavaElement.CLASS_FILE:
 				if (JavaModelUtil.PACKAGE_INFO_CLASS.equals(input.getElementName())) {
 					javadocHtml= getJavadocHtml(new IJavaElement[] { input.getParent() }, part, selection, monitor);
-				} else if (input instanceof IModularClassFile) {
+				} else if (input instanceof IModularClassFile modularClassFile) {
 					try {
-						javadocHtml= getJavadocHtml(new IJavaElement[] { ((IModularClassFile) input).getModule() }, part, selection, monitor);
+						javadocHtml= getJavadocHtml(new IJavaElement[] { modularClassFile.getModule() }, part, selection, monitor);
 					} catch (JavaModelException e) {
 						return null;
 					}
@@ -878,10 +825,6 @@ public class JavadocView extends AbstractInfoView {
 		return javadocHtml;
 	}
 
-	/*
-	 * @see AbstractInfoView#computeDescription(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
-	 * @since 3.4
-	 */
 	@Override
 	protected String computeDescription(IWorkbenchPart part, ISelection selection, IJavaElement inputElement, IProgressMonitor monitor) {
 		return ""; //$NON-NLS-1$
@@ -897,10 +840,10 @@ public class JavadocView extends AbstractInfoView {
 		fCurrent= input;
 
 		Object inputElement= input.getInputElement();
-		if (inputElement instanceof IJavaElement) {
-			setInput((IJavaElement) inputElement);
-		} else if (inputElement instanceof URL) {
-			fBrowser.setUrl(((URL) inputElement).toExternalForm());
+		if (inputElement instanceof IJavaElement javaElement) {
+			setInput(javaElement);
+		} else if (inputElement instanceof URL url) {
+			fBrowser.setUrl(url.toExternalForm());
 
 			if (fInputSelectionProvider != null)
 				fInputSelectionProvider.setSelection(new StructuredSelection(inputElement));
@@ -918,8 +861,8 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected void doSetInput(Object input) {
 		String javadocHtml;
-		if (input instanceof String) {
-			javadocHtml= (String) input;
+		if (input instanceof String s) {
+			javadocHtml= s;
 		} else {
 			StringBuilder buffer= new StringBuilder();
 			HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, fgStyleSheet);
@@ -996,11 +939,11 @@ public class JavadocView extends AbstractInfoView {
 				Reader reader= null;
 				String content= null;
 				try {
-					if (curr instanceof IPackageDeclaration) {
+					if (curr instanceof IPackageDeclaration packageDecl) {
 						try {
-							ISourceRange nameRange= ((IPackageDeclaration) curr).getNameRange();
+							ISourceRange nameRange= packageDecl.getNameRange();
 							if (SourceRange.isAvailable(nameRange)) {
-								ITypeRoot typeRoot= (ITypeRoot) ((IPackageDeclaration) curr).getParent();
+								ITypeRoot typeRoot= (ITypeRoot) packageDecl.getParent();
 								Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 								JavadocHover.addAnnotations(buffer, typeRoot.getParent(), typeRoot, hoverRegion);
 							}
@@ -1009,9 +952,9 @@ public class JavadocView extends AbstractInfoView {
 						}
 
 						content= JavadocContentAccess2.getHTMLContent((IPackageDeclaration) curr);
-					} else if (curr instanceof IPackageFragment) {
+					} else if (curr instanceof IPackageFragment packageFragm) {
 						JavadocHover.addAnnotations(buffer, curr, null, null);
-						content= JavadocContentAccess2.getHTMLContent((IPackageFragment) curr);
+						content= JavadocContentAccess2.getHTMLContent(packageFragm);
 					}
 				} catch (CoreException e) {
 					reader= new StringReader(JavaDocLocations.handleFailedJavadocFetch(e));
@@ -1046,10 +989,10 @@ public class JavadocView extends AbstractInfoView {
 				try {
 					ISourceRange nameRange= ((ISourceReference) curr).getNameRange();
 					if (SourceRange.isAvailable(nameRange)) {
-						if (element instanceof ILocalVariable) {
-							typeRoot= ((ILocalVariable) curr).getTypeRoot();
-						} else if (element instanceof ITypeParameter) {
-							typeRoot= ((ITypeParameter) curr).getTypeRoot();
+						if (element instanceof ILocalVariable localVar) {
+							typeRoot= localVar.getTypeRoot();
+						} else if (element instanceof ITypeParameter typeParam) {
+							typeRoot= typeParam.getTypeRoot();
 						} else {
 							typeRoot= ((IMember) curr).getTypeRoot();
 						}
@@ -1060,16 +1003,16 @@ public class JavadocView extends AbstractInfoView {
 				}
 
 				String constantValue= null;
-				if (element instanceof IField) {
-					constantValue= computeFieldConstant(activePart, selection, (IField) element, monitor);
+				if (element instanceof IField field) {
+					constantValue= computeFieldConstant(activePart, selection, field, monitor);
 					if (constantValue != null)
 						constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
 				}
 
 				String defaultValue= null;
-				if (element instanceof IMethod) {
+				if (element instanceof IMethod method) {
 					try {
-						defaultValue= JavadocHover.getAnnotationMemberDefaultValue((IMethod) element, typeRoot, hoverRegion);
+						defaultValue= JavadocHover.getAnnotationMemberDefaultValue(method, typeRoot, hoverRegion);
 						if (defaultValue != null) {
 							defaultValue= HTMLPrinter.convertToHTMLContentWithWhitespace(defaultValue);
 						}
@@ -1091,10 +1034,10 @@ public class JavadocView extends AbstractInfoView {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (content != null) {
 						IMember member;
-						if (element instanceof ILocalVariable) {
-							member= ((ILocalVariable) element).getDeclaringMember();
-						} else if (element instanceof ITypeParameter) {
-							member= ((ITypeParameter) element).getDeclaringMember();
+						if (element instanceof ILocalVariable localVar) {
+							member= localVar.getDeclaringMember();
+						} else if (element instanceof ITypeParameter typeParam) {
+							member= typeParam.getDeclaringMember();
 						} else {
 							member= (IMember) element;
 						}
@@ -1163,20 +1106,15 @@ public class JavadocView extends AbstractInfoView {
 		return JavadocHover.getImageAndLabel(member, allowImage, label.toString());
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#isIgnoringNewInput(org.eclipse.jdt.core.IJavaElement, org.eclipse.jface.viewers.ISelection)
-	 * @since 3.2
-	 */
 	@Override
 	protected boolean isIgnoringNewInput(IJavaElement je, IWorkbenchPart part, ISelection selection) {
 		if (fCurrent != null && fCurrent.getInputElement() instanceof URL)
 			return false;
 
 		if (super.isIgnoringNewInput(je, part, selection)
-				&& part instanceof ITextEditor
-				&& selection instanceof ITextSelection) {
+				&& part instanceof ITextEditor editor
+				&& selection instanceof ITextSelection textSel) {
 
-			ITextEditor editor= (ITextEditor)part;
 			IDocumentProvider docProvider= editor.getDocumentProvider();
 			if (docProvider == null)
 				return false;
@@ -1186,7 +1124,7 @@ public class JavadocView extends AbstractInfoView {
 				return false;
 
 			try {
-				int offset= ((ITextSelection)selection).getOffset();
+				int offset= textSel.getOffset();
 				String partition= ((IDocumentExtension3)document).getContentType(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 				return !IJavaPartitions.JAVA_DOC.equals(partition);
 			} catch (BadPartitioningException | BadLocationException ex) {
@@ -1197,37 +1135,30 @@ public class JavadocView extends AbstractInfoView {
 		return false;
 	}
 
-	/*
-	 * @see AbstractInfoView#findSelectedJavaElement(IWorkbenchPart)
-	 */
 	@Override
 	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
 		IJavaElement element= super.findSelectedJavaElement(part, selection);
 		try {
 			//update the Javadoc view when package.html is selected in project explorer view
-			if (element == null && selection instanceof IStructuredSelection) {
-				Object selectedElement= ((IStructuredSelection) selection).getFirstElement();
-				if (selectedElement instanceof IFile) {
-					IFile selectedFile= (IFile) selectedElement;
+			if (element == null && selection instanceof IStructuredSelection sSel) {
+				Object selectedElement= sSel.getFirstElement();
+				if (selectedElement instanceof IFile selectedFile) {
 					if (JavaModelUtil.PACKAGE_HTML.equals(selectedFile.getName())) {
 						element= JavaCore.create(selectedFile.getParent());
 					}
-				} else if (selectedElement instanceof IJarEntryResource) {
-					IJarEntryResource jarEntryResource= (IJarEntryResource) selectedElement;
+				} else if (selectedElement instanceof IJarEntryResource jarEntryResource) {
 					if (JavaModelUtil.PACKAGE_HTML.equals(jarEntryResource.getName())) {
 						Object parent= jarEntryResource.getParent();
-						if (parent instanceof IJavaElement) {
-							element= (IJavaElement) parent;
+						if (parent instanceof IJavaElement javaEl) {
+							element= javaEl;
 						}
 					}
 
 				}
 			}
 
-			if (element == null && selection instanceof ITextSelection) {
-				ITextSelection textSelection= (ITextSelection) selection;
-				if (part instanceof AbstractDecoratedTextEditor) {
-					AbstractDecoratedTextEditor editor= (AbstractDecoratedTextEditor) part;
+			if (element == null && selection instanceof ITextSelection textSelection) {
+				if (part instanceof AbstractDecoratedTextEditor editor) {
 					IDocumentProvider documentProvider= editor.getDocumentProvider();
 					if (documentProvider != null) {
 						IEditorInput editorInput= editor.getEditorInput();
@@ -1238,8 +1169,8 @@ public class JavadocView extends AbstractInfoView {
 							if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())){
 								element= TextSelectionConverter.getElementAtOffset((JavaEditor) part, textSelection);
 							}
-							else if (editorInput instanceof IFileEditorInput) {
-								IFile file= ((IFileEditorInput) editorInput).getFile();
+							else if (editorInput instanceof IFileEditorInput fei) {
+								IFile file= fei.getFile();
 								//update the Javadoc view when the content of the package.html is modified in the editor
 								if (JavaModelUtil.PACKAGE_HTML.equals(file.getName())) {
 									element= JavaCore.create(file.getParent());
@@ -1256,9 +1187,6 @@ public class JavadocView extends AbstractInfoView {
 		return element;
 	}
 
-	/*
-	 * @see AbstractInfoView#getControl()
-	 */
 	@Override
 	protected Control getControl() {
 		if (fIsUsingBrowserWidget)
@@ -1267,10 +1195,6 @@ public class JavadocView extends AbstractInfoView {
 			return fText;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getHelpContextId()
-	 * @since 3.1
-	 */
 	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.JAVADOC_VIEW;
@@ -1296,10 +1220,9 @@ public class JavadocView extends AbstractInfoView {
 
 		Object constantValue;
 
-		if (selection instanceof ITextSelection && activePart instanceof JavaEditor) {
-			IEditorPart editor= (IEditorPart) activePart;
+		if (selection instanceof ITextSelection textSel && activePart instanceof JavaEditor editor) {
 			ITypeRoot activeType= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
-			constantValue= getConstantValueFromActiveEditor(activeType, resolvedField, (ITextSelection) selection, monitor);
+			constantValue= getConstantValueFromActiveEditor(activeType, resolvedField, textSel, monitor);
 			if (constantValue == null) // fall back - e.g. when selection is inside Javadoc of the element
 				constantValue= computeFieldConstantFromTypeAST(resolvedField, monitor);
 		} else {
@@ -1355,8 +1278,8 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 		}
 
-		if (createBindings[0] instanceof IVariableBinding)
-			return ((IVariableBinding) createBindings[0]).getConstantValue();
+		if (createBindings[0] instanceof IVariableBinding variableBinding)
+			return variableBinding.getConstantValue();
 
 		return null;
 	}
@@ -1391,10 +1314,9 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private static String formatCompilerConstantValue(Object constantValue) {
-		if (constantValue instanceof String) {
+		if (constantValue instanceof String stringConstant) {
 			StringBuilder result= new StringBuilder();
 			result.append('"');
-			String stringConstant= (String)constantValue;
 			if (stringConstant.length() > 80) {
 				result.append(stringConstant.substring(0, 80));
 				result.append(JavaElementLabels.ELLIPSIS_STRING);

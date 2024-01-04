@@ -43,33 +43,26 @@ public class FileTool {
 	 * Unzips the given zip file to the given destination directory extracting only those entries
 	 * the pass through the given filter.
 	 *
-	 * @param zipFile the zip file to unzip
+	 * @param zFile the zip file to unzip
 	 * @param dstDir the destination directory
 	 * @throws IOException if an I/O error occurs
 	 */
-	public static void unzip(ZipFile zipFile, File dstDir) throws IOException {
-
-		Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-		try {
-			while(entries.hasMoreElements()){
-				ZipEntry entry = entries.nextElement();
-				if(entry.isDirectory()){
+	public static void unzip(File zFile, File dstDir) throws IOException {
+		try (ZipFile zipFile= new ZipFile(zFile)) {
+			Enumeration<? extends ZipEntry> entries= zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry entry= entries.nextElement();
+				if (entry.isDirectory()) {
 					continue;
 				}
-				String entryName = entry.getName();
-				File file = new File(dstDir, changeSeparator(entryName, '/', File.separatorChar));
+				String entryName= entry.getName();
+				File file= new File(dstDir, changeSeparator(entryName, '/', File.separatorChar));
 				file.getParentFile().mkdirs();
 				try (InputStream src= zipFile.getInputStream(entry);
 						OutputStream dst= new FileOutputStream(file)) {
 					transferData(src, dst);
 				} catch (IOException e) {
 				}
-			}
-		} finally {
-			try {
-				zipFile.close();
-			} catch(IOException e){
 			}
 		}
 	}

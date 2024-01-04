@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -249,7 +250,7 @@ public class SelectionConverter {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
-					result= codeResolve(input, selection);
+					result= JavaCore.callReadOnly(() -> codeResolve(input, selection));
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);
 				}

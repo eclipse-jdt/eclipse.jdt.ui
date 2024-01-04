@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -102,6 +101,8 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractSuperclassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
@@ -126,11 +127,9 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
-
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Refactoring processor for the extract supertype refactoring.
@@ -276,7 +275,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			status.merge(checkExtractedCompilationUnit());
 			if (status.hasFatalError())
 				return status;
-			return super.checkFinalConditions(new SubProgressMonitor(monitor, 1), context);
+			return super.checkFinalConditions(Progress.subMonitor(monitor, 1), context);
 		} finally {
 			monitor.done();
 		}
@@ -394,8 +393,8 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (declaringDeclaration != null) {
 				final String name= JavaModelUtil.getRenamedCUName(declaring.getCompilationUnit(), fTypeName);
 				final ICompilationUnit original= declaring.getPackageFragment().getCompilationUnit(name);
-				final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), new SubProgressMonitor(monitor, 10));
-				fSuperSource= createSuperTypeSource(copy, superType, declaringDeclaration, declaringRewrite, status, new SubProgressMonitor(monitor, 10));
+				final ICompilationUnit copy= getSharedWorkingCopy(original.getPrimary(), Progress.subMonitor(monitor, 10));
+				fSuperSource= createSuperTypeSource(copy, superType, declaringDeclaration, declaringRewrite, status, Progress.subMonitor(monitor, 10));
 				if (fSuperSource != null) {
 					copy.getBuffer().setContents(fSuperSource);
 					JavaModelUtil.reconcile(copy);
@@ -747,7 +746,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (imports != null && !"".equals(imports)) { //$NON-NLS-1$
 				buffer.append(imports);
 			}
-			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, declaringRewrite, typeComment, buffer, status, new SubProgressMonitor(monitor, 1));
+			createTypeDeclaration(extractedWorkingCopy, superType, declaringDeclaration, declaringRewrite, typeComment, buffer, status, Progress.subMonitor(monitor, 1));
 			source= createTypeTemplate(extractedWorkingCopy, "", fileComment, "", buffer.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			if (source == null) {
 				if (!declaring.getPackageFragment().isDefaultPackage()) {
@@ -985,9 +984,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing, 70);
-			status.merge(super.createWorkingCopyLayer(new SubProgressMonitor(monitor, 10)));
+			status.merge(super.createWorkingCopyLayer(Progress.subMonitor(monitor, 10)));
 			final IType declaring= getDeclaringType();
-			status.merge(createExtractedSuperType(getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 10)).getSuperclass(declaring), new SubProgressMonitor(monitor, 10)));
+			status.merge(createExtractedSuperType(getDeclaringSuperTypeHierarchy(Progress.subMonitor(monitor, 10)).getSuperclass(declaring), Progress.subMonitor(monitor, 10)));
 			if (status.hasFatalError())
 				return status;
 			final IType extractedType= computeExtractedType(fTypeName);
@@ -1027,14 +1026,14 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			extractParser.setResolveBindings(true);
 			extractParser.setProject(project);
 			extractParser.setSource(extractedType.getCompilationUnit());
-			final CompilationUnit extractUnit= (CompilationUnit) extractParser.createAST(new SubProgressMonitor(monitor, 10));
+			final CompilationUnit extractUnit= (CompilationUnit) extractParser.createAST(Progress.subMonitor(monitor, 10));
 			if (extractUnit != null) {
 				final AbstractTypeDeclaration extractDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(extractedType, extractUnit);
 				if (extractDeclaration != null)
 					extractBindings[0]= extractDeclaration.resolveBinding();
 			}
 			final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
-			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 30);
+			final IProgressMonitor subMonitor= Progress.subMonitor(monitor, 30);
 			try {
 				final Set<IJavaProject> keySet= projectToUnits.keySet();
 				subMonitor.beginTask("", keySet.size()); //$NON-NLS-1$
@@ -1046,7 +1045,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 					parser.setResolveBindings(true);
 					parser.setProject(project);
 					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-					final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+					final IProgressMonitor subsubMonitor= Progress.subMonitor(subMonitor, 1);
 					try {
 						subsubMonitor.beginTask("", collection.size()); //$NON-NLS-1$
 						subsubMonitor.setTaskName(RefactoringCoreMessages.ExtractSupertypeProcessor_preparing);
@@ -1100,9 +1099,9 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 			if (declaring != null) {
 				try {
 					monitor.beginTask(RefactoringCoreMessages.ExtractSupertypeProcessor_computing_possible_types, 10);
-					final IType superType= getDeclaringSuperTypeHierarchy(new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).getSuperclass(declaring);
+					final IType superType= getDeclaringSuperTypeHierarchy(Progress.subMonitorSupressed(monitor, 1)).getSuperclass(declaring);
 					if (superType != null) {
-						fPossibleCandidates= superType.newTypeHierarchy(fOwner, new SubProgressMonitor(monitor, 9, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).getSubtypes(superType);
+						fPossibleCandidates= superType.newTypeHierarchy(fOwner, Progress.subMonitorSupressed(monitor, 9)).getSubtypes(superType);
 						final LinkedList<IType> list= new LinkedList<>(Arrays.asList(fPossibleCandidates));
 						final Set<String> names= new HashSet<>();
 						for (final Iterator<IType> iterator= list.iterator(); iterator.hasNext();) {

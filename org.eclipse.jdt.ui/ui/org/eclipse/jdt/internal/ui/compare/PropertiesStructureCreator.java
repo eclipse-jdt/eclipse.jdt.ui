@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -40,6 +39,7 @@ import org.eclipse.compare.structuremergeviewer.StructureRootNode;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionScanner;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class PropertiesStructureCreator extends StructureCreator {
@@ -346,7 +346,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 	private IProgressMonitor beginWork(IProgressMonitor monitor) {
 		if (monitor == null)
 			return new NullProgressMonitor();
-		return new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN);
+		return Progress.subMonitor(monitor, IProgressMonitor.UNKNOWN);
 	}
 
 }

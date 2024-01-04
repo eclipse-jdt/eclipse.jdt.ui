@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 
+@SuppressWarnings("restriction") // org.eclipse.ltk.internal
 public class ExtensionPointTests {
 	@Rule
 	public ExtensionPointTestSetup eps= new ExtensionPointTestSetup();

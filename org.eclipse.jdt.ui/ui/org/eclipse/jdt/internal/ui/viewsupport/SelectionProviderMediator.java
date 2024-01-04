@@ -29,6 +29,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
+import org.eclipse.jdt.core.JavaCore;
+
 /**
  * A selection provider for view parts with more that one viewer.
  * Tracks the focus of the viewers to provide the correct selection.
@@ -128,6 +130,10 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	}
 
 	private void fireSelectionChanged() {
+		JavaCore.runReadOnly(this::fireSelectionChangedCached);
+	}
+
+	private void fireSelectionChangedCached() {
 		if (fSelectionChangedListeners != null) {
 			SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
 

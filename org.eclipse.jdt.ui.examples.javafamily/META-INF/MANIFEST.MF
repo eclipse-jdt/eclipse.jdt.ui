@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.examples.javafamily
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui.examples.javafamily; singleton:=true
-Bundle-Version: 3.3.0.qualifier
+Bundle-Version: 3.4.0.qualifier
 Bundle-ClassPath: javafamily.jar
 Bundle-Activator: org.eclipse.jsp.JspUIPlugin
 Bundle-Vendor: %providerName
@@ -28,7 +28,7 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.jdt.core.manipulation;bundle-version="1.8.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.core.indexsearch;x-internal:=true,
  org.eclipse.jdt.internal.ui.examples.jspeditor;x-internal:=true,
  org.eclipse.jface.text.source.translation;x-internal:=true,

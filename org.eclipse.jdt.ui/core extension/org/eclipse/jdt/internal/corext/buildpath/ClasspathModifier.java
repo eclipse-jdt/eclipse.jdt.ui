@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -58,6 +57,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
@@ -443,7 +443,7 @@ public class ClasspathModifier {
 			IClasspathEntry entry= root.getRawClasspathEntry();
 			if (entry == null)
 				return false;
-			return contains(selection.getPath().removeFirstSegments(root.getPath().segmentCount()), entry.getInclusionPatterns(), new SubProgressMonitor(monitor, 2));
+			return contains(selection.getPath().removeFirstSegments(root.getPath().segmentCount()), entry.getInclusionPatterns(), Progress.subMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}
@@ -604,7 +604,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ExamineInputFilters, 4);
-			IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 4));
+			IPackageFragmentRoot root= getFragmentRoot(resource, project, Progress.subMonitor(monitor, 4));
 			if (root != null) {
 				IClasspathEntry entry= root.getRawClasspathEntry();
 				return entry.getInclusionPatterns().length == 0;
@@ -651,7 +651,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 2);
-			exclude(resource.getFullPath(), existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
+			exclude(resource.getFullPath(), existingEntries, newEntries, project, Progress.subMonitor(monitor, 1));
 			CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, resource.getFullPath(), resource);
 			return entry;
 		} finally {
@@ -785,11 +785,11 @@ public class ClasspathModifier {
 			IPath[] newExcludedPath= new IPath[excludedPath.length + 1];
 			name= completeName(name);
 			IPath path= new Path(name);
-			if (!contains(path, excludedPath, new SubProgressMonitor(monitor, 2))) {
+			if (!contains(path, excludedPath, Progress.subMonitor(monitor, 2))) {
 				System.arraycopy(excludedPath, 0, newExcludedPath, 0, excludedPath.length);
 				newExcludedPath[excludedPath.length]= path;
 				entry.setAttribute(CPListElement.EXCLUSION, newExcludedPath);
-				entry.setAttribute(CPListElement.INCLUSION, remove(path, (IPath[]) entry.getAttribute(CPListElement.INCLUSION), new SubProgressMonitor(monitor, 4)));
+				entry.setAttribute(CPListElement.INCLUSION, remove(path, (IPath[]) entry.getAttribute(CPListElement.INCLUSION), Progress.subMonitor(monitor, 4)));
 			}
 			result= fullPath == null ? null : getResource(fullPath, project);
 		} finally {
@@ -838,7 +838,7 @@ public class ClasspathModifier {
 			if (elem == null) {
 				elem= existingElem;
 			}
-			exclude(path.removeFirstSegments(path.segmentCount() - i).toString(), null, elem, project, new SubProgressMonitor(monitor, 1));
+			exclude(path.removeFirstSegments(path.segmentCount() - i).toString(), null, elem, project, Progress.subMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -865,7 +865,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			String name= getName(javaElement.getPath(), entry.getPath());
-			return exclude(name, javaElement.getPath(), entry, project, new SubProgressMonitor(monitor, 1));
+			return exclude(name, javaElement.getPath(), entry, project, Progress.subMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -892,7 +892,7 @@ public class ClasspathModifier {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveExclusion, 10);
 			String name= getName(resource.getFullPath(), entry.getPath());
 			IPath[] excludedPath= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
-			IPath[] newExcludedPath= remove(new Path(completeName(name)), excludedPath, new SubProgressMonitor(monitor, 3));
+			IPath[] newExcludedPath= remove(new Path(completeName(name)), excludedPath, Progress.subMonitor(monitor, 3));
 			entry.setAttribute(CPListElement.EXCLUSION, newExcludedPath);
 		} finally {
 			monitor.done();
@@ -914,7 +914,7 @@ public class ClasspathModifier {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetFilters, 3);
 
-			List<Path> exclusionList= getFoldersOnCP(element.getPath(), project, new SubProgressMonitor(monitor, 2));
+			List<Path> exclusionList= getFoldersOnCP(element.getPath(), project, Progress.subMonitor(monitor, 2));
 			IPath outputLocation= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 			if (outputLocation != null) {
 				IPath[] exclusionPatterns= (IPath[]) entry.getAttribute(CPListElement.EXCLUSION);
@@ -996,7 +996,7 @@ public class ClasspathModifier {
 				throw new JavaModelException(status);
 
 			BuildPathSupport.setEEComplianceOptions(project, newEntries);
-			project.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
+			project.setRawClasspath(entries, outputLocation, Progress.subMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}
@@ -1019,7 +1019,7 @@ public class ClasspathModifier {
 				throw new JavaModelException(status);
 
 			BuildPathSupport.setEEComplianceOptions(javaProject, cpListElements);
-			javaProject.setRawClasspath(entries, outputLocation, new SubProgressMonitor(monitor, 2));
+			javaProject.setRawClasspath(entries, outputLocation, Progress.subMonitor(monitor, 2));
 		} finally {
 			monitor.done();
 		}
@@ -1138,7 +1138,7 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemovePath, paths.length + 5);
-			if (!contains(path, paths, new SubProgressMonitor(monitor, 5)))
+			if (!contains(path, paths, Progress.subMonitor(monitor, 5)))
 				return paths;
 
 			ArrayList<IPath> newPaths= new ArrayList<>();

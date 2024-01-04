@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -81,6 +80,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -513,13 +513,13 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 			IFolder folder= fCurrJProject.getProject().getFolder(relPath);
 			if (!folder.exists()) {
-				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+				CoreUtility.createFolder(folder, true, true, Progress.subMonitor(monitor, 1));
 			}
 			if (monitor.isCanceled()) {
 				throw new InterruptedException();
 			}
 
-			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, new SubProgressMonitor(monitor, 2));
+			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, Progress.subMonitor(monitor, 2));
 
 			fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
 		} finally {

@@ -14,12 +14,18 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -32,17 +38,17 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
+
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.AbstractTextSearchResult;
-import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class NLSSearchQuery implements ISearchQuery {
@@ -94,8 +100,8 @@ public class NLSSearchQuery implements ISearchQuery {
 				NLSSearchResultRequestor requestor= new NLSSearchResultRequestor(propertieFile, fResult);
 				try {
 					SearchEngine engine= new SearchEngine();
-					engine.search(pattern, participants, fScope, requestor, new SubProgressMonitor(monitor, 4));
-					requestor.reportUnusedPropertyNames(new SubProgressMonitor(monitor, 1));
+					engine.search(pattern, participants, fScope, requestor, Progress.subMonitor(monitor, 4));
+					requestor.reportUnusedPropertyNames(Progress.subMonitor(monitor, 1));
 
 					ICompilationUnit compilationUnit= ((IType)wrapperClass).getCompilationUnit();
 					CompilationUnitEntry groupElement= new CompilationUnitEntry(NLSSearchMessages.NLSSearchResultCollector_unusedKeys, compilationUnit);

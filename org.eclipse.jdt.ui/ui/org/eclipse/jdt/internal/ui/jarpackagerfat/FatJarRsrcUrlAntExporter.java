@@ -60,7 +60,9 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 	@Override
 	protected void buildANTScript(IPath antScriptLocation, String projectName, IPath absJarfile, String mainClass, SourceInfo[] sourceInfos) throws FileNotFoundException, IOException {
 		File antScriptFile= antScriptLocation.toFile();
-		buildANTScript(new FileOutputStream(antScriptFile), projectName, absJarfile, mainClass, sourceInfos);
+		try (FileOutputStream outputStream= new FileOutputStream(antScriptFile)) {
+			buildANTScript(outputStream, projectName, absJarfile, mainClass, sourceInfos);
+		}
 		copyJarInJarLoader(new File(antScriptFile.getParentFile(), FatJarRsrcUrlBuilder.JAR_RSRC_LOADER_ZIP));
 	}
 

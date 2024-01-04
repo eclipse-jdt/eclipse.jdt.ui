@@ -166,20 +166,16 @@ public class ProfileStore {
 
 	public void writeProfiles(Collection<Profile> profiles, IScopeContext instanceScope) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
+		writeProfilesToStream(profiles, stream, ENCODING, fProfileVersioner);
+		String val;
 		try {
-			writeProfilesToStream(profiles, stream, ENCODING, fProfileVersioner);
-			String val;
-			try {
-				val= stream.toString(ENCODING);
-			} catch (UnsupportedEncodingException e) {
-				val= stream.toString();
-			}
-			IEclipsePreferences uiPreferences = instanceScope.getNode(JavaUI.ID_PLUGIN);
-			uiPreferences.put(fProfilesKey, val);
-			uiPreferences.putInt(fProfilesVersionKey, fProfileVersioner.getCurrentVersion());
-		} finally {
-			try { stream.close(); } catch (IOException e) { /* ignore */ }
+			val= stream.toString(ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			val= stream.toString();
 		}
+		IEclipsePreferences uiPreferences = instanceScope.getNode(JavaUI.ID_PLUGIN);
+		uiPreferences.put(fProfilesKey, val);
+		uiPreferences.putInt(fProfilesVersionKey, fProfileVersioner.getCurrentVersion());
 	}
 
 	public List<Profile> readProfilesFromString(String profiles) throws CoreException {
@@ -191,17 +187,13 @@ public class ProfileStore {
 				bytes= profiles.getBytes();
 			}
 			InputStream is= new ByteArrayInputStream(bytes);
-			try {
-				List<Profile> res= readProfilesFromStream(new InputSource(is));
-				if (res != null) {
-					for (Profile re : res) {
-						fProfileVersioner.update((CustomProfile) re);
-					}
+			List<Profile> res= readProfilesFromStream(new InputSource(is));
+			if (res != null) {
+				for (Profile re : res) {
+					fProfileVersioner.update((CustomProfile) re);
 				}
-				return res;
-			} finally {
-				try { is.close(); } catch (IOException e) { /* ignore */ }
 			}
+			return res;
 		}
 		return null;
     }
@@ -214,13 +206,8 @@ public class ProfileStore {
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 */
 	public List<Profile> readProfilesFromFile(File file) throws CoreException {
-		try {
-			final FileInputStream reader= new FileInputStream(file);
-			try {
-				return readProfilesFromStream(new InputSource(reader));
-			} finally {
-				try { reader.close(); } catch (IOException e) { /* ignore */ }
-			}
+		try (FileInputStream reader= new FileInputStream(file)) {
+			return readProfilesFromStream(new InputSource(reader));
 		} catch (IOException e) {
 			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_reading_xml_message);
 		}
@@ -251,14 +238,8 @@ public class ProfileStore {
 	 * @param encoding the encoding to use
 	 */
 	public void writeProfilesToFile(Collection<Profile> profiles, File file, String encoding) throws CoreException {
-		final OutputStream stream;
-		try {
-			stream= new FileOutputStream(file);
-			try {
-				writeProfilesToStream(profiles, stream, encoding, fProfileVersioner);
-			} finally {
-				try { stream.close(); } catch (IOException e) { /* ignore */ }
-			}
+		try (OutputStream stream= new FileOutputStream(file)) {
+			writeProfilesToStream(profiles, stream, encoding, fProfileVersioner);
 		} catch (IOException e) {
 			throw createException(e, FormatterMessages.CodingStyleConfigurationBlock_error_serializing_xml_message);
 		}

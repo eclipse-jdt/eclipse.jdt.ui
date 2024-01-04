@@ -12,3 +12,4 @@ Bug 574522 - 4.21 I-Build: I20210628-1800 - Comparator Errors Found
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/pull/439 - Update ICU4J to version 71.1
 Bug 527899 [9] Implement JEP 280: Indify String Concatenation
 Bug 527899 [9] Implement JEP 280: Indify String Concatenation
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/1659

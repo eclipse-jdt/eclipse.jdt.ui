@@ -32,7 +32,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -141,6 +140,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Extracts a method in a compilation unit based on a text selection range.
@@ -319,10 +319,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 		result.merge(Checks.validateModifiesFiles(changedFiles, getValidationContext(), pm));
 		if (result.hasFatalError())
 			return result;
-		result.merge(ResourceChangeChecker.checkFilesToBeChanged(changedFiles, new SubProgressMonitor(pm, 1)));
+		result.merge(ResourceChangeChecker.checkFilesToBeChanged(changedFiles, Progress.subMonitor(pm, 1)));
 
 		if (fRoot == null) {
-			fRoot= RefactoringASTParser.parseWithASTProvider(fCUnit, true, new SubProgressMonitor(pm, 99));
+			fRoot= RefactoringASTParser.parseWithASTProvider(fCUnit, true, Progress.subMonitor(pm, 99));
 		}
 		fImportRewriter= StubUtility.createImportRewrite(fRoot, true);
 

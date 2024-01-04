@@ -222,6 +222,9 @@ public class TypeMismatchSubProcessor {
 				ImportRewrite imports= proposal.createImportRewrite(astRoot);
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
+				if (currBinding.isCapture()) {
+					currBinding= currBinding.getWildcard();
+				}
 				Type newReturnType= imports.addImport(currBinding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 

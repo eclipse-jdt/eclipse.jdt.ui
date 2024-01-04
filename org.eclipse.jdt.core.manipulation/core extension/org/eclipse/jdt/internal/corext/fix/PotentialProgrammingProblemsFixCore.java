@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
@@ -70,6 +69,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperationCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteOperationsFixCore {
@@ -106,24 +106,24 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 			try {
 				monitor.beginTask("", 10); //$NON-NLS-1$
 
-				IType[] types= findTypesWithMissingUID(fProject, fCompilationUnits, new SubProgressMonitor(monitor, 1));
+				IType[] types= findTypesWithMissingUID(fProject, fCompilationUnits, Progress.subMonitor(monitor, 1));
 				if (types.length == 0)
 					return new RefactoringStatus();
 
-				fProject.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
+				fProject.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, Progress.subMonitor(monitor, 60));
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();
 
 				result= new RefactoringStatus();
 				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setProject(fProject);
-				IBinding[] bindings= parser.createBindings(types, new SubProgressMonitor(monitor, 1));
+				IBinding[] bindings= parser.createBindings(types, Progress.subMonitor(monitor, 1));
 				for (int i= 0; i < bindings.length; i++) {
 					IBinding curr= bindings[i];
 					if (curr instanceof ITypeBinding) {
 						ITypeBinding typeBinding= (ITypeBinding) curr;
 						try {
-							Long id= SerialVersionHashOperationCore.calculateSerialVersionId(typeBinding, new SubProgressMonitor(monitor, 1));
+							Long id= SerialVersionHashOperationCore.calculateSerialVersionId(typeBinding, Progress.subMonitor(monitor, 1));
 							if (id != null) {
 								setSerialVersionId(typeBinding, id);
 							} else {
@@ -163,7 +163,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 
 					HashSet<ICompilationUnit> cus= new HashSet<>(Arrays.asList(compilationUnits));
 					monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, SERIALIZABLE_NAME));
-					ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
+					ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, Progress.subMonitor(monitor, compilationUnits.length));
 					IType[] allSubtypes1= hierarchy1.getAllSubtypes(serializable);
 					addTypes(allSubtypes1, cus, types);
 				} else {

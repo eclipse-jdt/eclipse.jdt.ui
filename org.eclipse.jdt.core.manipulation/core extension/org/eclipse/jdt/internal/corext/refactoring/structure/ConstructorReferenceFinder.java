@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
@@ -58,6 +57,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * This class is used to find references to constructors.
@@ -171,8 +172,8 @@ public class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		List<SearchMatch> searchMatches= new ArrayList<>(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
-		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, new SubProgressMonitor(pm, 1), status));
+		List<SearchMatch> searchMatches= new ArrayList<>(getImplicitConstructorReferencesFromHierarchy(owner, Progress.subMonitor(pm, 1)));
+		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, Progress.subMonitor(pm, 1), status));
 		pm.done();
 		return RefactoringSearchEngine.groupByCu(searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
 	}

@@ -19,10 +19,10 @@
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -67,11 +67,13 @@ public class JarWriter4 extends JarWriter3 {
 	}
 
 	public void addZipEntry(ZipEntry zipEntry, ZipFile zipFile, String path) throws IOException {
+		@SuppressWarnings("resource")
+		JarOutputStream jarOutputStream= this.getJarOutputStream();
 		JarPackagerUtilCore.addZipEntry(zipEntry, zipFile, path, fJarPackage.areDirectoryEntriesIncluded(),
-				fJarPackage.isCompressed(), this.getJarOutputStream(), this.getDirectories());
+				fJarPackage.isCompressed(), jarOutputStream, this.getDirectories());
 	}
 
-	public void addZipEntryStream(ZipEntry zipEntry, InputStream is, String path) throws IOException {
+	public void addZipEntryStream(ZipEntry zipEntry, byte[] content, String path) throws IOException {
 		if (fJarPackage.areDirectoryEntriesIncluded())
 			addDirectories(path);
 		JarEntry newEntry= new JarEntry(path.replace(File.separatorChar, '/'));
@@ -86,7 +88,10 @@ public class JarWriter4 extends JarWriter3 {
 		long lastModified= System.currentTimeMillis();
 		// Set modification time
 		newEntry.setTime(lastModified);
-		addEntry(newEntry, is);
+		@SuppressWarnings("resource")
+		JarOutputStream jarOutputStream= getJarOutputStream();
+		jarOutputStream.putNextEntry(newEntry);
+		jarOutputStream.write(content);
 	}
 
 	public void write(File file, IPath destinationPath) throws CoreException {
@@ -111,15 +116,20 @@ public class JarWriter4 extends JarWriter3 {
 
 		JarEntry newEntry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
 
+		byte[] allBytes= Files.readAllBytes(file.toPath());
 		if (fJarPackage.isCompressed())
 			newEntry.setMethod(ZipEntry.DEFLATED);
 			// Entry is filled automatically.
 		else {
 			newEntry.setMethod(ZipEntry.STORED);
-			JarPackagerUtil.calculateCrcAndSize(newEntry, new FileInputStream(file), new byte[4096]);
+				JarPackagerUtil.setCrcAndSize(newEntry, allBytes);
 		}
 
 		newEntry.setTime(file.lastModified());
-		addEntry(newEntry, new FileInputStream(file));
+
+		@SuppressWarnings("resource")
+		JarOutputStream jarOutputStream= getJarOutputStream();
+		jarOutputStream.putNextEntry(newEntry);
+		jarOutputStream.write(allBytes);
 	}
 }

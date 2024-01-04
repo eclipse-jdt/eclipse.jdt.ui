@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,6 +29,7 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class InfoFilesUtil {
 
@@ -89,7 +89,7 @@ public class InfoFilesUtil {
 			String formattedContent= CodeFormatterUtil.format(kind, originalContent, 0, lineDelimiter, FormatterProfileManager.getProjectSettings(pack.getJavaProject()));
 			formattedContent= org.eclipse.jdt.internal.core.manipulation.util.Strings.trimLeadingTabsAndSpaces(formattedContent);
 			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
-			compilationUnit.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
+			compilationUnit.commitWorkingCopy(true, Progress.subMonitor(monitor, 1));
 		} finally {
 			compilationUnit.discardWorkingCopy();
 		}

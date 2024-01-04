@@ -36,6 +36,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
@@ -144,11 +145,8 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob= new Job(JavaUIMessages.SelectionListenerWithASTManager_job_title) {
 				@Override
 				public IStatus run(IProgressMonitor monitor) {
-					if (monitor == null) {
-						monitor= new NullProgressMonitor();
-					}
 					synchronized (fJobLock) {
-						return calculateASTandInform(typeRoot, selection, monitor);
+						return JavaCore.callReadOnly(() -> calculateASTandInform(typeRoot, selection, monitor));
 					}
 				}
 			};
@@ -158,6 +156,9 @@ public class SelectionListenerWithASTManager {
 		}
 
 		protected IStatus calculateASTandInform(ITypeRoot input, ITextSelection selection, IProgressMonitor monitor) {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}
 			if (monitor.isCanceled()) {
 				return Status.CANCEL_STATUS;
 			}

@@ -28,7 +28,6 @@ import java.util.Stack;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -70,6 +69,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * A TargetProvider provides all targets that have to be adapted, i.e. all method invocations that should be inlined.
@@ -480,7 +481,7 @@ public abstract class TargetProvider {
 					}
 				}
 			};
-			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, new SubProgressMonitor(pm, 1));
+			new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, Progress.subMonitor(pm, 1));
 			return affectedCompilationUnits.toArray(new ICompilationUnit[affectedCompilationUnits.size()]);
 		}
 

@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -51,6 +50,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.TextMatch;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class TextMatchUpdater {
 
@@ -100,7 +101,7 @@ public class TextMatchUpdater {
 			for (IProject project : projectsInScope) {
 				if (pm.isCanceled())
 					throw new OperationCanceledException();
-				addTextMatches(project, new SubProgressMonitor(pm, 1));
+				addTextMatches(project, Progress.subMonitor(pm, 1));
 			}
 		} finally{
 			pm.done();
@@ -141,7 +142,7 @@ public class TextMatchUpdater {
 				for (IResource member : members) {
 					if (pm.isCanceled())
 						throw new OperationCanceledException();
-					addTextMatches(member, new SubProgressMonitor(pm, 1));
+					addTextMatches(member, Progress.subMonitor(pm, 1));
 				}
 			}
 		} catch (JavaModelException e){

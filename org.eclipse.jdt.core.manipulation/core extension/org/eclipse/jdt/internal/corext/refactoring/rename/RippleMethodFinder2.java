@@ -31,7 +31,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IRegion;
@@ -53,6 +52,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContex
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class RippleMethodFinder2 {
 
@@ -204,7 +205,7 @@ public class RippleMethodFinder2 {
 	private IMethod[] findAllRippleMethods(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 
-		findAllDeclarations(new SubProgressMonitor(pm, 1), owner);
+		findAllDeclarations(Progress.subMonitor(pm, 1), owner);
 
 		//TODO: report assertion as error status and fall back to only return fMethod
 		//check for bug 81058:
@@ -216,7 +217,7 @@ public class RippleMethodFinder2 {
 			}
 		}
 
-		createHierarchyOfDeclarations(new SubProgressMonitor(pm, 1), owner);
+		createHierarchyOfDeclarations(Progress.subMonitor(pm, 1), owner);
 		addMissedSuperTypes();
 		createTypeToMethod();
 		createUnionFind();
@@ -401,9 +402,9 @@ public class RippleMethodFinder2 {
 
 	private ITypeHierarchy hierarchy(IProgressMonitor pm, WorkingCopyOwner owner, IType type)
 			throws JavaModelException {
-		ITypeHierarchy hierarchy= getCachedHierarchy(type, owner, new SubProgressMonitor(pm, 1));
+		ITypeHierarchy hierarchy= getCachedHierarchy(type, owner, Progress.subMonitor(pm, 1));
 		if (hierarchy == null)
-			hierarchy= type.newTypeHierarchy(owner, new SubProgressMonitor(pm, 1));
+			hierarchy= type.newTypeHierarchy(owner, Progress.subMonitor(pm, 1));
 		return hierarchy;
 	}
 
@@ -423,7 +424,7 @@ public class RippleMethodFinder2 {
 			for (IType root : fRootReps.get(rep)) {
 				ITypeHierarchy hierarchy= fRootHierarchies.get(root);
 				if (hierarchy == null) {
-					hierarchy= root.newTypeHierarchy(owner, new SubProgressMonitor(monitor, 1));
+					hierarchy= root.newTypeHierarchy(owner, Progress.subMonitor(monitor, 1));
 					fRootHierarchies.put(root, hierarchy);
 				}
 				if (hierarchy.contains(type))

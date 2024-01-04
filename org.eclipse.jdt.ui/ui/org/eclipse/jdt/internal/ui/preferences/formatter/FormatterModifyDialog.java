@@ -1575,6 +1575,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 					CheckboxPreference child= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_comments_pref_format_line_comments_on_first_column,
 							DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, CheckboxPreference.FALSE_TRUE);
 					pref.addDependant(child, valueAcceptor(DefaultCodeFormatterConstants.TRUE));
+					child= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_comments_pref_never_join_line_comments,
+							DefaultCodeFormatterConstants.FORMATTER_JOIN_LINE_COMMENTS, CheckboxPreference.TRUE_FALSE);
+					pref.addDependant(child, valueAcceptor(DefaultCodeFormatterConstants.TRUE));
 				})
 				.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_header, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER)
 				.gap()
@@ -1632,6 +1635,10 @@ public class FormatterModifyDialog extends ModifyDialog {
 			blockMaster.addDependant(pref, blockChecker);
 			headerMaster.addDependant(pref, blockChecker);
 		}
+
+		Preference<?> joinLinesPref= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_JOIN_LINES_IN_COMMENTS);
+		javadocMaster.addDependant(joinLinesPref, javadocChecker.or(blockChecker));
+		blockMaster.addDependant(joinLinesPref, javadocChecker.or(blockChecker));
 	}
 
 	private SimpleTreeBuilder<?> createJavadocAlignOptions() {

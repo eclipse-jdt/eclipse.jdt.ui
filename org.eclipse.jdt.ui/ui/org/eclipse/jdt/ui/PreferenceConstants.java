@@ -2762,7 +2762,7 @@ public class PreferenceConstants {
 	public final static String SPELLING_IGNORE_SINGLE_LETTERS= "spelling_ignore_single_letters"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether '&' in
+	 * A named preference that controls whether '&amp;' in
 	 * Java properties files are ignored.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -3391,7 +3391,7 @@ public class PreferenceConstants {
 	 * <li>categoryId is the <code>String</code> holding the category ID</li>
 	 * <li>cycleState is an <code>int</code> which specifies the rank and the enablement:
 	 * <ul>
-	 *		<li>enabled= cycleState < 65535</li>
+	 *		<li>enabled= cycleState &lt; 65535</li>
 	 *		<li>rank= enabled ? cycleState : cycleState - 65535)</li>
 	 * </ul></li>
 	 * </ul>

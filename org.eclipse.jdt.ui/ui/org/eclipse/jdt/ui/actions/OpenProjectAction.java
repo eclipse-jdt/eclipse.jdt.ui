@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Action to open a closed project. Action either opens the closed projects
@@ -192,7 +192,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 			for (Object p : projects) {
 				IProject project= (IProject) p;
 				try {
-					project.open(IResource.BACKGROUND_REFRESH, new SubProgressMonitor(monitor, 1));
+					project.open(IResource.BACKGROUND_REFRESH, Progress.subMonitor(monitor, 1));
 				} catch (CoreException e) {
 					if (errorStatus == null)
 						errorStatus = new MultiStatus(JavaPlugin.getPluginId(), IStatus.ERROR, ActionMessages.OpenProjectAction_error_message, null);

@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -111,6 +110,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants;
 import org.eclipse.jdt.internal.ui.preferences.BulletListBlock;
 import org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class CleanUpPostSaveListener implements IPostSaveListener {
 
@@ -148,7 +148,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ITextFileBuffer buffer= null;
 			try {
-				manager.connect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
+				manager.connect(fFile.getFullPath(), LocationKind.IFILE, Progress.subMonitor(pm, 1));
 				buffer= manager.getTextFileBuffer(fFile.getFullPath(), LocationKind.IFILE);
 
 				final IDocument document= buffer.getDocument();
@@ -214,7 +214,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				throw wrapBadLocationException(e);
 			} finally {
 				if (buffer != null)
-					manager.disconnect(fFile.getFullPath(), LocationKind.IFILE, new SubProgressMonitor(pm, 1));
+					manager.disconnect(fFile.getFullPath(), LocationKind.IFILE, Progress.subMonitor(pm, 1));
 			}
 		}
 
@@ -329,7 +329,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
 
 			long oldFileValue= unit.getResource().getModificationStamp();
-			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), new SubProgressMonitor(monitor, 2));
+			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), Progress.subMonitor(monitor, 2));
 
 			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
 			LinkedList<UndoEdit> undoEdits= new LinkedList<>();
@@ -355,7 +355,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     			do {
     				RefactoringStatus preCondition= new RefactoringStatus();
 					for (ICleanUp cleanUp : cleanUps) {
-						RefactoringStatus conditions= cleanUp.checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, new SubProgressMonitor(monitor, 5));
+						RefactoringStatus conditions= cleanUp.checkPreConditions(unit.getJavaProject(), new ICompilationUnit[] {unit}, Progress.subMonitor(monitor, 5));
 						preCondition.merge(conditions);
 					}
     				if (showStatus(preCondition) != Window.OK)
@@ -371,7 +371,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
     				CompilationUnit ast= null;
     				if (requiresAST(cleanUps)) {
-    					ast= createAst(unit, options, new SubProgressMonitor(monitor, 10));
+    					ast= createAst(unit, options, Progress.subMonitor(monitor, 10));
     				}
 
     				CleanUpContext context;
@@ -386,7 +386,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
     				RefactoringStatus postCondition= new RefactoringStatus();
 					for (ICleanUp cleanUp : cleanUps) {
-						RefactoringStatus conditions= cleanUp.checkPostConditions(new SubProgressMonitor(monitor, 1));
+						RefactoringStatus conditions= cleanUp.checkPostConditions(Progress.subMonitor(monitor, 1));
 						postCondition.merge(conditions);
 					}
     				if (showStatus(postCondition) != Window.OK)
@@ -403,9 +403,9 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					performChangeOperation.setSchedulingRule(unit.getSchedulingRule());
 
     					if (changedRegions != null && changedRegions.length > 0 && requiresChangedRegions(cleanUps)) {
-							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, new SubProgressMonitor(monitor, 5));
+							changedRegions= performWithChangedRegionUpdate(performChangeOperation, changedRegions, unit, Progress.subMonitor(monitor, 5));
 						} else {
-							performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+							performChangeOperation.run(Progress.subMonitor(monitor, 5));
 						}
 
     					performChangeOperation.getUndoChange();
@@ -488,7 +488,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 	    ITextFileBuffer buffer= null;
 	    try {
-	    	manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+	    	manager.connect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 1));
 		    buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
     	    IDocument document= buffer.getDocument();
 
@@ -499,7 +499,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     		}
 	    } finally {
 	    	if (buffer != null)
-	    		manager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+	    		manager.disconnect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 1));
 	    	monitor.done();
 	    }
     }
@@ -512,7 +512,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 		ITextFileBuffer buffer= null;
 		try {
-			manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+			manager.connect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 1));
 			buffer= manager.getTextFileBuffer(path, LocationKind.IFILE);
 			IDocument document= buffer.getDocument();
 
@@ -535,7 +535,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 					}
 				}
 
-				performChangeOperation.run(new SubProgressMonitor(monitor, 5));
+				performChangeOperation.run(Progress.subMonitor(monitor, 5));
 
 				ArrayList<Region> result= new ArrayList<>();
 				for (Position position : positions) {
@@ -554,7 +554,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			}
 		} finally {
 			if (buffer != null)
-				manager.disconnect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+				manager.disconnect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 1));
 			monitor.done();
 		}
 	}

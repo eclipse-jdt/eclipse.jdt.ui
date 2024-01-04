@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -50,11 +49,12 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Drag support class to allow dragging of files and folder from
@@ -179,7 +179,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 					while (iter.hasNext()) {
 						IResource r= iter.next();
 						try {
-							r.refreshLocal(IResource.DEPTH_ONE, new SubProgressMonitor(monitor, 1));
+							r.refreshLocal(IResource.DEPTH_ONE, Progress.subMonitor(monitor, 1));
 						} catch (CoreException e) {
 							status.add(e.getStatus());
 						}

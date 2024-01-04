@@ -40,7 +40,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -71,6 +70,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -232,7 +232,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 			}
 
 			try {
-				createProject(fCurrProject, fCurrProjectLocation, new SubProgressMonitor(monitor, 2));
+				createProject(fCurrProject, fCurrProjectLocation, Progress.subMonitor(monitor, 2));
 			} catch (CoreException e) {
 				if (e.getStatus().getCode() == IResourceStatus.FAILED_READ_METADATA) {
 					result= new StatusInfo(IStatus.INFO, Messages.format(NewWizardMessages.NewJavaProjectWizardPageTwo_DeleteCorruptProjectFile_message, e.getLocalizedMessage()));
@@ -251,8 +251,8 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				throw new OperationCanceledException();
 			}
 
-			initializeBuildPath(JavaCore.create(fCurrProject), new SubProgressMonitor(monitor, 2));
-			configureJavaProject(new SubProgressMonitor(monitor, 3)); // create the Java project to allow the use of the new source folder page
+			initializeBuildPath(JavaCore.create(fCurrProject), Progress.subMonitor(monitor, 2));
+			configureJavaProject(Progress.subMonitor(monitor, 3)); // create the Java project to allow the use of the new source folder page
 		} finally {
 			monitor.done();
 		}
@@ -281,7 +281,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 
 			if (fKeepContent) {
 				if (!project.getFile(FILENAME_CLASSPATH).exists()) {
-					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, new SubProgressMonitor(monitor, 2));
+					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, Progress.subMonitor(monitor, 2));
 					entries= detector.getClasspath();
 					outputLocation= detector.getOutputLocation();
 					if (entries.length == 0)
@@ -297,7 +297,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 					IPath path= sourceClasspathEntry.getPath();
 					if (path.segmentCount() > 1) {
 						IFolder folder= root.getFolder(path);
-						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+						CoreUtility.createFolder(folder, true, true, Progress.subMonitor(monitor, 1));
 					}
 					cpEntries.add(sourceClasspathEntry);
 				}
@@ -309,7 +309,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				outputLocation= fFirstPage.getOutputLocation();
 				if (outputLocation.segmentCount() > 1) {
 					IFolder folder= root.getFolder(outputLocation);
-					CoreUtility.createDerivedFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+					CoreUtility.createDerivedFolder(folder, true, true, Progress.subMonitor(monitor, 1));
 				}
 			}
 			if (monitor.isCanceled()) {
@@ -403,9 +403,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		monitor.beginTask("", ticks); //$NON-NLS-1$
 		try {
 			IFileStore projectFile= EFS.getStore(projectLocation).getChild(FILENAME_PROJECT);
-			projectFile.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
+			projectFile.delete(EFS.NONE, Progress.subMonitor(monitor, 1));
 			if (fDotProjectBackup != null) {
-				copyFile(fDotProjectBackup, projectFile, new SubProgressMonitor(monitor, 1));
+				copyFile(fDotProjectBackup, projectFile, Progress.subMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
 			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_project, e);
@@ -413,9 +413,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		}
 		try {
 			IFileStore classpathFile= EFS.getStore(projectLocation).getChild(FILENAME_CLASSPATH);
-			classpathFile.delete(EFS.NONE, new SubProgressMonitor(monitor, 1));
+			classpathFile.delete(EFS.NONE, Progress.subMonitor(monitor, 1));
 			if (fDotClasspathBackup != null) {
-				copyFile(fDotClasspathBackup, classpathFile, new SubProgressMonitor(monitor, 1));
+				copyFile(fDotClasspathBackup, classpathFile, Progress.subMonitor(monitor, 1));
 			}
 		} catch (IOException e) {
 			IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, NewWizardMessages.NewJavaProjectWizardPageTwo_problem_restore_classpath, e);
@@ -457,10 +457,10 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		try {
 			monitor.beginTask(NewWizardMessages.NewJavaProjectWizardPageTwo_operation_create, 3);
 			if (fCurrProject == null) {
-				updateProject(new SubProgressMonitor(monitor, 1));
+				updateProject(Progress.subMonitor(monitor, 1));
 			}
 			String newProjectCompliance= fKeepContent ? null : fFirstPage.getCompilerCompliance();
-			configureJavaProject(newProjectCompliance, new SubProgressMonitor(monitor, 2));
+			configureJavaProject(newProjectCompliance, Progress.subMonitor(monitor, 2));
 			createJavaProjectModuleInfoFile();
 		} finally {
 			monitor.done();
@@ -523,9 +523,9 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 				if (!removeContent) {
 					restoreExistingFolders(projLoc);
 				}
-				fCurrProject.delete(removeContent, false, new SubProgressMonitor(monitor, 2));
+				fCurrProject.delete(removeContent, false, Progress.subMonitor(monitor, 2));
 
-				restoreExistingFiles(projLoc, new SubProgressMonitor(monitor, 1));
+				restoreExistingFiles(projLoc, Progress.subMonitor(monitor, 1));
 			} finally {
 				CoreUtility.setAutoBuilding(fIsAutobuild); // fIsAutobuild must be set
 				fIsAutobuild= null;

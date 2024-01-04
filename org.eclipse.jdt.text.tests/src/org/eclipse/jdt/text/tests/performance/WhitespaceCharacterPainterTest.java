@@ -21,8 +21,6 @@ import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
-
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import junit.framework.Test;
@@ -38,7 +36,8 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	private static final Class<WhitespaceCharacterPainterTest> THIS= WhitespaceCharacterPainterTest.class;
 
-	private final IPreferenceStore fPreferenceStore= EditorsPlugin.getDefault().getPreferenceStore();
+	@SuppressWarnings("restriction")
+	private final IPreferenceStore fPreferenceStore= org.eclipse.ui.internal.editors.text.EditorsPlugin.getDefault().getPreferenceStore();
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));

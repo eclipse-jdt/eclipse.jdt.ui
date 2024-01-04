@@ -813,33 +813,25 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	}
 
 	private String removeLeadingComments(String source, int offset) {
-		final JavaCodeReader reader= new JavaCodeReader();
-		IDocument document= new Document(source);
-		int i;
-		try {
+		try (JavaCodeReader reader= new JavaCodeReader()) {
+			IDocument document= new Document(source);
 			reader.configureForwardReader(document, offset, document.getLength() - offset, true, false);
 			int c= reader.read();
 			while (c != -1 && (c == '\r' || c == '\n')) {
 				c= reader.read();
 			}
-			i= reader.getOffset();
-			reader.close();
-		} catch (IOException ex) {
-			i= 0;
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException ex) {
-				JavaPlugin.log(ex);
+			int i= reader.getOffset();
+			if (i < 0) {
+				return source;
 			}
-		}
-
-		if (i < 0)
+			if (i == offset) {
+				return source;
+			}
+			return source.substring(i);
+		} catch (IOException ex) {
+			JavaPlugin.log(ex);
 			return source;
-		if (i == offset) {
-			return source;
 		}
-		return source.substring(i);
 	}
 
 	/*

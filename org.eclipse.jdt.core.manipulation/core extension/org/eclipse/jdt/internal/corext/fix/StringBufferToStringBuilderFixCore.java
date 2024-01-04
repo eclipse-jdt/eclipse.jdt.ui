@@ -127,7 +127,7 @@ public class StringBufferToStringBuilderFixCore extends CompilationUnitRewriteOp
 		@Override
 		public boolean visit(final MethodInvocation node) {
 			ITypeBinding returnBinding= node.resolveTypeBinding();
-			if (isStringBufferType(returnBinding)) {
+			if (returnBinding != null && isStringBufferType(returnBinding)) { // null check prevents AbortSearchException
 				IMethodBinding methodBinding= node.resolveMethodBinding();
 				if (methodBinding != null) {
 					ITypeBinding type= methodBinding.getDeclaringClass();

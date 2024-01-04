@@ -182,8 +182,7 @@ public class JavadocOptionsManager {
 		fRecentSettings= new RecentSettingsStore(javadocSection);
 
 		if (xmlJavadocFile != null) {
-			try {
-				JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents());
+			try (JavadocReader reader= new JavadocReader(xmlJavadocFile.getContents())) {
 				Element element= reader.readXML();
 				if (element != null) {
 					loadFromXML(element);
@@ -836,32 +835,21 @@ public class JavadocOptionsManager {
 
 
 	public File writeXML(Element javadocElement) throws CoreException {
-		FileOutputStream objectStreamOutput= null;
-		//@change
-		//for now only writing ant files for single project selection
-		try {
-			File file= new File(fAntpath);
+		File file= new File(fAntpath);
 
-			String encoding= "UTF-8"; //$NON-NLS-1$
-			IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.ant.core.antBuildFile"); //$NON-NLS-1$
-			if (type != null)
-				encoding= type.getDefaultCharset();
+		String encoding= "UTF-8"; //$NON-NLS-1$
+		IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.ant.core.antBuildFile"); //$NON-NLS-1$
+		if (type != null)
+			encoding= type.getDefaultCharset();
 
-			file.getParentFile().mkdirs();
+		file.getParentFile().mkdirs();
 
-			objectStreamOutput= new FileOutputStream(file);
+		try (FileOutputStream objectStreamOutput= new FileOutputStream(file)) {
 			JavadocWriter.writeDocument(javadocElement, encoding, objectStreamOutput);
 			return file;
 		} catch (IOException | TransformerException e) {
 			String message= JavadocExportMessages.JavadocOptionsManager_createXM_error;
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, message, e));
-		} finally {
-			if (objectStreamOutput != null) {
-				try {
-					objectStreamOutput.close();
-				} catch (IOException e) {
-				}
-			}
 		}
 	}
 

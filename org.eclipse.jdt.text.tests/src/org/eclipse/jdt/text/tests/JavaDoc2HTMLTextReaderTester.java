@@ -17,7 +17,7 @@ package org.eclipse.jdt.text.tests;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.Reader;
+import java.io.IOException;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,8 +26,6 @@ import org.junit.rules.TestName;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.internal.text.html.HTMLPrinter;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
@@ -44,9 +42,13 @@ public class JavaDoc2HTMLTextReaderTester {
 
 	private static final boolean DEBUG= false;
 
+	@SuppressWarnings("restriction")
 	private String getTransformedJavaDoc(String string) {
-		Reader reader= new JavaDocCommentReader(new MockBuffer(string), 0, string.length());
-		return HTMLPrinter.read(new JavaDoc2HTMLTextReader(reader));
+		try (JavaDoc2HTMLTextReader rd= new JavaDoc2HTMLTextReader(new JavaDocCommentReader(new MockBuffer(string), 0, string.length()))) {
+			return org.eclipse.jface.internal.text.html.HTMLPrinter.read(rd);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void verify(String string, String expected){

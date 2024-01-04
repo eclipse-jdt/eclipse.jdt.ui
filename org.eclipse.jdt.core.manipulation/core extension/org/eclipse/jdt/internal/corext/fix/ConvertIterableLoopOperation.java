@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -25,6 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -262,31 +264,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				for (Expression expression : fOccurrences) {
 					Statement parent= ASTNodes.getParent(expression, Statement.class);
-					if (parent != null && parent.getParent() instanceof Block) {
-						ListRewrite innerList= astRewrite.getListRewrite(parent.getParent(), Block.STATEMENTS_PROPERTY);
-						List<ASTNode> newComments= new ArrayList<>();
-						for (Comment comment : commentList) {
-							CompilationUnit cu= (CompilationUnit)parent.getRoot();
-							if (comment.getStartPosition() >= cu.getExtendedStartPosition(parent)
-									&& comment.getStartPosition() + comment.getLength() < parent.getStartPosition()) {
-								String commentString= cuRewrite.getCu().getBuffer().getText(comment.getStartPosition(), comment.getLength());
-								ASTNode newComment= astRewrite.createStringPlaceholder(commentString, comment.isBlockComment() ? ASTNode.BLOCK_COMMENT : ASTNode.LINE_COMMENT);
-								newComments.add(newComment);
-							}
-						}
-						if (!newComments.isEmpty()) {
-							ASTNode lastComment= newComments.get(0);
-							innerList.replace(parent, lastComment, group);
-							for (int i= 1; i < newComments.size(); ++i) {
-								ASTNode nextComment= newComments.get(i);
-								innerList.insertAfter(nextComment, lastComment, group);
-								lastComment= nextComment;
-							}
-						} else {
-							innerList.remove(parent, group);
-						}
-						remover.registerRemovedNode(parent);
-					}
+					removeorReplaceStatementByTrailingComments(cuRewrite, group, astRewrite, remover, commentList, parent);
 				}
 			} else {
 				list= null;
@@ -323,8 +301,17 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						Expression expression= node.getExpression();
 						if (expression instanceof Name) {
 							IBinding result= ((Name)expression).resolveBinding();
-							if (result != null && result.equals(fIteratorVariable))
-								return replace(node);
+							if (result != null && result.equals(fIteratorVariable)) {
+								List<ASTNode> siblingNodes = Optional.ofNullable(ASTNodes.getParent(node, Statement.class))
+										.map(it -> ASTNodes.getChildren(it))
+										.orElse(new ArrayList<>());
+								if(siblingNodes.stream().allMatch(node::equals)) {
+									Statement parentStatement = ASTNodes.getParent(node, Statement.class);
+									removeorReplaceStatementByTrailingComments(cuRewrite, group, astRewrite, remover, commentList, parentStatement);
+								} else {
+									return replace(node);
+								}
+							}
 						} else if (expression instanceof FieldAccess) {
 							IBinding result= ((FieldAccess)expression).resolveFieldBinding();
 							if (result != null && result.equals(fIteratorVariable))
@@ -379,6 +366,39 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		}
 
 		return fEnhancedForLoop;
+	}
+
+	private void removeorReplaceStatementByTrailingComments(CompilationUnitRewrite cuRewrite, final TextEditGroup group, ASTRewrite astRewrite, ImportRemover remover, List<Comment> commentList, Statement parent) {
+		if (parent != null && parent.getParent() instanceof Block) {
+			ListRewrite innerList= astRewrite.getListRewrite(parent.getParent(), Block.STATEMENTS_PROPERTY);
+			List<ASTNode> newComments= new ArrayList<>();
+			for (Comment comment : commentList) {
+				CompilationUnit cu= (CompilationUnit)parent.getRoot();
+				if (comment.getStartPosition() >= cu.getExtendedStartPosition(parent)
+						&& comment.getStartPosition() + comment.getLength() < parent.getStartPosition()) {
+					String commentString;
+					try {
+						commentString= cuRewrite.getCu().getBuffer().getText(comment.getStartPosition(), comment.getLength());
+					} catch (IndexOutOfBoundsException | JavaModelException e) {
+						commentString = ""; //$NON-NLS-1$
+					}
+					ASTNode newComment= astRewrite.createStringPlaceholder(commentString, comment.isBlockComment() ? ASTNode.BLOCK_COMMENT : ASTNode.LINE_COMMENT);
+					newComments.add(newComment);
+				}
+			}
+			if (!newComments.isEmpty()) {
+				ASTNode lastComment= newComments.get(0);
+				innerList.replace(parent, lastComment, group);
+				for (int i= 1; i < newComments.size(); ++i) {
+					ASTNode nextComment= newComments.get(i);
+					innerList.insertAfter(nextComment, lastComment, group);
+					lastComment= nextComment;
+				}
+			} else {
+				innerList.remove(parent, group);
+			}
+			remover.registerRemovedNode(parent);
+		}
 	}
 
 	public Expression getExpression() {

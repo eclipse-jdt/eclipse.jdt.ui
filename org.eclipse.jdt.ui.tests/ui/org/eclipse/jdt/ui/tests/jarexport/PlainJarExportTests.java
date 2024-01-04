@@ -182,7 +182,7 @@ public class PlainJarExportTests {
 		if (status.getSeverity() == IStatus.ERROR)
 			throw new CoreException(status);
 
-		return JarPackagerUtil.getArchiveFile(data.getJarLocation());
+		return JarPackagerUtil.createZipFile(data.getJarLocation());
 	}
 
 	private static ArrayList<String> getSortedEntries(ZipFile jar) {

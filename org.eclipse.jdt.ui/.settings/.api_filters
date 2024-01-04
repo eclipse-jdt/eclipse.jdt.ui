@@ -137,6 +137,38 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/JavaUI.java" type="org.eclipse.jdt.ui.JavaUI">
+        <filter comment="View ID constants should be final." id="388100214">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.JavaUI"/>
+                <message_argument value="ID_BROWSING_PERSPECTIVE"/>
+            </message_arguments>
+        </filter>
+        <filter comment="View ID constants should be final." id="388100214">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.JavaUI"/>
+                <message_argument value="ID_MEMBERS_VIEW"/>
+            </message_arguments>
+        </filter>
+        <filter comment="View ID constants should be final." id="388100214">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.JavaUI"/>
+                <message_argument value="ID_PACKAGES_VIEW"/>
+            </message_arguments>
+        </filter>
+        <filter comment="View ID constants should be final." id="388100214">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.JavaUI"/>
+                <message_argument value="ID_PROJECTS_VIEW"/>
+            </message_arguments>
+        </filter>
+        <filter comment="View ID constants should be final." id="388100214">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.JavaUI"/>
+                <message_argument value="ID_TYPES_VIEW"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/ui/StandardJavaElementContentProvider.java" type="org.eclipse.jdt.ui.StandardJavaElementContentProvider">
         <filter comment="For Java 13 Enable Preview feature" id="576725006">
             <message_arguments>

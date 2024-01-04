@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -165,6 +164,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class ChangeSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating {
@@ -715,7 +716,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private ITypeHierarchy getCachedTypeHierarchy(IProgressMonitor monitor) throws JavaModelException {
 		if (fCachedTypeHierarchy == null)
-			fCachedTypeHierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+			fCachedTypeHierarchy= fMethod.getDeclaringType().newTypeHierarchy(Progress.subMonitor(monitor, 1));
 		return fCachedTypeHierarchy;
 	}
 
@@ -731,11 +732,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 			if (fMethod.getDeclaringType().isInterface()) {
-				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
+				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(Progress.subMonitor(monitor, 1)));
 				monitor.worked(1);
 			} else if (MethodChecks.isVirtual(fMethod)) {
-				ITypeHierarchy hierarchy= getCachedTypeHierarchy(new SubProgressMonitor(monitor, 1));
-				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, hierarchy, new SubProgressMonitor(monitor, 1));
+				ITypeHierarchy hierarchy= getCachedTypeHierarchy(Progress.subMonitor(monitor, 1));
+				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, hierarchy, Progress.subMonitor(monitor, 1));
 				if (fTopMethod == null)
 					fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, hierarchy);
 			}
@@ -820,12 +821,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getMethodName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, binaryRefs, new SubProgressMonitor(pm, 1), null);
+			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, binaryRefs, Progress.subMonitor(pm, 1), null);
 			result.merge(checkVarargs());
 			if (result.hasFatalError())
 				return result;
 
-			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1), binaryRefs, result);
+			fOccurrences= findOccurrences(Progress.subMonitor(pm, 1), binaryRefs, result);
 			binaryRefs.addErrorIfNecessary(result);
 
 			result.merge(checkVisibilityChanges());
@@ -836,7 +837,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			// including visibility problems, shadowing and missing throws declarations.
 
 			if (! isOrderSameAsInitial())
-				result.merge(checkReorderings(new SubProgressMonitor(pm, 1)));
+				result.merge(checkReorderings(Progress.subMonitor(pm, 1)));
 			else
 				pm.worked(1);
 
@@ -845,15 +846,15 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			// - warn if exists with different parameter types (may cause overloading)
 
 			if (! areNamesSameAsInitial())
-				result.merge(checkRenamings(new SubProgressMonitor(pm, 1)));
+				result.merge(checkRenamings(Progress.subMonitor(pm, 1)));
 			else
 				pm.worked(1);
 			if (result.hasFatalError())
 				return result;
 
-//			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); // already done in checkSignature(true)
+//			resolveTypesWithoutBindings(Progress.subMonitor(pm, 1)); // already done in checkSignature(true)
 
-			createChangeManager(new SubProgressMonitor(pm, 1), result);
+			createChangeManager(Progress.subMonitor(pm, 1), result);
 			fCachedTypeHierarchy= null;
 
 			if (mustAnalyzeAstOfDeclaringCu())
@@ -1370,7 +1371,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		Map<ICompilationUnit, Set<IType>> namedSubclassMapping= null;
 		if (isNoArgConstructor){
 			//create only when needed;
-			namedSubclassMapping= createNamedSubclassMapping(new SubProgressMonitor(pm, 1));
+			namedSubclassMapping= createNamedSubclassMapping(Progress.subMonitor(pm, 1));
 		}else{
 			pm.worked(1);
 		}
@@ -1421,7 +1422,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private Map<ICompilationUnit, Set<IType>> createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
 		Map<ICompilationUnit, Set<IType>> result= new HashMap<>();
-		for (IType subclass : getCachedTypeHierarchy(new SubProgressMonitor(pm, 1)).getSubclasses(fMethod.getDeclaringType())) {
+		for (IType subclass : getCachedTypeHierarchy(Progress.subMonitor(pm, 1)).getSubclasses(fMethod.getDeclaringType())) {
 			if (subclass.isAnonymous())
 				continue;
 			ICompilationUnit cu= subclass.getCompilationUnit();

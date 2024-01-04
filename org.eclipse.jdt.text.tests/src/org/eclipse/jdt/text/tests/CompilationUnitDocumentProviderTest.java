@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 
 
+@SuppressWarnings("restriction") // org.eclipse.core.filebuffers.tests.ResourceHelper
 public class CompilationUnitDocumentProviderTest {
 
 	private IJavaProject fJavaProject;

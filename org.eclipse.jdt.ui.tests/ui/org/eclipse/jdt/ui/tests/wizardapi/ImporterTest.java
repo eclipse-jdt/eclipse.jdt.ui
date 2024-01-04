@@ -42,6 +42,7 @@ import org.eclipse.ui.wizards.datatransfer.ProjectConfigurator;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+@SuppressWarnings("restriction") // org.eclipse.ui.internal.
 public class ImporterTest{
 
 	@Test

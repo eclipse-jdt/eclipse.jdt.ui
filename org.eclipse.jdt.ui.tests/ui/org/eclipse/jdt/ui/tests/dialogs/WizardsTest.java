@@ -14,10 +14,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.UUID;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -30,6 +45,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackageReader;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
@@ -55,6 +73,7 @@ public class WizardsTest extends TestCase {
 		suite.addTest(new WizardsTest("testNewProjectWizard"));
 		suite.addTest(new WizardsTest("testPackageWizard"));
 		suite.addTest(new WizardsTest("testSourceFolderWizard"));
+		suite.addTest(new WizardsTest("testJarPackageWizard_sameElementOrderInJarDescriptionExports"));
 		return suite;
 	}
 
@@ -171,6 +190,70 @@ public class WizardsTest extends TestCase {
 		DialogCheck.assertDialog(dialog);
 
 		JavaProjectHelper.delete(jproject);
+	}
+
+	public void testJarPackageWizard_sameElementOrderInJarDescriptionExports() throws Exception {
+		IResource[] roots = createProjectsWithSourceFolders(20);
+		IProject outputProject = roots[0].getProject();
+
+		IFile jardescProperOrder = outputProject.getFile("proper.jardesc");
+		exportJardesc(outputProject, roots).move(jardescProperOrder.getFullPath(), true, null);
+
+		IFile jardescReverseOrder = outputProject.getFile("reverse.jardesc");
+		Collections.reverse(Arrays.asList(roots));
+		exportJardesc(outputProject, roots).move(jardescReverseOrder.getFullPath(), true, null);
+
+		IFile jardescRewritten= outputProject.getFile("rewritten.jardesc");
+		JarPackageData packageData = new JarPackageData();
+		try (InputStream packageDataFileStream = Files.newInputStream(jardescReverseOrder.getLocation().toPath())) {
+			new JarPackageReader(packageDataFileStream).read(packageData);
+		}
+		exportJardesc(outputProject, packageData).move(jardescRewritten.getFullPath(), true, null);
+
+		assertThat("JAR descriptions written for elements in original and reverse order differ", Files.readString(jardescProperOrder.getLocation().toPath()),
+				is(Files.readString(jardescReverseOrder.getLocation().toPath())));
+		assertThat("original and rewritten JAR descriptions differ", Files.readString(jardescProperOrder.getLocation().toPath()), is(Files.readString(jardescRewritten.getLocation().toPath())));
+
+		for (IResource root : roots) {
+			JavaProjectHelper.delete(root.getProject());
+		}
+	}
+
+	private IResource[] createProjectsWithSourceFolders(int numberOfProjects) throws CoreException {
+		String binFolderName = "bin";
+		String sourceFolderName = "src";
+		IResource[] roots = new IResource[numberOfProjects];
+		for (int projectNumber = 0 ; projectNumber < numberOfProjects; projectNumber++) {
+			IJavaProject project= JavaProjectHelper.createJavaProject(UUID.randomUUID().toString(), binFolderName);
+			roots[projectNumber] = JavaProjectHelper.addSourceContainer(project, sourceFolderName).getResource();
+		}
+		return roots;
+	}
+
+	private IFile exportJardesc(IProject projectForExport, IResource[] exportElements) throws CoreException {
+		JarPackageData data = new JarPackageData();
+		data.setElements(exportElements);
+		return exportJardesc(projectForExport, data);
+	}
+
+	private IFile exportJardesc(IProject projectForExport, JarPackageData data) throws CoreException {
+		IFile exportFile = projectForExport.getFile("export.jar");
+		data.setJarLocation(exportFile.getLocation());
+		IFile jardescFile = projectForExport.getFile("save.jardesc");
+		data.setDescriptionLocation(jardescFile.getFullPath());
+		data.setSaveDescription(true);
+
+		JarPackageWizard wizard = new JarPackageWizard();
+		wizard.init(getWorkbench(), data);
+		wizard.setForcePreviousAndNextButtons(true);
+		WizardDialog dialog = new WizardDialog(getShell(), wizard);
+		dialog.create();
+		boolean exportSuccessful = wizard.performFinish();
+
+		exportFile.delete(true, null);
+		assertTrue("wizard did not finish successfully: " + wizard, exportSuccessful);
+		assertTrue("JAR description file was not created", jardescFile.exists());
+		return jardescFile;
 	}
 
 }

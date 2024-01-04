@@ -39,6 +39,7 @@ import junit.framework.TestSuite;
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
+@SuppressWarnings("restriction") // org.eclipse.ui.internal
 @Deprecated
 public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 

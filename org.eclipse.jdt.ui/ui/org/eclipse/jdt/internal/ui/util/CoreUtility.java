@@ -193,5 +193,4 @@ public class CoreUtility {
 
 	private CoreUtility() {
 	}
-
 }

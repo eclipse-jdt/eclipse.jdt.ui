@@ -514,25 +514,18 @@ public class SourceView extends AbstractInfoView {
 	 * @return the source without leading comments
 	 */
 	private String removeLeadingComments(String source) {
-		JavaCodeReader reader= new JavaCodeReader();
-		IDocument document= new Document(source);
 		int i;
-		try {
+		IDocument document= new Document(source);
+		try (JavaCodeReader reader= new JavaCodeReader()) {
 			reader.configureForwardReader(document, 0, document.getLength(), true, false);
 			int c= reader.read();
 			while (c != -1 && (c == '\r' || c == '\n' || c == '\t')) {
 				c= reader.read();
 			}
 			i= reader.getOffset();
-			reader.close();
 		} catch (IOException ex) {
 			i= 0;
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException ex) {
-				JavaPlugin.log(ex);
-			}
+			JavaPlugin.log(ex);
 		}
 
 		try {

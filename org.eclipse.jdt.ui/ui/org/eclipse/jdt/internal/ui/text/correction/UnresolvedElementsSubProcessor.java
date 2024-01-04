@@ -16,10 +16,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -799,11 +799,12 @@ public class UnresolvedElementsSubProcessor {
 					@Override
 					public Change perform(IProgressMonitor pm) throws CoreException {
 						try {
-							if (file.exists())
+							if (file.exists()) {
 								file.delete(false, pm);
-							file.create(new BufferedInputStream(new FileInputStream(bundleFile)), false, pm);
+							}
+							file.create(new ByteArrayInputStream(Files.readAllBytes(bundleFile.toPath())), false, pm);
 							return new DeleteResourceChange(file.getFullPath(), false);
-						} catch (FileNotFoundException e) {
+						} catch (IOException e) {
 							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), e.getMessage()));
 						}
 					}

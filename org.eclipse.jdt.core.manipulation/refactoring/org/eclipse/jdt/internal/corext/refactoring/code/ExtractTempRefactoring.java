@@ -38,7 +38,6 @@ import java.util.StringTokenizer;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.CopySourceEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -155,6 +154,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SideEffectChecker;
 import org.eclipse.jdt.internal.corext.refactoring.util.UnsafeCheckTester;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
  */
@@ -725,9 +726,9 @@ public class ExtractTempRefactoring extends Refactoring {
 				}
 			}
 
-			doCreateChange(new SubProgressMonitor(pm, 2));
+			doCreateChange(Progress.subMonitor(pm, 2));
 
-			fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, new SubProgressMonitor(pm, 1));
+			fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, Progress.subMonitor(pm, 1));
 
 			fChange.getEdit().accept(new TextEditVisitor() {
 				@Override
@@ -986,12 +987,12 @@ public class ExtractTempRefactoring extends Refactoring {
 				return result;
 
 			if (fCompilationUnitNode == null) {
-				fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, new SubProgressMonitor(pm, 3));
+				fCompilationUnitNode= RefactoringASTParser.parseWithASTProvider(fCu, true, Progress.subMonitor(pm, 3));
 			} else {
 				pm.worked(3);
 			}
 
-			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
+			result.merge(checkSelection(Progress.subMonitor(pm, 3)));
 			if (!result.hasFatalError() && isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 			return result;

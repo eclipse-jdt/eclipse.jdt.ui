@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -131,12 +131,7 @@ public class ResourcesUtility {
 	 * Adapted / moved from  org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock
 	 */
 	public static void createProject(IProject project, URI locationURI, IProgressMonitor monitor) throws CoreException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		monitor.beginTask(ManipulationsCommonUtilMessages.BuildPathsBlock_operationdesc_project, 10);
-
-		// create the project
+		SubMonitor subMonitor= SubMonitor.convert(monitor, ManipulationsCommonUtilMessages.BuildPathsBlock_operationdesc_project, 2);
 		try {
 			if (!project.exists()) {
 				IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
@@ -144,17 +139,13 @@ public class ResourcesUtility {
 					locationURI= null;
 				}
 				desc.setLocationURI(locationURI);
-				project.create(desc, monitor);
-				monitor= null;
+				project.create(desc, subMonitor.newChild(1));
 			}
 			if (!project.isOpen()) {
-				project.open(monitor);
-				monitor= null;
+				project.open(subMonitor.newChild(1));
 			}
 		} finally {
-			if (monitor != null) {
-				monitor.done();
-			}
+			subMonitor.done();
 		}
 	}
 }

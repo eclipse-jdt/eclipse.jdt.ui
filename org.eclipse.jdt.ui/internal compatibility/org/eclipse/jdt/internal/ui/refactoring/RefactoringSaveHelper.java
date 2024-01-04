@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
@@ -48,6 +47,7 @@ import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 /**
@@ -152,7 +152,7 @@ public class RefactoringSaveHelper {
 						pm.beginTask("", count); //$NON-NLS-1$
 						for (int i= 0; i < count; i++) {
 							IEditorPart editor= dirtyEditors[i];
-							editor.doSave(new SubProgressMonitor(pm, 1));
+							editor.doSave(Progress.subMonitor(pm, 1));
 							if (pm.isCanceled())
 								throw new InterruptedException();
 						}

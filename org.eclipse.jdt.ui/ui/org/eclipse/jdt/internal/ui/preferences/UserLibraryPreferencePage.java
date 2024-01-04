@@ -557,8 +557,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 
 		protected static void saveLibraries(List<CPUserLibraryElement> libraries, File file, String encoding, IProgressMonitor monitor) throws IOException {
-			OutputStream stream= new FileOutputStream(file);
-			try {
+			try (OutputStream stream= new FileOutputStream(file)) {
 				DocumentBuilderFactory factory= XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE();
 				factory.setValidating(false);
 				DocumentBuilder docBuilder= factory.newDocumentBuilder();
@@ -625,11 +624,6 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			} catch (ParserConfigurationException | TransformerException e) {
 				throw new IOException(e.getMessage());
 			} finally {
-				try {
-					stream.close();
-				} catch (IOException e) {
-					// ignore
-				}
 				if (monitor != null) {
 					monitor.done();
 				}
@@ -637,16 +631,13 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 
 		private static List<CPUserLibraryElement> loadLibraries(File file) throws IOException {
-			InputStream stream= new FileInputStream(file);
 			Element cpElement;
-			try {
+			try (InputStream stream= new FileInputStream(file)) {
 				DocumentBuilder parser = XmlProcessorFactoryJdtUi.createDocumentBuilderFactoryWithErrorOnDOCTYPE().newDocumentBuilder();
 				parser.setErrorHandler(new DefaultHandler());
 				cpElement = parser.parse(new InputSource(stream)).getDocumentElement();
 			} catch (SAXException | ParserConfigurationException e) {
 				throw new IOException(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_load_badformat);
-			} finally {
-				stream.close();
 			}
 
 			if (!TAG_ROOT.equalsIgnoreCase(cpElement.getNodeName())) {

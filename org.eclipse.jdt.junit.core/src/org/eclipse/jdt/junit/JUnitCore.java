@@ -39,7 +39,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
-import org.eclipse.jdt.internal.junit.launcher.JUnit4TestFinder;
+import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.ModelMessages;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
@@ -156,7 +157,8 @@ public class JUnitCore {
 	 */
 	public static IType[] findTestTypes(IJavaElement container, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		final Set<IType> result= new HashSet<>();
-		JUnit4TestFinder finder= new JUnit4TestFinder();
+		ITestFinder finder= TestKindRegistry.getContainerTestKind(container).getFinder();
+
 		finder.findTestsInContainer(container, result, monitor);
 
 		return result.toArray(new IType[result.size()]);

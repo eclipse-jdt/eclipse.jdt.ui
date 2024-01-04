@@ -17,8 +17,6 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.lang.reflect.Method;
 
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.SWT;
@@ -30,8 +28,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jface.text.source.AnnotationPainter;
-
-import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -46,6 +42,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.actions.FindAction;
 import org.eclipse.jdt.ui.actions.FindReferencesAction;
+
+import junit.framework.Test;
 
 /**
  * Counts number of repaints ({@link AnnotationPainter#paintControl(PaintEvent)})
@@ -75,7 +73,8 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 
 		@Override
 		protected void setUp() throws Exception {
-			AnnotationPreference preference= EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(SEARCH_ANNOTATION_TYPE);
+			@SuppressWarnings("restriction")
+			AnnotationPreference preference= org.eclipse.ui.internal.editors.text.EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(SEARCH_ANNOTATION_TYPE);
 			IPreferenceStore store= EditorsUI.getPreferenceStore();
 			store.setValue(preference.getHighlightPreferenceKey(), false);
 			store.setValue(preference.getOverviewRulerPreferenceKey(), true);
@@ -121,7 +120,8 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 			if (fShownPerspective != null)
 				EditorTestHelper.showPerspective(fShownPerspective);
 
-			AnnotationPreference preference= EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(SEARCH_ANNOTATION_TYPE);
+			@SuppressWarnings("restriction")
+			AnnotationPreference preference= org.eclipse.ui.internal.editors.text.EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(SEARCH_ANNOTATION_TYPE);
 			IPreferenceStore store= EditorsUI.getPreferenceStore();
 			store.setToDefault(preference.getHighlightPreferenceKey());
 			store.setToDefault(preference.getOverviewRulerPreferenceKey());

@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
 /**
  * Reads data from an InputStream and returns a JarPackage
  */
-public class JavadocReader extends Object {
+public class JavadocReader implements AutoCloseable {
 
 	private InputStream fInputStream;
 
@@ -57,6 +57,7 @@ public class JavadocReader extends Object {
 	 *
 	 * @exception IOException if the stream cannot be closed
 	 */
+	@Override
 	public void close() throws IOException {
 		if (fInputStream != null)
 			fInputStream.close();

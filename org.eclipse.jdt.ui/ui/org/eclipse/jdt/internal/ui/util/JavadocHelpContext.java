@@ -17,11 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 import java.text.BreakIterator;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
@@ -191,15 +190,19 @@ public class JavadocHelpContext implements IContext2 {
 	}
 
 	private String retrieveText(IJavaElement elem) throws JavaModelException {
-		if (elem instanceof IMember) {
-			Reader reader= JavadocContentAccess.getHTMLContentReader((IMember)elem, true, true);
-			if (reader != null)
-				reader= new HTML2TextReader(reader, null);
-			if (reader != null) {
-				String str= getString(reader);
-				BreakIterator breakIterator= BreakIterator.getSentenceInstance();
-				breakIterator.setText(str);
-				return str.substring(0, breakIterator.next());
+		if (elem instanceof IMember mem) {
+			try (Reader contenReader= JavadocContentAccess.getHTMLContentReader(mem, true, true)) {
+				if (contenReader == null) {
+					return ""; //$NON-NLS-1$
+				}
+				try (Reader reader= new HTML2TextReader(contenReader, null)) {
+					String str= getString(reader);
+					BreakIterator breakIterator= BreakIterator.getSentenceInstance();
+					breakIterator.setText(str);
+					return str.substring(0, breakIterator.next());
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 		return ""; //$NON-NLS-1$

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
@@ -40,7 +43,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
@@ -121,12 +123,14 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		Assert.isLegal(JarPackagerUtil.DESCRIPTION_EXTENSION.equals(description.getFileExtension()));
 		JarPackageData jarPackage= new JarPackageData();
 		IJarDescriptionReader reader= null;
-		try {
-			reader= jarPackage.createJarDescriptionReader(description.getContents());
+		try (InputStream contents= description.getContents()) {
+			 reader= jarPackage.createJarDescriptionReader(contents);
 			// Do not save - only generate JAR
 			reader.read(jarPackage);
 			jarPackage.setSaveManifest(false);
 			jarPackage.setSaveDescription(false);
+		} catch (IOException close) {
+			throw new RuntimeException(close);
 		} catch (CoreException ex) {
 				String message= Messages.format(JarPackagerMessages.JarFileExportOperation_errorReadingFile, new Object[] {BasicElementLabels.getPathLabel(description.getFullPath(), false), ex.getStatus().getMessage()});
 				addToStatus(readStatus, message, ex);
