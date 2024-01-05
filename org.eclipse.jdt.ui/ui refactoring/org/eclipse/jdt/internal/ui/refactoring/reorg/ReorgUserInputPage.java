@@ -151,11 +151,11 @@ abstract class ReorgUserInputPage extends UserInputWizardPage {
 	}
 
 	private TreeViewer createViewer(Composite parent) {
-
-
 		// Create Search Text
 		Text searchText= new Text(parent, SWT.BORDER | SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		GridData searchStyle = new GridData(GridData.FILL_HORIZONTAL);
 		searchText.setMessage("Search"); //$NON-NLS-1$
+		searchText.setLayoutData(searchStyle);
 
 		TreeViewer treeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		GridData gd= new GridData(GridData.FILL_BOTH);
