@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
@@ -106,9 +107,21 @@ public class TypeFilter implements IPreferenceChangeListener {
 		return InstanceScope.INSTANCE.getNode(JavaManipulation.getPreferenceNodeId());
 	}
 
+	private IEclipsePreferences getDefaultPreferenceStore() {
+		return DefaultScope.INSTANCE.getNode(JavaManipulation.getPreferenceNodeId());
+	}
+
+	private String getPreference(String key, String def) {
+		String str= getPreferenceStore().get(key, null);
+		if( str == null ) {
+			str= getDefaultPreferenceStore().get(key, null);
+		}
+		return str == null ? def : str;
+	}
+
 	private synchronized StringMatcher[] getStringMatchers() {
 		if (fStringMatchers == null) {
-			String str= getPreferenceStore().get(PreferenceConstantsCore.TYPEFILTER_ENABLED, null);
+			String str= getPreference(PreferenceConstantsCore.TYPEFILTER_ENABLED, null);
 			StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 			int nTokens= tok.countTokens();
 
