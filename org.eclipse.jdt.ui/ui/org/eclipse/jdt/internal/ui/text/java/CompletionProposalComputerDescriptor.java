@@ -101,6 +101,7 @@ final class CompletionProposalComputerDescriptor {
 		partitions.add(IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 		partitions.add(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		partitions.add(IJavaPartitions.JAVA_STRING);
+		partitions.add(IJavaPartitions.JAVA_MULTI_LINE_STRING);
 		partitions.add(IJavaPartitions.JAVA_CHARACTER);
 
 		PARTITION_SET= Collections.unmodifiableSet(partitions);

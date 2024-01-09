@@ -330,6 +330,7 @@
 			requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
+			<partition type="__java_multiline_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
 	<extension
@@ -342,6 +343,7 @@
 			requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
+			<partition type="__java_multiline_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
 	<extension
@@ -354,6 +356,7 @@
 			requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
+			<partition type="__java_multiline_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
 	<!-- javadoc completions -->
@@ -432,6 +435,7 @@
             requiresUIThread="false">
             <partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
+			<partition type="__java_multiline_string"/>
       </javaCompletionProposalComputer>
 	</extension>
 	<extension
@@ -444,6 +448,7 @@
 			<partition type="__java_singleline_comment"/>
 			<partition type="__java_multiline_comment"/>
 			<partition type="__java_string"/>
+			<partition type="__java_multiline_string"/>
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
