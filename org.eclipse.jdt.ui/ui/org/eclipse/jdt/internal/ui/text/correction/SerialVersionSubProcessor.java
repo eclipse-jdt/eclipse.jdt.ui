@@ -16,11 +16,9 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -33,10 +31,10 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
  *
  * @since 3.1
  */
-public final class SerialVersionSubProcessor {
+public final class SerialVersionSubProcessor extends SerialVersionBaseSubProcessor<ICommandAccess> {
 
 	public static final class SerialVersionProposal extends FixCorrectionProposal {
-		public SerialVersionProposal(IProposableFix fix, int relevance, IInvocationContext context, boolean isDefault) {
+		public SerialVersionProposal(IProposableFix fix, int relevance, IInvocationContextCore context, boolean isDefault) {
 			super(fix, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD), context, new SerialVersionProposalCore(fix, relevance, context, isDefault));
 		}
 
@@ -58,18 +56,14 @@ public final class SerialVersionSubProcessor {
 	 * @param proposals the proposal collection to extend
 	 */
 	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocationCore location, final Collection<ICommandAccess> proposals) {
-
-		Assert.isNotNull(context);
-		Assert.isNotNull(location);
-		Assert.isNotNull(proposals);
-
-		IProposableFix[] fixes= PotentialProgrammingProblemsFix.createMissingSerialVersionFixes(context.getASTRoot(), location);
-		if (fixes != null) {
-			proposals.add(new SerialVersionProposal(fixes[0], IProposalRelevance.MISSING_SERIAL_VERSION_DEFAULT, context, true));
-			proposals.add(new SerialVersionProposal(fixes[1], IProposalRelevance.MISSING_SERIAL_VERSION, context, false));
-		}
+		new SerialVersionSubProcessor().addSerialVersionProposals(context, location, proposals);
 	}
 
 	private SerialVersionSubProcessor() {
+	}
+
+	@Override
+	protected ICommandAccess createSerialVersionProposal(IProposableFix iProposableFix, int missingSerialVersion, IInvocationContextCore context, boolean b) {
+		return new SerialVersionProposal(iProposableFix, missingSerialVersion, context, b);
 	}
 }
