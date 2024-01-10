@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -91,7 +90,7 @@ public class TypeMismatchSubProcessor {
 	private TypeMismatchSubProcessor() {
 	}
 
-	public static void addTypeMismatchProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void addTypeMismatchProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		String[] args= problem.getProblemArguments();
 		if (args.length != 2) {
 			return;
@@ -297,7 +296,7 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 
-	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addChangeSenderTypeProposals(IInvocationContextCore context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
 		IBinding callerBinding= Bindings.resolveExpressionBinding(nodeToCast, false);
 
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -356,7 +355,7 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 
-	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
+	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		String label;
@@ -369,7 +368,7 @@ public class TypeMismatchSubProcessor {
 		return new CastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}
 
-	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addIncompatibleReturnTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
@@ -418,7 +417,7 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 
-	public static void addIncompatibleThrowsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addIncompatibleThrowsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (!(selectedNode instanceof MethodDeclaration)) {
@@ -486,7 +485,7 @@ public class TypeMismatchSubProcessor {
 		return false;
 	}
 
-	public static void addTypeMismatchInForEachProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addTypeMismatchInForEachProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null || selectedNode.getLocationInParent() != EnhancedForStatement.EXPRESSION_PROPERTY) {
