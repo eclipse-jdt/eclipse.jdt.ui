@@ -39,7 +39,9 @@ import org.eclipse.jdt.core.IJavaProject;
  * At the end {@link #checkPostConditions(IProgressMonitor)} is called.
  * </p>
  *
- * @since 3.5
+ * Originally from org.eclipse.jdt.ui 3.5
+ *
+ * @since 1.21
  */
 public interface ICleanUp {
 

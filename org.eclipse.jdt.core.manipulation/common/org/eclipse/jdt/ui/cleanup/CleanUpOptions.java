@@ -22,8 +22,9 @@ import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 /**
  * Allows to set and retrieve clean up settings for given options keys.
+ * Originally from org.eclipse.jdt.ui 3.5
  *
- * @since 3.5
+ * @since 1.21
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class CleanUpOptions extends CleanUpOptionsCore {

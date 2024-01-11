@@ -20,14 +20,14 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
 public class ProblemLocation extends ProblemLocationCore implements IProblemLocation {
+	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.jdt.ui.error"; //$NON-NLS-1$
 
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
 		super(offset, length, annotation.getId(),
 				annotation.getArguments() != null ? annotation.getArguments() : new String[0],
-						JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()),
+						ERROR_ANNOTATION_TYPE.equals(annotation.getType()),
 						annotation.getMarkerType() != null ? annotation.getMarkerType() : IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 	}
 
