@@ -26,6 +26,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.Flags;
@@ -89,7 +90,6 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 	public static class SelfEncapsulateFieldProposalCore extends ChangeCorrectionProposalCore { // public for tests
 
 		private IField fField;
-		private boolean fNoDialog;
 
 		public SelfEncapsulateFieldProposalCore(int relevance, IField field) {
 			this(relevance, null, field);
@@ -98,7 +98,6 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 		public SelfEncapsulateFieldProposalCore(int relevance, Change change, IField field) {
 			super(getDescription(field), change, relevance);
 			fField= field;
-			fNoDialog= false;
 			setCommandId(SELF_ENCAPSULATE_FIELD_ID);
 		}
 
@@ -106,17 +105,23 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 			return fField;
 		}
 
-		public void setNoDialog(boolean noDialog) {
-			fNoDialog= noDialog;
-		}
-
-		public static TextFileChange getChange(IField field, IFile file) throws CoreException {
+		public static SelfEncapsulateFieldRefactoring getChangeRefactoring(IField field) throws CoreException {
 			final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field);
 			refactoring.setVisibility(Flags.AccPublic);
 			refactoring.setConsiderVisibility(false);//private field references are just searched in local file
 			refactoring.checkInitialConditions(new NullProgressMonitor());
 			refactoring.checkFinalConditions(new NullProgressMonitor());
+			return refactoring;
+		}
+
+		public static Change getChange(IField field) throws CoreException {
+			Refactoring refactoring= getChangeRefactoring(field);
 			Change createdChange= refactoring.createChange(new NullProgressMonitor());
+			return createdChange;
+		}
+
+		public static TextFileChange getChange(IField field, IFile file) throws CoreException {
+			Change createdChange= getChange(field);
 			if (createdChange instanceof CompositeChange) {
 				for (Change curr : ((CompositeChange) createdChange).getChildren()) {
 					if (curr instanceof TextFileChange && (file == null || ((TextFileChange) curr).getFile().equals(file))) {
@@ -128,7 +133,7 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 		}
 
 
-		private static String getDescription(IField field) {
+		public static String getDescription(IField field) {
 			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, BasicElementLabels.getJavaElementName(field.getElementName()));
 		}
 
@@ -173,7 +178,7 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 		addGetterSetterProposals(context, location.getCoveringNode(context.getASTRoot()), proposals, relevance);
 	}
 
-	private boolean addGetterSetterProposals(IInvocationContextCore context, ASTNode coveringNode, Collection<T> proposals, int relevance) {
+	protected boolean addGetterSetterProposals(IInvocationContextCore context, ASTNode coveringNode, Collection<T> proposals, int relevance) {
 		if (!(coveringNode instanceof SimpleName)) {
 			return false;
 		}

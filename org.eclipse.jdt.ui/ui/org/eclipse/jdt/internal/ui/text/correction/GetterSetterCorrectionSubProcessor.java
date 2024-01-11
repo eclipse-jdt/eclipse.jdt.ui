@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -31,8 +30,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
@@ -43,9 +40,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
@@ -70,7 +65,7 @@ public class GetterSetterCorrectionSubProcessor extends GetterSetterCorrectionBa
 		private boolean fNoDialog;
 
 		public SelfEncapsulateFieldProposal(int relevance, IField field) {
-			super(getDescription(field), null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			super(SelfEncapsulateFieldProposalCore.getDescription(field), null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 			fField= field;
 			fNoDialog= false;
 			setCommandId(SELF_ENCAPSULATE_FIELD_ID);
@@ -86,25 +81,7 @@ public class GetterSetterCorrectionSubProcessor extends GetterSetterCorrectionBa
 
 		// I can't find any caller for this but it is public and cannot be removed?
 		public TextFileChange getChange(IFile file) throws CoreException {
-			final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(fField);
-			refactoring.setVisibility(Flags.AccPublic);
-			refactoring.setConsiderVisibility(false);//private field references are just searched in local file
-			refactoring.checkInitialConditions(new NullProgressMonitor());
-			refactoring.checkFinalConditions(new NullProgressMonitor());
-			Change createdChange= refactoring.createChange(new NullProgressMonitor());
-			if (createdChange instanceof CompositeChange) {
-				for (Change curr : ((CompositeChange) createdChange).getChildren()) {
-					if (curr instanceof TextFileChange && ((TextFileChange) curr).getFile().equals(file)) {
-						return (TextFileChange) curr;
-					}
-				}
-			}
-			return null;
-		}
-
-
-		private static String getDescription(IField field) {
-			return Messages.format(CorrectionMessages.GetterSetterCorrectionSubProcessor_creategetterunsingencapsulatefield_description, BasicElementLabels.getJavaElementName(field.getElementName()));
+			return SelfEncapsulateFieldProposalCore.getChange(fField, file);
 		}
 
 		/*
