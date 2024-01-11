@@ -44,8 +44,12 @@ public abstract class SerialVersionBaseSubProcessor<T> {
 
 		IProposableFix[] fixes= PotentialProgrammingProblemsFixCore.createMissingSerialVersionFixes(context.getASTRoot(), location);
 		if (fixes != null) {
-			proposals.add(createSerialVersionProposal(fixes[0], IProposalRelevance.MISSING_SERIAL_VERSION_DEFAULT, context, true));
-			proposals.add(createSerialVersionProposal(fixes[1], IProposalRelevance.MISSING_SERIAL_VERSION, context, false));
+			T p1 = createSerialVersionProposal(fixes[0], IProposalRelevance.MISSING_SERIAL_VERSION_DEFAULT, context, true);
+			T p2 = createSerialVersionProposal(fixes[1], IProposalRelevance.MISSING_SERIAL_VERSION, context, false);
+			if( p1 != null )
+				proposals.add(p1);
+			if( p2 != null )
+				proposals.add(p2);
 		}
 	}
 
