@@ -53,7 +53,7 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 		super(name, compilationUnit, operation);
 	}
 
-	public static CompilationUnitRewriteOperationsFixCore createAddMissingMethodDeclaration(CompilationUnit compilationUnit, ASTNode node) {
+	public static AddMissingMethodDeclarationFixCore createAddMissingMethodDeclaration(CompilationUnit compilationUnit, ASTNode node) {
 		ExpressionMethodReference methodReferenceNode= node instanceof ExpressionMethodReference
 				? (ExpressionMethodReference) node
 				: ASTNodes.getParent(node, ExpressionMethodReference.class);
@@ -102,7 +102,7 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 			if (returnType.binding == null) {
 				return null;
 			}
-			return new CompilationUnitRewriteOperationsFixCore(label, compilationUnit, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, returnType, null));
+			return new AddMissingMethodDeclarationFixCore(label, compilationUnit, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, returnType, null));
 		} else {
 			IMethodBinding methodBinding= methodInvocationNode == null ? null : methodInvocationNode.resolveMethodBinding();
 			if (methodBinding == null) {
@@ -122,7 +122,7 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 				// node not found
 				return null;
 			}
-			return new CompilationUnitRewriteOperationsFixCore(label, compilationUnit, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, null, methodBinding));
+			return new AddMissingMethodDeclarationFixCore(label, compilationUnit, new AddMissingMethodDeclarationProposalOperation(methodReferenceNode, null, methodBinding));
 		}
 	}
 

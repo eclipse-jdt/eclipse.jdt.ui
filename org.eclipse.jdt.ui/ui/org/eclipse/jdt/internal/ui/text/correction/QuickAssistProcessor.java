@@ -155,7 +155,6 @@ import org.eclipse.jdt.internal.corext.fix.AddVarLambdaParameterTypesFixCore;
 import org.eclipse.jdt.internal.corext.fix.ChangeLambdaBodyToBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.ChangeLambdaBodyToExpressionFixCore;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.ConvertLambdaToMethodReferenceFixCore;
 import org.eclipse.jdt.internal.corext.fix.ConvertLoopFixCore;
@@ -980,12 +979,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getAddMethodDeclaration(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (resultingCollections == null) {
-			return true;
-		}
-
-		CompilationUnitRewriteOperationsFixCore fix= AddMissingMethodDeclarationFixCore.createAddMissingMethodDeclaration(context.getASTRoot(), covering);
+		AddMissingMethodDeclarationFixCore fix= AddMissingMethodDeclarationFixCore.createAddMissingMethodDeclaration(context.getASTRoot(), covering);
 		if (fix != null) {
+			if (resultingCollections == null) {
+				return true;
+			}
+
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image, context);
 			resultingCollections.add(proposal);
