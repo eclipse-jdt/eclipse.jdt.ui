@@ -121,7 +121,7 @@ public class TypeFilter implements IPreferenceChangeListener {
 
 	private synchronized StringMatcher[] getStringMatchers() {
 		if (fStringMatchers == null) {
-			String str= getPreference(PreferenceConstantsCore.TYPEFILTER_ENABLED, null);
+			String str= getPreference(PreferenceConstantsCore.TYPEFILTER_ENABLED, ""); //$NON-NLS-1$
 			StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 			int nTokens= tok.countTokens();
 
