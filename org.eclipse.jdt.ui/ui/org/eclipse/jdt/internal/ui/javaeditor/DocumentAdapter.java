@@ -303,6 +303,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 				fTextFileBuffer= manager.getTextFileBuffer(fPath, fLocationKind);
 			}
 			fDocument= fTextFileBuffer.getDocument();
+			if (fDocument instanceof ISynchronizable sDocument && sDocument.getLockObject() == null) {
+				sDocument.setLockObject(new Object());
+			}
 		} catch (CoreException x) {
 			fDocument= manager.createEmptyDocument(fPath, fLocationKind);
 			if (fDocument instanceof ISynchronizable)
