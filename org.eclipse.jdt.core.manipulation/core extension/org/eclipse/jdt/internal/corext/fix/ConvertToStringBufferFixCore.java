@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -44,12 +45,17 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperationsFixCore {
@@ -249,20 +255,39 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 			collectInfixPlusOperands(oldInfixExpression, operands);
 
 			Statement lastAppend= insertAfter;
+			int tagsCount= 0;
 			for (Expression operand : operands) {
-				MethodInvocation appendIncovationExpression= ast.newMethodInvocation();
-				appendIncovationExpression.setName(ast.newSimpleName("append")); //$NON-NLS-1$
-				SimpleName bufferNameReference= ast.newSimpleName(bufferName);
-
-				// If there was an existing name, don't offer to rename it
-				if (existingBuffer == null) {
-					linkedModel.getPositionGroup(groupID, true).addPosition(rewrite.track(bufferNameReference), true);
+				boolean tagged= false;
+				NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
+				if (nlsLine != null) {
+					for (NLSElement element : nlsLine.getElements()) {
+						if (element.getPosition().getOffset() == operand.getStartPosition()) {
+							if (element.hasTag()) {
+								tagged= true;
+								++tagsCount;
+							}
+						}
+					}
 				}
+				ExpressionStatement appendExpressionStatement= null;
+				if (tagged) {
+					String appendCall= bufferName + ".append(" + operand + "); //$NON-NLS-1$"; //$NON-NLS-1$ //$NON-NLS-2$
+					appendExpressionStatement= (ExpressionStatement)rewrite.createStringPlaceholder(appendCall, ASTNode.EXPRESSION_STATEMENT);
+				} else {
+					MethodInvocation appendIncovationExpression= ast.newMethodInvocation();
+					appendIncovationExpression.setName(ast.newSimpleName("append")); //$NON-NLS-1$
+					SimpleName bufferNameReference= ast.newSimpleName(bufferName);
 
-				appendIncovationExpression.setExpression(bufferNameReference);
-				appendIncovationExpression.arguments().add(rewrite.createCopyTarget(operand));
+					// If there was an existing name, don't offer to rename it
+					if (existingBuffer == null) {
+						linkedModel.getPositionGroup(groupID, true).addPosition(rewrite.track(bufferNameReference), true);
+					}
 
-				ExpressionStatement appendExpressionStatement= ast.newExpressionStatement(appendIncovationExpression);
+					appendIncovationExpression.setExpression(bufferNameReference);
+					appendIncovationExpression.arguments().add(rewrite.createCopyTarget(operand));
+
+					appendExpressionStatement= ast.newExpressionStatement(appendIncovationExpression);
+				}
 				if (lastAppend == null) {
 					listRewrite.insertFirst(appendExpressionStatement, null);
 				} else {
@@ -278,13 +303,18 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 				}
 			} else {
 				// replace old expression with toString
+
 				MethodInvocation bufferToString= ast.newMethodInvocation();
 				bufferToString.setName(ast.newSimpleName("toString")); //$NON-NLS-1$
 				SimpleName bufferNameReference= ast.newSimpleName(bufferName);
 				bufferToString.setExpression(bufferNameReference);
 				linkedModel.getPositionGroup(groupID, true).addPosition(rewrite.track(bufferNameReference), true);
 
-				rewrite.replace(oldInfixExpression, bufferToString, null);
+				if (tagsCount > 0) {
+					ASTNodes.replaceAndRemoveNLSByCount(rewrite, oldInfixExpression, bufferToString.toString().replaceAll(",", ", "), tagsCount, null, cuRewrite); //$NON-NLS-1$ //$NON-NLS-2$
+				} else {
+					rewrite.replace(oldInfixExpression, bufferToString, null);
+				}
 				linkedModel.setEndPosition(rewrite.track(bufferToString));
 			}
 		}
