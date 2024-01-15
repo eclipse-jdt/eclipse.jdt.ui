@@ -19,7 +19,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
@@ -58,21 +57,14 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.manipulation.TypeKinds;
 
@@ -80,11 +72,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -94,9 +82,7 @@ import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.OrganizeImportsAction;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -110,7 +96,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ClasspathVMUtil;
@@ -119,125 +104,18 @@ import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathFixSelectionDialog;
 
-public class ReorgCorrectionsSubProcessor {
+public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcessor<ICommandAccess> {
 
 	public static void getWrongTypeNameProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
-		ICompilationUnit cu= context.getCompilationUnit();
-		boolean isLinked= cu.getResource().isLinked();
-
-		IJavaProject javaProject= cu.getJavaProject();
-		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
-		String compliance= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		String previewEnabled= javaProject.getOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, true);
-
-		CompilationUnit root= context.getASTRoot();
-
-		ASTNode coveredNode= problem.getCoveredNode(root);
-		if (!(coveredNode instanceof SimpleName))
-			return;
-
-		ASTNode parentType= coveredNode.getParent();
-		if (!(parentType instanceof AbstractTypeDeclaration))
-			return;
-
-		String currTypeName= ((SimpleName) coveredNode).getIdentifier();
-		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
-
-		boolean hasOtherPublicTypeBefore= false;
-
-		boolean found= false;
-		List<AbstractTypeDeclaration> types= root.types();
-		for (AbstractTypeDeclaration curr : types) {
-			if (parentType != curr) {
-				if (newTypeName.equals(curr.getName().getIdentifier())) {
-					return;
-				}
-				if (!found && Modifier.isPublic(curr.getModifiers())) {
-					hasOtherPublicTypeBefore= true;
-				}
-			} else {
-				found= true;
-			}
-		}
-		if (!JavaConventions.validateJavaTypeName(newTypeName, sourceLevel, compliance, previewEnabled).matches(IStatus.ERROR)) {
-			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, IProposalRelevance.RENAME_TYPE));
-		}
-
-		if (!hasOtherPublicTypeBefore) {
-			String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
-			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
-			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName, sourceLevel, compliance).matches(IStatus.ERROR)) {
-				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-
-				// rename CU
-				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, BasicElementLabels.getResourceName(newCUName));
-				proposals.add(new ChangeCorrectionProposal(label, change, IProposalRelevance.RENAME_CU, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
-			}
-		}
+		new ReorgCorrectionsSubProcessor().addWrongTypeNameProposals(context, problem, proposals);
 	}
 
 	public static void getWrongPackageDeclNameProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-		boolean isLinked= cu.getResource().isLinked();
-
-		// correct package declaration
-		int relevance= cu.getPackageDeclarations().length == 0 ? IProposalRelevance.MISSING_PACKAGE_DECLARATION : IProposalRelevance.CORRECT_PACKAGE_DECLARATION; // bug 38357
-		if (CorrectPackageDeclarationProposalCore.isValidProposal(cu)) {
-			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
-		}
-
-		// move to package
-		IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
-		String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
-
-		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
-		IPackageFragment newPack= root.getPackageFragment(newPackName);
-
-		ICompilationUnit newCU= newPack.getCompilationUnit(cu.getElementName());
-		if (!newCU.exists() && !isLinked) {
-			String label;
-			if (newPack.isDefaultPackage()) {
-				label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_default_description, BasicElementLabels.getFileName(cu));
-			} else {
-				String packageLabel= JavaElementLabels.getElementLabel(newPack, JavaElementLabels.ALL_DEFAULT);
-				label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_description, new Object[] { BasicElementLabels.getFileName(cu), packageLabel });
-			}
-			CompositeChange composite= new CompositeChange(label);
-			composite.add(new CreatePackageChange(newPack));
-			composite.add(new MoveCompilationUnitChange(cu, newPack));
-
-			proposals.add(new ChangeCorrectionProposal(label, composite, IProposalRelevance.MOVE_CU_TO_PACKAGE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
-		}
+		new ReorgCorrectionsSubProcessor().addWrongPackageDeclNameProposals(context, problem, proposals);
 	}
 
 	public static void removeImportStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
-		IProposableFix fix= UnusedCodeFix.createRemoveUnusedImportFix(context.getASTRoot(), problem);
-		if (fix != null) {
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-			Map<String, String> options= new Hashtable<>();
-			options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(options), IProposalRelevance.REMOVE_UNUSED_IMPORT, image, context);
-			proposals.add(proposal);
-		}
-
-		final ICompilationUnit cu= context.getCompilationUnit();
-		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_organizeimports_description;
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, IProposalRelevance.ORGANIZE_IMPORTS, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
-			@Override
-			public void apply(IDocument document) {
-				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
-				IWorkbenchPage p= JavaPlugin.getActivePage();
-				if (p == null) {
-					return;
-				}
-				IEditorPart part= p.findEditor(input);
-				if (part instanceof JavaEditor) {
-					OrganizeImportsAction action= new OrganizeImportsAction((JavaEditor) part);
-					action.run(cu);
-				}
-			}
-		};
-		proposals.add(proposal);
+		new ReorgCorrectionsSubProcessor().addRemoveImportStatementProposals(context, problem, proposals);
 	}
 
 	public static class ClasspathFixCorrectionProposal extends CUCorrectionProposal {
@@ -299,10 +177,11 @@ public class ReorgCorrectionsSubProcessor {
 	}
 
 	public static void addProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<ICommandAccess> proposals) {
-		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(), missingType));
+		new ReorgCorrectionsSubProcessor().addProjectSetupFixProposals(context, problem, missingType, proposals);
 	}
 
 	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
+	// This should be part of the base class but it has circular refs with UnresolvedElementsSubProcessor
 	public static boolean importNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -661,5 +540,77 @@ public class ReorgCorrectionsSubProcessor {
 	private ReorgCorrectionsSubProcessor() {
 	}
 
+	@Override
+	public ICommandAccess createRenameCUProposal(String label, RenameCompilationUnitChange change, int renameCu) {
+		return new ChangeCorrectionProposal(label, change, IProposalRelevance.RENAME_CU, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME));
+	}
 
+	@Override
+	public ICommandAccess createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int renameType) {
+		return new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, IProposalRelevance.RENAME_TYPE);
+	}
+
+	@Override
+	protected ICommandAccess createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore problem, int relevance) {
+		return new CorrectPackageDeclarationProposal(cu, problem, relevance);
+	}
+
+	@Override
+	protected ICommandAccess createMoveToNewPackageProposal(String label, CompositeChange composite, int moveCuToPackage) {
+		return new ChangeCorrectionProposal(label, composite, IProposalRelevance.MOVE_CU_TO_PACKAGE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE));
+	}
+
+	@Override
+	protected ICommandAccess createOrganizeImportsProposal(String name, Object object, ICompilationUnit cu, int organizeImports) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, IProposalRelevance.ORGANIZE_IMPORTS, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			@Override
+			public void apply(IDocument document) {
+				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+				IWorkbenchPage p= JavaPlugin.getActivePage();
+				if (p == null) {
+					return;
+				}
+				IEditorPart part= p.findEditor(input);
+				if (part instanceof JavaEditor) {
+					OrganizeImportsAction action= new OrganizeImportsAction((JavaEditor) part);
+					action.run(cu);
+				}
+			}
+		};
+		return proposal;
+	}
+
+	@Override
+	protected ICommandAccess createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int removeUnusedImport, IInvocationContextCore context) {
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, unusedCodeCleanUp, IProposalRelevance.REMOVE_UNUSED_IMPORT, image, context);
+		return proposal;
+	}
+
+	@Override
+	public ICommandAccess createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<ICommandAccess> proposals) {
+		return new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(), missingType);
+	}
+
+	@Override
+	public boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+		return ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
+	}
+
+	@Override
+	protected ICommandAccess createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean b, String requiredVersion, int changeProjectCompliance) {
+		return new ChangeToRequiredCompilerCompliance(label1, project, b, requiredVersion, changeProjectCompliance);
+	}
+
+	@Override
+	protected ICommandAccess createChangeToRequiredCompilerComplianceProposal(String label2, IJavaProject project, boolean b, String requiredVersion, boolean enablePreviews,
+			int changeWorkspaceCompliance) {
+		return new ChangeToRequiredCompilerCompliance(label2, project, b, requiredVersion, enablePreviews, changeWorkspaceCompliance);
+	}
+
+	@Override
+	protected ICommandAccess createOpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedElement) {
+		// TODO Auto-generated method stub
+		return new OpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_BUILD_PATH, null);
+	}
 }
