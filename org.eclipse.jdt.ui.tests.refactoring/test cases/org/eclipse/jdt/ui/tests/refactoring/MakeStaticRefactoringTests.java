@@ -575,4 +575,14 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 12, 25, 12, 28);
 		assertHasNoCommonErrors(status);
 	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1044
+	 */
+	@Test
+	public void testMethodWithInvocationOnNewObject() throws Exception {
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 3, 17, 3, 23);
+		assertHasNoCommonErrors(status);
+	}
+
 }
