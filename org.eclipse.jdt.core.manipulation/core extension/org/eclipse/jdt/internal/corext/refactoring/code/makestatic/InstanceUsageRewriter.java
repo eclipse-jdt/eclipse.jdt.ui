@@ -230,11 +230,9 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 		}
 
 		if (!Modifier.isStatic(methodBinding.getModifiers())) {
-			fTargetMethodhasInstanceUsage= true;
-
 			fFinalConditionsChecker.checkIsNotRecursive(node, fTargetMethodDeclaration);
 
-			replaceMethodInvocation(node);
+			fTargetMethodhasInstanceUsage |= replaceMethodInvocation(node);
 		}
 	}
 
@@ -282,7 +280,7 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 		}
 	}
 
-	private void replaceMethodInvocation(SimpleName node) {
+	private boolean replaceMethodInvocation(SimpleName node) {
 		ASTNode parent= node.getParent();
 		SimpleName replacementExpression= fAst.newSimpleName(fParamName);
 		if (parent instanceof MethodInvocation) {
@@ -291,8 +289,10 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 
 			if (optionalExpression == null) {
 				fRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, replacementExpression, null);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private boolean parentIsAnonymousClass(ASTNode parentNode) {
