@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 
-	public static final String UNTOUCH_COMMENT= "untouchComment"; //$NON-NLS-1$
+	public static final String UNTOUCH_COMMENT_PROPERTY= "untouchComment"; //$NON-NLS-1$
 	public abstract static class CompilationUnitRewriteOperationWithSourceRange extends CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation {
 		public abstract void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException;
 
@@ -51,7 +51,7 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 			cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
 				@Override
 				public SourceRange computeSourceRange(final ASTNode node) {
-					if (Boolean.TRUE.equals(node.getProperty(UNTOUCH_COMMENT))) {
+					if (Boolean.TRUE.equals(node.getProperty(UNTOUCH_COMMENT_PROPERTY))) {
 						return new SourceRange(node.getStartPosition(), node.getLength());
 					}
 
@@ -103,7 +103,7 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 		Assert.isLegal(operations.length > 0);
 		fCompilationUnit= compilationUnit;
 		fOperations= operations;
-		fLinkedProposalModel= new LinkedProposalModelCore();
+		fLinkedProposalModel= proposalModel != null ? proposalModel : new LinkedProposalModelCore();
 	}
 
 	@Override

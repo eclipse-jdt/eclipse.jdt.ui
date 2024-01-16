@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteOperationsFixCore implements ILinkedFix {
-	public static final String UNTOUCH_COMMENT= CompilationUnitRewriteOperationsFixCore.UNTOUCH_COMMENT;
+	public static final String UNTOUCH_COMMENT= CompilationUnitRewriteOperationsFixCore.UNTOUCH_COMMENT_PROPERTY;
 
 	/**
 	 * Logic moved down to lower bundle.
