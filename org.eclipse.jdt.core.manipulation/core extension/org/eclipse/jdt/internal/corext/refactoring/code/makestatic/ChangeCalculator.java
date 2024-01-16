@@ -459,14 +459,16 @@ public class ChangeCalculator {
 				ASTNode[] invocations= targetProvider.getInvocations(body, null);
 				for (ASTNode invocationASTNode : invocations) {
 					MethodInvocation invocation= (MethodInvocation) invocationASTNode;
-					textEdits.add(createMethodInvocationChange(invocation));				}
+					textEdits.add(createMethodInvocationChange(invocation));
+				}
 			}
 
 			if (fFinalConditionsChecker.getStatus().hasFatalError()) {
 				return;
 			}
 
-			addEditsToChangeManager(textEdits, affectedICompilationUnit);		}
+			addEditsToChangeManager(textEdits, affectedICompilationUnit);
+		}
 		return;
 	}
 
