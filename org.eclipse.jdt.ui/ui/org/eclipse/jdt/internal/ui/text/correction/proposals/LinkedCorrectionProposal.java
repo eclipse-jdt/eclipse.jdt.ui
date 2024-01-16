@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
  *
  * @since 3.0
  */
-public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
+public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal implements ILinkedCorrectionProposalCore {
 
 
 	/**

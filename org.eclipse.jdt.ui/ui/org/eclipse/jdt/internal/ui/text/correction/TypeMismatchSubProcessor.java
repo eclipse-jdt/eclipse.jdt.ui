@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectio
 
 public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<ICommandAccess> {
 
-	private TypeMismatchSubProcessor() {
+	public TypeMismatchSubProcessor() {
 		super();
 	}
 
