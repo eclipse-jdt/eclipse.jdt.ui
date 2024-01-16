@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /**
@@ -54,6 +56,11 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	private MembersOrderPreferenceCacheCommon fMembersOrderPreferenceCacheCommon;
 
 	/**
+	 * Default instance of the appearance type filters.
+	 */
+	private volatile TypeFilter fTypeFilter;
+
+	/**
 	 * The constructor.
 	 */
 	public JavaManipulationPlugin() {
@@ -69,6 +76,11 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		fgDefault= null;
+
+		if (fTypeFilter != null) {
+			fTypeFilter.dispose();
+			fTypeFilter= null;
+		}
 	}
 
 	/**
@@ -99,6 +111,20 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	 */
 	public void setMembersOrderPreferenceCacheCommon(MembersOrderPreferenceCacheCommon mpcc) {
 		fMembersOrderPreferenceCacheCommon= mpcc;
+	}
+
+
+	public TypeFilter getTypeFilter() {
+		TypeFilter result= fTypeFilter;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fTypeFilter == null) { // Second check (with locking)
+				fTypeFilter= new TypeFilter();
+			}
+			return fTypeFilter;
+		}
 	}
 
 	public static void log(Throwable e) {
