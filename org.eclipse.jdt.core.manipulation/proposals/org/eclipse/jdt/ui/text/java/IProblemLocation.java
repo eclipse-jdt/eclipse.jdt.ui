@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
  * <p>
  * Note: this interface is not intended to be implemented.
  * </p>
+ * Originally since org.eclipse.jdt.ui 3.0
  *
  * Previously introduced in org.eclipse.jdt.ui version 3.0
  * @since 1.21
