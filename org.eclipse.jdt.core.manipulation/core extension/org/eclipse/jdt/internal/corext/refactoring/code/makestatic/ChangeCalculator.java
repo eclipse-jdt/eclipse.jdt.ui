@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2024 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -156,7 +156,7 @@ public class ChangeCalculator {
 	private void computeMethodDeclarationEdit() throws JavaModelException {
 		//Changes can't be applied to directly to AST, edits are saved in fChangeManager
 		TextEdit methodDeclarationEdit= fTargetMethodDeclarationASTRewrite.rewriteAST();
-		addEditToChangeManager(methodDeclarationEdit, fTargetMethod.getCompilationUnit());
+		addEditsToChangeManager(List.of(methodDeclarationEdit), fTargetMethod.getCompilationUnit());
 	}
 
 	/**
@@ -409,7 +409,7 @@ public class ChangeCalculator {
 		}
 	}
 
-	private void addEditToChangeManager(TextEdit editToAdd, ICompilationUnit iCompilationUnit) {
+	private void addEditsToChangeManager(List<TextEdit> editsToAdd, ICompilationUnit iCompilationUnit) {
 		//get CompilationUnitChange from ChangeManager, otherwise create one
 		CompilationUnitChange compilationUnitChange= (CompilationUnitChange) fChangeManager.get(iCompilationUnit);
 
@@ -418,7 +418,9 @@ public class ChangeCalculator {
 		if (allTextEdits == null) {
 			allTextEdits= new MultiTextEdit();
 		}
-		allTextEdits.addChild(editToAdd);
+		for (TextEdit editToAdd : editsToAdd) {
+			allTextEdits.addChild(editToAdd);
+		}
 		String changeName= Messages.format(RefactoringCoreMessages.MakeStaticRefactoring_change_name, iCompilationUnit.getElementName());
 		CompilationUnitChange newCompilationUnitChange= new CompilationUnitChange(changeName, iCompilationUnit);
 		newCompilationUnitChange.setEdit(allTextEdits);
@@ -452,21 +454,19 @@ public class ChangeCalculator {
 			}
 
 			BodyDeclaration[] bodies= targetProvider.getAffectedBodyDeclarations(affectedICompilationUnit, null);
-			MultiTextEdit multiTextEdit= new MultiTextEdit();
+			List<TextEdit> textEdits= new ArrayList<>();
 			for (BodyDeclaration body : bodies) {
 				ASTNode[] invocations= targetProvider.getInvocations(body, null);
 				for (ASTNode invocationASTNode : invocations) {
 					MethodInvocation invocation= (MethodInvocation) invocationASTNode;
-					modifyMethodInvocation(multiTextEdit, invocation);
-				}
+					textEdits.add(createMethodInvocationChange(invocation));				}
 			}
 
 			if (fFinalConditionsChecker.getStatus().hasFatalError()) {
 				return;
 			}
 
-			addEditToChangeManager(multiTextEdit, affectedICompilationUnit);
-		}
+			addEditsToChangeManager(textEdits, affectedICompilationUnit);		}
 		return;
 	}
 
@@ -479,7 +479,7 @@ public class ChangeCalculator {
 		return (CompilationUnit) parser.createAST(null);
 	}
 
-	private void modifyMethodInvocation(MultiTextEdit multiTextEdit, MethodInvocation invocation) throws JavaModelException {
+	private TextEdit createMethodInvocationChange(MethodInvocation invocation) throws JavaModelException {
 		AST ast= invocation.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -507,7 +507,7 @@ public class ChangeCalculator {
 		rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, optionalExpression, null);
 
 		TextEdit methodInvocationEdit= rewrite.rewriteAST();
-		multiTextEdit.addChild(methodInvocationEdit);
+		return methodInvocationEdit;
 	}
 
 	private ASTNode qualifyThisExpression(MethodInvocation invocation, AST ast) {
