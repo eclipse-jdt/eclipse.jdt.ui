@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2024 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which accompanies this distribution, and is available at
@@ -573,6 +573,15 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testJavaDocWithGenerics() throws Exception {
 		//New TypeParameter needs to be added to JavaDoc
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 12, 25, 12, 28);
+		assertHasNoCommonErrors(status);
+	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1045
+	 */
+	@Test
+	public void testCallsAroundRefactoredMethod() throws Exception {
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 8, 17, 8, 31);
 		assertHasNoCommonErrors(status);
 	}
 
