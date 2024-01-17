@@ -144,8 +144,8 @@ public class CoreJavaElementLinks {
 				refModuleName= refTypeName.substring(0, index);
 				refTypeName= refTypeName.substring(index+1);
 			}
-			if ((refTypeName== null || refTypeName.isEmpty()) &&
-					(refModuleName != null && !refModuleName.isEmpty())) {
+			if (refTypeName == null ||
+					(refTypeName.isEmpty() && (refModuleName != null && !refModuleName.isEmpty()))) {
 				return getModule(element, refModuleName);
 			}
 			if (refTypeName.indexOf('/') == -1) {

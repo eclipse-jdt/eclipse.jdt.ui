@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -333,8 +334,9 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if ((flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0 && fInput instanceof IJavaElement) {
 			IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)element;
 			IJavaElement inputsParent= ((IJavaElement)fInput).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			if (pkgRoot.equals(inputsParent))
+			if (Objects.equals(pkgRoot, inputsParent)) {
 				postRefresh(null);
+			}
 		}
 
 		// the source attachment of a JAR has changed

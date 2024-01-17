@@ -1909,7 +1909,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				label= CorrectionMessages.QuickAssistProcessor_unwrap_methodinvocation;
 			}
 		}
-		if (body == null) {
+		if (body == null || outer == null) {
 			return false;
 		}
 		ASTRewrite rewrite= ASTRewrite.create(outer.getAST());

@@ -67,7 +67,6 @@ public class MoveInitializerTests extends GenericRefactoringTest {
 
 	// Move static initializer in same package and ensure imports are brought along
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=108147
-	@SuppressWarnings("null")
 	@Test
 	public void test0() throws Exception{
 		ParticipantTesting.reset();
@@ -105,7 +104,6 @@ public class MoveInitializerTests extends GenericRefactoringTest {
 
 	// Move static initializer in different package and ensure imports are brought along
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=108147
-	@SuppressWarnings("null")
 	@Test
 	public void test1() throws Exception{
 		ParticipantTesting.reset();

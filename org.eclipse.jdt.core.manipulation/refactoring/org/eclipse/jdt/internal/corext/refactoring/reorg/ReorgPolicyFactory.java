@@ -3751,8 +3751,7 @@ public final class ReorgPolicyFactory {
 			} else if (destinationContainer instanceof AnonymousClassDeclaration) {
 				listRewrite= targetRewriter.getASTRewrite().getListRewrite(destinationContainer, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 			} else {
-				listRewrite= null;
-				Assert.isLegal(false);
+				throw new IllegalArgumentException(destinationContainer.getClass().getName());
 			}
 
 			if (getLocation() == IReorgDestination.LOCATION_ON) {

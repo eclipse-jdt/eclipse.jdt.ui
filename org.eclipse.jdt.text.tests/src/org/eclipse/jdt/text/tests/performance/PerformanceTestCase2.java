@@ -25,6 +25,7 @@ import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 /**
@@ -61,7 +62,7 @@ public class PerformanceTestCase2 extends TestCase {
 			// inherited ones.
 			runMethod= getClass().getMethod(getName(), PerformanceMeter.class);
 		} catch (NoSuchMethodException e) {
-			fail("Method \""+getName()+"\" not found");  //$NON-NLS-1$//$NON-NLS-2$
+			throw new AssertionFailedError("Method \""+getName()+"\" not found");  //$NON-NLS-1$//$NON-NLS-2$
 		}
 		assertTrue("Method \"" + getName() + "\" should be public", Modifier.isPublic(runMethod.getModifiers())); //$NON-NLS-1$ //$NON-NLS-2$
 

@@ -466,7 +466,7 @@ public class LocalCorrectionsSubProcessor {
 					}
 				}
 
-				if (isApplicable) {
+				if (isApplicable && binding != null) {
 					ITypeBinding[] methodExceptions= binding.getExceptionTypes();
 					ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<>(uncaughtExceptions.length);
 

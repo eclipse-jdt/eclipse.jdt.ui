@@ -198,7 +198,7 @@ public class ModifierCorrectionSubProcessor {
 					break;
 				case TO_NON_PRIVATE:
 					int visibility;
-					if (cu.getParent().getElementName().equals(typeBinding.getPackage().getName())) {
+					if (typeBinding != null && cu.getParent().getElementName().equals(typeBinding.getPackage().getName())) {
 						visibility= Modifier.NONE;
 						excludedModifiers= Modifier.PRIVATE;
 					} else {
@@ -217,7 +217,7 @@ public class ModifierCorrectionSubProcessor {
 				default:
 					throw new IllegalArgumentException("not supported"); //$NON-NLS-1$
 			}
-			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding.getTypeDeclaration());
+			ICompilationUnit targetCU= (typeBinding== null || isLocalVar) ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding.getTypeDeclaration());
 			if (targetCU != null) {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCorrectionProposal(label, targetCU, bindingDecl, selectedNode, includedModifiers, excludedModifiers, relevance, image));

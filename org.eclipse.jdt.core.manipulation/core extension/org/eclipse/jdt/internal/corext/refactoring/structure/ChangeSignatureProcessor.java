@@ -1403,7 +1403,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				occurrenceUpdate.updateNode();
 			}
 
-			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
+			if (namedSubclassMapping != null && namedSubclassMapping.containsKey(cu)) {
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
 				for (IType subtype : namedSubclassMapping.get(cu)) {
 					AbstractTypeDeclaration subtypeNode= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subtype, cuRewrite.getRoot());

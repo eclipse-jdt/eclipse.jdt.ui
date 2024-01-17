@@ -18,6 +18,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -228,6 +229,7 @@ public abstract class AbstractToStringGenerator {
 				objectMethod= objm;
 			}
 		}
+		Objects.requireNonNull(objectMethod);
 		if (fContext.isCreateComments()) {
 			String docString= CodeGeneration.getMethodComment(fContext.getCompilationUnit(), fContext.getTypeBinding().getQualifiedName(), toStringMethod, objectMethod, StubUtility
 					.getLineDelimiterUsed(fContext.getCompilationUnit()));

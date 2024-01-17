@@ -16,6 +16,7 @@ package org.eclipse.jdt.bcoview.asm;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Handle;
@@ -157,7 +158,7 @@ public class CommentedASMifierClassVisitor extends ASMifier implements ICommente
 				break;
 			}
 		}
-		assert meth != null;
+		Objects.requireNonNull(meth);
 
 		currMethod = new DecompiledMethod(className, new HashMap<>(), meth, options, access);
 		ASMifier textifier = super.visitMethod(access, name1, desc, signature, exceptions);

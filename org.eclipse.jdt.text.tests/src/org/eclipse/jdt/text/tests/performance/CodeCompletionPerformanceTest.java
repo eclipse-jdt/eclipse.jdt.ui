@@ -17,9 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.test.performance.Dimension;
@@ -52,6 +49,9 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
@@ -336,12 +336,10 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		IPackageFragment fragment= fSourceFolder.createPackageFragment("test2", false, null);
 
 		String parent= "HashMap";
-		String content= null;
-
 		for (int i= 0; i < 20; i++) {
 			String cu= "Completion" + i;
 			String field= "fField" + i;
-			content= "package test2;\n" +
+			String content= "package test2;\n" +
 					"\n" +
 					"public class " + cu + " extends " + parent + " {\n" +
 					"    int " + field + ";\n" +
@@ -356,11 +354,9 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 					"}\n";
 			fCU= fragment.createCompilationUnit(cu + ".java", content, false, null);
 			parent= cu;
+			fContents= content;
+			fCodeAssistOffset= content.indexOf( "//here");
 		}
-
-		String str= "//here";
-		fContents= content;
-		fCodeAssistOffset= content.indexOf(str);
 
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}

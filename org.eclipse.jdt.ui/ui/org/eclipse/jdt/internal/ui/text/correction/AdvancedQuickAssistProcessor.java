@@ -2070,7 +2070,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			ASTNode replaceNode= node;
-			while(!(replaceNode instanceof Assignment) && replaceNode != null) {
+			while(!(replaceNode instanceof Assignment)) {
 				replaceNode= replaceNode.getParent();
 			}
 			Assignment assignment= (Assignment) replaceNode;
@@ -2092,7 +2092,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			ASTNode replaceNode= node;
-			while(!(replaceNode instanceof VariableDeclarationFragment) && replaceNode != null) {
+			while(!(replaceNode instanceof VariableDeclarationFragment)) {
 				replaceNode= replaceNode.getParent();
 			}
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) replaceNode;
@@ -2273,6 +2273,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (covering instanceof ParenthesizedExpression && covering.getParent() instanceof PrefixExpression && ((PrefixExpression) covering.getParent()).getOperator() == PrefixExpression.Operator.NOT) {
 			negationExpression= (PrefixExpression) covering.getParent();
 			parenthesizedExpression= (ParenthesizedExpression) covering;
+		}
+		if (parenthesizedExpression==null) {
+			return false;
 		}
 		if (negationExpression == null || (!(parenthesizedExpression.getExpression() instanceof InfixExpression) && !(parenthesizedExpression.getExpression() instanceof ConditionalExpression))) {
 			return false;
@@ -2771,7 +2774,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				if (currentBlock == null) {
 					if (currentCondition != null) {
 						IfStatement ifStatement;
-						if (firstIfStatement == null) {
+						if (firstIfStatement == null || currentIfStatement == null) {
 							firstIfStatement= ast.newIfStatement();
 							ifStatement= firstIfStatement;
 						} else {
@@ -2805,7 +2808,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		// check, may be we have delayed default block
-		if (defaultBlock != null) {
+		if (defaultBlock != null && currentIfStatement != null) {
 			currentIfStatement.setElseStatement(defaultBlock);
 		}
 		// remove unnecessary blocks in blocks

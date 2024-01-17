@@ -49,7 +49,7 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 			if (contains(workingSetJavaElement, jElement, flags))
 				return true;
 			if (workingSetJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT &&
-				resource.getType() == IResource.FOLDER && checkIfDescendant(flags))
+					resource != null && resource.getType() == IResource.FOLDER && checkIfDescendant(flags))
 				return isChild(workingSetJavaElement, resource);
 		} else if (resource != null) {
 			return contains(workingSetJavaElement, resource, flags);

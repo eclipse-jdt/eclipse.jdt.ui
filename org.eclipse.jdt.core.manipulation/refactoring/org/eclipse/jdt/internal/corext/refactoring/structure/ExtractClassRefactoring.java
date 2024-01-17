@@ -625,7 +625,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper, marker);
 			assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
 			boolean markerReplaced= replaceMarker(rewrite, qualifier, assignedValue, marker);
-			if (markerReplaced) {
+			if (markerReplaced && qualifier != null) {
 				switch (qualifier.getNodeType()) {
 					case ASTNode.METHOD_INVOCATION:
 					case ASTNode.CLASS_INSTANCE_CREATION:

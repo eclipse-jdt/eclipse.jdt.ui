@@ -291,7 +291,8 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 			}
 		}
 		while (ami == null) {
-			memberType= memberType.getSuperclass();
+			ITypeBinding oldMemberType= memberType;
+			memberType= oldMemberType.getSuperclass();
 			if (memberType != null)
 				memberTypeName= memberType.getQualifiedName();
 			else

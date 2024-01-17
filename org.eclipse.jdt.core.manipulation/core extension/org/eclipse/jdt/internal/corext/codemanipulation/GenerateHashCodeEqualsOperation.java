@@ -583,9 +583,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// Double.doubleToIntBits(aDouble)
 			Expression comparison= createDoubleInvocation(provider.getThisAccess(name));
 
-			if (singleTemp)
+			if (singleTemp && fragment != null) {
 				fragment.setInitializer(comparison);
-			else {
+			} else {
 				Assignment ass= fAst.newAssignment();
 				ass.setLeftHandSide(fAst.newSimpleName(VARIABLE_NAME_DOUBLE_TEMPORARY));
 				ass.setRightHandSide(comparison);

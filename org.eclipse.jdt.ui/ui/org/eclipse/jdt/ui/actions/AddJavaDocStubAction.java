@@ -15,6 +15,7 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -216,7 +217,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 						if (cu == null) {
 							return null;
 						}
-					} else if (!cu.equals(member.getCompilationUnit())) {
+					} else if (!Objects.equals(cu, member.getCompilationUnit())) {
 						return null;
 					}
 					if (member instanceof IMethod && ((IMethod) member).isLambdaMethod()) {

@@ -83,7 +83,7 @@ public class FinalConditionsChecker {
 		String methodName= methodDeclaration.getName().getIdentifier();
 		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
 		if (methodBinding == null) {
-			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MakeStaticRefactoring_unexpected_binding_error));
+			throw new NullPointerException(RefactoringCoreMessages.MakeStaticRefactoring_unexpected_binding_error + ':' + methodDeclaration.toString());
 		}
 		ITypeBinding typeBinding= methodBinding.getDeclaringClass();
 		IType type= (IType) typeBinding.getJavaElement();
@@ -190,7 +190,7 @@ public class FinalConditionsChecker {
 		IMethodBinding nodeMethodBinding= (IMethodBinding) node.resolveBinding();
 		IMethodBinding outerMethodBinding= methodDeclaration.resolveBinding();
 		if (nodeMethodBinding == null || outerMethodBinding == null) {
-			fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MakeStaticRefactoring_unexpected_binding_error));
+			throw new NullPointerException(RefactoringCoreMessages.MakeStaticRefactoring_unexpected_binding_error + ' ' + methodDeclaration);
 		}
 
 		if (nodeMethodBinding.isEqualTo(outerMethodBinding)) {
