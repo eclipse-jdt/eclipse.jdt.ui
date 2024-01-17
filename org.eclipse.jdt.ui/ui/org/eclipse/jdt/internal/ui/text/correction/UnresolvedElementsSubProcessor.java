@@ -138,7 +138,6 @@ import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
@@ -174,7 +173,7 @@ public class UnresolvedElementsSubProcessor {
 
 	private static final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
-	public static void getVariableProposals(IInvocationContext context, IProblemLocationCore problem, IVariableBinding resolvedField, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getVariableProposals(IInvocationContextCore context, IProblemLocationCore problem, IVariableBinding resolvedField, Collection<ICommandAccess> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -608,7 +607,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 
-	public static void getTypeProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -1294,7 +1293,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getMethodProposals(IInvocationContext context, IProblemLocationCore problem, boolean isOnlyParameterMismatch, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getMethodProposals(IInvocationContextCore context, IProblemLocationCore problem, boolean isOnlyParameterMismatch, Collection<ICommandAccess> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -1373,7 +1372,7 @@ public class UnresolvedElementsSubProcessor {
 
 	}
 
-	private static void addStaticImportFavoriteProposals(IInvocationContext context, SimpleName node, boolean isMethod, Collection<ICommandAccess> proposals) throws JavaModelException {
+	private static void addStaticImportFavoriteProposals(IInvocationContextCore context, SimpleName node, boolean isMethod, Collection<ICommandAccess> proposals) throws JavaModelException {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
 		if (JavaModelUtil.is50OrHigher(project)) {
 			String pref= PreferenceConstants.getPreference(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
@@ -1587,7 +1586,7 @@ public class UnresolvedElementsSubProcessor {
 		return false;
 	}
 
-	private static void addParameterMissmatchProposals(IInvocationContext context, IProblemLocationCore problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<ICommandAccess> proposals) throws CoreException {
+	private static void addParameterMissmatchProposals(IInvocationContextCore context, IProblemLocationCore problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<ICommandAccess> proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -1611,7 +1610,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	private static void doMoreParameters(IInvocationContext context, ASTNode invocationNode, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<ICommandAccess> proposals) throws CoreException {
+	private static void doMoreParameters(IInvocationContextCore context, ASTNode invocationNode, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<ICommandAccess> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= paramTypes.length - argTypes.length;
@@ -1710,7 +1709,7 @@ public class UnresolvedElementsSubProcessor {
 		return '\'' + BasicElementLabels.getJavaElementName(ASTNodes.asString(expr)) + '\'';
 	}
 
-	private static void doMoreArguments(IInvocationContext context, ASTNode invocationNode, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection<ICommandAccess> proposals) throws CoreException {
+	private static void doMoreArguments(IInvocationContextCore context, ASTNode invocationNode, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection<ICommandAccess> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodRef.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= argTypes.length - paramTypes.length;
@@ -1822,7 +1821,7 @@ public class UnresolvedElementsSubProcessor {
 		return params;
 	}
 
-	private static void doEqualNumberOfParameters(IInvocationContext context, ASTNode invocationNode, IProblemLocationCore problem, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<ICommandAccess> proposals) throws CoreException {
+	private static void doEqualNumberOfParameters(IInvocationContextCore context, ASTNode invocationNode, IProblemLocationCore problem, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<ICommandAccess> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -2018,7 +2017,7 @@ public class UnresolvedElementsSubProcessor {
 		return res;
 	}
 
-	private static void addQualifierToOuterProposal(IInvocationContext context, MethodInvocation invocationNode, IMethodBinding binding, Collection<ICommandAccess> proposals) {
+	private static void addQualifierToOuterProposal(IInvocationContextCore context, MethodInvocation invocationNode, IMethodBinding binding, Collection<ICommandAccess> proposals) {
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding parentType= Bindings.getBindingOfParentType(invocationNode);
 		ITypeBinding currType= parentType;
@@ -2063,7 +2062,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 
-	public static void getConstructorProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getConstructorProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -2135,7 +2134,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getAmbiguosTypeReferenceProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getAmbiguosTypeReferenceProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		int offset= problem.getOffset();
 		int len= problem.getLength();
@@ -2158,7 +2157,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getArrayAccessProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getArrayAccessProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 
 		CompilationUnit root= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(root);
@@ -2185,7 +2184,7 @@ public class UnresolvedElementsSubProcessor {
 		proposals.add(new RenameNodeCorrectionProposal(label, context.getCompilationUnit(), offset, length, lengthId, IProposalRelevance.ARRAY_CHANGE_TO_LENGTH));
 	}
 
-	public static void getAnnotationMemberProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getAnnotationMemberProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);

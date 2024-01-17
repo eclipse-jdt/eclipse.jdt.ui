@@ -70,7 +70,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -197,7 +196,7 @@ public class GetterSetterCorrectionSubProcessor {
 	 * @param resultingCollections the resulting proposals
 	 * @return <code>true</code> if the quick assist is applicable at this offset
 	 */
-	public static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, IProblemLocationCore[] locations, ArrayList<ICommandAccess> resultingCollections) {
+	public static boolean addGetterSetterProposal(IInvocationContextCore context, ASTNode coveringNode, IProblemLocationCore[] locations, ArrayList<ICommandAccess> resultingCollections) {
 		if (locations != null) {
 			for (IProblemLocationCore location : locations) {
 				int problemId= location.getProblemId();
@@ -210,11 +209,11 @@ public class GetterSetterCorrectionSubProcessor {
 		return addGetterSetterProposal(context, coveringNode, resultingCollections, IProposalRelevance.GETTER_SETTER_QUICK_ASSIST);
 	}
 
-	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocationCore location, Collection<ICommandAccess> proposals, int relevance) {
+	public static void addGetterSetterProposal(IInvocationContextCore context, IProblemLocationCore location, Collection<ICommandAccess> proposals, int relevance) {
 		addGetterSetterProposal(context, location.getCoveringNode(context.getASTRoot()), proposals, relevance);
 	}
 
-	private static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals, int relevance) {
+	private static boolean addGetterSetterProposal(IInvocationContextCore context, ASTNode coveringNode, Collection<ICommandAccess> proposals, int relevance) {
 		if (!(coveringNode instanceof SimpleName)) {
 			return false;
 		}
