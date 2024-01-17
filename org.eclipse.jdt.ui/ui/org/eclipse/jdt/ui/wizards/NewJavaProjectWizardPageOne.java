@@ -1831,4 +1831,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		return true;
 	}
+
+	@Override
+	public  org.eclipse.swt.graphics.Point getMinimumPageSize() {
+		 return new org.eclipse.swt.graphics.Point(635,845);
+	}
 }
