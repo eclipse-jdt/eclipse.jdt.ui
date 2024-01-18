@@ -118,7 +118,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	 * @param key the name of the option
 	 * @return <code>true</code> if option with <code>key</code> is enabled
 	 */
-	protected boolean isEnabled(String key) {
+	public boolean isEnabled(String key) {
 		Assert.isNotNull(fOptions);
 		Assert.isLegal(key != null);
 		return fOptions.isEnabled(key);

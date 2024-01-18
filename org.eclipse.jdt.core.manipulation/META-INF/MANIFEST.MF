@@ -81,7 +81,9 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.ui.text.template.contentassist;x-friends:="org.eclipse.jdt.ui, org.eclipse.jdt.ui.tests, org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui, org.eclipse.jdt.junit, org.eclipse.jdt.astview,org.eclipse.jdt.junit.core, org.eclipse.jdt.ui.tests, org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.internal.ui.viewsupport;manipulation=split;mandatory:=manipulation,
+ org.eclipse.jdt.ui.cleanup;manipulation=split;mandatory:=manipulation,
  org.eclipse.jdt.ui.refactoring;manipulation=split;mandatory:=manipulation,
  org.eclipse.jdt.ui.text;manipulation=split;mandatory:=manipulation,
+ org.eclipse.jdt.ui.text.java;manipulation=split;mandatory:=manipulation,
  org.eclipse.jdt.ui.text.java.correction;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui"
 Bundle-RequiredExecutionEnvironment: JavaSE-17

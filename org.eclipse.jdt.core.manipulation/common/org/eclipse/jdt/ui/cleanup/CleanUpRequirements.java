@@ -22,8 +22,9 @@ import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
 
 /**
  * Specifies the requirements of a clean up.
+ * Originally from org.eclipse.jdt.ui 3.5
  *
- * @since 3.5
+ * @since 1.21
  */
 public final class CleanUpRequirements {
 
