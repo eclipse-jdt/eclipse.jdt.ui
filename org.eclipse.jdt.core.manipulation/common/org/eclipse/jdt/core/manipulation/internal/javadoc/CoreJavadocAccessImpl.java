@@ -1487,7 +1487,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 							fBuf.append('.');
 						}
 						fBuf.append(refMemberName);
-						if (refMethodParamTypes != null) {
+						if (refMethodParamTypes != null && refMethodParamNames != null) {
 							fBuf.append('(');
 							for (int i= 0; i < refMethodParamTypes.length; i++) {
 								String pType= refMethodParamTypes[i];

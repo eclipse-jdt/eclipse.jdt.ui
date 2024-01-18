@@ -2343,13 +2343,13 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	protected void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set<String> replacements, final IProgressMonitor monitor) throws CoreException {
 		try {
-			CompilationUnitRewrite currentRewrite= null;
+			CompilationUnitRewrite currentRewrite;
 			final CompilationUnitRewrite existingRewrite= fCompilationUnitRewrites.get(unit.getPrimary());
-			final boolean isTouched= existingRewrite != null;
-			if (isTouched)
+			if (existingRewrite != null) {
 				currentRewrite= existingRewrite;
-			else
+			} else {
 				currentRewrite= new CompilationUnitRewrite(unit, node);
+			}
 			final Collection<ITypeConstraintVariable> collection= fTypeOccurrences.get(unit);
 			if (collection != null && !collection.isEmpty() && !fArgumentAddedToHandleThis) {
 				SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.ExtractInterfaceProcessor_creating, collection.size());
@@ -2359,7 +2359,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							TType estimate= (TType) iTypeConstraintVariable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 							if (estimate != null) {
 								final CompilationUnitRange range= iTypeConstraintVariable.getRange();
-								if (isTouched)
+								if (existingRewrite != null)
 									rewriteTypeOccurrence(range, estimate, requestor, currentRewrite, node, replacements, currentRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.SuperTypeRefactoringProcessor_update_type_occurrence, SET_SUPER_TYPE));
 								else {
 									final ASTNode result= NodeFinder.perform(node, range.getSourceRange());
@@ -2374,7 +2374,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					subMonitor.done();
 				}
 			}
-			if (!isTouched) {
+			if (existingRewrite == null) {
 				final TextChange change= currentRewrite.createChange(true);
 				if (change != null)
 					manager.manage(unit, change);

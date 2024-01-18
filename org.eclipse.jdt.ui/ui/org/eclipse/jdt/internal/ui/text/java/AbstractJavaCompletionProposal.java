@@ -411,7 +411,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			replace(document, getReplacementOffset(), getReplacementLength(), replacement);
 
 			referenceOffset= referenceTracker.postReplace(document);
-			setReplacementOffset(referenceOffset - (replacement == null ? 0 : replacement.length()));
+			setReplacementOffset(referenceOffset - replacement.length());
 
 			// PR 47097
 			if (isSmartTrigger) {

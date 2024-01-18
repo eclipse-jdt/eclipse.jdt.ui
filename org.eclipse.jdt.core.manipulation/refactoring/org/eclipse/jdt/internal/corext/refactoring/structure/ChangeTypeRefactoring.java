@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -1498,7 +1499,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
 			if (selectedMethod == null) {
 				// can't happen since we checked it up front in check initial conditions
-				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
+				throw new AssertionFailedException(RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
 			}
 
 			// the following code fragment appears to be the source of a memory leak, when

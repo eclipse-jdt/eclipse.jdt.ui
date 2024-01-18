@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -352,29 +353,27 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		@Override
 		public IStatus validate(Object[] selection) {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38478
-			HashSet<Object> map= null;
-			if ((selection != null) && (selection.length > 1)) {
-				map= new HashSet<>(selection.length);
-			}
-
 			int selectedCount= 0;
 			int possibleDuplicateCount= 0;
-			for (Object element : selection) {
-				try {
-					if (element instanceof GetterSetterEntry) {
-						Object key= element;
-						IField getsetField= ((GetterSetterEntry) element).field;
-						if (((GetterSetterEntry) element).isGetter) {
-							if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
-								possibleDuplicateCount++;
-						} else {
-							key= createSignatureKey(GetterSetterUtil.getSetterName(getsetField, null), getsetField);
-							if (!map.add(key))
-								possibleDuplicateCount++;
+			if ((selection != null) && (selection.length > 1)) {
+				HashSet<Object> map= new HashSet<>(selection.length);
+				for (Object element : selection) {
+					try {
+						if (element instanceof GetterSetterEntry) {
+							Object key= element;
+							IField getsetField= ((GetterSetterEntry) element).field;
+							if (((GetterSetterEntry) element).isGetter) {
+								if (!map.add(GetterSetterUtil.getGetterName(getsetField, null)))
+									possibleDuplicateCount++;
+							} else {
+								key= createSignatureKey(GetterSetterUtil.getSetterName(getsetField, null), getsetField);
+								if (!map.add(key))
+									possibleDuplicateCount++;
+							}
+							selectedCount++;
 						}
-						selectedCount++;
+					} catch (JavaModelException e) {
 					}
-				} catch (JavaModelException e) {
 				}
 			}
 
@@ -675,7 +674,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 						if (cu == null) {
 							return null;
 						}
-					} else if (!cu.equals(fld.getCompilationUnit())) {
+					} else if (!Objects.equals(cu, fld.getCompilationUnit())) {
 						// all fields must be in the same CU
 						return null;
 					}

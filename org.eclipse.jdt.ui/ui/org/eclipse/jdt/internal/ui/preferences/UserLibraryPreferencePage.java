@@ -884,7 +884,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, monitor -> {
 				try {
-					if (monitor != null) {
+					if (monitor == null) {
 						monitor= new NullProgressMonitor();
 					}
 

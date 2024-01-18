@@ -289,11 +289,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		}
 
 
-		boolean hasTemplateActions= actions != null && actions.length > 0;
-		if (!hasTemplateActions && !addSurroundWith) {
-			ActionContributionItem item= new ActionContributionItem(NONE_APPLICABLE_ACTION);
-			item.fill(menu, -1);
-		} else if (hasTemplateActions) {
+		if (actions != null && actions.length > 0) {
 			if (addSurroundWith) {
 				Separator templateGroup= new Separator(TEMPLATE_GROUP);
 				templateGroup.fill(menu, -1);
@@ -303,6 +299,9 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 				ActionContributionItem item= new ActionContributionItem(action);
 				item.fill(menu, -1);
 			}
+		} else if (!addSurroundWith) {
+			ActionContributionItem item= new ActionContributionItem(NONE_APPLICABLE_ACTION);
+			item.fill(menu, -1);
 		}
 
 		Separator configGroup= new Separator(CONFIG_GROUP);

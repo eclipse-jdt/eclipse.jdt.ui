@@ -205,7 +205,7 @@ public class ToStringTemplateParser {
 					foundVariable= wantedVariable;
 				}
 			}
-			if (variablePosition == template.length()) {
+			if (foundVariable == null) {
 				result.add(template);
 				break;
 			} else {

@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -430,7 +431,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						if (unit == null) {
 							return null;
 						}
-					} else if (!unit.equals(field.getCompilationUnit())) {
+					} else if (!Objects.equals(unit, field.getCompilationUnit())) {
 						// all fields must be in the same CU
 						return null;
 					}

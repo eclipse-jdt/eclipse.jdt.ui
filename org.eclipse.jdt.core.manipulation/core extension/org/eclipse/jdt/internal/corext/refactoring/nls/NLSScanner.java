@@ -144,7 +144,7 @@ public class NLSScanner {
 				case ITerminalSymbols.TokenNameStringLiteral:
 					if (insideAnnotation.isEmpty() && defaultCounter == 0) {
 						currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
-						if (currentLineNr != previousLineNr) {
+						if (currentLine== null  ||currentLineNr != previousLineNr) {
 							currentLine= new NLSLine(currentLineNr - 1);
 							lines.add(currentLine);
 							previousLineNr= currentLineNr;
@@ -164,7 +164,7 @@ public class NLSScanner {
 				case ITerminalSymbols.TokenNameTextBlock:
 					if (insideAnnotation.isEmpty() && defaultCounter == 0) {
 						currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenEndPosition());
-						if (currentLineNr != previousLineNr) {
+						if (currentLine== null  || currentLineNr != previousLineNr) {
 							currentLine= new NLSLine(currentLineNr - 1);
 							lines.add(currentLine);
 							previousLineNr= currentLineNr;

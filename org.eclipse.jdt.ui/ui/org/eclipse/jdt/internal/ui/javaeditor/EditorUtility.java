@@ -179,7 +179,7 @@ public class EditorUtility {
 
 		IEditorInput input= getEditorInput(inputElement);
 		if (input == null)
-			throwPartInitException(JavaEditorMessages.EditorUtility_no_editorInput, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT);
+			throw new PartInitException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT, JavaEditorMessages.EditorUtility_no_editorInput, null));
 
 		return openInEditor(input, getEditorID(input), activate);
 	}
@@ -205,9 +205,12 @@ public class EditorUtility {
 		 */
 		if (inputElement instanceof IJavaElement) {
 			ICompilationUnit cu= (ICompilationUnit)((IJavaElement)inputElement).getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu != null) {
-				IWorkbenchPage page= JavaPlugin.getActivePage();
-				IEditorPart editor= page != null ? editor= page.getActiveEditor() : null;
+			if (cu == null) {
+				return null;
+			}
+			IWorkbenchPage page= JavaPlugin.getActivePage();
+			if (page!= null) {
+				IEditorPart editor= page.getActiveEditor();
 				if (editor != null) {
 					boolean isCompareEditorInput= isCompareEditorInput(editor.getEditorInput());
 					if (isCompareEditorInput || !JavaModelUtil.isPrimary(cu)) {
@@ -305,7 +308,7 @@ public class EditorUtility {
 			gotoMarkerTarget= (IGotoMarker)editor;
 		else
 			gotoMarkerTarget= editor != null ? (IGotoMarker)editor.getAdapter(IGotoMarker.class) : null;
-		if (gotoMarkerTarget != null) {
+		if (gotoMarkerTarget != null && editor !=null) {
 			final IEditorInput input= editor.getEditorInput();
 			if (input instanceof IFileEditorInput) {
 				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
@@ -358,11 +361,11 @@ public class EditorUtility {
 
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
 		if (file == null)
-			throwPartInitException(JavaEditorMessages.EditorUtility_file_must_not_be_null);
+			throw new PartInitException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, JavaEditorMessages.EditorUtility_file_must_not_be_null, null));
 
 		IWorkbenchPage p= JavaPlugin.getActivePage();
 		if (p == null)
-			throwPartInitException(JavaEditorMessages.EditorUtility_no_active_WorkbenchPage);
+			throw new PartInitException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, JavaEditorMessages.EditorUtility_no_active_WorkbenchPage, null));
 
 		IEditorPart editorPart= IDE.openEditor(p, file, activate);
 		initializeHighlightRange(editorPart);
@@ -375,41 +378,31 @@ public class EditorUtility {
 
 		IWorkbenchPage p= JavaPlugin.getActivePage();
 		if (p == null)
-			throwPartInitException(JavaEditorMessages.EditorUtility_no_active_WorkbenchPage);
+			throw new PartInitException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, JavaEditorMessages.EditorUtility_no_active_WorkbenchPage, null));
 
 		IEditorPart editorPart= p.openEditor(input, editorID, activate);
 		initializeHighlightRange(editorPart);
 		return editorPart;
 	}
 
-	private static void throwPartInitException(String message, int code) throws PartInitException {
-		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, code, message, null);
-		throw new PartInitException(status);
-	}
-
-	private static void throwPartInitException(String message) throws PartInitException {
-		throwPartInitException(message, IStatus.OK);
-	}
-
 	private static void initializeHighlightRange(IEditorPart editorPart) {
 		if (editorPart instanceof ITextEditor) {
 			IAction toggleAction= editorPart.getEditorSite().getActionBars().getGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY);
-			boolean enable= toggleAction != null;
-			if (enable && editorPart instanceof JavaEditor)
-				enable= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS);
-			else
-				enable= enable && toggleAction.isEnabled() && toggleAction.isChecked();
-			if (enable) {
-				if (toggleAction instanceof TextEditorAction) {
-					// Reset the action
-					((TextEditorAction)toggleAction).setEditor(null);
-					// Restore the action
-					((TextEditorAction)toggleAction).setEditor((ITextEditor)editorPart);
-				} else {
-					// Uncheck
-					toggleAction.run();
-					// Check
-					toggleAction.run();
+			if (toggleAction!= null) {
+				if ((editorPart instanceof JavaEditor)
+						? JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)
+						: (toggleAction.isEnabled() && toggleAction.isChecked())) {
+					if (toggleAction instanceof TextEditorAction) {
+						// Reset the action
+						((TextEditorAction)toggleAction).setEditor(null);
+						// Restore the action
+						((TextEditorAction)toggleAction).setEditor((ITextEditor)editorPart);
+					} else {
+						// Uncheck
+						toggleAction.run();
+						// Check
+						toggleAction.run();
+					}
 				}
 			}
 		}

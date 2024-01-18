@@ -289,7 +289,7 @@ public class JavaElementLabelComposerCore {
 
 			// constructor type arguments
 			if (getFlag(flags, JavaElementLabelsCore.T_TYPE_PARAMETERS) && method.exists() && method.isConstructor()) {
-				if (resolvedSig != null && resolvedKey.isParameterizedType()) {
+				if (resolvedKey != null && resolvedSig != null && resolvedKey.isParameterizedType()) {
 					BindingKey declaringType= resolvedKey.getDeclaringType();
 					if (declaringType != null) {
 						String[] declaringTypeArguments= declaringType.getTypeArguments();

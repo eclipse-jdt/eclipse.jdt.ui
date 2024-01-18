@@ -55,7 +55,6 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -70,7 +69,6 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -371,8 +369,10 @@ abstract class FlowAnalyzer extends GenericVisitor {
 						start= statement.getStartPosition();
 					}
 				}
-			} else {
+			} else if (info != null) {
 				info.merge(getFlowInfo(statement), fFlowContext);
+			} else {
+				throw new IllegalStateException(statement.getClass().getName());
 			}
 			end= statement.getStartPosition() + statement.getLength() - 1;
 		}
@@ -751,7 +751,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 
 	@Override
 	public void endVisit(MethodInvocation node) {
-		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), getMethodBinding(node.getName()));
+		endVisitMethodInvocation(node, node.getExpression(), node.arguments());
 	}
 
 	@Override
@@ -906,7 +906,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 
 	@Override
 	public void endVisit(SuperConstructorInvocation node) {
-		endVisitMethodInvocation(node, node.getExpression(), node.arguments(), node.resolveConstructorBinding());
+		endVisitMethodInvocation(node, node.getExpression(), node.arguments());
 	}
 
 	@Override
@@ -918,7 +918,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 
 	@Override
 	public void endVisit(SuperMethodInvocation node) {
-		endVisitMethodInvocation(node, node.getQualifier(), node.arguments(), getMethodBinding(node.getName()));
+		endVisitMethodInvocation(node, node.getQualifier(), node.arguments());
 	}
 
 	@Override
@@ -1065,7 +1065,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		assignFlowInfo(node, node.getBound());
 	}
 
-	private void endVisitMethodInvocation(ASTNode node, ASTNode receiver, List<Expression> arguments, IMethodBinding binding) {
+	private void endVisitMethodInvocation(ASTNode node, ASTNode receiver, List<Expression> arguments) {
 		if (skipNode(node))
 			return;
 		MessageSendFlowInfo info= createMessageSendFlowInfo();
@@ -1095,14 +1095,5 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		} else {
 			setFlowInfo(node, info);
 		}
-	}
-
-	private IMethodBinding getMethodBinding(Name name) {
-		if (name == null)
-			return null;
-		IBinding binding= name.resolveBinding();
-		if (binding instanceof IMethodBinding)
-			return (IMethodBinding)binding;
-		return null;
 	}
 }

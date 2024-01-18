@@ -134,14 +134,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 
 			ISourceRange range= fSuperType.getSourceRange();
-			boolean sameUnit= range != null && fCompilationUnit.equals(fSuperType.getCompilationUnit());
-
 			// creates a type that extends the super type
 			String dummyClassContent= createDummyType(name);
 
 			StringBuilder workingCopyContents= new StringBuilder(fCompilationUnit.getSource());
 			int insertPosition;
-			if (sameUnit) {
+			if (range != null && fCompilationUnit.equals(fSuperType.getCompilationUnit())) {
 				insertPosition= range.getOffset() + range.getLength();
 			} else {
 				ISourceRange firstTypeRange= fCompilationUnit.getTypes()[0].getSourceRange();

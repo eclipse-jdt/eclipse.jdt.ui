@@ -182,7 +182,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 			int prevTokenOffset= scanner.getPosition() + 1;
 			String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
 
-			if ((prevToken == Symbols.TokenIDENT && (previous.length() > 0 && Character.isUpperCase(previous.charAt(0))))
+			if ((prevToken == Symbols.TokenIDENT && (previous != null && previous.length() > 0 && Character.isUpperCase(previous.charAt(0))))
 					|| prevToken == Symbols.TokenEOF
 					|| prevToken == Symbols.TokenGREATERTHAN
 					|| prevToken == Symbols.TokenQUESTIONMARK)

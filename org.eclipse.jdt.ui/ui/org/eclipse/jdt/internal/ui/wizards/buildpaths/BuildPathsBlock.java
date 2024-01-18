@@ -633,7 +633,7 @@ public class BuildPathsBlock {
 		}
 
 		if (nEntriesMissing > 0) {
-			if (nEntriesMissing == 1) {
+			if (nEntriesMissing == 1 && entryMissing != null) {
 				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntryMissing, BasicElementLabels.getPathLabel(entryMissing.getPath(), false)));
 			} else {
 				fClassPathStatus.setWarning(Messages.format(NewWizardMessages.BuildPathsBlock_warning_EntriesMissing, String.valueOf(nEntriesMissing)));

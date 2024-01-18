@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -368,8 +369,7 @@ public class NLSRefactoring extends Refactoring {
 	private static RefactoringStatus checkKey(String key) {
 		RefactoringStatus result= new RefactoringStatus();
 
-		if (key == null)
-			result.addFatalError(NLSMessages.NLSRefactoring_null);
+		Objects.requireNonNull(key, NLSMessages.NLSRefactoring_null);
 
 		if (key.startsWith("!") || key.startsWith("#")) { //$NON-NLS-1$ //$NON-NLS-2$
 			RefactoringStatusContext context= new JavaStringStatusContext(key, new SourceRange(0, 0));

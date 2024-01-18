@@ -736,8 +736,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			listRewrite= rewrite.getListRewrite(parentStatement, Block.STATEMENTS_PROPERTY);
 		} else {
 			// should not happen. VariableDeclaration's can not be in a control statement body
-			listRewrite= null;
-			Assert.isTrue(false);
+			throw new IllegalStateException(parentStatement.getClass().getName());
 		}
     	int statementIndex= listRewrite.getOriginalList().indexOf(tempDeclarationStatement);
    	   	Assert.isTrue(statementIndex != -1);

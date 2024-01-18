@@ -1386,6 +1386,9 @@ public class ExtractTempRefactoring extends Refactoring {
 				break;
 			}
 		}
+		if (node == null) {
+			return null;
+		}
 		if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY
 				|| (location == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) node).resolveMethodBinding() != null)) {
 			node= (ASTNode) node.getStructuralProperty(location);

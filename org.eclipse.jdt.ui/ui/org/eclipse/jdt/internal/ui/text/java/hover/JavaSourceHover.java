@@ -688,7 +688,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			}
 			// advance currentStatement to the next 'else if' or 'else' statement; set it to null when no further processing is required
 			// advance ifNode to the 'if' in next 'else if'; set it to null if 'else' is reached
-			if (currentStatement != bracketNode) {
+			if (currentStatement != bracketNode && ifNode != null) {
 				Statement thenStatement= ifNode.getThenStatement();
 				Statement nextStatement= ifNode.getElseStatement();
 				if (nextStatement instanceof IfStatement) {
