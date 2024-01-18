@@ -155,7 +155,7 @@ public class TableTextCellEditor extends CellEditor {
         text.addSelectionListener(new SelectionAdapter() {
             @Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-                handleDefaultSelection(e);
+                handleDefaultSelection();
             }
         });
 		text.addKeyListener(new KeyAdapter() {
@@ -328,7 +328,7 @@ public class TableTextCellEditor extends CellEditor {
         return new LayoutData();
     }
 
-    protected void handleDefaultSelection(SelectionEvent event) {
+    protected final void handleDefaultSelection() {
         // same with enter-key handling code in keyReleaseOccured(e);
         fireApplyEditorValue();
         deactivate();

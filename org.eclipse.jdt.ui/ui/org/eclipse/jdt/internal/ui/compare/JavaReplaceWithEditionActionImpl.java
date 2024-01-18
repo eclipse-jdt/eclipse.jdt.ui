@@ -228,7 +228,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			IJavaProject javaProject= compilationUnit.getJavaProject();
 			if (javaProject != null)
 				options= javaProject.getOptions(true);
-			applyChanges(rewriter, document, textFileBuffer, getShell(), inEditor, options);
+			applyChanges(rewriter, document, textFileBuffer, inEditor, options);
 
 		}
 	}

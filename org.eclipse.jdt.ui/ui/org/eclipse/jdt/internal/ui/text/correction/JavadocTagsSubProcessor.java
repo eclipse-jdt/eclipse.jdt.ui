@@ -124,8 +124,8 @@ public class JavadocTagsSubProcessor extends JavadocTagsBaseSubProcessor<IComman
 	}
 
 	private static final class AddAllMissingModuleJavadocTagsProposal extends CUCorrectionProposal {
-		public AddAllMissingModuleJavadocTagsProposal(String label, ICompilationUnit cu, ModuleDeclaration decl, ASTNode missingNode, int relevance) {
-			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new AddAllMissingModuleJavadocTagsProposalCore(label, cu, decl, missingNode, relevance));
+		public AddAllMissingModuleJavadocTagsProposal(String label, ICompilationUnit cu, ModuleDeclaration decl, @SuppressWarnings("unused") ASTNode missingNode, int relevance) {
+			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new AddAllMissingModuleJavadocTagsProposalCore(label, cu, decl, relevance));
 		}
 	}
 

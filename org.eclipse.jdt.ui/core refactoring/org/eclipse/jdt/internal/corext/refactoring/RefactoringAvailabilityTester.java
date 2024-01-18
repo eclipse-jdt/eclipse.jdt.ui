@@ -803,14 +803,6 @@ public final class RefactoringAvailabilityTester {
 		return isRenameAvailable(method) && MethodChecks.isVirtual(method);
 	}
 
-	public static boolean isRenameElementAvailable(IJavaElement element) throws CoreException {
-		return isRenameElementAvailable(element, false);
-	}
-
-	public static boolean isRenameElementAvailable(IJavaElement element, boolean isTextSelection) throws CoreException {
-		return RefactoringAvailabilityTesterCore.isRenameElementAvailable(element, isTextSelection);
-	}
-
 	public static boolean isReplaceInvocationsAvailable(IMethod method) throws JavaModelException {
 		return RefactoringAvailabilityTesterCore.isReplaceInvocationsAvailable(method);
 	}

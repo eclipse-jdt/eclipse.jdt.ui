@@ -21,7 +21,7 @@ class ThrowFlowInfo extends FlowInfo {
 		super(THROW);
 	}
 
-	public void merge(FlowInfo info, FlowContext context) {
+	public void merge(FlowInfo info) {
 		if (info == null)
 			return;
 

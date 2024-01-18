@@ -296,32 +296,6 @@ public abstract class MethodWrapper extends PlatformObject {
         }
     }
 
-    /**
-     * Allows a visitor to traverse the call hierarchy. The visiting is stopped when
-     * a recursive node is reached.
-     *
-     * @param visitor the visitor
-     * @param progressMonitor the progress monitor
-     */
-    public void accept(CallHierarchyVisitor visitor, IProgressMonitor progressMonitor) {
-        if (getParent() != null && getParent().isRecursive()) {
-            return;
-        }
-        checkCanceled(progressMonitor);
-
-        visitor.preVisit(this);
-        if (visitor.visit(this)) {
-           for (MethodWrapper methodWrapper : getCalls(progressMonitor)) {
-            	methodWrapper.accept(visitor, progressMonitor);
-            }
-        }
-        visitor.postVisit(this);
-
-        if (progressMonitor != null) {
-            progressMonitor.worked(1);
-        }
-    }
-
 	/**
 	 * Removes the given method call from the cache.
 	 *

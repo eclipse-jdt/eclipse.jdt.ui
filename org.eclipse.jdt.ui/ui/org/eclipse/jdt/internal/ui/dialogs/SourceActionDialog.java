@@ -429,7 +429,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return composite;
 	}
 
-	protected Text createFilterComposite(Composite inner) {
+	protected Text createFilterComposite(@SuppressWarnings("unused") Composite inner) {
 		return null; // No filter as default
 	}
 
@@ -723,7 +723,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_" + getClass().getSimpleName()); //$NON-NLS-1$
 	}
 
-	protected void addMethodSearchFilter(Text filterText, CheckboxTreeViewer treeViewer) {
+	protected void addMethodSearchFilter(@SuppressWarnings("unused") Text filterText, @SuppressWarnings("unused") CheckboxTreeViewer treeViewer) {
 		//Default is do nothing
 	}
 

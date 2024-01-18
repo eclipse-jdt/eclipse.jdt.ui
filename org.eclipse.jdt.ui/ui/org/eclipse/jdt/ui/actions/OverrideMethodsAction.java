@@ -199,7 +199,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	}
 
 	private void run(Shell shell, IType type) throws CoreException {
-		final OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type, false);
+		final OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type);
 		if (!dialog.hasMethodsToOverride()) {
 			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found);
 			notifyResult(false);

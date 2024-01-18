@@ -283,7 +283,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		return validateTarget(target, operation);
 	}
 
-	public void internalTestDrop(Object target, int eventDetail) {
+	public final void internalTestDrop(int eventDetail) {
 		if (isWorkingSetSelection()) {
 			performWorkingSetReordering();
 		} else {

@@ -30,7 +30,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -49,12 +48,10 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 public class AddAllMissingModuleJavadocTagsProposalCore extends CUCorrectionProposalCore {
 
 	private final ModuleDeclaration fDecl; // MethodDecl or TypeDecl or ModuleDecl
-	private final ASTNode fMissingNode;
 
-	public AddAllMissingModuleJavadocTagsProposalCore(String label, ICompilationUnit cu, ModuleDeclaration decl, ASTNode missingNode, int relevance) {
+	public AddAllMissingModuleJavadocTagsProposalCore(String label, ICompilationUnit cu, ModuleDeclaration decl, int relevance) {
 		super(label, cu, null, relevance);
 		fDecl= decl;
-		fMissingNode= missingNode;
 	}
 
 	@Override
@@ -77,7 +74,7 @@ public class AddAllMissingModuleJavadocTagsProposalCore extends CUCorrectionProp
 				return;
 			}
 			StringBuilder comment= new StringBuilder();
-			insertPosition= AddMissingModuleJavadocTagProposalCore.findInsertPosition(javadoc, fMissingNode, document, lineDelimiter);
+			insertPosition= AddMissingModuleJavadocTagProposalCore.findInsertPosition(javadoc, document, lineDelimiter);
 
 		 	List<ModuleDirective> moduleStatements= fDecl.moduleStatements();
 		 	for (int i= moduleStatements.size() - 1; i >= 0 ; i--) {
