@@ -366,7 +366,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		}
 	}
 
-	private boolean isOnClassPath(ICompilationUnit element) throws JavaModelException {
+	private boolean isOnClassPath(ICompilationUnit element) {
 		IJavaProject project= element.getJavaProject();
 		if (project == null || !project.exists())
 			return false;

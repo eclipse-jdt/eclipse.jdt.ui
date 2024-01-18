@@ -50,7 +50,7 @@ public class RefactoringActions {
 			editor, (ITextSelection)editor.getSelectionProvider().getSelection()));
 	}
 
-	private static IType convertToEnclosingOrPrimaryType(IJavaElement element) throws JavaModelException {
+	private static IType convertToEnclosingOrPrimaryType(IJavaElement element) {
 		if (element instanceof IType)
 			return (IType)element;
 		IType result= (IType)element.getAncestor(IJavaElement.TYPE);

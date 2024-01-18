@@ -304,11 +304,11 @@ public class CoreJavadocAccess {
 		return createSuperMethodReferencesHTML(data.superInterfaceMethods(), data.superClassMethod());
 	}
 
-	protected StringBuffer createSuperMethodReferencesHTML(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) throws JavaModelException {
+	protected StringBuffer createSuperMethodReferencesHTML(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) {
 		return createSuperMethodReferencesHTMLStaticImpl(superInterfaceMethods, superClassMethod);
 	}
 
-	static StringBuffer createSuperMethodReferencesHTMLStaticImpl(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) throws JavaModelException {
+	static StringBuffer createSuperMethodReferencesHTMLStaticImpl(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod){
 		boolean hasSuperInterfaceMethods= !superInterfaceMethods.isEmpty();
 		StringBuffer buf= new StringBuffer();
 		buf.append("<div>"); //$NON-NLS-1$
