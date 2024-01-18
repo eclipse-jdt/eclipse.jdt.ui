@@ -395,6 +395,27 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void testMethodCallInAnonymousClassExtendingRefactoredClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 3, 10, 3, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
+	public void testMethodCallInAnonymousClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo", "p.Other" }, 4, 10, 4, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
+	public void testMethodCallInNestedAnonymousClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo", "p.Other" }, 4, 10, 4, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
 	public void testVariousInstanceCases() throws Exception {
 		//Various cases of instance access in many different forms
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 14, 17, 14, 20);
