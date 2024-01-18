@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -57,14 +56,14 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditFilterWizard;
 public class EditFilterAction extends BuildpathModifierAction {
 
 	public EditFilterAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService());
+		this(site, null);
 	}
 
-	public EditFilterAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context);
+	public EditFilterAction(ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget);
     }
 
-	private EditFilterAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
+	private EditFilterAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget) {
 		super(site, selectionTarget, BuildpathModifierAction.EDIT_FILTERS);
 
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label);

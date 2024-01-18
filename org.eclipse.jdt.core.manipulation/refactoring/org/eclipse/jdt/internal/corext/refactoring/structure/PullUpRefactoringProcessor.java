@@ -1543,7 +1543,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 									iterator.remove();
 							}
 						}
-						deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, list, SET_PULL_UP);
+						deleteDeclarationNodes(sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, list, SET_PULL_UP);
 					}
 					final CompilationUnit root= sourceRewriter.getRoot();
 					if (unit.equals(target)) {
@@ -1579,7 +1579,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 								final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, root);
 								if (oldField != null) {
 									int flags= getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, subsub.newChild(1), true, status);
-									final FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, subsub.newChild(1), status, flags);
+									final FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, flags);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, context, oldField.getParent(), new HashMap<>(), new HashMap<>(), false);
 
@@ -1859,12 +1859,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final ICompilationUnit declaringCu= getDeclaringType().getCompilationUnit();
 		if (!JdtFlags.isPublic(type) && !JdtFlags.isProtected(type)) {
 			if (mapping.length > 0)
-				return createPlaceholderForTypeDeclaration(oldType, declaringCu, mapping, rewrite, true);
+				return createPlaceholderForTypeDeclaration(oldType, declaringCu, mapping, rewrite);
 
 			return createPlaceholderForProtectedTypeDeclaration(oldType, declaringCuNode, declaringCu, rewrite, true);
 		}
 		if (mapping.length > 0)
-			return createPlaceholderForTypeDeclaration(oldType, declaringCu, mapping, rewrite, true);
+			return createPlaceholderForTypeDeclaration(oldType, declaringCu, mapping, rewrite);
 
 		return createPlaceholderForTypeDeclaration(oldType, declaringCu, rewrite, true);
 	}

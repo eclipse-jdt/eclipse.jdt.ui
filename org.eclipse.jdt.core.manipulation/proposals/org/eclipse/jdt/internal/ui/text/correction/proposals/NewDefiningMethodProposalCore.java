@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 public class NewDefiningMethodProposalCore extends AbstractMethodCorrectionProposalCore {
 	private final IMethodBinding fMethod;
 	private final String[] fParamNames;
-	public NewDefiningMethodProposalCore(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, boolean addOverride, int relevance) {
+	public NewDefiningMethodProposalCore(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, int relevance) {
 		super(label, targetCU, invocationNode, binding, relevance);
 		fMethod= method;
 		fParamNames= paramNames;

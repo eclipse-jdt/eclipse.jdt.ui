@@ -257,7 +257,7 @@ public class ParametricStructureComputer {
 		return new ParametricStructure(genericType);
 	}
 
-	private boolean isUnmodifiableFieldOrMethod(ConstraintVariable2 v) {
+	private boolean isUnmodifiableFieldOrMethod(@SuppressWarnings("unused") ConstraintVariable2 v) {
 		return false; //TODO: find out whether it's declared in a binary type
 	}
 

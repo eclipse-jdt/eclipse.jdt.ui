@@ -133,7 +133,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 		}
 	}
 
-	protected boolean handleSelectionEndsIn(ASTNode node) {
+	protected boolean handleSelectionEndsIn(@SuppressWarnings("unused") ASTNode node) {
 		return false;
 	}
 

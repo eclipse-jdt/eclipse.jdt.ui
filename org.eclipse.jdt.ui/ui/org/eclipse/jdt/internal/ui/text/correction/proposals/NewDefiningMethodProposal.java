@@ -65,7 +65,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
 	public NewDefiningMethodProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, IMethodBinding method, String[] paramNames, boolean addOverride,
 			int relevance) {
-		super(label, targetCU, relevance, null, new NewDefiningMethodProposalCore(label, targetCU, invocationNode, binding, method, paramNames, addOverride, relevance));
+		super(label, targetCU, relevance, null, new NewDefiningMethodProposalCore(label, targetCU, invocationNode, binding, method, paramNames, relevance));
 		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(binding.isInterface() || binding.isAnnotation(), method.getModifiers());
 		setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
 		fAddOverrideAnnotation= addOverride;

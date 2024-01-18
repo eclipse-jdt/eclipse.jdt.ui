@@ -725,10 +725,6 @@ public final class RefactoringAvailabilityTesterCore  {
 	}
 
 	public static boolean isRenameElementAvailable(IJavaElement element) throws CoreException {
-		return isRenameElementAvailable(element, false);
-	}
-
-	public static boolean isRenameElementAvailable(IJavaElement element, boolean isTextSelection) throws CoreException {
 		if (element != null) {
 			switch (element.getElementType()) {
 				case IJavaElement.JAVA_PROJECT:

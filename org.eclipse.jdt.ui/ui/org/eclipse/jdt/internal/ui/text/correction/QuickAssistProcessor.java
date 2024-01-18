@@ -173,7 +173,7 @@ import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFixCore;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
@@ -1736,7 +1736,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		IJavaElement javaElement= binding.getJavaElement();
-		if (javaElement == null ? !isRecordComponentAccessorMethod(binding) : !RefactoringAvailabilityTester.isRenameElementAvailable(javaElement, true)) {
+		if (javaElement == null ? !isRecordComponentAccessorMethod(binding) : !RefactoringAvailabilityTesterCore.isRenameElementAvailable(javaElement)) {
 			return false;
 		}
 

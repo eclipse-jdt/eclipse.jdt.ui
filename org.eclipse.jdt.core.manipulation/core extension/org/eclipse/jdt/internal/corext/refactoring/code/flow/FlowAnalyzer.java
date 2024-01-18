@@ -177,7 +177,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 
 	protected BranchFlowInfo createBranch(SimpleName label) {
-		return new BranchFlowInfo(label, fFlowContext);
+		return new BranchFlowInfo(label);
 	}
 
 	protected GenericSequentialFlowInfo createSequential() {
@@ -577,7 +577,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			return;
 		DoWhileFlowInfo info= createDoWhile();
 		setFlowInfo(node, info);
-		info.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
+		info.mergeAction(getFlowInfo(node.getBody()));
 		info.mergeCondition(getFlowInfo(node.getExpression()), fFlowContext);
 		info.removeLabel(null);
 	}
@@ -843,7 +843,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		if (createReturnFlowInfo(node)) {
 			ReturnFlowInfo info= createReturn(node);
 			setFlowInfo(node, info);
-			info.merge(getFlowInfo(node.getExpression()), fFlowContext);
+			info.merge(getFlowInfo(node.getExpression()));
 		} else {
 			assignFlowInfo(node, node.getExpression());
 		}
@@ -865,7 +865,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		} else if (binding instanceof ITypeBinding) {
 			ITypeBinding type= (ITypeBinding)binding;
 			if (type.isTypeVariable()) {
-				setFlowInfo(node, new TypeVariableFlowInfo(type, fFlowContext));
+				setFlowInfo(node, new TypeVariableFlowInfo(type));
 			}
 		}
 	}
@@ -962,7 +962,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		ThrowFlowInfo info= createThrow();
 		setFlowInfo(node, info);
 		Expression expression= node.getExpression();
-		info.merge(getFlowInfo(expression), fFlowContext);
+		info.merge(getFlowInfo(expression));
 	}
 
 	@Override

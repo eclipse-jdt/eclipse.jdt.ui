@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -23,8 +22,8 @@ public class CreateLinkedSourceFolderAction2 extends CreateLinkedSourceFolderAct
 
 	private final HintTextGroup fProvider;
 
-	public CreateLinkedSourceFolderAction2(HintTextGroup provider, IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		super(context, selectionTarget);
+	public CreateLinkedSourceFolderAction2(HintTextGroup provider, ISetSelectionTarget selectionTarget) {
+		super(selectionTarget);
 		fProvider= provider;
     }
 

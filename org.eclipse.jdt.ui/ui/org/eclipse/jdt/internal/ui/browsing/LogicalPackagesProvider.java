@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -38,7 +39,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElementChangedListener {
+abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElementChangedListener, IContentProvider {
 
 	protected static final Object[] NO_CHILDREN= new Object[0];
 
@@ -166,15 +167,14 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		return true;
 	}
 
+	@Override
 	public void dispose(){
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 		fMapToLogicalPackage= null;
 		fMapToPackageFragments= null;
 	}
 
-	/*
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput != null) {
 			JavaCore.addElementChangedListener(this);

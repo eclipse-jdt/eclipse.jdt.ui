@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -55,14 +54,14 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 public class CreateSourceFolderAction extends BuildpathModifierAction {
 
 	public CreateSourceFolderAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService());
+		this(site, null);
 	}
 
-	public CreateSourceFolderAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context);
+	public CreateSourceFolderAction(ISetSelectionTarget selectionTarget) {
+		this(null, selectionTarget);
     }
 
-	private CreateSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
+	private CreateSourceFolderAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget) {
 		super(site, selectionTarget, BuildpathModifierAction.CREATE_FOLDER);
 
 		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2);

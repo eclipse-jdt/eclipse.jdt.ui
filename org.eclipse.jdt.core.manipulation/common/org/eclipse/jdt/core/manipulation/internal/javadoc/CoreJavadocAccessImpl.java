@@ -147,7 +147,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		fJavadocLookup= JavadocLookup.NONE;
 	}
 
-	protected CoreJavaDocSnippetStringEvaluator createSnippetEvaluator(IJavaElement element) {
+	protected CoreJavaDocSnippetStringEvaluator createSnippetEvaluator(@SuppressWarnings("unused") IJavaElement element) {
 		return new CoreJavaDocSnippetStringEvaluator(fElement);
 	}
 
@@ -813,7 +813,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return text;
 	}
 
-	protected void handleInLineText(String text, ASTNode previousNode) {
+	protected void handleInLineText(String text, @SuppressWarnings("unused") ASTNode previousNode) {
 		handleText(text);
 	}
 
@@ -1513,7 +1513,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		}
 	}
 
-	protected String createLinkURI(String scheme, IJavaElement element, String refTypeName, String refMemberName, String[] refParameterTypes) throws URISyntaxException {
+	protected String createLinkURI(String scheme, @SuppressWarnings("unused") IJavaElement element, String refTypeName, String refMemberName, String[] refParameterTypes) throws URISyntaxException {
 		return CoreJavaElementLinks.createURI(scheme, fElement, refTypeName, refMemberName, refParameterTypes);
 	}
 

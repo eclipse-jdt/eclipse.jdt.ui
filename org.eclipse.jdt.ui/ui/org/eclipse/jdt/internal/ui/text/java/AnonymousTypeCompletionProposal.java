@@ -207,7 +207,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			}
 
 			if (type != null) {
-				OverrideMethodDialog dialog= new OverrideMethodDialog(JavaPlugin.getActiveWorkbenchShell(), null, type, true);
+				OverrideMethodDialog dialog= new OverrideMethodDialog(JavaPlugin.getActiveWorkbenchShell(), null, type);
 				dialog.setGenerateComment(false);
 				dialog.setElementPositionEnabled(false);
 				if (dialog.open() == Window.OK) {

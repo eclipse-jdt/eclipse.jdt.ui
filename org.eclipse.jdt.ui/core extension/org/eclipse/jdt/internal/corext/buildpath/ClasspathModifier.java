@@ -683,13 +683,12 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
 	 */
-	public static CPListElement addToClasspath(IJavaElement javaElement, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IJavaElement javaElement, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 10);
-			CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getResource());
-			return entry;
+			return new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getResource());
 		} finally {
 			monitor.done();
 		}

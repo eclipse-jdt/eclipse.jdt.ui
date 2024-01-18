@@ -103,7 +103,7 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		Text text= getTextControl(parent);
 		text.setLayoutData(gridDataForText(nColumns - 3));
 		Label status= getStatusLabelControl(parent);
-		status.setLayoutData(gridDataForStatusLabel(parent, 1));
+		status.setLayoutData(gridDataForStatusLabel(parent));
 		Button button= getChangeControl(parent);
 		button.setLayoutData(gridDataForButton(button, 1));
 
@@ -118,7 +118,7 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		return 4;
 	}
 
-	protected GridData gridDataForStatusLabel(Control aControl, int span) {
+	private GridData gridDataForStatusLabel(Control aControl) {
 		GridData gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.grabExcessHorizontalSpace= false;

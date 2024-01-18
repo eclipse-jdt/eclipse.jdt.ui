@@ -234,7 +234,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				if (element instanceof IResource)
 					entry= ClasspathModifier.addToClasspath((IResource) element, existingEntries, newEntries, project, Progress.subMonitor(monitor, 1));
 				else
-					entry= ClasspathModifier.addToClasspath((IJavaElement) element, existingEntries, newEntries, project, Progress.subMonitor(monitor, 1));
+					entry= ClasspathModifier.addToClasspath((IJavaElement) element, project, Progress.subMonitor(monitor, 1));
 				newEntries.add(entry);
 			}
 

@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 class TypeVariableFlowInfo extends FlowInfo {
 
-	public TypeVariableFlowInfo(ITypeBinding binding, FlowContext context) {
+	public TypeVariableFlowInfo(ITypeBinding binding) {
 		super(NO_RETURN);
 		addTypeVariable(binding);
 	}

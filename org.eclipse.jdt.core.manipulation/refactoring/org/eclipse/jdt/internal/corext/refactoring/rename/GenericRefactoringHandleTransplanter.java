@@ -49,7 +49,7 @@ public class GenericRefactoringHandleTransplanter {
 				return transplantHandle((IJavaProject) element);
 
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				return transplantHandle((IJavaProject) parent, (IPackageFragmentRoot) element);
+				return element;
 
 			case IJavaElement.PACKAGE_FRAGMENT:
 				return transplantHandle((IPackageFragmentRoot) parent, (IPackageFragment) element);
@@ -76,7 +76,7 @@ public class GenericRefactoringHandleTransplanter {
 				return transplantHandle((ICompilationUnit) parent, (IPackageDeclaration) element);
 
 			case IJavaElement.IMPORT_CONTAINER:
-				return transplantHandle((ICompilationUnit) parent, (IImportContainer) element);
+				return transplantHandle((ICompilationUnit) parent);
 
 			case IJavaElement.IMPORT_DECLARATION:
 				return transplantHandle((IImportContainer) parent, (IImportDeclaration) element);
@@ -101,10 +101,6 @@ public class GenericRefactoringHandleTransplanter {
 	}
 
 	protected IJavaProject transplantHandle(IJavaProject element) {
-		return element;
-	}
-
-	protected IPackageFragmentRoot transplantHandle(IJavaProject parent, IPackageFragmentRoot element) {
 		return element;
 	}
 
@@ -157,7 +153,7 @@ public class GenericRefactoringHandleTransplanter {
 		return parent.getPackageDeclaration(element.getElementName());
 	}
 
-	protected IImportContainer transplantHandle(ICompilationUnit parent, IImportContainer element) {
+	protected IImportContainer transplantHandle(ICompilationUnit parent) {
 		return parent.getImportContainer();
 	}
 

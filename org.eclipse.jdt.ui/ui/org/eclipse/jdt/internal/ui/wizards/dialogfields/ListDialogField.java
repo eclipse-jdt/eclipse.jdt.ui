@@ -943,25 +943,25 @@ public class ListDialogField<E> extends DialogField {
 
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
-			doListSelected(event);
+			doListSelected();
 		}
 
 		@Override
 		public void doubleClick(DoubleClickEvent event) {
-			doDoubleClick(event);
+			doDoubleClick();
 		}
 
 	}
 
 
-	protected void doListSelected(SelectionChangedEvent event) {
+	private void doListSelected() {
 		updateButtonState();
 		if (fListAdapter != null) {
 			fListAdapter.selectionChanged(this);
 		}
 	}
 
-	protected void doDoubleClick(DoubleClickEvent event) {
+	private void doDoubleClick() {
 		if (fListAdapter != null) {
 			fListAdapter.doubleClicked(this);
 		}
