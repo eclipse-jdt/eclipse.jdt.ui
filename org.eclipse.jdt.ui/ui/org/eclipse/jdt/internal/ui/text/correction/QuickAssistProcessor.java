@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3704,8 +3704,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		CompilationUnit cu= context.getASTRoot();
-		VariableDeclarationFragment vdf= (VariableDeclarationFragment) ASTNodes.findDeclaration(binding, cu);
-		if (vdf == null) {
+		ASTNode decl= ASTNodes.findDeclaration(binding, cu);
+		if (!(decl instanceof VariableDeclarationFragment vdf)) {
 			return false;
 		}
 		FieldDeclaration fd= (FieldDeclaration) vdf.getParent();
