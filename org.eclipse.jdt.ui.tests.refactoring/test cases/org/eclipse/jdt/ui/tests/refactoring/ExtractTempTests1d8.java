@@ -13,12 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.ui.tests.CustomBaseRunner;
 import org.eclipse.jdt.ui.tests.IgnoreInheritedTests;
 import org.eclipse.jdt.ui.tests.refactoring.rules.Java1d8Setup;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Those tests are made to run on Java Spider 1.8 .
@@ -75,26 +77,31 @@ public class ExtractTempTests1d8 extends ExtractTempTests {
 		helper1(6, 32, 6, 32, true, false, "x2", "x2");
 	}
 
+	@Override
 	@Test
 	public void test116() throws Exception {
 		helper1(6, 44, 6, 44, true, false, "string", "string");
 	}
 
+	@Override
 	@Test
 	public void test117() throws Exception {
 		helper1(6, 32, 6, 32, true, false, "integer", "integer");
 	}
 
+	@Override
 	@Test
 	public void test118() throws Exception {
 		helper1(6, 59, 6, 59, true, false, "string", "string");
 	}
 
+	@Override
 	@Test
 	public void test119() throws Exception {
 		helper1(7, 30, 7, 63, true, false, "supplier", "supplier");
 	}
 
+	@Override
 	@Test
 	public void test120() throws Exception {
 		helper1(13, 25, 13, 34, true, false, "list", "list");

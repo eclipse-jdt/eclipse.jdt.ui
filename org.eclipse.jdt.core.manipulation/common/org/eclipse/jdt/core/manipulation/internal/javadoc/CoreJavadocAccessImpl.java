@@ -553,6 +553,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return hasInheritedExceptions;
 	}
 
+	@Override
 	public CharSequence getMainDescription() {
 		if (fMainDescription == null) {
 			fMainDescription= new StringBuffer();
@@ -573,6 +574,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return fMainDescription.length() > 0 ? fMainDescription : null;
 	}
 
+	@Override
 	public CharSequence getReturnDescription() {
 		if (fReturnDescription == null) {
 			fReturnDescription= new StringBuffer();
