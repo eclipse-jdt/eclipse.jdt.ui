@@ -65,6 +65,9 @@ public class AddMissingMethodDeclarationFixCore extends CompilationUnitRewriteOp
 		}
 
 		TypeDeclaration typeDeclaration= ASTNodes.getParent(methodReferenceNode, TypeDeclaration.class);
+		if (typeDeclaration == null) {
+			return null;
+		}
 
 		if (QuickAssistProcessorUtil.isTypeReferenceToInstanceMethod(methodReferenceNode)) {
 			String methodReferenceQualifiedName= ((Name) methodReferenceNode.getExpression()).getFullyQualifiedName();
