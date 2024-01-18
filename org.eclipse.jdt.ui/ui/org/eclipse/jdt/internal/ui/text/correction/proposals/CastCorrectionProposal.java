@@ -40,4 +40,9 @@ public class CastCorrectionProposal extends LinkedCorrectionProposal {
 		setCommandId(ADD_CAST_ID);
 	}
 
+	public CastCorrectionProposal(CastCorrectionProposalCore core) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST), core);
+		setCommandId(ADD_CAST_ID);
+	}
+
 }

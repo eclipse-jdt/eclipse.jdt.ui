@@ -56,14 +56,14 @@ public class NewAnnotationMemberProposalCore extends LinkedCorrectionProposalCor
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fInvocationNode);
-		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
+		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(getInvocationNode());
+		ASTNode typeDecl= astRoot.findDeclaringNode(getSenderBinding());
 		ASTNode newTypeDecl= null;
 		if (typeDecl != null) {
 			newTypeDecl= typeDecl;
 		} else {
 			astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
-			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
+			newTypeDecl= astRoot.findDeclaringNode(getSenderBinding().getKey());
 		}
 		createImportRewrite(astRoot);
 
@@ -107,14 +107,14 @@ public class NewAnnotationMemberProposalCore extends LinkedCorrectionProposalCor
 		AST ast= rewrite.getAST();
 		Type newTypeNode= null;
 		ITypeBinding binding= null;
-		if (fInvocationNode.getLocationInParent() == MemberValuePair.NAME_PROPERTY) {
-			Expression value= ((MemberValuePair) fInvocationNode.getParent()).getValue();
+		if (getInvocationNode().getLocationInParent() == MemberValuePair.NAME_PROPERTY) {
+			Expression value= ((MemberValuePair) getInvocationNode().getParent()).getValue();
 			binding= value.resolveTypeBinding();
-		} else if (fInvocationNode instanceof Expression) {
-			binding= ((Expression) fInvocationNode).resolveTypeBinding();
+		} else if (getInvocationNode() instanceof Expression) {
+			binding= ((Expression) getInvocationNode()).resolveTypeBinding();
 		}
 		if (binding != null) {
-			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(fInvocationNode, getImportRewrite());
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(getInvocationNode(), getImportRewrite());
 			newTypeNode= getImportRewrite().addImport(binding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 		}
 		if (newTypeNode == null) {
@@ -137,10 +137,10 @@ public class NewAnnotationMemberProposalCore extends LinkedCorrectionProposalCor
 	private SimpleName getNewName(ASTRewrite rewrite) {
 		AST ast= rewrite.getAST();
 		String name;
-		if (fInvocationNode.getLocationInParent() == MemberValuePair.NAME_PROPERTY) {
-			name= ((SimpleName) fInvocationNode).getIdentifier();
-			if (ast == fInvocationNode.getAST()) {
-				addLinkedPosition(rewrite.track(fInvocationNode), true, KEY_NAME);
+		if (getInvocationNode().getLocationInParent() == MemberValuePair.NAME_PROPERTY) {
+			name= ((SimpleName) getInvocationNode()).getIdentifier();
+			if (ast == getInvocationNode().getAST()) {
+				addLinkedPosition(rewrite.track(getInvocationNode()), true, KEY_NAME);
 			}
 		} else {
 			name= "value"; //$NON-NLS-1$
@@ -150,6 +150,14 @@ public class NewAnnotationMemberProposalCore extends LinkedCorrectionProposalCor
 		SimpleName newNameNode= ast.newSimpleName(name);
 		addLinkedPosition(rewrite.track(newNameNode), false, KEY_NAME);
 		return newNameNode;
+	}
+
+	public ASTNode getInvocationNode() {
+		return fInvocationNode;
+	}
+
+	public ITypeBinding getSenderBinding() {
+		return fSenderBinding;
 	}
 
 }

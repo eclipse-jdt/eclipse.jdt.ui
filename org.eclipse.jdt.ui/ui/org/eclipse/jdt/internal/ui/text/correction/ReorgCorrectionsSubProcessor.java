@@ -537,7 +537,7 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 		return false;
 	}
 
-	private ReorgCorrectionsSubProcessor() {
+	ReorgCorrectionsSubProcessor() {
 	}
 
 	@Override

@@ -32,6 +32,10 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 
 	public static final int ENUM_CONST= NewVariableCorrectionProposalCore.ENUM_CONST;
 
+	public NewVariableCorrectionProposal(NewVariableCorrectionProposalCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), image, core);
+	}
+
 	public NewVariableCorrectionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
 		super(label, cu, null, relevance, image, new NewVariableCorrectionProposalCore(label, cu, variableKind, node, senderBinding, relevance));
 	}

@@ -20,6 +20,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class QualifyTypeProposal extends LinkedCorrectionProposal {
+	public QualifyTypeProposal(QualifyTypeProposalCore core) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), core);
+	}
 	public QualifyTypeProposal(String label, ICompilationUnit targetCU, int relevance, SimpleName original, String qualifiedName) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new QualifyTypeProposalCore(label, targetCU, relevance, original, qualifiedName));
 	}

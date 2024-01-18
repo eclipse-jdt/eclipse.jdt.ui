@@ -23,6 +23,10 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 
+	public AddTypeParameterProposal(AddTypeParameterProposalCore core) {
+		super("", core.getCompilationUnit(), null, core.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC), core); //$NON-NLS-1$
+	}
+
 	public AddTypeParameterProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, String name, ITypeBinding[] bounds, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC), new AddTypeParameterProposalCore(targetCU, binding, astRoot, name, bounds, relevance)); //$NON-NLS-1$
 	}
