@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
@@ -21,6 +24,7 @@ import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 
@@ -60,6 +64,8 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	 */
 	private volatile TypeFilter fTypeFilter;
 
+	private BundleContext fBundleContext;
+
 	/**
 	 * The constructor.
 	 */
@@ -75,6 +81,7 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
+		fBundleContext= context;
 		fgDefault= null;
 
 		if (fTypeFilter != null) {
@@ -151,6 +158,29 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 
 	public static String getPluginId() {
 		return JavaManipulation.ID_PLUGIN;
+	}
+
+	/**
+	 * Returns the bundles for a given bundle name and version range,
+	 * regardless whether the bundle is resolved or not.
+	 *
+	 * @param bundleName the bundle name
+	 * @param version the version of the bundle, or <code>null</code> for all bundles
+	 * @return the bundles of the given name belonging to the given version range
+	 * @since 3.10
+	 */
+	public Bundle[] getBundles(String bundleName, String version) {
+		Bundle[] bundles= Platform.getBundles(bundleName, version);
+		if (bundles != null)
+			return bundles;
+
+		// Accessing unresolved bundle
+		ServiceReference<PackageAdmin> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class);
+		PackageAdmin admin= fBundleContext.getService(serviceRef);
+		bundles= admin.getBundles(bundleName, version);
+		if (bundles != null && bundles.length > 0)
+			return bundles;
+		return null;
 	}
 
 	@Override

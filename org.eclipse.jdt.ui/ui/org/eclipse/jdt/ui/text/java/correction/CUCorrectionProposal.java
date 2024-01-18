@@ -168,7 +168,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	 * @since 3.31
 	 * @return the delegate
 	 */
-	protected CUCorrectionProposalCore getDelegate() {
+	public CUCorrectionProposalCore getDelegate() {
 		return fProposalCore;
 	}
 

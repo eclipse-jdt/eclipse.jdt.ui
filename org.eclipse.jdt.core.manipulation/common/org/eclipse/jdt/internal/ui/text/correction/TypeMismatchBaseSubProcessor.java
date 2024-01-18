@@ -347,14 +347,18 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			int relevance);
 
 	public T collectCastProposals(IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
-		ICompilationUnit cu= context.getCompilationUnit();
+		return collectCastProposals(null, context, castTypeBinding, nodeToCast, relevance);
+	}
 
-		String label;
-		String castType= BindingLabelProviderCore.getBindingLabel(castTypeBinding, JavaElementLabelsCore.ALL_DEFAULT);
-		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
-			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType);
-		} else {
-			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addcast_description, castType);
+	public T collectCastProposals(String label, IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
+		ICompilationUnit cu= context.getCompilationUnit();
+		if( label == null ) {
+			String castType= BindingLabelProviderCore.getBindingLabel(castTypeBinding, JavaElementLabelsCore.ALL_DEFAULT);
+			if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
+				label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType);
+			} else {
+				label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addcast_description, castType);
+			}
 		}
 		return createCastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}

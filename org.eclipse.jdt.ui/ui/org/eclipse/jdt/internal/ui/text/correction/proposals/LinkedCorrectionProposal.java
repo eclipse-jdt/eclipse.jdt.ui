@@ -85,6 +85,11 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal imple
 		super(name, cu, rewrite, relevance, image, new LinkedCorrectionProposalCore(name, cu, rewrite, relevance));
 	}
 
+	public LinkedCorrectionProposal(LinkedCorrectionProposalCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), image, core);
+	}
+
+
 	/* public only for tests. */
 	public LinkedProposalModelCore getLinkedProposalModel() {
 		return ((LinkedCorrectionProposalCore) getDelegate()).getLinkedProposalModel();

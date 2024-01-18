@@ -21,6 +21,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
+	public AddArgumentCorrectionProposal(AddArgumentCorrectionProposalCore core) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),core);
+	}
+
 	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode callerNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
 		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE),
 				new AddArgumentCorrectionProposalCore(label, cu, callerNode, insertIdx, expectedTypes, relevance));

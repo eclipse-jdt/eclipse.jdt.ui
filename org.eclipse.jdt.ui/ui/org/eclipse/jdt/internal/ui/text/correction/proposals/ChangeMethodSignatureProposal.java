@@ -24,6 +24,10 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.ChangeDescription;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
+	public ChangeMethodSignatureProposal(ChangeMethodSignatureProposalCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), image, core);
+	}
+
 	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, IMethodBinding binding, ChangeDescription[] paramChanges,
 			ChangeDescription[] exceptionChanges, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image, new ChangeMethodSignatureProposalCore(label, targetCU, invocationNode, binding, paramChanges, exceptionChanges, relevance));

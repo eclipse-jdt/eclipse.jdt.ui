@@ -21,7 +21,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
-
+	public NewAnnotationMemberProposal(NewAnnotationMemberProposalCore core, Image image) {
+		this(core.getName(), core.getCompilationUnit(), core.getInvocationNode(), core.getSenderBinding(), core.getRelevance(), image);
+	}
 	public NewAnnotationMemberProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image, new NewAnnotationMemberProposalCore(label, targetCU, invocationNode, binding, relevance));
 	}

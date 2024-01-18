@@ -1890,7 +1890,10 @@ public class LocalCorrectionsSubProcessor {
 
 			if (!simpleBinding.isRecovered()) {
 				if (binding.isParameterizedType() && (node.getParent() instanceof SimpleType || node.getParent() instanceof NameQualifiedType) && !(node.getParent().getParent() instanceof Type)) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, binding, node, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT, TypeLocation.TYPE_ARGUMENT));
+					UnresolvedElementsSubProcessor proc = getUnresolvedElementsSubProcessor();
+					if( proc != null ) {
+						proposals.add(proc.createTypeRefChangeFullProposal(cu, binding, node, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT, TypeLocation.TYPE_ARGUMENT));
+					}
 				}
 			}
 		} else {
@@ -1898,11 +1901,18 @@ public class LocalCorrectionsSubProcessor {
 			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
 				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
 				if (normBinding != null && !normBinding.isRecovered()) {
-					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT,
-							TypeLocation.TYPE_ARGUMENT));
+					UnresolvedElementsSubProcessor proc = getUnresolvedElementsSubProcessor();
+					if( proc != null ) {
+						proposals.add(proc.createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT,
+								TypeLocation.TYPE_ARGUMENT));
+					}
 				}
 			}
 		}
+	}
+
+	private static UnresolvedElementsSubProcessor getUnresolvedElementsSubProcessor() {
+		return new UnresolvedElementsSubProcessor();
 	}
 
 	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {

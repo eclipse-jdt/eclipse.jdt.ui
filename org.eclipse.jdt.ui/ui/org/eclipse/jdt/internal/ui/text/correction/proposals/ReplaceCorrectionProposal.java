@@ -21,6 +21,9 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {
+	public ReplaceCorrectionProposal(ReplaceCorrectionProposalCore core) {
+		super(core.getName(), core.getCompilationUnit(), core.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), core);
+	}
 
 	public ReplaceCorrectionProposal(String name, ICompilationUnit cu, int offset, int length, String replacementString, int relevance) {
 		super(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new ReplaceCorrectionProposalCore(name, cu, offset, length, replacementString, relevance));
