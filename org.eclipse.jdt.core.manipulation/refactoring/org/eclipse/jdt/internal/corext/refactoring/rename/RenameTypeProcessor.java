@@ -1088,7 +1088,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 
-	protected void createChangeForRenamedCU(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) throws CoreException {
+	protected void createChangeForRenamedCU(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) {
 		IResource resource= type.getCompilationUnit().getResource();
 		if (resource != null && resource.isLinked()) {
 			createChangeForRenamedCUNullOrLinkedResource(type, changeManager, resource, result);
@@ -1097,7 +1097,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 
-	protected void createChangeForRenamedCUStandardResource(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) throws CoreException {
+	protected void createChangeForRenamedCUStandardResource(IType type, TextChangeManager changeManager, DynamicValidationRefactoringChange result) {
 		result.addAll(changeManager.getAllChanges());
 
 		String renamedCUName = JavaModelUtil.getRenamedCUName(type.getCompilationUnit(), getNewElementName());

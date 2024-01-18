@@ -456,7 +456,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return createSuperMethodReferencesHTML(data.superInterfaceMethods(), data.superClassMethod());
 	}
 
-	protected StringBuffer createSuperMethodReferencesHTML(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) throws JavaModelException {
+	protected StringBuffer createSuperMethodReferencesHTML(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) {
 		// jdtls override to return null
 		return CoreJavadocAccess.createSuperMethodReferencesHTMLStaticImpl(superInterfaceMethods, superClassMethod);
 	}

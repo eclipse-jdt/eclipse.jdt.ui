@@ -123,7 +123,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 		return null;
 	}
 
-	private void checkDeltas(IMarkerDelta[] markerDeltas) throws CoreException {
+	private void checkDeltas(IMarkerDelta[] markerDeltas) {
 		for (IMarkerDelta markerDelta : markerDeltas) {
 			if (isAffected(markerDelta)) {
 				IMarker marker= markerDelta.getMarker();
@@ -150,16 +150,12 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	 */
 	@Override
 	public void resourceChanged(IResourceChangeEvent e) {
-		try {
-			IMarkerDelta[] deltas= e.findMarkerDeltas(null, true);
-			if (deltas != null) {
-				fChangesApplied= false;
-				checkDeltas(deltas);
-				if (fChangesApplied)
-					fireModelChanged();
-			}
-		} catch (CoreException x) {
-			handleCoreException(x, JavaEditorMessages.ClassFileMarkerAnnotationModel_error_resourceChanged);
+		IMarkerDelta[] deltas= e.findMarkerDeltas(null, true);
+		if (deltas != null) {
+			fChangesApplied= false;
+			checkDeltas(deltas);
+			if (fChangesApplied)
+				fireModelChanged();
 		}
 	}
 }

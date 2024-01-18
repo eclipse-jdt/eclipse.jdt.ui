@@ -485,7 +485,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return result;
 	}
 
-	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) throws JavaModelException {
+	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) {
 		final String[] lines= Strings.convertIntoLines(text);
 		Strings.trimIndentation(lines, declaringCu, false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(declaringCu));
