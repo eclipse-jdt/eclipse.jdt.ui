@@ -577,6 +577,26 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	}
 
 	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1043
+	 */
+	@Test
+	public void testJavaDocInsertBetweenExistingTags() throws Exception {
+		//If javadoc already contains tags, insert the new parameter information at reasonable positions
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 12, 18, 12, 21);
+		assertHasNoCommonErrors(status);
+	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1043
+	 */
+	@Test
+	public void testJavaDocShuffledTagsWithGenerics() throws Exception {
+		//If javadoc already has several tags in usual order, insert the new parameter information at reasonable positions
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 18, 27, 18, 30);
+		assertHasNoCommonErrors(status);
+	}
+
+	/**
 	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1045
 	 */
 	@Test
