@@ -579,10 +579,10 @@ public class CallHierarchyTestHelper {
     /**
      * Asserts that all the expected methods were found in the call results.
      */
-    public void assertCalls(Collection<IMember> expectedMembers, Collection<?> calls) {
+    public void assertCalls(Collection<IMember> expectedMembers, Collection<MethodWrapper> calls) {
         Collection<IMember> foundMembers= new ArrayList<>();
 
-		for (MethodWrapper element : (Collection<MethodWrapper>)calls) {
+		for (MethodWrapper element : calls) {
 			foundMembers.add(element.getMember());
 		}
 
@@ -601,7 +601,7 @@ public class CallHierarchyTestHelper {
      * Asserts that all the expected methods were found in the call results.
      */
     public void assertCalls(IMember[] expectedMembers, Object[] callResults) {
-        assertCalls(Arrays.asList(expectedMembers), Arrays.asList(callResults));
+        assertCalls(Arrays.asList(expectedMembers), Arrays.stream(callResults).map(MethodWrapper.class::cast).toList());
     }
 
     public MethodWrapper findMethodWrapper(IMethod method, Object[] methodWrappers) {
