@@ -24,7 +24,7 @@ pipeline {
 			}
 			post {
 				always {
-					archiveArtifacts artifacts: '*.log,*/target/work/data/.metadata/*.log,*/tests/target/work/data/.metadata/*.log,apiAnalyzer-workspace/.metadata/*.log', allowEmptyArchive: true
+					archiveArtifacts artifacts: '*.log,*/target/work/data/.metadata/*.log,*/tests/target/work/data/.metadata/*.log,apiAnalyzer-workspace/.metadata/*.log,**/target/compilelogs/*', allowEmptyArchive: true
 					junit '**/target/surefire-reports/*.xml'
 					discoverGitReferenceBuild referenceJob: 'eclipse.jdt.ui-github/master'
 					recordIssues publishAllIssues:false, tools:  [eclipse(pattern: '**/target/compilelogs/*.xml')], qualityGates: [[threshold: 1, type: 'DELTA_NORMAL', unstable: true]], minimumSeverity: 'NORMAL'
