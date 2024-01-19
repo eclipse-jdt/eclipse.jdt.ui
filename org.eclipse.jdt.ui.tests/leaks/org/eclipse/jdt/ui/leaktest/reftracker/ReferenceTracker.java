@@ -64,19 +64,24 @@ public final class ReferenceTracker {
 
 	private void followFieldReference(ReferencedObject ref, Object curr, Field fld) {
 		try {
+			String packageName= fld.getDeclaringClass().getPackageName();
+			if (packageName.startsWith("jdk.")  || packageName.startsWith("sun.") ) {
+				// cannot access
+				return;
+			}
 			if (fSkipWeakOrSoft && isWeakOrSoftReference(curr, fld)) {
 				return;
 			}
-			boolean isAccessible= setAccessible(fld, true);
-			try {
-				Object fieldVal= fld.get(curr);
-				if (fieldVal != null) {
-					fQueue.add(new ReferencedFieldElement(ref, fld, fieldVal));
-				}
-			} finally {
-				setAccessible(fld, isAccessible);
+			boolean isAccessible= fld.trySetAccessible();
+			if (!isAccessible) {
+				throw new RuntimeException("Cannot access '" + fld + "' in package '" + packageName
+						+ "'. JVM settings for --add-modules, --add-opens, and --illegal-access are probably missing. see 'javavmargs' in test.xml");
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | ExceptionInInitializerError e) {
+			Object fieldVal= fld.get(curr);
+			if (fieldVal != null) {
+				fQueue.add(new ReferencedFieldElement(ref, fld, fieldVal));
+			}
+		} catch (IllegalAccessException  e) {
 			handleError(e, fld);
 		}
 	}
@@ -99,18 +104,6 @@ public final class ReferenceTracker {
 			if (isStatic(fld.getModifiers()) && !fld.getType().isPrimitive()) {
 				followFieldReference(new RootReference(classInstance), null, fld);
 			}
-		}
-	}
-
-	private static boolean setAccessible(Field fld, boolean enable) {
-		try {
-			boolean isAccessible= fld.isAccessible();
-			if (isAccessible != enable) {
-				fld.setAccessible(enable);
-			}
-			return isAccessible;
-		} catch (RuntimeException ex) {
-			throw new RuntimeException("JVM settings for --add-modules, --add-opens, and --illegal-access are probably missing.\nException : \n" + ex.getMessage(), ex);
 		}
 	}
 
