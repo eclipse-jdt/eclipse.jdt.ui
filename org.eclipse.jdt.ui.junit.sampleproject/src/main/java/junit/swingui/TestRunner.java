@@ -186,7 +186,7 @@ public class TestRunner extends BaseTestRunner implements TestRunContext {
 			Class viewClass = null;
 			try {
 				viewClass = Class.forName(className);
-				return (FailureDetailView) viewClass.newInstance();
+				return (FailureDetailView) viewClass.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(fFrame, "Could not create Failure DetailView - using default view");
 			}
@@ -452,7 +452,7 @@ public class TestRunner extends BaseTestRunner implements TestRunContext {
 					"No Test Cases found.\nCheck that the configured \'TestCollector\' is supported on this platform.");
 			return;
 		}
-		selector.show();
+		selector.setVisible(true);
 		String className = selector.getSelectedItem();
 		if (className != null)
 			setSuite(className);
@@ -464,7 +464,7 @@ public class TestRunner extends BaseTestRunner implements TestRunContext {
 			Class collectorClass = null;
 			try {
 				collectorClass = Class.forName(className);
-				return (TestCollector) collectorClass.newInstance();
+				return (TestCollector) collectorClass.getDeclaredConstructor().newInstance();
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(fFrame, "Could not create TestCollector - using default collector");
 			}
@@ -751,6 +751,6 @@ public class TestRunner extends BaseTestRunner implements TestRunContext {
 
 	private void about() {
 		AboutDialog about = new AboutDialog(fFrame);
-		about.show();
+		about.setVisible(true);
 	}
 }
