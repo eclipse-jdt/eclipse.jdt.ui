@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -57,6 +60,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -65,6 +69,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
@@ -200,7 +205,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 	public static class ChangeStringConcatToTextBlock extends CompilationUnitRewriteOperation {
 
 		private final InfixExpression fInfix;
-		private final String fIndent;
+		private String fIndent;
 		private final boolean isTagged;
 
 		public ChangeStringConcatToTextBlock(final InfixExpression infix, boolean isTagged) {
@@ -223,6 +228,20 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					return super.computeSourceRange(nodeWithComment);
 				}
 			});
+
+			IJavaElement root= cuRewrite.getRoot().getJavaElement();
+			if (root != null) {
+				IJavaProject project= root.getJavaProject();
+				if (project != null) {
+					String tab_option= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
+					if (JavaCore.SPACE.equals(tab_option)) {
+						fIndent= ""; //$NON-NLS-1$
+						for (int i= 0; i < CodeFormatterUtil.getTabWidth(project); ++i) {
+							fIndent += " "; //$NON-NLS-1$
+						}
+					}
+				}
+			}
 
 			StringBuilder buf= new StringBuilder();
 
@@ -330,7 +349,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		}
 		if (readIndex < escapedText.length()) {
 			// there is text at the end of the string that is not followed by a newline
-			transformed.append(escapeTrailingWhitespace(escapedText.substring(readIndex)));
+			transformed.append(escapedText.substring(readIndex));
 		}
 		if (transformed.length() > 0) {
 			parts.add(transformed.toString());
@@ -600,7 +619,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final List<MethodInvocation> fToStringList;
 		private final List<Statement> fStatements;
 		private final List<StringLiteral> fLiterals;
-		private final String fIndent;
+		private String fIndent;
 		private final Set<String> fExcludedNames;
 		private final boolean fNonNLS;
 		private ExpressionStatement fAssignmentToConvert;
@@ -628,6 +647,19 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			String DEFAULT_NAME= "str"; //$NON-NLS-1$
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			IJavaElement root= cuRewrite.getRoot().getJavaElement();
+			if (root != null) {
+				IJavaProject project= root.getJavaProject();
+				if (project != null) {
+					String tab_option= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
+					if (JavaCore.SPACE.equals(tab_option)) {
+						fIndent= ""; //$NON-NLS-1$
+						for (int i= 0; i < CodeFormatterUtil.getTabWidth(project); ++i) {
+							fIndent += " "; //$NON-NLS-1$
+						}
+					}
+				}
+			}
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.StringConcatToTextBlockCleanUp_description, cuRewrite);
 			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
 				@Override
