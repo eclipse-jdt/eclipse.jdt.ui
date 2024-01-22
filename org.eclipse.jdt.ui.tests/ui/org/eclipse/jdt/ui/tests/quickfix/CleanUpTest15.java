@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -121,36 +121,36 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    static String str = \"\"\"\n" //
-				+ "    \tpublic class B {\\s\n" //
-				+ "    \t   public\\s\n" //
-				+ "    \tvoid foo() {\n" //
-				+ "    \t       System.out.println(\"abc\");\n" //
-				+ "    \t   }\n" //
-				+ "    \t}\"\"\"; //$NON-NLS-1$\n" //
+				+ "        public class B {\\s\n" //
+				+ "           public\\s\n" //
+				+ "        void foo() {\n" //
+				+ "               System.out.println(\"abc\");\n" //
+				+ "           }\n" //
+				+ "        }\"\"\"; //$NON-NLS-1$\n" //
 				+ "\n" //
 				+ "    public void testSimple() {\n" //
 				+ "        // comment 1\n" //
 				+ "        String x = \"\"\"\n" //
-    	        + "        \tpublic void foo() {\n" //
-    	        + "        \t    System.out.println(\"abc\");\n" //
-    	        + "        \t}\n" //
-    	        + "        \t\"\"\"; //$NON-NLS-1$ // comment 2\n" //
+    	        + "            public void foo() {\n" //
+    	        + "                System.out.println(\"abc\");\n" //
+    	        + "            }\n" //
+    	        + "            \"\"\"; //$NON-NLS-1$ // comment 2\n" //
     	        + "    }\n" //
     	        + "\n" //
 				+ "    public void testTrailingSpacesAndInnerNewlines() {\n" //
 				+ "        String x = \"\"\"\n" //
-    	        + "        \tpublic\\s\n"
-    	        + "        \tvoid foo() {\\s\\s\n" //
-    	        + "        \t    System.out.println\\\\(\"abc\");\n" //
-    	        + "        \t}\n" //
-    	        + "        \t\"\"\";\n" //
+    	        + "            public\\s\n"
+    	        + "            void foo() {\\s\\s\n" //
+    	        + "                System.out.println\\\\(\"abc\");\n" //
+    	        + "            }\n" //
+    	        + "            \"\"\";\n" //
     	        + "    }\n" //
     	        + "\n" //
     	        + "    public void testLineContinuationAndTripleQuotes() {\n" //
 				+ "        String x = \"\"\"\n" //
-    	        + "        \tabcdef\\\n" //
-    	        + "        \tghijkl\\\"\"\"\\\"123\\\"\"\"\\\n" //
-    	        + "        \tmnop\\\\\"\"\";\n" //
+    	        + "            abcdef\\\n" //
+    	        + "            ghijkl\\\"\"\"\\\"123\\\"\"\"\\\n" //
+    	        + "            mnop\\\\\"\"\";\n" //
     	        + "    }\n" //
     	        + "\n" //
     	        + "    public void testNoChange() {\n" //
@@ -165,22 +165,22 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "    }\n" //
     	        + "    public void testParameter() {\n" //
     	        + "        Integer k = foo(\"\"\"\n" //
-    	        + "        \tabcdef\n" //
-    	        + "        \t123456\n" //
-    	        + "        \tklm\"\"\");\n" //
+    	        + "            abcdef\n" //
+    	        + "            123456\n" //
+    	        + "            klm\"\"\");\n" //
     	        + "    }\n" //
     	        + "    public void testAssignment() {\n" //
     	        + "        Integer k = null;\n" //
     	        + "        k = foo(\"\"\"\n" //
-    	        + "        \tabcdef\n" //
-    	        + "        \t123456\n" //
-    	        + "        \tklm\"\"\");\n" //
+    	        + "            abcdef\n" //
+    	        + "            123456\n" //
+    	        + "            klm\"\"\");\n" //
     	        + "    }\n" //
     	        + "    public void testConcatInConstructor() {\n" //
     	        + "        new StringBuffer(\"\"\"\n" //
-    	        + "        \tabc\n" //
-    	        + "        \tdef\n" //
-    	        + "        \tghi\"\"\");\n" //
+    	        + "            abc\n" //
+    	        + "            def\n" //
+    	        + "            ghi\"\"\");\n" //
     	        + "    }\n" //
 				+ "}\n";
 
@@ -245,49 +245,49 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "    public void foo() {\n" //
 				+ "        // comment 1\n" //
 				+ "        String str = \"\"\"\n" //
-				+ "        \tintro string\n"
-				+ "        \tpublic void foo() {\n" //
-				+ "        \t    return null;\n" //
-				+ "        \t}\n" //
-				+ "        \t\n" //
-				+ "        \t\"\"\"; //$NON-NLS-1$\n" //
+				+ "            intro string\n"
+				+ "            public void foo() {\n" //
+				+ "                return null;\n" //
+				+ "            }\n" //
+				+ "            \n" //
+				+ "            \"\"\"; //$NON-NLS-1$\n" //
 				+ "        System.out.println(str);\n" //
 				+ "        System.out.println(str + \"abc\");\n" //
 				+ "        // comment 2\n" //
 				+ "        String str1 = \"\"\"\n" //
-				+ "        \tintro string 2\n" //
-				+ "        \tsome string\n" //
-				+ "        \t    another string\n" //
-				+ "        \t\"\"\";\n" //
+				+ "            intro string 2\n" //
+				+ "            some string\n" //
+				+ "                another string\n" //
+				+ "            \"\"\";\n" //
 				+ "        // comment 3\n" //
 				+ "        String k = str1;\n" //
 				+ "        // comment 4\n" //
 				+ "        String str2 = \"\"\"\n" //
-				+ "        \tpublic String metaPhone(final String txt2){\n" //
-				+ "        \t    return null;\n" //
-				+ "        \t}\n" //
-				+ "        \t\n" //
-				+ "        \t\"\"\";\n" //
+				+ "            public String metaPhone(final String txt2){\n" //
+				+ "                return null;\n" //
+				+ "            }\n" //
+				+ "            \n" //
+				+ "            \"\"\";\n" //
 				+ "        // comment 5\n" //
 				+ "        k = str2;\n" //
 				+ "        System.out.println(str2);\n" //
 				+ "        // comment 6\n" //
 				+ "        k = \"\"\"\n" //
-				+ "        \tpublic void foo() {\n" //
-				+ "        \t    return null;\n" //
-				+ "        \t}\n" //
-				+ "        \t\n" //
-				+ "        \t\"\"\";\n" //
+				+ "            public void foo() {\n" //
+				+ "                return null;\n" //
+				+ "            }\n" //
+				+ "            \n" //
+				+ "            \"\"\";\n" //
 				+ "\n" //
 				+ "        String x = \"\"\"\n" //
-				+ "        \tabc\n" //
-				+ "        \tdef\n" //
-				+ "        \tghi\n" //
-				+ "        \t\"\"\";\n" //
+				+ "            abc\n" //
+				+ "            def\n" //
+				+ "            ghi\n" //
+				+ "            \"\"\";\n" //
     	        + "        new StringBuffer(\"\"\"\n" //
-    	        + "        \tabc\n" //
-    	        + "        \tdef\n" //
-    	        + "        \tghi\"\"\");\n" //
+    	        + "            abc\n" //
+    	        + "            def\n" //
+    	        + "            ghi\"\"\");\n" //
 				+ "    }\n" //
 				+ "}";
 
@@ -344,17 +344,17 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "@SampleAnnotation(name = \"testQuery\",\n"
 				+ " query = \"\"\"\n"
-				+ "\tselect *\\s\\\n"
-				+ "\tfrom test_entities\\s\\\n"
-				+ "\twhere test = :test\"\"\" ) //comment 1\n"
+				+ "    select * \\\n"
+				+ "    from test_entities \\\n"
+				+ "    where test = :test\"\"\" ) //comment 1\n"
 				+ "public class E {\n"
 				+ "    public static void main(String[] args) {\n"
 				+ "        final String foo =  \n"
 				+ "            (\"\"\"\n"
-				+ "            \tLine1\\\n"
-				+ "            \tLine2\\\n"
-				+ "            \tLine3\\\n"
-				+ "            \tLine4\"\"\"//comment2\n"
+				+ "                Line1\\\n"
+				+ "                Line2\\\n"
+				+ "                Line3\\\n"
+				+ "                Line4\"\"\"//comment2\n"
 				+ "    }\n"
 				+ "}\n";
 
@@ -409,17 +409,17 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "\n" //
 				+ "@SampleAnnotation({\n"
 				+ "\"\"\"\n"
-				+ "\tselect *\\s\\\n"
-				+ "\tfrom test_entities\\s\\\n"
-				+ "\twhere test = :test\"\"\"}) //comment 1\n"
+				+ "    select * \\\n"
+				+ "    from test_entities \\\n"
+				+ "    where test = :test\"\"\"}) //comment 1\n"
 				+ "public class E {\n"
 				+ "    public static void main(String[] args) {\n"
 				+ "        final String foo =  \n"
 				+ "            (\"\"\"\n"
-				+ "            \tLine1\\\n"
-				+ "            \tLine2\\\n"
-				+ "            \tLine3\\\n"
-				+ "            \tLine4\"\"\"//comment2\n"
+				+ "                Line1\\\n"
+				+ "                Line2\\\n"
+				+ "                Line3\\\n"
+				+ "                Line4\"\"\"//comment2\n"
 				+ "    }\n"
 				+ "}\n";
 
