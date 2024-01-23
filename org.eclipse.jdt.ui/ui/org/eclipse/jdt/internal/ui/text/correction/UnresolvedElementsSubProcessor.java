@@ -29,9 +29,12 @@ import org.eclipse.ltk.core.refactoring.Change;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.manipulation.CUCorrectionProposalCore;
 import org.eclipse.jdt.core.manipulation.ChangeCorrectionProposalCore;
 import org.eclipse.jdt.core.manipulation.TypeKinds;
 
@@ -47,13 +50,14 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddArgumentCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddArgumentCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddTypeParameterProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddTypeParameterProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CastCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CastCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ILinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAnnotationMemberProposal;
@@ -105,7 +109,9 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 			case 1420:
 				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+			case 1450:
 			case 1480:
+			case 1490:
 				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
 			case 1650:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
@@ -164,6 +170,10 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 		new UnresolvedElementsSubProcessor().collectAnnotationMemberProposals(context, problem, proposals);
 	}
 
+	public static ICommandAccess getTypeRefChangeFullProposal(ICompilationUnit cu, ITypeBinding binding, ASTNode node, int relevance, TypeLocation typeLocation) {
+		return new UnresolvedElementsSubProcessor().createTypeRefChangeFullProposal(cu, binding, node, relevance, typeLocation);
+	}
+
 	@Override
 	protected ReorgCorrectionsBaseSubProcessor<ICommandAccess> getReorgSubProcessor() {
 		return new ReorgCorrectionsSubProcessor();
@@ -176,17 +186,14 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 	@Override
 	protected ChangeCorrectionProposalCore getOriginalProposalFromT(ICommandAccess proposal) {
 		if( proposal instanceof CUCorrectionProposal) {
-			return ((CUCorrectionProposal)proposal).getDelegate();
+			CUCorrectionProposalCore core= ((CUCorrectionProposal)proposal).getAdapter(CUCorrectionProposalCore.class);
+			if (core != null)
+				return core;
 		}
 		if( proposal instanceof ChangeCorrectionProposalCore) {
 			return (ChangeCorrectionProposalCore)proposal;
 		}
 		return null;
-	}
-
-	@Override
-	protected ILinkedCorrectionProposalCore createLinkedCorrectionProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance, int uid) {
-		return new LinkedCorrectionProposal(label, cu, rewrite, relevance, findImage(uid));
 	}
 
 	@Override
@@ -207,17 +214,6 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 	@Override
 	protected int getQualifiedTypeNameHistoryBoost(String qualifiedName, int min, int max) {
 		return QualifiedTypeNameHistory.getBoost(qualifiedName, min, max);
-	}
-
-	@Override
-	protected ICommandAccess linkedProposalToT(ILinkedCorrectionProposalCore proposal, int uid) {
-		if( proposal instanceof LinkedCorrectionProposal ) {
-			return (LinkedCorrectionProposal)proposal;
-		}
-		if( proposal instanceof LinkedCorrectionProposalCore) {
-			return new LinkedCorrectionProposal((LinkedCorrectionProposalCore)proposal, findImage(uid));
-		}
-		return null;
 	}
 
 	@Override
@@ -243,8 +239,8 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 	}
 
 	@Override
-	protected ICommandAccess addModuleRequiresProposalToT(ChangeCorrectionProposalCore proposal, int uid) {
-		return null;
+	protected ICommandAccess addModuleRequiresProposalToT(AddModuleRequiresCorrectionProposalCore proposal, int uid) {
+		return new AddModuleRequiresCorrectionProposal(proposal);
 	}
 
 	@Override
@@ -305,6 +301,10 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 			proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1));
 			addNullityAnnotationTypesProposals(cu, node, proposals);
 		}
+	}
 
+	@Override
+	protected ICommandAccess linkedProposalToT(LinkedCorrectionProposalCore proposal, int uid) {
+		return new LinkedCorrectionProposal(proposal, findImage(uid));
 	}
 }

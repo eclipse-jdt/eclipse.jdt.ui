@@ -17,23 +17,22 @@ import java.util.Collection;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ILinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeInLambdaCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeInLambdaCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposalCore;
 
 
 public class ReturnTypeSubProcessor extends ReturnTypeBaseSubProcessor<ICommandAccess> {
@@ -66,70 +65,49 @@ public class ReturnTypeSubProcessor extends ReturnTypeBaseSubProcessor<ICommandA
 		new ReturnTypeSubProcessor().collectMethodReturnsVoidProposals(context, problem, proposals);
 	}
 
-	@Override
-	protected ICommandAccess createMethodWithConstrNameProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
-	}
 
-	@Override
-	protected ICommandAccess voidMethodReturnsProposal1ToT(ILinkedCorrectionProposalCore prop) {
-		return (ICommandAccess)prop;
-	}
 
-	@Override
-	protected ICommandAccess createVoidMethodReturnsProposal2(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
-	}
-
-	@Override
-	protected ILinkedCorrectionProposalCore createVoidMethodReturnsProposal1(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new LinkedCorrectionProposal(label, cu, rewrite, relevance, image);
-	}
-
-	@Override
-	protected ICommandAccess createWrongConstructorNameProposal(String label, ICompilationUnit cu, int startPosition, int length, String constructorName, int relevance) {
-		return new ReplaceCorrectionProposal(label, cu, startPosition, length, constructorName, relevance);
-	}
-
-	@Override
-	protected ICommandAccess missingReturnTypeProposal1ToT(ILinkedCorrectionProposalCore proposal) {
-		return (ICommandAccess)proposal;
-	}
-
-	@Override
-	protected ILinkedCorrectionProposalCore createMissingReturnTypeProposal1(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new LinkedCorrectionProposal(label, cu, rewrite, relevance, image);
-	}
-
-	@Override
-	protected ICommandAccess changeReturnTypeToVoidProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
-	}
-
-	@Override
-	protected ICommandAccess createMissingReturnTypeInMethodCorrectionProposal(ICompilationUnit cu, MethodDeclaration methodDecl, ReturnStatement existingStatement, int relevance) {
-		return new MissingReturnTypeCorrectionProposal(cu, methodDecl, existingStatement, relevance);
-	}
-
-	@Override
-	protected ICommandAccess createMissingReturnTypeInLambdaCorrectionProposal(ICompilationUnit cu, LambdaExpression selectedNode, ReturnStatement existingStatement, int relevance) {
-		return new MissingReturnTypeInLambdaCorrectionProposal(cu, selectedNode, existingStatement, relevance);
-	}
-
-	@Override
-	protected ICommandAccess createReplaceReturnWithYieldStatementProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance) {
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
+	private static Image findImage(int id) {
+		switch( id) {
+			case 100:
+			case 210:
+			case 220:
+			case 310:
+			case 430:
+			case 510:
+				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		}
+		return null;
 	}
 
 	@Override
 	protected TypeMismatchBaseSubProcessor<ICommandAccess> getTypeMismatchSubProcessor() {
 		return new TypeMismatchSubProcessor();
+	}
+
+	@Override
+	protected ICommandAccess linkedCorrectionProposal1ToT(LinkedCorrectionProposalCore proposal, int uid) {
+		return new LinkedCorrectionProposal(proposal, findImage(uid));
+	}
+
+	@Override
+	protected ICommandAccess rewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore p, int uid) {
+		return new ASTRewriteCorrectionProposal(p, findImage(uid));
+	}
+
+	@Override
+	protected ICommandAccess replaceCorrectionProposalToT(ReplaceCorrectionProposalCore core, int uid) {
+		return new ReplaceCorrectionProposal(core);
+	}
+
+	@Override
+	protected ICommandAccess missingReturnTypeProposalToT(MissingReturnTypeCorrectionProposalCore core, int uid) {
+		return new MissingReturnTypeCorrectionProposal(core);
+	}
+
+	@Override
+	protected ICommandAccess missingReturnTypeInLambdaProposalToT(MissingReturnTypeInLambdaCorrectionProposalCore core, int uid) {
+		return new MissingReturnTypeInLambdaCorrectionProposal(core);
 	}
 
 }

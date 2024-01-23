@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,9 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new MissingReturnTypeCorrectionProposalCore(cu, decl, existingReturn, relevance)); //$NON-NLS-1$
 	}
 
+	public MissingReturnTypeCorrectionProposal(MissingReturnTypeCorrectionProposalCore delegate) {
+		super("", delegate.getCompilationUnit(), null, delegate.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), delegate); //$NON-NLS-1$	}
+	}
 	public MissingReturnTypeCorrectionProposal(ICompilationUnit cu, int relevance,
 			MissingReturnTypeCorrectionProposalCore delegate) {
 		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), delegate); //$NON-NLS-1$	}

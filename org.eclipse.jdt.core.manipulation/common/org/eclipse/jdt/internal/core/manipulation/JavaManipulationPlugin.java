@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -76,12 +76,12 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		fBundleContext= context;
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
-		fBundleContext= context;
 		fgDefault= null;
 
 		if (fTypeFilter != null) {
@@ -167,7 +167,6 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	 * @param bundleName the bundle name
 	 * @param version the version of the bundle, or <code>null</code> for all bundles
 	 * @return the bundles of the given name belonging to the given version range
-	 * @since 3.10
 	 */
 	public Bundle[] getBundles(String bundleName, String version) {
 		Bundle[] bundles= Platform.getBundles(bundleName, version);

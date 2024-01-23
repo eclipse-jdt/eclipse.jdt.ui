@@ -147,7 +147,8 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.SwapDescription;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ILinkedCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAbstractMethodCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewAnnotationMemberProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposalCore;
@@ -547,8 +548,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 							AST ast= astRoot.getAST();
 							ASTRewrite rewrite= ASTRewrite.create(ast);
 							String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetomethod_description, ASTResolving.getMethodSignature(curr));
-							ILinkedCorrectionProposalCore proposal= createLinkedCorrectionProposal(label, cu, rewrite, IProposalRelevance.CHANGE_TO_METHOD, 310);
-
+							LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_TO_METHOD);
 							MethodInvocation newInv= ast.newMethodInvocation();
 							newInv.setName(ast.newSimpleName(curr.getName()));
 							for (ITypeBinding parameterType : curr.getParameterTypes()) {
@@ -978,11 +978,12 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 	private T getCompositeChangeProposal(ChangeCorrectionProposalCore proposal) throws CoreException {
 		ChangeCorrectionProposalCore compositeProposal= null;
-		if (proposal instanceof AddImportCorrectionProposalCore cp) {
+		if (proposal instanceof AddImportCorrectionProposalCore aicpc) {
+			AddModuleRequiresCorrectionProposalCore cp= aicpc.getAdditionalProposal();
 			Change importChange= proposal.getChange();
-			Change change= cp.getChange();
+			Change change= cp == null ? null : cp.getChange();
 			if (change != null) {
-				ImportRewrite importRewrite= cp.getImportRewrite();
+				ImportRewrite importRewrite= aicpc.getImportRewrite();
 				boolean importNeedsToBeAdded= false;
 				if (importRewrite != null) {
 					String[] imports= importRewrite.getAddedImports();
@@ -1192,11 +1193,9 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		} while (node != null);
 	}
 
-	protected void addNewTypeProposalsInteractiveInnerLoop(ICompilationUnit cu, Name node, IJavaElement enclosing, int rel, int kind, Name refNode, Collection<T> proposals) throws CoreException {
-		// Subclasses can override
-	}
+	protected abstract void addNewTypeProposalsInteractiveInnerLoop(ICompilationUnit cu, Name node, IJavaElement enclosing, int rel, int kind, Name refNode, Collection<T> proposals) throws CoreException;
 
-	protected void addNewTypeProposalsParams(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<T> proposals) throws CoreException {
+	protected void addNewTypeProposalsParams(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<T> proposals) {
 		// type parameter proposals
 		if (refNode.isSimpleName() && (kind & TypeKinds.VARIABLES)  != 0) {
 			CompilationUnit root= (CompilationUnit) refNode.getRoot();
@@ -1309,7 +1308,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 						String[] args= { moduleName };
 						final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
 						final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
-						ChangeCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(moduleName, changeName, changeDescription, currentModuleCompilationUnit, relevance);
+						AddModuleRequiresCorrectionProposalCore proposal= new AddModuleRequiresCorrectionProposalCore(moduleName, changeName, changeDescription, currentModuleCompilationUnit, relevance);
 						Change change= proposal.getChange();
 						if (change != null) {
 							T t= addModuleRequiresProposalToT(proposal, 1180);
@@ -1507,7 +1506,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					}
 
 					if ( type1 && isSenderTypeAbstractClass ) {
-						NewMethodCorrectionProposalCore core= new NewMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
+						NewAbstractMethodCorrectionProposalCore core= new NewAbstractMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
 						T t= newMethodProposalToT(core, 1450);
 						if (t != null)
 							proposals.add(t);
@@ -1538,8 +1537,8 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 									if (t != null)
 										proposals.add(t);
 									if ( isSenderTypeAbstractClass ) {
-										NewMethodCorrectionProposalCore c2= new NewMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
-										T t2= newMethodProposalToT(core, 1490);
+										NewAbstractMethodCorrectionProposalCore c2= new NewAbstractMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
+										T t2= newMethodProposalToT(c2, 1490);
 										if (t2 != null)
 											proposals.add(t2);
 									}
@@ -2338,16 +2337,15 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	protected abstract ReorgCorrectionsBaseSubProcessor<T> getReorgSubProcessor();
 	protected abstract TypeMismatchBaseSubProcessor<T> getTypeMismatchSubProcessor();
 	protected abstract ChangeCorrectionProposalCore getOriginalProposalFromT(T proposal);
-	protected abstract ILinkedCorrectionProposalCore createLinkedCorrectionProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance, int uid);
 	protected abstract T newVariableCorrectionProposalToT(NewVariableCorrectionProposalCore core, int uid);
 	protected abstract T renameNodeCorrectionProposalToT(RenameNodeCorrectionProposalCore core, int uid);
 	protected abstract T compositeProposalToT(ChangeCorrectionProposalCore compositeProposal, int uid);
 	protected abstract int getQualifiedTypeNameHistoryBoost(String qualifiedName, int min, int max);
-	protected abstract T linkedProposalToT(ILinkedCorrectionProposalCore proposal, int uid);
+	protected abstract T linkedProposalToT(LinkedCorrectionProposalCore proposal, int uid);
 	protected abstract T changeCorrectionProposalToT(ChangeCorrectionProposalCore proposal, int uid);
 	protected abstract T qualifyTypeProposalToT(QualifyTypeProposalCore proposal, int uid);
 	protected abstract T addTypeParametersToT(AddTypeParameterProposalCore proposal, int uid);
-	protected abstract T addModuleRequiresProposalToT(ChangeCorrectionProposalCore proposal, int uid);
+	protected abstract T addModuleRequiresProposalToT(AddModuleRequiresCorrectionProposalCore proposal, int uid);
 	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore proposal, int uid);
 	protected abstract T castCorrectionProposalToT(CastCorrectionProposalCore c, int uid);
 	protected abstract T addArgumentCorrectionProposalToT(AddArgumentCorrectionProposalCore proposal, int uid);

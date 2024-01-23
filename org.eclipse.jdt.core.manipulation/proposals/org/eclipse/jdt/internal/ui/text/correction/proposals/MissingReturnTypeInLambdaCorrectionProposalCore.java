@@ -76,6 +76,10 @@ public class MissingReturnTypeInLambdaCorrectionProposalCore extends MissingRetu
 		return 0;
 	}
 
+	public LambdaExpression getLambdaExpression() {
+		return lambdaExpression;
+	}
+
 	@Override
 	protected Expression computeProposals(AST ast, ITypeBinding returnBinding, int returnOffset, CompilationUnit root, Expression result) {
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);

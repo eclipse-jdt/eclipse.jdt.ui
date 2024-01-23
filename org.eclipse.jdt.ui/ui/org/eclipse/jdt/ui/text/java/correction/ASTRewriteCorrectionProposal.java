@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	 * @param delegate The delegate instance
 	 * @param image the image that is displayed for this proposal or <code>null</code> if no image
 	 *            is desired
-	 * @since 3.31
+	 * @since 3.32
 	 */
 	public ASTRewriteCorrectionProposal(ASTRewriteCorrectionProposalCore delegate, Image image) {
 		super(delegate.getName(), delegate.getCompilationUnit(), delegate.getRelevance(), image, delegate);

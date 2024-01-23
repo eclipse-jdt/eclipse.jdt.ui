@@ -56,7 +56,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ILinkedCorrectionProposalCore;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
+
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeInLambdaCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposalCore;
 
 
 public abstract class ReturnTypeBaseSubProcessor<T> {
@@ -125,7 +130,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			rewrite.set(declaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.TRUE, null);
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_constrnamemethod_description;
-			T proposal= createMethodWithConstrNameProposal(label, cu, rewrite, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
+			ASTRewriteCorrectionProposalCore p= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
+			T proposal= rewriteCorrectionProposalToT(p, 100);
 			if (proposal != null)
 				proposals.add(proposal);
 		}
@@ -159,7 +165,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 
 				String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_voidmethodreturns_description, BindingLabelProviderCore.getBindingLabel(binding, BindingLabelProviderCore.DEFAULT_TEXTFLAGS));
-				ILinkedCorrectionProposalCore proposal= createVoidMethodReturnsProposal1(label, cu, rewrite, IProposalRelevance.VOID_METHOD_RETURNS);
+				LinkedCorrectionProposalCore proposal = new LinkedCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.VOID_METHOD_RETURNS);
 				ImportRewrite imports= proposal.createImportRewrite(astRoot);
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(methodDeclaration, imports);
 				Type newReturnType= imports.addImport(binding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
@@ -187,7 +193,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					proposal.addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
 
 				}
-				T wrapped= voidMethodReturnsProposal1ToT(proposal);
+				T wrapped= linkedCorrectionProposal1ToT(proposal, 210);
 				if (wrapped != null)
 					proposals.add(wrapped);
 			}
@@ -195,11 +201,13 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			rewrite.remove(returnStatement.getExpression(), null);
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_removereturn_description;
-			T proposal= createVoidMethodReturnsProposal2(label, cu, rewrite, IProposalRelevance.CHANGE_TO_RETURN);
+			ASTRewriteCorrectionProposalCore core= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_TO_RETURN);
+			T proposal= rewriteCorrectionProposalToT(core, 220);
 			if (proposal != null)
 				proposals.add(proposal);
 		}
 	}
+
 
 	public void collectMissingReturnTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -228,7 +236,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_missingreturntype_description, BindingLabelProviderCore.getBindingLabel(typeBinding, BindingLabelProviderCore.DEFAULT_TEXTFLAGS));
-			ILinkedCorrectionProposalCore proposal= createMissingReturnTypeProposal1(label, cu, rewrite, IProposalRelevance.MISSING_RETURN_TYPE);
+			LinkedCorrectionProposalCore proposal= new LinkedCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.MISSING_RETURN_TYPE);
 
 			ImportRewrite imports= proposal.createImportRewrite(astRoot);
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
@@ -255,7 +263,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					proposal.addLinkedPositionProposal(key, binding);
 				}
 			}
-			T wrapped= missingReturnTypeProposal1ToT(proposal);
+			T wrapped= linkedCorrectionProposal1ToT(proposal, 310);
 			if (wrapped != null)
 				proposals.add(wrapped);
 
@@ -267,13 +275,15 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					String constructorName= parentTypeDecl.getName().getIdentifier();
 					ASTNode nameNode= methodDeclaration.getName();
 					label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_wrongconstructorname_description, BasicElementLabels.getJavaElementName(constructorName));
-					T prop= createWrongConstructorNameProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
+					ReplaceCorrectionProposalCore core= new ReplaceCorrectionProposalCore(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
+					T prop= replaceCorrectionProposalToT(core, 320);
 					if (prop != null)
 						proposals.add(prop);
 				}
 			}
 		}
 	}
+
 
 	public void collectMissingReturnStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -285,8 +295,9 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
 		// Lambda Expression can be in a MethodDeclaration or a Field Declaration
 		if (selectedNode instanceof LambdaExpression lambda) {
-			T prop= createMissingReturnTypeInLambdaCorrectionProposal(cu, lambda, existingStatement,
+			MissingReturnTypeInLambdaCorrectionProposalCore core= new MissingReturnTypeInLambdaCorrectionProposalCore(cu, lambda, existingStatement,
 					IProposalRelevance.MISSING_RETURN_TYPE);
+			T prop= missingReturnTypeInLambdaProposalToT(core, 410);
 			if (prop != null)
 				proposals.add(prop);
 		} else {
@@ -296,7 +307,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 				if (block == null) {
 					return;
 				}
-				T p= createMissingReturnTypeInMethodCorrectionProposal(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE);
+				MissingReturnTypeCorrectionProposalCore core= new MissingReturnTypeCorrectionProposalCore(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE);
+				T p= missingReturnTypeProposalToT(core, 420);
 				proposals.add(p);
 
 				Type returnType= methodDecl.getReturnType2();
@@ -313,14 +325,14 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					}
 
 					String label= CorrectionMessages.ReturnTypeSubProcessor_changetovoid_description;
-					T proposal= changeReturnTypeToVoidProposal(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID);
+					ASTRewriteCorrectionProposalCore core2= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID);
+					T proposal= rewriteCorrectionProposalToT(core2, 430);
 					if (proposal != null)
 						proposals.add(proposal);
 				}
 			}
 		}
 	}
-
 	public void collectReplaceReturnWithYieldStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
@@ -353,7 +365,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			rewrite.replace(returnStatement, yieldStatement, null);
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_changeReturnToYield_description;
-			T proposal= createReplaceReturnWithYieldStatementProposal(label, cu, rewrite, IProposalRelevance.REMOVE_ABSTRACT_MODIFIER);
+			ASTRewriteCorrectionProposalCore core= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.REMOVE_ABSTRACT_MODIFIER);
+			T proposal= rewriteCorrectionProposalToT(core, 510);
 			if (proposal != null)
 				proposals.add(proposal);
 		}
@@ -381,29 +394,10 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		}
 	}
 
-
-	protected abstract T changeReturnTypeToVoidProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance);
-
-	protected abstract T createMissingReturnTypeInMethodCorrectionProposal(ICompilationUnit cu, MethodDeclaration methodDecl, ReturnStatement existingStatement, int relevance);
-
-	protected abstract T createMissingReturnTypeInLambdaCorrectionProposal(ICompilationUnit cu, LambdaExpression selectedNode, ReturnStatement existingStatement, int relevance);
-
-	protected abstract T createReplaceReturnWithYieldStatementProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int removeAbstractModifier);
-
-	protected abstract T createMethodWithConstrNameProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance);
-
-	protected abstract T voidMethodReturnsProposal1ToT(ILinkedCorrectionProposalCore prop);
-
-	protected abstract T createVoidMethodReturnsProposal2(String label, ICompilationUnit cu, ASTRewrite rewrite,
-			int changeToReturn);
-
-	protected abstract ILinkedCorrectionProposalCore createVoidMethodReturnsProposal1(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance);
-
-	protected abstract T createWrongConstructorNameProposal(String label, ICompilationUnit cu, int startPosition, int length, String constructorName, int relevance);
-
-	protected abstract T missingReturnTypeProposal1ToT(ILinkedCorrectionProposalCore proposal);
-
-	protected abstract ILinkedCorrectionProposalCore createMissingReturnTypeProposal1(String label, ICompilationUnit cu, ASTRewrite rewrite, int missingReturnType);
-
 	protected abstract TypeMismatchBaseSubProcessor<T> getTypeMismatchSubProcessor();
+	protected abstract T linkedCorrectionProposal1ToT(LinkedCorrectionProposalCore proposal, int uid);
+	protected abstract T rewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore p, int uid);
+	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore core, int uid);
+	protected abstract T missingReturnTypeProposalToT(MissingReturnTypeCorrectionProposalCore core, int uid);
+	protected abstract T missingReturnTypeInLambdaProposalToT(MissingReturnTypeInLambdaCorrectionProposalCore core, int uid);
 }
