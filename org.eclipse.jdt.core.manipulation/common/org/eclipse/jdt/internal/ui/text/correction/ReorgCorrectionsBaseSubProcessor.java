@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -81,14 +81,14 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		CompilationUnit root= context.getASTRoot();
 
 		ASTNode coveredNode= problem.getCoveredNode(root);
-		if (!(coveredNode instanceof SimpleName))
+		if (!(coveredNode instanceof SimpleName simpleCovered))
 			return;
 
 		ASTNode parentType= coveredNode.getParent();
 		if (!(parentType instanceof AbstractTypeDeclaration))
 			return;
 
-		String currTypeName= ((SimpleName) coveredNode).getIdentifier();
+		String currTypeName= simpleCovered.getIdentifier();
 		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
 
 		boolean hasOtherPublicTypeBefore= false;
@@ -108,8 +108,8 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			}
 		}
 		if (!JavaConventions.validateJavaTypeName(newTypeName, sourceLevel, compliance, previewEnabled).matches(IStatus.ERROR)) {
-			T prop1 = createCorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, IProposalRelevance.RENAME_TYPE);
-			if( prop1 != null )
+			T prop1= createCorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, IProposalRelevance.RENAME_TYPE);
+			if (prop1 != null)
 				proposals.add(prop1);
 		}
 
@@ -121,7 +121,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 				// rename CU
 				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, BasicElementLabels.getResourceName(newCUName));
-				T p2 = createRenameCUProposal(label, change, IProposalRelevance.RENAME_CU);
+				T p2= createRenameCUProposal(label, change, IProposalRelevance.RENAME_CU);
 				if( p2 != null )
 					proposals.add(p2);
 			}
@@ -139,8 +139,8 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		// correct package declaration
 		int relevance= cu.getPackageDeclarations().length == 0 ? IProposalRelevance.MISSING_PACKAGE_DECLARATION : IProposalRelevance.CORRECT_PACKAGE_DECLARATION; // bug 38357
 		if (CorrectPackageDeclarationProposalCore.isValidProposal(cu)) {
-			T p1 = createCorrectPackageDeclarationProposal(cu, problem, relevance);
-			if( p1 != null )
+			T p1= createCorrectPackageDeclarationProposal(cu, problem, relevance);
+			if (p1 != null)
 				proposals.add(p1);
 		}
 
@@ -164,8 +164,8 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			composite.add(new CreatePackageChange(newPack));
 			composite.add(new MoveCompilationUnitChange(cu, newPack));
 
-			T p1 = createMoveToNewPackageProposal(label, composite, IProposalRelevance.MOVE_CU_TO_PACKAGE);
-			if( p1 != null )
+			T p1= createMoveToNewPackageProposal(label, composite, IProposalRelevance.MOVE_CU_TO_PACKAGE);
+			if (p1 != null)
 				proposals.add(p1);
 		}
 	}
@@ -182,14 +182,14 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 			T proposal= createRemoveUnusedImportProposal(fix, new UnusedCodeCleanUp(options), IProposalRelevance.REMOVE_UNUSED_IMPORT, context);
-			if( proposal != null )
+			if (proposal != null)
 				proposals.add(proposal);
 		}
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_organizeimports_description;
-		T proposal = createOrganizeImportsProposal(name, null, cu, IProposalRelevance.ORGANIZE_IMPORTS);
-		if( proposal != null )
+		T proposal= createOrganizeImportsProposal(name, null, cu, IProposalRelevance.ORGANIZE_IMPORTS);
+		if (proposal != null)
 			proposals.add(proposal);
 	}
 
@@ -200,15 +200,14 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 
 	public void addProjectSetupFixProposals(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals) {
-		T prop = createProjectSetupFixProposal(context, problem, missingType, proposals);
-		if( prop != null ) {
+		T prop= createProjectSetupFixProposal(context, problem, missingType, proposals);
+		if (prop != null) {
 			proposals.add(prop);
 		}
 	}
 	public abstract T createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals);
 
 	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
-	// TODO: clean this up. Circular deps in classes made it hard to untangle
 	public abstract boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException;
 
 
@@ -256,8 +255,8 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			if (enablePreviews) {
 				label2= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_combine_two_quickfixes, new String[] {label2, CorrectionMessages.PreviewFeaturesSubProcessor_enable_preview_features_workspace});
 			}
-			T p1 = createChangeToRequiredCompilerComplianceProposal(label2, project, true, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_WORKSPACE_COMPLIANCE);
-			if( p1 != null )
+			T p1= createChangeToRequiredCompilerComplianceProposal(label2, project, true, requiredVersion, enablePreviews, IProposalRelevance.CHANGE_WORKSPACE_COMPLIANCE);
+			if (p1 != null)
 				proposals.add(p1);
 		}
 	}
@@ -279,23 +278,23 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		IProject project= context.getCompilationUnit().getJavaProject().getProject();
 		String label= CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
 		T proposal= createOpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_BUILD_PATH, null);
-		if( proposal != null )
+		if (proposal != null)
 			proposals.add(proposal);
 	}
 
 	public void addAccessRulesProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		IBinding referencedElement= null;
 		ASTNode node= problem.getCoveredNode(context.getASTRoot());
-		if (node instanceof Type) {
-			referencedElement= ((Type) node).resolveBinding();
-		} else if (node instanceof Name) {
-			referencedElement= ((Name) node).resolveBinding();
+		if (node instanceof Type type) {
+			referencedElement= type.resolveBinding();
+		} else if (node instanceof Name name) {
+			referencedElement= name.resolveBinding();
 		}
 		if (referencedElement != null && canModifyAccessRules(referencedElement)) {
 			IProject project= context.getCompilationUnit().getJavaProject().getProject();
 			String label= CorrectionMessages.ReorgCorrectionsSubProcessor_accessrules_description;
 			T proposal= createOpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_ACCESS_RULES, referencedElement);
-			if( proposal != null )
+			if (proposal != null)
 				proposals.add(proposal);
 		}
 	}

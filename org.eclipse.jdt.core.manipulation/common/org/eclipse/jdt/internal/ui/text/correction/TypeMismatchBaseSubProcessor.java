@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,10 +85,9 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		AST ast= astRoot.getAST();
 
 		ASTNode selectedNode= problem.getCoveredNode(astRoot);
-		if (!(selectedNode instanceof Expression)) {
+		if (!(selectedNode instanceof Expression nodeToCast)) {
 			return;
 		}
-		Expression nodeToCast= (Expression) selectedNode;
 		Name receiverNode= null;
 		ITypeBinding castTypeBinding= null;
 
@@ -101,10 +100,10 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 					nodeToCast= assign.getRightHandSide();
 				}
 				castTypeBinding= assign.getLeftHandSide().resolveTypeBinding();
-				if (leftHandSide instanceof Name) {
-					receiverNode= (Name) leftHandSide;
-				} else if (leftHandSide instanceof FieldAccess) {
-					receiverNode= ((FieldAccess) leftHandSide).getName();
+				if (leftHandSide instanceof Name name2) {
+					receiverNode= name2;
+				} else if (leftHandSide instanceof FieldAccess fieldAccess) {
+					receiverNode= fieldAccess.getName();
 				}
 				break;
 			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
@@ -133,8 +132,8 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
-		if (currBinding == null && nodeToCast instanceof MethodInvocation) {
-			IMethodBinding methodBinding= ((MethodInvocation) nodeToCast).resolveMethodBinding();
+		if (currBinding == null && nodeToCast instanceof MethodInvocation methodInvoc) {
+			IMethodBinding methodBinding= methodInvoc.resolveMethodBinding();
 			if (methodBinding != null) {
 				currBinding= methodBinding.getReturnType();
 			}
@@ -146,7 +145,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 				ITypeBinding nodeToCastTypeBinding= nodeToCast.resolveTypeBinding();
 				String label0= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changetooptionalempty_description, nodeToCast.toString());
 				T prop1= createOptionalProposal(label0, cu, nodeToCast, IProposalRelevance.CREATE_EMPTY_OPTIONAL, OptionalCorrectionProposalCore.OPTIONAL_EMPTY);
-				if( prop1 != null )
+				if (prop1 != null)
 					proposals.add(prop1);
 				ITypeBinding[] typeArguments= castTypeBinding.getTypeArguments();
 				boolean wrapAll= false;
@@ -159,12 +158,12 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 				if (wrapAll) {
 					String label1= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changetooptionalof_description, nodeToCast.toString());
 					T prop2= createOptionalProposal(label1, cu, nodeToCast, IProposalRelevance.CREATE_OPTIONAL, OptionalCorrectionProposalCore.OPTIONAL_OF);
-					if( prop2 != null )
+					if (prop2 != null)
 						proposals.add(prop2);
 					if (!nodeToCastTypeBinding.isPrimitive()) {
 						String label2= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changetooptionalofnullable_description, nodeToCast.toString());
 						T prop3= createOptionalProposal(label2, cu, nodeToCast, IProposalRelevance.CREATE_OPTIONAL_OF_NULLABLE, OptionalCorrectionProposalCore.OPTIONAL_OF_NULLABLE);
-						if( prop3 != null )
+						if (prop3 != null)
 							proposals.add(prop3);
 					}
 				}
@@ -189,10 +188,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		// change method return statement to actual type
 		if (!nullOrVoid && isTypeReturned(nodeToCast)) {
 			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-			if (decl instanceof MethodDeclaration) {
-				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
-
-
+			if (decl instanceof MethodDeclaration methodDeclaration) {
 				currBinding= Bindings.normalizeTypeBinding(currBinding);
 				if (currBinding == null) {
 					currBinding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
@@ -232,7 +228,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			expression.setOperator(InfixExpression.Operator.NOT_EQUALS);
 			rewrite.replace(nodeToCast, expression, null);
 			T prop= createInsertNullCheckProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INSERT_NULL_CHECK);
-			if( prop != null )
+			if (prop != null)
 				proposals.add(prop);
 		}
 	}
@@ -287,9 +283,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		ICompilationUnit targetCu= null;
 		ITypeBinding declaringType= null;
 		IBinding callerBindingDecl= callerBinding;
-		if (callerBinding instanceof IVariableBinding) {
-			IVariableBinding variableBinding= (IVariableBinding) callerBinding;
-
+		if (callerBinding instanceof IVariableBinding variableBinding) {
 			if (variableBinding.isEnumConstant()) {
 				return;
 			}
@@ -303,14 +297,13 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 				}
 				declaringType= declaringClass.getTypeDeclaration();
 			}
-		} else if (callerBinding instanceof IMethodBinding) {
-			IMethodBinding methodBinding= (IMethodBinding) callerBinding;
+		} else if (callerBinding instanceof IMethodBinding methodBinding) {
 			if (!methodBinding.isConstructor()) {
 				declaringType= methodBinding.getDeclaringClass().getTypeDeclaration();
 				callerBindingDecl= methodBinding.getMethodDeclaration();
 			}
-		} else if (callerBinding instanceof ITypeBinding && nodeToCast.getLocationInParent() == SingleMemberAnnotation.TYPE_NAME_PROPERTY) {
-			declaringType= (ITypeBinding) callerBinding;
+		} else if (callerBinding instanceof ITypeBinding typeBinding2 && nodeToCast.getLocationInParent() == SingleMemberAnnotation.TYPE_NAME_PROPERTY) {
+			declaringType= typeBinding2;
 			callerBindingDecl= Bindings.findMethodInType(declaringType, "value", (String[]) null); //$NON-NLS-1$
 			if (callerBindingDecl == null) {
 				return;
@@ -322,7 +315,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 		if (targetCu != null && ASTResolving.isUseableTypeInContext(castTypeBinding, callerBindingDecl, false)) {
 			T p= createChangeSenderTypeProposal(targetCu, callerBindingDecl, astRoot, castTypeBinding, isAssignedNode, relevance);
-			if( p != null )
+			if (p != null)
 				proposals.add(p);
 		}
 
@@ -334,7 +327,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 				ICompilationUnit nodeCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
 				if (nodeCu != null && ASTResolving.isUseableTypeInContext(castTypeBinding, typeDecl, true)) {
 					T p2= createImplementInterfaceProposal(nodeCu, typeDecl, astRoot, castTypeBinding, relevance - 1);
-					if( p2 != null )
+					if (p2 != null)
 						proposals.add(p2);
 				}
 			}
@@ -352,7 +345,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 
 	public T collectCastProposals(String label, IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
-		if( label == null ) {
+		if (label == null ) {
 			String castType= BindingLabelProviderCore.getBindingLabel(castTypeBinding, JavaElementLabelsCore.ALL_DEFAULT);
 			if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 				label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType);
@@ -394,7 +387,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			overriddenReturnType= overriddenReturnType.getErasure();
 		}
 		T p1= createChangeIncompatibleReturnTypeProposal(cu, methodDecl, astRoot, overriddenReturnType, false, IProposalRelevance.CHANGE_RETURN_TYPE);
-		if( p1 != null)
+		if (p1 != null)
 			proposals.add(p1);
 
 		ICompilationUnit targetCu= cu;
@@ -406,7 +399,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, overridenDeclType);
 			if (targetCu != null && ASTResolving.isUseableTypeInContext(returnType, overriddenDecl, false)) {
 				T proposal= createChangeReturnTypeOfOverridden(targetCu, overriddenDecl, astRoot, returnType, false, IProposalRelevance.CHANGE_RETURN_TYPE_OF_OVERRIDDEN, overridenDeclType);
-				if( proposal != null ) {
+				if (proposal != null) {
 					proposals.add(proposal);
 				}
 			}
@@ -414,7 +407,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 	}
 
 	/*
-	 				if( proposal != null ) {
+	 				if (proposal != null) {
 					if (overridenDeclType.isInterface()) {
 						proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
 					} else {
@@ -430,10 +423,9 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 	public void collectIncompatibleThrowsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-		if (!(selectedNode instanceof MethodDeclaration)) {
+		if (!(selectedNode instanceof MethodDeclaration decl)) {
 			return;
 		}
-		MethodDeclaration decl= (MethodDeclaration) selectedNode;
 		IMethodBinding methodDeclBinding= decl.resolveBinding();
 		if (methodDeclBinding == null) {
 			return;
@@ -463,8 +455,8 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 				return;
 			}
 			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_removeexceptions_description, BasicElementLabels.getJavaElementName(methodDeclBinding.getName()));
-			T p1 = createChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, IProposalRelevance.REMOVE_EXCEPTIONS);
-			if( p1 != null )
+			T p1= createChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, IProposalRelevance.REMOVE_EXCEPTIONS);
+			if (p1 != null)
 				proposals.add(p1);
 		}
 
@@ -483,7 +475,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			String[] args= {  BasicElementLabels.getJavaElementName(declaringType.getName()), BasicElementLabels.getJavaElementName(overridden.getName()) };
 			String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addexceptions_description, args);
 			T p2= createChangeMethodSignatureProposal(label, targetCu, astRoot, overriddenDecl, null, changes, IProposalRelevance.ADD_EXCEPTIONS);
-			if( p2 != null )
+			if (p2 != null)
 				proposals.add(p2);
 		}
 	}
@@ -536,20 +528,20 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		ICompilationUnit cu= context.getCompilationUnit();
 		if (parameter.getName().getLength() == 0) {
 			SimpleName simpleName= null;
-			if (parameter.getType() instanceof SimpleType) {
-				SimpleType type= (SimpleType) parameter.getType();
-				if (type.getName() instanceof SimpleName) {
-					simpleName= (SimpleName) type.getName();
+			if (parameter.getType() instanceof SimpleType simpleType) {
+				SimpleType type= simpleType;
+				if (type.getName() instanceof SimpleName simpleName2) {
+					simpleName= simpleName2;
 				}
-			} else if (parameter.getType() instanceof NameQualifiedType) {
-				simpleName= ((NameQualifiedType) parameter.getType()).getName();
+			} else if (parameter.getType() instanceof NameQualifiedType nameQualifiedType) {
+				simpleName= nameQualifiedType.getName();
 			}
 			if (simpleName != null) {
 				String name= simpleName.getIdentifier();
 				int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
-				T p1 = createNewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance);
-				if( p1 != null )
+				T p1= createNewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance);
+				if (p1 != null)
 					proposals.add(p1);
 				return;
 			}
@@ -557,8 +549,8 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 
 		String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_incompatible_for_each_type_description, new String[] { BasicElementLabels.getJavaElementName(parameter.getName().getIdentifier()), BindingLabelProviderCore.getBindingLabel(expectedBinding, BindingLabelProviderCore.DEFAULT_TEXTFLAGS) });
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		T p2 = createIncompatibleForEachTypeProposal(label, cu, rewrite, IProposalRelevance.INCOMPATIBLE_FOREACH_TYPE, astRoot, ast, expectedBinding, selectedNode, parameter);
-		if( p2 != null )
+		T p2= createIncompatibleForEachTypeProposal(label, cu, rewrite, IProposalRelevance.INCOMPATIBLE_FOREACH_TYPE, astRoot, ast, expectedBinding, selectedNode, parameter);
+		if (p2 != null)
 			proposals.add(p2);
 	}
 

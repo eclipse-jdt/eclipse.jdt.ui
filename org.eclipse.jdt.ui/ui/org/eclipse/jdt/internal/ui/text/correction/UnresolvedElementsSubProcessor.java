@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -222,7 +222,7 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 
 	@Override
 	protected ICommandAccess changeCorrectionProposalToT(final ChangeCorrectionProposalCore proposal, int uid) {
-		ChangeCorrectionProposal ret = new ChangeCorrectionProposal(proposal.getName(), null, proposal.getRelevance()) {
+		ChangeCorrectionProposal ret= new ChangeCorrectionProposal(proposal.getName(), null, proposal.getRelevance()) {
 			@Override
 			protected Change createChange() throws CoreException {
 				return proposal.getChange();

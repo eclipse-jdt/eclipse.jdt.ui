@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -120,15 +120,13 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode instanceof MethodDeclaration) {
-			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
-
+		if (selectedNode instanceof MethodDeclaration declaration) {
 			ASTRewrite rewrite= ASTRewrite.create(declaration.getAST());
 			rewrite.set(declaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.TRUE, null);
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_constrnamemethod_description;
-			T proposal = createMethodWithConstrNameProposal(label, cu, rewrite, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
-			if( proposal != null )
+			T proposal= createMethodWithConstrNameProposal(label, cu, rewrite, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
+			if (proposal != null)
 				proposals.add(proposal);
 		}
 	}
@@ -144,7 +142,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		}
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration && selectedNode.getNodeType() == ASTNode.RETURN_STATEMENT) {
+		if (decl instanceof MethodDeclaration methodDeclaration && selectedNode.getNodeType() == ASTNode.RETURN_STATEMENT) {
 			ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 			Expression expr= returnStatement.getExpression();
 			if (expr != null) {
@@ -157,8 +155,6 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 				if (binding.isWildcardType()) {
 					binding= ASTResolving.normalizeWildcardType(binding, true, ast);
 				}
-
-				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -191,8 +187,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					proposal.addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
 
 				}
-				T wrapped = voidMethodReturnsProposal1ToT(proposal);
-				if( wrapped != null )
+				T wrapped= voidMethodReturnsProposal1ToT(proposal);
+				if (wrapped != null)
 					proposals.add(wrapped);
 			}
 			ASTRewrite rewrite= ASTRewrite.create(decl.getAST());
@@ -200,7 +196,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_removereturn_description;
 			T proposal= createVoidMethodReturnsProposal2(label, cu, rewrite, IProposalRelevance.CHANGE_TO_RETURN);
-			if( proposal != null )
+			if (proposal != null)
 				proposals.add(proposal);
 		}
 	}
@@ -214,9 +210,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			return;
 		}
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration) {
-			MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
-
+		if (decl instanceof MethodDeclaration methodDeclaration) {
 			ReturnStatementCollector eval= new ReturnStatementCollector();
 			decl.accept(eval);
 
@@ -261,20 +255,20 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					proposal.addLinkedPositionProposal(key, binding);
 				}
 			}
-			T wrapped = missingReturnTypeProposal1ToT(proposal);
-			if( wrapped != null )
+			T wrapped= missingReturnTypeProposal1ToT(proposal);
+			if (wrapped != null)
 				proposals.add(wrapped);
 
 			// change to constructor
 			ASTNode parentType= ASTResolving.findParentType(decl);
-			if (parentType instanceof AbstractTypeDeclaration) {
+			if (parentType instanceof AbstractTypeDeclaration parentTypeDecl) {
 				boolean isInterface= parentType instanceof TypeDeclaration && ((TypeDeclaration) parentType).isInterface();
 				if (!isInterface) {
-					String constructorName= ((AbstractTypeDeclaration) parentType).getName().getIdentifier();
+					String constructorName= parentTypeDecl.getName().getIdentifier();
 					ASTNode nameNode= methodDeclaration.getName();
 					label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_wrongconstructorname_description, BasicElementLabels.getJavaElementName(constructorName));
-					T prop = createWrongConstructorNameProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
-					if( prop != null )
+					T prop= createWrongConstructorNameProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
+					if (prop != null)
 						proposals.add(prop);
 				}
 			}
@@ -290,20 +284,19 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		}
 		ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
 		// Lambda Expression can be in a MethodDeclaration or a Field Declaration
-		if (selectedNode instanceof LambdaExpression) {
-			T prop = createMissingReturnTypeInLambdaCorrectionProposal(cu, (LambdaExpression) selectedNode, existingStatement,
+		if (selectedNode instanceof LambdaExpression lambda) {
+			T prop= createMissingReturnTypeInLambdaCorrectionProposal(cu, lambda, existingStatement,
 					IProposalRelevance.MISSING_RETURN_TYPE);
-			if( prop != null )
+			if (prop != null)
 				proposals.add(prop);
 		} else {
 			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-			if (decl instanceof MethodDeclaration) {
-				MethodDeclaration methodDecl= (MethodDeclaration) decl;
+			if (decl instanceof MethodDeclaration methodDecl) {
 				Block block= methodDecl.getBody();
 				if (block == null) {
 					return;
 				}
-				T p = createMissingReturnTypeInMethodCorrectionProposal(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE);
+				T p= createMissingReturnTypeInMethodCorrectionProposal(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE);
 				proposals.add(p);
 
 				Type returnType= methodDecl.getReturnType2();
@@ -320,8 +313,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					}
 
 					String label= CorrectionMessages.ReturnTypeSubProcessor_changetovoid_description;
-					T proposal = changeReturnTypeToVoidProposal(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID);
-					if( proposal != null )
+					T proposal= changeReturnTypeToVoidProposal(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID);
+					if (proposal != null)
 						proposals.add(proposal);
 				}
 			}
@@ -332,21 +325,18 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-		if (!(selectedNode instanceof ReturnStatement)) {
+		if (!(selectedNode instanceof ReturnStatement returnStatement)) {
 			return;
 		}
-		ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 		Expression expression= returnStatement.getExpression();
 		if (expression == null) {
 			return;
 		}
 		ASTNode parent= returnStatement.getParent();
 		List<Statement> stmts= null;
-		if(parent instanceof Block) {
-			Block block= (Block) parent;
+		if(parent instanceof Block block) {
 			stmts= block.statements();
-		} else if (parent instanceof SwitchExpression) {
-			SwitchExpression switchExp= (SwitchExpression) parent;
+		} else if (parent instanceof SwitchExpression switchExp) {
 			stmts= switchExp.statements();
 		}
 		if (stmts !=  null) {
@@ -363,8 +353,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			rewrite.replace(returnStatement, yieldStatement, null);
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_changeReturnToYield_description;
-			T proposal = createReplaceReturnWithYieldStatementProposal(label, cu, rewrite, IProposalRelevance.REMOVE_ABSTRACT_MODIFIER);
-			if( proposal != null )
+			T proposal= createReplaceReturnWithYieldStatementProposal(label, cu, rewrite, IProposalRelevance.REMOVE_ABSTRACT_MODIFIER);
+			if (proposal != null)
 				proposals.add(proposal);
 		}
 	}
@@ -372,23 +362,21 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 	public void collectMethodReturnsVoidProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-		if (!(selectedNode instanceof ReturnStatement)) {
+		if (!(selectedNode instanceof ReturnStatement returnStatement)) {
 			return;
 		}
-		ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 		Expression expression= returnStatement.getExpression();
 		if (expression == null) {
 			return;
 		}
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration) {
-			MethodDeclaration methDecl= (MethodDeclaration) decl;
+		if (decl instanceof MethodDeclaration methDecl) {
 			Type retType= methDecl.getReturnType2();
 			if (retType == null || retType.resolveBinding() == null) {
 				return;
 			}
-			TypeMismatchBaseSubProcessor<T> sub = getTypeMismatchSubProcessor();
-			if( sub != null )
+			TypeMismatchBaseSubProcessor<T> sub= getTypeMismatchSubProcessor();
+			if (sub != null)
 				sub.collectChangeSenderTypeProposals(context, expression, retType.resolveBinding(), false, IProposalRelevance.METHOD_RETURNS_VOID, proposals);
 		}
 	}
