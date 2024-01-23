@@ -83,11 +83,13 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 			}
 			ModuleDeclaration moduleDecl= (ModuleDeclaration) node.getParent();
 			T proposal= addMissingModuleJavadocTagProposal(label, context.getCompilationUnit(), moduleDecl, node, IProposalRelevance.ADD_MISSING_TAG);
-			proposals.add(proposal);
+			if (proposal != null)
+				proposals.add(proposal);
 
 			String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
 			T addAllMissing= addAllMissingModuleJavadocTagsProposal(label2, context.getCompilationUnit(), moduleDecl, node, IProposalRelevance.ADD_ALL_MISSING_TAGS);
-			proposals.add(addAllMissing);
+			if (addAllMissing != null)
+				proposals.add(addAllMissing);
 		} else {
 			parentDeclaration= ASTResolving.findParentBodyDeclaration(node);
 			if (parentDeclaration == null) {
@@ -121,11 +123,13 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 				return;
 			}
 			T proposal= addMissingJavadocTagProposal(label, context.getCompilationUnit(), parentDeclaration, node, IProposalRelevance.ADD_MISSING_TAG);
-			proposals.add(proposal);
+			if (proposal != null)
+				proposals.add(proposal);
 
 			String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
 			T addAllMissing= addAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), parentDeclaration, IProposalRelevance.ADD_ALL_MISSING_TAGS);
-			proposals.add(addAllMissing);
+			if (addAllMissing != null)
+				proposals.add(addAllMissing);
 		}
 	}
 
@@ -174,7 +178,8 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 			label= CorrectionMessages.JavadocTagsSubProcessor_document_exception_description;
 		}
 		T proposal= addMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDecl, node, IProposalRelevance.DOCUMENT_UNUSED_ITEM);
-		proposals.add(proposal);
+		if (proposal != null)
+			proposals.add(proposal);
 	}
 
 	public void addMissingJavadocCommentProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
@@ -201,7 +206,9 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 					String.valueOf('\n'));
 			if (comment != null) {
 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description;
-				proposals.add(addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_MODULE, declaration.getStartPosition(), comment));
+				T p = addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_MODULE, declaration.getStartPosition(), comment);
+				if (p != null)
+					proposals.add(p);
 			}
 		} else {
 			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(node);
@@ -224,7 +231,9 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 				String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, overridden, String.valueOf('\n'));
 				if (string != null) {
 					String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description;
-					proposals.add(addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_METHOD, declaration.getStartPosition(), string));
+					T p = addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_METHOD, declaration.getStartPosition(), string);
+					if (p != null)
+						proposals.add(p);
 				}
 			} else if (declaration instanceof AbstractTypeDeclaration) {
 				String typeQualifiedName= Bindings.getTypeQualifiedName(binding);
@@ -254,7 +263,9 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 				String string= CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParamNames, params, String.valueOf('\n'));
 				if (string != null) {
 					String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_type_description;
-					proposals.add(addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_TYPE, declaration.getStartPosition(), string));
+					T p = addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_TYPE, declaration.getStartPosition(), string);
+					if (p != null)
+						proposals.add(p);
 				}
 			} else if (declaration instanceof FieldDeclaration) {
 				String comment= "/**\n *\n */\n"; //$NON-NLS-1$
@@ -267,14 +278,18 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 				}
 				if (comment != null) {
 					String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_field_description;
-					proposals.add(addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_FIELD, declaration.getStartPosition(), comment));
+					T p = addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_FIELD, declaration.getStartPosition(), comment);
+					if (p != null)
+						proposals.add(p);
 				}
 			} else if (declaration instanceof EnumConstantDeclaration) {
 				EnumConstantDeclaration enumDecl= (EnumConstantDeclaration) declaration;
 				String id= enumDecl.getName().getIdentifier();
 				String comment= CodeGeneration.getFieldComment(cu, binding.getName(), id, String.valueOf('\n'));
 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_enumconst_description;
-				proposals.add(addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_ENUM, declaration.getStartPosition(), comment));
+				T p = addJavadocCommentProposal(label, cu, IProposalRelevance.ADD_JAVADOC_ENUM, declaration.getStartPosition(), comment);
+				if (p != null)
+					proposals.add(p);
 			}
 		}
 	}
@@ -293,7 +308,9 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 		rewrite.remove(node, null);
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description;
-		proposals.add(createRemoveJavadocTagProposals(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_TAG));
+		T p = createRemoveJavadocTagProposals(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_TAG);
+		if (p != null)
+			proposals.add(p);
 	}
 
 
@@ -322,7 +339,8 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 			String label= Messages.format(CorrectionMessages.JavadocTagsSubProcessor_removeduplicatetag_description, ((TextElement) ((TagElement) node).fragments().get(0)).getText().trim());
 			T proposal= createRemoveDuplicateModuleJavadocTagProposal(label, context.getCompilationUnit(), start, length,
 					"", IProposalRelevance.REMOVE_TAG); //$NON-NLS-1$
-			proposals.add(proposal);
+			if (proposal != null)
+				proposals.add(proposal);
 		}
 	}
 
@@ -371,7 +389,8 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_qualifylinktoinner_description;
 		T proposal= createInvalidQualificationProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.QUALIFY_INNER_TYPE_NAME);
-		proposals.add(proposal);
+		if (proposal != null)
+			proposals.add(proposal);
 	}
 
 	protected abstract T createInvalidQualificationProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int qualifyInnerTypeName);
