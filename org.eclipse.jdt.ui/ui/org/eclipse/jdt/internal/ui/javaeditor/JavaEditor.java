@@ -1209,11 +1209,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		@Override
 		public void windowActivated(IWorkbenchWindow window) {
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
-				JavaCore.runReadOnly(this::windowActivatedCached);
+				windowActivated();
 			}
 		}
 
-		private void windowActivatedCached() {
+		private void windowActivated() {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 			ITypeRoot inputJavaElement= getInputJavaElement();
 			if (inputJavaElement != null) {
