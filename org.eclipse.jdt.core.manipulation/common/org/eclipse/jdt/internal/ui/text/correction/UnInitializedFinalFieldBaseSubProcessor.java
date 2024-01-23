@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -67,11 +67,11 @@ public abstract class UnInitializedFinalFieldBaseSubProcessor<T> {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 
 			T p1 = createInitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposalCore.UPDATE_AT_CONSTRUCTOR);
-			if( p1 != null )
+			if (p1 != null)
 				proposals.add(p1);
 
 			T p2= conditionallyCreateInitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposalCore.UPDATE_CONSTRUCTOR_NEW_PARAMETER);
-			if( p2 != null ) {
+			if (p2 != null) {
 				proposals.add(p2);
 			}
 
@@ -89,7 +89,7 @@ public abstract class UnInitializedFinalFieldBaseSubProcessor<T> {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetDecl);
 
 			T p3= createInitializeFinalFieldProposal(problem, targetCU, node, targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR);
-			if( p3 != null )
+			if (p3 != null)
 				proposals.add(p3);
 		}
 	}
