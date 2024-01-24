@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1067,8 +1067,12 @@ public class LocalCorrectionsSubProcessor {
 
 		CompilationUnit root= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(root);
-		if (selectedNode instanceof MethodDeclaration) {
-			selectedNode= ((MethodDeclaration) selectedNode).getName();
+		if (selectedNode instanceof MethodDeclaration methodDeclaration) {
+			if (methodDeclaration.isConstructor()) {
+				addRemoveProposal(context, methodDeclaration, proposals);
+				return;
+			}
+			selectedNode= methodDeclaration.getName();
 		}
 		if (!(selectedNode instanceof SimpleName)) {
 			return;

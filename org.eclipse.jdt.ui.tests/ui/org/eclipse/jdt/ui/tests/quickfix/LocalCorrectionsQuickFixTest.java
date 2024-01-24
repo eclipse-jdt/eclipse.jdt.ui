@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13184,6 +13184,40 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[3]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testDuplicateConstructor() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1123
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        System.out.println(\"first\");\n");
+		buf.append("    }\n");
+		buf.append("    public E() {\n");
+		buf.append("        System.out.println(\"second\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        System.out.println(\"second\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
