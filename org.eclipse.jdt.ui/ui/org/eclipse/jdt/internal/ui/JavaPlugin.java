@@ -539,8 +539,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			// must add here to guarantee that it is the first in the listener list
 
 			OpenTypeHistory.shutdown();
-
-			JavaManipulation.setPreferenceNodeId(null);
 		} finally {
 			super.stop(context);
 		}
