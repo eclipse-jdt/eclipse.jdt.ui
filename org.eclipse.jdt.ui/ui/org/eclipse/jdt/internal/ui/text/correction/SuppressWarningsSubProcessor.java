@@ -62,8 +62,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class SuppressWarningsSubProcessor extends SuppressWarningsSubProcessorCore {
 
-	static final String ADD_SUPPRESSWARNINGS_ID= SuppressWarningsSubProcessorCore.ADD_SUPPRESSWARNINGS_ID;
-
 	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
 		if (problem.isError() && !JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
 			return;
