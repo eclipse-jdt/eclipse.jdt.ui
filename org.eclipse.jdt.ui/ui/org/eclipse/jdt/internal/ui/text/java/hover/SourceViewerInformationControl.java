@@ -376,6 +376,7 @@ public class SourceViewerInformationControl
 	@Override
 	public void setInput(Object input) {
 		String content= null;
+		boolean doSetInformation= true;
 		if (input instanceof String) {
 			content= (String) input;
 		} else if (input instanceof JavaSourceInformationInput) {
@@ -388,13 +389,14 @@ public class SourceViewerInformationControl
 					fSemanticHighlightingManager.getReconciler().refresh(); // triggers semantic coloring job
 				} else {
 					setContentFrom(fSemanticHighlightingViewer);
+					doSetInformation= false;
 				}
 			}
 		}
 
-		if (fViewer.getDocument() == null) {
+		if (doSetInformation) {
 			setInformation(content);
-		} // else document already set to content of fSemanticHighlightingViewer
+		}
 
 		if (fShell != null && !fShell.isDisposed()) {
 			Display display= fShell.getDisplay();
