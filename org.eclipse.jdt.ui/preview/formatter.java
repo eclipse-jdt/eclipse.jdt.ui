@@ -137,6 +137,10 @@ class Example {
 			case 0:        fField.set(0);        break;      
 			case 1: {        break;        }      default:        fField.reset();   
 		}  
+		switch(p) {
+			case 0 -> { fField.set(0); }
+			default -> { fField.reset(); }
+		}
 	}}
 //--PREVIEW--END--section-braces
 }
