@@ -62,6 +62,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_braces_pref_array_initializer;
 	public static String FormatterModifyDialog_braces_pref_blocks;
 	public static String FormatterModifyDialog_braces_pref_blocks_in_case;
+	public static String FormatterModifyDialog_braces_pref_blocks_in_case_after_arrow;
 	public static String FormatterModifyDialog_braces_pref_class_declaration;
 	public static String FormatterModifyDialog_braces_pref_constructor_declaration;
 	public static String FormatterModifyDialog_braces_pref_enum_declaration;
