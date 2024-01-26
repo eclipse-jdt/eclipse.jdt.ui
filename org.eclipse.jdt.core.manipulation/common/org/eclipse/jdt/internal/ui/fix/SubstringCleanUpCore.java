@@ -49,7 +49,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>The expression must be passive.</li>
  * </ul>
  */
-public class SubstringCleanUpCore extends AbstractMultiFixCore {
+public class SubstringCleanUpCore extends AbstractMultiFix {
 	public SubstringCleanUpCore() {
 		this(Collections.emptyMap());
 	}

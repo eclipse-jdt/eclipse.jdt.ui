@@ -31,9 +31,20 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -47,14 +58,22 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
+
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.UpdateProperty;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.tests.core.rules.Java13ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.AbstractCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
@@ -62,18 +81,6 @@ import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.tests.core.rules.Java13ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
 
 public class CleanUpTest extends CleanUpTestCase {
 	@Rule
@@ -10597,16 +10604,16 @@ public class CleanUpTest extends CleanUpTestCase {
 		String previewFooter= "" //
 				+ "    }\n" //
 				+ "}\n";
-		AbstractCleanUpCore cleanUp= new PrimitiveRatherThanWrapperCleanUpCore() {
+		AbstractCleanUp cleanUp= new PrimitiveRatherThanWrapperCleanUpCore() {
 			@Override
-			protected boolean isEnabled(String key) {
+			public boolean isEnabled(String key) {
 				return false;
 			}
 		};
 		String given= previewHeader + cleanUp.getPreview() + previewFooter;
 		cleanUp= new PrimitiveRatherThanWrapperCleanUpCore() {
 			@Override
-			protected boolean isEnabled(String key) {
+			public boolean isEnabled(String key) {
 				return true;
 			}
 		};
@@ -23816,16 +23823,16 @@ public class CleanUpTest extends CleanUpTestCase {
 		String previewFooter= "" //
 				+ "    }\n" //
 				+ "}\n";
-		AbstractCleanUpCore cleanUp= new PlainReplacementCleanUpCore() {
+		AbstractCleanUp cleanUp= new PlainReplacementCleanUpCore() {
 			@Override
-			protected boolean isEnabled(String key) {
+			public boolean isEnabled(String key) {
 				return false;
 			}
 		};
 		String given= previewHeader + cleanUp.getPreview() + previewFooter;
 		cleanUp= new PlainReplacementCleanUpCore() {
 			@Override
-			protected boolean isEnabled(String key) {
+			public boolean isEnabled(String key) {
 				return true;
 			}
 		};

@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class InvertEqualsCleanUpCore extends AbstractCleanUpCore {
+public class InvertEqualsCleanUpCore extends AbstractCleanUp {
 	public InvertEqualsCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

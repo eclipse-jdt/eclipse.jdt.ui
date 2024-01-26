@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class RedundantComparatorCleanUpCore extends AbstractCleanUpCore {
+public class RedundantComparatorCleanUpCore extends AbstractCleanUp {
 	public RedundantComparatorCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

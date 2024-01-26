@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * Create fixes which can remove unused code
  * see org.eclipse.jdt.internal.corext.fix.UnusedCodeFix
  */
-public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
+public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 
 	public UnusedCodeCleanUpCore(Map<String, String> options) {
 		super(options);

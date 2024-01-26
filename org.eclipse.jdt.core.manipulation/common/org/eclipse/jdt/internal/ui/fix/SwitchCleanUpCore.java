@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class SwitchCleanUpCore extends AbstractCleanUpCore {
+public class SwitchCleanUpCore extends AbstractCleanUp {
 	public SwitchCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

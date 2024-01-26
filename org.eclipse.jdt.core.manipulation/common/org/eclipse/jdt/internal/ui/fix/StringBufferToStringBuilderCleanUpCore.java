@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class StringBufferToStringBuilderCleanUpCore extends AbstractCleanUpCore {
+public class StringBufferToStringBuilderCleanUpCore extends AbstractCleanUp {
 
 	public StringBufferToStringBuilderCleanUpCore(final Map<String, String> options) {
 		super(options);

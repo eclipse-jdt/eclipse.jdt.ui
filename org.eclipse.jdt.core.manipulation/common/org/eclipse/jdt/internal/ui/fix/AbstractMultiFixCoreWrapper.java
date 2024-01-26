@@ -22,11 +22,11 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * An extension of {@link AbstractCleanUpCoreWrapper} for cases where the wrapped
- * cleanup extends {@link AbstractMultiFixCore}
+ * cleanup extends {@link AbstractMultiFix}
  *
  * @param <T> The type of the cleanup this class forwards to.
  */
-public class AbstractMultiFixCoreWrapper<T extends AbstractMultiFixCore> extends AbstractCleanUpCoreWrapper<T> implements IMultiFix {
+public class AbstractMultiFixCoreWrapper<T extends AbstractMultiFix> extends AbstractCleanUpCoreWrapper<T> implements IMultiFix {
 
 	protected AbstractMultiFixCoreWrapper(Map<String, String> settings, T wrapped) {
 		super(settings, wrapped);
