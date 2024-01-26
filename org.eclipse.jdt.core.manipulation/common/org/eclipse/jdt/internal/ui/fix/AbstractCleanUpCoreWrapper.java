@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
  *
  * @param <T> The type of the cleanup this class forwards to.
  */
-public class AbstractCleanUpCoreWrapper<T extends AbstractCleanUpCore> extends AbstractCleanUp {
+public class AbstractCleanUpCoreWrapper<T extends AbstractCleanUp> extends AbstractCleanUp {
 	protected final T cleanUpCore;
 
 	protected AbstractCleanUpCoreWrapper(Map<String, String> settings, T wrapped) {

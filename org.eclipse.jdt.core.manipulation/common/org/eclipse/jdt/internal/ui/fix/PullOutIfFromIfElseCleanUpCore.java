@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class PullOutIfFromIfElseCleanUpCore extends AbstractCleanUpCore {
+public class PullOutIfFromIfElseCleanUpCore extends AbstractCleanUp {
 	public PullOutIfFromIfElseCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

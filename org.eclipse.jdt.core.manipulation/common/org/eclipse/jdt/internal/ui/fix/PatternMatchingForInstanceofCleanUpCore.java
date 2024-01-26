@@ -29,7 +29,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class PatternMatchingForInstanceofCleanUpCore extends AbstractCleanUpCore {
+public class PatternMatchingForInstanceofCleanUpCore extends AbstractCleanUp {
 	public PatternMatchingForInstanceofCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

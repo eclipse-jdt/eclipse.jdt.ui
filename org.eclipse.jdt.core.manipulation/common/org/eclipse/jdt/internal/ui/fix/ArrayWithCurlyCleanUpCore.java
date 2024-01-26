@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class ArrayWithCurlyCleanUpCore extends AbstractCleanUpCore {
+public class ArrayWithCurlyCleanUpCore extends AbstractCleanUp {
 	public ArrayWithCurlyCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

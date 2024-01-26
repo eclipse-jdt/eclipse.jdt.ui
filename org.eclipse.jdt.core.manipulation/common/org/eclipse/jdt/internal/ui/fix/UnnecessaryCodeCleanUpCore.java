@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
+public class UnnecessaryCodeCleanUpCore extends AbstractMultiFix {
 
 	public UnnecessaryCodeCleanUpCore(Map<String, String> options) {
 		super(options);

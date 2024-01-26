@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
+public class LambdaExpressionsCleanUpCore extends AbstractCleanUp {
 
 	public LambdaExpressionsCleanUpCore(Map<String, String> options) {
 		super(options);

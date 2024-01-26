@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class BooleanValueRatherThanComparisonCleanUpCore extends AbstractCleanUpCore {
+public class BooleanValueRatherThanComparisonCleanUpCore extends AbstractCleanUp {
 	public BooleanValueRatherThanComparisonCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

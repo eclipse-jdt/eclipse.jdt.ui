@@ -72,7 +72,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * using the <code>var</code> keyword.</li>
  * </ul>
  */
-public class VarCleanUpCore extends AbstractMultiFixCore {
+public class VarCleanUpCore extends AbstractMultiFix {
 	public VarCleanUpCore() {
 		this(Collections.emptyMap());
 	}

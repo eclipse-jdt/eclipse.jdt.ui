@@ -34,7 +34,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
-public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
+public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFix {
 
 	public InlineDeprecatedMethodCleanUpCore() {
 		this(Collections.emptyMap());

@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class DoWhileRatherThanWhileCleanUpCore extends AbstractCleanUpCore {
+public class DoWhileRatherThanWhileCleanUpCore extends AbstractCleanUp {
 	public DoWhileRatherThanWhileCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

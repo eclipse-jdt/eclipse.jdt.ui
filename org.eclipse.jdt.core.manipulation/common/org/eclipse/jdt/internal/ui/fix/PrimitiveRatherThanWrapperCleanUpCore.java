@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class PrimitiveRatherThanWrapperCleanUpCore extends AbstractCleanUpCore {
+public class PrimitiveRatherThanWrapperCleanUpCore extends AbstractCleanUp {
 	public PrimitiveRatherThanWrapperCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}

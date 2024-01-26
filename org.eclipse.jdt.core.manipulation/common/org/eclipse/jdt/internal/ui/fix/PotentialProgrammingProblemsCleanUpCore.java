@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFixCore {
+public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFix {
 
 	public PotentialProgrammingProblemsCleanUpCore(Map<String, String> options) {
 		super(options);

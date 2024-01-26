@@ -55,7 +55,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that removes a String instance from a String literal.
  */
-public class NoStringCreationCleanUpCore extends AbstractMultiFixCore {
+public class NoStringCreationCleanUpCore extends AbstractMultiFix {
 	public NoStringCreationCleanUpCore() {
 		this(Collections.emptyMap());
 	}

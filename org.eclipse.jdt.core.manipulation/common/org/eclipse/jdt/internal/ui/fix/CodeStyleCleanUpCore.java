@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * Creates fixes which can resolve code style issues
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore
  */
-public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
+public class CodeStyleCleanUpCore extends AbstractMultiFix {
 
 	public CodeStyleCleanUpCore() {
 	}

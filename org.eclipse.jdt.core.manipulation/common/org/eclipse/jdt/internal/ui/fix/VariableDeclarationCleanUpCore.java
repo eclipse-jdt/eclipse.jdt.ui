@@ -29,7 +29,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class VariableDeclarationCleanUpCore extends AbstractCleanUpCore {
+public class VariableDeclarationCleanUpCore extends AbstractCleanUp {
 
 	public VariableDeclarationCleanUpCore(Map<String, String> options) {
 		super(options);
