@@ -49,6 +49,6 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 
 	@Override
 	public LinkedProposalModelCore getLinkedPositions() {
-		return super.getLinkedPositionsCore();
+		return super.getLinkedPositions();
 	}
 }

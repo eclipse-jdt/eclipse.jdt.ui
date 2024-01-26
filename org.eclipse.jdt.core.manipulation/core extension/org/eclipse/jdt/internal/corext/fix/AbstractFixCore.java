@@ -16,8 +16,10 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public abstract class AbstractFixCore implements IProposableFix, ILinkedFixCore {
+
+public abstract class AbstractFixCore implements IProposableFix, ILinkedFix, ICleanUpFix {
 
 	private final String fDisplayString;
 
@@ -36,7 +38,7 @@ public abstract class AbstractFixCore implements IProposableFix, ILinkedFixCore 
 	}
 
 	@Override
-	public LinkedProposalModelCore getLinkedPositionsCore() {
+	public LinkedProposalModelCore getLinkedPositions() {
 		return null;
 	}
 
