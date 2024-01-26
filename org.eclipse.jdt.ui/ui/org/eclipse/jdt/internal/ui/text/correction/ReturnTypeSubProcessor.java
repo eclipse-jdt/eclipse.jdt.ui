@@ -15,8 +15,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -67,19 +65,6 @@ public class ReturnTypeSubProcessor extends ReturnTypeBaseSubProcessor<ICommandA
 
 
 
-	private static Image findImage(int id) {
-		switch( id) {
-			case 100:
-			case 210:
-			case 220:
-			case 310:
-			case 430:
-			case 510:
-				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		}
-		return null;
-	}
-
 	@Override
 	protected TypeMismatchBaseSubProcessor<ICommandAccess> getTypeMismatchSubProcessor() {
 		return new TypeMismatchSubProcessor();
@@ -87,12 +72,12 @@ public class ReturnTypeSubProcessor extends ReturnTypeBaseSubProcessor<ICommandA
 
 	@Override
 	protected ICommandAccess linkedCorrectionProposal1ToT(LinkedCorrectionProposalCore proposal, int uid) {
-		return new LinkedCorrectionProposal(proposal, findImage(uid));
+		return new LinkedCorrectionProposal(proposal, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
 	@Override
 	protected ICommandAccess rewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore p, int uid) {
-		return new ASTRewriteCorrectionProposal(p, findImage(uid));
+		return new ASTRewriteCorrectionProposal(p, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
 	@Override

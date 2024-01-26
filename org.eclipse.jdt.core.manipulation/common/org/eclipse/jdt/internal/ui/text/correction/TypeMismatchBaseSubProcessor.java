@@ -233,16 +233,6 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createInsertNullCheckProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int insertNullCheck);
-	/*
- 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.INSERT_NULL_CHECK, image));
-	 */
-
-	protected abstract T createChangeReturnTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int changeMethodReturnType, ITypeBinding currBinding, AST ast, CompilationUnit astRoot, MethodDeclaration methodDeclaration, BodyDeclaration decl);
-
-	protected abstract T createOptionalProposal(String label0, ICompilationUnit cu, Expression nodeToCast, int relevance, int optionalType);
-
 	private static boolean isTypeReturned(final Expression nodeToCast) {
 		int parentNodeType= nodeToCast.getParent().getNodeType();
 
@@ -334,11 +324,6 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createImplementInterfaceProposal(ICompilationUnit nodeCu, ITypeBinding typeDecl, CompilationUnit astRoot, ITypeBinding castTypeBinding, int relevance);
-
-	protected abstract T createChangeSenderTypeProposal(ICompilationUnit targetCu, IBinding callerBindingDecl, CompilationUnit astRoot, ITypeBinding castTypeBinding, boolean isAssignedNode,
-			int relevance);
-
 	public T collectCastProposals(IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		return collectCastProposals(null, context, castTypeBinding, nodeToCast, relevance);
 	}
@@ -355,8 +340,6 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 		return createCastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}
-
-	protected abstract T createCastCorrectionProposal(String label, ICompilationUnit cu, Expression nodeToCast, ITypeBinding castTypeBinding, int relevance);
 
 	public void collectIncompatibleReturnTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
@@ -414,12 +397,6 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 						proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
 					}
 	 */
-	protected abstract T createChangeReturnTypeOfOverridden(ICompilationUnit targetCu, IMethodBinding overriddenDecl, CompilationUnit astRoot, ITypeBinding returnType, boolean b,
-			int changeReturnTypeOfOverridden, ITypeBinding overridenDeclType);
-
-	protected abstract T createChangeIncompatibleReturnTypeProposal(ICompilationUnit cu, IMethodBinding methodDecl, CompilationUnit astRoot, ITypeBinding overriddenReturnType, boolean b,
-			int changeReturnType);
-
 	public void collectIncompatibleThrowsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -479,9 +456,6 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 				proposals.add(p2);
 		}
 	}
-
-	protected abstract T createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, Object object, ChangeDescription[] changes,
-			int removeExceptions);
 
 	private static boolean isDeclaredException(ITypeBinding curr, ITypeBinding[] declared) {
 		for (ITypeBinding d : declared) {
@@ -554,18 +528,29 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			proposals.add(p2);
 	}
 
+	protected abstract T createInsertNullCheckProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int insertNullCheck);
+
+	protected abstract T createChangeReturnTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int changeMethodReturnType, ITypeBinding currBinding, AST ast, CompilationUnit astRoot, MethodDeclaration methodDeclaration, BodyDeclaration decl);
+
+	protected abstract T createOptionalProposal(String label0, ICompilationUnit cu, Expression nodeToCast, int relevance, int optionalType);
+
+	protected abstract T createImplementInterfaceProposal(ICompilationUnit nodeCu, ITypeBinding typeDecl, CompilationUnit astRoot, ITypeBinding castTypeBinding, int relevance);
+
+	protected abstract T createChangeSenderTypeProposal(ICompilationUnit targetCu, IBinding callerBindingDecl, CompilationUnit astRoot, ITypeBinding castTypeBinding, boolean isAssignedNode,
+			int relevance);
+
+	protected abstract T createCastCorrectionProposal(String label, ICompilationUnit cu, Expression nodeToCast, ITypeBinding castTypeBinding, int relevance);
+
+	protected abstract T createChangeReturnTypeOfOverridden(ICompilationUnit targetCu, IMethodBinding overriddenDecl, CompilationUnit astRoot, ITypeBinding returnType, boolean b,
+			int changeReturnTypeOfOverridden, ITypeBinding overridenDeclType);
+
+	protected abstract T createChangeIncompatibleReturnTypeProposal(ICompilationUnit cu, IMethodBinding methodDecl, CompilationUnit astRoot, ITypeBinding overriddenReturnType, boolean b,
+			int changeReturnType);
+
+	protected abstract T createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, Object object, ChangeDescription[] changes,
+			int removeExceptions);
+
 	protected abstract T createNewVariableCorrectionProposal(String label, ICompilationUnit cu, int local, SimpleName simpleName, Object object, int relevance);
 
 	protected abstract T createIncompatibleForEachTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int incompatibleForeachType, CompilationUnit astRoot, AST ast, ITypeBinding expectedBinding, ASTNode selectedNode, SingleVariableDeclaration parameter);
-	/*
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.INCOMPATIBLE_FOREACH_TYPE, image);
-
-		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(selectedNode), importRewrite);
-		Type newType= importRewrite.addImport(expectedBinding, ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE);
-		rewrite.replace(parameter.getType(), newType, null);
-
-		return null;
-	}
-*/
 }

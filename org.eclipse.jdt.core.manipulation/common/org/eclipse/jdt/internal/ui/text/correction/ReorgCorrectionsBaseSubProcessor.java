@@ -128,9 +128,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		}
 	}
 
-	public abstract T createRenameCUProposal(String label, RenameCompilationUnitChange change, int renameCu);
-
-	public abstract T createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int renameType);
 
 	public void addWrongPackageDeclNameProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -170,11 +167,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore problem, int relevance);
-
-
-	protected abstract T createMoveToNewPackageProposal(String label, CompositeChange composite, int moveCuToPackage);
-
 
 	public void addRemoveImportStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		IProposableFix fix= UnusedCodeFixCore.createRemoveUnusedImportFix(context.getASTRoot(), problem);
@@ -193,11 +185,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			proposals.add(proposal);
 	}
 
-	protected abstract T createOrganizeImportsProposal(String name, Object object, ICompilationUnit cu, int organizeImports);
-
-
-	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int removeUnusedImport, IInvocationContextCore context);
-
 
 	public void addProjectSetupFixProposals(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals) {
 		T prop= createProjectSetupFixProposal(context, problem, missingType, proposals);
@@ -205,10 +192,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			proposals.add(prop);
 		}
 	}
-	public abstract T createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals);
-
-	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
-	public abstract boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException;
 
 
 	/**
@@ -261,12 +244,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean b, String requiredVersion, int changeProjectCompliance);
-
-
-	protected abstract T createChangeToRequiredCompilerComplianceProposal(String label2, IJavaProject project, boolean b, String requiredVersion, boolean enablePreviews,
-			int changeWorkspaceCompliance);
-
 
 	/**
 	 * Adds a proposal that opens the build path dialog
@@ -299,9 +276,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createOpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedElement);
-
-
 	private static boolean canModifyAccessRules(IBinding binding) {
 		IJavaElement element= binding.getJavaElement();
 		if (element == null)
@@ -327,5 +301,29 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		}
 		return false;
 	}
+
+	public abstract T createRenameCUProposal(String label, RenameCompilationUnitChange change, int renameCu);
+
+	public abstract T createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int renameType);
+
+	protected abstract T createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore problem, int relevance);
+
+	protected abstract T createMoveToNewPackageProposal(String label, CompositeChange composite, int moveCuToPackage);
+
+	protected abstract T createOrganizeImportsProposal(String name, Object object, ICompilationUnit cu, int organizeImports);
+
+	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int removeUnusedImport, IInvocationContextCore context);
+
+	public abstract T createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals);
+
+	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
+	public abstract boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException;
+
+	protected abstract T createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean b, String requiredVersion, int changeProjectCompliance);
+
+	protected abstract T createChangeToRequiredCompilerComplianceProposal(String label2, IJavaProject project, boolean b, String requiredVersion, boolean enablePreviews,
+			int changeWorkspaceCompliance);
+
+	protected abstract T createOpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedElement);
 
 }

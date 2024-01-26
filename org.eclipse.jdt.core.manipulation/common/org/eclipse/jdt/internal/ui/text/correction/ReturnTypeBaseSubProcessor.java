@@ -66,6 +66,23 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionPr
 
 public abstract class ReturnTypeBaseSubProcessor<T> {
 
+	/*
+	 * These constants must remain for any interested subclass
+	 * that may wish to know precisely which unique proposal is
+	 * being created and converted to type T, so that the subclass may
+	 * categorize it according to its own logic or wrap it in its own
+	 * wrapper class.
+	 */
+	protected static final int MethodWithConstructorName1= 100;
+	protected static final int VoidMethodReturns1= 210;
+	protected static final int VoidMethodReturns2= 220;
+	protected static final int MissingReturnTypeProposal1= 310;
+	protected static final int MissingReturnTypeProposal2= 320;
+	protected static final int MissingReturnStatementProposal1= 410;
+	protected static final int MissingReturnStatementProposal2= 420;
+	protected static final int MissingReturnStatementProposal3= 430;
+	protected static final int ReplaceReturnWithYieldStatementProposal1= 510;
+
 	protected ReturnTypeBaseSubProcessor() {
 	}
 
@@ -131,7 +148,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_constrnamemethod_description;
 			ASTRewriteCorrectionProposalCore p= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
-			T proposal= rewriteCorrectionProposalToT(p, 100);
+			T proposal= rewriteCorrectionProposalToT(p, MethodWithConstructorName1);
 			if (proposal != null)
 				proposals.add(proposal);
 		}
@@ -193,7 +210,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					proposal.addLinkedPosition(rewrite.track(commentStart), false, "comment_start"); //$NON-NLS-1$
 
 				}
-				T wrapped= linkedCorrectionProposal1ToT(proposal, 210);
+				T wrapped= linkedCorrectionProposal1ToT(proposal, VoidMethodReturns1);
 				if (wrapped != null)
 					proposals.add(wrapped);
 			}
@@ -202,7 +219,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_removereturn_description;
 			ASTRewriteCorrectionProposalCore core= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_TO_RETURN);
-			T proposal= rewriteCorrectionProposalToT(core, 220);
+			T proposal= rewriteCorrectionProposalToT(core, VoidMethodReturns2);
 			if (proposal != null)
 				proposals.add(proposal);
 		}
@@ -263,7 +280,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					proposal.addLinkedPositionProposal(key, binding);
 				}
 			}
-			T wrapped= linkedCorrectionProposal1ToT(proposal, 310);
+			T wrapped= linkedCorrectionProposal1ToT(proposal, MissingReturnTypeProposal1);
 			if (wrapped != null)
 				proposals.add(wrapped);
 
@@ -276,7 +293,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					ASTNode nameNode= methodDeclaration.getName();
 					label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_wrongconstructorname_description, BasicElementLabels.getJavaElementName(constructorName));
 					ReplaceCorrectionProposalCore core= new ReplaceCorrectionProposalCore(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, IProposalRelevance.CHANGE_TO_CONSTRUCTOR);
-					T prop= replaceCorrectionProposalToT(core, 320);
+					T prop= replaceCorrectionProposalToT(core, MissingReturnTypeProposal2);
 					if (prop != null)
 						proposals.add(prop);
 				}
@@ -297,7 +314,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		if (selectedNode instanceof LambdaExpression lambda) {
 			MissingReturnTypeInLambdaCorrectionProposalCore core= new MissingReturnTypeInLambdaCorrectionProposalCore(cu, lambda, existingStatement,
 					IProposalRelevance.MISSING_RETURN_TYPE);
-			T prop= missingReturnTypeInLambdaProposalToT(core, 410);
+			T prop= missingReturnTypeInLambdaProposalToT(core, MissingReturnStatementProposal1);
 			if (prop != null)
 				proposals.add(prop);
 		} else {
@@ -308,7 +325,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 					return;
 				}
 				MissingReturnTypeCorrectionProposalCore core= new MissingReturnTypeCorrectionProposalCore(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE);
-				T p= missingReturnTypeProposalToT(core, 420);
+				T p= missingReturnTypeProposalToT(core, MissingReturnStatementProposal2);
 				proposals.add(p);
 
 				Type returnType= methodDecl.getReturnType2();
@@ -326,7 +343,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 
 					String label= CorrectionMessages.ReturnTypeSubProcessor_changetovoid_description;
 					ASTRewriteCorrectionProposalCore core2= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID);
-					T proposal= rewriteCorrectionProposalToT(core2, 430);
+					T proposal= rewriteCorrectionProposalToT(core2, MissingReturnStatementProposal3);
 					if (proposal != null)
 						proposals.add(proposal);
 				}
@@ -366,7 +383,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 
 			String label= CorrectionMessages.ReturnTypeSubProcessor_changeReturnToYield_description;
 			ASTRewriteCorrectionProposalCore core= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.REMOVE_ABSTRACT_MODIFIER);
-			T proposal= rewriteCorrectionProposalToT(core, 510);
+			T proposal= rewriteCorrectionProposalToT(core, ReplaceReturnWithYieldStatementProposal1);
 			if (proposal != null)
 				proposals.add(proposal);
 		}

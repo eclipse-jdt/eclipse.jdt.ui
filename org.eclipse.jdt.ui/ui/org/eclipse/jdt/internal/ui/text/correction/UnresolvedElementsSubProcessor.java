@@ -81,52 +81,52 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 
 	private static Image findImage(int id) {
 		switch( id) {
-			case 100:
-			case 101:
-			case 400:
+			case NewVariableProposal1:
+			case NewVariableProposal2:
+			case EnhancedForWithoutTypeProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			case 102:
+			case NewVariableProposal3:
 				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			case 200:
-			case 211:
-			case 221:
+			case NewFieldForTypeProposal1:
+			case NewFieldForTypeProposal3:
+			case NewFieldForTypeProposal5:
 				return JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
-			case 210:
-			case 220:
+			case NewFieldForTypeProposal2:
+			case NewFieldForTypeProposal4:
 				return JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
-			case 310:
-			case 830:
-			case 910:
+			case SimilarVariableProposal2:
+			case TypeRefChangeProposal2:
+			case TypeRefChangeFullProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			case 820:
-			case 1310:
-			case 2200:
+			case TypeRefChangeProposal1:
+			case StaticImportFavoriteProposal1:
+			case AmbiguosTypeReferenceProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
-			case 1410:
-			case 1430:
-			case 1475:
-			case 2401:
+			case NewMethodProposal1:
+			case NewMethodProposal3:
+			case NewMethodProposal5:
+			case AnnotationMemberProposal2:
 				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-			case 1420:
+			case NewMethodProposal2:
 				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
-			case 1450:
-			case 1480:
-			case 1490:
+			case NewMethodProposal4:
+			case NewMethodProposal6:
+			case NewMethodProposal7:
 				return JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);
-			case 1650:
+			case ExistingParentCastProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
-			case 1700:
-			case 1850:
+			case MoreParametersProposal1:
+			case MoreArgumentsProposal2:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			case 1750:
-			case 1810:
+			case MoreParametersProposal2:
+			case MoreArgumentsProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-			case 1950:
-			case 1970:
-			case 1980:
-			case 2000:
+			case EqualNumberOfParameters1:
+			case EqualNumberOfParameters2:
+			case EqualNumberOfParameters3:
+			case AddQualifierToOuterProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			case 2100:
+			case ConstructorProposal1:
 				return JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
 
 		}
