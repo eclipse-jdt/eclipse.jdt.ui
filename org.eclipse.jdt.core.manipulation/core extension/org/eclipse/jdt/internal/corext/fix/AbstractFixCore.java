@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
-
 public abstract class AbstractFixCore implements IProposableFix, ILinkedFix {
 
 	private final String fDisplayString;
