@@ -26,10 +26,11 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -119,7 +120,7 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops,
 			boolean makeFinal, boolean checkIfLoopVarUsed) {
 		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;

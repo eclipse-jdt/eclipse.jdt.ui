@@ -24,14 +24,15 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
 import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
-import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public abstract class AbstractCleanUpCore implements ICleanUpCore {
+public abstract class AbstractCleanUpCore implements ICleanUp {
 
 	private CleanUpOptionsCore fOptions;
 
@@ -39,14 +40,14 @@ public abstract class AbstractCleanUpCore implements ICleanUpCore {
 	}
 
 	public AbstractCleanUpCore(Map<String, String> settings) {
-		setOptions(new MapCleanUpOptionsCore(settings));
+		setOptions(new MapCleanUpOptions(settings));
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.fix.ICleanUpCore#setOptions(org.eclipse.jdt.ui.cleanup.CleanUpOptions)
+	 * @see org.eclipse.jdt.internal.corext.fix.ICleanUp#setOptions(org.eclipse.jdt.ui.cleanup.CleanUpOptions)
 	 */
 	@Override
-	public void setOptions(CleanUpOptionsCore options) {
+	public void setOptions(CleanUpOptions options) {
 		Assert.isLegal(options != null);
 		fOptions= options;
 	}
@@ -71,8 +72,8 @@ public abstract class AbstractCleanUpCore implements ICleanUpCore {
 	 * @see org.eclipse.jdt.internal.corext.fix.ICleanUpCore#getRequirementsCore()
 	 */
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
-		return new CleanUpRequirementsCore(false, false, false, null);
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(false, false, false, null);
 	}
 
 	/*
@@ -84,10 +85,10 @@ public abstract class AbstractCleanUpCore implements ICleanUpCore {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.fix.ICleanUpCore#createFixCore(org.eclipse.jdt.ui.cleanup.CleanUpContext)
+	 * @see org.eclipse.jdt.internal.corext.fix.ICleanUp#createFixCore(org.eclipse.jdt.ui.cleanup.CleanUpContext)
 	 */
 	@Override
-	public ICleanUpFixCore createFixCore(CleanUpContextCore context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		return null;
 	}
 

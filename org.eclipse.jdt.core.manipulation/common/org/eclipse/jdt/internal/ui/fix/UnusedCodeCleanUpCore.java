@@ -26,12 +26,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
@@ -49,10 +49,10 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
+	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirementsCore(requireAST, false, false, requiredOptions);
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -68,7 +68,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit) throws CoreException {
+	public ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 
 		return UnusedCodeFixCore.createCleanUp(compilationUnit,
@@ -83,7 +83,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+	public ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 
 		return UnusedCodeFixCore.createCleanUp(compilationUnit, problems,

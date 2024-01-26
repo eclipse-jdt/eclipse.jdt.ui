@@ -41,12 +41,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -60,7 +61,7 @@ public class TryWithResourceFixCore extends CompilationUnitRewriteOperationsFixC
 		super(name, compilationUnit, operation);
 	}
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit unit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit unit) {
 
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
 

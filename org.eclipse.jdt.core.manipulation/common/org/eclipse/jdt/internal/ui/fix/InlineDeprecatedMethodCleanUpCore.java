@@ -24,13 +24,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
 public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
@@ -44,9 +45,9 @@ public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
+	public CleanUpRequirements getRequirements() {
 		boolean requireAST= isEnabled(CleanUpConstants.REPLACE_DEPRECATED_CALLS);
-		return new CleanUpRequirementsCore(requireAST, false, false, null);
+		return new CleanUpRequirements(requireAST, false, false, null);
 	}
 
 	@Override
@@ -89,7 +90,7 @@ public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(CompilationUnit compilationUnit) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.REPLACE_DEPRECATED_CALLS)) {
 			return null;
 		}
@@ -114,7 +115,7 @@ public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		return null;
 	}
 

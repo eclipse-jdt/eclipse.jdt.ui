@@ -53,13 +53,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -348,7 +349,7 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit unit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit unit) {
 		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
 		LambdaExpressionFinder finder= new LambdaExpressionFinder(rewriteOperations);
 		unit.accept(finder);

@@ -19,7 +19,6 @@ import java.util.function.Function;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -28,13 +27,13 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
- * Class to wrap an ICleanUpFixCore and be used as an ICleanUpFix
+ * Class to wrap an ICleanUpFix and be used as an ICleanUpFix
  */
 public class CleanUpFixWrapper implements ICleanUpFix {
 
-	private ICleanUpFixCore cleanUpFixCore;
+	private ICleanUpFix cleanUpFixCore;
 
-	public CleanUpFixWrapper(ICleanUpFixCore cleanUpFixCore) {
+	public CleanUpFixWrapper(ICleanUpFix cleanUpFixCore) {
 		this.cleanUpFixCore= cleanUpFixCore;
 	}
 
@@ -43,11 +42,11 @@ public class CleanUpFixWrapper implements ICleanUpFix {
 		return cleanUpFixCore.createChange(progressMonitor);
 	}
 
-	public static CleanUpFixWrapper create(ICleanUpFixCore cleanUpFixCore) {
+	public static CleanUpFixWrapper create(ICleanUpFix cleanUpFixCore) {
 		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
 	}
 
-	public static ICleanUpFix create(IProblemLocation[] problems, Function<IProblemLocation[], ICleanUpFixCore> createFunction) {
+	public static ICleanUpFix create(IProblemLocation[] problems, Function<IProblemLocation[], ICleanUpFix> createFunction) {
 		IProblemLocation[] problemLocationArray= null;
 		if (problems != null) {
 			problemLocationArray= new ProblemLocation[problems.length];

@@ -34,12 +34,12 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -154,7 +154,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 		return null;
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -167,7 +167,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 				removeRedundantTypeArguments);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
 
 		if (insertInferredTypeArguments) {
 			final ArrayList<ASTNode> changedNodes= new ArrayList<>();

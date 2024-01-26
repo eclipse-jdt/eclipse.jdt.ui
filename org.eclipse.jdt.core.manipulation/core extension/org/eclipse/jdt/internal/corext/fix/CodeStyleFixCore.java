@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -72,6 +71,7 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -573,7 +573,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new CodeStyleFixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] {operations[0]});
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addThisQualifier,
 			boolean changeNonStaticAccessToStatic,
 			boolean qualifyStaticFieldAccess,
@@ -611,7 +611,7 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new CodeStyleFixCore(FixMessages.CodeStyleFix_change_name, compilationUnit, operationsArray);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean addThisQualifier,
 			boolean changeNonStaticAccessToStatic,
 			boolean changeIndirectStaticAccessToDirect) {

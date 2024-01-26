@@ -22,7 +22,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -50,7 +49,7 @@ public class AbstractCleanUpCoreWrapper<T extends AbstractCleanUpCore> extends A
 
 	@Override
 	public final ICleanUpFix createFix(CleanUpContext context) throws CoreException {
-		ICleanUpFixCore fix= cleanUpCore.createFixCore(context);
+		ICleanUpFix fix= cleanUpCore.createFix(context);
 		return fix != null ? new CleanUpFixWrapper(fix) : null;
 	}
 
@@ -66,7 +65,7 @@ public class AbstractCleanUpCoreWrapper<T extends AbstractCleanUpCore> extends A
 
 	@Override
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(cleanUpCore.getRequirementsCore());
+		return cleanUpCore.getRequirements();
 	}
 
 	@Override
