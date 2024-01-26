@@ -122,6 +122,9 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 	}
 
 	private IJavaElement getEnclosingMethod(ITypeRoot input, ITextSelection selection) {
+		if (input == null) {
+			return null;
+		}
 		try {
 			IJavaElement enclosingElement= input.getElementAt(selection.getOffset());
 			if (enclosingElement instanceof IMethod || enclosingElement instanceof IInitializer || enclosingElement instanceof IField) {
