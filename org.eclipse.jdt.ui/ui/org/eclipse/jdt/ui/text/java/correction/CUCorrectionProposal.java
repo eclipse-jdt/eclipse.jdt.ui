@@ -373,14 +373,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
 		if (getDelegate() != null) {
-	        if( adapter.isInstance(getDelegate())) {
-	        	return (T) getDelegate();
-	        }
+			if( adapter.isInstance(getDelegate())) {
+				return (T) getDelegate();
+			}
 		}
-        if (adapter.isInstance(this)) {
-        	return (T) this;
-        }
-        return null;
+		if (adapter.isInstance(this)) {
+			return (T) this;
+		}
+		return null;
 	}
 
 }
