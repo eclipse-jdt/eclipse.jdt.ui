@@ -228,9 +228,9 @@ public class ChangeCorrectionProposalCore implements IAdaptable {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
-        if (adapter.isInstance(this)) {
-        	return (T) this;
-        }
-        return null;
+		if (adapter.isInstance(this)) {
+			return (T) this;
+		}
+		return null;
 	}
 }
