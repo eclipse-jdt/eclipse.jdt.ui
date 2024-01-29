@@ -366,6 +366,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		return fSwitchedEditor;
 	}
 
+	/**
+	 * @since 3.32
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
