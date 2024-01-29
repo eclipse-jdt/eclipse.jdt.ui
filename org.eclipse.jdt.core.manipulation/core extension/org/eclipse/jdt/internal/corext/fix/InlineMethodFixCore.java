@@ -300,11 +300,9 @@ public class InlineMethodFixCore implements IProposableFix {
 				}
 			}
 			textEdit= new ReplaceEdit(replaceEdit.getOffset(), replaceEdit.getLength(), text);
-		} else if (textEdit instanceof MultiTextEdit multiTextEdit) {
-			MultiTextEdit newEdit= new MultiTextEdit();
+		} else if (textEdit instanceof MultiTextEdit) {
 			TextEdit[] childEdits= textEdit.getChildren();
-			textEdit= newEdit;
-			TextEdit parentEdit= newEdit;
+			textEdit= new MultiTextEdit();
 			for (TextEdit childEdit : childEdits) {
 				if (childEdit instanceof InsertEdit insertEdit) {
 					String text= insertEdit.getText();
@@ -315,12 +313,12 @@ public class InlineMethodFixCore implements IProposableFix {
 						}
 					}
 					TextEdit newChildEdit= new InsertEdit(insertEdit.getOffset(), text);
-					parentEdit.addChild(newChildEdit);
-				} else if (childEdit instanceof MultiTextEdit childMultiTextEdit) {
+					textEdit.addChild(newChildEdit);
+				} else if (childEdit instanceof MultiTextEdit) {
 					TextEdit newChildEdit= modifyEdit(index, childEdit, methodInvocation);
-					parentEdit.addChild(newChildEdit);
+					textEdit.addChild(newChildEdit);
 				} else {
-					parentEdit.addChild(childEdit.copy());
+					textEdit.addChild(childEdit.copy());
 				}
 			}
 		}
@@ -429,7 +427,7 @@ public class InlineMethodFixCore implements IProposableFix {
 				@Override
 				public boolean visit(SimpleName node) {
 					IBinding binding= node.resolveBinding();
-					if (binding instanceof IVariableBinding varBinding) {
+					if (binding instanceof IVariableBinding) {
 						usesLocals= true;
 						throw new AbortSearchException();
 					}
