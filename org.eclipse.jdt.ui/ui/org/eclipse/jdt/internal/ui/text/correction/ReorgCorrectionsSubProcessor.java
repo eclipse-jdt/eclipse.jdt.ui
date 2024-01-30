@@ -50,6 +50,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.IProgressService;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
@@ -541,13 +542,13 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	}
 
 	@Override
-	public ICommandAccess createRenameCUProposal(String label, RenameCompilationUnitChange change, int renameCu) {
-		return new ChangeCorrectionProposal(label, change, IProposalRelevance.RENAME_CU, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME));
+	public ICommandAccess createRenameCUProposal(String label, RenameCompilationUnitChange change, int relevance) {
+		return new ChangeCorrectionProposal(label, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME));
 	}
 
 	@Override
-	public ICommandAccess createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int renameType) {
-		return new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, IProposalRelevance.RENAME_TYPE);
+	public ICommandAccess createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int relevance) {
+		return new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, relevance);
 	}
 
 	@Override
@@ -556,13 +557,13 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	}
 
 	@Override
-	protected ICommandAccess createMoveToNewPackageProposal(String label, CompositeChange composite, int moveCuToPackage) {
-		return new ChangeCorrectionProposal(label, composite, IProposalRelevance.MOVE_CU_TO_PACKAGE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE));
+	protected ICommandAccess createMoveToNewPackageProposal(String label, CompositeChange composite, int relevance) {
+		return new ChangeCorrectionProposal(label, composite, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE));
 	}
 
 	@Override
-	protected ICommandAccess createOrganizeImportsProposal(String name, Object object, ICompilationUnit cu, int organizeImports) {
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, IProposalRelevance.ORGANIZE_IMPORTS, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+	protected ICommandAccess createOrganizeImportsProposal(String name, Change change, ICompilationUnit cu, int relevance) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			@Override
 			public void apply(IDocument document) {
 				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
@@ -581,9 +582,9 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	}
 
 	@Override
-	protected ICommandAccess createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int removeUnusedImport, IInvocationContextCore context) {
+	protected ICommandAccess createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int relevance, IInvocationContextCore context) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, unusedCodeCleanUp, IProposalRelevance.REMOVE_UNUSED_IMPORT, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, unusedCodeCleanUp, relevance, image, context);
 		return proposal;
 	}
 
@@ -598,19 +599,18 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	}
 
 	@Override
-	protected ICommandAccess createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean b, String requiredVersion, int changeProjectCompliance) {
-		return new ChangeToRequiredCompilerCompliance(label1, project, b, requiredVersion, changeProjectCompliance);
+	protected ICommandAccess createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, int relevance) {
+		return new ChangeToRequiredCompilerCompliance(label1, project, changeOnWorkspace, requiredVersion, relevance);
 	}
 
 	@Override
-	protected ICommandAccess createChangeToRequiredCompilerComplianceProposal(String label2, IJavaProject project, boolean b, String requiredVersion, boolean enablePreviews,
-			int changeWorkspaceCompliance) {
-		return new ChangeToRequiredCompilerCompliance(label2, project, b, requiredVersion, enablePreviews, changeWorkspaceCompliance);
+	protected ICommandAccess createChangeToRequiredCompilerComplianceProposal(String label2, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, boolean enablePreviews,
+			int relevance) {
+		return new ChangeToRequiredCompilerCompliance(label2, project, changeOnWorkspace, requiredVersion, enablePreviews, relevance);
 	}
 
 	@Override
 	protected ICommandAccess createOpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedElement) {
-		// TODO Auto-generated method stub
 		return new OpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_BUILD_PATH, null);
 	}
 }

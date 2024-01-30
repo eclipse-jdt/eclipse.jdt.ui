@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2023 IBM Corporation and others.
+ * Copyright (c) 2011, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,16 +57,18 @@ public class VarargsWarningsSubProcessor extends VarargsWarningsBaseSubProcessor
 	}
 
 	@Override
-	protected ICommandAccess createAddSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, MethodDeclaration methodDeclaration, Object object, int addSafevarargs) {
-		return new AddSafeVarargsProposal(label, compilationUnit, methodDeclaration, null, IProposalRelevance.ADD_SAFEVARARGS);
+	protected ICommandAccess createAddSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, MethodDeclaration methodDeclaration, IMethodBinding methodBinding, int relevance) {
+		return new AddSafeVarargsProposal(label, compilationUnit, methodDeclaration, methodBinding, relevance);
 	}
+
 	@Override
-	protected ICommandAccess createAddSafeVarargsToDeclarationProposal1(String label, ICompilationUnit targetCu, Object object, IMethodBinding methodDeclaration, int addSafevarargs) {
-		return new AddSafeVarargsProposal(label, targetCu, null, methodDeclaration, IProposalRelevance.ADD_SAFEVARARGS);
+	protected ICommandAccess createAddSafeVarargsToDeclarationProposal1(String label, ICompilationUnit targetCu, Object object, IMethodBinding methodDeclaration, int relevance) {
+		return new AddSafeVarargsProposal(label, targetCu, null, methodDeclaration, relevance);
 	}
+
 	@Override
-	protected ICommandAccess createRemoveSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int removeSafevarargs) {
+	protected ICommandAccess createRemoveSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int relevance) {
 		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		return new ASTRewriteCorrectionProposal(label, compilationUnit, rewrite, IProposalRelevance.REMOVE_SAFEVARARGS, image);
+		return new ASTRewriteCorrectionProposal(label, compilationUnit, rewrite, relevance, image);
 	}
 }

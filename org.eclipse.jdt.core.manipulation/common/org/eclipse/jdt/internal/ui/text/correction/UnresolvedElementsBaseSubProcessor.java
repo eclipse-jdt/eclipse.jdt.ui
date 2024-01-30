@@ -2375,17 +2375,17 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	protected abstract T renameNodeCorrectionProposalToT(RenameNodeCorrectionProposalCore core, int uid);
 	protected abstract T compositeProposalToT(ChangeCorrectionProposalCore compositeProposal, int uid);
 	protected abstract int getQualifiedTypeNameHistoryBoost(String qualifiedName, int min, int max);
-	protected abstract T linkedProposalToT(LinkedCorrectionProposalCore proposal, int uid);
-	protected abstract T changeCorrectionProposalToT(ChangeCorrectionProposalCore proposal, int uid);
-	protected abstract T qualifyTypeProposalToT(QualifyTypeProposalCore proposal, int uid);
-	protected abstract T addTypeParametersToT(AddTypeParameterProposalCore proposal, int uid);
-	protected abstract T addModuleRequiresProposalToT(AddModuleRequiresCorrectionProposalCore proposal, int uid);
-	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore proposal, int uid);
-	protected abstract T castCorrectionProposalToT(CastCorrectionProposalCore c, int uid);
-	protected abstract T addArgumentCorrectionProposalToT(AddArgumentCorrectionProposalCore proposal, int uid);
-	protected abstract T changeMethodSignatureProposalToT(ChangeMethodSignatureProposalCore proposal, int uid);
+	protected abstract T linkedProposalToT(LinkedCorrectionProposalCore core, int uid);
+	protected abstract T changeCorrectionProposalToT(ChangeCorrectionProposalCore core, int uid);
+	protected abstract T qualifyTypeProposalToT(QualifyTypeProposalCore core, int uid);
+	protected abstract T addTypeParametersToT(AddTypeParameterProposalCore core, int uid);
+	protected abstract T addModuleRequiresProposalToT(AddModuleRequiresCorrectionProposalCore core, int uid);
+	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore core, int uid);
+	protected abstract T castCorrectionProposalToT(CastCorrectionProposalCore core, int uid);
+	protected abstract T addArgumentCorrectionProposalToT(AddArgumentCorrectionProposalCore core, int uid);
+	protected abstract T changeMethodSignatureProposalToT(ChangeMethodSignatureProposalCore core, int uid);
 	protected abstract T newMethodProposalToT(NewMethodCorrectionProposalCore core, int uid);
-	protected abstract T rewriteProposalToT(ASTRewriteCorrectionProposalCore proposal, int uid);
+	protected abstract T rewriteProposalToT(ASTRewriteCorrectionProposalCore core, int uid);
 	protected abstract T newAnnotationProposalToT(NewAnnotationMemberProposalCore core, int uid);
 	protected abstract T renameNodeProposalToT(RenameNodeCorrectionProposalCore core, int uid);
 

@@ -412,8 +412,8 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 	}
 
 	protected abstract TypeMismatchBaseSubProcessor<T> getTypeMismatchSubProcessor();
-	protected abstract T linkedCorrectionProposal1ToT(LinkedCorrectionProposalCore proposal, int uid);
-	protected abstract T rewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore p, int uid);
+	protected abstract T linkedCorrectionProposal1ToT(LinkedCorrectionProposalCore core, int uid);
+	protected abstract T rewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore core, int uid);
 	protected abstract T replaceCorrectionProposalToT(ReplaceCorrectionProposalCore core, int uid);
 	protected abstract T missingReturnTypeProposalToT(MissingReturnTypeCorrectionProposalCore core, int uid);
 	protected abstract T missingReturnTypeInLambdaProposalToT(MissingReturnTypeInLambdaCorrectionProposalCore core, int uid);

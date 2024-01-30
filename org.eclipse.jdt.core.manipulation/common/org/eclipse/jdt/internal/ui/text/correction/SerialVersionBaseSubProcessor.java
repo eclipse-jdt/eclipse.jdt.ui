@@ -53,6 +53,6 @@ public abstract class SerialVersionBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createSerialVersionProposal(IProposableFix iProposableFix, int missingSerialVersion, IInvocationContextCore context, boolean b);
+	protected abstract T createSerialVersionProposal(IProposableFix iProposableFix, int relevance, IInvocationContextCore context, boolean isDefault);
 
 }

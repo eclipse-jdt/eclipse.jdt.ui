@@ -122,7 +122,7 @@ public abstract class VarargsWarningsBaseSubProcessor<T> {
 			proposals.add(proposal);
 	}
 
-	protected abstract T createAddSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, MethodDeclaration methodDeclaration, Object object, int addSafevarargs);
-	protected abstract T createAddSafeVarargsToDeclarationProposal1(String label, ICompilationUnit targetCu, Object object, IMethodBinding methodDeclaration, int addSafevarargs);
+	protected abstract T createAddSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, MethodDeclaration methodDeclaration, IMethodBinding methodBinding, int relevance);
+	protected abstract T createAddSafeVarargsToDeclarationProposal1(String label, ICompilationUnit targetCu, Object object, IMethodBinding methodDeclaration, int relevance);
 	protected abstract T createRemoveSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int removeSafevarargs);
 }

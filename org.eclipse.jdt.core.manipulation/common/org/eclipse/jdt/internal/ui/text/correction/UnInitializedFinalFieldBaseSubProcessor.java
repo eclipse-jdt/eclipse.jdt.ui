@@ -94,7 +94,7 @@ public abstract class UnInitializedFinalFieldBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int createConstructor);
-	protected abstract T createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int createConstructor, int updateAtConstructor);
-	protected abstract T conditionallyCreateInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int createConstructor, int updateAtConstructor);
+	protected abstract T createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int relevance);
+	protected abstract T createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType);
+	protected abstract T conditionallyCreateInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType);
 }
