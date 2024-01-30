@@ -189,7 +189,23 @@
         <filter id="576720909">
             <message_arguments>
                 <message_argument value="IInvocationContextCore"/>
-                <message_argument value="IInvocationContext"/>
+		<message_argument value="IInvocationContext"/>
+            </message_arguments>
+	</filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/text/java/correction/ASTRewriteCorrectionProposal.java" type="org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal">
+        <filter id="643850349">
+            <message_arguments>
+                <message_argument value="ASTRewriteCorrectionProposalCore"/>
+                <message_argument value="ASTRewriteCorrectionProposal"/>
+                <message_argument value="ASTRewriteCorrectionProposal(ASTRewriteCorrectionProposalCore, Image)"/>
+            </message_arguments>
+        </filter>
+        <filter id="643850349">
+            <message_arguments>
+                <message_argument value="ASTRewriteCorrectionProposalCore"/>
+                <message_argument value="ASTRewriteCorrectionProposal"/>
+                <message_argument value="ASTRewriteCorrectionProposal(String, ICompilationUnit, ASTRewrite, int, Image, ASTRewriteCorrectionProposalCore)"/>
             </message_arguments>
         </filter>
     </resource>

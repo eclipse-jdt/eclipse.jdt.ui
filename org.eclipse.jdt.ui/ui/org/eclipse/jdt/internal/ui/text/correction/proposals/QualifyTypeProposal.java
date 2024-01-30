@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class QualifyTypeProposal extends LinkedCorrectionProposal {
+	public QualifyTypeProposal(QualifyTypeProposalCore core) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), core);
+	}
 	public QualifyTypeProposal(String label, ICompilationUnit targetCU, int relevance, SimpleName original, String qualifiedName) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new QualifyTypeProposalCore(label, targetCU, relevance, original, qualifiedName));
 	}
