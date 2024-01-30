@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposalCore;
 
 public class UnInitializedFinalFieldSubProcessor extends UnInitializedFinalFieldBaseSubProcessor<ICommandAccess>{
 
@@ -41,18 +40,18 @@ public class UnInitializedFinalFieldSubProcessor extends UnInitializedFinalField
 	}
 
 	@Override
-	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int createConstructor) {
-		return new InitializeFinalFieldProposal(problem, targetCU, node, targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR);
+	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int relevance) {
+		return new InitializeFinalFieldProposal(problem, targetCU, node, targetBinding, relevance);
 	}
 
 	@Override
-	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int createConstructor, int updateAtConstructor) {
-		return new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposalCore.UPDATE_AT_CONSTRUCTOR);
+	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType) {
+		return new InitializeFinalFieldProposal(problem, targetCU, node, relevance, updateType);
 	}
 
 	@Override
-	protected ICommandAccess conditionallyCreateInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int createConstructor, int updateAtConstructor) {
-		InitializeFinalFieldProposal initializeFinalFieldProposal= new InitializeFinalFieldProposal(problem, targetCU, node, IProposalRelevance.CREATE_CONSTRUCTOR, InitializeFinalFieldProposalCore.UPDATE_CONSTRUCTOR_NEW_PARAMETER);
+	protected ICommandAccess conditionallyCreateInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType) {
+		InitializeFinalFieldProposal initializeFinalFieldProposal= new InitializeFinalFieldProposal(problem, targetCU, node, relevance, updateType);
 		try {
 			if(initializeFinalFieldProposal.hasProposal()) {
 				return initializeFinalFieldProposal;

@@ -65,6 +65,13 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 	}
 	public void addMissingJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
+		addMissingJavadocTagProposals(context, node, proposals);
+	}
+
+	/*
+	 * This entry point is requested by jdt.ls
+	 */
+	public void addMissingJavadocTagProposals(IInvocationContextCore context, ASTNode node, Collection<T> proposals) {
 		ASTNode parentDeclaration= null;
 		if (node == null) {
 			return;
@@ -132,14 +139,6 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 				proposals.add(addAllMissing);
 		}
 	}
-
-	protected abstract T addAllMissingJavadocTagsProposal(String label2, ICompilationUnit compilationUnit, ASTNode parentDeclaration, int addAllMissingTags);
-
-	protected abstract T addMissingJavadocTagProposal(String label, ICompilationUnit compilationUnit, ASTNode parentDeclaration, ASTNode node, int addMissingTag);
-
-	protected abstract T addAllMissingModuleJavadocTagsProposal(String label2, ICompilationUnit compilationUnit, ModuleDeclaration moduleDecl, ASTNode node, int addAllMissingTags);
-
-	protected abstract T addMissingModuleJavadocTagProposal(String label, ICompilationUnit compilationUnit, ModuleDeclaration moduleDecl, ASTNode node, int addMissingTag);
 
 	public void addUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -393,6 +392,10 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 			proposals.add(proposal);
 	}
 
-	protected abstract T createInvalidQualificationProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int qualifyInnerTypeName);
+	protected abstract T addAllMissingJavadocTagsProposal(String label, ICompilationUnit compilationUnit, ASTNode parentDeclaration, int relevance);
+	protected abstract T addMissingJavadocTagProposal(String label, ICompilationUnit compilationUnit, ASTNode parentDeclaration, ASTNode node, int relevance);
+	protected abstract T addAllMissingModuleJavadocTagsProposal(String label, ICompilationUnit compilationUnit, ModuleDeclaration moduleDecl, ASTNode node, int relevance);
+	protected abstract T addMissingModuleJavadocTagProposal(String label, ICompilationUnit compilationUnit, ModuleDeclaration moduleDecl, ASTNode node, int relevance);
+	protected abstract T createInvalidQualificationProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int relevance);
 
 }

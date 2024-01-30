@@ -528,11 +528,11 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			proposals.add(p2);
 	}
 
-	protected abstract T createInsertNullCheckProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int insertNullCheck);
+	protected abstract T createInsertNullCheckProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int relevance);
 
-	protected abstract T createChangeReturnTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int changeMethodReturnType, ITypeBinding currBinding, AST ast, CompilationUnit astRoot, MethodDeclaration methodDeclaration, BodyDeclaration decl);
+	protected abstract T createChangeReturnTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance, ITypeBinding currBinding, AST ast, CompilationUnit astRoot, MethodDeclaration methodDeclaration, BodyDeclaration decl);
 
-	protected abstract T createOptionalProposal(String label0, ICompilationUnit cu, Expression nodeToCast, int relevance, int optionalType);
+	protected abstract T createOptionalProposal(String label, ICompilationUnit cu, Expression nodeToCast, int relevance, int optionalType);
 
 	protected abstract T createImplementInterfaceProposal(ICompilationUnit nodeCu, ITypeBinding typeDecl, CompilationUnit astRoot, ITypeBinding castTypeBinding, int relevance);
 
@@ -541,16 +541,16 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 
 	protected abstract T createCastCorrectionProposal(String label, ICompilationUnit cu, Expression nodeToCast, ITypeBinding castTypeBinding, int relevance);
 
-	protected abstract T createChangeReturnTypeOfOverridden(ICompilationUnit targetCu, IMethodBinding overriddenDecl, CompilationUnit astRoot, ITypeBinding returnType, boolean b,
-			int changeReturnTypeOfOverridden, ITypeBinding overridenDeclType);
+	protected abstract T createChangeReturnTypeOfOverridden(ICompilationUnit targetCu, IMethodBinding overriddenDecl, CompilationUnit astRoot, ITypeBinding returnType, boolean offerSuperTypeProposals,
+			int relevance, ITypeBinding overridenDeclType);
 
-	protected abstract T createChangeIncompatibleReturnTypeProposal(ICompilationUnit cu, IMethodBinding methodDecl, CompilationUnit astRoot, ITypeBinding overriddenReturnType, boolean b,
-			int changeReturnType);
+	protected abstract T createChangeIncompatibleReturnTypeProposal(ICompilationUnit cu, IMethodBinding methodDecl, CompilationUnit astRoot, ITypeBinding overriddenReturnType, boolean offerSuperTypeProposals,
+			int relevance);
 
-	protected abstract T createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, Object object, ChangeDescription[] changes,
-			int removeExceptions);
+	protected abstract T createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, ChangeDescription[] paramChanges,
+			ChangeDescription[] changes, int relevance);
 
-	protected abstract T createNewVariableCorrectionProposal(String label, ICompilationUnit cu, int local, SimpleName simpleName, Object object, int relevance);
+	protected abstract T createNewVariableCorrectionProposal(String label, ICompilationUnit cu, int local, SimpleName simpleName, ITypeBinding senderBinding, int relevance);
 
 	protected abstract T createIncompatibleForEachTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int incompatibleForeachType, CompilationUnit astRoot, AST ast, ITypeBinding expectedBinding, ASTNode selectedNode, SingleVariableDeclaration parameter);
 }

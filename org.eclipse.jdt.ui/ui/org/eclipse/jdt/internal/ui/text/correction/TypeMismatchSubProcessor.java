@@ -55,7 +55,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ImplementInterfaceProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.OptionalCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 
@@ -95,15 +94,15 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 	}
 
 	@Override
-	protected ICommandAccess createInsertNullCheckProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int insertNullCheck) {
+	protected ICommandAccess createInsertNullCheckProposal(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int relevance) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		return new ASTRewriteCorrectionProposal(label, compilationUnit, rewrite, IProposalRelevance.INSERT_NULL_CHECK, image);
+		return new ASTRewriteCorrectionProposal(label, compilationUnit, rewrite, relevance, image);
 	}
 
 	@Override
-	protected ICommandAccess createChangeReturnTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int changeMethodReturnType, ITypeBinding currBinding, AST ast, CompilationUnit astRoot, MethodDeclaration methodDeclaration, BodyDeclaration decl) {
+	protected ICommandAccess createChangeReturnTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance, ITypeBinding currBinding, AST ast, CompilationUnit astRoot, MethodDeclaration methodDeclaration, BodyDeclaration decl) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, IProposalRelevance.CHANGE_METHOD_RETURN_TYPE, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, relevance, image);
 		ImportRewrite imports= proposal.createImportRewrite(astRoot);
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
@@ -143,9 +142,9 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 	}
 
 	@Override
-	protected ICommandAccess createChangeReturnTypeOfOverridden(ICompilationUnit targetCu, IMethodBinding overriddenDecl, CompilationUnit astRoot, ITypeBinding returnType, boolean b,
-			int changeReturnTypeOfOverridden, ITypeBinding overridenDeclType) {
-		TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, false, IProposalRelevance.CHANGE_RETURN_TYPE_OF_OVERRIDDEN);
+	protected ICommandAccess createChangeReturnTypeOfOverridden(ICompilationUnit targetCu, IMethodBinding overriddenDecl, CompilationUnit astRoot, ITypeBinding returnType, boolean offerSuperTypeProposals,
+			int relevance, ITypeBinding overridenDeclType) {
+		TypeChangeCorrectionProposal proposal= new TypeChangeCorrectionProposal(targetCu, overriddenDecl, astRoot, returnType, offerSuperTypeProposals, relevance);
 		if (overridenDeclType.isInterface()) {
 			proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofimplemented_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
 		} else {
@@ -155,29 +154,29 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 	}
 
 	@Override
-	protected ICommandAccess createChangeIncompatibleReturnTypeProposal(ICompilationUnit cu, IMethodBinding methodDecl, CompilationUnit astRoot, ITypeBinding overriddenReturnType, boolean b,
-			int changeReturnType) {
-		return new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overriddenReturnType, false, IProposalRelevance.CHANGE_RETURN_TYPE);
+	protected ICommandAccess createChangeIncompatibleReturnTypeProposal(ICompilationUnit cu, IMethodBinding methodDecl, CompilationUnit astRoot, ITypeBinding overriddenReturnType, boolean offerSuperTypeProposals,
+			int relevance) {
+		return new TypeChangeCorrectionProposal(cu, methodDecl, astRoot, overriddenReturnType, offerSuperTypeProposals, relevance);
 	}
 
 	@Override
-	protected ICommandAccess createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, Object object,
-			ChangeDescription[] changes, int removeExceptions) {
+	protected ICommandAccess createChangeMethodSignatureProposal(String label, ICompilationUnit cu, CompilationUnit astRoot, IMethodBinding methodDeclBinding, ChangeDescription[] paramChanges,
+			ChangeDescription[] changes, int relevance) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-		return new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, IProposalRelevance.REMOVE_EXCEPTIONS, image);
+		return new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, relevance, image);
 	}
 
 	@Override
-	protected ICommandAccess createNewVariableCorrectionProposal(String label, ICompilationUnit cu, int local, SimpleName simpleName, Object object, int relevance) {
+	protected ICommandAccess createNewVariableCorrectionProposal(String label, ICompilationUnit cu, int local, SimpleName simpleName, ITypeBinding senderBinding, int relevance) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-		return new NewVariableCorrectionProposal(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance, image);
+		return new NewVariableCorrectionProposal(label, cu, local, simpleName, null, relevance, image);
 	}
 
 	@Override
-	protected ICommandAccess createIncompatibleForEachTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int incompatibleForeachType, CompilationUnit astRoot, AST ast,
+	protected ICommandAccess createIncompatibleForEachTypeProposal(String label, ICompilationUnit cu, ASTRewrite rewrite, int relevance, CompilationUnit astRoot, AST ast,
 			ITypeBinding expectedBinding, ASTNode selectedNode, SingleVariableDeclaration parameter) {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.INCOMPATIBLE_FOREACH_TYPE, image);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
 		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(selectedNode), importRewrite);
 		Type newType= importRewrite.addImport(expectedBinding, ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE);
