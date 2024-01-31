@@ -43,13 +43,18 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+import org.eclipse.jdt.core.manipulation.TypeKinds;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
@@ -181,7 +186,16 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_organizeimports_description;
-		T proposal= createOrganizeImportsProposal(name, null, cu, IProposalRelevance.ORGANIZE_IMPORTS);
+		ICleanUpFixCore removeAllUnusedImportsFix = UnusedCodeFixCore.createCleanUp(context.getASTRoot(), false, false, false, false, false, true, false, false);
+		Change cleanupChange= null;
+		if( removeAllUnusedImportsFix != null ) {
+			try {
+				cleanupChange= removeAllUnusedImportsFix.createChange(null);
+			} catch(CoreException ce) {
+				// ignore
+			}
+		}
+		T proposal= createOrganizeImportsProposal(name, cleanupChange, cu, IProposalRelevance.ORGANIZE_IMPORTS);
 		if (proposal != null)
 			proposals.add(proposal);
 	}
@@ -277,6 +291,39 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		}
 	}
 
+
+	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
+	public boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		UnresolvedElementsBaseSubProcessor<T> unresolvedElements = getUnresolvedElementsSubProcessor();
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return false;
+		}
+		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
+		if (importDeclaration == null) {
+			return false;
+		}
+		if (!importDeclaration.isOnDemand()) {
+			Name name= importDeclaration.getName();
+			if (importDeclaration.isStatic() && name.isQualifiedName()) {
+				name= ((QualifiedName) name).getQualifier();
+			}
+			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? TypeKinds.REF_TYPES : TypeKinds.CLASSES | TypeKinds.INTERFACES;
+			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
+			unresolvedElements.collectNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
+		} else {
+			Name name= importDeclaration.getName();
+			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+		}
+		String name= ASTNodes.asString(importDeclaration.getName());
+		if (importDeclaration.isOnDemand()) {
+			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
+		}
+		addProjectSetupFixProposals(context, problem, name, proposals);
+		return true;
+	}
+
 	private static boolean canModifyAccessRules(IBinding binding) {
 		IJavaElement element= binding.getJavaElement();
 		if (element == null)
@@ -303,6 +350,8 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		return false;
 	}
 
+	public abstract UnresolvedElementsBaseSubProcessor<T> getUnresolvedElementsSubProcessor();
+
 	public abstract T createRenameCUProposal(String label, RenameCompilationUnitChange change, int relevance);
 
 	public abstract T createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int relevance);
@@ -316,9 +365,6 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int relevance, IInvocationContextCore context);
 
 	public abstract T createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals);
-
-	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
-	public abstract boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException;
 
 	protected abstract T createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, int relevance);
 

@@ -184,34 +184,7 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
 	// This should be part of the base class but it has circular refs with UnresolvedElementsSubProcessor
 	public static boolean importNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode == null) {
-			return false;
-		}
-		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
-		if (importDeclaration == null) {
-			return false;
-		}
-		if (!importDeclaration.isOnDemand()) {
-			Name name= importDeclaration.getName();
-			if (importDeclaration.isStatic() && name.isQualifiedName()) {
-				name= ((QualifiedName) name).getQualifier();
-			}
-			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? TypeKinds.REF_TYPES : TypeKinds.CLASSES | TypeKinds.INTERFACES;
-			UnresolvedElementsSubProcessor.addRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
-			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
-		} else {
-			Name name= importDeclaration.getName();
-			UnresolvedElementsSubProcessor.addRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
-		}
-		String name= ASTNodes.asString(importDeclaration.getName());
-		if (importDeclaration.isOnDemand()) {
-			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
-		}
-		addProjectSetupFixProposal(context, problem, name, proposals);
-		return true;
+		return new ReorgCorrectionsSubProcessor().addImportNotFoundProposals(context, problem, proposals);
 	}
 
 	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {
@@ -595,7 +568,34 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 
 	@Override
 	public boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
-		return ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
+		ICompilationUnit cu= context.getCompilationUnit();
+		UnresolvedElementsBaseSubProcessor<ICommandAccess> unresolvedElements = getUnresolvedElementsSubProcessor();
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return false;
+		}
+		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
+		if (importDeclaration == null) {
+			return false;
+		}
+		if (!importDeclaration.isOnDemand()) {
+			Name name= importDeclaration.getName();
+			if (importDeclaration.isStatic() && name.isQualifiedName()) {
+				name= ((QualifiedName) name).getQualifier();
+			}
+			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? TypeKinds.REF_TYPES : TypeKinds.CLASSES | TypeKinds.INTERFACES;
+			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
+			unresolvedElements.collectNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
+		} else {
+			Name name= importDeclaration.getName();
+			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+		}
+		String name= ASTNodes.asString(importDeclaration.getName());
+		if (importDeclaration.isOnDemand()) {
+			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
+		}
+		addProjectSetupFixProposal(context, problem, name, proposals);
+		return true;
 	}
 
 	@Override
@@ -612,5 +612,10 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	@Override
 	protected ICommandAccess createOpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedElement) {
 		return new OpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_BUILD_PATH, null);
+	}
+
+	@Override
+	public UnresolvedElementsBaseSubProcessor<ICommandAccess> getUnresolvedElementsSubProcessor() {
+		return new UnresolvedElementsSubProcessor();
 	}
 }
