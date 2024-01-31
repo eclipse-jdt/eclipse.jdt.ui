@@ -13,8 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.sef;
 
+import java.util.List;
+
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
+import org.eclipse.jdt.core.IField;
+
+import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldCompositeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -22,12 +27,25 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 
+	private List<IField> preselected;
+
+	public List<IField> getPreselected() {
+		return preselected;
+	}
+
 	/* package */ static final String DIALOG_SETTING_SECTION= "SelfEncapsulateFieldWizard"; //$NON-NLS-1$
 
 	public SelfEncapsulateFieldWizard(SelfEncapsulateFieldRefactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.SelfEncapsulateField_sef);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+	}
+
+	public SelfEncapsulateFieldWizard(SelfEncapsulateFieldCompositeRefactoring refactoring, List<IField> preselected) {
+		super(refactoring, DIALOG_BASED_USER_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.SelfEncapsulateField_sef);
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+		this.preselected = preselected;
 	}
 
 	@Override

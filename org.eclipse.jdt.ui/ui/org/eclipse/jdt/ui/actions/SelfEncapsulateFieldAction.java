@@ -14,6 +14,11 @@
 package org.eclipse.jdt.ui.actions;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -24,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -114,18 +120,36 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		try {
 			if (!ActionUtil.isEditable(fEditor))
 				return;
-			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
-			if (elements.length != 1 || !(elements[0] instanceof IField)) {
-				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
-				return;
+			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor, true);
+			IField[] fields;
+			List<IField> selfEncapsulationAvailableFields = new ArrayList<>();
+			List<IField> preselected;
+			if (elements.length == 1 && (elements[0] instanceof IField)) {
+				IField field= (IField) elements[0];
+				fields = field.getDeclaringType().getFields();
+				preselected = Collections.singletonList((IField) elements[0]);
+			} else {
+				IType type = (IType) Optional.ofNullable(SelectionConverter.getElementAtOffset(fEditor)).map(element -> element.getAncestor(IJavaElement.TYPE)).orElse(null);
+				if (type == null) {
+					MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
+					return;
+				} else {
+					fields = type.getFields();
+					preselected = Collections.emptyList();
+				}
 			}
-			IField field= (IField)elements[0];
 
-			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
+			for (IField field: fields) {
+				if (RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) {
+					selfEncapsulationAvailableFields.add(field);
+				}
+			}
+			if (selfEncapsulationAvailableFields.size() == 0) {
 				MessageDialog.openInformation(getShell(), ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_unavailable);
 				return;
 			}
-			run(field);
+			run(selfEncapsulationAvailableFields, preselected);
+
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 			return;
@@ -170,5 +194,13 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		if (! ActionUtil.isEditable(fEditor, getShell(), field))
 			return;
 		RefactoringExecutionStarter.startSelfEncapsulateRefactoring(field, getShell());
+	}
+
+	/**
+	 * @since 3.32
+	 */
+	private void run(List<IField> fields, List<IField> preselected) {
+		List<IField> editableFields = fields.stream().filter(field -> ActionUtil.isEditable(fEditor, getShell(), field)).toList();
+		RefactoringExecutionStarter.startSelfEncapsulateRefactoring(editableFields, preselected, getShell());
 	}
 }

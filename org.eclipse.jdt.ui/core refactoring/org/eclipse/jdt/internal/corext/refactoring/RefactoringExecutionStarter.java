@@ -14,8 +14,10 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Shell;
@@ -85,6 +87,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldCompositeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
@@ -482,6 +485,38 @@ public final class RefactoringExecutionStarter {
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform);
 		}
+	}
+
+	public static void startSelfEncapsulateRefactoring(final List<IField> fields, List<IField> preselected, final Shell shell) {
+		if(fields.stream().map(field -> {
+			try {
+				return !RefactoringAvailabilityTesterCore.isSelfEncapsulateAvailable(field);
+			} catch (JavaModelException e) {
+				ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform);
+				return false;
+			}
+		}).allMatch(Boolean::booleanValue)) {
+			return;
+		}
+		try {
+			new RefactoringStarter().activate(new SelfEncapsulateFieldWizard(new SelfEncapsulateFieldCompositeRefactoring(fields), preselected), shell, "", IRefactoringSaveModes.SAVE_REFACTORING); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform);
+		}
+	}
+
+	public static List<SelfEncapsulateFieldRefactoring> getRefactoringFromFields(List<IField> fields) {
+		List<SelfEncapsulateFieldRefactoring> refactorings = new ArrayList<>();
+		try {
+			for(IField field : fields) {
+				if (RefactoringAvailabilityTesterCore.isSelfEncapsulateAvailable(field)) {
+					refactorings.add(new SelfEncapsulateFieldRefactoring(field));
+				}
+			}
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform);
+		}
+		return refactorings;
 	}
 
 	public static void startUseSupertypeRefactoring(final IType type, final Shell shell) {
