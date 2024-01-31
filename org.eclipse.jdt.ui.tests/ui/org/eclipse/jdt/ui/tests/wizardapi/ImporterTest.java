@@ -59,7 +59,7 @@ public class ImporterTest{
 			project = ResourcesPlugin.getWorkspace().getRoot().getProject(expandedZip.getName());
 			Assert.assertTrue("Project wasn't created", project.exists());
 			Assert.assertTrue("Project doesn't have Java nature", project.hasNature(JavaCore.NATURE_ID));
-			IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+			IJavaProject javaProject = JavaCore.create(project);
 			project.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
 			Assert.assertNotNull("Couldn't resolve type from Java project", javaProject.findType("junit.framework.TestCase"));
 			Assert.assertNotNull("Couldn't resolve JRE type from Java project", javaProject.findType("java.util.List"));

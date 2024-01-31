@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -37,11 +36,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /*
  * http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
@@ -102,9 +101,8 @@ public class ActionUtil {
 			IProject resourceProject= project.getProject();
 			if (resourceProject == null)
 				return false;
-			IProjectNature nature= resourceProject.getNature(JavaCore.NATURE_ID);
 			// We have a Java project
-			if (nature != null)
+			if (resourceProject.hasNature(JavaCore.NATURE_ID))
 				return true;
 		} catch (CoreException e) {
 		}

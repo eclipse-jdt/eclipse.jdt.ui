@@ -76,7 +76,7 @@ public class GotoResourceAction extends Action {
 			private boolean select(IResource resource) {
 				IProject project= resource.getProject();
 				try {
-					if (project.getNature(JavaCore.NATURE_ID) != null)
+					if (project.hasNature(JavaCore.NATURE_ID))
 						return fJavaModel.contains(resource);
 				} catch (CoreException e) {
 					// do nothing. Consider resource;
