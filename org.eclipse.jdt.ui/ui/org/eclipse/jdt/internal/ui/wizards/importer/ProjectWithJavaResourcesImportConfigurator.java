@@ -100,16 +100,16 @@ public class ProjectWithJavaResourcesImportConfigurator implements ProjectConfig
 			SubMonitor subMonitor = SubMonitor.convert(monitor, 6);
 			IProjectDescription description = project.getDescription();
 			List<String> natures = Arrays.asList(description.getNatureIds());
-			IJavaProject javaNature = null;
+			IJavaProject javaProject = null;
 			if (!natures.contains(JavaCore.NATURE_ID)) {
 				List<String> newNatures = new ArrayList<>(natures);
 				newNatures.add(JavaCore.NATURE_ID);
 				description.setNatureIds(newNatures.toArray(new String[newNatures.size()]));
 				project.setDescription(description, subMonitor.split(1));
-				javaNature = JavaCore.create(project);
-				javaNature.open(subMonitor.split(1));
+				javaProject = JavaCore.create(project);
+				javaProject.open(subMonitor.split(1));
 			} else {
-				javaNature = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
+				javaProject = JavaCore.create(project);
 				subMonitor.worked(2);
 			}
 			if (!project.getFile(CLASSPATH).exists()) {
@@ -119,7 +119,7 @@ public class ProjectWithJavaResourcesImportConfigurator implements ProjectConfig
 				if (entries.length == 0) {
 					entries = PreferenceConstants.getDefaultJRELibrary();
 				}
-				javaNature.setRawClasspath(entries, subMonitor.split(1));
+				javaProject.setRawClasspath(entries, subMonitor.split(1));
 				if (outputLocation == null) {
 					IFolder binFolder = project.getFolder(BIN);
 					if (!binFolder.exists()) {
@@ -131,7 +131,7 @@ public class ProjectWithJavaResourcesImportConfigurator implements ProjectConfig
 				} else {
 					subMonitor.worked(1);
 				}
-				javaNature.setOutputLocation(outputLocation, subMonitor.split(1));
+				javaProject.setOutputLocation(outputLocation, subMonitor.split(1));
 			} else {
 				subMonitor.worked(4);
 			}
@@ -153,7 +153,7 @@ public class ProjectWithJavaResourcesImportConfigurator implements ProjectConfig
 	public Set<IFolder> getFoldersToIgnore(IProject project, IProgressMonitor monitor) {
 		Set<IFolder> res = new HashSet<>();
 		try {
-			IJavaProject javaProject = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
+			IJavaProject javaProject = JavaCore.create(project);
 			if (javaProject == null) {
 				return res;
 			}

@@ -82,7 +82,7 @@ public class JDTProjectNatureImportConfigurator implements ProjectConfigurator {
 	public Set<IFolder> getFoldersToIgnore(IProject project, IProgressMonitor monitor) {
 		Set<IFolder> res = new HashSet<>();
 		try {
-			IJavaProject javaProject = (IJavaProject)project.getNature(JavaCore.NATURE_ID);
+			IJavaProject javaProject = JavaCore.create(project);
 			if (javaProject == null) { // project already has .classpath and .project but Java nature isn't set
 				return Collections.emptySet();
 			}
