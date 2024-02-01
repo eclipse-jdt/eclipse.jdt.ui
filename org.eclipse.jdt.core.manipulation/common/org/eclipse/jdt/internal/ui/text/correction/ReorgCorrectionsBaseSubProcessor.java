@@ -49,7 +49,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.manipulation.TypeKinds;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
@@ -186,16 +185,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_organizeimports_description;
-		ICleanUpFixCore removeAllUnusedImportsFix = UnusedCodeFixCore.createCleanUp(context.getASTRoot(), false, false, false, false, false, true, false, false);
-		Change cleanupChange= null;
-		if( removeAllUnusedImportsFix != null ) {
-			try {
-				cleanupChange= removeAllUnusedImportsFix.createChange(null);
-			} catch(CoreException ce) {
-				// ignore
-			}
-		}
-		T proposal= createOrganizeImportsProposal(name, cleanupChange, cu, IProposalRelevance.ORGANIZE_IMPORTS);
+		T proposal= createOrganizeImportsProposal(name, null, cu, IProposalRelevance.ORGANIZE_IMPORTS);
 		if (proposal != null)
 			proposals.add(proposal);
 	}

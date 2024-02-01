@@ -63,16 +63,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.manipulation.TypeKinds;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -564,38 +560,6 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	@Override
 	public ICommandAccess createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<ICommandAccess> proposals) {
 		return new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(), missingType);
-	}
-
-	@Override
-	public boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-		UnresolvedElementsBaseSubProcessor<ICommandAccess> unresolvedElements = getUnresolvedElementsSubProcessor();
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (selectedNode == null) {
-			return false;
-		}
-		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
-		if (importDeclaration == null) {
-			return false;
-		}
-		if (!importDeclaration.isOnDemand()) {
-			Name name= importDeclaration.getName();
-			if (importDeclaration.isStatic() && name.isQualifiedName()) {
-				name= ((QualifiedName) name).getQualifier();
-			}
-			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? TypeKinds.REF_TYPES : TypeKinds.CLASSES | TypeKinds.INTERFACES;
-			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
-			unresolvedElements.collectNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
-		} else {
-			Name name= importDeclaration.getName();
-			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
-		}
-		String name= ASTNodes.asString(importDeclaration.getName());
-		if (importDeclaration.isOnDemand()) {
-			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
-		}
-		addProjectSetupFixProposal(context, problem, name, proposals);
-		return true;
 	}
 
 	@Override
