@@ -53,6 +53,7 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -64,9 +65,9 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public abstract class ProfileConfigurationBlock {
 
 	private class StoreUpdater implements Observer {
