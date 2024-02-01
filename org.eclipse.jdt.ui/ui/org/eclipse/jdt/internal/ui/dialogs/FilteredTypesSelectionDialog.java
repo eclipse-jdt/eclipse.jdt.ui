@@ -676,7 +676,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (contributedImageDescriptor == null) {
 				return TypeNameMatchLabelProvider.getImage((TypeNameMatch) element, TypeNameMatchLabelProvider.SHOW_TYPE_ONLY);
 			} else {
-				return fImageManager.createImage(contributedImageDescriptor);
+				return fImageManager.create(contributedImageDescriptor);
 			}
 		}
 
