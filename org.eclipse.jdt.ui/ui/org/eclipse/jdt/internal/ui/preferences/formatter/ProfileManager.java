@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 /**
  * The model for the set of profiles which are available in the workbench.
  */
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public abstract class ProfileManager extends Observable {
 
     public static final class KeySet {

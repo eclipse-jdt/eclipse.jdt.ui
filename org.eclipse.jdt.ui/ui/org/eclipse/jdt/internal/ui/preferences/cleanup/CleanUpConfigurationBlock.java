@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 /**
  * The clean up configuration block for the clean up preference page.
  */
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
 	private static final String CLEANUP_PAGE_SETTINGS_KEY= "cleanup_page"; //$NON-NLS-1$

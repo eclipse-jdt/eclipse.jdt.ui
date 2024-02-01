@@ -61,6 +61,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 
 	/**
