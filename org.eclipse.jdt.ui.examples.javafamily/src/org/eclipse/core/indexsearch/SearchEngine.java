@@ -132,7 +132,7 @@ public class SearchEngine {
 	 * Perform the given query against the index and return results via the resultCollector.
 	 */
 	public void search(IIndexQuery search, ISearchResultCollector resultCollector,
-						IProgressMonitor progressMonitor, @SuppressWarnings("unused") int waitingPolicy) {
+						IProgressMonitor progressMonitor, int waitingPolicy) {
 
 		HashSet pathCollector= new HashSet();
 		IProgressMonitor pm= SubMonitor.convert(progressMonitor, 5);
