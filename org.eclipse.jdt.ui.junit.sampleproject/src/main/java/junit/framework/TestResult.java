@@ -151,8 +151,14 @@ public class TestResult extends Object {
 			p.protect();
 		} catch (AssertionFailedError e) {
 			addFailure(test, e);
-		} catch (ThreadDeath e) { // don't catch ThreadDeath by accident
-			throw e;
+		} catch (Error e) {
+			// The type ThreadDeath has been deprecated since version 20
+			// and marked for removal
+			if ("ThreadDeath".equals(e.getClass().getSimpleName())) {
+				// don't catch ThreadDeath by accident
+				throw e;
+			}
+			addError(test, e);
 		} catch (Throwable e) {
 			addError(test, e);
 		}
