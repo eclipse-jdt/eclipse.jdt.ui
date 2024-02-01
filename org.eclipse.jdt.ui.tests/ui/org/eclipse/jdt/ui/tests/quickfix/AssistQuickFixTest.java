@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7288,6 +7288,39 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToStringBufferNLS() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String strX = \"foo\"+\"bar\"+\"baz\"+\"biz\"; //a comment //$NON-NLS-1$ //$NON-NLS-3$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuilder stringBuilder = new StringBuilder();\n");
+		buf.append("        stringBuilder.append(\"foo\"); //$NON-NLS-1$\n");
+		buf.append("        stringBuilder.append(\"bar\");\n");
+		buf.append("        stringBuilder.append(\"baz\"); //$NON-NLS-1$\n");
+		buf.append("        stringBuilder.append(\"biz\");\n");
+		buf.append("        String strX = stringBuilder.toString(); //a comment\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertProposalPreviewEquals(buf.toString(), NLS.bind(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuilder"), proposals);
+	}
+
+	@Test
 	public void testConvertToStringBufferNoFixWithoutString() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
@@ -7580,8 +7613,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("\n");
 			buf.append("public class A {\n");
 			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\",\n");
-			buf.append("                new Object[]{o1, o2}));\n");
+			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", new Object[]{o1, o2}));\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 
@@ -7809,6 +7841,58 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToMessageFormatNLS() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2); //a comment //$NON-NLS-1$ //$NON-NLS-2$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", o1, o2)); //a comment //$NON-NLS-1$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
+	}
+
+	@Test
+	public void testConvertToMessageFormatNLSInvalid() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2); //a comment //$NON-NLS-1$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
+	}
+
+	@Test
 	public void testConvertToStringFormatStringConcat() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -7856,6 +7940,55 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 
 		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_string_format, proposals);
+	}
+
+	@Test
+	public void testConvertToStringFormatNLS() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2); //a comment //$NON-NLS-1$ //$NON-NLS-2$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(String.format(\"foo%s \\\"bar\\\" %s\", o1, o2)); //a comment //$NON-NLS-1$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertProposalPreviewEquals(buf.toString(), CorrectionMessages.QuickAssistProcessor_convert_to_string_format, proposals);
+	}
+
+	@Test
+	public void testConvertToStringFormatNLSInvalid() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Object o1, Object o2) {\n");
+		buf.append("        System.out.println(\"foo\" + o1 + \" \\\"bar\\\" \" + o2); //a comment //$NON-NLS-1$\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 	}
 
 	@Test

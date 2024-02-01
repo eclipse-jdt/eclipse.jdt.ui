@@ -53,7 +53,7 @@ public class QuickFixTest15 extends QuickFixTest {
 
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit(QuickFixTest14.MODULE_INFO_FILE, QuickFixTest14.MODULE_INFO_FILE_CONTENT, false, null);
+		def.createCompilationUnit(QuickFixTest14.MODULE_INFO_FILE, QuickFixTest.MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String test= ""

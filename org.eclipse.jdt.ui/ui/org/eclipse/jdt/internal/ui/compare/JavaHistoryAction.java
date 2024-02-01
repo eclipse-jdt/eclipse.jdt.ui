@@ -84,6 +84,6 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 
 	@Override
 	public final void run(IAction action) {
-		getDelegate().run(action);
+		getDelegate().run();
 	}
 }

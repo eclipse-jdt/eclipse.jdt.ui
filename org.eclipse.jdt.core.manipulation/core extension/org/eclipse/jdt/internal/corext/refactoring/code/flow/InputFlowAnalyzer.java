@@ -81,7 +81,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 				return;
 			DoWhileFlowInfo info= createDoWhile();
 			setFlowInfo(node, info);
-			info.mergeAction(getFlowInfo(node.getBody()), fFlowContext);
+			info.mergeAction(getFlowInfo(node.getBody()));
 			// No need to merge the condition. It was already considered by the InputFlowAnalyzer.
 			info.removeLabel(null);
 		}

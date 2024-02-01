@@ -14,6 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 
+import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -161,10 +162,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected Map<ICompilationUnit, Collection<CastVariable2>> fObsoleteCasts= null;
 
+	private static final Cleaner cleaner= Cleaner.create();
+
 	/** The working copy owner */
-	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
-		// use default implementation
-	};
+	protected final CleanableWorkingCopyOwner fOwner= new CleanableWorkingCopyOwner();
 
 	/** Should occurrences of the type be replaced by the supertype? */
 	protected boolean fReplace= false;
@@ -192,6 +193,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected SuperTypeRefactoringProcessor(final CodeGenerationSettings settings) {
 		fSettings= settings;
+		cleaner.register(this, fOwner);
 	}
 
 	/**
@@ -484,11 +486,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		return StubUtility.getCompilationUnitContent(unit, buffer.toString(), fileComment, comment, content, delimiter);
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		resetWorkingCopies();
-	}
-
 	/**
 	 * Returns the field which corresponds to the specified variable declaration
 	 * fragment
@@ -759,11 +756,21 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		}
 	}
 
+	static class CleanableWorkingCopyOwner extends WorkingCopyOwner implements Runnable {
+        @Override
+		public void run() {
+            resetWorkingCopies(this);
+        }
+	}
+
+	protected void resetWorkingCopies() {
+		resetWorkingCopies(fOwner);
+	}
 	/**
 	 * Resets the working copies.
 	 */
-	protected void resetWorkingCopies() {
-		for (ICompilationUnit unit : JavaCore.getWorkingCopies(fOwner)) {
+	private static void resetWorkingCopies(WorkingCopyOwner owner) {
+		for (ICompilationUnit unit : JavaCore.getWorkingCopies(owner)) {
 			try {
 				unit.discardWorkingCopy();
 			} catch (Exception exception) {

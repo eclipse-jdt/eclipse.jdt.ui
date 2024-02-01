@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
@@ -21,10 +24,13 @@ import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
+
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
@@ -54,6 +60,13 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	private MembersOrderPreferenceCacheCommon fMembersOrderPreferenceCacheCommon;
 
 	/**
+	 * Default instance of the appearance type filters.
+	 */
+	private volatile TypeFilter fTypeFilter;
+
+	private BundleContext fBundleContext;
+
+	/**
 	 * The constructor.
 	 */
 	public JavaManipulationPlugin() {
@@ -63,12 +76,18 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		fBundleContext= context;
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		fgDefault= null;
+
+		if (fTypeFilter != null) {
+			fTypeFilter.dispose();
+			fTypeFilter= null;
+		}
 	}
 
 	/**
@@ -101,6 +120,20 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 		fMembersOrderPreferenceCacheCommon= mpcc;
 	}
 
+
+	public TypeFilter getTypeFilter() {
+		TypeFilter result= fTypeFilter;
+		if (result != null) { // First check (no locking)
+			return result;
+		}
+		synchronized(this) {
+			if (fTypeFilter == null) { // Second check (with locking)
+				fTypeFilter= new TypeFilter();
+			}
+			return fTypeFilter;
+		}
+	}
+
 	public static void log(Throwable e) {
 		ILog.of(JavaManipulationPlugin.class).log(new Status(IStatus.ERROR, JavaManipulation.ID_PLUGIN, IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
 	}
@@ -125,6 +158,28 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 
 	public static String getPluginId() {
 		return JavaManipulation.ID_PLUGIN;
+	}
+
+	/**
+	 * Returns the bundles for a given bundle name and version range,
+	 * regardless whether the bundle is resolved or not.
+	 *
+	 * @param bundleName the bundle name
+	 * @param version the version of the bundle, or <code>null</code> for all bundles
+	 * @return the bundles of the given name belonging to the given version range
+	 */
+	public Bundle[] getBundles(String bundleName, String version) {
+		Bundle[] bundles= Platform.getBundles(bundleName, version);
+		if (bundles != null)
+			return bundles;
+
+		// Accessing unresolved bundle
+		ServiceReference<PackageAdmin> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class);
+		PackageAdmin admin= fBundleContext.getService(serviceRef);
+		bundles= admin.getBundles(bundleName, version);
+		if (bundles != null && bundles.length > 0)
+			return bundles;
+		return null;
 	}
 
 	@Override

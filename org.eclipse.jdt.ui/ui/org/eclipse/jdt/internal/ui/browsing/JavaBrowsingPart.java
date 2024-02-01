@@ -906,9 +906,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		// Use the selection, if any
 		IWorkbenchPage page= getSite().getPage();
 		ISelection selection= null;
-		if (page != null)
+		if (page != null) {
 			selection= page.getSelection();
-		if (selection instanceof ITextSelection) {
+		}
+		if (page != null && selection instanceof ITextSelection) {
 			Object part= page.getActivePart();
 			if (part instanceof IEditorPart) {
 				setSelectionFromEditor((IEditorPart)part);

@@ -21,8 +21,9 @@ import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
 
 /**
  * The context that contains all information required by a clean up to create a fix.
+ * Originally from org.eclipse.jdt.ui 3.5
  *
- * @since 3.5
+ * @since 1.21
  */
 public class CleanUpContext extends CleanUpContextCore {
 

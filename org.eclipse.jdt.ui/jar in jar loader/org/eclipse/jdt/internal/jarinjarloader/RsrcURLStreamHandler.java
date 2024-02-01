@@ -45,17 +45,19 @@ public class RsrcURLStreamHandler extends java.net.URLStreamHandler {
 	@Override
     protected void parseURL(URL url, String spec, int start, int limit) {
     	String file;
+    	String ref = null;
     	if (spec.startsWith(JIJConstants.INTERNAL_URL_PROTOCOL_WITH_COLON))
     		file = spec.substring(5);
     	else if (JIJConstants.CURRENT_DIR.equals(url.getFile()))
     		file = spec;
     	else if (url.getFile().endsWith(JIJConstants.PATH_SEPARATOR))
     		file = url.getFile() + spec;
-		else if (JIJConstants.RUNTIME.equals(spec))
+    	else if (JIJConstants.RUNTIME_WITH_HASH.equals(spec)) {
     		file = url.getFile();
-    	else
+    		ref = JIJConstants.RUNTIME;
+    	} else
     		file = spec;
-    	setURL(url, JIJConstants.INTERNAL_URL_PROTOCOL, "", -1, null, null, file, null, null);	 //$NON-NLS-1$
+    	setURL(url, JIJConstants.INTERNAL_URL_PROTOCOL, "", -1, null, null, file, null, ref);	 //$NON-NLS-1$
     }
 
 }

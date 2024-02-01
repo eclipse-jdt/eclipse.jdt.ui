@@ -104,12 +104,18 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		void setStatus(NullAnnotationsConfigurationDialog.AnnotationWrapper element, IStatus newStatus);
 	}
 
-	private class NullAnnotationsConfigurationDialog extends StatusDialog {
+	abstract class AbstractAnnotationsConfigurationDialog extends StatusDialog {
 
-		private static final String COLUMN_ANNOTATION= "annotation"; //$NON-NLS-1$
-		private static final String EMPTY_STRING= ""; //$NON-NLS-1$
+		protected static final int RESTORE_DEFAULTS_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
 
-		private class AnnotationDialogField extends StringDialogField implements IAnnotationDialogField {
+		protected static final String COLUMN_ANNOTATION= "annotation"; //$NON-NLS-1$
+		protected static final String EMPTY_STRING= ""; //$NON-NLS-1$
+
+		public AbstractAnnotationsConfigurationDialog(Shell parent) {
+			super(parent);
+		}
+
+		protected class AnnotationDialogField extends StringDialogField implements IAnnotationDialogField {
 
 			final String fErrorMessage;
 			IStatus fStatus;
@@ -134,11 +140,11 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				fStatus= newStatus;
 			}
 			IStatus doValidation() {
-				return NullAnnotationsConfigurationDialog.this.doValidation(this, null, getText(), true);
+				return AbstractAnnotationsConfigurationDialog.this.doValidation(this, null, getText(), true);
 			}
 		}
 
-		private class AnnotationWrapper { // mimic a mutable string
+		protected class AnnotationWrapper { // mimic a mutable string
 			public String annotationName;
 			public IStatus status; // null means: no status computed, yet.
 
@@ -146,6 +152,119 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				this.annotationName= annotationName;
 			}
 		}
+
+		protected class FieldListener implements ModifyListener {
+			AnnotationDialogField fField;
+			FieldListener(AnnotationDialogField field) {
+				fField= field;
+			}
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				fField.doValidation();
+			}
+		}
+
+		protected class AnnotationCompletionContextRequestor extends CompletionContextRequestor {
+			@Override
+			public StubTypeContext getStubTypeContext() {
+				return TypeContextChecker.createAnnotationStubTypeContext(fProject);
+			}
+		}
+
+
+		protected abstract IStatus doValidation(IAnnotationDialogField dialogField, AnnotationWrapper element, String newValue, boolean isTypeMandatory);
+
+
+		protected Group createAnnotationGroup(AnnotationDialogField primaryField, Composite parent, String[] texts, int fieldWidthHint) {
+			Group group= new Group(parent, SWT.NONE);
+			GridLayout layout= new GridLayout(3, false);
+			layout.marginLeft= convertWidthInCharsToPixels(2);
+			GridData groupData= new GridData(SWT.FILL, SWT.FILL, true, true);
+
+			// compensate different height of intro texts when suggesting height of the group:
+			GC gc= new GC(parent);
+			gc.setFont(JFaceResources.getDialogFont());
+			Point size= gc.stringExtent(texts[1]);
+			int lines= (size.x / fieldWidthHint) + 1;
+			gc.dispose();
+			groupData.heightHint= convertHeightInCharsToPixels(8+lines);
+
+			group.setLayoutData(groupData);
+			group.setLayout(layout);
+			group.setText(texts[0]);
+
+			Label intro= new Label(group, SWT.WRAP);
+			intro.setText(texts[1]);
+			intro.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, layout.numColumns, 1));
+			LayoutUtil.setWidthHint(intro, 1); // force text wrapping
+
+
+			primaryField.doFillIntoGrid(group, 2);
+			addSpacer(group); // button column is empty for the primary field
+
+			Text text= primaryField.getTextControl(null);
+			((GridData)text.getLayoutData()).grabExcessHorizontalSpace= true;
+			text.addModifyListener(new FieldListener(primaryField));
+			TextFieldNavigationHandler.install(text);
+			BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
+
+			if (fProject != null) {
+				JavaTypeCompletionProcessor annotationCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
+				annotationCompletionProcessor.setCompletionContextRequestor(new AnnotationCompletionContextRequestor());
+				ControlContentAssistHelper.createTextContentAssistant(text, annotationCompletionProcessor);
+			}
+			return group;
+		}
+
+		Label addSpacer(Group group) {
+			return new Label(group,  SWT.NONE);
+		}
+
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, RESTORE_DEFAULTS_BUTTON_ID, PreferencesMessages.NullAnnotationsConfigurationDialog_restore_defaults, false);
+			super.createButtonsForButtonBar(parent);
+		}
+
+
+		@Override
+		protected boolean isResizable() {
+			return true;
+		}
+
+
+		@Override
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.PROBLEM_SEVERITIES_PROPERTY_PAGE);
+		}
+
+		@Override
+		public void create() {
+			super.create(); // cannot show error status before this super call
+			StringDialogField firstErrorField= null;
+			IStatus firstError= null;
+			AnnotationDialogField[] primaryFields= getPrimaryFields();
+			for (AnnotationDialogField field : primaryFields) {
+				IStatus status= field.doValidation();
+				if (status.getSeverity() == IStatus.ERROR && firstError == null) {
+					firstErrorField= field;
+					firstError= status;
+				}
+			}
+			if (firstErrorField != null && firstError != null) {
+				updateStatus(firstError);
+				firstErrorField.postSetFocusOnDialogField(dialogArea.getDisplay());
+			}
+		}
+
+
+		protected abstract AnnotationDialogField[] getPrimaryFields();
+
+	}
+	class NullAnnotationsConfigurationDialog extends AbstractAnnotationsConfigurationDialog {
 
 		private class AnnotationListDialogField extends ListDialogField<AnnotationWrapper> implements IAnnotationDialogField {
 
@@ -206,25 +325,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			}
 		}
 
-		private class FieldListener implements ModifyListener {
-			AnnotationDialogField fField;
-			FieldListener(AnnotationDialogField field) {
-				fField= field;
-			}
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				fField.doValidation();
-			}
-		}
-
-		private class AnnotationCompletionContextRequestor extends CompletionContextRequestor {
-			@Override
-			public StubTypeContext getStubTypeContext() {
-				return TypeContextChecker.createAnnotationStubTypeContext(fProject);
-			}
-		}
-
 		private class AnnotationListAdapter implements IListAdapter<AnnotationWrapper> {
 
 			@Override
@@ -266,7 +366,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					AnnotationWrapper annotationWrapper= (AnnotationWrapper) element;
 					IStatus status= annotationWrapper.status;
 					if (status == null) {
-						status= validateNullnessAnnotation(annotationWrapper.annotationName, fField.getErrorMessage(), false);
+						status= validateAnnotation(annotationWrapper.annotationName, fField.getErrorMessage(), false);
 						annotationWrapper.status= status;
 					}
 					switch (status.getSeverity()) {
@@ -281,8 +381,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				return JavaPluginImages.get(JavaPluginImages.IMG_BLANK);
 			}
 		}
-
-		private static final int RESTORE_DEFAULTS_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
 
 
 		private AnnotationDialogField fNullableAnnotationDialogField;
@@ -363,44 +461,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		}
 
 		private void createNullAnnotationGroup(AnnotationDialogField primaryField, final AnnotationListDialogField secondaryList, Composite parent, String[] texts, int fieldWidthHint) {
-			Group group= new Group(parent, SWT.NONE);
-			GridLayout layout= new GridLayout(3, false);
-			layout.marginLeft= convertWidthInCharsToPixels(2);
-			GridData groupData= new GridData(SWT.FILL, SWT.FILL, true, true);
-
-			// compensate different height of intro texts when suggesting height of the group:
-			GC gc= new GC(parent);
-			gc.setFont(JFaceResources.getDialogFont());
-			Point size= gc.stringExtent(texts[1]);
-			int lines= (size.x / fieldWidthHint) + 1;
-			gc.dispose();
-			groupData.heightHint= convertHeightInCharsToPixels(8+lines);
-
-			group.setLayoutData(groupData);
-			group.setLayout(layout);
-			group.setText(texts[0]);
-
-			Label intro= new Label(group, SWT.WRAP);
-			intro.setText(texts[1]);
-			intro.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, layout.numColumns, 1));
-			LayoutUtil.setWidthHint(intro, 1); // force text wrapping
-
-
-			primaryField.doFillIntoGrid(group, 2);
-			addSpacer(group); // button column is empty for the primary field
-
-			Text text= primaryField.getTextControl(null);
-			((GridData)text.getLayoutData()).grabExcessHorizontalSpace= true;
-			text.addModifyListener(new FieldListener(primaryField));
-			TextFieldNavigationHandler.install(text);
-			BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
-
-			if (fProject != null) {
-				JavaTypeCompletionProcessor annotationCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
-				annotationCompletionProcessor.setCompletionContextRequestor(new AnnotationCompletionContextRequestor());
-				ControlContentAssistHelper.createTextContentAssistant(text, annotationCompletionProcessor);
-			}
-
+			Group group= createAnnotationGroup(primaryField, parent, texts, fieldWidthHint);
 
 			secondaryList.doFillIntoGrid(group, 3);
 			final TableViewer tableViewer= secondaryList.getTableViewer();
@@ -466,31 +527,14 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			});
 		}
 
-		private Label addSpacer(Group group) {
-			return new Label(group,  SWT.NONE);
+		@Override
+		protected AnnotationDialogField[] getPrimaryFields() {
+			return new AnnotationDialogField[] { fNullableAnnotationDialogField, fNonNullAnnotationDialogField, fNonNullByDefaultAnnotationDialogField };
 		}
 
 		@Override
-		public void create() {
-			super.create(); // cannot show error status before this super call
-			StringDialogField firstErrorField= null;
-			IStatus firstError= null;
-			AnnotationDialogField[] primaryFields= { fNullableAnnotationDialogField, fNonNullAnnotationDialogField, fNonNullByDefaultAnnotationDialogField };
-			for (AnnotationDialogField field : primaryFields) {
-				IStatus status= field.doValidation();
-				if (status.getSeverity() == IStatus.ERROR && firstError == null) {
-					firstErrorField= field;
-					firstError= status;
-				}
-			}
-			if (firstErrorField != null && firstError != null) {
-				updateStatus(firstError);
-				firstErrorField.postSetFocusOnDialogField(dialogArea.getDisplay());
-			}
-		}
-
-		private IStatus doValidation(IAnnotationDialogField dialogField, AnnotationWrapper element, String newValue, boolean isTypeMandatory) {
-			IStatus fieldStatus= validateNullnessAnnotation(newValue, dialogField.getErrorMessage(), isTypeMandatory);
+		protected IStatus doValidation(IAnnotationDialogField dialogField, AnnotationWrapper element, String newValue, boolean isTypeMandatory) {
+			IStatus fieldStatus= validateAnnotation(newValue, dialogField.getErrorMessage(), isTypeMandatory);
 			if (fieldStatus != null) {
 				dialogField.setStatus(element, fieldStatus);
 
@@ -505,12 +549,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				return fieldStatus;
 			}
 			return new StatusInfo();
-		}
-
-		@Override
-		protected void createButtonsForButtonBar(Composite parent) {
-			createButton(parent, RESTORE_DEFAULTS_BUTTON_ID, PreferencesMessages.NullAnnotationsConfigurationDialog_restore_defaults, false);
-			super.createButtonsForButtonBar(parent);
 		}
 
 		@Override
@@ -537,16 +575,95 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					fOtherNonNullByDefaultAnnotationsDialogField.getCommaSeparatedElements()
 			};
 		}
+	}
 
-		@Override
-		protected boolean isResizable() {
-			return true;
+	class OwningAnnotationsConfigurationDialog extends AbstractAnnotationsConfigurationDialog {
+		private AnnotationDialogField fOwningAnnotationDialogField;
+		private AnnotationDialogField fNotOwningAnnotationDialogField;
+
+		private OwningAnnotationsConfigurationDialog() {
+			super(ProblemSeveritiesConfigurationBlock.this.getShell());
+
+			setTitle(PreferencesMessages.OwningAnnotationsConfigurationDialog_title);
+
+			String errorMessage= PreferencesMessages.OwningAnnotationsConfigurationDialog_owning_annotation_error;
+			fOwningAnnotationDialogField= createAnnotationDialogField(PREF_OWNING_ANNOTATION_NAME, errorMessage);
+
+			errorMessage= PreferencesMessages.OwningAnnotationsConfigurationDialog_notowning_annotation_error;
+			fNotOwningAnnotationDialogField= createAnnotationDialogField(PREF_NOTOWNING_ANNOTATION_NAME, errorMessage);
+		}
+
+		private AnnotationDialogField createAnnotationDialogField(Key key, String errorMessage) {
+			AnnotationDialogField field= new AnnotationDialogField(errorMessage);
+			field.setLabelText(PreferencesMessages.OwningAnnotationsConfigurationDialog_annotation_label);
+			field.setText(getValue(key));
+			return field;
 		}
 
 		@Override
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.PROBLEM_SEVERITIES_PROPERTY_PAGE);
+		protected Control createDialogArea(Composite parent) {
+			Composite composite= (Composite) super.createDialogArea(parent);
+			initializeDialogUnits(parent);
+
+			GridLayout layout= (GridLayout) composite.getLayout();
+			layout.numColumns= 1;
+
+			int fieldWidthHint= convertWidthInCharsToPixels(90); // heuristic to match the default size of the dialog
+
+			Label intro= new Label(composite, SWT.WRAP);
+			intro.setText(PreferencesMessages.OwningAnnotationsConfigurationDialog_owning_annotations_description);
+	    	intro.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, layout.numColumns, 1));
+			LayoutUtil.setWidthHint(intro, fieldWidthHint);
+
+			String[] texts= { PreferencesMessages.OwningAnnotationsConfigurationDialog_owning_annotation_label,
+					PreferencesMessages.OwningAnnotationsConfigurationDialog_owning_annotation_description };
+			createAnnotationGroup(fOwningAnnotationDialogField, composite, texts, fieldWidthHint);
+
+			texts= new String[] { PreferencesMessages.OwningAnnotationsConfigurationDialog_notowning_annotation_label,
+					PreferencesMessages.OwningAnnotationsConfigurationDialog_notowning_annotation_description };
+			createAnnotationGroup(fNotOwningAnnotationDialogField, composite, texts, fieldWidthHint);
+
+			fOwningAnnotationDialogField.postSetFocusOnDialogField(parent.getDisplay());
+
+			applyDialogFont(composite);
+			return composite;
+		}
+
+		@Override
+		protected AnnotationDialogField[] getPrimaryFields() {
+			return new AnnotationDialogField[] { fOwningAnnotationDialogField, fNotOwningAnnotationDialogField };
+		}
+
+		@Override
+		protected IStatus doValidation(IAnnotationDialogField dialogField, AnnotationWrapper element, String newValue, boolean isTypeMandatory) {
+			IStatus fieldStatus= validateAnnotation(newValue, dialogField.getErrorMessage(), isTypeMandatory);
+			if (fieldStatus != null) {
+				dialogField.setStatus(element, fieldStatus);
+
+				// compute most severe among all known statuses, preferring fieldStatus then first-found if equal severities:
+				IStatus mostSevereStatus= StatusUtil.getMoreSevere(fOwningAnnotationDialogField.getStatus(), fieldStatus);
+				mostSevereStatus= StatusUtil.getMoreSevere(fNotOwningAnnotationDialogField.getStatus(), mostSevereStatus);
+				updateStatus(mostSevereStatus);
+				return fieldStatus;
+			}
+			return new StatusInfo();
+		}
+
+		@Override
+		protected void buttonPressed(int buttonId) {
+			if (buttonId == RESTORE_DEFAULTS_BUTTON_ID) {
+				fOwningAnnotationDialogField.setText(OWNING_ANNOTATIONS_DEFAULTS[0]);
+				fNotOwningAnnotationDialogField.setText(OWNING_ANNOTATIONS_DEFAULTS[1]);
+			} else {
+				super.buttonPressed(buttonId);
+			}
+		}
+
+		public String[] getResult() {
+			return new String[] {
+					fOwningAnnotationDialogField.getText(),
+					fNotOwningAnnotationDialogField.getText(),
+			};
 		}
 	}
 
@@ -647,6 +764,21 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_UNCLOSED_CLOSEABLE= getJDTCoreKey(JavaCore.COMPILER_PB_UNCLOSED_CLOSEABLE);
 	private static final Key PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE= getJDTCoreKey(JavaCore.COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE);
 	private static final Key PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE= getJDTCoreKey(JavaCore.COMPILER_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE);
+	private static final Key PREF_ANNOTATION_RESOURCE_ANALYSIS = getJDTCoreKey(JavaCore.COMPILER_ANNOTATION_RESOURCE_ANALYSIS);
+	private static final Key PREF_PB_INCOMPATIBLE_OWNING_CONTRACT = getJDTCoreKey(JavaCore.COMPILER_PB_INCOMPATIBLE_OWNING_CONTRACT);
+	private static final Key PREF_PB_RECOMMENDED_RESOURCE_MANAGEMENT = getJDTCoreKey(JavaCore.COMPILER_PB_RECOMMENDED_RESOURCE_MANAGEMENT);
+	/**
+	 * Key for the "Use default annotations for ownership " setting.
+	 * <p>Values are { {@link #ENABLED}, {@link #DISABLED} }.
+	 */
+	private static final Key INTR_DEFAULT_OWNING_ANNOTATIONS= getLocalKey("internal.default.owning.annotations"); //$NON-NLS-1$
+	private static final Key PREF_OWNING_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_OWNING_ANNOTATION_NAME);
+	private static final Key PREF_NOTOWNING_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NOTOWNING_ANNOTATION_NAME);
+	private static final String[] OWNING_ANNOTATIONS_DEFAULTS= {
+		PREF_OWNING_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
+		PREF_NOTOWNING_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
+	};
+
 
 	private static final Key PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS= getJDTCoreKey(JavaCore.COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS);
 	private static final Key PREF_PB_REDUNDANT_SUPERINTERFACE= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_SUPERINTERFACE);
@@ -749,6 +881,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_INHERIT_NULL_ANNOTATIONS,
 				PREF_EXTERNAL_ANNOTATIONS_FROM_ALL_LOCATIONS,
 				PREF_PB_UNCLOSED_CLOSEABLE, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE,
+				PREF_ANNOTATION_RESOURCE_ANALYSIS, PREF_PB_INCOMPATIBLE_OWNING_CONTRACT, PREF_PB_RECOMMENDED_RESOURCE_MANAGEMENT,
+				INTR_DEFAULT_OWNING_ANNOTATIONS, PREF_OWNING_ANNOTATION_NAME, PREF_NOTOWNING_ANNOTATION_NAME,
 				PREF_PB_FALLTHROUGH_CASE, PREF_PB_REDUNDANT_SUPERINTERFACE, PREF_PB_UNUSED_WARNING_TOKEN, PREF_PB_SUPPRESS_WARNINGS_NOT_FULLY_ANALYSED,
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION,
@@ -956,6 +1090,24 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_resource_leak_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_enable_annotation_resource_analysis;
+		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_ANNOTATION_RESOURCE_ANALYSIS, enabledDisabled, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incompatible_owning_contract_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_INCOMPATIBLE_OWNING_CONTRACT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_recommended_resource_management_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_RECOMMENDED_RESOURCE_MANAGEMENT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, section);
+
+		label= PreferencesMessages.OwningAnnotationsConfigurationDialog_use_default_annotations_for_owning;
+		fFilteredPrefTree.addCheckBoxWithLink(inner, label, INTR_DEFAULT_OWNING_ANNOTATIONS, enabledDisabled, extraIndent, node, SWT.DEFAULT,
+				new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						openOwningAnnotationsConfigurationDialog();
+					}
+				});
 
 		// - affecting members
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_serial_version_label;
@@ -1256,6 +1408,17 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		updateNullAnnotationsSetting();
 	}
 
+	private void openOwningAnnotationsConfigurationDialog() {
+		OwningAnnotationsConfigurationDialog dialog= new OwningAnnotationsConfigurationDialog();
+		int result= dialog.open();
+		if (result == Window.OK) {
+			String[] annotationNames= dialog.getResult();
+			setValue(PREF_OWNING_ANNOTATION_NAME, annotationNames[0]);
+			setValue(PREF_NOTOWNING_ANNOTATION_NAME, annotationNames[1]);
+		}
+		updateOwningAnnotationsSetting();
+	}
+
 	private Composite createInnerComposite(ExpandableComposite excomposite, int nColumns, Font font) {
 		Composite inner= new Composite(excomposite, SWT.NONE);
 		inner.setFont(font);
@@ -1282,7 +1445,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey) ||
 					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey) ||
-					PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey)) {
+					PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey) ||
+					PREF_ANNOTATION_RESOURCE_ANALYSIS.equals(changedKey)) {
 				updateEnableStates();
 			}
 
@@ -1348,6 +1512,14 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					openNullAnnotationsConfigurationDialog();
 				}
 
+			} else if (INTR_DEFAULT_OWNING_ANNOTATIONS.equals(changedKey)) {
+				if (ENABLED.equals(newValue)) {
+					setValue(PREF_OWNING_ANNOTATION_NAME, OWNING_ANNOTATIONS_DEFAULTS[0]);
+					setValue(PREF_NOTOWNING_ANNOTATION_NAME, OWNING_ANNOTATIONS_DEFAULTS[1]);
+				} else {
+					openOwningAnnotationsConfigurationDialog();
+				}
+
 			} else {
 				return;
 			}
@@ -1379,6 +1551,16 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		String defaultNullAnnotationsValue= Arrays.equals(annotationNames, NULL_ANNOTATIONS_DEFAULTS) ? ENABLED : DISABLED;
 		setValue(INTR_DEFAULT_NULL_ANNOTATIONS, defaultNullAnnotationsValue);
 		updateCheckBox(getCheckBox(INTR_DEFAULT_NULL_ANNOTATIONS));
+	}
+
+	private void updateOwningAnnotationsSetting() {
+		String[] annotationNames= {
+				getValue(PREF_OWNING_ANNOTATION_NAME),
+				getValue(PREF_NOTOWNING_ANNOTATION_NAME),
+		};
+		String defaultOwningAnnotationsValue= Arrays.equals(annotationNames, OWNING_ANNOTATIONS_DEFAULTS) ? ENABLED : DISABLED;
+		setValue(INTR_DEFAULT_OWNING_ANNOTATIONS, defaultOwningAnnotationsValue);
+		updateCheckBox(getCheckBox(INTR_DEFAULT_OWNING_ANNOTATIONS));
 	}
 
 	private void updateEnableStates() {
@@ -1422,9 +1604,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		getCheckBox(PREF_INHERIT_NULL_ANNOTATIONS).setEnabled(enableAnnotationNullAnalysis);
 		getCheckBox(PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS).setEnabled(enableAnnotationNullAnalysis);
 		getCheckBox(PREF_EXTERNAL_ANNOTATIONS_FROM_ALL_LOCATIONS).setEnabled(enableAnnotationNullAnalysis);
+
+		boolean enableAnnotationResourceAnalysis= checkValue(PREF_ANNOTATION_RESOURCE_ANALYSIS, ENABLED);
+		setComboEnabled(PREF_PB_INCOMPATIBLE_OWNING_CONTRACT, enableAnnotationResourceAnalysis);
+		setComboEnabled(PREF_PB_RECOMMENDED_RESOURCE_MANAGEMENT, enableAnnotationResourceAnalysis);
 	}
 
-	private IStatus validateNullnessAnnotation(String value, String errorMessage, boolean isTypeMandatory) {
+	private IStatus validateAnnotation(String value, String errorMessage, boolean isTypeMandatory) {
 		StatusInfo status= new StatusInfo();
 		if (value.isEmpty() && !isTypeMandatory)
 			return status;

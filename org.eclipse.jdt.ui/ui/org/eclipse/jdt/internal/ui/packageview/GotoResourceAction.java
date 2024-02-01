@@ -24,7 +24,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.PlatformUI;
@@ -42,7 +41,7 @@ public class GotoResourceAction extends Action {
 
 	private static class GotoResourceDialog extends FilteredResourcesSelectionDialog {
 		private IJavaModel fJavaModel;
-		public GotoResourceDialog(Shell parentShell, IContainer container, StructuredViewer viewer) {
+		public GotoResourceDialog(Shell parentShell, IContainer container) {
 			super(parentShell, false, container, IResource.FILE | IResource.FOLDER | IResource.PROJECT);
 			fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 			setTitle(PackagesMessages.GotoResource_dialog_title);
@@ -77,7 +76,7 @@ public class GotoResourceAction extends Action {
 			private boolean select(IResource resource) {
 				IProject project= resource.getProject();
 				try {
-					if (project.getNature(JavaCore.NATURE_ID) != null)
+					if (project.hasNature(JavaCore.NATURE_ID))
 						return fJavaModel.contains(resource);
 				} catch (CoreException e) {
 					// do nothing. Consider resource;
@@ -109,7 +108,7 @@ public class GotoResourceAction extends Action {
 	public void run() {
 		TreeViewer viewer= fPackageExplorer.getTreeViewer();
 		GotoResourceDialog dialog= new GotoResourceDialog(fPackageExplorer.getSite().getShell(),
-			ResourcesPlugin.getWorkspace().getRoot(), viewer);
+			ResourcesPlugin.getWorkspace().getRoot());
 	 	dialog.open();
 	 	Object[] result = dialog.getResult();
 	 	if (result == null || result.length == 0 || !(result[0] instanceof IResource))

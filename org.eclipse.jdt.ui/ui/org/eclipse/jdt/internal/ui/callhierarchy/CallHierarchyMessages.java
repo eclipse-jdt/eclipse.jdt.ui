@@ -135,6 +135,7 @@ public final class CallHierarchyMessages extends NLS {
 	public static String OpenLocationAction_error_title;
 	public static String CallHierarchyUI_open_in_editor_error_message;
 	public static String CallHierarchyUI_open_in_editor_error_messageArgs;
+	public static String CallHierarchyUI_open_in_editor_notExists;
 	public static String CallHierarchyUI_open_operation_unavialable;
 	public static String CallHierarchyUI_error_open_view;
 	public static String CopyCallHierarchyAction_label;

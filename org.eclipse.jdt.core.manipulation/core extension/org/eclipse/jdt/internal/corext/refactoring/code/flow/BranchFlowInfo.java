@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 class BranchFlowInfo extends FlowInfo {
 
-	public BranchFlowInfo(SimpleName label, FlowContext context) {
+	public BranchFlowInfo(SimpleName label) {
 		super(NO_RETURN);
 		fBranches= new HashSet<>(2);
 		fBranches.add(makeString(label));

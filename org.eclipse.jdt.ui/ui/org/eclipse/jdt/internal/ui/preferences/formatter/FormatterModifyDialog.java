@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -310,7 +310,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		}
 
 		public static ModifyAll<ToolBar> addModifyAll(Section section, boolean withIndent, final Images images) {
-			return new ModifyAll<ToolBar>(section, images) {
+			return new ModifyAll<>(section, images) {
 				private LineWrapPreference fPreference;
 
 				@Override
@@ -919,6 +919,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_VARIABLE_DECLARATIONS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
 		final CheckboxPreference alignAssignmentsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_ASSIGNMENT_STATEMENTS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
+		final CheckboxPreference alignArrowsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_arrows_in_switch_on_columns,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_ARROWS_IN_SWITCH_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
 
 		fTree.addGap(alignSection);
 		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
@@ -926,11 +928,13 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Preference<?> tabCharPref= parentSection.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 		Predicate<String> anyAlignChecker= v -> DefaultCodeFormatterConstants.TRUE.equals(alignFieldsPref.getValue())
 				|| DefaultCodeFormatterConstants.TRUE.equals(alignVariablesPref.getValue())
-				|| DefaultCodeFormatterConstants.TRUE.equals(alignAssignmentsPref.getValue());
+				|| DefaultCodeFormatterConstants.TRUE.equals(alignAssignmentsPref.getValue())
+				|| DefaultCodeFormatterConstants.TRUE.equals(alignArrowsPref.getValue());
 		Predicate<String> spacesChecker= anyAlignChecker.and(v -> !JavaCore.SPACE.equals(tabCharPref.getValue()));
 		alignFieldsPref.addDependant(useSpacesPref, spacesChecker);
 		alignVariablesPref.addDependant(useSpacesPref, spacesChecker);
 		alignAssignmentsPref.addDependant(useSpacesPref, spacesChecker);
+		alignArrowsPref.addDependant(useSpacesPref, spacesChecker);
 		tabCharPref.addDependant(useSpacesPref, spacesChecker);
 
 		Button checkbox = new Button(alignSection.fInnerComposite, SWT.CHECK);
@@ -945,6 +949,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		alignFieldsPref.addDependant(groupingPref, anyAlignChecker);
 		alignVariablesPref.addDependant(groupingPref, anyAlignChecker);
 		alignAssignmentsPref.addDependant(groupingPref, anyAlignChecker);
+		alignArrowsPref.addDependant(groupingPref, anyAlignChecker);
 
 		groupingPref.setValueValidator(value -> {
 			String warningMessage= null;
@@ -991,6 +996,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_braces_pref_annotation_type_declaration, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION)
 				.pref(FormatterMessages.FormatterModifyDialog_braces_pref_blocks, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK)
 				.pref(FormatterMessages.FormatterModifyDialog_braces_pref_blocks_in_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE)
+				.pref(FormatterMessages.FormatterModifyDialog_braces_pref_blocks_in_case_after_arrow, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE_AFTER_ARROW)
 				.pref(FormatterMessages.FormatterModifyDialog_braces_pref_switch_case, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH)
 				.pref(FormatterMessages.FormatterModifyDialog_braces_pref_array_initializer, DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER, pref -> {
 					CheckboxPreference emptyOnOneLine= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_braces_pref_keep_empty_array_initializer_on_one_line,

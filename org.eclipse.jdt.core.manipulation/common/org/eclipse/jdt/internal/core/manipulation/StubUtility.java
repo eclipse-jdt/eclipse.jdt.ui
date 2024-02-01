@@ -713,7 +713,12 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());
 		if (!decl.isConstructor()) {
-			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(getReturnType(decl)));
+			ASTNode retType= getReturnType(decl);
+			if (retType != null) {
+				context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(retType));
+			} else {
+				context.setVariable(CodeTemplateContextType.RETURN_TYPE, "void"); //$NON-NLS-1$
+			}
 		}
 		if (needsTarget) {
 			if (delegate)
@@ -756,7 +761,12 @@ public class StubUtility {
 
 		String returnType= null;
 		if (!decl.isConstructor()) {
-			returnType= ASTNodes.asString(getReturnType(decl));
+			ASTNode retType= getReturnType(decl);
+			if (retType != null) {
+				returnType= ASTNodes.asString(retType);
+			} else {
+				returnType= "void"; //$NON-NLS-1$
+			}
 		}
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first

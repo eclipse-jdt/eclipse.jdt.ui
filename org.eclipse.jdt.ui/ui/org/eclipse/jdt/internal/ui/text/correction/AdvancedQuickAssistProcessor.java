@@ -235,7 +235,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
-	private static boolean getConvertToIfReturnProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+	private static boolean getConvertToIfReturnProposals(IInvocationContextCore context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
 		if (!(coveringNode instanceof IfStatement)) {
 			return false;
 		}
@@ -343,7 +343,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getIfReturnIntoIfElseAtEndOfVoidMethodProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getIfReturnIntoIfElseAtEndOfVoidMethodProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -409,7 +409,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getInverseIfProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -450,7 +450,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseIfContinueIntoIfThenInLoopsProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getInverseIfContinueIntoIfThenInLoopsProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -498,7 +498,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseIfIntoContinueInLoopsProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getInverseIfIntoContinueInLoopsProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof IfStatement)) {
 			return false;
 		}
@@ -577,7 +577,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return statements;
 	}
 
-	private static boolean getInverseConditionProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getInverseConditionProposals(IInvocationContextCore context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		if (coveredNodes.isEmpty()) {
 			return false;
 		}
@@ -770,7 +770,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return newExpression;
 	}
 
-	private static boolean getRemoveExtraParenthesesProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getRemoveExtraParenthesesProposals(IInvocationContextCore context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		ArrayList<ASTNode> nodes;
 		if (context.getSelectionLength() == 0 && covering instanceof ParenthesizedExpression) {
 			nodes= new ArrayList<>();
@@ -797,7 +797,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParanoidalParenthesesProposals(IInvocationContext context, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getAddParanoidalParenthesesProposals(IInvocationContextCore context, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 
 		IProposableFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
 		if (fix == null)
@@ -816,7 +816,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddParenthesesForExpressionProposals(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getAddParenthesesForExpressionProposals(IInvocationContextCore context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
 		ASTNode node;
 
 		if (context.getSelectionLength() == 0) {
@@ -861,7 +861,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
+	static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContextCore context, ASTNode coveringNode) {
 		final ArrayList<ASTNode> coveredNodes= new ArrayList<>();
 		final int selectionBegin= context.getSelectionOffset();
 		final int selectionEnd= selectionBegin + context.getSelectionLength();
@@ -895,7 +895,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return coveredNodes;
 	}
 
-	private static boolean getJoinAndIfStatementsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getJoinAndIfStatementsProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 
 		//
 		if (!(node instanceof IfStatement)) {
@@ -1003,7 +1003,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return parenthesizedExpression;
 	}
 
-	public static boolean getSplitAndConditionProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getSplitAndConditionProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		Operator andOperator= InfixExpression.Operator.CONDITIONAL_AND;
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
@@ -1107,7 +1107,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return -1;
 	}
 
-	private static boolean getJoinOrIfStatementsProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getJoinOrIfStatementsProposals(IInvocationContextCore context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		Operator orOperator= InfixExpression.Operator.CONDITIONAL_OR;
 		if (coveredNodes.size() < 2)
 			return false;
@@ -1191,7 +1191,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	public static boolean getSplitOrConditionProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getSplitOrConditionProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		Operator orOperator= InfixExpression.Operator.CONDITIONAL_OR;
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
@@ -1257,7 +1257,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseConditionalExpressionProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getInverseConditionalExpressionProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		// try to find conditional expression as parent
 		while (covering instanceof Expression) {
 			if (covering instanceof ConditionalExpression)
@@ -1290,7 +1290,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getExchangeInnerAndOuterIfConditionsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getExchangeInnerAndOuterIfConditionsProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		boolean result= false;
 		//
 		if (!(node instanceof IfStatement)) {
@@ -1367,7 +1367,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return result;
 	}
 
-	private static boolean getExchangeOperandsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getExchangeOperandsProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// check that user invokes quick assist on infix expression
 		if (!(node instanceof InfixExpression)) {
 			return false;
@@ -1496,7 +1496,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return infix;
 	}
 
-	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getCastAndAssignIfStatementProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (node instanceof IfStatement) {
 			node= ((IfStatement)node).getExpression();
 		} else if (node instanceof WhileStatement) {
@@ -1660,7 +1660,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), binding, null, excluded);
 	}
 
-	private static boolean getCombineStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getCombineStringProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// we work with InfixExpressions
 		InfixExpression infixExpression;
 		if (node instanceof InfixExpression) {
@@ -1719,7 +1719,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getPickOutStringProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getPickOutStringProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		// we work with String's
 		if (!(node instanceof StringLiteral)) {
 			return false;
@@ -1808,7 +1808,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return statement;
 	}
 
-	private static boolean getReplaceIfElseWithConditionalProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getReplaceIfElseWithConditionalProposals(IInvocationContextCore context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		if (!(node instanceof IfStatement)) {
 			return false;
 		}
@@ -2007,7 +2007,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return statement;
 	}
 
-	private static boolean getReplaceConditionalWithIfElseProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getReplaceConditionalWithIfElseProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		ASTNode node= covering;
 		while (!(node instanceof ConditionalExpression) && node instanceof Expression) {
 			node= node.getParent();
@@ -2070,7 +2070,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 			ASTNode replaceNode= node;
-			while(!(replaceNode instanceof Assignment) && replaceNode != null) {
+			while(!(replaceNode instanceof Assignment)) {
 				replaceNode= replaceNode.getParent();
 			}
 			Assignment assignment= (Assignment) replaceNode;
@@ -2092,7 +2092,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			ASTNode replaceNode= node;
-			while(!(replaceNode instanceof VariableDeclarationFragment) && replaceNode != null) {
+			while(!(replaceNode instanceof VariableDeclarationFragment)) {
 				replaceNode= replaceNode.getParent();
 			}
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) replaceNode;
@@ -2113,7 +2113,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getInverseLocalVariableProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getInverseLocalVariableProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		final AST ast= covering.getAST();
 		// cursor should be placed on variable name
 		if (!(covering instanceof SimpleName)) {
@@ -2258,7 +2258,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getPushNegationDownProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getPushNegationDownProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		PrefixExpression negationExpression= null;
 		ParenthesizedExpression parenthesizedExpression= null;
 		// check for case when cursor is on '!' before parentheses
@@ -2273,6 +2273,9 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (covering instanceof ParenthesizedExpression && covering.getParent() instanceof PrefixExpression && ((PrefixExpression) covering.getParent()).getOperator() == PrefixExpression.Operator.NOT) {
 			negationExpression= (PrefixExpression) covering.getParent();
 			parenthesizedExpression= (ParenthesizedExpression) covering;
+		}
+		if (parenthesizedExpression==null) {
+			return false;
 		}
 		if (negationExpression == null || (!(parenthesizedExpression.getExpression() instanceof InfixExpression) && !(parenthesizedExpression.getExpression() instanceof ConditionalExpression))) {
 			return false;
@@ -2344,7 +2347,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return null;
 	}
 
-	private static boolean getPullNegationUpProposals(IInvocationContext context, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getPullNegationUpProposals(IInvocationContextCore context, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		if (coveredNodes.size() != 1) {
 			return false;
 		}
@@ -2381,7 +2384,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getJoinIfListInIfElseIfProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getJoinIfListInIfElseIfProposals(IInvocationContextCore context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		if (coveredNodes.isEmpty()) {
 			return false;
 		}
@@ -2677,7 +2680,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return !hasToString;
 	}
 
-	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+	private static boolean getConvertSwitchToIfProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		if (!(covering instanceof SwitchStatement)) {
 			return false;
 		}
@@ -2690,7 +2693,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return getConvertSwitchToIfProposals(context, covering, resultingCollections, true);
 	}
 
-	private static boolean getConvertSwitchToIfProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections, boolean preserveNPE) {
+	private static boolean getConvertSwitchToIfProposals(IInvocationContextCore context, ASTNode covering, Collection<ICommandAccess> resultingCollections, boolean preserveNPE) {
 		final AST ast= covering.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
@@ -2771,7 +2774,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				if (currentBlock == null) {
 					if (currentCondition != null) {
 						IfStatement ifStatement;
-						if (firstIfStatement == null) {
+						if (firstIfStatement == null || currentIfStatement == null) {
 							firstIfStatement= ast.newIfStatement();
 							ifStatement= firstIfStatement;
 						} else {
@@ -2805,7 +2808,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		// check, may be we have delayed default block
-		if (defaultBlock != null) {
+		if (defaultBlock != null && currentIfStatement != null) {
 			currentIfStatement.setElseStatement(defaultBlock);
 		}
 		// remove unnecessary blocks in blocks
@@ -2907,7 +2910,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return (Statement) rewrite.createMoveTarget(source);
 	}
 
-	private static boolean getConvertIfElseToSwitchProposals(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+	private static boolean getConvertIfElseToSwitchProposals(IInvocationContextCore context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
 		if (!(coveringNode instanceof IfStatement)) {
 			return false;
 		}
@@ -2921,7 +2924,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return getConvertIfElseToSwitchProposals(context, (IfStatement) coveringNode, resultingCollections, false);
 	}
 
-	private static boolean getConvertIfElseToSwitchProposals(final IInvocationContext context, final IfStatement coveringNode, final List<ICommandAccess> resultingCollections, final boolean handleNullArg) {
+	private static boolean getConvertIfElseToSwitchProposals(final IInvocationContextCore context, final IfStatement coveringNode, final List<ICommandAccess> resultingCollections, final boolean handleNullArg) {
 		final AST ast= coveringNode.getAST();
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		final ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);

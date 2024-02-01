@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1403,7 +1402,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				occurrenceUpdate.updateNode();
 			}
 
-			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
+			if (namedSubclassMapping != null && namedSubclassMapping.containsKey(cu)) {
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
 				for (IType subtype : namedSubclassMapping.get(cu)) {
 					AbstractTypeDeclaration subtypeNode= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subtype, cuRewrite.getRoot());
@@ -2338,7 +2337,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					}
 				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
 					TagElement returnNode= createReturnTag();
-					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_RETURN);
+					TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(tags, TagElement.TAG_RETURN);
 					insertTag(returnNode, previousTag, tagsRewrite);
 					tags= tagsRewrite.getRewrittenList();
 				}
@@ -2378,7 +2377,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 				if (! isOrderSameAsInitial()) {
 					// reshuffle (sort in declaration sequence) & add (only add to top of ripple):
-					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
+					TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
 					boolean first= true; // workaround for bug 92111: preserve first tag if possible
 					// reshuffle:
 					for (ParameterInfo info : fParameterInfos) {
@@ -2455,7 +2454,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				}
 				// reshuffle:
 				tags= tagsRewrite.getRewrittenList();
-				TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_THROWS);
+				TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(tags, TagElement.TAG_THROWS);
 				for (ExceptionInfo info : fExceptionInfos) {
 					if (info.isAdded()) {
 						if (!isTopOfRipple)
@@ -2531,40 +2530,6 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			else
 				tagsRewrite.insertAfter(tag, previousTag, fDescription);
 		}
-
-		/**
-		 * @param tags existing tags
-		 * @param tagName name of tag to add
-		 * @return the <code>TagElement</code> just before a new <code>TagElement</code> with name
-		 *         <code>tagName</code>, or <code>null</code>.
-		 */
-		private TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
-			List<String> tagOrder= Arrays.asList(
-					TagElement.TAG_AUTHOR,
-					TagElement.TAG_VERSION,
-					TagElement.TAG_PARAM,
-					TagElement.TAG_RETURN,
-					TagElement.TAG_THROWS,
-					TagElement.TAG_EXCEPTION,
-					TagElement.TAG_SEE,
-					TagElement.TAG_SINCE,
-					TagElement.TAG_SERIAL,
-					TagElement.TAG_SERIALFIELD,
-					TagElement.TAG_SERIALDATA,
-					TagElement.TAG_DEPRECATED,
-					TagElement.TAG_VALUE
-			);
-			int goalOrdinal= tagOrder.indexOf(tagName);
-			if (goalOrdinal == -1) // unknown tag -> to end
-				return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());
-			for (int i= 0; i < tags.size(); i++) {
-				int tagOrdinal= tagOrder.indexOf(tags.get(i).getTagName());
-				if (tagOrdinal >= goalOrdinal)
-					return (i == 0) ? null : (TagElement) tags.get(i - 1);
-			}
-			return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size() - 1);
-		}
-
 
 		@Override
 		protected SingleVariableDeclaration createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<SingleVariableDeclaration> nodes) {

@@ -117,7 +117,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 				PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(fNameField.getText());
 				PromoteTempInputPage.this.updateStatus();
 			});
-			IContentAssistProcessor processor= new FieldNameProcessor(guessedFieldNames, getPromoteTempRefactoring());
+			IContentAssistProcessor processor= new FieldNameProcessor(getPromoteTempRefactoring());
 			ControlContentAssistHelper.createTextContentAssistant(fNameField, processor);
 			TextFieldNavigationHandler.install(fNameField);
 		}

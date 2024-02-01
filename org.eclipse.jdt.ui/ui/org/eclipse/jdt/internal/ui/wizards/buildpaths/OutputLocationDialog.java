@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
@@ -52,15 +51,14 @@ import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.buildpath.CPJavaProject;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -201,13 +199,9 @@ public class OutputLocationDialog extends StatusDialog {
 		IPath projectPath= fCPJavaProject.getJavaProject().getProject().getFullPath();
 		IPath outputPath= projectPath.append(pathStr);
 
-		try {
-	        fContainerFieldStatus= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, outputPath, fAllowInvalidClasspath, fCPJavaProject);
-	        if (fContainerFieldStatus.getSeverity() != IStatus.ERROR) {
-	        	fOutputLocation= outputPath;
-	        }
-        } catch (CoreException e) {
-	        JavaPlugin.log(e);
+        fContainerFieldStatus= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, outputPath, fAllowInvalidClasspath, fCPJavaProject);
+        if (fContainerFieldStatus.getSeverity() != IStatus.ERROR) {
+        	fOutputLocation= outputPath;
         }
 	}
 
@@ -258,13 +252,10 @@ public class OutputLocationDialog extends StatusDialog {
                     return typedStatus;
                 if (selection[0] instanceof IFolder) {
                     IFolder folder= (IFolder) selection[0];
-                    try {
-                    	IStatus result= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, folder.getFullPath(), fAllowInvalidClasspath, fCPJavaProject);
-                    	if (result.getSeverity() == IStatus.ERROR)
-	                    	return result;
-                    } catch (CoreException e) {
-	                    JavaPlugin.log(e);
-                    }
+                	IStatus result= ClasspathModifier.checkSetOutputLocationPrecondition(fEntryToEdit, folder.getFullPath(), fAllowInvalidClasspath, fCPJavaProject);
+                	if (result.getSeverity() == IStatus.ERROR) {
+                    	return result;
+                	}
                     return new StatusInfo();
                 } else {
                 	return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$

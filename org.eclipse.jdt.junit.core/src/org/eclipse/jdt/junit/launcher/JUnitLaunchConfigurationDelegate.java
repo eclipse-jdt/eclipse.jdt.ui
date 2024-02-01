@@ -25,7 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,7 +43,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.URIUtil;
 
 import org.eclipse.debug.core.DebugPlugin;
@@ -123,32 +122,28 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	}
 
 	private VMRunnerConfiguration getVMRunnerConfiguration(ILaunchConfiguration configuration, ILaunch launch, String mode, IProgressMonitor monitor) throws CoreException {
-		VMRunnerConfiguration runConfig = null;
-			monitor.beginTask(MessageFormat.format("{0}...", configuration.getName()), 5); //$NON-NLS-1$
+		SubMonitor subMon= SubMonitor.convert(monitor, JUnitMessages.JUnitLaunchConfigurationDelegate_verifying_attriburtes_description, 4);
 		// check for cancellation
-		if (monitor.isCanceled()) {
+		if (subMon.isCanceled()) {
 			return null;
 		}
-
 		try {
 			if (JUnitLaunchConfigurationConstants.MODE_RUN_QUIETLY_MODE.equals(mode)) {
 				launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_NO_DISPLAY, "true"); //$NON-NLS-1$
 				mode = ILaunchManager.RUN_MODE;
 			}
 
-			monitor.subTask(JUnitMessages.JUnitLaunchConfigurationDelegate_verifying_attriburtes_description);
-
 			try {
-				preLaunchCheck(configuration, launch, new SubProgressMonitor(monitor, 2));
+				preLaunchCheck(configuration, launch, subMon.newChild(2));
 			} catch (CoreException e) {
 				if (e.getStatus().getSeverity() == IStatus.CANCEL) {
-					monitor.setCanceled(true);
+					subMon.setCanceled(true);
 					return null;
 				}
 				throw e;
 			}
 			// check for cancellation
-			if (monitor.isCanceled()) {
+			if (subMon.isCanceled()) {
 				return null;
 			}
 
@@ -159,13 +154,13 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			ITestKind testKind= getTestRunnerKind(configuration);
 			IJavaProject javaProject= getJavaProject(configuration);
 			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId()) || TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
-				fTestElements= evaluateTests(configuration, new SubProgressMonitor(monitor, 1));
+				fTestElements= evaluateTests(configuration, subMon.newChild( 1));
 			} else {
 				IJavaElement testTarget= getTestTarget(configuration, javaProject);
 				if (testTarget instanceof IPackageFragment || testTarget instanceof IPackageFragmentRoot || testTarget instanceof IJavaProject) {
 					fTestElements= new IJavaElement[] { testTarget };
 				} else {
-					fTestElements= evaluateTests(configuration, new SubProgressMonitor(monitor, 1));
+					fTestElements= evaluateTests(configuration, subMon.newChild(1));
 				}
 			}
 
@@ -236,7 +231,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 
 			// Create VM config
-			runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
+			VMRunnerConfiguration runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
 			runConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
 			runConfig.setProgramArguments(programArguments.toArray(new String[programArguments.size()]));
 			runConfig.setEnvironment(envp);
@@ -258,14 +253,14 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 
 			// check for cancellation
-			if (monitor.isCanceled()) {
+			if (subMon.isCanceled()) {
 				return null;
 			}
-		}finally {
+			return runConfig;
+		} finally {
 			// done the verification phase
-			monitor.worked(1);
+			subMon.worked(1);
 		}
-		return runConfig;
 	}
 
 	@Override

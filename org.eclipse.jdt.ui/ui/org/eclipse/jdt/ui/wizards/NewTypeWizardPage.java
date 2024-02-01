@@ -845,7 +845,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 							}
 						}
 					}
-					if (noOfPackages == 1) { // use package name
+					if (thePackage != null) { // use package name
 						packName= thePackage.getElementName();
 						return pkgFragmentRoot.getPackageFragment(packName);
 					}
@@ -1838,7 +1838,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	    		// error as createType will fail otherwise (bug 96928)
 	    		return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, BasicElementLabels.getJavaElementName(root.getJavaProject().getElementName())));
 	    	}
-	    	if (fTypeKind == ENUM_TYPE) {
+	    	if (root != null && fTypeKind == ENUM_TYPE) {
 		    	try {
 		    	    // if findType(...) == null then Enum is unavailable
 		    	    if (findType(root.getJavaProject(), "java.lang.Enum") == null) //$NON-NLS-1$
@@ -1903,7 +1903,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged);
 		}
 
-		if (project != null) {
+		if (project != null && root != null) {
 			if (project.exists() && packName.length() > 0) {
 				try {
 					IPath rootPath= root.getPath();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,7 +49,7 @@ public class SuppressWarningsProposalCore extends ASTRewriteCorrectionProposalCo
 		fWarningToken= warningToken;
 		fNode= node;
 		fProperty= property;
-		setCommandId(SuppressWarningsSubProcessorCore.ADD_SUPPRESSWARNINGS_ID);
+		setCommandId(SuppressWarningsBaseSubProcessor.ADD_SUPPRESSWARNINGS_ID);
 	}
 
 	/**

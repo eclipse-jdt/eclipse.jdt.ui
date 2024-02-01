@@ -26,10 +26,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 
 public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnotation {
 
-	public static final String ERROR_ANNOTATION_TYPE= "org.eclipse.jdt.ui.error"; //$NON-NLS-1$
+	public static final String ERROR_ANNOTATION_TYPE= ProblemLocation.ERROR_ANNOTATION_TYPE;
 	public static final String WARNING_ANNOTATION_TYPE= "org.eclipse.jdt.ui.warning"; //$NON-NLS-1$
 	public static final String INFO_ANNOTATION_TYPE= "org.eclipse.jdt.ui.info"; //$NON-NLS-1$
 	public static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$

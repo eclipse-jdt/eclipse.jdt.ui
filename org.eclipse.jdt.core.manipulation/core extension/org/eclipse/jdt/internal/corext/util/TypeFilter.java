@@ -13,25 +13,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.StringTokenizer;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
-public class TypeFilter implements IPropertyChangeListener {
+public class TypeFilter implements IPreferenceChangeListener {
 
 	public static TypeFilter getDefault() {
-		return JavaPlugin.getDefault().getTypeFilter();
+		return JavaManipulationPlugin.getDefault().getTypeFilter();
 	}
 
 	public static boolean isFiltered(String fullTypeName) {
@@ -70,16 +76,52 @@ public class TypeFilter implements IPropertyChangeListener {
 		}
 	}
 
+	/**
+	 * Remove the type filter if any of the imported element matches.
+	 */
+	public synchronized void removeFilterIfMatched(Collection<String> importedElements) {
+		if (importedElements == null || importedElements.isEmpty()) {
+			return;
+		}
+
+		StringMatcher[] matchers = getStringMatchers();
+		this.fStringMatchers = Arrays.stream(matchers).filter(m -> {
+			for (String importedElement : importedElements) {
+				if (m.match(importedElement)) {
+					return false;
+				}
+			}
+			return true;
+		}).toArray(size -> new StringMatcher[size]);
+	}
+
+
 	private StringMatcher[] fStringMatchers;
 
 	public TypeFilter() {
 		fStringMatchers= null;
-		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(this);
+		getPreferenceStore().addPreferenceChangeListener(this);
+	}
+
+	private IEclipsePreferences getPreferenceStore() {
+		return InstanceScope.INSTANCE.getNode(JavaManipulation.getPreferenceNodeId());
+	}
+
+	private IEclipsePreferences getDefaultPreferenceStore() {
+		return DefaultScope.INSTANCE.getNode(JavaManipulation.getPreferenceNodeId());
+	}
+
+	private String getPreference(String key, String def) {
+		String str= getPreferenceStore().get(key, null);
+		if( str == null ) {
+			str= getDefaultPreferenceStore().get(key, null);
+		}
+		return str == null ? def : str;
 	}
 
 	private synchronized StringMatcher[] getStringMatchers() {
 		if (fStringMatchers == null) {
-			String str= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.TYPEFILTER_ENABLED);
+			String str= getPreference(PreferenceConstantsCore.TYPEFILTER_ENABLED, ""); //$NON-NLS-1$
 			StringTokenizer tok= new StringTokenizer(str, ";"); //$NON-NLS-1$
 			int nTokens= tok.countTokens();
 
@@ -95,7 +137,7 @@ public class TypeFilter implements IPropertyChangeListener {
 	}
 
 	public void dispose() {
-		PreferenceConstants.getPreferenceStore().removePropertyChangeListener(this);
+		getPreferenceStore().removePreferenceChangeListener(this);
 		fStringMatchers= null;
 	}
 
@@ -118,11 +160,9 @@ public class TypeFilter implements IPropertyChangeListener {
 	}
 
 	@Override
-	public synchronized void propertyChange(PropertyChangeEvent event) {
-		if (PreferenceConstants.TYPEFILTER_ENABLED.equals(event.getProperty())) {
+	public void preferenceChange(PreferenceChangeEvent event) {
+		if( PreferenceConstantsCore.TYPEFILTER_ENABLED.equals(event.getKey())) {
 			fStringMatchers= null;
 		}
 	}
-
-
 }

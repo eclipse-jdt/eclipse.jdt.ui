@@ -157,37 +157,25 @@ public class TestCaseClassLoader extends ClassLoader {
 	}
 
 	private byte[] loadJarData(String path, String fileName) {
-		ZipFile zipFile = null;
-		InputStream stream = null;
 		File archive = new File(path);
 		if (!archive.exists())
 			return null;
-		try {
-			zipFile = new ZipFile(archive);
-		} catch (IOException io) {
-			return null;
-		}
-		ZipEntry entry = zipFile.getEntry(fileName);
-		if (entry == null)
-			return null;
-		int size = (int) entry.getSize();
-		try {
-			stream = zipFile.getInputStream(entry);
-			byte[] data = new byte[size];
-			int pos = 0;
-			while (pos < size) {
-				int n = stream.read(data, pos, data.length - pos);
-				pos += n;
+		try (ZipFile zipFile = new ZipFile(archive)) {
+			ZipEntry entry = zipFile.getEntry(fileName);
+			if (entry == null) {
+				return null;
 			}
-			zipFile.close();
-			return data;
+			int size = (int) entry.getSize();
+			try (InputStream stream = zipFile.getInputStream(entry)) {
+				byte[] data = new byte[size];
+				int pos = 0;
+				while (pos < size) {
+					int n = stream.read(data, pos, data.length - pos);
+					pos += n;
+				}
+				return data;
+			}
 		} catch (IOException e) {
-		} finally {
-			try {
-				if (stream != null)
-					stream.close();
-			} catch (IOException e) {
-			}
 		}
 		return null;
 	}

@@ -128,9 +128,8 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 
 		boolean isInterface= Flags.isInterface(flags);
 		IType declaringType= type.getDeclaringType();
-		boolean isInner= declaringType != null;
 		boolean isInInterfaceOrAnnotation= false;
-		if (isInner) {
+		if (declaringType != null) {
 			int declaringTypeFlags= hierarchy.getCachedFlags(declaringType);
 			if (declaringTypeFlags != -1) {
 				isInInterfaceOrAnnotation= Flags.isInterface(declaringTypeFlags);
@@ -143,7 +142,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 			}
 		}
 
-		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(isInner, isInInterfaceOrAnnotation, flags, isInDifferentHierarchyScope(type));
+		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(declaringType != null, isInInterfaceOrAnnotation, flags, isInDifferentHierarchyScope(type));
 
 		int adornmentFlags= 0;
 		if (Flags.isFinal(flags)) {

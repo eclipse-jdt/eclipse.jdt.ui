@@ -125,7 +125,6 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 *
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
-	@SuppressWarnings("boxing")
 	public int computeAdornmentFlags(Object element) {
 		return JavaCore.callReadOnly(() -> {
 			if (element instanceof IMethod) {

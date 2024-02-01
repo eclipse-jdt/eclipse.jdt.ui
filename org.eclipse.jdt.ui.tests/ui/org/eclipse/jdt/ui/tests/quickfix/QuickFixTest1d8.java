@@ -2871,4 +2871,65 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
+	// Bug 148012 - https://bugs.eclipse.org/bugs/show_bug.cgi?id=148012
+	@Test
+	public void testBug148012() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        foo()[0];\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static Object[] foo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(1, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrectionsNoCheck(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        Object object = foo()[0];\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static Object[] foo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1 = buf.toString();
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Object object;\n");
+		buf.append("\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        object = foo()[0];\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    static Object[] foo() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected2 = buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
+	}
+
 }

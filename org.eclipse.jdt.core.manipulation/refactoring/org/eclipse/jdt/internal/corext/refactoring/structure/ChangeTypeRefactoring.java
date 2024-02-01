@@ -1496,10 +1496,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (fMethodBinding != null) {
 
 			IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
-			if (selectedMethod == null) {
-				// can't happen since we checked it up front in check initial conditions
-				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
-			}
+			// can't happen since we checked it up front in check initial conditions
+			Assert.isNotNull(selectedMethod, RefactoringCoreMessages.ChangeTypeRefactoring_no_method);
 
 			// the following code fragment appears to be the source of a memory leak, when
 			// GT is repeatedly applied

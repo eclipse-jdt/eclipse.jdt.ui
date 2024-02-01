@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -70,12 +70,12 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroupCore.Propo
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
@@ -294,6 +294,19 @@ public class QuickFixTest {
 		if (!proposals.isEmpty()) {
 			assertCorrectContext(context, problem);
 		}
+
+		return proposals;
+	}
+
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrectionsNoCheck(ICompilationUnit cu, IProblem curr, IInvocationContext context) throws CoreException {
+		int offset= curr.getSourceStart();
+		int length= curr.getSourceEnd() + 1 - offset;
+		if (context == null) {
+			context= new AssistContext(cu, offset, length);
+		}
+
+		ProblemLocation problem= new ProblemLocation(curr);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		return proposals;
 	}

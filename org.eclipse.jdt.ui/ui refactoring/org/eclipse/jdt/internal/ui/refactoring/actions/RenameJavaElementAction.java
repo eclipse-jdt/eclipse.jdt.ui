@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -100,7 +100,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		return RefactoringAvailabilityTester.isRenameElementAvailable(element);
+		return RefactoringAvailabilityTesterCore.isRenameElementAvailable(element);
 	}
 
 	private static IJavaElement getJavaElement(IStructuredSelection selection) {
@@ -139,7 +139,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 				}
 				else {
 					if (elements.length == 1) {
-						setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0], true));
+						setEnabled(RefactoringAvailabilityTesterCore.isRenameElementAvailable(elements[0]));
 					} else {
 						ASTNode node= javaTextSelection.resolveCoveringNode();
 						setEnabled(node instanceof SimpleName);
@@ -159,19 +159,15 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			return;
 		boolean isVarTypeSelection= isVarTypeSelection(selection);
 		if (!isVarTypeSelection && canRunInEditor())
-			doRun(true);
-		else if (!isVarTypeSelection && canBeRenamed(false)) {
+			doRun();
+		else if (!isVarTypeSelection && canBeRenamed()) {
 			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable_in_editor);
 		} else {
 			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);
 		}
 	}
 
-	public void doRun() {
-		doRun(false);
-	}
-
-	public void doRun(boolean isTextSelection) {
+	final public void doRun() {
 		RenameLinkedMode activeLinkedMode= RenameLinkedMode.getActiveLinkedMode();
 		if (activeLinkedMode != null) {
 			if (activeLinkedMode.isCaretInLinkedPosition()) {
@@ -186,7 +182,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			IJavaElement element= getJavaElementFromEditor();
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			boolean lightweight= store.getBoolean(PreferenceConstants.REFACTOR_LIGHTWEIGHT);
-			if (element != null && RefactoringAvailabilityTester.isRenameElementAvailable(element, isTextSelection)) {
+			if (element != null && RefactoringAvailabilityTesterCore.isRenameElementAvailable(element)) {
 				run(element, lightweight);
 				return;
 			} else if (lightweight) {
@@ -207,16 +203,16 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (RenameLinkedMode.getActiveLinkedMode() != null)
 			return true;
 
-		return canBeRenamed(true);
+		return canBeRenamed();
 	}
 
-	private boolean canBeRenamed(boolean isTextSelection) {
+	private boolean canBeRenamed() {
 		try {
 			IJavaElement element= getJavaElementFromEditor();
 			if (element == null)
 				return true;
 
-			return RefactoringAvailabilityTester.isRenameElementAvailable(element, isTextSelection);
+			return RefactoringAvailabilityTesterCore.isRenameElementAvailable(element);
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);

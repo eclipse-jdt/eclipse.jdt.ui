@@ -78,7 +78,7 @@ public class DeleteWizard extends RefactoringWizard {
 		private final JavaDeleteProcessor fProcessor;
 
 		public DeleteInputPage(JavaDeleteProcessor processor) {
-			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
+			super(PAGE_NAME, MessageWizardPage.STYLE_QUESTION);
 			fProcessor= processor;
 		}
 

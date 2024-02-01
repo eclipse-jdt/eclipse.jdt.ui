@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,6 +62,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_braces_pref_array_initializer;
 	public static String FormatterModifyDialog_braces_pref_blocks;
 	public static String FormatterModifyDialog_braces_pref_blocks_in_case;
+	public static String FormatterModifyDialog_braces_pref_blocks_in_case_after_arrow;
 	public static String FormatterModifyDialog_braces_pref_class_declaration;
 	public static String FormatterModifyDialog_braces_pref_constructor_declaration;
 	public static String FormatterModifyDialog_braces_pref_enum_declaration;
@@ -111,6 +112,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_indentation_info_blank_lines_before_field;
 	public static String FormatterModifyDialog_indentation_info_blank_lines_before_field_delete;
 	public static String FormatterModifyDialog_indentation_info_blank_lines_to_preserve;
+	public static String FormatterModifyDialog_indentation_pref_align_arrows_in_switch_on_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_fields_in_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_variable_declarations_on_columns;

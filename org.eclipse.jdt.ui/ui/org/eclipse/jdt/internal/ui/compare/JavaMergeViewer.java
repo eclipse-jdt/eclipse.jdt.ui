@@ -656,11 +656,12 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	// no setter to private field AbstractTextEditor.fSourceViewer
 	private void setSourceViewer(ITextEditor editor, SourceViewer viewer) {
-		Field field= null;
+		Field field;
 		try {
 			field= AbstractTextEditor.class.getDeclaredField("fSourceViewer"); //$NON-NLS-1$
 		} catch (SecurityException | NoSuchFieldException ex) {
 			JavaPlugin.log(ex);
+			throw new RuntimeException(ex);
 		}
 		field.setAccessible(true);
 		try {

@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
-
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -187,7 +185,7 @@ public class VariableDeclarationRewrite {
 		List<VariableDeclarationFragment> fragments= declarationNode.fragments();
 		Iterator<VariableDeclarationFragment> iter= fragments.iterator();
 
-		ListRewrite blockRewrite= null;
+		ListRewrite blockRewrite;
 		ASTNode parentStatement= declarationNode.getParent();
 		if (parentStatement instanceof SwitchStatement) {
 			blockRewrite= rewrite.getListRewrite(parentStatement, SwitchStatement.STATEMENTS_PROPERTY);
@@ -195,7 +193,7 @@ public class VariableDeclarationRewrite {
 			blockRewrite= rewrite.getListRewrite(parentStatement, Block.STATEMENTS_PROPERTY);
 		} else {
 			// should not happen. VariableDeclaration's can not be in a control statement body
-			Assert.isTrue(false);
+			throw new IllegalStateException(parentStatement.getClass().getName());
 		}
 
 		VariableDeclarationFragment lastFragment= iter.next();

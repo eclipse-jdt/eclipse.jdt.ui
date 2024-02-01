@@ -18,9 +18,23 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardDialog;
+
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -37,6 +51,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -44,11 +59,23 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
+import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
+import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
+import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
+import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+import org.eclipse.jdt.ui.wizards.NewRecordWizardPage;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -58,25 +85,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewRecordCreationWizard;
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
-import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
-import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
-import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
-import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
-import org.eclipse.jdt.ui.wizards.NewRecordWizardPage;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 
 
 /**
@@ -85,7 +93,7 @@ import org.eclipse.ui.PlatformUI;
  * If selected, this proposal will open a {@link NewClassCreationWizard},
  * {@link NewInterfaceCreationWizard}, {@link NewEnumCreationWizard} or {@link NewAnnotationCreationWizard}.
  *
- * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContext, IProblemLocationCore, Collection)
+ * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContextCore, IProblemLocationCore, Collection)
  */
 public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 

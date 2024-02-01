@@ -69,7 +69,7 @@ public class ClasspathModifier {
 
 	private ClasspathModifier() {}
 
-	public static BuildpathDelta setOutputLocation(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) throws CoreException {
+	public static BuildpathDelta setOutputLocation(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) {
 		BuildpathDelta result= new BuildpathDelta(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
 
 		IJavaProject javaProject= cpProject.getJavaProject();
@@ -108,7 +108,7 @@ public class ClasspathModifier {
 		return result;
 	}
 
-	public static IStatus checkSetOutputLocationPrecondition(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) throws CoreException {
+	public static IStatus checkSetOutputLocationPrecondition(CPListElement elementToChange, IPath outputPath, boolean allowInvalidCP, CPJavaProject cpProject) {
 		IJavaProject javaProject= cpProject.getJavaProject();
 		IProject project= javaProject.getProject();
 		IWorkspace workspace= project.getWorkspace();
@@ -646,7 +646,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
 	 */
-	public static CPListElement addToClasspath(IResource resource, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IResource resource, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -683,13 +683,12 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the new element of type <code>IPackageFragmentRoot</code> that has been added to the build path
 	 */
-	public static CPListElement addToClasspath(IJavaElement javaElement, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	public static CPListElement addToClasspath(IJavaElement javaElement, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 10);
-			CPListElement entry= new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getResource());
-			return entry;
+			return new CPListElement(project, IClasspathEntry.CPE_SOURCE, javaElement.getPath(), javaElement.getResource());
 		} finally {
 			monitor.done();
 		}
@@ -775,7 +774,7 @@ public class ClasspathModifier {
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return a <code>IResource</code> corresponding to the excluded element
 	 */
-	private static IResource exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	private static IResource exclude(String name, IPath fullPath, CPListElement entry, IJavaProject project, IProgressMonitor monitor) {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		IResource result;
@@ -817,7 +816,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 */
-	public static void exclude(IPath path, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void exclude(IPath path, List<CPListElement> existingEntries, List<CPListElement> newEntries, IJavaProject project, IProgressMonitor monitor) {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -860,7 +859,7 @@ public class ClasspathModifier {
 	 *
 	 * @return the resulting <code>IResource<code>
 	 */
-	public static IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -885,7 +884,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 */
-	public static void unExclude(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
+	public static void unExclude(IResource resource, CPListElement entry, IJavaProject project, IProgressMonitor monitor) {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -938,7 +937,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @return an attribute representing the modified output folder
 	 */
-	public static CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) throws JavaModelException {
+	public static CPListElementAttribute resetOutputFolder(CPListElement entry, IJavaProject project) {
 		entry.setAttribute(CPListElement.OUTPUT, null);
 		CPListElementAttribute outputFolder= new CPListElementAttribute(entry, CPListElement.OUTPUT, entry.getAttribute(CPListElement.OUTPUT), true);
 		return outputFolder;

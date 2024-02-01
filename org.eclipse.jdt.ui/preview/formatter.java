@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2022 Mateusz Matela and others.
+ * Copyright (c) 2018, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -100,6 +100,13 @@ class Example {
 			object = Arrays.asList(str);
 			i += 2;
 		}
+		
+		switch(i){
+			case 0 -> theInt++;
+			case 22, 33 -> theInt--;
+			case 1234567890 -> theInt = 0;
+			default -> theInt = -1;
+		}
 	}
 }
 //--PREVIEW--END--section-indentation-align-on-column
@@ -130,6 +137,10 @@ class Example {
 			case 0:        fField.set(0);        break;      
 			case 1: {        break;        }      default:        fField.reset();   
 		}  
+		switch(p) {
+			case 0 -> { fField.set(0); }
+			default -> { fField.reset(); }
+		}
 	}}
 //--PREVIEW--END--section-braces
 }

@@ -821,7 +821,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDeclaringType(), rewrite.getRoot());
 						if (!JdtFlags.isAbstract(getDeclaringType()) && getAbstractDeclarationInfos().length != 0)
 							ModifierRewrite.create(rewrite.getASTRewrite(), declaration).setModifiers((Modifier.ABSTRACT | declaration.getModifiers()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PushDownRefactoring_make_abstract, SET_PUSH_DOWN));
-						deleteDeclarationNodes(sourceRewriter, false, rewrite, Arrays.asList(getDeletableMembers()), SET_PUSH_DOWN);
+						deleteDeclarationNodes(false, rewrite, Arrays.asList(getDeletableMembers()), SET_PUSH_DOWN);
 						for (MemberActionInfo method : getAbstractDeclarationInfos()) {
 							declareMethodAbstract(method, sourceRewriter, rewrite);
 						}

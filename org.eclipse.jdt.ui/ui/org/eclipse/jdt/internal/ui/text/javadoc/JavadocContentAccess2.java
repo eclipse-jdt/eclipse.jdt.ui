@@ -24,13 +24,6 @@ import org.eclipse.jdt.core.manipulation.internal.javadoc.CoreJavadocAccess;
 
 /**
  * Helper to get the content of a Javadoc comment as HTML.
- *
- * <p>
- * <strong>This is work in progress. Parts of this will later become
- * API through {@link CoreJavadocContentAccess}</strong>
- * </p>
- *
- * @since 3.4
  */
 public class JavadocContentAccess2 {
 
@@ -59,7 +52,6 @@ public class JavadocContentAccess2 {
 	/**
 	 * @param content HTML content produced by <code>getHTMLContent(...)</code>
 	 * @return the baseURL to use for the given content, or <code>null</code> if none
-	 * @since 3.10
 	 */
 	public static String extractBaseURL(String content) {
 		return new CoreJavadocAccess().extractBaseURL(content);
@@ -73,7 +65,6 @@ public class JavadocContentAccess2 {
 	 *         associated Javadoc
 	 * @throws CoreException if the Java element does not exists or an exception occurs while
 	 *             accessing the file containing the package Javadoc
-	 * @since 3.9
 	 */
 	public static String getHTMLContent(IPackageDeclaration packageDeclaration) throws CoreException {
 		return new CoreJavadocAccess().getHTMLContent(packageDeclaration);
@@ -89,7 +80,6 @@ public class JavadocContentAccess2 {
 	 *         Javadoc
 	 * @throws CoreException if the Java element does not exists or an exception occurs while
 	 *             accessing the file containing the package Javadoc
-	 * @since 3.9
 	 */
 	public static String getHTMLContent(IPackageFragment packageFragment) throws CoreException {
 		return new CoreJavadocAccess().getHTMLContent(packageFragment);

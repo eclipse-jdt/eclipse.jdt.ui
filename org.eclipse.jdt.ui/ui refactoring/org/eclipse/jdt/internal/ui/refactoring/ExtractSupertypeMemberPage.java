@@ -53,7 +53,6 @@ import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
 
@@ -368,11 +367,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 
 	@Override
 	protected void createSuperTypeControl(final Composite parent) {
-		try {
-			createSuperTypeList(parent);
-		} catch (JavaModelException exception) {
-			ExceptionHandler.handle(exception, getShell(), RefactoringMessages.ExtractSupertypeMemberPage_extract_supertype, RefactoringMessages.PullUpInputPage_exception);
-		}
+		createSuperTypeList(parent);
 	}
 
 	/**
@@ -398,7 +393,7 @@ public final class ExtractSupertypeMemberPage extends PullUpMemberPage {
 	 * @param parent
 	 *            the parent control
 	 */
-	protected void createSuperTypeList(final Composite parent) throws JavaModelException {
+	protected void createSuperTypeList(final Composite parent) {
 		createSpacer(parent);
 
 		final Label label= new Label(parent, SWT.NONE);

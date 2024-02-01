@@ -93,6 +93,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapperDynamic;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
@@ -188,13 +189,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @since 3.0
 	 */
 	private TemplateStore fCodeTemplateStore;
-
-	/**
-	 * Default instance of the appearance type filters.
-	 * @since 3.0
-	 */
-	private volatile TypeFilter fTypeFilter;
-
 
 	private volatile WorkingCopyManager fWorkingCopyManager;
 
@@ -498,11 +492,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				fJavaTextTools= null;
 			}
 
-			if (fTypeFilter != null) {
-				fTypeFilter.dispose();
-				fTypeFilter= null;
-			}
-
 			if (fContentAssistHistory != null) {
 				ContentAssistHistory.store(fContentAssistHistory, getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				fContentAssistHistory= null;
@@ -550,8 +539,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			// must add here to guarantee that it is the first in the listener list
 
 			OpenTypeHistory.shutdown();
-
-			JavaManipulation.setPreferenceNodeId(null);
 		} finally {
 			super.stop(context);
 		}
@@ -699,16 +686,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 
 	public TypeFilter getTypeFilter() {
-		TypeFilter result= fTypeFilter;
-		if (result != null) { // First check (no locking)
-			return result;
-		}
-		synchronized(this) {
-			if (fTypeFilter == null) { // Second check (with locking)
-				fTypeFilter= new TypeFilter();
-			}
-			return fTypeFilter;
-		}
+		return JavaManipulationPlugin.getDefault().getTypeFilter();
 	}
 
 	public FormToolkit getDialogsFormToolkit() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2024 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.TargetProvider;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -156,7 +157,7 @@ public class ChangeCalculator {
 	private void computeMethodDeclarationEdit() throws JavaModelException {
 		//Changes can't be applied to directly to AST, edits are saved in fChangeManager
 		TextEdit methodDeclarationEdit= fTargetMethodDeclarationASTRewrite.rewriteAST();
-		addEditToChangeManager(methodDeclarationEdit, fTargetMethod.getCompilationUnit());
+		addEditsToChangeManager(List.of(methodDeclarationEdit), fTargetMethod.getCompilationUnit());
 	}
 
 	/**
@@ -261,17 +262,22 @@ public class ChangeCalculator {
 		ListRewrite lrw= fTargetMethodDeclarationASTRewrite.getListRewrite(fTargetMethodDeclaration, MethodDeclaration.PARAMETERS_PROPERTY);
 		lrw.insertFirst(generateNewParameter(), null);
 		//Changes to fTargetMethodDeclaration's signature need to be adjusted in JavaDocs too
-		updateJavaDocs();
+		addParameterToJavaDoc();
 	}
 
-	private void updateJavaDocs() {
+	private void addParameterToJavaDoc() {
 		Javadoc javadoc= fTargetMethodDeclaration.getJavadoc();
 		if (javadoc != null) {
 			TagElement newParameterTag= fTargetMethodDeclarationAST.newTagElement();
 			newParameterTag.setTagName(TagElement.TAG_PARAM);
 			newParameterTag.fragments().add(fTargetMethodDeclarationAST.newSimpleName(fParameterName));
 			ListRewrite tagsRewrite= fTargetMethodDeclarationASTRewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-			tagsRewrite.insertFirst(newParameterTag, null);
+			TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(javadoc.tags(), TagElement.TAG_PARAM);
+			if (previousTag == null) {
+				tagsRewrite.insertFirst(newParameterTag, null);
+			} else {
+				tagsRewrite.insertAfter(newParameterTag, previousTag, null);
+			}
 		}
 	}
 
@@ -311,7 +317,6 @@ public class ChangeCalculator {
 		IType parentType= fTargetMethod.getDeclaringType();
 		ITypeParameter[] classTypeParameters= parentType.getTypeParameters();
 		ListRewrite typeParamsRewrite= fTargetMethodDeclarationASTRewrite.getListRewrite(fTargetMethodDeclaration, MethodDeclaration.TYPE_PARAMETERS_PROPERTY);
-		Javadoc javadoc= fTargetMethodDeclaration.getJavadoc();
 		List<String> methodParameterTypes= getMethodParameterTypes();
 		List<String> methodTypeParametersNames= getTypeParameterNames();
 
@@ -330,7 +335,7 @@ public class ChangeCalculator {
 					//only insert if typeParam not already existing
 					if (!methodTypeParametersNames.contains(typeParameter.getName().getIdentifier())) {
 						typeParamsRewrite.insertLast(typeParameter, null);
-						addNewTypeParamsToJavaDoc(javadoc, typeParameter);
+						addTypeParamToJavaDoc(typeParameter);
 					}
 				}
 			}
@@ -381,16 +386,21 @@ public class ChangeCalculator {
 		return methodTypeParametersNames;
 	}
 
-	private void addNewTypeParamsToJavaDoc(Javadoc javadoc, TypeParameter typeParameter) {
+	private void addTypeParamToJavaDoc(TypeParameter typeParameter) {
+		Javadoc javadoc= fTargetMethodDeclaration.getJavadoc();
 		if (javadoc != null) {
-			//add new type params to javaDoc
 			TextElement textElement= fTargetMethodDeclarationAST.newTextElement();
 			textElement.setText("<" + typeParameter.getName().getIdentifier() + ">"); //$NON-NLS-1$ //$NON-NLS-2$
 			TagElement newParameterTag= fTargetMethodDeclarationAST.newTagElement();
 			newParameterTag.setTagName(TagElement.TAG_PARAM);
 			newParameterTag.fragments().add(textElement);
+			TagElement subsequentTag= JavadocUtil.findTagElementToInsertBefore(javadoc.tags(), TagElement.TAG_PARAM);
 			ListRewrite tagsRewrite= fTargetMethodDeclarationASTRewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
-			tagsRewrite.insertLast(newParameterTag, null);
+			if (subsequentTag == null) {
+				tagsRewrite.insertLast(newParameterTag, null);
+			} else {
+				tagsRewrite.insertBefore(newParameterTag, subsequentTag, null);
+			}
 		}
 	}
 
@@ -409,7 +419,7 @@ public class ChangeCalculator {
 		}
 	}
 
-	private void addEditToChangeManager(TextEdit editToAdd, ICompilationUnit iCompilationUnit) {
+	private void addEditsToChangeManager(List<TextEdit> editsToAdd, ICompilationUnit iCompilationUnit) {
 		//get CompilationUnitChange from ChangeManager, otherwise create one
 		CompilationUnitChange compilationUnitChange= (CompilationUnitChange) fChangeManager.get(iCompilationUnit);
 
@@ -418,7 +428,9 @@ public class ChangeCalculator {
 		if (allTextEdits == null) {
 			allTextEdits= new MultiTextEdit();
 		}
-		allTextEdits.addChild(editToAdd);
+		for (TextEdit editToAdd : editsToAdd) {
+			allTextEdits.addChild(editToAdd);
+		}
 		String changeName= Messages.format(RefactoringCoreMessages.MakeStaticRefactoring_change_name, iCompilationUnit.getElementName());
 		CompilationUnitChange newCompilationUnitChange= new CompilationUnitChange(changeName, iCompilationUnit);
 		newCompilationUnitChange.setEdit(allTextEdits);
@@ -452,12 +464,12 @@ public class ChangeCalculator {
 			}
 
 			BodyDeclaration[] bodies= targetProvider.getAffectedBodyDeclarations(affectedICompilationUnit, null);
-			MultiTextEdit multiTextEdit= new MultiTextEdit();
+			List<TextEdit> textEdits= new ArrayList<>();
 			for (BodyDeclaration body : bodies) {
 				ASTNode[] invocations= targetProvider.getInvocations(body, null);
 				for (ASTNode invocationASTNode : invocations) {
 					MethodInvocation invocation= (MethodInvocation) invocationASTNode;
-					modifyMethodInvocation(multiTextEdit, invocation);
+					textEdits.add(createMethodInvocationChange(invocation));
 				}
 			}
 
@@ -465,7 +477,7 @@ public class ChangeCalculator {
 				return;
 			}
 
-			addEditToChangeManager(multiTextEdit, affectedICompilationUnit);
+			addEditsToChangeManager(textEdits, affectedICompilationUnit);
 		}
 		return;
 	}
@@ -479,7 +491,7 @@ public class ChangeCalculator {
 		return (CompilationUnit) parser.createAST(null);
 	}
 
-	private void modifyMethodInvocation(MultiTextEdit multiTextEdit, MethodInvocation invocation) throws JavaModelException {
+	private TextEdit createMethodInvocationChange(MethodInvocation invocation) throws JavaModelException {
 		AST ast= invocation.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -507,7 +519,7 @@ public class ChangeCalculator {
 		rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, optionalExpression, null);
 
 		TextEdit methodInvocationEdit= rewrite.rewriteAST();
-		multiTextEdit.addChild(methodInvocationEdit);
+		return methodInvocationEdit;
 	}
 
 	private ASTNode qualifyThisExpression(MethodInvocation invocation, AST ast) {

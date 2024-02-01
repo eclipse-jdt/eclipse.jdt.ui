@@ -13,18 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.cleanup;
 
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 /**
- * Initializes the default options for a clean up kind.
+ * A clean up fix calculates a {@link CompilationUnitChange} which can be applied on a document to
+ * fix one or more problems in a compilation unit.
+ * Originally from org.eclipse.jdt.ui 3.5
  *
- * @since 3.5
+ * @since 1.21
  */
-public interface ICleanUpOptionsInitializer {
+public interface ICleanUpFix extends ICleanUpFixCore {
 
-	/**
-	 * Sets the default options of this initializer.
-	 *
-	 * @param options the clean up options
-	 */
-	void setDefaultOptions(CleanUpOptions options);
 }

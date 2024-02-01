@@ -147,7 +147,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		fJavadocLookup= JavadocLookup.NONE;
 	}
 
-	protected CoreJavaDocSnippetStringEvaluator createSnippetEvaluator(IJavaElement element) {
+	protected CoreJavaDocSnippetStringEvaluator createSnippetEvaluator(@SuppressWarnings("unused") IJavaElement element) {
 		return new CoreJavaDocSnippetStringEvaluator(fElement);
 	}
 
@@ -456,7 +456,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return createSuperMethodReferencesHTML(data.superInterfaceMethods(), data.superClassMethod());
 	}
 
-	protected StringBuffer createSuperMethodReferencesHTML(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) throws JavaModelException {
+	protected StringBuffer createSuperMethodReferencesHTML(ArrayList<IMethod> superInterfaceMethods, IMethod superClassMethod) {
 		// jdtls override to return null
 		return CoreJavadocAccess.createSuperMethodReferencesHTMLStaticImpl(superInterfaceMethods, superClassMethod);
 	}
@@ -553,6 +553,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return hasInheritedExceptions;
 	}
 
+	@Override
 	public CharSequence getMainDescription() {
 		if (fMainDescription == null) {
 			fMainDescription= new StringBuffer();
@@ -573,6 +574,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return fMainDescription.length() > 0 ? fMainDescription : null;
 	}
 
+	@Override
 	public CharSequence getReturnDescription() {
 		if (fReturnDescription == null) {
 			fReturnDescription= new StringBuffer();
@@ -811,7 +813,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		return text;
 	}
 
-	protected void handleInLineText(String text, ASTNode previousNode) {
+	protected void handleInLineText(String text, @SuppressWarnings("unused") ASTNode previousNode) {
 		handleText(text);
 	}
 
@@ -1487,7 +1489,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 							fBuf.append('.');
 						}
 						fBuf.append(refMemberName);
-						if (refMethodParamTypes != null) {
+						if (refMethodParamTypes != null && refMethodParamNames != null) {
 							fBuf.append('(');
 							for (int i= 0; i < refMethodParamTypes.length; i++) {
 								String pType= refMethodParamTypes[i];
@@ -1511,7 +1513,7 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 		}
 	}
 
-	protected String createLinkURI(String scheme, IJavaElement element, String refTypeName, String refMemberName, String[] refParameterTypes) throws URISyntaxException {
+	protected String createLinkURI(String scheme, @SuppressWarnings("unused") IJavaElement element, String refTypeName, String refMemberName, String[] refParameterTypes) throws URISyntaxException {
 		return CoreJavaElementLinks.createURI(scheme, fElement, refTypeName, refMemberName, refParameterTypes);
 	}
 

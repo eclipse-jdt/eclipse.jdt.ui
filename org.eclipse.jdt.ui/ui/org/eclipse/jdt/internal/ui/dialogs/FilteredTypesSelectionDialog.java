@@ -438,7 +438,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				}
 			}
 		}
-		return JavaCore.callReadOnly(super::open).intValue();
+		return super.open();
 	}
 
 	/**

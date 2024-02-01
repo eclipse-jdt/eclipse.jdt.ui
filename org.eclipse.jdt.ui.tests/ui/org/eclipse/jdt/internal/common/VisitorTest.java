@@ -107,19 +107,19 @@ public class VisitorTest {
 //		System.out.println(result.toString());
 	}
 
-	private void astnodeprocessorend(ASTNode node, ReferenceHolder<String,NodeFound> holder) {
+	private void astnodeprocessorend(ASTNode node, @SuppressWarnings("unused") ReferenceHolder<String,NodeFound> holder) {
 		String x = "End   "+node.getNodeType() + " :" + node;
 		System.out.printf("%-40s %s%n",x,ASTNode.nodeClassForType(node.getNodeType()));
 	}
 
-	private Boolean astnodeprocesser(ASTNode node, ReferenceHolder<String,NodeFound> holder) {
+	private Boolean astnodeprocesser(ASTNode node, @SuppressWarnings("unused") ReferenceHolder<String,NodeFound> holder) {
 //		NodeFound nodeFound = holder.get(VisitorEnum.fromNodetype(node.getNodeType()));
 		String x = "Start "+node.getNodeType() + " :" + node;
 		System.out.printf("%-40s %s%n",x,ASTNode.nodeClassForType(node.getNodeType()));
 		return true;
 	}
 
-	private boolean handleMethodInvocation(MethodInvocation assignment, ReferenceHolder<String,NodeFound> holder) {
+	private boolean handleMethodInvocation(MethodInvocation assignment, @SuppressWarnings("unused") ReferenceHolder<String,NodeFound> holder) {
 		System.out.println(assignment);
 		return true;
 	}

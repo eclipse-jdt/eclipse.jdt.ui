@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2024 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which accompanies this distribution, and is available at
@@ -395,6 +395,27 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void testMethodCallInAnonymousClassExtendingRefactoredClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 3, 10, 3, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
+	public void testMethodCallInAnonymousClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo", "p.Other" }, 4, 10, 4, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
+	public void testMethodCallInNestedAnonymousClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo", "p.Other" }, 4, 10, 4, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
 	public void testVariousInstanceCases() throws Exception {
 		//Various cases of instance access in many different forms
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 14, 17, 14, 20);
@@ -575,4 +596,43 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 12, 25, 12, 28);
 		assertHasNoCommonErrors(status);
 	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1043
+	 */
+	@Test
+	public void testJavaDocInsertBetweenExistingTags() throws Exception {
+		//If javadoc already contains tags, insert the new parameter information at reasonable positions
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 12, 18, 12, 21);
+		assertHasNoCommonErrors(status);
+	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1043
+	 */
+	@Test
+	public void testJavaDocShuffledTagsWithGenerics() throws Exception {
+		//If javadoc already has several tags in usual order, insert the new parameter information at reasonable positions
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 18, 27, 18, 30);
+		assertHasNoCommonErrors(status);
+	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1045
+	 */
+	@Test
+	public void testCallsAroundRefactoredMethod() throws Exception {
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 8, 17, 8, 31);
+		assertHasNoCommonErrors(status);
+	}
+
+	/**
+	 * See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1044
+	 */
+	@Test
+	public void testMethodWithInvocationOnNewObject() throws Exception {
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 3, 17, 3, 23);
+		assertHasNoCommonErrors(status);
+	}
+
 }

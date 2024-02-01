@@ -182,6 +182,7 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 	 * @throws CoreException The core exception
 	 * @deprecated Use assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected, Set<String> expectedGroupCategories) instead.
 	 */
+	@Deprecated
 	protected void assertGroupCategoryUsed(ICompilationUnit[] cus, Set<String> setOfExpectedGroupCategories) throws CoreException {
 		final CleanUpRefactoring ref= new CleanUpRefactoring();
 		ref.setUseOptionsFromProfile(true);

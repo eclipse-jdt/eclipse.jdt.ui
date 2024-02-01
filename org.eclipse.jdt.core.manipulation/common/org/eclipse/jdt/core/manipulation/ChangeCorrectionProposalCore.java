@@ -17,6 +17,7 @@
 package org.eclipse.jdt.core.manipulation;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -31,7 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 /**
  * @since 1.11
  */
-public class ChangeCorrectionProposalCore {
+public class ChangeCorrectionProposalCore implements IAdaptable {
 	protected Change fChange;
 	protected String fName;
 	protected int fRelevance;
@@ -222,5 +223,14 @@ public class ChangeCorrectionProposalCore {
 	 */
 	public void setCommandId(String commandId) {
 		fCommandId= commandId;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter.isInstance(this)) {
+			return (T) this;
+		}
+		return null;
 	}
 }

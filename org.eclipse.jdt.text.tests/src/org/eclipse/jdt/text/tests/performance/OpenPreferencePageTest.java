@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import java.util.Objects;
+
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
@@ -80,7 +82,7 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 			EditorTestHelper.runEventQueue();
 			editorNode= findTreeItem(javaNode.getItems(), "Editor");
 		}
-		assertNotNull(editorNode);
+		Objects.requireNonNull(editorNode);
 
 		EditorTestHelper.runEventQueue();
 

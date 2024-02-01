@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,10 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposal {
+	public NewMethodCorrectionProposal(NewMethodCorrectionProposalCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), core.getRelevance(), image, core);
+	}
+
 	public NewMethodCorrectionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, List<Expression> arguments, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, relevance, image, new NewMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, binding, relevance));
 	}

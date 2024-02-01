@@ -216,7 +216,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			IJavaProject javaProject= cu2.getJavaProject();
 			if (javaProject != null)
 				options= javaProject.getOptions(true);
-			applyChanges(rewriter, document, textFileBuffer, shell, inEditor, options);
+			applyChanges(rewriter, document, textFileBuffer, inEditor, options);
 
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);

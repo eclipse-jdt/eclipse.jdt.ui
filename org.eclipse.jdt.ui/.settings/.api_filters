@@ -105,11 +105,27 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/preferences/cleanup/ContributedCleanUpTabPage.java" type="org.eclipse.jdt.internal.ui.preferences.cleanup.ContributedCleanUpTabPage">
+        <filter id="571519004">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.internal.ui.preferences.cleanup.ContributedCleanUpTabPage.setWorkingValues(Map&lt;String,String&gt;)"/>
+                <message_argument value="CleanUpOptions"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="OutlineTreeViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/util/CleanUpCoreWrapper.java" type="org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper">
+        <filter id="571519004">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper.wrapOptions(CleanUpOptionsCore)"/>
+                <message_argument value="CleanUpOptions"/>
             </message_arguments>
         </filter>
     </resource>
@@ -193,11 +209,19 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/ui/text/java/IProblemLocation.java" type="org.eclipse.jdt.ui.text.java.IProblemLocation">
-        <filter id="576720909">
+    <resource path="ui/org/eclipse/jdt/ui/text/java/correction/ASTRewriteCorrectionProposal.java" type="org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal">
+        <filter id="643850349">
             <message_arguments>
-                <message_argument value="IProblemLocationCore"/>
-                <message_argument value="IProblemLocation"/>
+                <message_argument value="ASTRewriteCorrectionProposalCore"/>
+                <message_argument value="ASTRewriteCorrectionProposal"/>
+                <message_argument value="ASTRewriteCorrectionProposal(ASTRewriteCorrectionProposalCore, Image)"/>
+            </message_arguments>
+        </filter>
+        <filter id="643850349">
+            <message_arguments>
+                <message_argument value="ASTRewriteCorrectionProposalCore"/>
+                <message_argument value="ASTRewriteCorrectionProposal"/>
+                <message_argument value="ASTRewriteCorrectionProposal(String, ICompilationUnit, ASTRewrite, int, Image, ASTRewriteCorrectionProposalCore)"/>
             </message_arguments>
         </filter>
     </resource>

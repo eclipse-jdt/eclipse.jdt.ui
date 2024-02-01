@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -162,10 +162,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 		this.fProposalCore = delegate != null ? delegate : new CUCorrectionProposalCore(this, name, cu, change, relevance);
 	}
 
-
-
 	/**
-	 * @since 3.31
+	 * @since 3.32
 	 * @return the delegate
 	 */
 	protected CUCorrectionProposalCore getDelegate() {
@@ -367,4 +365,22 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	protected boolean didOpenEditor() {
 		return fSwitchedEditor;
 	}
+
+	/**
+	 * @since 3.32
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (getDelegate() != null) {
+			if( adapter.isInstance(getDelegate())) {
+				return (T) getDelegate();
+			}
+		}
+		if (adapter.isInstance(this)) {
+			return (T) this;
+		}
+		return null;
+	}
+
 }

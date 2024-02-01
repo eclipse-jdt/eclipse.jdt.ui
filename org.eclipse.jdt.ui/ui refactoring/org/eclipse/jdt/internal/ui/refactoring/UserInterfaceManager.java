@@ -48,7 +48,7 @@ public class UserInterfaceManager {
 		if (tuple == null)
 			return null;
 		try {
-			UserInterfaceStarter starter= tuple.starter.newInstance();
+			UserInterfaceStarter starter= tuple.starter.getDeclaredConstructor().newInstance();
 			Class<? extends RefactoringWizard> wizardClass= tuple.wizard;
 			Constructor<? extends RefactoringWizard> constructor= wizardClass.getConstructor(Refactoring.class);
 			RefactoringWizard wizard= constructor.newInstance(refactoring);

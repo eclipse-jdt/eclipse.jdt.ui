@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.corext.refactoring.code.makestatic;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -115,10 +116,10 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 	@Override
 	public boolean visit(SimpleName node) {
 		IBinding binding= node.resolveBinding();
-		if (binding instanceof IVariableBinding) {
-			modifyFieldUsage(node, binding);
-		} else if (binding instanceof IMethodBinding) {
-			modifyInstanceMethodUsage(node, binding);
+		if (binding instanceof IVariableBinding variableBinding) {
+			modifyFieldUsage(node, variableBinding);
+		} else if (binding instanceof IMethodBinding methodBinding) {
+			modifyInstanceMethodUsage(node, methodBinding);
 		}
 		return super.visit(node);
 	}
@@ -145,7 +146,7 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 		if (qualifier != null) {
 			IBinding qualifierBinding= qualifier.resolveBinding();
 			ITypeBinding typeBinding= (ITypeBinding) qualifierBinding;
-			if (isInsideAnonymousClass(typeBinding)) {
+			if (isAccessToAnonymousClass(node, typeBinding)) {
 				return super.visit(node);
 			}
 		} else {
@@ -198,12 +199,8 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 		return super.visit(node);
 	}
 
-	private void modifyFieldUsage(SimpleName node, IBinding binding) {
-		IVariableBinding variableBinding= (IVariableBinding) binding;
-
-		//Check if we are inside a anonymous class
-		ITypeBinding declaringClass= variableBinding.getDeclaringClass();
-		if (isInsideAnonymousClass(declaringClass)) {
+	private void modifyFieldUsage(SimpleName node, IVariableBinding variableBinding) {
+		if (isAccessToAnonymousClass(node, variableBinding.getDeclaringClass())) {
 			return;
 		}
 
@@ -221,32 +218,41 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 		}
 	}
 
-	private void modifyInstanceMethodUsage(SimpleName node, IBinding binding) {
-		IMethodBinding methodBinding= (IMethodBinding) binding;
-		ITypeBinding declaringClass= methodBinding.getDeclaringClass();
-		//Check if we are inside a anonymous class
-		if (isInsideAnonymousClass(declaringClass)) {
+	private void modifyInstanceMethodUsage(SimpleName node, IMethodBinding methodBinding) {
+		if (isAccessToAnonymousClass(node, methodBinding.getDeclaringClass())) {
 			return;
 		}
 
 		if (!Modifier.isStatic(methodBinding.getModifiers())) {
-			fTargetMethodhasInstanceUsage= true;
-
 			fFinalConditionsChecker.checkIsNotRecursive(node, fTargetMethodDeclaration);
 
-			replaceMethodInvocation(node);
+			fTargetMethodhasInstanceUsage |= replaceMethodInvocation(node);
 		}
 	}
 
-	private boolean isInsideAnonymousClass(ITypeBinding declaringClass) {
-		if (declaringClass != null) {
-			boolean isLocal= declaringClass.isLocal();
-			boolean isAnonymous= declaringClass.isAnonymous();
-			boolean isMember= declaringClass.isMember();
-			boolean isNested= declaringClass.isNested();
-			boolean isTopLevel= declaringClass.isTopLevel();
-			if (!isTopLevel || isNested || isAnonymous || isLocal || isMember) {
-				return true;
+	private boolean isAccessToAnonymousClass(ASTNode node, ITypeBinding declaringClass) {
+		IMethodBinding refactoredMethod = fTargetMethodDeclaration.resolveBinding();
+		if (refactoredMethod == null) {
+			// If we cannot resolve the binding of the refactored method for some reason, better keep this member access
+			// as is and, in the worst case, risk a compile error than changing semantics by erroneously modifying the access.
+			return true;
+		}
+		ITypeBinding typeOfRefactoredMethod = refactoredMethod.getDeclaringClass();
+		ASTNode currentNode = node;
+		while (currentNode != null) {
+			currentNode = currentNode.getParent();
+			// Stop when reaching class declaration with method to be refactored
+			if (currentNode instanceof AbstractTypeDeclaration typeDeclaration) {
+				if (typeOfRefactoredMethod.equals(typeDeclaration.resolveBinding())) {
+					return false;
+				}
+			}
+			// If containing anonymous class specializes declaring class of called method, method is invoked on this anonymous class
+			if (currentNode instanceof AnonymousClassDeclaration typeDeclaration) {
+				ITypeBinding anonymousClass = typeDeclaration.resolveBinding();
+				if (anonymousClass != null && anonymousClass.isAssignmentCompatible(declaringClass)) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -282,7 +288,7 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 		}
 	}
 
-	private void replaceMethodInvocation(SimpleName node) {
+	private boolean replaceMethodInvocation(SimpleName node) {
 		ASTNode parent= node.getParent();
 		SimpleName replacementExpression= fAst.newSimpleName(fParamName);
 		if (parent instanceof MethodInvocation) {
@@ -291,8 +297,10 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 
 			if (optionalExpression == null) {
 				fRewrite.set(methodInvocation, MethodInvocation.EXPRESSION_PROPERTY, replacementExpression, null);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private boolean parentIsAnonymousClass(ASTNode parentNode) {
