@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore {
@@ -105,7 +105,7 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 		}
 	}
 
-	public static SealedClassFixCore addTypeAsPermittedSubTypeProposal(CompilationUnit cu, IProblemLocationCore problem) {
+	public static SealedClassFixCore addTypeAsPermittedSubTypeProposal(CompilationUnit cu, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(cu);
 
 		IType sealedType= getSealedType(selectedNode);
@@ -148,7 +148,7 @@ public class SealedClassFixCore extends CompilationUnitRewriteOperationsFixCore 
 		return new SealedClassFixCore(label, cuRewrite.getRoot(), op);
 	}
 
-	public static SealedClassFixCore addSealedAsDirectSuperTypeProposal(CompilationUnit cu, IProblemLocationCore problem) {
+	public static SealedClassFixCore addSealedAsDirectSuperTypeProposal(CompilationUnit cu, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(cu);
 
 		TypeDeclaration sealedType= getSealedTypeNodeFromPermitsNode(selectedNode);

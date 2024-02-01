@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
 
@@ -64,7 +64,7 @@ public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFixCore.createCleanUp(compilationUnit, problems,
 				false,
 				false,
@@ -111,7 +111,7 @@ public class UnnecessaryCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.UnnecessaryCast)
 			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
 

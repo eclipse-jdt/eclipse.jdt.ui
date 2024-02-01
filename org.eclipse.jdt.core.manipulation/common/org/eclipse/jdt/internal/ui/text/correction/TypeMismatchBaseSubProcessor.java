@@ -60,6 +60,9 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposalCore.RemoveDescription;
@@ -73,7 +76,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 	protected TypeMismatchBaseSubProcessor() {
 	}
 
-	public void collectTypeMismatchProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void collectTypeMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		String[] args= problem.getProblemArguments();
 		if (args.length != 2) {
 			return;
@@ -264,7 +267,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 	}
 
-	public void collectChangeSenderTypeProposals(IInvocationContextCore context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<T> proposals) throws JavaModelException {
+	public void collectChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<T> proposals) throws JavaModelException {
 		IBinding callerBinding= Bindings.resolveExpressionBinding(nodeToCast, false);
 
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -324,11 +327,11 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		}
 	}
 
-	public T collectCastProposals(IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
+	public T collectCastProposals(IInvocationContext context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		return collectCastProposals(null, context, castTypeBinding, nodeToCast, relevance);
 	}
 
-	public T collectCastProposals(String label, IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
+	public T collectCastProposals(String label, IInvocationContext context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		if (label == null ) {
 			String castType= BindingLabelProviderCore.getBindingLabel(castTypeBinding, JavaElementLabelsCore.ALL_DEFAULT);
@@ -341,7 +344,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		return createCastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}
 
-	public void collectIncompatibleReturnTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
+	public void collectIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
@@ -397,7 +400,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 						proposal.setDisplayName(Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturnofoverridden_description, BasicElementLabels.getJavaElementName(overriddenDecl.getName())));
 					}
 	 */
-	public void collectIncompatibleThrowsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
+	public void collectIncompatibleThrowsProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (!(selectedNode instanceof MethodDeclaration decl)) {
@@ -466,7 +469,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		return false;
 	}
 
-	public void collectTypeMismatchInForEachProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectTypeMismatchInForEachProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null || selectedNode.getLocationInParent() != EnhancedForStatement.EXPRESSION_PROPERTY) {

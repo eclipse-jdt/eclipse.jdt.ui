@@ -39,7 +39,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.fix.IMultiFixCore;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * A utility class for wrapping ICleanUp objects to be used by
@@ -119,7 +119,7 @@ public class CleanUpCoreWrapper {
 			}
 
 			@Override
-			public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+			public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 				return var.canFix(compilationUnit, problem);
 			}
 
@@ -216,7 +216,7 @@ public class CleanUpCoreWrapper {
 			}
 
 			@Override
-			public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+			public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 				return var.canFix(compilationUnit, problem);
 			}
 

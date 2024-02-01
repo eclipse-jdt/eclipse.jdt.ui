@@ -18,7 +18,7 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * An extension of {@link AbstractCleanUpCoreWrapper} for cases where the wrapped
@@ -38,7 +38,7 @@ public class AbstractMultiFixCoreWrapper<T extends AbstractMultiFixCore> extends
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		return cleanUpCore.canFix(compilationUnit, problem);
 	}
 }

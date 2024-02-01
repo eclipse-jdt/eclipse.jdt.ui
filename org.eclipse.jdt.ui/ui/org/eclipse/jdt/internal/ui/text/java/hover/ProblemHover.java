@@ -42,7 +42,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -112,13 +112,13 @@ public class ProblemHover extends AbstractAnnotationHover {
 				return NO_PROPOSALS;
 
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
-			JavaCorrectionProcessor.collectCorrections(context, new IProblemLocationCore[] { location }, proposals);
+			JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 			Collections.sort(proposals, new CompletionProposalComparator());
 
 			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		}
 
-		private static boolean hasProblem(IProblem[] problems, IProblemLocationCore location) {
+		private static boolean hasProblem(IProblem[] problems, IProblemLocation location) {
 			for (IProblem problem : problems) {
 				if (problem.getID() == location.getProblemId() && problem.getSourceStart() == location.getOffset())
 					return true;

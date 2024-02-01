@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.TypeAnnotationSubProcessor;
@@ -89,7 +89,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		return selectedNode.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY;
 	}
 
-	public static NullAnnotationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocationCore problem,
+	public static NullAnnotationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem,
 			ChangeKind changeKind, boolean isArgumentProblem) {
 		IJavaElement javaElement= compilationUnit.getJavaElement();
 		String nullableAnnotationName= getNullableAnnotationName(javaElement, false);
@@ -152,12 +152,12 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				new NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation[] { operation });
 	}
 
-	public static NullAnnotationsFix createRemoveRedundantNullAnnotationsFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static NullAnnotationsFix createRemoveRedundantNullAnnotationsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		RemoveRedundantAnnotationRewriteOperation operation= new RemoveRedundantAnnotationRewriteOperation(compilationUnit, problem);
 		return new NullAnnotationsFix(FixMessages.NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation, compilationUnit, new RemoveRedundantAnnotationRewriteOperation[] { operation });
 	}
 
-	public static NullAnnotationsFix createAddMissingDefaultNullnessAnnotationsFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static NullAnnotationsFix createAddMissingDefaultNullnessAnnotationsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		AddMissingDefaultNullnessRewriteOperation operation= new AddMissingDefaultNullnessRewriteOperation(compilationUnit, problem);
 		String nonNullByDefaultAnnotationname= NullAnnotationsFix.getNonNullByDefaultAnnotationName(compilationUnit.getJavaElement(), true);
 		String label= Messages.format(FixMessages.NullAnnotationsRewriteOperations_add_missing_default_nullness_annotation, new String[] { nonNullByDefaultAnnotationname });
@@ -165,7 +165,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	// Entry for NullAnnotationsCleanup:
-	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] locations, int problemID) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] locations, int problemID) {
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
@@ -173,7 +173,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		if (locations == null) {
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();
-			locations= new IProblemLocationCore[problems.length];
+			locations= new IProblemLocation[problems.length];
 			for (int i= 0; i < problems.length; i++) {
 				if (problems[i].getID() == problemID)
 					locations[i]= new ProblemLocation(problems[i]);
@@ -194,9 +194,9 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		return new NullAnnotationsFix(message, compilationUnit, operationsArray);
 	}
 
-	private static boolean createMoveTypeAnnotationOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> operations) {
+	private static boolean createMoveTypeAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> operations) {
 		boolean isMove= false;
-		for (IProblemLocationCore location: locations) {
+		for (IProblemLocation location: locations) {
 			if (location == null)
 				continue;
 			MoveTypeAnnotationRewriteOperation operation= new MoveTypeAnnotationRewriteOperation(compilationUnit, location);
@@ -206,12 +206,12 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		return isMove;
 	}
 
-	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> result) {
+	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
 		String nullableAnnotationName= getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 
 		Set<String> handledPositions= new HashSet<>();
-		for (IProblemLocationCore problem : locations) {
+		for (IProblemLocation problem : locations) {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
 
@@ -262,8 +262,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static void createRemoveRedundantNullAnnotationsOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (IProblemLocationCore problem : locations) {
+	private static void createRemoveRedundantNullAnnotationsOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
+		for (IProblemLocation problem : locations) {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
 

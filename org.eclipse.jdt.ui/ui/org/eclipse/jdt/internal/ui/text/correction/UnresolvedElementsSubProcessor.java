@@ -41,6 +41,8 @@ import org.eclipse.jdt.core.manipulation.TypeKinds;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -133,12 +135,12 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 		return null;
 	}
 
-	public static void getVariableProposals(IInvocationContextCore context, IProblemLocationCore problem, IVariableBinding resolvedField, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnresolvedElementsSubProcessor().collectVariableProposals(context, problem, resolvedField, proposals);
 	}
 
 
-	public static void getTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnresolvedElementsSubProcessor().collectTypeProposals(context, problem, proposals);
 	}
 
@@ -150,23 +152,23 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 		new UnresolvedElementsSubProcessor().collectRequiresModuleProposals(cu, node, relevance, proposals, isOnDemand);
 	}
 
-	public static void getMethodProposals(IInvocationContextCore context, IProblemLocationCore problem, boolean isOnlyParameterMismatch, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getMethodProposals(IInvocationContext context, IProblemLocation problem, boolean isOnlyParameterMismatch, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnresolvedElementsSubProcessor().collectMethodProposals(context, problem, isOnlyParameterMismatch, proposals);
 	}
 
-	public static void getConstructorProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnresolvedElementsSubProcessor().collectConstructorProposals(context, problem, proposals);
 	}
 
-	public static void getAmbiguosTypeReferenceProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getAmbiguosTypeReferenceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnresolvedElementsSubProcessor().collectAmbiguosTypeReferenceProposals(context, problem, proposals);
 	}
 
-	public static void getArrayAccessProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getArrayAccessProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new UnresolvedElementsSubProcessor().collectArrayAccessProposals(context, problem, proposals);
 	}
 
-	public static void getAnnotationMemberProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getAnnotationMemberProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnresolvedElementsSubProcessor().collectAnnotationMemberProposals(context, problem, proposals);
 	}
 

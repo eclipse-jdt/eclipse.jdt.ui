@@ -25,12 +25,14 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUpCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 
 public class SerialVersionProposalCore extends FixCorrectionProposalCore {
 	private boolean fIsDefaultProposal;
-	public SerialVersionProposalCore(IProposableFix fix, int relevance, IInvocationContextCore context, boolean isDefault) {
+	public SerialVersionProposalCore(IProposableFix fix, int relevance, IInvocationContext context, boolean isDefault) {
 		super(fix, createCleanUp(isDefault), relevance, context);
 		fIsDefaultProposal= isDefault;
 	}

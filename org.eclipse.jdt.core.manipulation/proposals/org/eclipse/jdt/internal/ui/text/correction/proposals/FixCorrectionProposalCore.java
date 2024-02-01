@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.fix.ILinkedFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 public class FixCorrectionProposalCore extends LinkedCorrectionProposalCore {
 
@@ -37,7 +37,7 @@ public class FixCorrectionProposalCore extends LinkedCorrectionProposalCore {
 	private final ICleanUpCore fCleanUp;
 	private CompilationUnit fCompilationUnit;
 
-	public FixCorrectionProposalCore(IProposableFix fix, ICleanUpCore cleanUp, int relevance, IInvocationContextCore context) {
+	public FixCorrectionProposalCore(IProposableFix fix, ICleanUpCore cleanUp, int relevance, IInvocationContext context) {
 		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance);
 		fFix= fix;
 		fCleanUp= cleanUp;

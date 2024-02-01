@@ -32,6 +32,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposalCore;
 
 public abstract class UnInitializedFinalFieldBaseSubProcessor<T> {
@@ -39,7 +42,7 @@ public abstract class UnInitializedFinalFieldBaseSubProcessor<T> {
 	public UnInitializedFinalFieldBaseSubProcessor() {
 	}
 
-	public void addProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void addProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -94,7 +97,7 @@ public abstract class UnInitializedFinalFieldBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int relevance);
-	protected abstract T createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType);
-	protected abstract T conditionallyCreateInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType);
+	protected abstract T createInitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int relevance);
+	protected abstract T createInitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType);
+	protected abstract T conditionallyCreateInitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType);
 }

@@ -43,12 +43,12 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class TypeAnnotationRewriteOperations {
 	static class MoveTypeAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
 
-		private IProblemLocationCore fProblem;
+		private IProblemLocation fProblem;
 
 		private CompilationUnit fCompilationUnit;
 
@@ -56,7 +56,7 @@ public class TypeAnnotationRewriteOperations {
 
 		private Annotation fAnnotation;
 
-		public MoveTypeAnnotationRewriteOperation(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+		public MoveTypeAnnotationRewriteOperation(CompilationUnit compilationUnit, IProblemLocation problem) {
 			fCompilationUnit= compilationUnit;
 			fProblem= problem;
 			CompilationUnit astRoot= fCompilationUnit;

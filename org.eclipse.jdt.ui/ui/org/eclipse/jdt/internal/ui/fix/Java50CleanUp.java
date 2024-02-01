@@ -31,9 +31,9 @@ import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 
 /**
@@ -78,13 +78,13 @@ public class Java50CleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
-		ProblemLocationCore[] coreProblems= new ProblemLocationCore[problems.length];
+		ProblemLocation[] coreProblems= new ProblemLocation[problems.length];
 		for (int i= 0; i < coreProblems.length; i++) {
-			coreProblems[i]= new ProblemLocationCore(problems[i].getOffset(), problems[i].getLength(), problems[i].getProblemId(), problems[i].getProblemArguments(), problems[i].isError(),
+			coreProblems[i]= new ProblemLocation(problems[i].getOffset(), problems[i].getLength(), problems[i].getProblemId(), problems[i].getProblemArguments(), problems[i].isError(),
 					problems[i].getMarkerType());
 		}
 
@@ -171,7 +171,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 
 		if (Java50FixCore.isMissingOverrideAnnotationProblem(id)) {

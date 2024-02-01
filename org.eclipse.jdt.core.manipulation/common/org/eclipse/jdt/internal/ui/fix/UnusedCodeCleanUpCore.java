@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Create fixes which can remove unused code
@@ -83,7 +83,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
 
 		return UnusedCodeFixCore.createCleanUp(compilationUnit, problems,
@@ -222,7 +222,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (UnusedCodeFixCore.isUnusedImport(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 

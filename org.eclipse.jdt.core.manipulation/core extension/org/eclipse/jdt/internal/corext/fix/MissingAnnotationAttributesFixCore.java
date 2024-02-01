@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class MissingAnnotationAttributesFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -35,7 +35,7 @@ public class MissingAnnotationAttributesFixCore extends CompilationUnitRewriteOp
 	 * @return a fix that adds the missing required attributes to the annotation at the problem
 	 *         location, or null if the given problem location isn't an annotation
 	 */
-	public static MissingAnnotationAttributesFixCore addMissingAnnotationAttributesProposal(CompilationUnit cu, IProblemLocationCore problemLocation) {
+	public static MissingAnnotationAttributesFixCore addMissingAnnotationAttributesProposal(CompilationUnit cu, IProblemLocation problemLocation) {
 		ASTNode selectedNode= problemLocation.getCoveringNode(cu);
 		if (!(selectedNode instanceof Annotation)) {
 			return null;

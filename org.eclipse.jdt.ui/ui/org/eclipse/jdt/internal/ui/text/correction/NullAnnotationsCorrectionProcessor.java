@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -60,7 +61,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.MakeLocalVariableNo
 public class NullAnnotationsCorrectionProcessor {
 
 	// pre: changeKind != OVERRIDDEN
-	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocationCore problem, ChangeKind changeKind,
+	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, ChangeKind changeKind,
 			Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -70,7 +71,7 @@ public class NullAnnotationsCorrectionProcessor {
 			addNullAnnotationInSignatureProposal(context, problem, proposals, changeKind, isArgumentProblem);
 	}
 
-	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocationCore problem,
+	public static void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem,
 			Collection<ICommandAccess> proposals, ChangeKind changeKind, boolean isArgumentProblem) {
 		NullAnnotationsFix fix= NullAnnotationsFix.createNullAnnotationInSignatureFix(context.getASTRoot(), problem,
 				changeKind, isArgumentProblem);
@@ -120,7 +121,7 @@ public class NullAnnotationsCorrectionProcessor {
 		}
 	}
 
-	public static void addRemoveRedundantAnnotationProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addRemoveRedundantAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		NullAnnotationsFix fix= NullAnnotationsFix.createRemoveRedundantNullAnnotationsFix(context.getASTRoot(), problem);
 		if (fix == null)
 			return;
@@ -131,7 +132,7 @@ public class NullAnnotationsCorrectionProcessor {
 		proposals.add(proposal);
 	}
 
-	public static void addAddMissingDefaultNullnessProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void addAddMissingDefaultNullnessProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		final CompilationUnit astRoot= context.getASTRoot();
 		if (JavaModelUtil.PACKAGE_INFO_JAVA.equals(astRoot.getJavaElement().getElementName())) {
 			NullAnnotationsFix fix= NullAnnotationsFix.createAddMissingDefaultNullnessAnnotationsFix(astRoot, problem);
@@ -154,7 +155,7 @@ public class NullAnnotationsCorrectionProcessor {
 	 * @param problem problem to be fixed
 	 * @param proposals accumulator for computed proposals
 	 */
-	public static void addExtractCheckedLocalProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addExtractCheckedLocalProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		CompilationUnit compilationUnit = context.getASTRoot();
 		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
 
@@ -192,7 +193,7 @@ public class NullAnnotationsCorrectionProcessor {
 		return null;
 	}
 
-	public static void addLocalVariableAnnotationProposal(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addLocalVariableAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 

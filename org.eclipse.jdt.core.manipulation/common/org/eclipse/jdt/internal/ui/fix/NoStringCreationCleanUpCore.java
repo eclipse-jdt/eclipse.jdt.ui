@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.text.edits.TextEditGroup;
 
 /**
@@ -140,12 +140,12 @@ public class NoStringCreationCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocationCore problem) {
+	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocation problem) {
 		return false;
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(final CompilationUnit unit, final IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFixCore createFix(final CompilationUnit unit, final IProblemLocation[] problems) throws CoreException {
 		return null;
 	}
 

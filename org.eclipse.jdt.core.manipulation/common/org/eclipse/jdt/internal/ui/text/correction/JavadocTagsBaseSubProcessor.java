@@ -60,10 +60,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 public abstract class JavadocTagsBaseSubProcessor<T> {
 	protected JavadocTagsBaseSubProcessor() {
 	}
-	public void addMissingJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		addMissingJavadocTagProposals(context, node, proposals);
 	}
@@ -71,7 +74,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 	/*
 	 * This entry point is requested by jdt.ls
 	 */
-	public void addMissingJavadocTagProposals(IInvocationContextCore context, ASTNode node, Collection<T> proposals) {
+	public void addMissingJavadocTagProposals(IInvocationContext context, ASTNode node, Collection<T> proposals) {
 		ASTNode parentDeclaration= null;
 		if (node == null) {
 			return;
@@ -140,7 +143,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 		}
 	}
 
-	public void addUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IJavaProject project= cu.getJavaProject();
 
@@ -181,7 +184,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 			proposals.add(proposal);
 	}
 
-	public void addMissingJavadocCommentProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void addMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {
 			return;
@@ -295,7 +298,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 
 	protected abstract T addJavadocCommentProposal(String label, ICompilationUnit cu, int addJavadocModule, int startPosition, String comment);
 
-	public void addRemoveJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addRemoveJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		while (node != null && !(node instanceof TagElement)) {
 			node= node.getParent();
@@ -315,7 +318,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 
 	protected abstract T createRemoveJavadocTagProposals(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int removeTag);
 
-	public void addRemoveDuplicateModuleJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addRemoveDuplicateModuleJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node instanceof ModuleDeclaration) {
 			node= findModuleJavadocTag((ModuleDeclaration) node, problem);
@@ -345,7 +348,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 
 	protected abstract T createRemoveDuplicateModuleJavadocTagProposal(String label, ICompilationUnit compilationUnit, int start, int length, String string, int removeTag);
 
-	private ASTNode findModuleJavadocTag(ModuleDeclaration decl, IProblemLocationCore problem) {
+	private ASTNode findModuleJavadocTag(ModuleDeclaration decl, IProblemLocation problem) {
 		ASTNode result= null;
 		CompilationUnit cu= (CompilationUnit) decl.getParent();
 		int problemLocationStart= problem.getOffset();
@@ -370,7 +373,7 @@ public abstract class JavadocTagsBaseSubProcessor<T> {
 		return result;
 	}
 
-	public void addInvalidQualificationProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addInvalidQualificationProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (!(node instanceof Name)) {
 			return;

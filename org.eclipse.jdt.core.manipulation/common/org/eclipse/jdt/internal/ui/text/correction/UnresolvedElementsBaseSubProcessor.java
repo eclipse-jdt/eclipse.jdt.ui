@@ -134,6 +134,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddArgumentCorrectionProposalCore;
@@ -208,7 +210,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 	private final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
-	public void collectVariableProposals(IInvocationContextCore context, IProblemLocationCore problem, IVariableBinding resolvedField, Collection<T> proposals) throws CoreException {
+	public void collectVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection<T> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -659,7 +661,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 
-	public void collectTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void collectTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -1370,7 +1372,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 
 	// 1200
-	public void collectMethodProposals(IInvocationContextCore context, IProblemLocationCore problem, boolean isOnlyParameterMismatch, Collection<T> proposals) throws CoreException {
+	public void collectMethodProposals(IInvocationContext context, IProblemLocation problem, boolean isOnlyParameterMismatch, Collection<T> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -1453,7 +1455,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 
 	// 1300
-	private void addStaticImportFavoriteProposals(IInvocationContextCore context, SimpleName node, boolean isMethod, Collection<T> proposals) throws JavaModelException {
+	private void addStaticImportFavoriteProposals(IInvocationContext context, SimpleName node, boolean isMethod, Collection<T> proposals) throws JavaModelException {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
 		if (JavaModelUtil.is50OrHigher(project)) {
 			String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
@@ -1694,7 +1696,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		return false;
 	}
 
-	private void addParameterMissmatchProposals(IInvocationContextCore context, IProblemLocationCore problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) throws CoreException {
+	private void addParameterMissmatchProposals(IInvocationContext context, IProblemLocation problem, List<IMethodBinding> similarElements, ASTNode invocationNode, List<Expression> arguments, Collection<T> proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -1719,7 +1721,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 	// 1700
-	private void doMoreParameters(IInvocationContextCore context, ASTNode invocationNode, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<T> proposals) throws CoreException {
+	private void doMoreParameters(IInvocationContext context, ASTNode invocationNode, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<T> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= paramTypes.length - argTypes.length;
@@ -1821,7 +1823,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 	// 1800
-	private void doMoreArguments(IInvocationContextCore context, ASTNode invocationNode, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection<T> proposals) throws CoreException {
+	private void doMoreArguments(IInvocationContext context, ASTNode invocationNode, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodRef, Collection<T> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodRef.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= argTypes.length - paramTypes.length;
@@ -1936,7 +1938,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 	// 1900
-	private void doEqualNumberOfParameters(IInvocationContextCore context, ASTNode invocationNode, IProblemLocationCore problem, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<T> proposals) throws CoreException {
+	private void doEqualNumberOfParameters(IInvocationContext context, ASTNode invocationNode, IProblemLocation problem, List<Expression> arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, Collection<T> proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -2139,7 +2141,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 	// 2000
-	private void addQualifierToOuterProposal(IInvocationContextCore context, MethodInvocation invocationNode, IMethodBinding binding, Collection<T> proposals) {
+	private void addQualifierToOuterProposal(IInvocationContext context, MethodInvocation invocationNode, IMethodBinding binding, Collection<T> proposals) {
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding parentType= Bindings.getBindingOfParentType(invocationNode);
 		ITypeBinding currType= parentType;
@@ -2185,7 +2187,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 	// 2100
-	public void collectConstructorProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void collectConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -2260,7 +2262,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 
 	// 2200
-	public void collectAmbiguosTypeReferenceProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void collectAmbiguosTypeReferenceProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		int offset= problem.getOffset();
 		int len= problem.getLength();
@@ -2284,7 +2286,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 
 	// 2300
-	public void collectArrayAccessProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectArrayAccessProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 
 		CompilationUnit root= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(root);
@@ -2317,7 +2319,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	}
 
 	// 2400
-	public void collectAnnotationMemberProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void collectAnnotationMemberProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);

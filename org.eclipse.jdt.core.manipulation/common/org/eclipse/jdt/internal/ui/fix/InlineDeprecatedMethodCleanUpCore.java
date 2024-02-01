@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessorUtil;
 
 public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
@@ -84,7 +84,7 @@ public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		return false;
 	}
 
@@ -114,7 +114,7 @@ public class InlineDeprecatedMethodCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		return null;
 	}
 

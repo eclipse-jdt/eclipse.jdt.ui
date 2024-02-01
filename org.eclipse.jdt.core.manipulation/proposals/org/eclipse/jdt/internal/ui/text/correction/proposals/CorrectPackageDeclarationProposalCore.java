@@ -40,12 +40,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CorrectPackageDeclarationProposalCore extends CUCorrectionProposalCore {
-	private IProblemLocationCore fLocation;
+	private IProblemLocation fLocation;
 
-	public CorrectPackageDeclarationProposalCore(ICompilationUnit cu, IProblemLocationCore location, int relevance) {
+	public CorrectPackageDeclarationProposalCore(ICompilationUnit cu, IProblemLocation location, int relevance) {
 		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance);
 		fLocation= location;
 	}
