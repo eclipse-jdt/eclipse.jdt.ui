@@ -22,7 +22,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  *
  * @since 3.3
  */
-public interface IJavaThemeConstants {
+public interface IJavaThemeConstants {  // HI
 
 	String ID_PREFIX= JavaUI.ID_PLUGIN + "."; //$NON-NLS-1$
 
