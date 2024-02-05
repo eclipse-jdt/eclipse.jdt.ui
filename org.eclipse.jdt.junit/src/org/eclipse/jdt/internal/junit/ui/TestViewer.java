@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -448,9 +448,17 @@ public class TestViewer {
 		String testName= testSuite.getTestName();
 		ITestElement[] children= testSuite.getChildren();
 
-		if (testName.startsWith("[") && testName.endsWith("]") && children.length > 0 && children[0] instanceof TestCaseElement) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (children.length > 0 && children[0] instanceof TestCaseElement tce && tce.isDynamicTest()) {
 			// a group of parameterized tests
 			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0], null);
+		}
+		if (children.length == 0) {
+			// check if we have applied the workaround for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/945
+			TestCaseElement child= testSuite.getSingleDynamicChild();
+			if (child != null) {
+				// a parameterized test that ran only one test
+				return new OpenTestAction(fTestRunnerPart, child, null);
+			}
 		}
 
 		int index= testName.indexOf('(');

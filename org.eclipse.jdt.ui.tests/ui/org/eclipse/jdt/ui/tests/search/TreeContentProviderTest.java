@@ -118,7 +118,7 @@ public class TreeContentProviderTest {
 		}
 
 		@Override
-		protected void setSelection(List items) {
+		protected void setSelection(List<Item> items) {
 			// ignore
 		}
 

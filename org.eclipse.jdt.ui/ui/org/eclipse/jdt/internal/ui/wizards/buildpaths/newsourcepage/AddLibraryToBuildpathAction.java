@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -48,6 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
@@ -135,11 +135,11 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 							throw new InterruptedException();
 
 						List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
-						ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(pm, 1));
+						ClasspathModifier.setNewEntry(existingEntries, addedEntries, project, Progress.subMonitor(pm, 1));
 						if (pm.isCanceled())
 							throw new InterruptedException();
 
-						ClasspathModifier.commitClassPath(existingEntries, project, new SubProgressMonitor(pm, 1));
+						ClasspathModifier.commitClassPath(existingEntries, project, Progress.subMonitor(pm, 1));
 
 			        	BuildpathDelta delta= new BuildpathDelta(getToolTipText());
 			        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));

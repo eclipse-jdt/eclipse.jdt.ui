@@ -15,42 +15,26 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-
-import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteOperationsFixCore implements ILinkedFix {
-	public static final String UNTOUCH_COMMENT= "untouchComment"; //$NON-NLS-1$
+	public static final String UNTOUCH_COMMENT= CompilationUnitRewriteOperationsFixCore.UNTOUCH_COMMENT_PROPERTY;
 
-	public abstract static class CompilationUnitRewriteOperation extends CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation {
-		public abstract void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException;
-
-		@Override
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
-			cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
-				@Override
-				public SourceRange computeSourceRange(final ASTNode node) {
-					if (Boolean.TRUE.equals(node.getProperty(UNTOUCH_COMMENT))) {
-						return new SourceRange(node.getStartPosition(), node.getLength());
-					}
-
-					return super.computeSourceRange(node);
-				}
-			});
-			rewriteASTInternal(cuRewrite, linkedModel);
-		}
+	/**
+	 * Logic moved down to lower bundle.
+	 * Please use CompilationUnitRewriteOperationWithSourceRange instead
+	 */
+	@Deprecated
+	public abstract static class CompilationUnitRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
 	}
 
-	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
-		this(name, compilationUnit, new CompilationUnitRewriteOperation[] { operation });
+	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange operation) {
+		this(name, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] { operation });
 		Assert.isNotNull(operation);
 	}
 
-	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
+	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange[] operations) {
 		this(name, compilationUnit, operations, new LinkedProposalModelCore());
 	}
 

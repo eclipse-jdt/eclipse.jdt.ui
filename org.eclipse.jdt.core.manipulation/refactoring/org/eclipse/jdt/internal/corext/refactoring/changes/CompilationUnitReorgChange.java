@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -29,10 +28,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 abstract class CompilationUnitReorgChange extends ResourceChange {
 
@@ -65,7 +65,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 		try {
 			ICompilationUnit unit= getCu();
 			ResourceMapping mapping= JavaElementResourceMapping.create(unit);
-			Change result= doPerformReorg(new SubProgressMonitor(pm, 1));
+			Change result= doPerformReorg(Progress.subMonitor(pm, 1));
 			markAsExecuted(unit, mapping);
 			return result;
 		} finally {

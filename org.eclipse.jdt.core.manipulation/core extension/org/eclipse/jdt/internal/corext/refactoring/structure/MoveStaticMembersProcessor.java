@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -133,6 +132,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating {
@@ -388,13 +388,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (result.hasFatalError())
 				return result;
 
-			result.merge(checkNativeMovedMethods(new SubProgressMonitor(pm, 1)));
+			result.merge(checkNativeMovedMethods(Progress.subMonitor(pm, 1)));
 
 			if (result.hasFatalError())
 				return result;
 
 			List<ICompilationUnit> modifiedCus= new ArrayList<>();
-			createChange(modifiedCus, result, new SubProgressMonitor(pm, 7));
+			createChange(modifiedCus, result, Progress.subMonitor(pm, 7));
 			ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
 			for (IFile changedFile : getAllFilesToModify(modifiedCus)) {
 				checker.getDeltaFactory().change(changedFile);
@@ -535,13 +535,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				if (typeMember instanceof IInitializer)
 					pm.worked(1);
 				else
-					result.merge(checkMovedMemberAvailability((IMember) typeMember, new SubProgressMonitor(pm, 1)));
+					result.merge(checkMovedMemberAvailability((IMember) typeMember, Progress.subMonitor(pm, 1)));
 			}
 		} else {
 			pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, 1);
 		}
 
-		for (IType blindAccessorType : getTypesNotSeeingMovedMember(memberToMove, new SubProgressMonitor(pm, 1), result)) {
+		for (IType blindAccessorType : getTypesNotSeeingMovedMember(memberToMove, Progress.subMonitor(pm, 1), result)) {
 			String message= createNonAccessibleMemberMessage(memberToMove, blindAccessorType,/*moved*/true);
 			result.addError(message, JavaStatusContext.create(memberToMove));
 		}
@@ -554,7 +554,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			return new IType[0];
 
 		HashSet<IType> blindAccessorTypes= new HashSet<>(); // referencing, but access to destination type illegal
-		for (SearchResultGroup reference : getReferences(member, new SubProgressMonitor(pm, 1), status)) {
+		for (SearchResultGroup reference : getReferences(member, Progress.subMonitor(pm, 1), status)) {
 			for (SearchMatch searchResult : reference.getSearchResults()) {
 				IJavaElement element= SearchUtils.getEnclosingJavaElement(searchResult);
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
@@ -638,7 +638,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(member));
 		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(monitor, 1));
+		engine.searchPattern(Progress.subMonitor(monitor, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}
 
@@ -731,7 +731,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 		try {
 			Map<IMember, IncomingMemberVisibilityAdjustment> adjustments= new HashMap<>();
-			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+			IProgressMonitor sub= Progress.subMonitorSupressed(monitor, 1);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, fMembersToMove.length);
 			Set<IMember> rewritten= new HashSet<>();
 			for (IMember member : fMembersToMove) {
@@ -756,7 +756,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 				// Check if destination type is visible from references ->
 				// error message if not (for example, when moving into a private type)
-				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
+				status.merge(checkMovedMemberAvailability(member, Progress.subMonitor(sub, 1)));
 				// Put rewrite info into code and into status
 				for (IMember iMember : rewritten) {
 					adjustments.remove(iMember);
@@ -798,13 +798,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 			modifiedCus.addAll(Arrays.asList(units));
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, fDestinationType);
-			sub= new SubProgressMonitor(monitor, 1);
+			sub= Progress.subMonitor(monitor, 1);
 			sub.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, units.length);
 			for (ICompilationUnit unit : units) {
 				CompilationUnitRewrite rewrite= getCuRewrite(unit);
 				adjustor.setRewrites(Collections.singletonMap(unit, rewrite));
 				adjustor.setAdjustments(adjustments);
-				adjustor.rewriteVisibility(unit, new SubProgressMonitor(sub, 1));
+				adjustor.rewriteVisibility(unit, Progress.subMonitor(sub, 1));
 				ReferenceAnalyzer analyzer= new ReferenceAnalyzer(rewrite, fMemberBindings, targetBinding, fSourceBinding);
 				rewrite.getRoot().accept(analyzer);
 				status.merge(analyzer.getStatus());

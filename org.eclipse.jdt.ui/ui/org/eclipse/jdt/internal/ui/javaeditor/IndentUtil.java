@@ -95,9 +95,8 @@ public final class IndentUtil {
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		JavaIndenter indenter= new JavaIndenter(document, scanner, project);
 		boolean changed= false;
-		int tabSize= CodeFormatterUtil.getTabWidth(project);
 		for (int line= lines.getStartLine(), last= line + numberOfLines, i= 0; line < last; line++) {
-			changed |= indentLine(document, line, indenter, scanner, result.commentLinesAtColumnZero, i++, tabSize);
+			changed |= indentLine(document, line, indenter, scanner, result.commentLinesAtColumnZero, i++);
 		}
 		result.hasChanged= changed;
 
@@ -371,7 +370,7 @@ public final class IndentUtil {
 	 *         <code>false</code> if not
 	 * @throws BadLocationException if the document got changed concurrently
 	 */
-	private static boolean indentLine(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean[] commentLines, int lineIndex, int tabSize) throws BadLocationException {
+	private static boolean indentLine(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean[] commentLines, int lineIndex) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		final int offset= currentLine.getOffset();
 		int wsStart= offset; // where we start searching for non-WS; after the "//" in single line comments

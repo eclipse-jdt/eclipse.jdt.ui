@@ -49,6 +49,7 @@ import org.junit.runners.Suite;
 	IntroduceParameterTests1d7.class,
 	IntroduceFactoryTests.class,
 	IntroduceFactoryTests16.class,
+	MakeStaticRefactoringTests.class,
 
 	//-- structure
 	ChangeSignatureTests.class,

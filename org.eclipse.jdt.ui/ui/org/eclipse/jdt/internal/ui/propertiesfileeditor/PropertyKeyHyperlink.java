@@ -15,12 +15,11 @@
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import java.text.Collator;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -31,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -86,6 +84,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PatternConstructor;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -452,7 +451,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 										if (resource != null)
 											result.add(new KeyReference(resource, (IJavaElement) match.getElement(), match.getOffset(), match.getLength(), fIsFileEditorInput));
 									}
-								}, new SubProgressMonitor(monitor, 1));
+								}, Progress.subMonitor(monitor, 1));
 							} catch (CoreException e) {
 								throw new InvocationTargetException(e);
 							}
@@ -477,7 +476,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 							 * </p>
 							*/
 							if (fStorage instanceof IResource) {
-								engine.search(createScope(((IResource)fStorage).getProject()), collector, searchPattern, new SubProgressMonitor(monitor, 4));
+								engine.search(createScope(((IResource)fStorage).getProject()), collector, searchPattern, Progress.subMonitor(monitor, 4));
 							}
 						} else {
 							monitor.worked(1);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -84,6 +84,11 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image, new LinkedCorrectionProposalCore(name, cu, rewrite, relevance));
 	}
+
+	public LinkedCorrectionProposal(LinkedCorrectionProposalCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), image, core);
+	}
+
 
 	/* public only for tests. */
 	public LinkedProposalModelCore getLinkedProposalModel() {

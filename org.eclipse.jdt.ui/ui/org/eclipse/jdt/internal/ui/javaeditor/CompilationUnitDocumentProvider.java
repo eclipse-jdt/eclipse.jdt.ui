@@ -46,7 +46,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IEncodedStorage;
@@ -129,6 +128,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantReg
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class CompilationUnitDocumentProvider extends TextFileDocumentProvider implements ICompilationUnitDocumentProvider, IAnnotationModelFactory {
@@ -1323,7 +1323,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 */
 	private IProgressMonitor getSubProgressMonitor(IProgressMonitor monitor, int ticks) {
 		if (monitor != null)
-			return new SubProgressMonitor(monitor, ticks, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+			return Progress.subMonitorPrepend(monitor, ticks);
 
 		return new NullProgressMonitor();
 	}

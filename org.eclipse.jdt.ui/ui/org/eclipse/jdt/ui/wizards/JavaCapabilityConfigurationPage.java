@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 
@@ -43,6 +42,7 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -279,8 +279,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 
 		try {
 			IProject project= getJavaProject().getProject();
-			BuildPathsBlock.addJavaNature(project, new SubProgressMonitor(monitor, 1));
-			getBuildPathsBlock().configureJavaProject(newProjectCompliance, new SubProgressMonitor(monitor, 5));
+			BuildPathsBlock.addJavaNature(project, Progress.subMonitor(monitor, 1));
+			getBuildPathsBlock().configureJavaProject(newProjectCompliance, Progress.subMonitor(monitor, 5));
 		} catch (OperationCanceledException e) {
 			throw new InterruptedException();
 		} finally {

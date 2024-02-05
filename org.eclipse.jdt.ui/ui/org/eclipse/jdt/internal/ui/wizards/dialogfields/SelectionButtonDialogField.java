@@ -149,18 +149,18 @@ public class SelectionButtonDialogField extends DialogField {
 			fButton.addSelectionListener(new SelectionListener() {
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
-					doWidgetSelected(e);
+					doWidgetSelected();
 				}
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					doWidgetSelected(e);
+					doWidgetSelected();
 				}
 			});
 		}
 		return fButton;
 	}
 
-	private void doWidgetSelected(SelectionEvent e) {
+	private void doWidgetSelected() {
 		if (isOkToUse(fButton)) {
 			changeValue(fButton.getSelection());
 		}

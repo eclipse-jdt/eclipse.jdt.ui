@@ -124,7 +124,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 * describes the result of input validation. <code>Null</code> is interpreted
 	 * as no error.
 	 */
-	protected RefactoringStatus validateTextField(String text){
+	protected RefactoringStatus validateTextField(@SuppressWarnings("unused") String text){
 		return null;
 	}
 

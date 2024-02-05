@@ -151,6 +151,8 @@ If &quot;true&quot;, the completion proposal will run in UI Thread, freezing the
                   </enumeration>
                   <enumeration value="__java_character">
                   </enumeration>
+                  <enumeration value="__java_multiline_string">
+                  </enumeration>
                </restriction>
             </simpleType>
          </attribute>

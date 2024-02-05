@@ -15,6 +15,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
+import java.util.Objects;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -24,7 +26,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -686,14 +687,13 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @param resetIfInvalid <code>true</code> if the view should be reset if the input is invalid, <code>false</code> otherwise
 	 */
 	private void computeAndDoSetInput(final IWorkbenchPart part, final IJavaElement element, final boolean resetIfInvalid) {
-		Assert.isLegal(part != null || element != null);
-
 		final int currentCount= ++fComputeCount;
 
 		final ISelection selection;
 		if (element != null)
 			selection= null;
 		else {
+			Objects.requireNonNull(part);
 			ISelectionProvider provider= part.getSite().getSelectionProvider();
 			if (provider == null)
 				return;

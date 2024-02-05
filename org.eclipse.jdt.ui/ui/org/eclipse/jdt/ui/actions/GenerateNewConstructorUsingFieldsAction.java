@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -178,7 +179,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 						if (unit == null) {
 							return null;
 						}
-					} else if (!unit.equals(field.getCompilationUnit())) {
+					} else if (!Objects.equals(unit, field.getCompilationUnit())) {
 						// all fields must be in the same CU
 						return null;
 					}

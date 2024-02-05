@@ -123,9 +123,9 @@ public class BuildpathModifierActionEnablementTest {
 		fRemoveFromBuildpathAction= new RemoveFromBuildpathAction(context, nullSelectionTarget);
 		fExcludeFromBuildpathAction= new ExcludeFromBuildpathAction(context, nullSelectionTarget);
 		fIncludeToBuildpathAction= new IncludeToBuildpathAction(context, nullSelectionTarget);
-		fEditFilterAction= new EditFilterAction(context, nullSelectionTarget);
+		fEditFilterAction= new EditFilterAction(nullSelectionTarget);
 		fEditOutputFolderAction= new EditOutputFolderAction(context, nullSelectionTarget);
-		fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction(context, nullSelectionTarget);
+		fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction(nullSelectionTarget);
 
 		return new BuildpathModifierAction[] {
 				fAddFolderToBuildpathAction,

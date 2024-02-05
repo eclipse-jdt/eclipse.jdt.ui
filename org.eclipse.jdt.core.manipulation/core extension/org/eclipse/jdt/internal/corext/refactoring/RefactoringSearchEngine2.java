@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -52,6 +51,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Helper class to use the search engine in refactorings.
@@ -492,7 +493,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine(fWorkingCopies);
-				engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, getCollector(), Progress.subMonitorSupressed(monitor, 1));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -521,7 +522,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine(fWorkingCopies);
-				engine.searchDeclarationsOfAccessedFields(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchDeclarationsOfAccessedFields(element, getCollector(), Progress.subMonitorSupressed(monitor, 1));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -550,7 +551,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine(fWorkingCopies);
-				engine.searchDeclarationsOfSentMessages(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchDeclarationsOfSentMessages(element, getCollector(), Progress.subMonitorSupressed(monitor, 1));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}
@@ -579,7 +580,7 @@ public final class RefactoringSearchEngine2 {
 					engine= new SearchEngine(fOwner);
 				else
 					engine= new SearchEngine(fWorkingCopies);
-				engine.searchDeclarationsOfReferencedTypes(element, getCollector(), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				engine.searchDeclarationsOfReferencedTypes(element, getCollector(), Progress.subMonitorSupressed(monitor, 1));
 			} catch (CoreException exception) {
 				throw new JavaModelException(exception);
 			}

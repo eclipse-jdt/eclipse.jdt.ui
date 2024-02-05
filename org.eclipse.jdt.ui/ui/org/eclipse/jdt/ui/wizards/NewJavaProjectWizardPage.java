@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -46,6 +45,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
@@ -317,9 +317,9 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 				IPath locationPath= getLocationPath();
 				BuildPathsBlock.createProject(getProjectHandle(),
 					locationPath != null ? URIUtil.toURI(locationPath) : null,
-					new SubProgressMonitor(monitor, 2));
-				BuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
-				fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));
+					Progress.subMonitor(monitor, 2));
+				BuildPathsBlock.addJavaNature(getProjectHandle(), Progress.subMonitor(monitor, 2));
+				fBuildPathsBlock.configureJavaProject(Progress.subMonitor(monitor, 6));
 			} catch (CoreException e1) {
 				throw new InvocationTargetException(e1);
 			} catch (OperationCanceledException e2) {

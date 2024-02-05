@@ -108,7 +108,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         };
 		fDialogPackageExplorer.addSelectionChangedListener(fIncludeToBuildpathAction);
 
-			fEditFilterAction= new EditFilterAction(context, fDialogPackageExplorer) {
+			fEditFilterAction= new EditFilterAction(fDialogPackageExplorer) {
 	        	@Override
 				public void run() {
 	        		page.commitDefaultOutputFolder();
@@ -131,7 +131,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fDropDownAction.addAction(fEditOutputFolderAction);
 		fDialogPackageExplorer.addPostSelectionChangedListener(fDropDownAction);
 
-        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(provider, context, fDialogPackageExplorer) {
+        fCreateLinkedSourceFolderAction= new CreateLinkedSourceFolderAction2(provider, fDialogPackageExplorer) {
         	@Override
 			public void run() {
         		page.commitDefaultOutputFolder();
@@ -151,7 +151,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	}
         };
 
-        fCreateSourceFolderAction= new CreateSourceFolderAction2(provider, context, fDialogPackageExplorer) {
+        fCreateSourceFolderAction= new CreateSourceFolderAction2(provider, fDialogPackageExplorer) {
         	@Override
 			public void run() {
         		page.commitDefaultOutputFolder();

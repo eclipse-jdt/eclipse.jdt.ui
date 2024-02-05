@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -58,6 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Import wizard to import a refactoring-aware Java Archive (JAR) file.
@@ -271,7 +271,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 			}
 		}
 		if (!fCancelled)
-			replaceJarFile(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			replaceJarFile(Progress.subMonitorSupressed(monitor, 100));
 		return rename;
 	}
 
@@ -399,13 +399,13 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 						final IFileStore store= EFS.getStore(location);
 						if (fImportData.isRenameJarFile()) {
 							final URI target= getTargetURI(uri);
-							store.copy(EFS.getStore(target), EFS.OVERWRITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+							store.copy(EFS.getStore(target), EFS.OVERWRITE, Progress.subMonitorSupressed(monitor, 50));
 							if (!uri.equals(target))
-								EFS.getStore(uri).delete(EFS.NONE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+								EFS.getStore(uri).delete(EFS.NONE, Progress.subMonitorSupressed(monitor, 50));
 						} else
-							store.copy(EFS.getStore(uri), EFS.OVERWRITE, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+							store.copy(EFS.getStore(uri), EFS.OVERWRITE, Progress.subMonitorSupressed(monitor, 100));
 						if (fJavaProject != null)
-							fJavaProject.getResource().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+							fJavaProject.getResource().refreshLocal(IResource.DEPTH_INFINITE, Progress.subMonitorSupressed(monitor, 50));
 						return;
 					}
 				}

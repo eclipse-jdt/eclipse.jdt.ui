@@ -14,9 +14,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
+import static java.util.Arrays.sort;
+import static java.util.Comparator.comparing;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -663,7 +667,9 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	Object[] getSelectedElementsWithoutContainedChildren() {
 		Set<Object> closure= removeContainedChildren(fInputGroup.getWhiteCheckedTreeItems());
 		closure.addAll(getExportedNonContainers());
-		return closure.toArray();
+		Object[] sortedElements = closure.toArray();
+		sort(sortedElements, comparing(Objects::toString));
+		return sortedElements;
 	}
 
 	private Set<Object> removeContainedChildren(Set<Object> elements) {

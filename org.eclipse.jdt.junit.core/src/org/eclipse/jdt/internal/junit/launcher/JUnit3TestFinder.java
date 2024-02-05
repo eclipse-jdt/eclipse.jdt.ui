@@ -19,8 +19,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -43,10 +42,7 @@ public class JUnit3TestFinder implements ITestFinder {
 			throw new IllegalArgumentException();
 		}
 
-		if (pm == null)
-			pm= new NullProgressMonitor();
-
-		pm.beginTask(JUnitMessages.TestSearchEngine_message_searching, 10);
+		SubMonitor subMon= SubMonitor.convert(pm, JUnitMessages.TestSearchEngine_message_searching, 10);
 		try {
 			if (element instanceof IType) {
 				if (isTest((IType) element)) {
@@ -60,17 +56,17 @@ public class JUnit3TestFinder implements ITestFinder {
 					}
 				}
 			} else {
-				findTestCases(element, result, new SubProgressMonitor(pm, 7));
-				if (pm.isCanceled()) {
+				findTestCases(element, result, subMon.newChild(7));
+				if (subMon.isCanceled()) {
 					return;
 				}
-				CoreTestSearchEngine.findSuiteMethods(element, result, new SubProgressMonitor(pm, 3));
+				CoreTestSearchEngine.findSuiteMethods(element, result, subMon.newChild(3));
 			}
-			if (pm.isCanceled()) {
+			if (subMon.isCanceled()) {
 				return;
 			}
 		} finally {
-			pm.done();
+			subMon.done();
 		}
 	}
 

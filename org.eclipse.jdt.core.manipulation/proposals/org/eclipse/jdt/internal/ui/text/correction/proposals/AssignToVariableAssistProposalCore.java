@@ -234,29 +234,22 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 			setEndPosition(rewrite.track(nodeToAssign)); // set cursor after expression statement
 		} else {
 			TryStatement tryStatement= null;
-			boolean modifyExistingTry= false;
 			TryStatement enclosingTry= (TryStatement)ASTResolving.findAncestor(nodeToAssign, ASTNode.TRY_STATEMENT);
 			ListRewrite resourcesRewriter= null;
 			ListRewrite clausesRewriter= null;
-			if (enclosingTry == null || enclosingTry.getBody() == null || enclosingTry.getBody().statements().get(0) != nodeToAssign) {
-				tryStatement= ast.newTryStatement();
-			} else {
-				modifyExistingTry= true;
-				resourcesRewriter= rewrite.getListRewrite(enclosingTry, TryStatement.RESOURCES2_PROPERTY);
-				clausesRewriter= rewrite.getListRewrite(enclosingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
-			}
-
 			VariableDeclarationExpression varExpression= ast.newVariableDeclarationExpression(newDeclFrag);
 			varExpression.setType(type);
 			EmptyStatement blankLine= null;
-			if (modifyExistingTry) {
-				resourcesRewriter.insertLast(varExpression, null);
-			} else {
+			if (enclosingTry == null || enclosingTry.getBody() == null || enclosingTry.getBody().statements().get(0) != nodeToAssign) {
+				tryStatement= ast.newTryStatement();
 				tryStatement.resources().add(varExpression);
 				blankLine = (EmptyStatement) rewrite.createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
 				tryStatement.getBody().statements().add(blankLine);
+			} else {
+				resourcesRewriter= rewrite.getListRewrite(enclosingTry, TryStatement.RESOURCES2_PROPERTY);
+				clausesRewriter= rewrite.getListRewrite(enclosingTry, TryStatement.CATCH_CLAUSES_PROPERTY);
+				resourcesRewriter.insertLast(varExpression, null);
 			}
-
 
 			CatchClause catchClause= ast.newCatchClause();
 			SingleVariableDeclaration decl= ast.newSingleVariableDeclaration();
@@ -288,7 +281,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(analyzer.getEnclosingBodyDeclaration(), importRewrite);
 				LinkedProposalModelCore linkedProposalModel= createProposalModel();
 				int i= 0;
-				if (!modifyExistingTry) {
+				if (tryStatement != null) {
 					for (ITypeBinding mustThrow : mustRethrowList) {
 						CatchClause newClause= ast.newCatchClause();
 						SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
@@ -320,17 +313,17 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 				if (st != null) {
 					catchClause.getBody().statements().add(st);
 				}
-				if (modifyExistingTry) {
+				if (clausesRewriter != null) {
 					clausesRewriter.insertLast(catchClause, null);
-				} else {
+				} if (tryStatement != null) {
 					tryStatement.catchClauses().add(catchClause);
 				}
 			}
-			if (modifyExistingTry) {
-				rewrite.remove(nodeToAssign, null);
-			} else {
+			if (tryStatement != null) {
 				rewrite.replace(expression, tryStatement, null);
 				setEndPosition(rewrite.track(blankLine));
+			} else {
+				rewrite.remove(nodeToAssign, null);
 			}
 
 		}

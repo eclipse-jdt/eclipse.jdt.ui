@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -454,6 +454,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractConstantRefactoring_descriptor_description_short;
 
 	public static String ExtractConstantRefactoring_name;
+
+	public static String ExtractConstantRefactoring_no_type;
 
 	public static String ExtractConstantRefactoring_no_void;
 
@@ -1032,6 +1034,52 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceIndirectionRefactoring_original_pattern;
 
 	public static String IntroduceIndirectionRefactoring_unable_determine_declaring_type;
+
+	public static String MakeStaticRefactoring_name;
+
+	public static String MakeStaticRefactoring_checking_activation;
+
+	public static String MakeStaticRefactoring_checking_preconditions;
+
+	public static String MakeStaticRefactoring_checking_conditions;
+
+	public static String MakeStaticRefactoring_creating_changes;
+
+	public static String MakeStaticRefactoring_not_available_on_this_selection;
+
+	public static String MakeStaticRefactoring_not_available_on_annotation;
+
+	public static String MakeStaticRefactoring_not_available_for_local_or_anonymous_types;
+
+	public static String MakeStaticRefactoring_not_available_for_constructors;
+
+	public static String MakeStaticRefactoring_not_available_for_super_method_invocations;
+
+	public static String MakeStaticRefactoring_duplicate_method_signature;
+
+	public static String MakeStaticRefactoring_method_already_static;
+
+	public static String MakeStaticRefactoring_method_is_overridden_in_subtype;
+
+	public static String MakeStaticRefactoring_hiding_method_of_parent_type;
+
+	public static String MakeStaticRefactoring_not_available_for_recursive_methods;
+
+	public static String MakeStaticRefactoring_unexpected_binding_error;
+
+	public static String MakeStaticRefactoring_not_available_for_parametrized_methods;
+
+	public static String MakeStaticRefactoring_not_available_for_wildCardTypes_as_bound;
+
+	public static String MakeStaticRefactoring_not_available_for_method_references;
+
+	public static String MakeStaticRefactoring_explicit_super_method_invocation;
+
+	public static String MakeStaticRefactoring_selected_method_uses_super_field_access;
+
+	public static String MakeStaticRefactoring_source_not_available_for_selected_method;
+
+	public static String MakeStaticRefactoring_change_name;
 
 	public static String IntroduceParameterObjectRefactoring_cannotalanyzemethod_mappingerror;
 

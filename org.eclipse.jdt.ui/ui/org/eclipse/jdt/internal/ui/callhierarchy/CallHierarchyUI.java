@@ -139,60 +139,66 @@ public class CallHierarchyUI {
 	 *         <code>false</code> iff an error dialog was raised.
 	 */
 	public static boolean openInEditor(Object element, Shell shell, boolean activateOnOpen) {
-        CallLocation callLocation= CallHierarchy.getCallLocation(element);
+		CallLocation callLocation= CallHierarchy.getCallLocation(element);
 
-        try {
-	        IMember enclosingMember;
-	        int selectionStart;
+		String name= ""; //$NON-NLS-1$
+		try {
+			IMember enclosingMember;
+			int selectionStart;
 			int selectionLength;
 
-	        if (callLocation != null) {
+			if (callLocation != null) {
 				enclosingMember= callLocation.getMember();
 				selectionStart= callLocation.getStart();
 				selectionLength= callLocation.getEnd() - selectionStart;
-	        } else if (element instanceof MethodWrapper) {
-	        	enclosingMember= ((MethodWrapper) element).getMember();
-	        	ISourceRange selectionRange= enclosingMember.getNameRange();
-	        	if (selectionRange == null)
-	        		selectionRange= enclosingMember.getSourceRange();
-	        	if (selectionRange == null)
-	        		return true;
-	        	selectionStart= selectionRange.getOffset();
-	        	selectionLength= selectionRange.getLength();
-	        } else {
-	            return true;
-	        }
+				name= callLocation.getCalledMember().getElementName();
+				if (!enclosingMember.exists()) {
+					MessageDialog.openInformation(shell, CallHierarchyMessages.OpenLocationAction_error_title,
+							Messages.format(CallHierarchyMessages.CallHierarchyUI_open_in_editor_notExists, name));
+				}
+			} else if (element instanceof MethodWrapper mw) {
+				name= mw.getName();
+				try {
+					enclosingMember= mw.getMember();
+					ISourceRange selectionRange= enclosingMember.getNameRange();
+					if (selectionRange == null)
+						selectionRange= enclosingMember.getSourceRange();
+					if (selectionRange == null)
+						return true;
+					selectionStart= selectionRange.getOffset();
+					selectionLength= selectionRange.getLength();
+				} catch (JavaModelException e) {
+					MessageDialog.openInformation(shell, CallHierarchyMessages.OpenLocationAction_error_title,
+							Messages.format(CallHierarchyMessages.CallHierarchyUI_open_in_editor_notExists, name));
+					return false;
+				}
+			} else {
+				return true;
+			}
 
-			IEditorPart methodEditor = JavaUI.openInEditor(enclosingMember, activateOnOpen, false);
-            if (methodEditor instanceof ITextEditor) {
-                ITextEditor editor = (ITextEditor) methodEditor;
+			IEditorPart methodEditor= JavaUI.openInEditor(enclosingMember, activateOnOpen, false);
+			if (methodEditor instanceof ITextEditor) {
+				ITextEditor editor= (ITextEditor) methodEditor;
 				editor.selectAndReveal(selectionStart, selectionLength);
-            }
-            return true;
-        } catch (JavaModelException e) {
-            JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-                    IJavaStatusConstants.INTERNAL_ERROR,
-                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e));
+			}
+			return true;
+		} catch (JavaModelException e) {
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
+					IJavaStatusConstants.INTERNAL_ERROR,
+					CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e));
 
-            ErrorDialog.openError(shell, CallHierarchyMessages.OpenLocationAction_error_title,
-                CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message,
-                e.getStatus());
-            return false;
-        } catch (PartInitException x) {
-            String name;
-        	if (callLocation != null)
-        		name= callLocation.getCalledMember().getElementName();
-        	else if (element instanceof MethodWrapper)
-        		name= ((MethodWrapper) element).getName();
-        	else
-        		name= "";  //$NON-NLS-1$
-            MessageDialog.openError(shell, CallHierarchyMessages.OpenLocationAction_error_title,
-                Messages.format(
-                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs,
-                    new String[] { name, x.getMessage() }));
-            return false;
-        }
-    }
+			ErrorDialog.openError(shell, CallHierarchyMessages.OpenLocationAction_error_title,
+					CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message,
+					e.getStatus());
+			return false;
+		} catch (PartInitException x) {
+			MessageDialog.openError(shell, CallHierarchyMessages.OpenLocationAction_error_title,
+					Messages.format(
+							CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs,
+							new String[] { name, x.getMessage() }));
+			return false;
+		}
+	}
 
     public static IEditorPart isOpenInEditor(Object elem) {
         IJavaElement javaElement= null;

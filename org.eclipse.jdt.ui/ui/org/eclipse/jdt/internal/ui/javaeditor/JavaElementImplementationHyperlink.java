@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -72,6 +71,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 /**
@@ -237,7 +237,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					if (receiverType.isInterface()) {
 						hierarchyScope= SearchEngine.createHierarchyScope(method.getDeclaringType());
 					} else {
-						if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
+						if (isFullHierarchyNeeded(Progress.subMonitor(monitor, 3), method, receiverType))
 							hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
 						else {
 							isMethodAbstract[0]= JdtFlags.isAbstract(method);
@@ -250,7 +250,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					Assert.isNotNull(pattern);
 					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 					SearchEngine engine= new SearchEngine();
-					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
+					engine.search(pattern, participants, hierarchyScope, requestor, Progress.subMonitor(monitor, 7));
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();
 					}

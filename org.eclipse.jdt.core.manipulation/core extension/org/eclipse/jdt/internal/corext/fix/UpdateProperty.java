@@ -411,6 +411,7 @@ public enum UpdateProperty {
 		}
 	}
 
+	@SuppressWarnings("unused") // unused parameter to implement IRewriter
 	private static void defaultRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
 			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -469,6 +470,7 @@ public enum UpdateProperty {
 		ASTNodes.replaceAndRemoveNLS(rewrite, visited, replace_with_Call, group, cuRewrite);
 	}
 
+	@SuppressWarnings("unused") // unused parameter to implement IRewriter
 	private static void pathRewrite(UpdateProperty upp, final MethodInvocation visited, final String propertykey, Expression expression,
 			final CompilationUnitRewrite cuRewrite,final TextEditGroup group, Object object) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();

@@ -192,7 +192,7 @@ public class ChangeCorrectionProposal extends ChangeCorrectionProposalCore imple
 				disabledStyledText.setEditable(true);
 				disabledStyledText.removeTraverseListener(traverseBlocker);
 				// Workaround to fix bug 434791 during 4.4 RC2. Will be replaced by official API during 4.5.
-				ITextOperationTarget textOperationTarget= activeEditor.getAdapter(ITextOperationTarget.class);
+				ITextOperationTarget textOperationTarget= activeEditor == null ? null : activeEditor.getAdapter(ITextOperationTarget.class);
 				if (textOperationTarget != null && textOperationTarget.canDoOperation(-100))
 					textOperationTarget.doOperation(-100);
 			}

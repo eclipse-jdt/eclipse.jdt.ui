@@ -52,6 +52,10 @@ public class MissingReturnTypeCorrectionProposalCore extends LinkedCorrectionPro
 		fExistingReturn= existingReturn;
 	}
 
+	public ReturnStatement getExistingReturnStatement() {
+		return fExistingReturn;
+	}
+
 	@Override
 	public String getName() {
 		if (fExistingReturn != null) {

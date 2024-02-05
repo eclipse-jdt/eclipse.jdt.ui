@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.RangeMarker;
@@ -132,6 +131,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class InlineConstantRefactoring extends Refactoring {
 
@@ -930,7 +931,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		engine.setScope(RefactoringScopeFactory.create(fField));
 		engine.setStatus(status);
 		engine.setRequestor(match -> match.isInsideDocComment() ? null : match);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
+		engine.searchPattern(Progress.subMonitor(pm, 1));
 		return (SearchResultGroup[]) engine.getResults();
 	}
 

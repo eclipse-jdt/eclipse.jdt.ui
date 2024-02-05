@@ -234,7 +234,6 @@ public final class RefactoringAvailabilityTesterCore  {
 		return (method != null) && Checks.isAvailable(method) && !Flags.isAnnotation(method.getDeclaringType().getFlags());
 	}
 
-
 	public static IType getDeclaringType(IJavaElement element) {
 		if (element == null)
 			return null;
@@ -726,10 +725,6 @@ public final class RefactoringAvailabilityTesterCore  {
 	}
 
 	public static boolean isRenameElementAvailable(IJavaElement element) throws CoreException {
-		return isRenameElementAvailable(element, false);
-	}
-
-	public static boolean isRenameElementAvailable(IJavaElement element, boolean isTextSelection) throws CoreException {
 		if (element != null) {
 			switch (element.getElementType()) {
 				case IJavaElement.JAVA_PROJECT:
@@ -802,6 +797,10 @@ public final class RefactoringAvailabilityTesterCore  {
 		return ReorgUtilsCore.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous()  && !type.isLambda();
 	}
 
+
+	public static boolean isMakeStaticAvailable(final IMethod method) throws JavaModelException {
+		return (method != null) && Checks.isAvailable(method) && !Flags.isAnnotation(method.getDeclaringType().getFlags());
+	}
 
 	private RefactoringAvailabilityTesterCore() {
 	}

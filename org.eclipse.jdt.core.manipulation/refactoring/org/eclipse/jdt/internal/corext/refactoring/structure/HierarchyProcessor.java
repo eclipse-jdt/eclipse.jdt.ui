@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -55,12 +54,10 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -72,7 +69,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -83,6 +79,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -106,7 +103,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Partial implementation of a hierarchy refactoring processor used in pull up,
@@ -280,7 +277,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return null;
 	}
 
-	protected static FieldDeclaration createNewFieldDeclarationNode(final ASTRewrite rewrite, final CompilationUnit unit, final IField field, final VariableDeclarationFragment oldFieldFragment, final TypeVariableMaplet[] mapping, final IProgressMonitor monitor, final RefactoringStatus status, final int modifiers) throws JavaModelException {
+	protected static FieldDeclaration createNewFieldDeclarationNode(final ASTRewrite rewrite, final CompilationUnit unit, final IField field, final VariableDeclarationFragment oldFieldFragment, final TypeVariableMaplet[] mapping, final int modifiers) throws JavaModelException {
 		final VariableDeclarationFragment newFragment= rewrite.getAST().newVariableDeclarationFragment();
 		copyExtraDimensions(oldFieldFragment, newFragment);
 		if (oldFieldFragment.getInitializer() != null) {
@@ -341,40 +338,6 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return (BodyDeclaration) rewrite.createStringPlaceholder(text, ASTNode.TYPE_DECLARATION);
 	}
 
-	protected static BodyDeclaration createPlaceholderForProtectedTypeDeclaration(final BodyDeclaration bodyDeclaration, final CompilationUnit declaringCuNode, final ICompilationUnit declaringCu, final TypeVariableMaplet[] mapping, final ASTRewrite rewrite, final boolean removeIndentation) throws JavaModelException {
-		BodyDeclaration result= null;
-		try {
-			final IDocument document= new Document(declaringCu.getBuffer().getContents());
-			final ASTRewrite rewriter= ASTRewrite.create(bodyDeclaration.getAST());
-			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
-			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping) {
-
-				@Override
-				public final boolean visit(final AnnotationTypeDeclaration node) {
-					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
-					return true;
-				}
-
-				@Override
-				public final boolean visit(final EnumDeclaration node) {
-					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
-					return true;
-				}
-
-				@Override
-				public final boolean visit(final TypeDeclaration node) {
-					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
-					return true;
-				}
-			});
-			rewriter.rewriteAST(document, declaringCu.getOptions(true)).apply(document, TextEdit.NONE);
-			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
-		} catch (MalformedTreeException | BadLocationException exception) {
-			JavaManipulationPlugin.log(exception);
-		}
-		return result;
-	}
-
 	protected static SingleVariableDeclaration createPlaceholderForSingleVariableDeclaration(final SingleVariableDeclaration declaration, final ICompilationUnit declaringCu, final ASTRewrite rewrite) throws JavaModelException {
 		return (SingleVariableDeclaration) rewrite.createStringPlaceholder(declaringCu.getBuffer().getText(declaration.getStartPosition(), declaration.getLength()), ASTNode.SINGLE_VARIABLE_DECLARATION);
 	}
@@ -417,7 +380,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return (BodyDeclaration) rewrite.createStringPlaceholder(getNewText(bodyDeclaration, declaringCu, removeIndentation), ASTNode.TYPE_DECLARATION);
 	}
 
-	protected static BodyDeclaration createPlaceholderForTypeDeclaration(final BodyDeclaration bodyDeclaration, final ICompilationUnit declaringCu, final TypeVariableMaplet[] mapping, final ASTRewrite rewrite, final boolean removeIndentation) throws JavaModelException {
+	static BodyDeclaration createPlaceholderForTypeDeclaration(final BodyDeclaration bodyDeclaration, final ICompilationUnit declaringCu, final TypeVariableMaplet[] mapping, final ASTRewrite rewrite) throws JavaModelException {
 		BodyDeclaration result= null;
 		try {
 			final IDocument document= new Document(declaringCu.getBuffer().getContents());
@@ -432,7 +395,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return result;
 	}
 
-	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List<IMember> members, final GroupCategorySet set) throws JavaModelException {
+	protected static void deleteDeclarationNodes(final boolean sameCu, final CompilationUnitRewrite unitRewriter, final List<IMember> members, final GroupCategorySet set) throws JavaModelException {
 		final List<ASTNode> declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
 		for (ASTNode node : declarationNodes) {
 			final ASTRewrite rewriter= unitRewriter.getASTRewrite();
@@ -485,7 +448,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return result;
 	}
 
-	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) throws JavaModelException {
+	protected static String getUnindentedText(final String text, final ICompilationUnit declaringCu) {
 		final String[] lines= Strings.convertIntoLines(text);
 		Strings.trimIndentation(lines, declaringCu, false);
 		return Strings.concatenate(lines, StubUtility.getLineDelimiterUsed(declaringCu));
@@ -546,6 +509,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		}
 	}
 
+	@SuppressWarnings("unused") // overridden in subclass
 	protected boolean canBeAccessedFrom(final IMember member, final IType target, final ITypeHierarchy hierarchy) throws JavaModelException {
 		Assert.isTrue(!(member instanceof IInitializer));
 		return member.exists();
@@ -557,10 +521,10 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			final RefactoringStatus result= new RefactoringStatus();
 			final String message= Messages.format(RefactoringCoreMessages.HierarchyRefactoring_gets_instantiated, new Object[] { JavaElementLabelsCore.getTextLabel(type, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)});
 
-			for (SearchResultGroup group : ConstructorReferenceFinder.getConstructorReferences(type, fOwner, new SubProgressMonitor(monitor, 1), result)) {
+			for (SearchResultGroup group : ConstructorReferenceFinder.getConstructorReferences(type, fOwner, Progress.subMonitor(monitor, 1), result)) {
 				ICompilationUnit unit= group.getCompilationUnit();
 				if (unit != null) {
-					final CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(unit, false, new SubProgressMonitor(monitor, 1));
+					final CompilationUnit cuNode= RefactoringASTParser.parseWithASTProvider(unit, false, Progress.subMonitor(monitor, 1));
 					for (ASTNode node : ASTNodeSearchUtil.getAstNodes(group.getSearchResults(), cuNode)) {
 						if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)) {
 							final RefactoringStatusContext context= JavaStatusContext.create(unit, node);
@@ -687,7 +651,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 			engine.setStatus(status);
 			engine.setOwner(fOwner);
 			engine.setScope(RefactoringScopeFactory.create(member));
-			engine.searchPattern(new SubProgressMonitor(monitor, 1));
+			engine.searchPattern(Progress.subMonitor(monitor, 1));
 			fCachedMembersReferences.put(member, engine.getResults());
 		}
 		final SearchResultGroup[] groups= (SearchResultGroup[]) fCachedMembersReferences.get(member);

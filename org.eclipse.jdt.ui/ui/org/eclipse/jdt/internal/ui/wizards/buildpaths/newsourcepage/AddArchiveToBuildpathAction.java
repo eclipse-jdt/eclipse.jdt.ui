@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
@@ -130,7 +130,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 
 			CPJavaProject cpProject= CPJavaProject.createFromExisting(project);
 			BuildpathDelta delta= ClasspathModifier.addExternalJars(jarPaths, cpProject);
-			ClasspathModifier.commitClassPath(cpProject, new SubProgressMonitor(monitor, 4));
+			ClasspathModifier.commitClassPath(cpProject, Progress.subMonitor(monitor, 4));
 
     		informListeners(delta);
 

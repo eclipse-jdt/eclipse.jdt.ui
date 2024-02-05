@@ -245,7 +245,7 @@ public class WorkingSetDropAdapterTest {
 			int result= fAdapter.internalTestValidateTarget(target, DND.DROP_DEFAULT);
 			assertEquals(validateResult, result);
 			if (validateResult != DND.DROP_NONE)
-				fAdapter.internalTestDrop(target, result);
+				fAdapter.internalTestDrop(result);
 		} finally {
 			LocalSelectionTransfer.getTransfer().setSelection(null);
 		}

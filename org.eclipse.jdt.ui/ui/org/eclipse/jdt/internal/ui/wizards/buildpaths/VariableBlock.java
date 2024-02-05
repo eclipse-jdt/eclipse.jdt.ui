@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -58,6 +57,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -386,7 +386,7 @@ public class VariableBlock {
 				paths[k]= null;
 				k++;
 			}
-			JavaCore.setClasspathVariables(names, paths, new SubProgressMonitor(monitor, 1));
+			JavaCore.setClasspathVariables(names, paths, Progress.subMonitor(monitor, 1));
 		}
 	}
 

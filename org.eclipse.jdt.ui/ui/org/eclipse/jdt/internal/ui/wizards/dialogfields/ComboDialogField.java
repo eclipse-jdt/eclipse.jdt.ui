@@ -105,7 +105,7 @@ public class ComboDialogField extends DialogField {
 			SelectionListener selectionListener= new SelectionListener() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					doSelectionChanged(e);
+					doSelectionChanged();
 				}
 
 				@Override
@@ -129,7 +129,7 @@ public class ComboDialogField extends DialogField {
 		return fComboControl;
 	}
 
-	private void doModifyText(ModifyEvent e) {
+	private void doModifyText(@SuppressWarnings("unused") ModifyEvent e) {
 		if (isOkToUse(fComboControl)) {
 			fText= fComboControl.getText();
 			fSelectionIndex= fComboControl.getSelectionIndex();
@@ -137,7 +137,7 @@ public class ComboDialogField extends DialogField {
 		dialogFieldChanged();
 	}
 
-	private void doSelectionChanged(SelectionEvent e) {
+	private void doSelectionChanged() {
 		if (isOkToUse(fComboControl)) {
 			fItems= fComboControl.getItems();
 			fText= fComboControl.getText();

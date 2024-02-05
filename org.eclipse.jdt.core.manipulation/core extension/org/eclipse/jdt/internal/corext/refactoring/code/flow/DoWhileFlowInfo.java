@@ -18,7 +18,7 @@ class DoWhileFlowInfo extends FlowInfo {
 
 	private boolean fActionBranches;
 
-	public void mergeAction(FlowInfo info, FlowContext context) {
+	public void mergeAction(FlowInfo info) {
 		if (info == null)
 			return;
 

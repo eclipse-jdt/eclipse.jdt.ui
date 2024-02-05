@@ -15,6 +15,16 @@
 package org.eclipse.jdt.internal.ui;
 
 public class PreferenceConstantsCore {
+	/**
+	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
+	 * @since 3.0
+	 */
+	public static final String TYPEFILTER_ENABLED= "org.eclipse.jdt.ui.typefilter.enabled"; //$NON-NLS-1$
+	/**
+	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
+	 * @since 3.0
+	 */
+	public static final String TYPEFILTER_DISABLED= "org.eclipse.jdt.ui.typefilter.disabled"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether code snippets are formatted

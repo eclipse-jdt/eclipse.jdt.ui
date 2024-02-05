@@ -23,7 +23,7 @@ class ReturnFlowInfo extends FlowInfo {
 		super(getReturnFlag(node));
 	}
 
-	public void merge(FlowInfo info, FlowContext context) {
+	public void merge(FlowInfo info) {
 		if (info == null)
 			return;
 

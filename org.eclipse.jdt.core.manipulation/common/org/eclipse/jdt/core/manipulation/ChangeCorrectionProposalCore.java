@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@
 package org.eclipse.jdt.core.manipulation;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -31,7 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 /**
  * @since 1.11
  */
-public class ChangeCorrectionProposalCore {
+public class ChangeCorrectionProposalCore implements IAdaptable {
 	protected Change fChange;
 	protected String fName;
 	protected int fRelevance;
@@ -160,7 +161,9 @@ public class ChangeCorrectionProposalCore {
 	 * @return The current change, or null if not initialized yet
 	 */
 	public Change getCurrentChange() {
-		return fChange;
+		synchronized (this) {
+			return fChange;
+		}
 	}
 
 
@@ -222,5 +225,14 @@ public class ChangeCorrectionProposalCore {
 	 */
 	public void setCommandId(String commandId) {
 		fCommandId= commandId;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if (adapter.isInstance(this)) {
+			return (T) this;
+		}
+		return null;
 	}
 }

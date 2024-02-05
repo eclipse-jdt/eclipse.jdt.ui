@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -156,6 +156,15 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		return "TestSuite: " + getTestName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
+	@Override
+	public String getTrace() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child != null) {
+			return child.getTrace();
+		}
+		return super.getTrace();
+	}
+
 	private static boolean isSingleDynamicTest(TestElement element) {
 		if (element instanceof TestCaseElement) {
 			TestCaseElement testCase = (TestCaseElement) element;
@@ -165,5 +174,26 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * If this test suite is a {@code @TestTemplate} test case with a single child, return that child.
+	 * @return The single dynamic test case child or {@code null} if the suite has no children or multiple or non-dynamid children.
+	 */
+	public TestCaseElement getSingleDynamicChild() {
+		try {
+			if (fChildren.size() == 1) {
+				TestElement child= fChildren.get(0);
+				if (child instanceof TestCaseElement) {
+					TestCaseElement testCase= (TestCaseElement) child;
+					if (testCase.isDynamicTest()) {
+						return testCase;
+					}
+				}
+			}
+		} catch (IndexOutOfBoundsException e) {
+			// don't care, children changed concurrently
+		}
+		return null;
 	}
 }

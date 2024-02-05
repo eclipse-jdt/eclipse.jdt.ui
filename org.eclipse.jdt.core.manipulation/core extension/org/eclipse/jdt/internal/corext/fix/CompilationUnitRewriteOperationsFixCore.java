@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
+import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
@@ -40,6 +41,26 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
+
+	public static final String UNTOUCH_COMMENT_PROPERTY= "untouchComment"; //$NON-NLS-1$
+	public abstract static class CompilationUnitRewriteOperationWithSourceRange extends CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation {
+		public abstract void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException;
+
+		@Override
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
+			cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+				@Override
+				public SourceRange computeSourceRange(final ASTNode node) {
+					if (Boolean.TRUE.equals(node.getProperty(UNTOUCH_COMMENT_PROPERTY))) {
+						return new SourceRange(node.getStartPosition(), node.getLength());
+					}
+
+					return super.computeSourceRange(node);
+				}
+			});
+			rewriteASTInternal(cuRewrite, linkedModel);
+		}
+	}
 
 	public abstract static class CompilationUnitRewriteOperation {
 
@@ -73,12 +94,16 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 	}
 
 	public CompilationUnitRewriteOperationsFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
+		this(name, compilationUnit, operations, new LinkedProposalModelCore());
+	}
+
+	public CompilationUnitRewriteOperationsFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations, LinkedProposalModelCore proposalModel) {
 		super(name);
 		Assert.isNotNull(operations);
 		Assert.isLegal(operations.length > 0);
 		fCompilationUnit= compilationUnit;
 		fOperations= operations;
-		fLinkedProposalModel= new LinkedProposalModelCore();
+		fLinkedProposalModel= proposalModel != null ? proposalModel : new LinkedProposalModelCore();
 	}
 
 	@Override

@@ -140,7 +140,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	 */
 	private static boolean isInJavaProject(IFolder folder) {
 		try {
-			return folder.getProject().getNature(JavaCore.NATURE_ID) != null;
+			return folder.getProject().hasNature(JavaCore.NATURE_ID);
 		} catch (CoreException e) {
 			return false;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation and others.
+ * Copyright (c) 2020, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2005,6 +2005,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "import java.util.List;\n" //
 				+ "import java.util.Locale;\n" //
 				+ "import java.util.TreeSet;\n" //
+				+ "import java.util.Map.Entry;\n" //
+				+ "import java.util.stream.Stream;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    private Comparator<Date> refactorField = new Comparator<Date>() {\n" //
@@ -2406,6 +2408,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        return listToSort;\n" //
 				+ "    }\n" //
 				+ "\n" //
+				+ "    void wildcardMethod() {\n" //
+				+ "        Stream.<Entry<String, String>>of().sorted((entry1, entry2) -> entry1.getKey().compareTo(entry2.getKey()));\n"//
+				+ "    }\n" //
+				+ "\n" //
 				+ "    public class FooBar {\n" //
 				+ "        public String value;\n" //
 				+ "    }\n" //
@@ -2424,6 +2430,8 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "import java.util.List;\n" //
 				+ "import java.util.Locale;\n" //
 				+ "import java.util.TreeSet;\n" //
+				+ "import java.util.Map.Entry;\n" //
+				+ "import java.util.stream.Stream;\n" //
 				+ "\n" //
 				+ "public class E {\n" //
 				+ "    private Comparator<Date> refactorField = Comparator.comparing(Date::toString);\n" //
@@ -2616,6 +2624,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "        Collections.sort(listToSort, comparator);\n" //
 				+ "\n" //
 				+ "        return listToSort;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    void wildcardMethod() {\n" //
+				+ "        Stream.<Entry<String, String>>of().sorted(Comparator.comparing(Entry<String, String>::getKey));\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public class FooBar {\n" //

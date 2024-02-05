@@ -161,7 +161,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		try {
 			for (int i= 0; i < count; i++) {
 				final Position position= createRandomPositionPoisson(document.getLength());
-				final String string= createRandomStringPoisson(4);
+				final String string= createRandomStringPoisson();
 				document.replace(position.getOffset(), position.getLength(), string);
 			}
 		} catch (BadLocationException e) {
@@ -212,7 +212,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		return (char) (32 + 95 * Math.random());
 	}
 
-	private static String createRandomStringPoisson(int mean) {
+	private static String createRandomStringPoisson() {
 		final int length= getRandomPoissonValue(2);
 		return createRandomString(length);
 	}

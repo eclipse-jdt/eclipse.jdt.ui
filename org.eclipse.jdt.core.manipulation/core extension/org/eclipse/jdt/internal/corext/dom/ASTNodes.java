@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.Assert;
@@ -4021,6 +4022,7 @@ public class ASTNodes {
 	 * Should match the last NLS comment before end of the line
 	 */
 	static final Pattern comment= Pattern.compile("([ ]*\\/\\/\\$NON-NLS-[0-9]\\$) *$"); //$NON-NLS-1$
+
 	/**
 	 * Should match leading whitespaces - not sure why eclipse does not allow to use \h instead of [ \t]
 	 */
@@ -4066,6 +4068,48 @@ public class ASTNodes {
 			throw new CoreException(Status.CANCEL_STATUS);
 		}
 	}
+
+	/**
+	 * Replaces the provided node from the AST with the provided replacement call string.
+	 * Remove a specified number of NLS comments at the same time.
+	 *
+	 * @param rewrite	The AST Rewriter
+	 * @param visited	The node to remove
+	 * @param replace_with_Call	The replacement node
+	 * @param count		Number of NLS comments to remove
+	 * @param editGroup	The edit group
+	 * @param cuRewrite	The cu rewrite
+	 * @throws CoreException Exception to be thrown to allow error handling in case of problem to compute the replacement
+	 */
+	public static void replaceAndRemoveNLSByCount(final ASTRewrite rewrite, final ASTNode visited, final String replace_with_Call, final int count, final TextEditGroup editGroup, final CompilationUnitRewrite cuRewrite) throws CoreException {
+		String original= null;
+		ASTNode replacement= null;
+		try {
+			ASTNode st=getFirstAncestorOrNull(visited, Statement.class, FieldDeclaration.class);
+			CompilationUnit cu= (CompilationUnit)st.getRoot();
+			String buffer= cuRewrite.getCu().getBuffer().getContents();
+			int origStart= cu.getExtendedStartPosition(st);
+			int origLength= cu.getExtendedLength(st);
+			original= buffer.substring(origStart, origStart + origLength);
+			Matcher commentMatcher= comment.matcher(original);
+			int i= count;
+			while (i-- > 0) {
+				original= commentMatcher.replaceFirst(""); //$NON-NLS-1$
+				commentMatcher= comment.matcher(original);
+			}
+			original= leadingspaces_start.matcher(original).replaceAll(""); //$NON-NLS-1$
+			original= leadingspaces.matcher(original).replaceAll("\n"); //$NON-NLS-1$
+			String visitedString= buffer.substring(visited.getStartPosition(), visited.getStartPosition() + visited.getLength());
+			// we are using the toString() method to get string representation of replace_with_Call so tweak string to
+			// add spaces between parameters
+			String originalmodified= original.replace(visitedString, replace_with_Call);
+			replacement= rewrite.createStringPlaceholder(originalmodified, st.getNodeType());
+			rewrite.replace(st, replacement, editGroup);
+		} catch (JavaModelException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+	}
+
 	/**
 	 * Returns a list of local variable names which are visible at the given node.
 	 *

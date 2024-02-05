@@ -15,6 +15,7 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -38,11 +39,26 @@ import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessorCore;
 
 public class JavadocUtil {
 
+	private static List<String> tagOrder= Arrays.asList(
+			TagElement.TAG_AUTHOR,
+			TagElement.TAG_VERSION,
+			TagElement.TAG_PARAM,
+			TagElement.TAG_RETURN,
+			TagElement.TAG_THROWS,
+			TagElement.TAG_EXCEPTION,
+			TagElement.TAG_SEE,
+			TagElement.TAG_SINCE,
+			TagElement.TAG_SERIAL,
+			TagElement.TAG_SERIALFIELD,
+			TagElement.TAG_SERIALDATA,
+			TagElement.TAG_DEPRECATED,
+			TagElement.TAG_VALUE
+	);
+
 	private JavadocUtil() {
 		// static-only
 	}
 
-	//TODO: is a copy of ChangeSignatureRefactoring.DeclarationUpdate#createParamTag(..)
 	public static TagElement createParamTag(String parameterName, AST ast, IJavaProject javaProject) {
 		TagElement paramNode= ast.newTagElement();
 		paramNode.setTagName(TagElement.TAG_PARAM);
@@ -96,4 +112,49 @@ public class JavadocUtil {
 		TagElement parameterTag= createParamTag(parameterName, astRewrite.getAST(), javaProject);
 		JavadocTagsSubProcessorCore.insertTag(tagsRewrite, parameterTag, leadingNames, groupDescription);
 	}
+
+	/**
+	 * In a given list of tags, finds the one after which a first tag of type {@code tagName} should
+	 * be inserted.
+	 *
+	 * @param tags existing tags
+	 * @param tagName name of tag to add
+	 * @return the <code>TagElement</code> just before the positions where a new
+	 *         <code>TagElement</code> with name <code>tagName</code> should be inserted, or
+	 *         <code>null</code> if it should be inserted as first.
+	 */
+	public static TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
+		int goalOrdinal= tagOrder.indexOf(tagName);
+		if (goalOrdinal == -1) // unknown tag -> to end
+			return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());
+		for (int i= 0; i < tags.size(); i++) {
+			int tagOrdinal= tagOrder.indexOf(tags.get(i).getTagName());
+			if (tagOrdinal >= goalOrdinal)
+				return (i == 0) ? null : (TagElement) tags.get(i - 1);
+		}
+		return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size() - 1);
+	}
+
+	/**
+	 * In a given list of tags, finds the one before which a last tag of type {@code tagName} should
+	 * be inserted.
+	 *
+	 * @param tags existing tags
+	 * @param tagName name of tag to add
+	 * @return the <code>TagElement</code> just after the positions where a new
+	 *         <code>TagElement</code> with name <code>tagName</code> should be inserted, or
+	 *         <code>null</code> if it should be inserted as last.
+	 */
+	public static TagElement findTagElementToInsertBefore(List<TagElement> tags, String tagName) {
+		int goalOrdinal= tagOrder.indexOf(tagName);
+		if (goalOrdinal == -1) // unknown tag -> to end
+			return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());
+		for (int i= tags.size() - 1; i >= 0; i--) {
+			int tagOrdinal= tagOrder.indexOf(tags.get(i).getTagName());
+			if (tagOrdinal <= goalOrdinal)
+				return (i == tags.size() - 1) ? null : (TagElement) tags.get(i + 1);
+		}
+		return null;
+	}
+
 }

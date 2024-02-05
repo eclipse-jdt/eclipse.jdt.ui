@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,17 +22,45 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.ModuleDirective;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.UsesDirective;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 public class JavadocTagsSubProcessorCore {
+
+	public static Set<String> getPreviousProvidesNames(List<ModuleDirective> directives, ASTNode missingNode) {
+		Set<String> previousNames= new HashSet<>();
+		for (int i= 0; i < directives.size() && missingNode != directives.get(i); i++) {
+			ModuleDirective directive= directives.get(i);
+			if (directive instanceof ProvidesDirective) {
+				ProvidesDirective providesDirective= (ProvidesDirective) directive;
+				previousNames.add(providesDirective.getName().getFullyQualifiedName().toString());
+			}
+		}
+		return previousNames;
+	}
+
+	public static Set<String> getPreviousUsesNames(List<ModuleDirective> directives, ASTNode missingNode) {
+		Set<String> previousNames= new HashSet<>();
+		for (int i= 0; i < directives.size() && missingNode != directives.get(i); i++) {
+			ModuleDirective directive= directives.get(i);
+			if (directive instanceof UsesDirective) {
+				UsesDirective usesDirective= (UsesDirective) directive;
+				previousNames.add(usesDirective.getName().getFullyQualifiedName().toString());
+			}
+		}
+		return previousNames;
+	}
+
 	static Set<String> getPreviousExceptionNames(List<Type> list, ASTNode missingNode) {
 		Set<String> previousNames=  new HashSet<>();
 		for (int i= 0; i < list.size() && missingNode != list.get(i); i++) {

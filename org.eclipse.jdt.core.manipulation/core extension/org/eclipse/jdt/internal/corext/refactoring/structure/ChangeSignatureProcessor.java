@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +28,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -165,6 +163,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 
 public class ChangeSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating {
@@ -715,7 +715,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private ITypeHierarchy getCachedTypeHierarchy(IProgressMonitor monitor) throws JavaModelException {
 		if (fCachedTypeHierarchy == null)
-			fCachedTypeHierarchy= fMethod.getDeclaringType().newTypeHierarchy(new SubProgressMonitor(monitor, 1));
+			fCachedTypeHierarchy= fMethod.getDeclaringType().newTypeHierarchy(Progress.subMonitor(monitor, 1));
 		return fCachedTypeHierarchy;
 	}
 
@@ -731,11 +731,11 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				return RefactoringStatus.createFatalErrorStatus(message);
 			}
 			if (fMethod.getDeclaringType().isInterface()) {
-				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(new SubProgressMonitor(monitor, 1)));
+				fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, fMethod.getDeclaringType().newSupertypeHierarchy(Progress.subMonitor(monitor, 1)));
 				monitor.worked(1);
 			} else if (MethodChecks.isVirtual(fMethod)) {
-				ITypeHierarchy hierarchy= getCachedTypeHierarchy(new SubProgressMonitor(monitor, 1));
-				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, hierarchy, new SubProgressMonitor(monitor, 1));
+				ITypeHierarchy hierarchy= getCachedTypeHierarchy(Progress.subMonitor(monitor, 1));
+				fTopMethod= MethodChecks.isDeclaredInInterface(fMethod, hierarchy, Progress.subMonitor(monitor, 1));
 				if (fTopMethod == null)
 					fTopMethod= MethodChecks.overridesAnotherMethod(fMethod, hierarchy);
 			}
@@ -820,12 +820,12 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getMethodName()));
 			ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
 
-			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, binaryRefs, new SubProgressMonitor(pm, 1), null);
+			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, binaryRefs, Progress.subMonitor(pm, 1), null);
 			result.merge(checkVarargs());
 			if (result.hasFatalError())
 				return result;
 
-			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1), binaryRefs, result);
+			fOccurrences= findOccurrences(Progress.subMonitor(pm, 1), binaryRefs, result);
 			binaryRefs.addErrorIfNecessary(result);
 
 			result.merge(checkVisibilityChanges());
@@ -836,7 +836,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			// including visibility problems, shadowing and missing throws declarations.
 
 			if (! isOrderSameAsInitial())
-				result.merge(checkReorderings(new SubProgressMonitor(pm, 1)));
+				result.merge(checkReorderings(Progress.subMonitor(pm, 1)));
 			else
 				pm.worked(1);
 
@@ -845,15 +845,15 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			// - warn if exists with different parameter types (may cause overloading)
 
 			if (! areNamesSameAsInitial())
-				result.merge(checkRenamings(new SubProgressMonitor(pm, 1)));
+				result.merge(checkRenamings(Progress.subMonitor(pm, 1)));
 			else
 				pm.worked(1);
 			if (result.hasFatalError())
 				return result;
 
-//			resolveTypesWithoutBindings(new SubProgressMonitor(pm, 1)); // already done in checkSignature(true)
+//			resolveTypesWithoutBindings(Progress.subMonitor(pm, 1)); // already done in checkSignature(true)
 
-			createChangeManager(new SubProgressMonitor(pm, 1), result);
+			createChangeManager(Progress.subMonitor(pm, 1), result);
 			fCachedTypeHierarchy= null;
 
 			if (mustAnalyzeAstOfDeclaringCu())
@@ -1370,7 +1370,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		Map<ICompilationUnit, Set<IType>> namedSubclassMapping= null;
 		if (isNoArgConstructor){
 			//create only when needed;
-			namedSubclassMapping= createNamedSubclassMapping(new SubProgressMonitor(pm, 1));
+			namedSubclassMapping= createNamedSubclassMapping(Progress.subMonitor(pm, 1));
 		}else{
 			pm.worked(1);
 		}
@@ -1402,7 +1402,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				occurrenceUpdate.updateNode();
 			}
 
-			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
+			if (namedSubclassMapping != null && namedSubclassMapping.containsKey(cu)) {
 				//only non-anonymous subclasses may have noArgConstructors to modify - see bug 43444
 				for (IType subtype : namedSubclassMapping.get(cu)) {
 					AbstractTypeDeclaration subtypeNode= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(subtype, cuRewrite.getRoot());
@@ -1421,7 +1421,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private Map<ICompilationUnit, Set<IType>> createNamedSubclassMapping(IProgressMonitor pm) throws JavaModelException{
 		Map<ICompilationUnit, Set<IType>> result= new HashMap<>();
-		for (IType subclass : getCachedTypeHierarchy(new SubProgressMonitor(pm, 1)).getSubclasses(fMethod.getDeclaringType())) {
+		for (IType subclass : getCachedTypeHierarchy(Progress.subMonitor(pm, 1)).getSubclasses(fMethod.getDeclaringType())) {
 			if (subclass.isAnonymous())
 				continue;
 			ICompilationUnit cu= subclass.getCompilationUnit();
@@ -2337,7 +2337,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					}
 				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
 					TagElement returnNode= createReturnTag();
-					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_RETURN);
+					TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(tags, TagElement.TAG_RETURN);
 					insertTag(returnNode, previousTag, tagsRewrite);
 					tags= tagsRewrite.getRewrittenList();
 				}
@@ -2377,7 +2377,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 				if (! isOrderSameAsInitial()) {
 					// reshuffle (sort in declaration sequence) & add (only add to top of ripple):
-					TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
+					TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(tags, TagElement.TAG_PARAM);
 					boolean first= true; // workaround for bug 92111: preserve first tag if possible
 					// reshuffle:
 					for (ParameterInfo info : fParameterInfos) {
@@ -2454,7 +2454,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				}
 				// reshuffle:
 				tags= tagsRewrite.getRewrittenList();
-				TagElement previousTag= findTagElementToInsertAfter(tags, TagElement.TAG_THROWS);
+				TagElement previousTag= JavadocUtil.findTagElementToInsertAfter(tags, TagElement.TAG_THROWS);
 				for (ExceptionInfo info : fExceptionInfos) {
 					if (info.isAdded()) {
 						if (!isTopOfRipple)
@@ -2530,40 +2530,6 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			else
 				tagsRewrite.insertAfter(tag, previousTag, fDescription);
 		}
-
-		/**
-		 * @param tags existing tags
-		 * @param tagName name of tag to add
-		 * @return the <code>TagElement</code> just before a new <code>TagElement</code> with name
-		 *         <code>tagName</code>, or <code>null</code>.
-		 */
-		private TagElement findTagElementToInsertAfter(List<TagElement> tags, String tagName) {
-			List<String> tagOrder= Arrays.asList(
-					TagElement.TAG_AUTHOR,
-					TagElement.TAG_VERSION,
-					TagElement.TAG_PARAM,
-					TagElement.TAG_RETURN,
-					TagElement.TAG_THROWS,
-					TagElement.TAG_EXCEPTION,
-					TagElement.TAG_SEE,
-					TagElement.TAG_SINCE,
-					TagElement.TAG_SERIAL,
-					TagElement.TAG_SERIALFIELD,
-					TagElement.TAG_SERIALDATA,
-					TagElement.TAG_DEPRECATED,
-					TagElement.TAG_VALUE
-			);
-			int goalOrdinal= tagOrder.indexOf(tagName);
-			if (goalOrdinal == -1) // unknown tag -> to end
-				return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size());
-			for (int i= 0; i < tags.size(); i++) {
-				int tagOrdinal= tagOrder.indexOf(tags.get(i).getTagName());
-				if (tagOrdinal >= goalOrdinal)
-					return (i == 0) ? null : (TagElement) tags.get(i - 1);
-			}
-			return (tags.isEmpty()) ? null : (TagElement) tags.get(tags.size() - 1);
-		}
-
 
 		@Override
 		protected SingleVariableDeclaration createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<SingleVariableDeclaration> nodes) {

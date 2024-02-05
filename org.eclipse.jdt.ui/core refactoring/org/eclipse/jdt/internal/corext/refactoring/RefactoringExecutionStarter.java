@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.MakeStaticRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
@@ -102,6 +103,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -120,6 +122,7 @@ import org.eclipse.jdt.internal.ui.refactoring.IntroduceFactoryWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceIndirectionWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterObjectWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
+import org.eclipse.jdt.internal.ui.refactoring.MakeStaticWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInnerToTopWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInstanceMethodWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
@@ -370,6 +373,18 @@ public final class RefactoringExecutionStarter {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(method);
 		new RefactoringStarter().activate(new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell,
 				RefactoringMessages.IntroduceIndirectionAction_dialog_title, IRefactoringSaveModes.SAVE_REFACTORING);
+	}
+
+	public static void startMakeStaticRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) {
+		final MakeStaticRefactoring refactoring= new MakeStaticRefactoring(unit, offset, length);
+		new RefactoringStarter().activate(new MakeStaticWizard(refactoring, RefactoringMessages.MakeStaticAction_dialog_title), shell,
+				RefactoringMessages.MakeStaticAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
+	}
+
+	public static void startMakeStaticRefactoring(final IMethod method, final Shell shell) {
+		final MakeStaticRefactoring refactoring= new MakeStaticRefactoring(method);
+		new RefactoringStarter().activate(new MakeStaticWizard(refactoring, RefactoringMessages.MakeStaticAction_dialog_title), shell,
+				RefactoringMessages.MakeStaticAction_dialog_title, RefactoringSaveHelper.SAVE_REFACTORING);
 	}
 
 	public static void startIntroduceParameter(ICompilationUnit unit, int offset, int length, Shell shell) {

@@ -27,8 +27,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IFile;
@@ -84,13 +84,14 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
+import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
 
@@ -202,7 +203,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 
-	private final static class CleanUpRefactoringProgressMonitor extends SubProgressMonitor {
+	private final static class CleanUpRefactoringProgressMonitor extends ProgressMonitorWrapper {
 
 		private double fRealWork;
 		private int fFlushCount;
@@ -210,7 +211,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		private final int fIndex;
 
 		private CleanUpRefactoringProgressMonitor(IProgressMonitor monitor, int ticks, int size, int index) {
-			super(monitor, ticks);
+			super(Progress.subMonitor(monitor, ticks));
 			fFlushCount= 0;
 			fSize= size;
 			fIndex= index;
@@ -493,7 +494,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		}
 	}
 
-	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 1, 0, 0);
+	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(1, 1, 0, 0);
 
 	/**
 	 * A clean up is considered slow if its execution lasts longer then the value of
@@ -636,11 +637,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					if (result.hasFatalError())
 						return result;
 				}
-				result.merge(checkPreConditions(project, targets, new SubProgressMonitor(pm, 3 * cleanUps.length)));
+				result.merge(checkPreConditions(project, targets, Progress.subMonitor(pm, 3 * cleanUps.length)));
 				if (result.hasFatalError())
 					return result;
 				Change[] changes= cleanUpProject(project, targets, cleanUps, pm);
-				result.merge(checkPostConditions(new SubProgressMonitor(pm, cleanUps.length)));
+				result.merge(checkPostConditions(Progress.subMonitor(pm, cleanUps.length)));
 				if (result.hasFatalError())
 					return result;
 				for (Change c : changes) {
@@ -674,7 +675,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	private Change[] cleanUpProject(IJavaProject project, CleanUpTarget[] targets, ICleanUp[] cleanUps, IProgressMonitor monitor) throws CoreException {
 		CleanUpFixpointIterator iter= new CleanUpFixpointIterator(targets, cleanUps);
 
-		SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 2 * targets.length * cleanUps.length);
+		IProgressMonitor subMonitor= Progress.subMonitor(monitor, 2 * targets.length * cleanUps.length);
 		subMonitor.beginTask("", targets.length); //$NON-NLS-1$
 		subMonitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Parser_Startup_message, BasicElementLabels.getResourceName(project.getProject())));
 		try {
@@ -715,7 +716,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		monitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, BasicElementLabels.getResourceName(javaProject.getProject())));
 		try {
 			for (ICleanUp cleanUp : cleanUps) {
-				result.merge(cleanUp.checkPreConditions(javaProject, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length)));
+				result.merge(cleanUp.checkPreConditions(javaProject, compilationUnits, Progress.subMonitor(monitor, compilationUnits.length)));
 				if (result.hasFatalError())
 					return result;
 			}
@@ -726,7 +727,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		return result;
 	}
 
-	private RefactoringStatus checkPostConditions(SubProgressMonitor monitor) throws CoreException {
+	private RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 
 		ICleanUp[] cleanUps= getCleanUps();
@@ -734,7 +735,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		monitor.subTask(FixMessages.CleanUpRefactoring_checkingPostConditions_message);
 		try {
 			for (ICleanUp cleanUp : cleanUps) {
-				result.merge(cleanUp.checkPostConditions(new SubProgressMonitor(monitor, 1)));
+				result.merge(cleanUp.checkPostConditions(Progress.subMonitor(monitor, 1)));
 			}
 		} finally {
 			monitor.done();

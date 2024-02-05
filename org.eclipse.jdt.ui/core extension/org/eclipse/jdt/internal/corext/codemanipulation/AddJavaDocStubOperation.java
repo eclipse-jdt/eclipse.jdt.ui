@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -56,6 +55,7 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Add javadoc stubs to members. All members must belong to the same compilation unit.
@@ -123,7 +123,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
 		IPath path= cu.getPath();
 
-		manager.connect(path, LocationKind.IFILE, new SubProgressMonitor(monitor, 1));
+		manager.connect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 1));
 		try {
 			IDocument document= manager.getTextFileBuffer(path, LocationKind.IFILE).getDocument();
 
@@ -172,7 +172,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
-			manager.disconnect(path, LocationKind.IFILE,new SubProgressMonitor(monitor, 1));
+			manager.disconnect(path, LocationKind.IFILE, Progress.subMonitor(monitor, 1));
 		}
 	}
 

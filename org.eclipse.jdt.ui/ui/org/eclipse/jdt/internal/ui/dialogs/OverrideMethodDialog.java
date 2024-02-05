@@ -300,7 +300,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 	private CompilationUnit fUnit= null;
 
-	public OverrideMethodDialog(Shell shell, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
+	public OverrideMethodDialog(Shell shell, CompilationUnitEditor editor, IType type) throws JavaModelException {
 		super(shell, new BindingLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
 		RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 		fUnit= parser.parse(type.getCompilationUnit(), true);

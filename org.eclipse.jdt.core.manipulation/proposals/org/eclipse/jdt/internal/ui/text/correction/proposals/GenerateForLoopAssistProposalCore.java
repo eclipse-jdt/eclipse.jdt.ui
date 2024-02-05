@@ -503,11 +503,9 @@ public class GenerateForLoopAssistProposalCore extends LinkedCorrectionProposalC
 	 * @return an array of proposal strings
 	 */
 	private String[] getVariableNameProposals(String basename, String excludedName) {
-		ASTNode surroundingBlock= fCurrentStatement;
-		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
-			if (surroundingBlock instanceof Block) {
-				break;
-			}
+		ASTNode surroundingBlock= fCurrentStatement.getParent();
+		while (!(surroundingBlock instanceof Block)) {
+			surroundingBlock= surroundingBlock.getParent();
 		}
 		Collection<String> localUsedNames= new ScopeAnalyzer((CompilationUnit) fCurrentExpression.getRoot()).getUsedVariableNames(surroundingBlock.getStartPosition(), surroundingBlock.getLength());
 		if (excludedName != null) {

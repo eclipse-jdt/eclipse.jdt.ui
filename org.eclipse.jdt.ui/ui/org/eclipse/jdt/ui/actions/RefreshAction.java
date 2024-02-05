@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -53,6 +52,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Action for refreshing the workspace from the local file system for
@@ -175,8 +175,8 @@ public class RefreshAction extends SelectionDispatchAction {
 
 		WrappedWorkbenchRefreshAction workbenchAction= new WrappedWorkbenchRefreshAction(getSite());
 		workbenchAction.selectionChanged(selection);
-		workbenchAction.run(new SubProgressMonitor(monitor, 1));
-		refreshJavaElements(selection, new SubProgressMonitor(monitor, 1));
+		workbenchAction.run(Progress.subMonitor(monitor, 1));
+		refreshJavaElements(selection, Progress.subMonitor(monitor, 1));
 	}
 
 	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {

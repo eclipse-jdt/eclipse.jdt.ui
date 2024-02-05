@@ -16,15 +16,11 @@ package org.eclipse.jdt.internal.jarinjarloader;
 
 /**
  * Constants used in the Jar-in-Jar loader.
- *
- * Some of these are duplicated in JIJConstants in the source for the Runnable Jar File Export Wizard:
- * {@link org.eclipse.jdt.internal.ui.jarpackagerfat}.
- *
- * @since 3.6
  */
 final class JIJConstants {
-
+	/** duplicates org.eclipse.jdt.internal.ui.jarpackagerfat.JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME*/
 	static final String REDIRECTED_CLASS_PATH_MANIFEST_NAME  = "Rsrc-Class-Path";  //$NON-NLS-1$
+	/** duplicates org.eclipse.jdt.internal.ui.jarpackagerfat.JIJConstants.REDIRECTED_MAIN_CLASS_MANIFEST_NAME*/
 	static final String REDIRECTED_MAIN_CLASS_MANIFEST_NAME  = "Rsrc-Main-Class";  //$NON-NLS-1$
 	static final String DEFAULT_REDIRECTED_CLASSPATH         = "";  //$NON-NLS-1$
 	static final String MAIN_METHOD_NAME                     = "main";  //$NON-NLS-1$
@@ -35,7 +31,8 @@ final class JIJConstants {
 	static final String PATH_SEPARATOR                       = "/";  //$NON-NLS-1$
 	static final String CURRENT_DIR                          = "./";  //$NON-NLS-1$
 	static final String UTF8_ENCODING                        = "UTF-8";  //$NON-NLS-1$
-	static final String RUNTIME                              = "#runtime";  //$NON-NLS-1$
+	static final String RUNTIME_WITH_HASH                    = "#runtime";  //$NON-NLS-1$
+	static final String RUNTIME                              = "runtime";  //$NON-NLS-1$
 
 	private JIJConstants() {
 	}

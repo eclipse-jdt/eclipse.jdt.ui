@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
@@ -62,6 +61,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * Workspace runnable to add accessor methods to fields.
@@ -371,7 +371,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 			fEdit= astRewrite.rewriteAST();
 			if (fApply) {
-				JavaModelUtil.applyEdit(unit, fEdit, fSave, new SubProgressMonitor(monitor, 1));
+				JavaModelUtil.applyEdit(unit, fEdit, fSave, Progress.subMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();

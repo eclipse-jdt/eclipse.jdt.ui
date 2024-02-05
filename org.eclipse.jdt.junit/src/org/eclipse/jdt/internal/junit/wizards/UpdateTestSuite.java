@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -65,6 +64,8 @@ import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.Resources;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.util.Progress;
 
 /**
  * An object contribution action that updates existing AllTests classes.
@@ -250,7 +251,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			IBuffer buf= testSuite.getBuffer();
 			buf.replace(0, buf.getLength(), formattedContent);
 			monitor.worked(1);
-			testSuite.save(new SubProgressMonitor(monitor, 1), true);
+			testSuite.save(Progress.subMonitor(monitor, 1), true);
 			monitor.worked(1);
 
 
@@ -276,7 +277,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			IBuffer buf= testSuite.getBuffer();
 			buf.replace(0, buf.getLength(), formattedContent);
 			monitor.worked(1);
-			testSuite.save(new SubProgressMonitor(monitor, 1), true);
+			testSuite.save(Progress.subMonitor(monitor, 1), true);
 			monitor.worked(1);
 
 
@@ -307,7 +308,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				IBuffer buf= testSuite.getBuffer();
 				buf.replace(0, buf.getLength(), formattedContent);
 				monitor.worked(1);
-				testSuite.save(new SubProgressMonitor(monitor, 1), true);
+				testSuite.save(Progress.subMonitor(monitor, 1), true);
 				monitor.worked(1);
 			}
 

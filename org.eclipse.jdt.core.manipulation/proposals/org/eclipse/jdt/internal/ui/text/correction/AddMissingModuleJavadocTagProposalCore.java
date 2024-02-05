@@ -74,7 +74,7 @@ public class AddMissingModuleJavadocTagProposalCore extends CUCorrectionProposal
 				return;
 			}
 			StringBuilder comment= new StringBuilder();
-			int insertPosition= findInsertPosition(javadoc, fMissingNode, document, lineDelimiter);
+			int insertPosition= findInsertPosition(javadoc, document, lineDelimiter);
 
 		 	if (fMissingNode instanceof UsesDirective) {
 		 		UsesDirective directive= (UsesDirective)fMissingNode;
@@ -95,7 +95,7 @@ public class AddMissingModuleJavadocTagProposalCore extends CUCorrectionProposal
 		}
 	}
 
-	public static int findInsertPosition(Javadoc javadoc, ASTNode node, IDocument document, String lineDelimiter) throws BadLocationException {
+	public static int findInsertPosition(Javadoc javadoc, IDocument document, String lineDelimiter) throws BadLocationException {
 		int position= -1;
 		List<TagElement> tags= javadoc.tags();
 		TagElement lastTag= null;

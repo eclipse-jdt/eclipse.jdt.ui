@@ -40,9 +40,6 @@ public class QuickFixTest14 extends QuickFixTest {
 	private IPackageFragmentRoot fSourceFolder;
 
 	public static final String MODULE_INFO_FILE= "module-info.java";
-	public static final String MODULE_INFO_FILE_CONTENT= ""
-										+ "module test {\n"
-										+ "}\n";
 
 	@Test
 	public void testAddDefaultCaseSwitchStatement1() throws Exception {

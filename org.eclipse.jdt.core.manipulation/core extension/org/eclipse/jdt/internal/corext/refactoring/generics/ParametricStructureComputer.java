@@ -257,7 +257,7 @@ public class ParametricStructureComputer {
 		return new ParametricStructure(genericType);
 	}
 
-	private boolean isUnmodifiableFieldOrMethod(ConstraintVariable2 v) {
+	private boolean isUnmodifiableFieldOrMethod(@SuppressWarnings("unused") ConstraintVariable2 v) {
 		return false; //TODO: find out whether it's declared in a binary type
 	}
 
@@ -278,9 +278,8 @@ public class ParametricStructureComputer {
 		Assert.isTrue(structure1 != otherStructure, "updateStructureOfIthParamFrom(): attempt to unify ith param of a parametric type with itself!"); //$NON-NLS-1$
 
 		ParametricStructure param1= structure1.getParameters()[i];
-		boolean param1Unknown= (param1 == null);
 
-		if (param1Unknown) {
+		if (param1 == null) {
 			if (DEBUG_INITIALIZATION)
 				System.out.println("  setting param " + i + " of " + structure1 + " to " + otherStructure); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			structure1.getParameters()[i]= otherStructure;
@@ -426,10 +425,9 @@ public class ParametricStructureComputer {
 			return false ;
 
 		ParametricStructure vStructure= elemStructure(v);
-		boolean vStructureUnknown= (vStructure == null);
 		boolean type2Structured= type2 != ParametricStructure.NONE;
 
-		if (vStructureUnknown) {
+		if ((vStructure == null)) {
 			if (DEBUG_INITIALIZATION)
 				System.out.println("  setting structure of " + v + " to " + type2); //$NON-NLS-1$ //$NON-NLS-2$
 			setStructureAndPush(v, type2);

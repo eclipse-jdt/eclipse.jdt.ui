@@ -69,10 +69,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -196,9 +196,8 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		return true;
 	}
 
-	void applyChanges(ASTRewrite rewriter, final IDocument document, final ITextFileBuffer textFileBuffer, Shell shell, boolean inEditor, Map<String, String> options)
-							throws CoreException, InvocationTargetException, InterruptedException {
-
+	static void applyChanges(ASTRewrite rewriter, final IDocument document, final ITextFileBuffer textFileBuffer, boolean inEditor, Map<String, String> options)
+							throws InvocationTargetException, InterruptedException {
 
 		MultiTextEdit edit= new MultiTextEdit();
 		try {
@@ -319,7 +318,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		uiProxy.setEnabled(isEnabled(selection));
 	}
 
-	public final void run(IAction action) {
+	public final void run() {
 		run(fSelection);
 	}
 

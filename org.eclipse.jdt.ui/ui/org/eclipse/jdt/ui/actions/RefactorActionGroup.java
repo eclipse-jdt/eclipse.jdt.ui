@@ -169,6 +169,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractConstantAction;
+	private SelectionDispatchAction fMakeStaticAction;
 	private SelectionDispatchAction fExtractClassAction;
 	private SelectionDispatchAction fIntroduceParameterAction;
 	private SelectionDispatchAction fIntroduceParameterObjectAction;
@@ -307,6 +308,10 @@ public class RefactorActionGroup extends ActionGroup {
 			initUpdatingAction(fExtractConstantAction, provider, null, selection, IJavaEditorActionDefinitionIds.EXTRACT_CONSTANT);
 			editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 
+			fMakeStaticAction= new MakeStaticAction(editor);
+			initUpdatingAction(fMakeStaticAction, provider, null, selection, IJavaEditorActionDefinitionIds.MAKE_STATIC);
+			editor.setAction("MakeStatic", fMakeStaticAction); //$NON-NLS-1$
+
 			fIntroduceParameterAction= new IntroduceParameterAction(editor);
 			initUpdatingAction(fIntroduceParameterAction, provider, null, selection, IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
 			editor.setAction("IntroduceParameter", fIntroduceParameterAction); //$NON-NLS-1$
@@ -374,6 +379,9 @@ public class RefactorActionGroup extends ActionGroup {
 
 			fModifyParametersAction= new ModifyParametersAction(fSite);
 			initUpdatingAction(fModifyParametersAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
+
+			fMakeStaticAction= new MakeStaticAction(fSite);
+			initUpdatingAction(fMakeStaticAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.MAKE_STATIC);
 
 			fPullUpAction= new PullUpAction(fSite);
 			initUpdatingAction(fPullUpAction, fSelectionProvider, selectionProvider, selection, IJavaEditorActionDefinitionIds.PULL_UP);
@@ -476,6 +484,7 @@ public class RefactorActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(JdtActionConstants.PUSH_DOWN, fPushDownAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_TEMP, fExtractTempAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_CONSTANT, fExtractConstantAction);
+			actionBars.setGlobalActionHandler(JdtActionConstants.MAKE_STATIC, fMakeStaticAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER, fIntroduceParameterAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_FACTORY, fIntroduceFactoryAction);
 			actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
@@ -524,6 +533,7 @@ public class RefactorActionGroup extends ActionGroup {
 			disposeAction(fMoveAction, fSelectionProvider);
 			disposeAction(fRenameAction, fSelectionProvider);
 			disposeAction(fModifyParametersAction, fSelectionProvider);
+			disposeAction(fMakeStaticAction, fSelectionProvider);
 			disposeAction(fPullUpAction, fSelectionProvider);
 			disposeAction(fPushDownAction, fSelectionProvider);
 			disposeAction(fExtractTempAction, fSelectionProvider);
@@ -589,6 +599,7 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractMethodAction);
 		added+= addAction(refactorSubmenu, fExtractTempAction);
 		added+= addAction(refactorSubmenu, fExtractConstantAction);
+		added+= addAction(refactorSubmenu, fMakeStaticAction);
 		added+= addAction(refactorSubmenu, fInlineAction);
 		refactorSubmenu.add(new Separator(GROUP_REORG2));
 		added+= addAction(refactorSubmenu, fConvertAnonymousToNestedAction);

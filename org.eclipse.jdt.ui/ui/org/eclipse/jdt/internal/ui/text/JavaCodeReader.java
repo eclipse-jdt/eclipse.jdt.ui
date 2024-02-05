@@ -53,7 +53,7 @@ public class JavaCodeReader extends SingleCharReader {
 		return fForward ? fOffset -1 : fOffset;
 	}
 
-	public void configureForwardReader(IDocument document, int offset, int length, boolean skipComments, boolean skipStrings) throws IOException {
+	public void configureForwardReader(IDocument document, int offset, int length, boolean skipComments, boolean skipStrings) {
 		fDocument= document;
 		fOffset= offset;
 		fSkipComments= skipComments;

@@ -923,24 +923,24 @@ public class TreeListDialogField<E> extends DialogField {
 
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
-			doListSelected(event);
+			doListSelected();
 		}
 
 		@Override
 		public void doubleClick(DoubleClickEvent event) {
-			doDoubleClick(event);
+			doDoubleClick();
 		}
 
 	}
 
-	protected void doListSelected(SelectionChangedEvent event) {
+	private void doListSelected() {
 		updateButtonState();
 		if (fTreeAdapter != null) {
 			fTreeAdapter.selectionChanged(this);
 		}
 	}
 
-	protected void doDoubleClick(DoubleClickEvent event) {
+	private void doDoubleClick() {
 		if (fTreeAdapter != null) {
 			fTreeAdapter.doubleClicked(this);
 		}

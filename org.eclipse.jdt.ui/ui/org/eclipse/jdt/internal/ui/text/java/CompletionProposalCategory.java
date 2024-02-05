@@ -32,11 +32,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -331,7 +331,7 @@ public final class CompletionProposalCategory {
 	 * @return the list of computed completion proposals (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.ICompletionProposal})
 	 */
-	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
+	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, String partition, IProgressMonitor monitor) {
 		fLastError= null;
 		List<ICompletionProposal> result= new ArrayList<>();
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<>(fRegistry.getProposalComputerDescriptors(partition));
@@ -355,7 +355,7 @@ public final class CompletionProposalCategory {
 	 * @return the list of computed context information objects (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.IContextInformation})
 	 */
-	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
+	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, String partition, IProgressMonitor monitor) {
 		fLastError= null;
 		List<IContextInformation> result= new ArrayList<>();
 		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<>(fRegistry.getProposalComputerDescriptors(partition));

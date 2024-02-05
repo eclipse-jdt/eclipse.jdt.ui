@@ -21,7 +21,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -42,6 +41,7 @@ import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.Progress;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
@@ -142,7 +142,7 @@ public class ResetAction extends BuildpathModifierAction {
         			else
         				root= (IPackageFragmentRoot) element;
         			CPListElement entry= ClasspathModifier.getClasspathEntry(entries, root);
-        			ClasspathModifier.resetFilters(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
+        			ClasspathModifier.resetFilters(javaElement, entry, project, Progress.subMonitor(monitor, 1));
         			result.add(javaElement);
         		} else {
         			CPListElement selElement= ((CPListElementAttribute) element).getParent();

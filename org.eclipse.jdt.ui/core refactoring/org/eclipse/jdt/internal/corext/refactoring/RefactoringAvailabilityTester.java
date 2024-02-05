@@ -124,6 +124,20 @@ public final class RefactoringAvailabilityTester {
 		return isChangeSignatureAvailable(method);
 	}
 
+	public static boolean isMakeStaticAvailable(final IMethod method) throws JavaModelException {
+		return RefactoringAvailabilityTesterCore.isMakeStaticAvailable(method);
+	}
+
+	public static boolean isMakeStaticAvailable(final IStructuredSelection selection) throws JavaModelException {
+		final IMethod method= getSelectedMethod(selection);
+		return isMakeStaticAvailable(method);
+	}
+
+	public static boolean isMakeStaticAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IMethod method= getSelectedMethod(selection);
+		return isMakeStaticAvailable(method);
+	}
+
 	public static IMethod getSelectedMethod(final IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof IMethod) {
@@ -787,14 +801,6 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isRenameVirtualMethodAvailable(final IMethod method) throws CoreException {
 		return isRenameAvailable(method) && MethodChecks.isVirtual(method);
-	}
-
-	public static boolean isRenameElementAvailable(IJavaElement element) throws CoreException {
-		return isRenameElementAvailable(element, false);
-	}
-
-	public static boolean isRenameElementAvailable(IJavaElement element, boolean isTextSelection) throws CoreException {
-		return RefactoringAvailabilityTesterCore.isRenameElementAvailable(element, isTextSelection);
 	}
 
 	public static boolean isReplaceInvocationsAvailable(IMethod method) throws JavaModelException {
