@@ -78,6 +78,8 @@ public class AssistQuickFixTest extends QuickFixTest {
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
+	private static final String EXTRACT_TO_LOCAL= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
+	private static final String EXTRACT_TO_LOCAL_REPLACE= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -2066,6 +2068,44 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String ex3= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3 });
+	}
+	@Test
+	public void testExtractToLocalVariable5() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1176
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    Object parent;\n");
+		buf.append("    Object elementName;\n");
+		buf.append("    \n");
+		buf.append("    public Object getElementName() {\n");
+		buf.append("        return elementName;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private class UtilClass {\n");
+		buf.append("        public static int combineHashCodes(int a, int b) {\n");
+		buf.append("            return a + b;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public int hashCode() {\n");
+		buf.append("        int k = this.parent == null ? super.hashCode() :\n");
+		buf.append("        UtilClass.combineHashCodes(getElementName().hashCode(), this.parent.hashCode());\n");
+		buf.append("        return k;\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "UtilClass.combineHashCodes(getElementName().hashCode(), this.parent.hashCode())";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertProposalDoesNotExist(proposals, EXTRACT_TO_LOCAL);
+		assertProposalDoesNotExist(proposals, EXTRACT_TO_LOCAL_REPLACE);
 	}
 
 	@Test
