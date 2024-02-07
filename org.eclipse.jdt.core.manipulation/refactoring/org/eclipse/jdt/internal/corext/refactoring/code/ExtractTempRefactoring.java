@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.text.edits.TextEditVisitor;
@@ -526,6 +527,10 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private CompilationUnitChange fChange;
 
+	private boolean fCheckFinal;
+
+	private RefactoringStatus fCheckFinalResult;
+
 	private LinkedProposalModelCore fLinkedProposalModel;
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
@@ -709,52 +714,65 @@ public class ExtractTempRefactoring extends Refactoring {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 4);
 
-			fCURewrite= new CompilationUnitRewrite(null, fCu, fCompilationUnitNode, fFormatterOptions);
-			fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
+			if (!fCheckFinal) {
 
-			RefactoringStatus result= new RefactoringStatus();
-			fStartPoint= -1;
-			fEndPoint= -1;
-			fSeen.clear();
-			boolean replaceAll= fReplaceAllOccurrences;
+				fCURewrite= new CompilationUnitRewrite(null, fCu, fCompilationUnitNode, fFormatterOptions);
+				fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 
-			if (fReplaceAllOccurrences) {
-				RefactoringStatus checkSideEffectsInSelectedExpression= checkSideEffectsInSelectedExpression();
-				if (checkSideEffectsInSelectedExpression.hasInfo()) {
-					fReplaceAllOccurrences= false;
-					result.merge(checkSideEffectsInSelectedExpression);
+				RefactoringStatus result= new RefactoringStatus();
+				fStartPoint= -1;
+				fEndPoint= -1;
+				fSeen.clear();
+				boolean replaceAll= fReplaceAllOccurrences;
+
+				if (fReplaceAllOccurrences) {
+					RefactoringStatus checkSideEffectsInSelectedExpression= checkSideEffectsInSelectedExpression();
+					if (checkSideEffectsInSelectedExpression.hasInfo()) {
+						fReplaceAllOccurrences= false;
+						result.merge(checkSideEffectsInSelectedExpression);
+					}
 				}
-			}
 
-			doCreateChange(Progress.subMonitor(pm, 2));
+				doCreateChange(Progress.subMonitor(pm, 2));
 
-			fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, Progress.subMonitor(pm, 1));
+				fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, Progress.subMonitor(pm, 1));
 
-			fChange.getEdit().accept(new TextEditVisitor() {
-				@Override
-				public void preVisit(TextEdit edit) {
-					TextEdit[] children= edit.getChildren();
-					for (TextEdit te : children)
-						if (te instanceof CopySourceEdit) {
-							CopySourceEdit cse= (CopySourceEdit) te;
-							if (cse.getTargetEdit() == null || cse.getTargetEdit().getOffset() == 0) {
-								edit.removeChild(te);
+				fChange.getEdit().accept(new TextEditVisitor() {
+					@Override
+					public void preVisit(TextEdit edit) {
+						TextEdit[] children= edit.getChildren();
+						for (TextEdit te : children)
+							if (te instanceof CopySourceEdit) {
+								CopySourceEdit cse= (CopySourceEdit) te;
+								if (cse.getTargetEdit() == null || cse.getTargetEdit().getOffset() == 0) {
+									edit.removeChild(te);
+								}
 							}
+						super.preVisit(edit);
+					}
+				});
+				if (fChange.getEdit() instanceof MultiTextEdit topEdit) {
+					TextEdit[] children= topEdit.getChildren();
+					if (children.length == 1 && children[0] instanceof MultiTextEdit childEdit) {
+						if (childEdit.hasChildren() == false) {
+							result.addInfo(RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible);
 						}
-					super.preVisit(edit);
+					}
 				}
-			});
-			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
-				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, BasicElementLabels.getJavaElementName(fTempName)));
+				if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
+					result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, BasicElementLabels.getJavaElementName(fTempName)));
 
-			result.merge(checkMatchingFragments());
-			fChange.setKeepPreviewEdits(false);
+				result.merge(checkMatchingFragments());
+				fChange.setKeepPreviewEdits(false);
 
-			if (fCheckResultForCompileProblems) {
-				result.merge(RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCompilationUnitNode, pm));
+				if (fCheckResultForCompileProblems) {
+					result.merge(RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCompilationUnitNode, pm));
+				}
+				fReplaceAllOccurrences= replaceAll;
+				fCheckFinal= true;
+				fCheckFinalResult= result;
 			}
-			fReplaceAllOccurrences= replaceAll;
-			return result;
+			return fCheckFinalResult;
 		} finally {
 			pm.done();
 		}

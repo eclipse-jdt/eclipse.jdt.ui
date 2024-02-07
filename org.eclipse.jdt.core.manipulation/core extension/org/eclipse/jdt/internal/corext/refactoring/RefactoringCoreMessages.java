@@ -713,6 +713,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractTempRefactoring_side_effcts_in_selected_expression;
 
+	public static String ExtractTempRefactoring_side_effects_possible;
+
 	public static String FlowAnalyzer_execution_flow;
 
 	public static String HierarchyRefactoring_add_member;

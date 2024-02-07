@@ -50,6 +50,7 @@ import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -527,30 +528,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		final ICompilationUnit cu= context.getCompilationUnit();
-		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
-		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
-			extractTempRefactoring.setReplaceAllOccurrences(true);
-			LinkedProposalModelCore linkedProposalModel= createProposalModel();
-			extractTempRefactoring.setLinkedProposalModel(linkedProposalModel);
-			extractTempRefactoring.setCheckResultForCompileProblems(false);
-
-			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			int relevance;
-			if (context.getSelectionLength() == 0) {
-				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ZERO_SELECTION;
-			} else if (problemsAtLocation) {
-				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ERROR;
-			} else {
-				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL;
-			}
-			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoring, relevance);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
-
-			proposal.setCommandId(EXTRACT_LOCAL_ID);
-			proposal.setLinkedProposalModel(linkedProposalModel);
-			proposals.add(proposal);
-		}
 
 		ExtractTempRefactoring extractTempRefactoringSelectedOnly= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
 		extractTempRefactoringSelectedOnly.setReplaceAllOccurrences(false);
@@ -570,11 +547,44 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				relevance= IProposalRelevance.EXTRACT_LOCAL;
 			}
 			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoringSelectedOnly, relevance);
-			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
+			core.init(extractTempRefactoringSelectedOnly);
+			RefactoringStatus status= extractTempRefactoringSelectedOnly.checkFinalConditions(new NullProgressMonitor());
+			if (status.isOK()) {
+				RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
 
-			proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
-			proposal.setLinkedProposalModel(linkedProposalModel);
-			proposals.add(proposal);
+				proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
+				proposal.setLinkedProposalModel(linkedProposalModel);
+				proposals.add(proposal);
+			}
+		}
+
+		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
+		if (extractTempRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+			extractTempRefactoring.setReplaceAllOccurrences(true);
+			LinkedProposalModelCore linkedProposalModel= createProposalModel();
+			extractTempRefactoring.setLinkedProposalModel(linkedProposalModel);
+			extractTempRefactoring.setCheckResultForCompileProblems(false);
+
+			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			int relevance;
+			if (context.getSelectionLength() == 0) {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ZERO_SELECTION;
+			} else if (problemsAtLocation) {
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ERROR;
+			} else {
+				relevance= IProposalRelevance.EXTRACT_LOCAL;
+			}
+			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoring, relevance);
+			core.init(extractTempRefactoring);
+			RefactoringStatus status= extractTempRefactoring.checkFinalConditions(new NullProgressMonitor());
+			if (status.isOK()) {
+				RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
+
+				proposal.setCommandId(EXTRACT_LOCAL_ID);
+				proposal.setLinkedProposalModel(linkedProposalModel);
+				proposals.add(proposal);
+			}
 		}
 
 		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
