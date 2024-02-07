@@ -3375,7 +3375,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -3391,30 +3391,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int var[];\n");
-		buf.append("        foo();\n");
-		buf.append("        int[] var2 = var;\n");
-		buf.append("        var = null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int var[];\n");
-		buf.append("        foo();\n");
-		buf.append("        int[] var2 = var;\n");
-		buf.append("        var = null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
 		buf.append("    private int vars[];\n");
 		buf.append("\n");
 		buf.append("    public void foo() {\n");
@@ -3422,9 +3398,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        vars = null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected4= buf.toString();
+		String expected2= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 
 	@Test
@@ -3575,7 +3551,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -3598,42 +3574,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // 1;\n");
-		buf.append("        \n");
-		buf.append("        String message;\n");
-		buf.append("        \n");
-		buf.append("        // 2;\n");
-		buf.append("        \n");
-		buf.append("        String message2 = message;\n");
-		buf.append("        message = \"\";\n");
-		buf.append("        \n");
-		buf.append("        // 3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String ex2= buf.toString();
-
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // 1;\n");
-		buf.append("        \n");
-		buf.append("        String message;\n");
-		buf.append("        \n");
-		buf.append("        // 2;\n");
-		buf.append("        \n");
-		buf.append("        String message2 = message;\n");
-		buf.append("        message = \"\";\n");
-		buf.append("        \n");
-		buf.append("        // 3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String ex3= buf.toString();
-
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
 		buf.append("    private String message;\n");
 		buf.append("\n");
 		buf.append("    public void foo() {\n");
@@ -3648,9 +3588,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        // 3;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String ex4= buf.toString();
+		String ex2= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3, ex4 });
+		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2 });
 	}
 
 	@Test
