@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2023 IBM Corporation and others.
+ * Copyright (c) 2014, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -95,7 +95,6 @@ public class ExtractTempTests1d8 extends ExtractTempTests {
 		helper1(6, 59, 6, 59, true, false, "string", "string");
 	}
 
-	@Override
 	@Test
 	public void test119() throws Exception {
 		helper1(7, 30, 7, 63, true, false, "supplier", "supplier");
