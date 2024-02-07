@@ -31,7 +31,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
@@ -52,7 +51,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 	}
 
 	/*
-	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext,org.eclipse.jdt.ui.text.java.IProblemLocationCore[])
+	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext,org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
 	@Override
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext invocationContext, IProblemLocation[] locations) throws CoreException {
@@ -63,7 +62,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 		List<RankedWordProposal> proposals= null;
 		String[] arguments= null;
 
-		IProblemLocationCore location= null;
+		IProblemLocation location= null;
 		RankedWordProposal proposal= null;
 		IJavaCompletionProposal[] result= null;
 

@@ -54,11 +54,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class InitializeFinalFieldProposalCore extends LinkedCorrectionProposalCore {
-	private IProblemLocationCore fProblem;
+	private IProblemLocation fProblem;
 	private ASTNode fAstNode;
 	private final IVariableBinding fVariableBinding;
 	private int fupdateType;
@@ -66,7 +66,7 @@ public class InitializeFinalFieldProposalCore extends LinkedCorrectionProposalCo
 	public static final int UPDATE_AT_CONSTRUCTOR= 1;
 	public static final int UPDATE_CONSTRUCTOR_NEW_PARAMETER= 2;
 
-	public InitializeFinalFieldProposalCore(IProblemLocationCore problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
+	public InitializeFinalFieldProposalCore(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
 		super(Messages.format(CorrectionMessages.InitializeFieldAtDeclarationCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance);
 
 		fProblem= problem;
@@ -75,7 +75,7 @@ public class InitializeFinalFieldProposalCore extends LinkedCorrectionProposalCo
 		fupdateType= UPDATE_AT_DECLARATION;
 	}
 
-	public InitializeFinalFieldProposalCore(IProblemLocationCore problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
+	public InitializeFinalFieldProposalCore(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
 		super(Messages.format(CorrectionMessages.InitializeFieldInConstructorCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance);
 		if (updateType == UPDATE_CONSTRUCTOR_NEW_PARAMETER) {
 			setDisplayName(Messages.format(CorrectionMessages.InitializeFieldWithConstructorParameterCorrectionProposal_description, problem.getProblemArguments()[0]));

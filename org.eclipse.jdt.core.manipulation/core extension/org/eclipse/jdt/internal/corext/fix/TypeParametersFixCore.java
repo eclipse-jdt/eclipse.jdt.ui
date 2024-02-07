@@ -40,8 +40,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -141,7 +142,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 		return new TypeParametersFixCore(FixMessages.TypeParametersFix_insert_inferred_type_arguments_name, compilationUnit, new CompilationUnitRewriteOperation[] { op });
 	}
 
-	public static IProposableFix createRemoveRedundantTypeArgumentsFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static IProposableFix createRemoveRedundantTypeArgumentsFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		if (id == IProblem.RedundantSpecificationOfTypeArguments) {
 			ParameterizedType parameterizedType= getParameterizedType(compilationUnit, problem);
@@ -156,9 +157,9 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocationCore(problems[i]);
+			locations[i]= new ProblemLocation(problems[i]);
 		}
 
 		return createCleanUp(compilationUnit, locations,
@@ -166,7 +167,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 				removeRedundantTypeArguments);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
 
 		if (insertInferredTypeArguments) {
 			final ArrayList<ASTNode> changedNodes= new ArrayList<>();
@@ -180,7 +181,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 
 		} else if (removeRedundantTypeArguments) {
 			List<CompilationUnitRewriteOperation> result= new ArrayList<>();
-			for (IProblemLocationCore problem : problems) {
+			for (IProblemLocation problem : problems) {
 				int id= problem.getProblemId();
 
 				if (id == IProblem.RedundantSpecificationOfTypeArguments) {
@@ -197,7 +198,7 @@ public class TypeParametersFixCore extends CompilationUnitRewriteOperationsFixCo
 		return null;
 	}
 
-	public static ParameterizedType getParameterizedType(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static ParameterizedType getParameterizedType(CompilationUnit compilationUnit, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 		if (selectedNode == null)
 			return null;

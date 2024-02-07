@@ -62,6 +62,9 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 
 public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 
@@ -152,9 +155,9 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 	 * @param resultingCollections the resulting proposals
 	 * @return <code>true</code> if the quick assist is applicable at this offset
 	 */
-	public boolean addGetterSetterProposals(IInvocationContextCore context, ASTNode coveringNode, IProblemLocationCore[] locations, ArrayList<T> resultingCollections) {
+	public boolean addGetterSetterProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, ArrayList<T> resultingCollections) {
 		if (locations != null) {
-			for (IProblemLocationCore location : locations) {
+			for (IProblemLocation location : locations) {
 				int problemId= location.getProblemId();
 				if (problemId == IProblem.UnusedPrivateField)
 					return false;
@@ -165,11 +168,11 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 		return addGetterSetterProposals(context, coveringNode, resultingCollections, IProposalRelevance.GETTER_SETTER_QUICK_ASSIST);
 	}
 
-	public void addGetterSetterProposals(IInvocationContextCore context, IProblemLocationCore location, Collection<T> proposals, int relevance) {
+	public void addGetterSetterProposals(IInvocationContext context, IProblemLocation location, Collection<T> proposals, int relevance) {
 		addGetterSetterProposals(context, location.getCoveringNode(context.getASTRoot()), proposals, relevance);
 	}
 
-	protected boolean addGetterSetterProposals(IInvocationContextCore context, ASTNode coveringNode, Collection<T> proposals, int relevance) {
+	protected boolean addGetterSetterProposals(IInvocationContext context, ASTNode coveringNode, Collection<T> proposals, int relevance) {
 		if (!(coveringNode instanceof SimpleName sn)) {
 			return false;
 		}

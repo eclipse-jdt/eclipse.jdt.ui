@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * A fix that removes the second <code>substring()</code> parameter if this parameter is the length of the string:
@@ -118,13 +118,13 @@ public class SubstringCleanUpCore extends AbstractMultiFixCore {
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocationCore[] problems) throws CoreException {
+	public ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		return createFix(unit);
 	}
 
 
 	@Override
-	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocationCore problem) {
+	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocation problem) {
 		return false;
 	}
 

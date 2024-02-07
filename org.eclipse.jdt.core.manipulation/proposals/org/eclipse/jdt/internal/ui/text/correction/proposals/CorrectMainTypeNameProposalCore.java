@@ -27,17 +27,16 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
-
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
 
 public class CorrectMainTypeNameProposalCore extends ASTRewriteCorrectionProposalCore {
 
 	private final String fOldName;
 	private final String fNewName;
-	private final IInvocationContextCore fContext;
+	private final IInvocationContext fContext;
 
-	public CorrectMainTypeNameProposalCore(String name, ICompilationUnit cu, ASTRewrite rewrite, IInvocationContextCore context, String oldTypeName, String newTypeName, int relevance) {
+	public CorrectMainTypeNameProposalCore(String name, ICompilationUnit cu, ASTRewrite rewrite, IInvocationContext context, String oldTypeName, String newTypeName, int relevance) {
 		super(name, cu, rewrite, relevance);
 		fContext= context;
 		fOldName= oldTypeName;

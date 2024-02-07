@@ -26,13 +26,14 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.InitializeFinalFieldProposal;
 
 public class UnInitializedFinalFieldSubProcessor extends UnInitializedFinalFieldBaseSubProcessor<ICommandAccess>{
 
-	public static void getProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new UnInitializedFinalFieldSubProcessor().addProposals(context, problem, proposals);
 	}
 
@@ -40,17 +41,17 @@ public class UnInitializedFinalFieldSubProcessor extends UnInitializedFinalField
 	}
 
 	@Override
-	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int relevance) {
+	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit targetCU, SimpleName node, IVariableBinding targetBinding, int relevance) {
 		return new InitializeFinalFieldProposal(problem, targetCU, node, targetBinding, relevance);
 	}
 
 	@Override
-	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType) {
+	protected ICommandAccess createInitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType) {
 		return new InitializeFinalFieldProposal(problem, targetCU, node, relevance, updateType);
 	}
 
 	@Override
-	protected ICommandAccess conditionallyCreateInitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType) {
+	protected ICommandAccess conditionallyCreateInitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit targetCU, MethodDeclaration node, int relevance, int updateType) {
 		InitializeFinalFieldProposal initializeFinalFieldProposal= new InitializeFinalFieldProposal(problem, targetCU, node, relevance, updateType);
 		try {
 			if(initializeFinalFieldProposal.hasProposal()) {

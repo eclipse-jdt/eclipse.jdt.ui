@@ -38,13 +38,13 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class TaskMarkerProposalCore extends CUCorrectionProposalCore {
 
-	private IProblemLocationCore fLocation;
+	private IProblemLocation fLocation;
 
-	public TaskMarkerProposalCore(ICompilationUnit cu, IProblemLocationCore location, int relevance) {
+	public TaskMarkerProposalCore(ICompilationUnit cu, IProblemLocation location, int relevance) {
 		super("", cu, relevance); //$NON-NLS-1$
 		fLocation= location;
 		setDisplayName(CorrectionMessages.TaskMarkerProposal_description);

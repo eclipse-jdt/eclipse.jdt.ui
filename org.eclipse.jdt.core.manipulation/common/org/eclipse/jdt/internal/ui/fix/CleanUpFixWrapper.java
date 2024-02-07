@@ -23,9 +23,9 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Class to wrap an ICleanUpFixCore and be used as an ICleanUpFix
@@ -47,10 +47,10 @@ public class CleanUpFixWrapper implements ICleanUpFix {
 		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
 	}
 
-	public static ICleanUpFix create(IProblemLocationCore[] problems, Function<IProblemLocationCore[], ICleanUpFixCore> createFunction) {
-		IProblemLocationCore[] problemLocationArray= null;
+	public static ICleanUpFix create(IProblemLocation[] problems, Function<IProblemLocation[], ICleanUpFixCore> createFunction) {
+		IProblemLocation[] problemLocationArray= null;
 		if (problems != null) {
-			problemLocationArray= new ProblemLocationCore[problems.length];
+			problemLocationArray= new ProblemLocation[problems.length];
 			for (int i= 0; i < problems.length; i++) {
 				problemLocationArray[i]=  problems[i];
 			}

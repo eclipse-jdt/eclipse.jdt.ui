@@ -66,8 +66,9 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperationCore;
 import org.eclipse.jdt.internal.ui.util.Progress;
 
@@ -251,7 +252,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 
 	private static ISerialVersionFixContext fCurrentContext;
 
-	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() != IProblem.MissingSerialVersion)
 			return null;
 
@@ -326,14 +327,14 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addSerialVersionIds) {
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocationCore(problems[i]);
+			locations[i]= new ProblemLocation(problems[i]);
 		}
 		return createCleanUp(compilationUnit, locations, addSerialVersionIds);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems, boolean addSerialVersionIds) {
+	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addSerialVersionIds) {
 		if (addSerialVersionIds) {
 
 			final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();
@@ -341,7 +342,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 				return null;
 
 			List<ASTNode> declarationNodes= new ArrayList<>();
-			for (IProblemLocationCore problem : problems) {
+			for (IProblemLocation problem : problems) {
 				if (problem.getProblemId() == IProblem.MissingSerialVersion) {
 					final SimpleName simpleName= getSelectedName(compilationUnit, problem);
 					if (simpleName != null) {
@@ -366,7 +367,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 		return null;
 	}
 
-	public static SimpleName getSelectedName(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static SimpleName getSelectedName(CompilationUnit compilationUnit, IProblemLocation problem) {
 		final ASTNode selection= problem.getCoveredNode(compilationUnit);
 		if (selection == null)
 			return null;

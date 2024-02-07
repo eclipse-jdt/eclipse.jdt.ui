@@ -20,6 +20,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFixCore;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 /**
  * Subprocessor for serial version quickfix proposals.
  *
@@ -36,7 +39,7 @@ public abstract class SerialVersionBaseSubProcessor<T> {
 	 * @param location the problem location
 	 * @param proposals the proposal collection to extend
 	 */
-	public void addSerialVersionProposals(final IInvocationContextCore context, final IProblemLocationCore location, final Collection<T> proposals) {
+	public void addSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection<T> proposals) {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);
@@ -53,6 +56,6 @@ public abstract class SerialVersionBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createSerialVersionProposal(IProposableFix iProposableFix, int relevance, IInvocationContextCore context, boolean isDefault);
+	protected abstract T createSerialVersionProposal(IProposableFix iProposableFix, int relevance, IInvocationContext context, boolean isDefault);
 
 }

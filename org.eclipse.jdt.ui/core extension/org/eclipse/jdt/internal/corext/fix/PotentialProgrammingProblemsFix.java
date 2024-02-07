@@ -16,12 +16,12 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 
 public class PotentialProgrammingProblemsFix {
 
-	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static IProposableFix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) {
 		return PotentialProgrammingProblemsFixCore.createMissingSerialVersionFixes(compilationUnit, problem);
 	}
 
