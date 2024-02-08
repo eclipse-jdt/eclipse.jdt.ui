@@ -88,7 +88,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 		}
 
 		ICleanUpFix cleanUpFixCore= LambdaExpressionAndMethodRefFixCore.createCleanUp(unit);
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		return cleanUpFixCore;
 	}
 
 	@Override

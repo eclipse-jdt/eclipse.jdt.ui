@@ -18,8 +18,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.fix.CleanUpFixWrapper;
-
 /**
  * A fix which fixes code style issues.
  */
@@ -35,8 +33,8 @@ public class CodeStyleFix {
 			boolean removeFieldQualifier,
 			boolean removeMethodQualifier) {
 
-		return CleanUpFixWrapper.create(CodeStyleFixCore.createCleanUp(compilationUnit, addThisQualifier, changeNonStaticAccessToStatic, qualifyStaticFieldAccess,
-				changeIndirectStaticAccessToDirect, qualifyMethodAccess, qualifyStaticMethodAccess, removeFieldQualifier, removeMethodQualifier));
+		return CodeStyleFixCore.createCleanUp(compilationUnit, addThisQualifier, changeNonStaticAccessToStatic, qualifyStaticFieldAccess,
+				changeIndirectStaticAccessToDirect, qualifyMethodAccess, qualifyStaticMethodAccess, removeFieldQualifier, removeMethodQualifier);
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
@@ -44,9 +42,7 @@ public class CodeStyleFix {
 			boolean changeNonStaticAccessToStatic,
 			boolean changeIndirectStaticAccessToDirect) {
 
-		return CleanUpFixWrapper.create(problems, problemLocations -> {
-			return CodeStyleFixCore.createCleanUp(compilationUnit, problemLocations, addThisQualifier, changeNonStaticAccessToStatic, changeIndirectStaticAccessToDirect);
-		});
+		return CodeStyleFixCore.createCleanUp(compilationUnit, problems, addThisQualifier, changeNonStaticAccessToStatic, changeIndirectStaticAccessToDirect);
 	}
 
 }

@@ -41,8 +41,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-import org.eclipse.jdt.internal.ui.fix.CleanUpFixWrapper;
-
 public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperationsFix {
 
 	public final static class UnnecessaryArrayCreationFinder extends GenericVisitor {
@@ -151,7 +149,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 			return null;
 
 		CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[operations.size()]);
-		return new CleanUpFixWrapper(new ConvertLoopFixCore(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops, null));
+		return new ConvertLoopFixCore(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops, null);
 	}
 
 	public static UnnecessaryArrayCreationFix createUnnecessaryArrayCreationFix(CompilationUnit compilationUnit, Expression methodInvocation) {

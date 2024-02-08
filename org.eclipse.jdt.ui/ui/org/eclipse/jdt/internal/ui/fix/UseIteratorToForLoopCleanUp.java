@@ -38,8 +38,7 @@ public class UseIteratorToForLoopCleanUp extends AbstractCleanUp {
 	}
 	@Override
 	public ICleanUpFix createFix(final CleanUpContext context) throws CoreException {
-		ICleanUpFix fixCore= coreCleanUp.createFix(context);
-		return fixCore == null ? null : new CleanUpFixWrapper(fixCore);
+		return coreCleanUp.createFix(context);
 	}
 	@Override
 	public String[] getStepDescriptions() {

@@ -69,7 +69,7 @@ public class StringCleanUp extends AbstractMultiFix {
 		ICleanUpFix coreFix= StringFixCore.createCleanUp(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
-		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
+		return coreFix;
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class StringCleanUp extends AbstractMultiFix {
 		ICleanUpFix coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
-		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
+		return coreFix;
 	}
 
 	private Map<String, String> getRequiredOptions() {

@@ -49,8 +49,7 @@ public class AbstractCleanUpCoreWrapper<T extends AbstractCleanUpCore> extends A
 
 	@Override
 	public final ICleanUpFix createFix(CleanUpContext context) throws CoreException {
-		ICleanUpFix fix= cleanUpCore.createFix(context);
-		return fix != null ? new CleanUpFixWrapper(fix) : null;
+		return cleanUpCore.createFix(context);
 	}
 
 	@Override

@@ -61,8 +61,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		ICleanUpFix fix= cleanUpCore.createFix(compilationUnit);
-		return fix == null ? null : new CleanUpFixWrapper(fix);
+		return cleanUpCore.createFix(compilationUnit);
 	}
 
 	@Override
@@ -76,7 +75,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 			problemsCore= problemsList.toArray(new IProblemLocation[0]);
 		}
 		ICleanUpFix fix= cleanUpCore.createFix(compilationUnit, problemsCore);
-		return fix == null ? null : new CleanUpFixWrapper(fix);
+		return fix;
 	}
 
 	@Override

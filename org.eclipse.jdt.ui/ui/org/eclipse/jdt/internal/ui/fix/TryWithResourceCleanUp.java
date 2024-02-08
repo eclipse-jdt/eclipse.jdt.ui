@@ -84,7 +84,7 @@ public class TryWithResourceCleanUp extends AbstractMultiFix implements ICleanUp
 		}
 
 		ICleanUpFix cleanUpFixCore= TryWithResourceFixCore.createCleanUp(unit);
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		return cleanUpFixCore;
 	}
 
 	@Override
