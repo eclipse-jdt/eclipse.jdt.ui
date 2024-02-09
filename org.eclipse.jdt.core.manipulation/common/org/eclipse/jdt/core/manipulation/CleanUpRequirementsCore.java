@@ -25,7 +25,9 @@ import org.eclipse.jdt.core.JavaCore;
  * Specifies the requirements of a clean up.
  *
  * @since 1.12
+ * @deprecated Please use CleanUpRequirements in the future
  */
+@Deprecated
 final public class CleanUpRequirementsCore {
 
 	protected final boolean fRequiresAST;

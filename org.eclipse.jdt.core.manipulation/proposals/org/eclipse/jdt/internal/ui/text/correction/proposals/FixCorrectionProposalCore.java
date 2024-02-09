@@ -24,7 +24,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.fix.ILinkedFixCore;
+import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
@@ -97,8 +97,8 @@ public class FixCorrectionProposalCore extends LinkedCorrectionProposalCore {
 		CompilationUnitChange createChange= fFix.createChange(null);
 		createChange.setSaveMode(TextFileChange.LEAVE_DIRTY);
 
-		if (fFix instanceof ILinkedFixCore) {
-			setLinkedProposalModel(((ILinkedFixCore) fFix).getLinkedPositionsCore());
+		if (fFix instanceof ILinkedFix) {
+			setLinkedProposalModel(((ILinkedFix) fFix).getLinkedPositions());
 		}
 
 		return createChange;

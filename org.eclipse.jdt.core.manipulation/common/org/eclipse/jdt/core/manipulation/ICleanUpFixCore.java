@@ -25,7 +25,9 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
  * fix one or more problems in a compilation unit.
  *
  * @since 1.12
+ * @deprecated Please use ICleanUpFix in the future
  */
+@Deprecated
 public interface ICleanUpFixCore {
 
 	/**

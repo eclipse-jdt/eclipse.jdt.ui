@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
  *
  * @since 1.21
  */
+@SuppressWarnings("deprecation")
 public interface ICleanUpFix extends ICleanUpFixCore {
 
 	/**
