@@ -30,8 +30,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -40,6 +38,8 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
@@ -59,9 +59,9 @@ public class SubstringCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
+	public CleanUpRequirements getRequirements() {
 		boolean requireAST= isEnabled(CleanUpConstants.SUBSTRING);
-		return new CleanUpRequirementsCore(requireAST, false, false, null);
+		return new CleanUpRequirements(requireAST, false, false, null);
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class SubstringCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(final CompilationUnit unit) throws CoreException {
+	public ICleanUpFix createFix(final CompilationUnit unit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.SUBSTRING)) {
 			return null;
 		}
@@ -118,7 +118,7 @@ public class SubstringCleanUpCore extends AbstractMultiFixCore {
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
+	public ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		return createFix(unit);
 	}
 

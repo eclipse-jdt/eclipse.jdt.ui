@@ -25,14 +25,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
@@ -68,10 +66,10 @@ public class StringCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
+		ICleanUpFix coreFix= StringFixCore.createCleanUp(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
-		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
+		return coreFix;
 	}
 
 	@Override
@@ -83,10 +81,10 @@ public class StringCleanUp extends AbstractMultiFix {
 		for (IProblemLocation problem : problems) {
 			coreProblems.add(problem);
 		}
-		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
+		ICleanUpFix coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
-		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
+		return coreFix;
 	}
 
 	private Map<String, String> getRequiredOptions() {

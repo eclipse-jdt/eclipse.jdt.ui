@@ -21,7 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -84,8 +83,8 @@ public class TryWithResourceCleanUp extends AbstractMultiFix implements ICleanUp
 			return null;
 		}
 
-		ICleanUpFixCore cleanUpFixCore= TryWithResourceFixCore.createCleanUp(unit);
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		ICleanUpFix cleanUpFixCore= TryWithResourceFixCore.createCleanUp(unit);
+		return cleanUpFixCore;
 	}
 
 	@Override

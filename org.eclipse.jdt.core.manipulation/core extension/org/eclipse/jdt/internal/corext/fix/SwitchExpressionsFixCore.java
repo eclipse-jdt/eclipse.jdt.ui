@@ -61,11 +61,12 @@ import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -632,7 +633,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		return new SwitchExpressionsFixCore(FixMessages.SwitchExpressionsFix_convert_to_switch_expression, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit) {
 		if (!JavaModelUtil.is14OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 

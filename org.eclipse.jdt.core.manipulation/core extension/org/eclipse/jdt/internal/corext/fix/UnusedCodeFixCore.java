@@ -82,7 +82,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -93,6 +92,7 @@ import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
@@ -812,7 +812,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new UnusedCodeFixCore(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new CompilationUnitRewriteOperation[] { new RemoveCastOperation((CastExpression) curr) });
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean removeUnusedPrivateMethods,
 			boolean removeUnusedPrivateConstructors,
 			boolean removeUnusedPrivateFields,
@@ -875,7 +875,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean removeUnusedPrivateMethods,
 			boolean removeUnusedPrivateConstructors,
 			boolean removeUnusedPrivateFields,

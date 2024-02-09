@@ -59,13 +59,13 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -324,7 +324,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 	    return new RefactoringStatus();
     }
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addSerialVersionIds) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addSerialVersionIds) {
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -334,7 +334,7 @@ public class PotentialProgrammingProblemsFixCore extends CompilationUnitRewriteO
 		return createCleanUp(compilationUnit, locations, addSerialVersionIds);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addSerialVersionIds) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addSerialVersionIds) {
 		if (addSerialVersionIds) {
 
 			final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();

@@ -32,12 +32,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -123,7 +124,7 @@ public class StandardComparisonFixCore extends CompilationUnitRewriteOperationsF
 	}
 
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit) {
 		List<StandardComparisonFixOperation> operations= new ArrayList<>();
 		StandardComparisonFinder finder= new StandardComparisonFinder(operations);
 		compilationUnit.accept(finder);

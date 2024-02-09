@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -86,11 +84,6 @@ public class UseStringIsBlankCleanUp extends AbstractCleanUp {
 
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
-		ICleanUpFixCore fixCore= createFixCore(context);
-		return fixCore != null ? new CleanUpFixWrapper(fixCore) : null;
-	}
-
-	private ICleanUpFixCore createFixCore(final CleanUpContextCore context) {
 		CompilationUnit compilationUnit= context.getAST();
 
 		if (compilationUnit == null
@@ -102,7 +95,7 @@ public class UseStringIsBlankCleanUp extends AbstractCleanUp {
 		return createCleanUp(compilationUnit);
 	}
 
-	private static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
+	private static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit) {
 		List<UseStringIsBlankFixOperation> operations= new ArrayList<>();
 		compilationUnit.accept(new UseStringIsBlankFinder(operations));
 

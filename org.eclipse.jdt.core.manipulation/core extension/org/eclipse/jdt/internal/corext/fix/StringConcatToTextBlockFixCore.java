@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
@@ -71,6 +70,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -781,7 +782,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 	}
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit, boolean includeStringBufferBuilder) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit, boolean includeStringBufferBuilder) {
 		if (!JavaModelUtil.is15OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 

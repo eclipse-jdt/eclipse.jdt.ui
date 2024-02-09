@@ -35,12 +35,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -85,7 +85,7 @@ public class StringFixCore implements IProposableFix {
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
@@ -97,14 +97,14 @@ public class StringFixCore implements IProposableFix {
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, locations);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, problems);
 	}
 
-	private static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
+	private static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!cu.isStructureKnown())
 			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :

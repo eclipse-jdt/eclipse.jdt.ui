@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionAndMethodRefFixCore;
@@ -88,8 +87,8 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		ICleanUpFixCore cleanUpFixCore= LambdaExpressionAndMethodRefFixCore.createCleanUp(unit);
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		ICleanUpFix cleanUpFixCore= LambdaExpressionAndMethodRefFixCore.createCleanUp(unit);
+		return cleanUpFixCore;
 	}
 
 	@Override

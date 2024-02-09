@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
@@ -69,12 +68,12 @@ public class Java50CleanUp extends AbstractMultiFix {
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		boolean addOverride= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-		ICleanUpFixCore cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit,
+		ICleanUpFix cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit,
 				addAnotations && addOverride,
 				addAnotations && addOverride && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION),
 				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		return cleanUpFixCore;
 	}
 
 	@Override
@@ -90,12 +89,12 @@ public class Java50CleanUp extends AbstractMultiFix {
 
 		boolean addAnnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		boolean addOverride= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-		ICleanUpFixCore cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit, coreProblems,
+		ICleanUpFix cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit, coreProblems,
 				addAnnotations && addOverride,
 				addAnnotations && addOverride && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION),
 				addAnnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		return cleanUpFixCore;
 	}
 
 	private Map<String, String> getRequiredOptions() {

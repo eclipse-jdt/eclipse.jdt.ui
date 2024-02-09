@@ -36,9 +36,9 @@ import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFixCore;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
@@ -106,7 +106,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		IProblemLocation[] problemLocations= filter(problems, new int[] { IProblem.AbstractMethodMustBeImplemented, IProblem.EnumConstantMustImplementAbstractMethod });
-		return CleanUpFixWrapper.create(problemLocations, problemsCore->UnimplementedCodeFixCore.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemsCore));
+		return UnimplementedCodeFixCore.createCleanUp(unit, isEnabled(CleanUpConstants.ADD_MISSING_METHODES), isEnabled(MAKE_TYPE_ABSTRACT), problemLocations);
 	}
 
 	@Override

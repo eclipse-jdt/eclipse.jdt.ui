@@ -137,22 +137,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/util/CleanUpCoreWrapper.java" type="org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper">
-        <filter id="571519004">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper.wrapOptions(CleanUpOptionsCore)"/>
-                <message_argument value="CleanUpOptions"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
-        <filter id="571473929">
-            <message_arguments>
-                <message_argument value="ViewForm"/>
-                <message_argument value="ViewerPane"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTableViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer">
         <filter id="571473929">
             <message_arguments>

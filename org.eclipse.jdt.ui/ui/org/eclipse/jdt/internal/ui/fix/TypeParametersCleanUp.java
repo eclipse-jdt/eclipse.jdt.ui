@@ -66,9 +66,9 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return CleanUpFixWrapper.create(TypeParametersFixCore.createCleanUp(compilationUnit,
+		return TypeParametersFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS),
-				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)));
+				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS));
 	}
 
 	@Override
@@ -76,9 +76,9 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		return CleanUpFixWrapper.create(problems, problemLocations -> TypeParametersFixCore.createCleanUp(compilationUnit, problemLocations,
+		return TypeParametersFixCore.createCleanUp(compilationUnit, problems,
 				isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS),
-				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)));
+				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS));
 	}
 
 	@Override

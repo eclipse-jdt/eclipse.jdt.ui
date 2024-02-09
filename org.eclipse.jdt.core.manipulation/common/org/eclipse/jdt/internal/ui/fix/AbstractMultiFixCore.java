@@ -21,9 +21,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
@@ -39,7 +39,7 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 	}
 
 	@Override
-	public final ICleanUpFixCore createFixCore(CleanUpContextCore context) throws CoreException {
+	public final ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit unit= context.getAST();
 		if (unit == null)
 			return null;
@@ -51,9 +51,9 @@ public abstract class AbstractMultiFixCore extends AbstractCleanUpCore implement
 		}
 	}
 
-	protected abstract ICleanUpFixCore createFix(CompilationUnit unit) throws CoreException;
+	protected abstract ICleanUpFix createFix(CompilationUnit unit) throws CoreException;
 
-	protected abstract ICleanUpFixCore createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException;
+	protected abstract ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException;
 
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {

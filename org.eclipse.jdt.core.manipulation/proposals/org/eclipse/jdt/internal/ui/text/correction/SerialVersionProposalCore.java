@@ -22,9 +22,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUpCore;
@@ -37,7 +37,7 @@ public class SerialVersionProposalCore extends FixCorrectionProposalCore {
 		fIsDefaultProposal= isDefault;
 	}
 
-	private static ICleanUpCore createCleanUp(boolean isDefault) {
+	private static ICleanUp createCleanUp(boolean isDefault) {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptionsCore.TRUE);
 		if (isDefault) {

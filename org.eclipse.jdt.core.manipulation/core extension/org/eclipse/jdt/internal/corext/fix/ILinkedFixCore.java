@@ -14,7 +14,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
  * A fix which when executed can set up a linked mode model
@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
  *
  * @since 1.10
  */
-public interface ILinkedFixCore extends ICleanUpFixCore {
+public interface ILinkedFixCore extends ICleanUpFix {
 
 	/**
 	 * @return the linked proposal model to use to set up linked positions or <b>null</b>
