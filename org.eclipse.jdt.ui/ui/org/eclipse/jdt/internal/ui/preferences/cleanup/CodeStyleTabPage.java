@@ -31,8 +31,8 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.SwitchCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SwitchCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_style"; //$NON-NLS-1$
@@ -41,7 +41,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
 				new ControlStatementsCleanUp(values),
-				new SwitchCleanUp(values),
+				new SwitchCleanUpCore(values),
 				new AddAllCleanUp(values),
 				new ElseIfCleanUp(values),
 				new ReduceIndentationCleanUp(values),
@@ -50,7 +50,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new PullUpAssignmentCleanUp(values),
 				new NumberSuffixCleanUp(values),
 				new InstanceofCleanUp(values),
-				new VariableDeclarationCleanUp(values),
+				new VariableDeclarationCleanUpCore(values),
 				new LambdaExpressionAndMethodRefCleanUp(values)
 		};
 	}

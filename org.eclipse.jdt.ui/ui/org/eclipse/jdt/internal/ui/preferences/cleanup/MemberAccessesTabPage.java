@@ -23,7 +23,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 
 public final class MemberAccessesTabPage extends AbstractCleanUpTabPage {
 
@@ -36,7 +36,7 @@ public final class MemberAccessesTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
-        	new CodeStyleCleanUp(values)
+        	new CodeStyleCleanUpCore(values)
         };
     }
 

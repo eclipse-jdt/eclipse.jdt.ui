@@ -24,19 +24,19 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
-import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.NoStringCreationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PatternCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringBufferToStringBuilderCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringBufferToStringBuilderCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUpCore;
 
 public final class PerformanceTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.performance"; //$NON-NLS-1$
@@ -48,17 +48,17 @@ public final class PerformanceTabPage extends AbstractCleanUpTabPage {
 				new BreakLoopCleanUp(values),
 				new StaticInnerClassCleanUp(values),
 				new StringBuilderCleanUp(values),
-				new PlainReplacementCleanUp(values),
+				new PlainReplacementCleanUpCore(values),
 				new UseStringIsBlankCleanUp(values),
 				new LazyLogicalCleanUp(values),
-				new ValueOfRatherThanInstantiationCleanUp(values),
-				new PrimitiveComparisonCleanUp(values),
+				new ValueOfRatherThanInstantiationCleanUpCore(values),
+				new PrimitiveComparisonCleanUpCore(values),
 				new PrimitiveParsingCleanUp(values),
 				new PrimitiveSerializationCleanUp(values),
-				new PrimitiveRatherThanWrapperCleanUp(values),
+				new PrimitiveRatherThanWrapperCleanUpCore(values),
 				new PatternCleanUp(values),
-				new StringBufferToStringBuilderCleanUp(values),
-				new NoStringCreationCleanUp(values),
+				new StringBufferToStringBuilderCleanUpCore(values),
+				new NoStringCreationCleanUpCore(values),
 				new BooleanLiteralCleanUp(values)
 		};
 	}

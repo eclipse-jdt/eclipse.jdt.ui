@@ -53,7 +53,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 
 public class ChangeNonStaticToStaticTest extends QuickFixTest {
 
@@ -110,11 +110,11 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
 
-	private CodeStyleCleanUp createCleanUp() {
+	private CodeStyleCleanUpCore createCleanUp() {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
-	    return new CodeStyleCleanUp(options);
+	    return new CodeStyleCleanUpCore(options);
     }
 
 	@Test

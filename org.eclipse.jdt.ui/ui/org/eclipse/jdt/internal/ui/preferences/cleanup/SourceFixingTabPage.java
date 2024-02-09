@@ -27,9 +27,9 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
-import org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUp;
-import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUpCore;
 
 public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.source_fixing"; //$NON-NLS-1$
@@ -37,10 +37,10 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(final Map<String, String> values) {
 		return new AbstractCleanUp[] {
-				new InvertEqualsCleanUp(values),
-				new StandardComparisonCleanUp(values),
+				new InvertEqualsCleanUpCore(values),
+				new StandardComparisonCleanUpCore(values),
 				new BitwiseConditionalExpressionCleanup(values),
-				new InlineDeprecatedMethodCleanUp(values)
+				new InlineDeprecatedMethodCleanUpCore(values)
 		};
 	}
 

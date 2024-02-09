@@ -15,13 +15,15 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
-import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 
 public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 
@@ -33,7 +35,7 @@ public final class MissingCodeTabPage extends AbstractCleanUpTabPage {
 
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
-		return new AbstractCleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUp(values), new UnimplementedCodeCleanUp(values) };
+		return new AbstractCleanUp[] { new Java50CleanUp(values), new PotentialProgrammingProblemsCleanUpCore(values), new UnimplementedCodeCleanUp(values) };
 	}
 
 	@Override

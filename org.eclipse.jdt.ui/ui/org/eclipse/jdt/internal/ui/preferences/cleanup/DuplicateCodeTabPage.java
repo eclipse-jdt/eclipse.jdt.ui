@@ -23,9 +23,9 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlFlowMergeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
-import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.OperandFactorizationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantFallingThroughBlockEndCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantIfConditionCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp;
@@ -42,10 +42,10 @@ public final class DuplicateCodeTabPage extends AbstractCleanUpTabPage {
 				new StrictlyEqualOrDifferentCleanUp(values),
 				new MergeConditionalBlocksCleanUp(values),
 				new ControlFlowMergeCleanUp(values),
-				new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp(values),
+				new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore(values),
 				new RedundantFallingThroughBlockEndCleanUp(values),
 				new RedundantIfConditionCleanUp(values),
-				new PullOutIfFromIfElseCleanUp(values)
+				new PullOutIfFromIfElseCleanUpCore(values)
 		};
 	}
 
