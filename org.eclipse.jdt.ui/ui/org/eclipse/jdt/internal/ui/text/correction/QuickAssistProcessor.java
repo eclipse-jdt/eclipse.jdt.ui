@@ -588,7 +588,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
-		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+		if (extractConstRefactoring.checkInitialConditions(new NullProgressMonitor()).isOK() && extractConstRefactoring.selectionAllStaticFinal()) {
 			LinkedProposalModelCore linkedProposalModel= createProposalModel();
 			extractConstRefactoring.setLinkedProposalModel(linkedProposalModel);
 			extractConstRefactoring.setCheckResultForCompileProblems(false);

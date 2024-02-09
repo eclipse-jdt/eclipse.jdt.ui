@@ -80,6 +80,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 	private static final String EXTRACT_TO_LOCAL= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 	private static final String EXTRACT_TO_LOCAL_REPLACE= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
+	private static final String EXTRACT_TO_CONSTANT= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -2103,9 +2104,79 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertProposalDoesNotExist(proposals, EXTRACT_TO_LOCAL);
 		assertProposalDoesNotExist(proposals, EXTRACT_TO_LOCAL_REPLACE);
+		assertProposalDoesNotExist(proposals, EXTRACT_TO_CONSTANT);
+	}
+
+	@Test
+	public void testExtractToConstant1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    public final static E instance= new E();\n");
+		buf.append("    \n");
+		buf.append("    int s;\n");
+		buf.append("\n");
+		buf.append("    final static int f() {\n");
+		buf.append("        System.out.println(E.instance.s + 1);\n");
+		buf.append("        return 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "E.instance.s + 1";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, EXTRACT_TO_CONSTANT);
+	}
+
+	@Test
+	public void testExtractToConstant2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    public final static E instance= new E();\n");
+		buf.append("\n");
+		buf.append("    static final int t = 5;\n");
+		buf.append("\n");
+		buf.append("    int f1() {\n");
+		buf.append("        return 23 * E.t;  \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "23 * E.t";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    public final static E instance= new E();\n");
+		buf.append("\n");
+		buf.append("    static final int t = 5;\n");
+		buf.append("\n");
+		buf.append("    private static final int INT = 23 * E.t;\n");
+		buf.append("\n");
+		buf.append("    int f1() {\n");
+		buf.append("        return INT;  \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
 	}
 
 	@Test
