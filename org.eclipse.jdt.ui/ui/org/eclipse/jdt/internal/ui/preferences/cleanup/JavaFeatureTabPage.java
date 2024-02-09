@@ -15,7 +15,11 @@ package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
 import java.util.Map;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
@@ -23,18 +27,16 @@ import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
-import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUp;
-import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VarCleanUp;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
+import org.eclipse.jdt.internal.ui.fix.VarCleanUpCore;
 
 public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.java_feature"; //$NON-NLS-1$
@@ -42,14 +44,14 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(final Map<String, String> values) {
 		return new AbstractCleanUp[] {
-				new PatternMatchingForInstanceofCleanUp(values),
-				new SwitchExpressionsCleanUp(values),
-				new VarCleanUp(values),
-				new LambdaExpressionsCleanUp(values),
+				new PatternMatchingForInstanceofCleanUpCore(values),
+				new SwitchExpressionsCleanUpCore(values),
+				new VarCleanUpCore(values),
+				new LambdaExpressionsCleanUpCore(values),
 				new ComparingOnCriteriaCleanUp(values),
 				new JoinCleanUp(values),
 				new TryWithResourceCleanUp(values),
-				new StringConcatToTextBlockCleanUp(values),
+				new StringConcatToTextBlockCleanUpCore(values),
 				new MultiCatchCleanUp(values),
 				new TypeParametersCleanUp(values),
 				new HashCleanUp(values),

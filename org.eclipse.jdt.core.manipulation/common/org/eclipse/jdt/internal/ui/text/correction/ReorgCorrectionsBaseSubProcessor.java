@@ -67,7 +67,7 @@ import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposalCore;
 
 public abstract class ReorgCorrectionsBaseSubProcessor<T> {
@@ -180,7 +180,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		if (fix != null) {
 			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
-			T proposal= createRemoveUnusedImportProposal(fix, new UnusedCodeCleanUp(options), IProposalRelevance.REMOVE_UNUSED_IMPORT, context);
+			T proposal= createRemoveUnusedImportProposal(fix, new UnusedCodeCleanUpCore(options), IProposalRelevance.REMOVE_UNUSED_IMPORT, context);
 			if (proposal != null)
 				proposals.add(proposal);
 		}
@@ -354,7 +354,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 	protected abstract T createOrganizeImportsProposal(String name, Change change, ICompilationUnit cu, int relevance);
 
-	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int relevance, IInvocationContext context);
+	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUpCore unusedCodeCleanUp, int relevance, IInvocationContext context);
 
 	public abstract T createProjectSetupFixProposal(IInvocationContext context, IProblemLocation problem, String missingType, Collection<T> proposals);
 

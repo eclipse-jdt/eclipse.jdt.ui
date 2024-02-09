@@ -59,15 +59,15 @@ import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCaseCommon;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AutoboxingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.BooleanLiteralCleanUp;
-import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.BreakLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ComparingOnCriteriaCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp;
@@ -80,30 +80,30 @@ import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LazyLogicalCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp;
-import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUp;
-import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PlainReplacementCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveComparisonCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PullOutIfFromIfElseCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ValueOfRatherThanInstantiationCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
@@ -301,7 +301,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp());
+		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -426,7 +426,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
-	public void testUnnecessaryCodeCleanUp() throws Exception {
+	public void testUnnecessaryCodeCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -434,13 +434,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUp());
+		cleanUpRefactoring.addCleanUp(new UnnecessaryCodeCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testUnusedCodeCleanUp() throws Exception {
+	public void testUnusedCodeCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -457,13 +457,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp());
+		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testVariableDeclarationCleanUp() throws Exception {
+	public void testVariableDeclarationCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -476,7 +476,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUp());
+		cleanUpRefactoring.addCleanUp(new VariableDeclarationCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -508,7 +508,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new SwitchExpressionsCleanUp());
+		cleanUpRefactoring.addCleanUp(new SwitchExpressionsCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -647,7 +647,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
-	public void testPlainReplacementCleanUp() throws Exception {
+	public void testPlainReplacementCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -657,7 +657,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new PlainReplacementCleanUp());
+		cleanUpRefactoring.addCleanUp(new PlainReplacementCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -679,7 +679,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
-	public void testBooleanValueRatherThanComparisonCleanUp() throws Exception {
+	public void testBooleanValueRatherThanComparisonCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -689,7 +689,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new BooleanValueRatherThanComparisonCleanUp());
+		cleanUpRefactoring.addCleanUp(new BooleanValueRatherThanComparisonCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -775,7 +775,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
-	public void testOneIfRatherThanDuplicateBlocksThatFallThroughCleanUp() throws Exception {
+	public void testOneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -785,13 +785,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp());
+		cleanUpRefactoring.addCleanUp(new OneIfRatherThanDuplicateBlocksThatFallThroughCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testPullOutIfFromIfElseCleanUp() throws Exception {
+	public void testPullOutIfFromIfElseCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -801,7 +801,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new PullOutIfFromIfElseCleanUp());
+		cleanUpRefactoring.addCleanUp(new PullOutIfFromIfElseCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -855,7 +855,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
-	public void testValueOfRatherThanInstantiationCleanUp() throws Exception {
+	public void testValueOfRatherThanInstantiationCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -865,13 +865,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new ValueOfRatherThanInstantiationCleanUp());
+		cleanUpRefactoring.addCleanUp(new ValueOfRatherThanInstantiationCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testPrimitiveComparisonCleanUp() throws Exception {
+	public void testPrimitiveComparisonCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -881,7 +881,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new PrimitiveComparisonCleanUp());
+		cleanUpRefactoring.addCleanUp(new PrimitiveComparisonCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -897,13 +897,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new PrimitiveRatherThanWrapperCleanUp());
+		cleanUpRefactoring.addCleanUp(new PrimitiveRatherThanWrapperCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testRedundantComparatorCleanUp() throws Exception {
+	public void testRedundantComparatorCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -913,13 +913,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new RedundantComparatorCleanUp());
+		cleanUpRefactoring.addCleanUp(new RedundantComparatorCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testArrayWithCurlyCleanUp() throws Exception {
+	public void testArrayWithCurlyCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -929,13 +929,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new ArrayWithCurlyCleanUp());
+		cleanUpRefactoring.addCleanUp(new ArrayWithCurlyCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testReturnExpressionCleanUp() throws Exception {
+	public void testReturnExpressionCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -945,7 +945,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new ReturnExpressionCleanUp());
+		cleanUpRefactoring.addCleanUp(new ReturnExpressionCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
@@ -983,7 +983,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 	}
 
 	@Test
-	public void testInvertEqualsCleanUp() throws Exception {
+	public void testInvertEqualsCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -993,13 +993,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new InvertEqualsCleanUp());
+		cleanUpRefactoring.addCleanUp(new InvertEqualsCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
 
 	@Test
-	public void testStandardComparisonCleanUp() throws Exception {
+	public void testStandardComparisonCleanUpCore() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
@@ -1009,7 +1009,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new StandardComparisonCleanUp());
+		cleanUpRefactoring.addCleanUp(new StandardComparisonCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
