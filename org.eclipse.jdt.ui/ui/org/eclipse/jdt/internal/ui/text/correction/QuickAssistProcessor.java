@@ -39,6 +39,7 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -50,7 +51,6 @@ import org.eclipse.ui.preferences.WorkingCopyManager;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -537,6 +537,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			extractTempRefactoringSelectedOnly.setCheckResultForCompileProblems(false);
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
+			String preview= CorrectionMessages.QuickAssistProcessor_extract_to_local_preview;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			int relevance;
 			if (context.getSelectionLength() == 0) {
@@ -546,16 +547,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else {
 				relevance= IProposalRelevance.EXTRACT_LOCAL;
 			}
-			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoringSelectedOnly, relevance);
-			core.init(extractTempRefactoringSelectedOnly);
-			RefactoringStatus status= extractTempRefactoringSelectedOnly.checkFinalConditions(new NullProgressMonitor());
-			if (status.isOK()) {
-				RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
+			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoringSelectedOnly, relevance, preview);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
 
-				proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
-				proposal.setLinkedProposalModel(linkedProposalModel);
-				proposals.add(proposal);
-			}
+			proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposals.add(proposal);
 		}
 
 		ExtractTempRefactoring extractTempRefactoring= new ExtractTempRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
@@ -566,6 +563,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			extractTempRefactoring.setCheckResultForCompileProblems(false);
 
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
+			String preview= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_preview;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			int relevance;
 			if (context.getSelectionLength() == 0) {
@@ -573,18 +571,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			} else if (problemsAtLocation) {
 				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL_ERROR;
 			} else {
-				relevance= IProposalRelevance.EXTRACT_LOCAL;
+				relevance= IProposalRelevance.EXTRACT_LOCAL_ALL;
 			}
-			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoring, relevance);
-			core.init(extractTempRefactoring);
-			RefactoringStatus status= extractTempRefactoring.checkFinalConditions(new NullProgressMonitor());
-			if (status.isOK()) {
-				RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
+			ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu,
+					extractTempRefactoring, relevance, preview);
+			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
 
-				proposal.setCommandId(EXTRACT_LOCAL_ID);
-				proposal.setLinkedProposalModel(linkedProposalModel);
-				proposals.add(proposal);
-			}
+			proposal.setCommandId(EXTRACT_LOCAL_ID);
+			proposal.setLinkedProposalModel(linkedProposalModel);
+			proposals.add(proposal);
 		}
 
 		ExtractConstantRefactoring extractConstRefactoring= new ExtractConstantRefactoring(context.getASTRoot(), context.getSelectionOffset(), context.getSelectionLength());
@@ -614,14 +609,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static class ExtractTempRefactoringProposalCore extends RefactoringCorrectionProposalCore {
-		public ExtractTempRefactoringProposalCore(String name, ICompilationUnit cu, Refactoring refactoring, int relevance) {
+		private final String fPreview;
+
+		public ExtractTempRefactoringProposalCore(String name, ICompilationUnit cu, Refactoring refactoring, int relevance, String preview) {
 			super(name, cu, refactoring, relevance);
+			fPreview= preview;
 		}
 
 		@Override
 		protected void init(Refactoring refactoring) throws CoreException {
 			ExtractTempRefactoring etr= (ExtractTempRefactoring) refactoring;
 			etr.setTempName(etr.guessTempName()); // expensive
+		}
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return fPreview;
 		}
 	}
 

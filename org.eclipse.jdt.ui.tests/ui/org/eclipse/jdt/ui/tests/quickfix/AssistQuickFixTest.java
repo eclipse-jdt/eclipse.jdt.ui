@@ -2104,9 +2104,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
-		assertProposalDoesNotExist(proposals, EXTRACT_TO_LOCAL);
-		assertProposalDoesNotExist(proposals, EXTRACT_TO_LOCAL_REPLACE);
+		assertNumberOfProposals(proposals, 5);
 		assertProposalDoesNotExist(proposals, EXTRACT_TO_CONSTANT);
 	}
 
@@ -3446,7 +3444,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -3622,7 +3620,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
