@@ -57,7 +57,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -28920,7 +28919,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		parser.setResolveBindings(true);
 		CompilationUnit unit= (CompilationUnit) parser.createAST(null);
 		Map<String, String> options= new HashMap<>();
-		options.put(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpOptionsCore.TRUE);
+		options.put(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.TRUE);
 		NoChangeRedundantModifiersCleanUp cleanup= new NoChangeRedundantModifiersCleanUp(options);
 		ICleanUpFix fix= cleanup.createFix(unit);
 
