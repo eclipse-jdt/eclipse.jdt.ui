@@ -1358,19 +1358,19 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	@Test
 	public void testFail41() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
-		failHelper1(5, 28, 5, 38, true, false, "length", RefactoringStatus.INFO);
+		failHelper1(5, 28, 5, 38, true, false, "length", RefactoringStatus.FATAL);
 	}
 
 	@Test
 	public void testFail42() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
-		failHelper1(5, 68, 5, 94, true, false, "intValue", RefactoringStatus.INFO);
+		failHelper1(5, 68, 5, 94, true, false, "intValue", RefactoringStatus.FATAL);
 	}
 
 	@Test
 	public void testFail43() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1176
-		failHelper1(19, 9, 19, 88, true, false, "intValue", RefactoringStatus.INFO);
+		failHelper1(19, 9, 19, 88, true, false, "intValue", RefactoringStatus.FATAL);
 	}
 
 }
