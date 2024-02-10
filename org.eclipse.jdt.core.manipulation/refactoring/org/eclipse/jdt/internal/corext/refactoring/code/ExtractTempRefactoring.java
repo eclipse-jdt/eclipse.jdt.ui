@@ -756,9 +756,11 @@ public class ExtractTempRefactoring extends Refactoring {
 					if (children.length == 1 && children[0] instanceof MultiTextEdit childEdit) {
 						if (childEdit.hasChildren() == false) {
 							fCURewrite.clearASTAndImportRewrites();
-							fLinkedProposalModel.clear();
+							if (fLinkedProposalModel != null) {
+								fLinkedProposalModel.clear();
+							}
 							fLinkedProposalModel= null;
-							result.addEntry(RefactoringStatus.ERROR, RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible, null, JavaManipulationPlugin.getPluginId(), RefactoringStatus.INFO, null);
+							result.addEntry(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible, null, JavaManipulationPlugin.getPluginId(), RefactoringStatusCodes.EXPRESSION_MAY_CAUSE_SIDE_EFFECTS, null);
 						}
 					}
 				}

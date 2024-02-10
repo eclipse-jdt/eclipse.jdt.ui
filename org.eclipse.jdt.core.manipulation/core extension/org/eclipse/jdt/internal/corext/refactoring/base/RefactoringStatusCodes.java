@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ public class RefactoringStatusCodes {
 	public static final int EXPRESSION_NOT_RVALUE= 								64;
 	public static final int EXPRESSION_NOT_RVALUE_VOID= 						65;
 	public static final int EXTRANEOUS_TEXT= 											66;
+	public static final int EXPRESSION_MAY_CAUSE_SIDE_EFFECTS=					67;
 
 	public static final int NOT_STATIC_FINAL_SELECTED= 							128;
 	public static final int SYNTAX_ERRORS= 												129;

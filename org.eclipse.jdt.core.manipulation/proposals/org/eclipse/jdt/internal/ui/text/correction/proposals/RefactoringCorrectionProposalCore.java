@@ -34,6 +34,7 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 
 public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalCore {
 
@@ -63,10 +64,10 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 	public TextChange createTextChange() throws CoreException {
 		init(fRefactoring);
 		fRefactoringStatus= fRefactoring.checkFinalConditions(new NullProgressMonitor());
-		if (fRefactoringStatus.hasFatalError() || fRefactoringStatus.hasError()) {
+		if (fRefactoringStatus.hasFatalError()) {
 			TextFileChange dummyChange= new TextFileChange("fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
 			dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
-			if (fRefactoringStatus.getEntryAt(0).getCode() == RefactoringStatus.INFO) {
+			if (fRefactoringStatus.getEntryAt(0).getCode() == RefactoringStatusCodes.EXPRESSION_MAY_CAUSE_SIDE_EFFECTS) {
 				JavaManipulationPlugin.log(new Status(IStatus.INFO, JavaManipulationPlugin.getPluginId(), fRefactoringStatus.getEntryAt(0).getMessage()));
 			}
 			return dummyChange;
