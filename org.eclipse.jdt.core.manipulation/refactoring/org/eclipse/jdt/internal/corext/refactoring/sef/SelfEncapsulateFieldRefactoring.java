@@ -993,7 +993,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fConsiderVisibility= considerVisibility;
 	}
 
-	public boolean isSeletced() {
+	public boolean isSelected() {
 		return fSelected;
 	}
 

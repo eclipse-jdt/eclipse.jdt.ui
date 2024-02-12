@@ -21,9 +21,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TreeEditor;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -73,7 +72,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	private static final String REFACTORING_TYPE= "refactoringType"; //$NON-NLS-1$
-	private static final String TEXT_WIDGET= "textWidget"; //$NON-NLS-1$
 	private static final String REFACTORING= "refactoring"; //$NON-NLS-1$
 	private static final String WARNING_ICON= "warningIcon"; //$NON-NLS-1$
 	private static final String WARNING_TEXT= "warningText"; //$NON-NLS-1$
@@ -84,6 +82,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	private HashMap<SelfEncapsulateFieldRefactoring, TreeItem> refactoringButtonMap = new HashMap<>();
 
 	private HashMap<String, Label> warningLabelMap = new HashMap<>();
+	private SelfEncapsulateFieldRefactoring selectedField;
 
 	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 
@@ -99,45 +98,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 	public List<SelfEncapsulateFieldRefactoring> getSelectedRefactorings() {
 		return fRefactorings.getRefactorings().stream()
-				.filter(SelfEncapsulateFieldRefactoring::isSeletced).toList();
+				.filter(SelfEncapsulateFieldRefactoring::isSelected).toList();
 	}
-
-	private void enableEditing(TreeItem item, Tree tree, String textData, RefactoringType refactoringType, SelfEncapsulateFieldRefactoring refactoring) {
-        Text text = new Text(tree, SWT.BORDER);
-        text.setSize(2, text.getSize().y);
-        text.setText(textData);
-        TreeEditor editor = new TreeEditor(tree);
-        editor.minimumWidth = 200;
-
-        item.setData("textEditor", editor); //$NON-NLS-1$
-        item.setData(TEXT_WIDGET, text);
-        item.setData(REFACTORING_TYPE, refactoringType);
-        item.setData(REFACTORING, refactoring);
-
-        text.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                Text textWidget = (Text) item.getData(TEXT_WIDGET);
-                item.setText(textWidget.getText());
-                String methodName = item.getChecked() ? textWidget.getText() : ""; //$NON-NLS-1$
-                if(refactoringType == RefactoringType.GETTER) {
-                	refactoring.setGetterName(methodName);
-                } else {
-                	refactoring.setSetterName(methodName);
-                }
-
-                processValidation();
-            }
-        });
-
-        text.addTraverseListener(event -> {
-            if (event.detail == SWT.TRAVERSE_RETURN) {
-                Text textWidget = (Text) item.getData(TEXT_WIDGET);
-                item.setText(textWidget.getText());
-            }
-        });
-        editor.setEditor(text, item);
-    }
 
 	@Override
 	public void createControl(Composite parent) {
@@ -152,18 +114,96 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		initializeDialogUnits(result);
 		result.setLayout(new GridLayout(3, false));
 
-		Tree tree = new Tree(result, SWT.CHECK);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 3, 1));
+		Composite selectorGroup = new Composite(result, SWT.NONE);
+		selectorGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+		selectorGroup.setLayout(new GridLayout(2, false));
+
+		Tree tree = new Tree(selectorGroup, SWT.CHECK);
+		tree.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true, 1, 1));
+
+		Composite editorContainerGroup = new Composite(selectorGroup, SWT.NONE);
+		editorContainerGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		editorContainerGroup.setLayout(new GridLayout(1, false));
+		editorContainerGroup.setEnabled(false);
+
+		Label fieldLabel= new Label(editorContainerGroup, SWT.LEFT);
+		fieldLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
+		fieldLabel.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_selected_field_name);
+		fEnablements.add(fieldLabel);
+
+		Composite editorGroup = new Composite(editorContainerGroup, SWT.NONE);
+		editorGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		GridLayout editorLayout = new GridLayout(2, false);
+		editorLayout.marginWidth = 0;
+		editorGroup.setLayout(editorLayout);
+
+		GridData textLayoutData = new GridData(SWT.FILL, SWT.LEFT, true, true);
+		textLayoutData.widthHint = SWT.DEFAULT;
+
+		Label getterLabel= new Label(editorGroup, SWT.LEFT);
+		getterLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		getterLabel.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_getter_name);
+		fEnablements.add(getterLabel);
+
+		Text getterText = new Text(editorGroup, SWT.LEFT | SWT.BORDER);
+		getterText.setLayoutData(textLayoutData);
+		getterText.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				selectedField.setGetterName(getterText.getText());
+                for (TreeItem treeItem : refactoringButtonMap.get(selectedField).getItems()) {
+                	if (treeItem.getData(REFACTORING_TYPE) == RefactoringType.GETTER)
+                		treeItem.setText(getterText.getText());
+                }
+                processValidation();
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// Not needed
+			}
+		});
+		fEnablements.add(getterText);
+
+		Label setterLabel= new Label(editorGroup, SWT.LEFT);
+		setterLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		setterLabel.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_setter_name);
+		fEnablements.add(setterLabel);
+
+		Text setterText = new Text(editorGroup, SWT.LEFT | SWT.BORDER);
+		setterText.setLayoutData(textLayoutData);
+		setterText.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				selectedField.setSetterName(setterText.getText());
+                for (TreeItem treeItem : refactoringButtonMap.get(selectedField).getItems()) {
+                	if (treeItem.getData(REFACTORING_TYPE) == RefactoringType.SETTER)
+                		treeItem.setText(setterText.getText());
+                }
+                processValidation();
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// Not needed
+			}
+		});
+		fEnablements.add(setterText);
+
 		tree.addListener(SWT.Selection, new Listener() {
 
 			@Override
 			public void handleEvent(Event event) {
 				 TreeItem selectedItem = (TreeItem) event.item;
+            	 TreeItem parentItem = selectedItem.getParentItem();
+				 System.out.println(event.detail);
+				 selectField(editorContainerGroup, fieldLabel, getterText, setterText, parentItem == null ? selectedItem : parentItem);
 	             if(event.detail == SWT.CHECK) {
-	            	 TreeItem parentItem = selectedItem.getParentItem();
 	            	 if(parentItem != null) {	// Setter or Getter
 	            		 SelfEncapsulateFieldRefactoring refactoring = (SelfEncapsulateFieldRefactoring) selectedItem.getData(REFACTORING);
-	            		 String methodName = selectedItem.getChecked() ? ((Text) selectedItem.getData(TEXT_WIDGET)).getText() : ""; //$NON-NLS-1$
+	            		 String methodName = ""; //$NON-NLS-1$
 	            		 if ((RefactoringType) selectedItem.getData(REFACTORING_TYPE) == RefactoringType.GETTER) {
 	            			 refactoring.setGetterName(methodName);
 	            		 } else {
@@ -181,9 +221,9 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		            		 ((SelfEncapsulateFieldRefactoring) item.getData(REFACTORING)).setSelected(selectedItem.getChecked());
 		            	 }
 	            	 }
+		             updateRefactorings();
+		             processValidation();
 	             }
-	             updateRefactorings();
-	             processValidation();
 			}
 		});
 		fRefactorings.getRefactorings().forEach(refactoring -> {
@@ -192,17 +232,20 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
         	TreeItem item = new TreeItem(tree, SWT.CHECK);
         	refactoringButtonMap.put(refactoring, item);
 			item.setChecked(isChecked);
+			item.setData(REFACTORING, refactoring);
 
         	TreeItem generateGetter = new TreeItem(item, SWT.CHECK);
             generateGetter.setChecked(isChecked);
             generateGetter.setText(refactoring.getGetterName());
-            enableEditing(generateGetter, tree, refactoring.getGetterName(), RefactoringType.GETTER, refactoring);
+            generateGetter.setData(REFACTORING_TYPE, RefactoringType.GETTER);
+            generateGetter.setData(REFACTORING, refactoring);
 
             if(needsSetter(refactoring)) {
             	TreeItem generateSetter = new TreeItem(item, SWT.CHECK);
             	generateSetter.setChecked(isChecked);
                 generateSetter.setText(refactoring.getSetterName());
-                enableEditing(generateSetter, tree, refactoring.getSetterName(), RefactoringType.SETTER, refactoring);
+                generateSetter.setData(REFACTORING_TYPE, RefactoringType.SETTER);
+                generateSetter.setData(REFACTORING, refactoring);
             } else {
             	fieldName += String.format(" %s", RefactoringMessages.SelfEncapsulateFieldInputPage_final_field) ; //$NON-NLS-1$
             }
@@ -264,6 +307,26 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 
 		Dialog.applyDialogFont(result);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);
+	}
+
+	private void selectField(Composite group, Label header, Text getter, Text setter, TreeItem parentItem) {
+		SelfEncapsulateFieldRefactoring refactoring = (SelfEncapsulateFieldRefactoring) parentItem.getData(REFACTORING);
+		this.selectedField = refactoring;
+		group.setEnabled(true);
+		header.setText(String.format("%s %s", RefactoringMessages.SelfEncapsulateFieldInputPage_selected_field_name, refactoring.getField().getElementName())); //$NON-NLS-1$
+		for (TreeItem child : parentItem.getItems()) {
+			if (child.getData(REFACTORING_TYPE) == RefactoringType.GETTER) {
+				getter.setText(child.getText());
+			}
+			else if (child.getData(REFACTORING_TYPE) == RefactoringType.SETTER) {
+				setter.setEnabled(true);
+				setter.setText(child.getText());
+			}
+		}
+		if (!needsSetter(refactoring)) {
+			setter.setEnabled(false);
+			setter.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_final_field);
+		}
 	}
 
 	private void doOpenPreference() {

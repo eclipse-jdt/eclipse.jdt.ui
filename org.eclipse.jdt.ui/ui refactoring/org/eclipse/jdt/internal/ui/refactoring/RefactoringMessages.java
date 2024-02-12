@@ -948,6 +948,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SelfEncapsulateFieldInputPage_description;
 
+	public static String SelfEncapsulateFieldInputPage_selected_field_name;
+
 	public static String SelfEncapsulateFieldInputPage_field_access;
 
 	public static String SelfEncapsulateFieldInputPage_first_method;

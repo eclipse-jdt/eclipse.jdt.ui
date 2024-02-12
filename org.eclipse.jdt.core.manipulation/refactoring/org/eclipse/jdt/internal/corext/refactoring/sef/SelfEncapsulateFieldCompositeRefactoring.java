@@ -223,7 +223,7 @@ public class SelfEncapsulateFieldCompositeRefactoring extends Refactoring {
 	}
 
 	public List<SelfEncapsulateFieldRefactoring> getSelectedRefactorings() {
-		return fRefactorings.stream().filter(SelfEncapsulateFieldRefactoring::isSeletced).toList();
+		return fRefactorings.stream().filter(SelfEncapsulateFieldRefactoring::isSelected).toList();
 	}
 
 }
