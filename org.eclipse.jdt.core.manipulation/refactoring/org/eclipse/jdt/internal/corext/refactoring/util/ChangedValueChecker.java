@@ -16,10 +16,10 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -74,7 +74,7 @@ public class ChangedValueChecker extends AbstractChecker {
 
 	private ASTNode fNode2;
 
-	private HashSet<Elem> fDependSet;
+	private Set<Elem> fDependSet;
 
 	private ASTNode fBodyNode;
 
@@ -82,7 +82,7 @@ public class ChangedValueChecker extends AbstractChecker {
 
 	private ArrayList<ASTNode> fMiddleNodes;
 
-	private boolean fConflict;
+	private volatile boolean fConflict;
 
 	private Set<Position> fPosSet;
 
@@ -98,7 +98,7 @@ public class ChangedValueChecker extends AbstractChecker {
 		fNode2= node;
 		fBodyNode= bodyNode;
 		fConflict= false;
-		fPosSet= Collections.synchronizedSet(new HashSet<>());
+		fPosSet= ConcurrentHashMap.newKeySet();
 		PathVisitor pathVisitor= new PathVisitor(startOffset, endOffset, fNode2, candidateList);
 		while (fBodyNode != null && (fBodyNode.getStartPosition() + fBodyNode.getLength() < pathVisitor.endOffset
 				|| fBodyNode.getStartPosition() > pathVisitor.startOffset)) {
@@ -110,7 +110,7 @@ public class ChangedValueChecker extends AbstractChecker {
 	}
 
 	public void analyzeSelectedExpression(ASTNode selectedExpression) {
-		fDependSet= new HashSet<>();
+		fDependSet= ConcurrentHashMap.newKeySet();
 		ReadVisitor readVisitor= new ReadVisitor(true);
 		selectedExpression.accept(readVisitor);
 		fDependSet.addAll(readVisitor.readSet);
@@ -121,25 +121,24 @@ public class ChangedValueChecker extends AbstractChecker {
 				new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
 		try {
 			for (ASTNode node : fMiddleNodes) {
-				Position pos= new Position(node.getStartPosition(), node.getLength());
-				if (fPosSet.contains(pos)) {
-					continue;
-				}
-				if (fConflict == true) {
+				if (fConflict) {
 					break;
 				}
-				threadPool.execute(() -> {
-					fPosSet.add(pos);
-					UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
-					node.accept(uv);
-					if (uv.hasConflict())
-						fConflict= true;
-				});
+				Position pos= new Position(node.getStartPosition(), node.getLength());
+				if (fPosSet.add(pos)) {
+					threadPool.execute(() -> {
+						UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
+						node.accept(uv);
+						if (uv.hasConflict()) {
+							fConflict= true;
+						}
+					});
+				}
 			}
-			if (fConflict == false) {
+			if (!fConflict) {
 				threadPool.shutdown();
-				threadPool.awaitTermination(5, TimeUnit.SECONDS);
-				while (!threadPool.isTerminated() && fConflict == false) {
+				while (!threadPool.isTerminated() && !fConflict) {
+					threadPool.awaitTermination(10, TimeUnit.MILLISECONDS);
 				}
 			}
 		} catch (InterruptedException e) {
@@ -506,11 +505,11 @@ public class ChangedValueChecker extends AbstractChecker {
 
 		private HashSet<Elem> updateSet;
 
-		private HashSet<Elem> dependSet;
+		private Set<Elem> dependSet;
 
 		private boolean visitMethodCall;
 
-		public UpdateVisitor(HashSet<Elem> dependSet, boolean visitMethodCall) {
+		public UpdateVisitor(Set<Elem> dependSet, boolean visitMethodCall) {
 			this.updateSet= new HashSet<>();
 			this.visitMethodCall= visitMethodCall;
 			this.dependSet= dependSet;
