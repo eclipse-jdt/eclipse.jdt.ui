@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.JavaCore;
  * @since 1.12
  * @deprecated Please use CleanUpRequirements in the future
  */
-@Deprecated
+@Deprecated(forRemoval=true, since="2024-06")
 final public class CleanUpRequirementsCore {
 
 	protected final boolean fRequiresAST;

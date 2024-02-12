@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @since 1.12
  * @deprecated Please use CleanUpContext in the future
  */
-@Deprecated
+@Deprecated(forRemoval=true, since="2024-06")
 public class CleanUpContextCore {
 
 	private final ICompilationUnit fUnit;

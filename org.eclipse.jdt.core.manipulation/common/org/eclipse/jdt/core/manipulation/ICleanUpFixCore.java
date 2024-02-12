@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
  * @since 1.12
  * @deprecated Please use ICleanUpFix in the future
  */
-@Deprecated
+@Deprecated(forRemoval=true, since="2024-06")
 public interface ICleanUpFixCore {
 
 	/**

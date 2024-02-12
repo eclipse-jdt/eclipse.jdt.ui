@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
  * @deprecated Please use CleanUpOptions in the future
  * This class is not intended to be subclassed by clients.
  */
-@Deprecated
+@Deprecated(forRemoval=true, since="2024-06")
 public class CleanUpOptionsCore {
 
 	private final Map<String, String> fOptions;
