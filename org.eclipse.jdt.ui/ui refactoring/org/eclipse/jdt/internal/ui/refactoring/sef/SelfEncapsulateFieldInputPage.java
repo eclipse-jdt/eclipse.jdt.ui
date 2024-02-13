@@ -115,29 +115,31 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		result.setLayout(new GridLayout(3, false));
 
 		Composite selectorGroup = new Composite(result, SWT.NONE);
-		selectorGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 3, 1));
+		selectorGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 3, 1));
 		selectorGroup.setLayout(new GridLayout(2, false));
 
 		Tree tree = new Tree(selectorGroup, SWT.CHECK);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true, 1, 1));
+		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		Composite editorContainerGroup = new Composite(selectorGroup, SWT.NONE);
-		editorContainerGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		final GridData editorContainerGroupLayoutData = new GridData(SWT.FILL, SWT.TOP, false, true);
+		editorContainerGroupLayoutData.widthHint = 300;
+		editorContainerGroup.setLayoutData(editorContainerGroupLayoutData);
 		editorContainerGroup.setLayout(new GridLayout(1, false));
 		editorContainerGroup.setEnabled(false);
 
 		Label fieldLabel= new Label(editorContainerGroup, SWT.LEFT);
-		fieldLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
+		fieldLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		fieldLabel.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_selected_field_name);
 		fEnablements.add(fieldLabel);
 
 		Composite editorGroup = new Composite(editorContainerGroup, SWT.NONE);
-		editorGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		editorGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		GridLayout editorLayout = new GridLayout(2, false);
 		editorLayout.marginWidth = 0;
 		editorGroup.setLayout(editorLayout);
 
-		GridData textLayoutData = new GridData(SWT.FILL, SWT.LEFT, true, true);
+		GridData textLayoutData = new GridData(SWT.FILL, SWT.LEFT, true, false);
 		textLayoutData.widthHint = SWT.DEFAULT;
 
 		Label getterLabel= new Label(editorGroup, SWT.LEFT);
@@ -264,12 +266,12 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		link.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
 
 		Label separator= new Label(result, SWT.NONE);
-		separator.setLayoutData(new GridData(SWT.INHERIT_NONE, SWT.CENTER, true, true, 3, 1));
+		separator.setLayoutData(new GridData(SWT.INHERIT_NONE, SWT.CENTER, true, false, 3, 1));
 
 		createFieldAccessBlock(result);
 
 		Label label= new Label(result, SWT.LEFT);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		label.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_insert_after);
 		fEnablements.add(label);
 
