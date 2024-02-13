@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.JavaProject;
+import org.eclipse.jdt.internal.core.PackageFragment;
+import org.eclipse.jdt.internal.core.PackageFragmentRoot;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -169,13 +171,13 @@ abstract class ReorgUserInputPage extends UserInputWizardPage {
 		TreeViewerFilter viewerFilter = new TreeViewerFilter();
 		treeViewer.addFilter(viewerFilter);
 
-		// Add a ModifyListener to the search text to update the filter
 		searchText.addModifyListener(e -> {
 			String searchString= searchText.getText().trim();
 			viewerFilter.setSearchText(searchString);
 			treeViewer.refresh();
-			treeViewer.expandAll();
+			setPageComplete(false);
 		});
+
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
 	}
@@ -224,19 +226,24 @@ class TreeViewerFilter extends ViewerFilter {
 				children= treeElement.getChildren();
 
 	        	for (Object child : children) {
-	        		if(child.toString().contains(searchText)) {
-	        			return true; // short circuit the operation if even one child is matching (to keep the project in the tree view), child filtering is done in else block
+	        		if(child.getClass().equals(PackageFragmentRoot.class) ) { 		// Added this check so we don't try to find anything in JarFragmentRoot
+						PackageFragmentRoot packFrag= (PackageFragmentRoot) child;
+						if(packFrag.toString().toLowerCase().contains(searchText)) {
+							return true; // short circuit the operation if even one child is matching (to keep the project in the tree view), child filtering is done in else block
+						}
 	        		}
 	        	}
 			} catch (JavaModelException e) {
 				e.printStackTrace();
 			}
-	        String elementText = treeElement.getElementName().toLowerCase();
-	        return elementText.contains(searchText);
+			return false; // in case project name and its content doesn't match remove it entirely
         } else {
-        	String childElementName = element.toString();
-        	return childElementName.contains(searchText);
+        	if(element instanceof PackageFragment) {
+        		PackageFragment packageFrag = (PackageFragment) element;
+	        	return packageFrag.toString().toLowerCase().contains(searchText);
+			}
         }
+		return true;
     }
 }
 
