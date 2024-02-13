@@ -107,7 +107,7 @@ public class CompilationUnitRewriteOperationsFixCore extends AbstractFixCore {
 	}
 
 	@Override
-	public LinkedProposalModelCore getLinkedPositionsCore() {
+	public LinkedProposalModelCore getLinkedPositions() {
 		if (!fLinkedProposalModel.hasLinkedPositions())
 			return null;
 

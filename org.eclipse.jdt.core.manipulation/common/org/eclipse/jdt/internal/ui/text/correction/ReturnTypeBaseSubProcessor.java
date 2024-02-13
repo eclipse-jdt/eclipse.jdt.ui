@@ -56,6 +56,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposalCore;
@@ -138,7 +140,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 
 	}
 
-	public void collectMethodWithConstrNameProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectMethodWithConstrNameProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -155,7 +157,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 	}
 
 
-	public void collectVoidMethodReturnsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectVoidMethodReturnsProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -226,7 +228,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 	}
 
 
-	public void collectMissingReturnTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectMissingReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -302,7 +304,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 	}
 
 
-	public void collectMissingReturnStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectMissingReturnStatementProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -350,7 +352,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 			}
 		}
 	}
-	public void collectReplaceReturnWithYieldStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void collectReplaceReturnWithYieldStatementProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -389,7 +391,7 @@ public abstract class ReturnTypeBaseSubProcessor<T> {
 		}
 	}
 
-	public void collectMethodReturnsVoidProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws JavaModelException {
+	public void collectMethodReturnsVoidProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws JavaModelException {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (!(selectedNode instanceof ReturnStatement returnStatement)) {

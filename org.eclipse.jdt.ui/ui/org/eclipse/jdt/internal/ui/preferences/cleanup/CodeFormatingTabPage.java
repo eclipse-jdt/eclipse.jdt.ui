@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
 
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 	public static final String ID= "org.eclipse.jdt.ui.cleanup.tabpage.code_formatting"; //$NON-NLS-1$

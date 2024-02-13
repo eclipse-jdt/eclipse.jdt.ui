@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+s * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,8 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -65,7 +67,7 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 		super();
 	}
 
-	public static void addTypeMismatchProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void addTypeMismatchProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new TypeMismatchSubProcessor().collectTypeMismatchProposals(context, problem, proposals);
 	}
 
@@ -73,23 +75,23 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 		return TypeMismatchBaseSubProcessor.boxOrUnboxPrimitives(castType, toCast, ast);
 	}
 
-	public static void addChangeSenderTypeProposals(IInvocationContextCore context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection<ICommandAccess> proposals) throws JavaModelException {
 		new TypeMismatchSubProcessor().collectChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, isAssignedNode, relevance, proposals);
 	}
 
-	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContextCore context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
+	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		return (ASTRewriteCorrectionProposal)new TypeMismatchSubProcessor().collectCastProposals(context, castTypeBinding, nodeToCast, relevance);
 	}
 
-	public static void addIncompatibleReturnTypeProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		new TypeMismatchSubProcessor().collectIncompatibleReturnTypeProposals(context, problem, proposals);
 	}
 
-	public static void addIncompatibleThrowsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addIncompatibleThrowsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		new TypeMismatchSubProcessor().collectIncompatibleThrowsProposals(context, problem, proposals);
 	}
 
-	public static void addTypeMismatchInForEachProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addTypeMismatchInForEachProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new TypeMismatchSubProcessor().collectTypeMismatchInForEachProposals(context, problem, proposals);
 	}
 

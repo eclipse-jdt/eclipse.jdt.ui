@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Cleanup for adding required null annotations.
@@ -59,18 +59,18 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		IProblemLocationCore[] locations= null;
-		ArrayList<IProblemLocationCore> filteredLocations= new ArrayList<>();
+		IProblemLocation[] locations= null;
+		ArrayList<IProblemLocation> filteredLocations= new ArrayList<>();
 		if (problems != null) {
-			for (IProblemLocationCore problem : problems) {
+			for (IProblemLocation problem : problems) {
 				if (problem.getProblemId() == this.handledProblemID) {
 					filteredLocations.add(problem);
 				}
 			}
-			locations= filteredLocations.toArray(new IProblemLocationCore[filteredLocations.size()]);
+			locations= filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
 		}
 		return NullAnnotationsFix.createCleanUp(compilationUnit, locations, this.handledProblemID);
 	}
@@ -128,7 +128,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		if (id == this.handledProblemID) {
 			// FIXME search specifically: return param (which??)

@@ -33,10 +33,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -161,7 +162,7 @@ public class PlainReplacementFixCore extends CompilationUnitRewriteOperationsFix
 
 	}
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit) {
 		List<PlainReplacementFixOperation> operations= new ArrayList<>();
 		PlainReplacementFinder finder= new PlainReplacementFinder(operations);
 		compilationUnit.accept(finder);

@@ -867,12 +867,6 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
-	public void test119() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
-		helper1(5, 28, 5, 38, true, false, "length", "length");
-	}
-
-	@Test
 	public void test120() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
 		helper1(7, 63, 7, 87, true, false, "charAt", "charAt");
@@ -882,12 +876,6 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	public void test121() throws Exception {
 		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
 		helper1(8, 44, 8, 58, true, false, "length", "length");
-	}
-
-	@Test
-	public void test122() throws Exception {
-		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
-		helper1(5, 68, 5, 94, true, false, "intValue", "intValue");
 	}
 
 	@Test
@@ -1366,4 +1354,23 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=100430
 		failHelper1(7, 16, 7, 28, false, false, "bar", RefactoringStatus.WARNING);
 	}
+
+	@Test
+	public void testFail41() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		failHelper1(5, 28, 5, 38, true, false, "length", RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testFail42() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/39
+		failHelper1(5, 68, 5, 94, true, false, "intValue", RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testFail43() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1176
+		failHelper1(19, 9, 19, 88, true, false, "intValue", RefactoringStatus.FATAL);
+	}
+
 }

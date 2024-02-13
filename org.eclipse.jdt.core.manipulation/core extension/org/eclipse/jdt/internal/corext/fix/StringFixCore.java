@@ -35,14 +35,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Fix which solves various issues with strings.
@@ -56,7 +57,7 @@ public class StringFixCore implements IProposableFix {
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
 
-	public static StringFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore problem, boolean removeNLSTag, boolean addNLSTag) throws CoreException {
+	public static StringFixCore createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeNLSTag, boolean addNLSTag) throws CoreException {
 		TextEdit addEdit= null;
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (addNLSTag) {
@@ -84,34 +85,34 @@ public class StringFixCore implements IProposableFix {
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocationCore(problems[i]);
+			locations[i]= new ProblemLocation(problems[i]);
 		}
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, locations);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
 		if (!addNLSTag && !removeNLSTag)
 			return null;
 
 		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, problems);
 	}
 
-	private static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocationCore[] problems) throws CoreException, JavaModelException {
+	private static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!cu.isStructureKnown())
 			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 :
 
 		List<CategorizedTextEditGroup> result= new ArrayList<>();
 
-		List<IProblemLocationCore> missingNLSProblems= new ArrayList<>();
-		for (IProblemLocationCore problem : problems) {
+		List<IProblemLocation> missingNLSProblems= new ArrayList<>();
+		for (IProblemLocation problem : problems) {
 			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
 				missingNLSProblems.add(problem);
 			}
@@ -129,7 +130,7 @@ public class StringFixCore implements IProposableFix {
 		if (!missingNLSProblems.isEmpty()) {
 			int[] positions= new int[missingNLSProblems.size()];
 			int i=0;
-			for (IProblemLocationCore problem : missingNLSProblems) {
+			for (IProblemLocation problem : missingNLSProblems) {
 				positions[i]= problem.getOffset();
 				i++;
 			}

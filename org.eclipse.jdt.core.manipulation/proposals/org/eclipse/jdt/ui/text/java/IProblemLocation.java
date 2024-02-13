@@ -16,8 +16,6 @@ package org.eclipse.jdt.ui.text.java;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-
 /**
  * Problem information for quick fix and quick assist processors.
  * <p>
@@ -31,14 +29,13 @@ import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
  * @noimplement This interface is not intended to be implemented by clients.
  * @noextend This interface is not intended to be extended by clients.
  */
-public interface IProblemLocation extends IProblemLocationCore {
+public interface IProblemLocation {
 
 	/**
 	 * Returns the start offset of the problem.
 	 *
 	 * @return the start offset of the problem
 	 */
-	@Override
 	int getOffset();
 
 	/**
@@ -46,7 +43,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 *
 	 * @return the length of the problem
 	 */
-	@Override
 	int getLength();
 
 	/**
@@ -55,7 +51,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 * @return The marker type of the problem.
 	 * @since 3.2
 	 */
-	@Override
 	String getMarkerType();
 
 	/**
@@ -65,7 +60,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 *
 	 * @return The id of the problem.
 	 */
-	@Override
 	int getProblemId();
 
 	/**
@@ -73,7 +67,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 *
 	 * @return String[] Returns the problem arguments.
 	 */
-	@Override
 	String[] getProblemArguments();
 
 	/**
@@ -81,7 +74,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 *
 	 * @return <code>true</code> if the problem has error severity
 	 */
-	@Override
 	boolean isError();
 
 	/**
@@ -90,7 +82,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 * @param astRoot The root node of the current AST
 	 * @return Returns the node that covers the location of the problem
 	 */
-	@Override
 	ASTNode getCoveringNode(CompilationUnit astRoot);
 
 	/**
@@ -99,7 +90,6 @@ public interface IProblemLocation extends IProblemLocationCore {
 	 * @param astRoot The root node of the current AST
 	 * @return Returns the node that is covered by the location of the problem
 	 */
-	@Override
 	ASTNode getCoveredNode(CompilationUnit astRoot);
 
 }

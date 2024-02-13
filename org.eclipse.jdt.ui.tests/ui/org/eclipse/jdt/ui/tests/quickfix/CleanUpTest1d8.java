@@ -4931,6 +4931,96 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
 	}
 
+	/**
+	 * https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/963
+	 *
+	 * @throws CoreException on failure
+	 */
+	@Test
+	public void testWhileIssue963() throws CoreException {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class Test {\n" //
+				+ "\n" //
+				+ "    public int foo(String x, List<? extends File> files) {\n" //
+				+ "        Iterator<? extends File> iter= files.iterator();\n" //
+				+ "        while(iter.hasNext()){\n" //
+				+ "            dumpIMethod((String)iter.next().getAbsolutePath());\n" //
+				+ "        }\n" //
+				+ "        if (x.length() == 8) {\n" //
+				+ "            int count = 0;\n" //
+				+ "            for (Iterator<? extends File> iterator = files.iterator(); iterator.hasNext(); ) {\n" //
+				+ "                iterator.next();\n" //
+				+ "                count++;\n" //
+				+ "            }\n" //
+				+ "            return count;\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void dumpIMethodList(List<?> l){\n" //
+				+ "        Iterator<?> iter= l.iterator();\n" //
+				+ "        while(iter.hasNext()){\n" //
+				+ "            dumpIMethod((String)iter.next());\n" //
+				+ "        }\n" //
+				+ "        for (Iterator<?> i = l.iterator(); i.hasNext();) {\n" //
+				+ "            dumpIMethod((String)i.next());\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static void dumpIMethod(String next) {\n" //
+				+ "        System.out.println(next);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
+
+		String expected= "" //
+				+ "package test;\n" //
+				+ "import java.io.File;\n" //
+				+ "import java.util.Iterator;\n" //
+				+ "import java.util.List;\n" //
+				+ "\n" //
+				+ "public class Test {\n" //
+				+ "\n" //
+				+ "    public int foo(String x, List<? extends File> files) {\n" //
+				+ "        for (File file : files) {\n" //
+				+ "            dumpIMethod((String)file.getAbsolutePath());\n" //
+				+ "        }\n" //
+				+ "        if (x.length() == 8) {\n" //
+				+ "            int count = 0;\n" //
+				+ "            for (File file : files) {\n" //
+				+ "                count++;\n" //
+				+ "            }\n" //
+				+ "            return count;\n" //
+				+ "        }\n" //
+				+ "        return 0;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public static void dumpIMethodList(List<?> l){\n" //
+				+ "        for (Object element : l) {\n" //
+				+ "            dumpIMethod((String)element);\n" //
+				+ "        }\n" //
+				+ "        for (Object name : l) {\n" //
+				+ "            dumpIMethod((String)name);\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private static void dumpIMethod(String next) {\n" //
+				+ "        System.out.println(next);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description)));
+	}
+
 	@Test
 	public void testWhileSelf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);

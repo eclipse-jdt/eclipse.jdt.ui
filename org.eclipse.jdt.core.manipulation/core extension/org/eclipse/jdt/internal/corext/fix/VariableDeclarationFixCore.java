@@ -51,7 +51,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -59,6 +58,8 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class VariableDeclarationFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -547,7 +548,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		return new VariableDeclarationFixCore(label, compilationUnit, result);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addFinalFields, boolean addFinalParameters, boolean addFinalLocals) {
 
 		if (!addFinalFields && !addFinalParameters && !addFinalLocals)

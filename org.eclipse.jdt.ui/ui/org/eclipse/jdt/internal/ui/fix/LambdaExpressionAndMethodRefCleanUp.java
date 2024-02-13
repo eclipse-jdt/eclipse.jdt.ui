@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionAndMethodRefFixCore;
@@ -28,7 +27,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * A fix that simplifies the lambda expression and the method reference syntax:
@@ -88,17 +87,17 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		ICleanUpFixCore cleanUpFixCore= LambdaExpressionAndMethodRefFixCore.createCleanUp(unit);
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		ICleanUpFix cleanUpFixCore= LambdaExpressionAndMethodRefFixCore.createCleanUp(unit);
+		return cleanUpFixCore;
 	}
 
 	@Override
-	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocationCore problem) {
+	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocation problem) {
 		return false;
 	}
 
 	@Override
-	protected ICleanUpFix createFix(final CompilationUnit unit, IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFix createFix(final CompilationUnit unit, IProblemLocation[] problems) throws CoreException {
 		return null;
 	}
 }

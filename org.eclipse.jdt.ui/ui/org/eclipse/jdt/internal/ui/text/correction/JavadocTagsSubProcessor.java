@@ -39,6 +39,8 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -49,15 +51,15 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionPr
 
 public class JavadocTagsSubProcessor extends JavadocTagsBaseSubProcessor<ICommandAccess>{
 
-	public static void getMissingJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getMissingJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new JavadocTagsSubProcessor().addMissingJavadocTagProposals(context, problem, proposals);
 	}
 
-	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getUnusedAndUndocumentedParameterOrExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new JavadocTagsSubProcessor().addUnusedAndUndocumentedParameterOrExceptionProposals(context, problem, proposals);
 	}
 
-	public static void getMissingJavadocCommentProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void getMissingJavadocCommentProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		new JavadocTagsSubProcessor().addMissingJavadocCommentProposals(context, problem, proposals);
 	}
 
@@ -98,15 +100,15 @@ public class JavadocTagsSubProcessor extends JavadocTagsBaseSubProcessor<IComman
 		JavadocTagsSubProcessorCore.insertTag(rewriter, newElement, sameKindLeadingNames, null);
 	}
 
-	public static void getRemoveJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getRemoveJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new JavadocTagsSubProcessor().addRemoveJavadocTagProposals(context, problem, proposals);
 	}
 
-	public static void getRemoveDuplicateModuleJavadocTagProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getRemoveDuplicateModuleJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new JavadocTagsSubProcessor().addRemoveDuplicateModuleJavadocTagProposals(context, problem, proposals);
 	}
 
-	public static void getInvalidQualificationProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getInvalidQualificationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new JavadocTagsSubProcessor().addInvalidQualificationProposals(context, problem, proposals);
 	}
 

@@ -21,10 +21,10 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
-	public CorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore location, int relevance) {
+	public CorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocation location, int relevance) {
 		super(CorrectionMessages.CorrectPackageDeclarationProposal_name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL),
 				new CorrectPackageDeclarationProposalCore(cu, location, relevance));
 	}

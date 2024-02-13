@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
-
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
@@ -36,12 +34,11 @@ public class UseIteratorToForLoopCleanUp extends AbstractCleanUp {
 	}
 	@Override
 	public CleanUpRequirements getRequirements() {
-		return new CleanUpRequirements(coreCleanUp.getRequirementsCore());
+		return coreCleanUp.getRequirements();
 	}
 	@Override
 	public ICleanUpFix createFix(final CleanUpContext context) throws CoreException {
-		ICleanUpFixCore fixCore= coreCleanUp.createFixCore(context);
-		return fixCore == null ? null : new CleanUpFixWrapper(fixCore);
+		return coreCleanUp.createFix(context);
 	}
 	@Override
 	public String[] getStepDescriptions() {

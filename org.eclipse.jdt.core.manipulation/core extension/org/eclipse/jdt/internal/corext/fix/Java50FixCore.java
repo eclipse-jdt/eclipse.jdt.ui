@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -64,8 +63,10 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Fix which introduce new language constructs to pre Java50 code.
@@ -144,7 +145,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	public static Java50FixCore createAddOverrideAnnotationFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static Java50FixCore createAddOverrideAnnotationFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (!isMissingOverrideAnnotationProblem(problem.getProblemId()))
 			return null;
 
@@ -159,7 +160,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		return id == IProblem.MissingOverrideAnnotation || id == IProblem.MissingOverrideAnnotationForInterfaceMethodImplementation;
 	}
 
-	public static Java50FixCore createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static Java50FixCore createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (!isMissingDeprecationProblem(problem.getProblemId()))
 			return null;
 
@@ -172,7 +173,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 				|| id == IProblem.TypeMissingDeprecatedAnnotation;
 	}
 
-	private static Java50FixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore problem, String annotation, String label) {
+	private static Java50FixCore createFix(CompilationUnit compilationUnit, IProblemLocation problem, String annotation, String label) {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
@@ -192,16 +193,16 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new Java50FixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation});
 	}
 
-	public static Java50FixCore createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static Java50FixCore createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
-		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocationCore[] {problem}, operations);
+		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
 		if (operations.isEmpty())
 			return null;
 
 		return new Java50FixCore(Messages.format(FixMessages.Java50Fix_AddTypeArguments_description,  BasicElementLabels.getJavaElementName(node.getName().getFullyQualifiedName())), compilationUnit, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean addOverrideAnnotation,
 			boolean addOverrideInterfaceAnnotation,
 			boolean addDeprecatedAnnotation,
@@ -217,9 +218,9 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocationCore(problems[i]);
+			locations[i]= new ProblemLocation(problems[i]);
 		}
 
 		if (addOverrideAnnotation)
@@ -245,7 +246,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new Java50FixCore(fixName, compilationUnit, operationsArray);
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean addOverrideAnnotation,
 			boolean addOverrideInterfaceAnnotation,
 			boolean addDeprecatedAnnotation,
@@ -277,8 +278,8 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new Java50FixCore(FixMessages.Java50Fix_add_annotations_change_name, compilationUnit, operationsArray);
 	}
 
-	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (IProblemLocationCore problem : locations) {
+	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
+		for (IProblemLocation problem : locations) {
 			if (isMissingDeprecationProblem(problem.getProblemId())) {
 				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 				if (selectedNode != null) {
@@ -294,8 +295,8 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> result) {
-		for (IProblemLocationCore problem : locations) {
+	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, boolean addOverrideInterfaceAnnotation, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
+		for (IProblemLocation problem : locations) {
 			int problemId= problem.getProblemId();
 
 			if (isMissingOverrideAnnotationProblem(problemId)) {
@@ -315,12 +316,12 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocationCore[] locations, List<CompilationUnitRewriteOperation> operations) {
+	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> operations) {
 		if (hasFatalError(compilationUnit))
 			return null;
 
 		List<SimpleType> result= new ArrayList<>();
-		for (IProblemLocationCore problem : locations) {
+		for (IProblemLocation problem : locations) {
 			if (isRawTypeReferenceProblem(problem.getProblemId())) {
 				ASTNode node= problem.getCoveredNode(compilationUnit);
 				if (node instanceof ClassInstanceCreation) {

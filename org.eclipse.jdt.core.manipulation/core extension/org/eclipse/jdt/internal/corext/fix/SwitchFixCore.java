@@ -46,11 +46,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -419,7 +420,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 	}
 
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit) {
 		List<SwitchFixOperation> operations= new ArrayList<>();
 		SwitchStatementsFinder finder= new SwitchStatementsFinder(operations);
 		compilationUnit.accept(finder);

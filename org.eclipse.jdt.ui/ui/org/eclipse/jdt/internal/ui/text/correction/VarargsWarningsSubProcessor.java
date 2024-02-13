@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -41,15 +43,15 @@ public class VarargsWarningsSubProcessor extends VarargsWarningsBaseSubProcessor
 		}
 	}
 
-	public static void addAddSafeVarargsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addAddSafeVarargsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new VarargsWarningsSubProcessor().createAddSafeVarargsProposals(context, problem, proposals);
 	}
 
-	public static void addAddSafeVarargsToDeclarationProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addAddSafeVarargsToDeclarationProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new VarargsWarningsSubProcessor().createAddSafeVarargsToDeclarationProposals(context, problem, proposals);
 	}
 
-	public static void addRemoveSafeVarargsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addRemoveSafeVarargsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new VarargsWarningsSubProcessor().createRemoveSafeVarargsProposals(context, problem, proposals);
 	}
 

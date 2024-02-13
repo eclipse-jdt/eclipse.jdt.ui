@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 Carsten Hammer.
+ * Copyright (c) 2021, 2024 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.common.HelperVisitor;
 import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -496,9 +497,21 @@ public class WhileToForEach extends AbstractTool<WhileLoopToChangeHit> {
 			}
 			if (parameterizedType == null) {
 				if (varBinding != null) {
-					parameterizedType= importRewrite.addImport(varBinding, ast);
-					if (isLocalOrMemberType(varBinding, hit.whileStatement)) {
-						importRewrite.removeImport(looptargettype);
+					if (varBinding.isWildcardType()) {
+						varBinding= ASTResolving.normalizeWildcardType(varBinding, true, ast);
+					} else if (varBinding.isCapture()) {
+						ITypeBinding bounds[]= varBinding.getTypeBounds();
+						if (bounds.length == 0) {
+							parameterizedType= ast.newSimpleType(addImport("java.lang.Object", cuRewrite, ast)); //$NON-NLS-1$
+						} else {
+							varBinding= varBinding.getTypeBounds()[0];
+						}
+					}
+					if (parameterizedType == null) {
+						parameterizedType= importRewrite.addImport(varBinding, ast);
+						if (isLocalOrMemberType(varBinding, hit.whileStatement)) {
+							importRewrite.removeImport(looptargettype);
+						}
 					}
 				} else {
 					parameterizedType= ast.newSimpleType(addImport(looptargettype, cuRewrite, ast));

@@ -74,8 +74,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -93,7 +93,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewRecordCreationWizard;
  * If selected, this proposal will open a {@link NewClassCreationWizard},
  * {@link NewInterfaceCreationWizard}, {@link NewEnumCreationWizard} or {@link NewAnnotationCreationWizard}.
  *
- * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContextCore, IProblemLocationCore, Collection)
+ * @see UnresolvedElementsSubProcessor#getTypeProposals(IInvocationContext, IProblemLocation, Collection)
  */
 public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 

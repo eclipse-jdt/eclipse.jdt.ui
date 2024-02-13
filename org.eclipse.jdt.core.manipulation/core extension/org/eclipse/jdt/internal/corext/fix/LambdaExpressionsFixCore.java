@@ -81,7 +81,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -98,6 +97,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -1204,7 +1205,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		return new LambdaExpressionsFixCore(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation, root, new CompilationUnitRewriteOperation[] { op });
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean useLambda, boolean useAnonymous, boolean simplifyLambda) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean useLambda, boolean useAnonymous, boolean simplifyLambda) {
 		if (!JavaModelUtil.is1d8OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			return null;
 		}

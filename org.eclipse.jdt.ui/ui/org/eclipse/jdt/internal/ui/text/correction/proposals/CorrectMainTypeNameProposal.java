@@ -23,7 +23,7 @@ import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 /**
  * Renames the primary type to be compatible with the name of the compilation unit. All constructors
@@ -40,7 +40,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	 * @param newTypeName the new type name
 	 * @param relevance the relevance
 	 */
-	public CorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String oldTypeName, String newTypeName, int relevance) {
+	public CorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String oldTypeName, String newTypeName, int relevance) {
 		super("", cu, null, relevance, null, new CorrectMainTypeNameProposalCore("", cu, null, context, oldTypeName, newTypeName, relevance)); //$NON-NLS-1$ //$NON-NLS-2$
 		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, BasicElementLabels.getJavaElementName(newTypeName)));
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));

@@ -16,8 +16,9 @@ package org.eclipse.jdt.ui.cleanup;
 
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
 
 
 /**
@@ -28,7 +29,14 @@ import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
  */
 public final class CleanUpRequirements {
 
-	private CleanUpRequirementsCore requirementsCore;
+	protected final boolean fRequiresAST;
+
+	protected final Map<String, String> fCompilerOptions;
+
+	protected final boolean fRequiresFreshAST;
+
+	protected final boolean fRequiresChangedRegions;
+
 
 	/**
 	 * Create a new instance
@@ -39,17 +47,16 @@ public final class CleanUpRequirements {
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
 	 */
 	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
-		this.requirementsCore= new CleanUpRequirementsCore(requiresAST, requiresFreshAST, requiresChangedRegions, compilerOptions);
-	}
+		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
+		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
+		fRequiresAST= requiresAST;
+		fRequiresFreshAST= requiresFreshAST;
+		fRequiresChangedRegions= requiresChangedRegions;
 
-	/**
-	 * Create a new instance
-	 *
-	 * @param requirementsCore a CleanUpRequirementsCore instance to use
-	 * @since 3.19
-	 */
-	public CleanUpRequirements(CleanUpRequirementsCore requirementsCore) {
-		this.requirementsCore= requirementsCore;
+		fCompilerOptions= compilerOptions;
+		// Make sure that compile warnings are not suppressed since some clean ups work on reported warnings
+		if (fCompilerOptions != null)
+			fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 	}
 
 	/**
@@ -62,7 +69,7 @@ public final class CleanUpRequirements {
 	 * @return <code>true</code> if the CleanUpContext context must provide an AST
 	 */
 	public boolean requiresAST() {
-		return requirementsCore.requiresAST();
+		return fRequiresAST;
 	}
 
 	/**
@@ -72,7 +79,7 @@ public final class CleanUpRequirements {
 	 * @return <code>true</code> if the caller needs an up to date AST
 	 */
 	public boolean requiresFreshAST() {
-		return requirementsCore.requiresFreshAST();
+		return fRequiresFreshAST;
 	}
 
 	/**
@@ -82,7 +89,7 @@ public final class CleanUpRequirements {
 	 * @see JavaCore
 	 */
 	public Map<String, String> getCompilerOptions() {
-		return requirementsCore.getCompilerOptions();
+		return fCompilerOptions;
 	}
 
 	/**
@@ -101,17 +108,7 @@ public final class CleanUpRequirements {
 	 *         regions
 	 */
 	public boolean requiresChangedRegions() {
-		return requirementsCore.requiresChangedRegions();
-	}
-
-	/**
-	 * Convert to a core element
-	 * @return the underlying core element
-	 *
-	 * @since 3.31
-	 */
-	public CleanUpRequirementsCore toCore() {
-		return requirementsCore;
+		return fRequiresChangedRegions;
 	}
 
 }

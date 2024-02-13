@@ -51,6 +51,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 public abstract class SuppressWarningsBaseSubProcessor<T> {
 
 	static final String ADD_SUPPRESSWARNINGS_ID= "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
@@ -68,7 +71,7 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		return false;
 	}
 
-	public void getSuppressWarningsProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void getSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		if (problem.isError() && !JavaCore.ENABLED.equals(context.getCompilationUnit().getJavaProject().getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true))) {
 			return;
 		}
@@ -184,7 +187,7 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		return ""; //$NON-NLS-1$
 	}
 
-	public void getUnknownSuppressWarningProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void getUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (!(coveringNode instanceof StringLiteral))
 			return;
@@ -209,7 +212,7 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 	}
 
 
-	public void getRemoveUnusedSuppressWarningProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void getRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		if (!(coveringNode instanceof StringLiteral))
 			return;

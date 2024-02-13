@@ -43,13 +43,17 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.manipulation.TypeKinds;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
@@ -60,6 +64,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposalCore;
@@ -70,7 +76,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	}
 
 
-	public void addWrongTypeNameProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addWrongTypeNameProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		boolean isLinked= cu.getResource().isLinked();
 
@@ -130,7 +136,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	}
 
 
-	public void addWrongPackageDeclNameProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException {
+	public void addWrongPackageDeclNameProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		boolean isLinked= cu.getResource().isLinked();
 
@@ -169,7 +175,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	}
 
 
-	public void addRemoveImportStatementProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addRemoveImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		IProposableFix fix= UnusedCodeFixCore.createRemoveUnusedImportFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Map<String, String> options= new Hashtable<>();
@@ -187,7 +193,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	}
 
 
-	public void addProjectSetupFixProposals(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals) {
+	public void addProjectSetupFixProposals(IInvocationContext context, IProblemLocation problem, String missingType, Collection<T> proposals) {
 		T prop= createProjectSetupFixProposal(context, problem, missingType, proposals);
 		if (prop != null) {
 			proposals.add(prop);
@@ -202,11 +208,11 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	 * @param proposals the resulting proposals
 	 * @param requiredVersion the minimal required Java compiler version
 	 */
-	public void addNeedHigherComplianceProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals, String requiredVersion) {
+	public void addNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals, String requiredVersion) {
 		addNeedHigherComplianceProposals(context, problem, proposals, false, requiredVersion);
 	}
 
-	public void addNeedHigherComplianceProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args != null && args.length == 2) {
 			addNeedHigherComplianceProposals(context, problem, proposals, false, args[1]);
@@ -223,7 +229,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	 * @param enablePreviews --enable-previews option will be enabled if set to true
 	 * @param requiredVersion the minimal required Java compiler version
 	 */
-	protected void addNeedHigherComplianceProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals, boolean enablePreviews, String requiredVersion) {
+	protected void addNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals, boolean enablePreviews, String requiredVersion) {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
 		String label1= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_change_project_compliance_description, requiredVersion);
 		if (enablePreviews) {
@@ -252,7 +258,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 	 * @param problem the current problem
 	 * @param proposals the resulting proposals
 	 */
-	public void addIncorrectBuildPathProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addIncorrectBuildPathProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		IProject project= context.getCompilationUnit().getJavaProject().getProject();
 		String label= CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
 		T proposal= createOpenBuildPathCorrectionProposal(project, label, IProposalRelevance.CONFIGURE_BUILD_PATH, null);
@@ -260,7 +266,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			proposals.add(proposal);
 	}
 
-	public void addAccessRulesProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) {
+	public void addAccessRulesProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
 		IBinding referencedElement= null;
 		ASTNode node= problem.getCoveredNode(context.getASTRoot());
 		if (node instanceof Type type) {
@@ -275,6 +281,39 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			if (proposal != null)
 				proposals.add(proposal);
 		}
+	}
+
+
+	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
+	public boolean addImportNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		UnresolvedElementsBaseSubProcessor<T> unresolvedElements = getUnresolvedElementsSubProcessor();
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return false;
+		}
+		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
+		if (importDeclaration == null) {
+			return false;
+		}
+		if (!importDeclaration.isOnDemand()) {
+			Name name= importDeclaration.getName();
+			if (importDeclaration.isStatic() && name.isQualifiedName()) {
+				name= ((QualifiedName) name).getQualifier();
+			}
+			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? TypeKinds.REF_TYPES : TypeKinds.CLASSES | TypeKinds.INTERFACES;
+			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
+			unresolvedElements.collectNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
+		} else {
+			Name name= importDeclaration.getName();
+			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+		}
+		String name= ASTNodes.asString(importDeclaration.getName());
+		if (importDeclaration.isOnDemand()) {
+			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
+		}
+		addProjectSetupFixProposals(context, problem, name, proposals);
+		return true;
 	}
 
 	private static boolean canModifyAccessRules(IBinding binding) {
@@ -303,22 +342,21 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 		return false;
 	}
 
+	public abstract UnresolvedElementsBaseSubProcessor<T> getUnresolvedElementsSubProcessor();
+
 	public abstract T createRenameCUProposal(String label, RenameCompilationUnitChange change, int relevance);
 
-	public abstract T createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContextCore context, String currTypeName, String newTypeName, int relevance);
+	public abstract T createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String currTypeName, String newTypeName, int relevance);
 
-	protected abstract T createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocationCore problem, int relevance);
+	protected abstract T createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocation problem, int relevance);
 
 	protected abstract T createMoveToNewPackageProposal(String label, CompositeChange composite, int relevance);
 
 	protected abstract T createOrganizeImportsProposal(String name, Change change, ICompilationUnit cu, int relevance);
 
-	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int relevance, IInvocationContextCore context);
+	protected abstract T createRemoveUnusedImportProposal(IProposableFix fix, UnusedCodeCleanUp unusedCodeCleanUp, int relevance, IInvocationContext context);
 
-	public abstract T createProjectSetupFixProposal(IInvocationContextCore context, IProblemLocationCore problem, String missingType, Collection<T> proposals);
-
-	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
-	public abstract boolean addImportNotFoundProposals(IInvocationContextCore context, IProblemLocationCore problem, Collection<T> proposals) throws CoreException;
+	public abstract T createProjectSetupFixProposal(IInvocationContext context, IProblemLocation problem, String missingType, Collection<T> proposals);
 
 	protected abstract T createChangeToRequiredCompilerComplianceProposal(String label1, IJavaProject project, boolean changeOnWorkspace, String requiredVersion, int relevance);
 

@@ -29,15 +29,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFixCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFixCore {
+public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFix {
 
 	public PotentialProgrammingProblemsCleanUpCore(Map<String, String> options) {
 		super(options);
@@ -51,10 +51,10 @@ public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFixCor
 	 * {@inheritDoc}
 	 */
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
+	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirementsCore(requireAST, false, false, requiredOptions);
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -67,7 +67,7 @@ public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFixCor
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit) throws CoreException {
+	public ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 
 		boolean addSUID= isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		if (!addSUID)
@@ -79,7 +79,7 @@ public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFixCor
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	public ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -127,7 +127,7 @@ public class PotentialProgrammingProblemsCleanUpCore extends AbstractMultiFixCor
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.MissingSerialVersion)
 			return (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))
 				|| (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
