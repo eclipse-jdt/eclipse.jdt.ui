@@ -28,6 +28,10 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.SWT;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+
+import org.eclipse.core.resources.ProjectScope;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -42,7 +46,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -84,6 +90,27 @@ public class ChainCompletionTest {
 
 		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 
+		assertEquals(0, proposals.size());
+	}
+
+	@Test
+	public void testInvalidPreferenceHandling() throws Exception {
+		IEclipsePreferences node= new ProjectScope(fJProject.getProject()).getNode(JavaManipulation.getPreferenceNodeId());
+		node.put(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, "number_four");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n" +
+				"public class Foo {\n" +
+				"  public void foo () {\n" +
+				"    String s = \"\";\n" +
+				"    int length = $\n" +
+				"  }\n" +
+				"}");
+
+		int completionIndex= getCompletionIndex(buf);
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
+
+		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 		assertEquals(0, proposals.size());
 	}
 
