@@ -152,6 +152,11 @@ abstract class ReorgUserInputPage extends UserInputWizardPage {
 		}
 	}
 
+	// Initialize variables for debounce
+    Runnable debounceRunnable = null;
+    long lastModifyTime = 0;
+    int DEBOUNCE_DELAY = 1000;
+
 	private TreeViewer createViewer(Composite parent) {
 		// Create Search Text
 		Text searchText= new Text(parent, SWT.BORDER | SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
@@ -172,14 +177,31 @@ abstract class ReorgUserInputPage extends UserInputWizardPage {
 		treeViewer.addFilter(viewerFilter);
 
 		searchText.addModifyListener(e -> {
-			String searchString= searchText.getText().trim();
-			viewerFilter.setSearchText(searchString);
-			treeViewer.refresh();
-			setPageComplete(false);
-		});
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastModifyTime > DEBOUNCE_DELAY) {
+                    // If debounce time has elapsed, execute search immediately
+                    executeSearch(searchText, viewerFilter, treeViewer);
+                } else {
+                    // Schedule the search to execute after debounce delay
+                    if (debounceRunnable != null) {
+                        parent.getDisplay().timerExec(-1, debounceRunnable); // Cancel previous debounce
+                    }
+                    debounceRunnable = () -> executeSearch(searchText, viewerFilter, treeViewer);
+                    parent.getDisplay().timerExec((int) (DEBOUNCE_DELAY - (currentTime - lastModifyTime)), debounceRunnable);
+                }
+                lastModifyTime = currentTime;
+        });
 
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
+	}
+
+	private void executeSearch(Text searchText, TreeViewerFilter viewerFilter, TreeViewer treeViewer) {
+		String searchString= searchText.getText().trim();
+		viewerFilter.setSearchText(searchString);
+		treeViewer.refresh();
+		setPageComplete(false);
+		treeViewer.expandAll();
 	}
 
 	protected TreeViewer getTreeViewer() {
