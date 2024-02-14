@@ -98,7 +98,8 @@ public class RippleMethodFinder2 {
 		public IType find(IType element) {
 			IType root= element;
 			IType rep= fElementToRepresentative.get(root);
-			while (rep != null && ! rep.equals(root)) {
+			Set<IType> visited=new HashSet<>();
+			while (rep != null && visited.add(root)) {
 				root= rep;
 				rep= fElementToRepresentative.get(root);
 			}
