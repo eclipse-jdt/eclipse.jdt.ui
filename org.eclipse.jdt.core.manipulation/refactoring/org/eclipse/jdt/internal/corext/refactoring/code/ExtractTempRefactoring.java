@@ -1199,7 +1199,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			ExpressionStatement exs= ast.newExpressionStatement(vds);
 			insertAt(node, exs);
 			return;
-		} else if (node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+		} else if (node != null && node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
 			fStartPoint= 0;
 			fEndPoint= retainOnlyReplacableMatches.length - 1;
 			insertResourceAt(node, vds);
