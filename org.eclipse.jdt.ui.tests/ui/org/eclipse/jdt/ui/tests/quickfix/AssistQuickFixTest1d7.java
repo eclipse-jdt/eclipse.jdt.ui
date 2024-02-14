@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 IBM Corporation and others.
+ * Copyright (c) 2011, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -998,6 +998,88 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, REMOVE_SURROUNDING_TRY_BLOCK);
+	}
+
+	@Test
+	public void testExtractLocalInTryWithResource1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.BufferedReader;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.Reader;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws Exception {\n");
+		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
+		buf.append("                Reader r = new BufferedReader(new FileReader(\"a.b\"))) {\n");
+		buf.append("            r.read();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "new FileReader(\"a.b\")";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.BufferedReader;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.Reader;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws Exception {\n");
+		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
+		buf.append("                FileReader fileReader = new FileReader(\"a.b\");\n");
+		buf.append("                Reader r = new BufferedReader(fileReader)) {\n");
+		buf.append("            r.read();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testExtractLocalInTryWithResource2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.BufferedReader;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.Reader;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws Exception {\n");
+		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
+		buf.append("                Reader r = new BufferedReader(new FileReader(\"a.b\"))) {\n");
+		buf.append("            r.read();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String str= "\"a.b\"";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.io.BufferedReader;\n");
+		buf.append("import java.io.FileReader;\n");
+		buf.append("import java.io.Reader;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() throws Exception {\n");
+		buf.append("        String string = \"a.b\";\n");
+		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
+		buf.append("                Reader r = new BufferedReader(new FileReader(string))) {\n");
+		buf.append("            r.read();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
 	@Test
