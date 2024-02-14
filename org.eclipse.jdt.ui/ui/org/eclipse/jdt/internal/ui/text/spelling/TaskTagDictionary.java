@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
  *
  * @since 3.0
  */
+@SuppressWarnings("deprecation") // Preferences
 public class TaskTagDictionary extends AbstractSpellDictionary implements IPropertyChangeListener {
 
 	/*

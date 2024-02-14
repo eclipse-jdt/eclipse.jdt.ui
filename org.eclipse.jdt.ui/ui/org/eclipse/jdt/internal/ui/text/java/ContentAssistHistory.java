@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.util.XmlProcessorFactoryJdtUi;
  *
  * @since 3.2
  */
+@SuppressWarnings("deprecation") // Preferences
 public final class ContentAssistHistory {
 	/**
 	 * Persistence implementation.

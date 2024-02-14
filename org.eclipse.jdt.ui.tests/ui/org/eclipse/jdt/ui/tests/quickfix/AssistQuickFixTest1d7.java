@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 /**
  * Those tests should run on Java Dolphin 1.7 .
  */
+@SuppressWarnings("deprecation") // Preferences
 public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 	@Rule

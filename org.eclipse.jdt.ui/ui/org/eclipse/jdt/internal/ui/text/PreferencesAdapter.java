@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @since 3.0
  */
+@SuppressWarnings("deprecation") // Preferences
 public class PreferencesAdapter implements IPreferenceStore {
 
 	/**

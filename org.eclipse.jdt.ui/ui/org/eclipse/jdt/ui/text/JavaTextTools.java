@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
+@SuppressWarnings("deprecation") // Preferences
 public class JavaTextTools {
 
 	/**

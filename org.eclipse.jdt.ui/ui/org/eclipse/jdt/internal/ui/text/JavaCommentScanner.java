@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 /**
  * Java comment scanner.
  */
+@SuppressWarnings("deprecation") // Preferences
 public class JavaCommentScanner extends AbstractJavaScanner{
 
 	private static class AtJavaIdentifierDetector implements IWordDetector {

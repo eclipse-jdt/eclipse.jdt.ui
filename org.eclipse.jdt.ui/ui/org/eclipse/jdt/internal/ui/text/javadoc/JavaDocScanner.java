@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 /**
  * A rule based JavaDoc scanner.
  */
+@SuppressWarnings("deprecation") // Preferences
 public final class JavaDocScanner extends JavaCommentScanner {
 
 
