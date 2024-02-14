@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 
+@SuppressWarnings("deprecation") // Preferences
 public class ChangeNonStaticToStaticTest extends QuickFixTest {
 
 	@Rule

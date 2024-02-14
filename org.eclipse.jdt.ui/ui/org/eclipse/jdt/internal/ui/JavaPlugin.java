@@ -139,6 +139,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
  * access to the workbench, keeps track of elements shared by all editors and viewers
  * of the plug-in such as document providers and find-replace-dialogs.
  */
+@SuppressWarnings("deprecation") // Preferences
 public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener {
 
 	/**
