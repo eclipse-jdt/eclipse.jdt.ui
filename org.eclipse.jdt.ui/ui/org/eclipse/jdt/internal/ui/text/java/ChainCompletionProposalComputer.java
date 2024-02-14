@@ -152,13 +152,21 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 	}
 
 	private List<ICompletionProposal> executeCallChainSearch() {
-		final int maxChains= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MAX_CHAINS, ctx.getProject()));
-		final int minDepth= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, ctx.getProject()));
-		final int maxDepth= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, ctx.getProject()));
+		final int maxChains, minDepth, maxDepth;
+		try {
+			maxChains= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MAX_CHAINS, ctx.getProject()));
+			minDepth= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, ctx.getProject()));
+			maxDepth= Integer.parseInt(JavaManipulation.getPreference(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, ctx.getProject()));
+		} catch (NumberFormatException e) {
+			return Collections.emptyList();
+		}
 
-		excludedTypes= JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, ctx.getProject()).split("\\|"); //$NON-NLS-1$
-		for (int i= 0; i < excludedTypes.length; ++i) {
-			excludedTypes[i]= "L" + excludedTypes[i].replace('.', '/'); //$NON-NLS-1$
+		String excludedTypesVal = JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_IGNORED_TYPES, ctx.getProject());
+		if (excludedTypesVal != null) {
+			excludedTypes= excludedTypesVal.split("\\|"); //$NON-NLS-1$
+			for (int i= 0; i < excludedTypes.length; ++i) {
+				excludedTypes[i]= "L" + excludedTypes[i].replace('.', '/'); //$NON-NLS-1$
+			}
 		}
 
 		final IType invocationType= ctx.getCompilationUnit().findPrimaryType();
@@ -172,7 +180,13 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 					finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth);
 				}
 			});
-			long timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
+
+			long timeout;
+			try {
+				timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
+			} catch (NumberFormatException e) {
+				timeout = 1;
+			}
 			future.get(timeout, TimeUnit.SECONDS);
 		} catch (final Exception e) {
 			finder.cancel();
