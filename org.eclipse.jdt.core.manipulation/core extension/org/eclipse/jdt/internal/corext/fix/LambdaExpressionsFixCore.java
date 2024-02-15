@@ -1292,7 +1292,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		if (interfaces.length != 1) {
 			return false;
 		}
-		if (interfaces[0].getFunctionalInterfaceMethod() == null) {
+		if (interfaces[0].getFunctionalInterfaceMethod() == null || interfaces[0].getFunctionalInterfaceMethod().isGenericMethod()) {
 			return false;
 		}
 
