@@ -200,7 +200,6 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			public void handleEvent(Event event) {
 				 TreeItem selectedItem = (TreeItem) event.item;
             	 TreeItem parentItem = selectedItem.getParentItem();
-				 System.out.println(event.detail);
 				 selectField(editorContainerGroup, fieldLabel, getterText, setterText, parentItem == null ? selectedItem : parentItem);
 	             if(event.detail == SWT.CHECK) {
 	            	 if(parentItem != null) {	// Setter or Getter
@@ -228,6 +227,8 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 	             }
 			}
 		});
+
+		// Populate the tree with fields and their getter and setter
 		fRefactorings.getRefactorings().forEach(refactoring -> {
 			boolean isChecked = wizard.getPreselected().contains(refactoring.getField());
 			String fieldName = refactoring.getField().getElementName();
@@ -254,6 +255,15 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
         	item.setText(fieldName);
             refactoring.setSelected(isChecked);
 		});
+
+		// Select the first preselected field
+		getSelectedRefactorings().stream()
+			.findFirst()
+			.ifPresent(refactoring -> {
+				TreeItem item = refactoringButtonMap.get(refactoring);
+				tree.setSelection(item);
+				selectField(editorContainerGroup, fieldLabel, getterText, setterText, item);
+			});
 
 		Link link= new Link(result, SWT.NONE);
 		link.setText(RefactoringMessages.SelfEncapsulateFieldInputPage_configure_link);
@@ -311,6 +321,9 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);
 	}
 
+	/*
+	 * Selects the field in the tree and fills its getter and setter in the text boxes
+	 */
 	private void selectField(Composite group, Label header, Text getter, Text setter, TreeItem parentItem) {
 		SelfEncapsulateFieldRefactoring refactoring = (SelfEncapsulateFieldRefactoring) parentItem.getData(REFACTORING);
 		this.selectedField = refactoring;
