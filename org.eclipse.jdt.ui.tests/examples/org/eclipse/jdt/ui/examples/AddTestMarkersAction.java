@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.ui.JavaUI;
 
 /** In plugin.xml:
+ * <pre>{@code
     <extension
          id="testmarker"
          name="jdt-test-problem"
@@ -69,6 +70,7 @@ import org.eclipse.jdt.ui.JavaUI;
          </action>
       </objectContribution>
    </extension>
+   }</pre>
  */
 
 public class AddTestMarkersAction extends Action implements IActionDelegate {

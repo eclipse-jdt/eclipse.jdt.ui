@@ -14,9 +14,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -36,6 +33,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Measurements of the {@link org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy}.
@@ -124,7 +124,7 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 	/**
 	 * Places the caret behind a Javadoc prefix after which the declaration of a method with many
 	 * arguments and declared exceptions follows and measures the time it takes to auto edit when
-	 * entering a newline. See also <code>testResources/javaDocIndentStrategyTest1/Test.java<code>.
+	 * entering a newline. See also <code>testResources/javaDocIndentStrategyTest1/Test.java</code>.
 	 *
 	 * @throws Exception if something fails while executing this test
 	 */

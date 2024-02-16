@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
 
 /** In plugin.xml:
+ * <pre>{@code
          <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
@@ -61,6 +62,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.MoveDescriptor;
          </action>
       </objectContribution>
    </extension>
+   }</pre>
 */
 
 public class TestMoveDescriptorAction extends Action implements IActionDelegate {
