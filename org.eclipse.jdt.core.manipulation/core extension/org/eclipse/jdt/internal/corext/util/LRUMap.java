@@ -21,8 +21,8 @@ import java.util.Map;
  * Least-recently-used cache. When the map tops the maximum size configured in the constructor, it
  * automatically removes the oldest entry in terms of last access.
  * <p>
- * Invoking the <tt>put</tt> or <tt>get</tt> method results in an access to the corresponding entry.
- * The <tt>putAll</tt> method generates one entry access for each mapping in the specified map, in
+ * Invoking the <code>put</code> or <code>get</code> method results in an access to the corresponding entry.
+ * The <code>putAll</code> method generates one entry access for each mapping in the specified map, in
  * the order that key-value mappings are provided by the specified map's entry set iterator. <i>No
  * other methods generate entry accesses.</i> In particular, operations on collection-views do
  * <i>not</i> affect the order of iteration of the backing map.

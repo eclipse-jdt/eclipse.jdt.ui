@@ -45,7 +45,6 @@ public class MembersOrderPreferenceCacheCommon {
 	 * <li><b>SM</b>: Static Methods</li>
 	 * <li><b>SF</b>: Static Fields</li>
 	 * </ul>
-	 * </p>
 	 */
 	public static final String APPEARANCE_MEMBER_SORT_ORDER= "outlinesortoption"; //$NON-NLS-1$
 
@@ -62,7 +61,6 @@ public class MembersOrderPreferenceCacheCommon {
 	 * <li><b>R</b>: Protected</li>
 	 * <li><b>D</b>: Default</li>
 	 * </ul>
-	 * </p>
 	 */
 	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.visibility.order"; //$NON-NLS-1$
 

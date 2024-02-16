@@ -38,7 +38,7 @@ public interface IExpressionFragment extends IASTFragment {
 	 * Creates a copy of this IExpressionFragment.
 	 *
 	 * @param rewrite an ASTRewrite
-	 * @param removeSurroundingParenthesis if set to <code>true</true>, a surrounding ParenthesizedExpression will not be part of
+	 * @param removeSurroundingParenthesis if set to <code>true</code>, a surrounding ParenthesizedExpression will not be part of
 	 * the copied node.
 	 * @return a copy of this IExpressionFragment, ready for use in the given
 	 *         rewrite

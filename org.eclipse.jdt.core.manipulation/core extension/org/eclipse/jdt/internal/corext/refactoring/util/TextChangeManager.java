@@ -72,11 +72,11 @@ public class TextChangeManager {
 	}
 
 	/**
-	 * Removes the <tt>TextChange</tt> managed under the given key
-	 * <code>unit<code>.
+	 * Removes the <code>TextChange</code> managed under the given key
+	 * <code>unit</code>.
 	 *
-	 * @param unit the key determining the <tt>TextChange</tt> to be removed.
-	 * @return the removed <tt>TextChange</tt>.
+	 * @param unit the key determining the <code>TextChange</code> to be removed.
+	 * @return the removed <code>TextChange</code>.
 	 */
 	public TextChange remove(ICompilationUnit unit) {
 		return fMap.remove(unit);

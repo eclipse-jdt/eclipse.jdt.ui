@@ -43,8 +43,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
  * }
  * </pre>
  *
- * </p>
- *
  * @since 3.5
  */
 public class StringFormatGenerator extends AbstractToStringGenerator {

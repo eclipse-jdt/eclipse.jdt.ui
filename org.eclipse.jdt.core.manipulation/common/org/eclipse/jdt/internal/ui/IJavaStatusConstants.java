@@ -39,7 +39,7 @@ public interface IJavaStatusConstants {
 	int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
 
 	/**
-	 * Status constant indicating that a <tt>ChangeAbortException</tt> has been
+	 * Status constant indicating that a <code>ChangeAbortException</code> has been
 	 * caught.
  	 */
 	int CHANGE_ABORTED= 10004;

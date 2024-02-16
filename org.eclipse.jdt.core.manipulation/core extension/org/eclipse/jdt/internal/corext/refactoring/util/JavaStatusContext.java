@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 
 /**
- * A Java element context that can be used to annotate a </code>RefactoringStatusEntry<code>
+ * A Java element context that can be used to annotate a <code>RefactoringStatusEntry</code>
  * with detailed information about an error detected in an <code>IJavaElement</code>.
  */
 public abstract class JavaStatusContext extends RefactoringStatusContext {

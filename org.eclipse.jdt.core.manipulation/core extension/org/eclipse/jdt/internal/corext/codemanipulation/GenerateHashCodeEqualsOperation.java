@@ -127,7 +127,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * implementation is consistent with the wrapper types java.lang.Float and
  * java.lang.Double.</li>
  * </ul>
- * </p>
  *
  * @since 3.2
  */
