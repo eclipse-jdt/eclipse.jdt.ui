@@ -333,6 +333,68 @@ public class CleanUpTest16 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testOneIfWithPatternInstanceof() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1200
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    protected String getString(Number number) {\n" //
+				+ "\n" //
+				+ "        if (number instanceof Long n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Float n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Double n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Float n && n.isInfinite()) {\n" //
+				+ "            return \"Inf\"; //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Double m && m.isInfinite()) {\n" //
+				+ "            return \"Inf\"; //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    protected String getString(Number number) {\n" //
+				+ "\n" //
+				+ "        if (number instanceof Long n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Float n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Double n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if ((number instanceof Float n && n.isInfinite()) || (number instanceof Double m && m.isInfinite())) {\n" //
+				+ "            return \"Inf\"; //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp_description)));
+	}
+
+	@Test
 	public void testDoNotMatchPatternForInstanceof() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= "" //
