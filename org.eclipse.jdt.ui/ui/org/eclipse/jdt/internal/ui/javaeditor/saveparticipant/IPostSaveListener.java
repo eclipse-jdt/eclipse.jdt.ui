@@ -88,13 +88,13 @@ public interface IPostSaveListener {
 	 *   <li>must not assume to be called in the UI thread</li>
 	 *   <li>should be as fast as possible since this code is executed every time the <code>compilationUnit</code> is saved</li>
 	 * </ul>
-	 * The compilation unit document provider can disable a listener that violates any of the above rules.</p>
+	 * The compilation unit document provider can disable a listener that violates any of the above rules.
 	 *
 	 * @param compilationUnit
 	 * 				the compilation unit which was saved
 	 * @param changedRegions
 	 * 				the regions where the compilationUnit has changed since the last save
-	 * 				or <b>null</b> if </code>requiresChangedRegions</code> did return <code>false</code>.
+	 * 				or <b>null</b> if <code>requiresChangedRegions</code> did return <code>false</code>.
 	 * 				The changed regions do not include changes introduced by other save participants.
 	 * @param monitor
 	 * 				the progress monitor for reporting progress

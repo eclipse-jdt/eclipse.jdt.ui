@@ -130,7 +130,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * input for this part.
 	 *
 	 * @param 	element	the object to test
-	 * @return	<true> if the given element is a valid input
+	 * @return	<code>true</code> if the given element is a valid input
 	 */
 	@Override
 	protected boolean isValidInput(Object element) {
@@ -142,7 +142,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * element for this part.
 	 *
 	 * @param 	element	the object to test
-	 * @return	<true> if the given element is a valid element
+	 * @return	<code>true</code> if the given element is a valid element
 	 */
 	@Override
 	protected boolean isValidElement(Object element) {

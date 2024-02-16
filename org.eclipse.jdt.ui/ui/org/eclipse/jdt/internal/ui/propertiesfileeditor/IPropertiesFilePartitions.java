@@ -46,7 +46,6 @@ public interface IPropertiesFilePartitions {
 
 	/**
 	 * Array with properties file partitions.
-	 * Value: {@value}
 	 */
 	String[] PARTITIONS= new String[] { COMMENT, PROPERTY_VALUE };
 

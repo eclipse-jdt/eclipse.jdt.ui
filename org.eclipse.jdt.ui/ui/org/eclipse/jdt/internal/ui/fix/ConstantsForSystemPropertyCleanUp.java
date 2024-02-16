@@ -19,14 +19,13 @@ import java.util.Map;
 /**
  * A fix that replaces <code>System.getProperty(xxx)</code> by Java methods:
  * <ul>
- * <li>Beware! The code doesn't any longer take the system property into account!</li>
- *
- * System.getProperties() can be overridden by calls to System.setProperty(String key, String value)
+ * <li> System.getProperties() can be overridden by calls to System.setProperty(String key, String value)
  * or with command line parameters -Dfile.separator=/
+ * <br><b>Beware! The code doesn't any longer take the system property into account!</b>
  *
- * File.separator gets the separator for the default filesystem.
+ * <li>File.separator gets the separator for the default filesystem.
  *
- * FileSystems.getDefault() gets you the default filesystem.
+ * <li>FileSystems.getDefault() gets you the default filesystem.
  * </ul>
  */
 public class ConstantsForSystemPropertyCleanUp extends AbstractCleanUpCoreWrapper<ConstantsForSystemPropertiesCleanUpCore> {

@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  * <li>pattern ~valueFilter</li>
  * <li>~valueFilter pattern</li>
  * </ul>
- * </p>
  */
 public class FilteredPreferenceTree {
 

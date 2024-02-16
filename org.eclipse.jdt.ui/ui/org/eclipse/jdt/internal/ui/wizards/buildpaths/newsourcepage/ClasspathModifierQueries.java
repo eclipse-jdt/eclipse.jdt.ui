@@ -33,13 +33,13 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ExclusionInclusionDialog;
@@ -65,9 +65,11 @@ public class ClasspathModifierQueries {
          *
          * @param newElements a list of elements that will be added
          * to the buildpath. The list's items can be of type:
+         * <ul>
          * <li><code>IJavaProject</code></li>
          * <li><code>IPackageFragment</code></li>
          * <li><code>IFolder</code></li>
+         * </ul>
          * @param project the Java project
          */
         public OutputFolderValidator(List<?> newElements, IJavaProject project) throws JavaModelException {

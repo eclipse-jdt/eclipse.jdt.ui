@@ -44,8 +44,8 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that uses lazy logical operator when possible:
  * <ul>
- * <li>Replaces & by &&,</li>
- * <li>Replaces | by ||.</li>
+ * <li>Replaces {@code &} by {@code &&},</li>
+ * <li>Replaces {@code |} by {@code ||}.</li>
  * </ul>
  */
 public class LazyLogicalCleanUp extends AbstractMultiFix {

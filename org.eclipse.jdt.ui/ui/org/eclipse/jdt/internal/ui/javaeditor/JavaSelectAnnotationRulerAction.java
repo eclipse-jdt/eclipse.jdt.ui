@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.A
  * Action which gets triggered when selecting (annotations) in the vertical ruler.
  *
  * <p>
- * Was originally called >code>JavaSelectMarkerRulerAction</code>.
+ * Was originally called <code>JavaSelectMarkerRulerAction</code>.
  * </p>
  */
 public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {

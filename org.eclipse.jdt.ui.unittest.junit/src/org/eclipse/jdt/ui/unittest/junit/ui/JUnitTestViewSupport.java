@@ -193,7 +193,7 @@ public class JUnitTestViewSupport implements ITestViewSupport {
 		ILaunchConfigurationWorkingCopy res;
 		try {
 			res = launchConfiguration.copy(launchConfiguration.getName() + " - rerun"); //$NON-NLS-1$
-			res.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, testMethodName);
+			res.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testMethodName);
 			return res;
 		} catch (CoreException e) {
 			JUnitTestPlugin.log(e);

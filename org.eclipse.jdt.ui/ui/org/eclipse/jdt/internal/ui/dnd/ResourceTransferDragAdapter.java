@@ -48,10 +48,9 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
- * A drag adapter that transfers the current selection as </code>
- * IResource</code>. Only those elements in the selection are part
- * of the transfer which can be converted into an <code>IResource
- * </code>.
+ * A drag adapter that transfers the current selection as <code>IResource</code>. Only those
+ * elements in the selection are part of the transfer which can be converted into an
+ * <code>IResource</code>.
  */
 public class ResourceTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 

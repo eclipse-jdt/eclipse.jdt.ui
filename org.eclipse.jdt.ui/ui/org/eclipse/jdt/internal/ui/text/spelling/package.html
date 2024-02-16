@@ -20,14 +20,14 @@ For non Java specific content the engine also contributes
 word completion proposals to the content assist processor.
 <h3>
 Spell-check engine</h3>
-<tt>SpellCheckEngine</tt> is the default implementation of the interface <tt>ISpellCheckEngine</tt>.
+<code>SpellCheckEngine</code> is the default implementation of the interface <code>ISpellCheckEngine</code>.
 It provides a facade for dealing with the setup of a spell-checker. This class provides methods
 to retrieve the available dictionaries and is responsible for the registration of those with the spell-checker.
-<tt>SpellCheckEngine</tt> also has support for life-cycle management. Single dictionaries can be temporarily
+<code>SpellCheckEngine</code> also has support for life-cycle management. Single dictionaries can be temporarily
 unloaded from memory or unregistered.<br>
 To contribute own dictionaries use the methods to register locale sensitive or insensitive dictionaries. A dictionary can
 be associated to a specified locale, but can also be available for spell-checking arbitrary text in arbitrary languages.
-The actual spell-checker for a specified language can then be obtained by calling <tt>createSpellChecker(Locale)</tt>.
+The actual spell-checker for a specified language can then be obtained by calling <code>createSpellChecker(Locale)</code>.
 This is the central point to working with the spell-checker. When requesting a spell-checker for a specified locale, the
 engine looks up the corresponding dictionary and registers it with the spell-checker. Note that the dictionaries
 are lazily loaded and can be further optimized by prefiltering the queried words.

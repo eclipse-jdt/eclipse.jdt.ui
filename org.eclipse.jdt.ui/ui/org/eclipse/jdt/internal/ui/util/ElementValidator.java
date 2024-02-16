@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
- * Helper class to check if a set of <tt>IJavaElement</tt> objects can be
+ * Helper class to check if a set of <code>IJavaElement</code> objects can be
  * modified by an operation.
  *
  * @since 	2.1

@@ -224,7 +224,6 @@ public final class CompletionProposalComputerRegistry {
 	 * Returns the list of proposal categories contributed to the
 	 * <code>javaCompletionProposalComputer</code> extension point.
 	 * <p>
-	 * <p>
 	 * The returned list is read-only and is sorted in the order that the extensions were read in.
 	 * There are no duplicate elements in the returned list. The returned list may change if
 	 * plug-ins are loaded or unloaded while the application is running.

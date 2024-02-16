@@ -21,7 +21,6 @@ import java.util.Arrays;
  * <p>
  * This algorithm uses an adapted version double metaphone algorithm by
  * Lawrence Philips.
- * <p>
  *
  * @since 3.0
  */

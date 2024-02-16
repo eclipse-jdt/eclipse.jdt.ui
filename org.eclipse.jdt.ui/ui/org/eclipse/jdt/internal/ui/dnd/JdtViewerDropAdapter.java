@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.ui.JdtViewerDropAdapterConstants;
  * </ul>
  * The <code>setFeedbackEnabled</code> method can be called to turn on and off
  * visual insertion feedback (on by default).
- * </p>
  * <p>
  * THIS IS (ALMOST) A ONE-TO-ONE COPY OF PLATFORMS ViewerDropAdapter
  * REFERE THERE FIRST IF YOU NEED TO FIX SOMETHING.

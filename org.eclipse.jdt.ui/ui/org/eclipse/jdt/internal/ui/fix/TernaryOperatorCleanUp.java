@@ -46,7 +46,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A fix that replaces <code>(X && Y) || (!X && Z)</code> by <code>X ? Y : Z</code>:
+ * A fix that replaces {@code (X && Y) || (!X && Z)} by {@code X ? Y : Z}:
  * <ul>
  * <li>The operands must be passive and boolean.</li>
  * </ul>

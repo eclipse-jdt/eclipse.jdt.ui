@@ -80,7 +80,6 @@ import org.eclipse.jdt.internal.ui.util.Progress;
  * for associated refactorings, the wizard executes eventual refactorings,
  * copies the JAR file over its old version, the dialog closes, and the call to
  * <code>open</code> returns.
- * </p>
  *
  * @since 3.2
  */
