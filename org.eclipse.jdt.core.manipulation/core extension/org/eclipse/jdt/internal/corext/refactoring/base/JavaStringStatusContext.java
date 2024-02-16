@@ -21,7 +21,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.jdt.core.ISourceRange;
 
 /**
- * A Java string context can be used to annotate a </code>RefactoringStatusEntry<code>
+ * A Java string context can be used to annotate a <code>RefactoringStatusEntry</code>
  * with detailed information about an error detected in Java source code represented
  * by a string.
  */

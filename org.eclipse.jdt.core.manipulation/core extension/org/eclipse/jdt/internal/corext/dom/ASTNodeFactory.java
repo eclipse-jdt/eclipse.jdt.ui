@@ -172,7 +172,7 @@ public class ASTNodeFactory {
 	/**
 	 * Negates the provided expression and applies the provided copy operation on
 	 * the returned expression:
-	 *
+	 * <pre>{@code
 	 * isValid  =>  !isValid
 	 * !isValid =>  isValid
 	 * true                           =>  false
@@ -181,6 +181,7 @@ public class ASTNodeFactory {
 	 * isValid || isEnabled           =>  !isValid && !isEnabled
 	 * !isValid || !isEnabled         =>  isValid && isEnabled
 	 * isValid ? (i > 0) : !isEnabled =>  isValid ? (i <= 0) : isEnabled
+	 * }</pre>
 	 *
 	 * @param ast The AST to create the resulting node with.
 	 * @param rewrite the rewrite
@@ -195,7 +196,7 @@ public class ASTNodeFactory {
 	/**
 	 * Negates the provided expression and applies the provided copy operation on
 	 * the returned expression and unwraps parentheses of result (e.g. !(x > 2) => x > 2:
-	 *
+	 * <pre>{@code
 	 * isValid  =>  !isValid
 	 * !isValid =>  isValid
 	 * true                           =>  false
@@ -204,6 +205,7 @@ public class ASTNodeFactory {
 	 * isValid || isEnabled           =>  !isValid && !isEnabled
 	 * !isValid || !isEnabled         =>  isValid && isEnabled
 	 * isValid ? (i > 0) : !isEnabled =>  isValid ? (i <= 0) : isEnabled
+	 * }</pre>
 	 *
 	 * @param ast The AST to create the resulting node with.
 	 * @param rewrite the rewrite

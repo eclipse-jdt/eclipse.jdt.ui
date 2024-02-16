@@ -116,7 +116,7 @@ public class BasicElementLabels {
 	}
 
 	/**
-	 * Returns a label for Java element name. Example is 'new Test<? extends List>() { ...}'.
+	 * Returns a label for Java element name. Example is {@code new Test<? extends List>() { ...}}.
 	 * This method should only be used for simple element names. Use
 	 * org.eclipse.jdt.ui.JavaElementLabels to create a label from a Java element or
 	 * org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider for labels of bindings.
@@ -129,7 +129,7 @@ public class BasicElementLabels {
 	}
 
 	/**
-	 * Returns a label for Java code snippet used in a label. Example is 'Test test= new Test<? extends List>() { ...}'.
+	 * Returns a label for Java code snippet used in a label. Example is {@code 'Test test= new Test<? extends List>() { ...}}.
 	 *
 	 * @param string the Java code snippet
 	 * @return the label for the Java code snippet

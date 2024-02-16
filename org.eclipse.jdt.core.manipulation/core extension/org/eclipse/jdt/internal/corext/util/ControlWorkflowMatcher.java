@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
  * The conditions and the expressions are analyzed as ordinary matcher using <code>org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher</code>.
  * All the remaining part of the structure may have lots of different forms:
  *
- * <pre>
+ * <pre>{@code
  * if (c1 && c2) {
  *     return A;
  * } else if (c1 && not c2) {
@@ -76,9 +76,9 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
  * } else if (not c1 && c3) {
  *     return C;
  * }
- * </pre>
+ * }</pre>
  *
- * <pre>
+ * <pre>{@code
  * if (c1) {
  *   if (c2) {
  *     return A;
@@ -90,9 +90,9 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
  *   }
  *   return D;
  * }
- * </pre>
+ * }</pre>
  *
- * <pre>
+ * <pre>{@code
  * if (c1) {
  *   if (not c2) {
  *     return B;
@@ -106,9 +106,9 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
  *     return C;
  *   }
  * }
- * </pre>
+ * }</pre>
  *
- * <pre>
+ * <pre>{@code
  * if (c1) {
  *   return c2 ? A : B;
  * } else {
@@ -120,7 +120,7 @@ import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
  * }
  *
  * return not c2 ? A : B;
- * </pre>
+ * }</pre>
  */
 public final class ControlWorkflowMatcher implements ControlWorkflowMatcherCompletable, ControlWorkflowMatcherRunnable {
 	/**

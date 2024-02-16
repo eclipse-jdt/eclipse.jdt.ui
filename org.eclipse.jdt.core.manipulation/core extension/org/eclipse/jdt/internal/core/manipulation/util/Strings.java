@@ -139,8 +139,8 @@ public class Strings {
 	 * don't contain any line delimiter characters.
 	 *
 	 * @param input the string
-	 * @return the string converted into an array of strings. Returns <code>
-	 * 	null</code> if the input string can't be converted in an array of lines.
+	 * @return the string converted into an array of strings. Returns {@code
+	 * 	null} if the input string can't be converted in an array of lines.
 	 */
 	public static String[] convertIntoLines(String input) {
 		try {
@@ -160,13 +160,13 @@ public class Strings {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given string only consists of
-	 * white spaces according to Java. If the string is empty, <code>true
-	 * </code> is returned.
+	 * Returns {@code true} if the given string only consists of
+	 * white spaces according to Java. If the string is empty, {@code true
+	 * } is returned.
 	 *
 	 * @param s the string to test
-	 * @return <code>true</code> if the string only consists of white
-	 * 	spaces; otherwise <code>false</code> is returned
+	 * @return {@code true} if the string only consists of white
+	 * 	spaces; otherwise {@code false} is returned
 	 *
 	 * @see java.lang.Character#isWhitespace(char)
 	 */
@@ -229,7 +229,7 @@ public class Strings {
 	 *
 	 * @param line the text line
 	 * @param project the java project from which to get the formatter
-	 *        preferences, or <code>null</code> for global preferences
+	 *        preferences, or {@code null} for global preferences
 	 * @return the number of indent units
 	 * @since 3.1
 	 */
@@ -266,12 +266,12 @@ public class Strings {
 
 	/**
 	 * Computes the visual length of the indentation of a
-	 * <code>CharSequence</code>, counting a tab character as the size until
+	 * {@code CharSequence}, counting a tab character as the size until
 	 * the next tab stop and every other whitespace character as one.
 	 *
 	 * @param line the string to measure the indent of
 	 * @param tabSize the visual size of a tab in space equivalents
-	 * @return the visual length of the indentation of <code>line</code>
+	 * @return the visual length of the indentation of {@code line}
 	 * @since 3.1
 	 */
 	public static int measureIndentLength(CharSequence line, int tabSize) {
@@ -280,13 +280,13 @@ public class Strings {
 
 	/**
 	 * Removes the given number of indents from the line. Asserts that the given line
-	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
+	 * has the requested number of indents. If {@code indentsToRemove <= 0}
 	 * the line is returned.
 	 * @param line the line
 	 * @param indentsToRemove the indents to remove
 	 *
 	 * @param project the java project from which to get the formatter
-	 *        preferences, or <code>null</code> for global preferences
+	 *        preferences, or {@code null} for global preferences
 	 * @return the trimmed line
 	 *
 	 * @since 3.1
@@ -297,7 +297,7 @@ public class Strings {
 
 	/**
 	 * Removes the given number of indents from the line. Asserts that the given line
-	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
+	 * has the requested number of indents. If {@code indentsToRemove <= 0}
 	 * the line is returned.
 	 *
 	 * @param line the line
@@ -311,7 +311,7 @@ public class Strings {
 
 	/**
 	 * Removes the given number of indents from the line. Asserts that the given line
-	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
+	 * has the requested number of indents. If {@code indentsToRemove <= 0}
 	 * the line is returned.
 	 * @param line the line
 	 * @param indentsToRemove the indents to remove
@@ -331,7 +331,7 @@ public class Strings {
 	 * @param lines the lines
 
 	 * @param project the java project from which to get the formatter
-	 *        preferences, or <code>null</code> for global preferences
+	 *        preferences, or {@code null} for global preferences
 	 * @since 3.1
 	 */
 	public static void trimIndentation(String[] lines, IJavaProject project) {
@@ -353,13 +353,13 @@ public class Strings {
 
 	/**
 	 * Removes the common number of indents from all lines. If a line
-	 * only consists out of white space it is ignored. If <code>
-	 * considerFirstLine</code> is false the first line will be ignored.
+	 * only consists out of white space it is ignored. If {@code
+	 * considerFirstLine} is false the first line will be ignored.
 	 * @param lines the lines
 	 *
 	 * @param project the java project from which to get the formatter
-	 *        preferences, or <code>null</code> for global preferences
-	 * @param considerFirstLine  If <code>considerFirstLine</code> is false the first line will be ignored.
+	 *        preferences, or {@code null} for global preferences
+	 * @param considerFirstLine  If {@code considerFirstLine} is false the first line will be ignored.
 	 * @since 3.1
 	 */
 	public static void trimIndentation(String[] lines, IJavaProject project, boolean considerFirstLine) {
@@ -368,12 +368,12 @@ public class Strings {
 
 	/**
 	 * Removes the common number of indents from all lines. If a line
-	 * only consists out of white space it is ignored. If <code>
-	 * considerFirstLine</code> is false the first line will be ignored.
+	 * only consists out of white space it is ignored. If {@code
+	 * considerFirstLine} is false the first line will be ignored.
 	 *
 	 * @param lines the lines
 	 * @param cu the compilation unit from which to get the formatter preferences
-	 * @param considerFirstLine  If <code>considerFirstLine</code> is false the first line will be ignored.
+	 * @param considerFirstLine  If {@code considerFirstLine} is false the first line will be ignored.
 	 */
 	public static void trimIndentation(String[] lines, ICompilationUnit cu, boolean considerFirstLine) {
 		trimIndentation(lines, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu), considerFirstLine);
@@ -381,12 +381,12 @@ public class Strings {
 
 	/**
 	 * Removes the common number of indents from all lines. If a line
-	 * only consists out of white space it is ignored. If <code>
-	 * considerFirstLine</code> is false the first line will be ignored.
+	 * only consists out of white space it is ignored. If {@code
+	 * considerFirstLine} is false the first line will be ignored.
 	 * @param lines the lines
 	 * @param tabWidth the size of one tab in space equivalents
 	 * @param indentWidth the size of the indent in space equivalents
-	 * @param considerFirstLine If <code> considerFirstLine</code> is false the first line will be ignored.
+	 * @param considerFirstLine If {@code  considerFirstLine} is false the first line will be ignored.
 	 * @since 3.1
 	 */
 	public static void trimIndentation(String[] lines, int tabWidth, int indentWidth, boolean considerFirstLine) {
@@ -423,13 +423,13 @@ public class Strings {
 	}
 
 	/**
-	 * Returns that part of the indentation of <code>line</code> that makes up
+	 * Returns that part of the indentation of {@code line} that makes up
 	 * a multiple of indentation units.
 	 *
 	 * @param line the line to scan
 	 * @param project the java project from which to get the formatter
-	 *        preferences, or <code>null</code> for global preferences
-	 * @return the indent part of <code>line</code>, but no odd spaces
+	 *        preferences, or {@code null} for global preferences
+	 * @return the indent part of {@code line}, but no odd spaces
 	 * @since 3.1
 	 */
 	public static String getIndentString(String line, IJavaProject project) {
@@ -437,25 +437,25 @@ public class Strings {
 	}
 
 	/**
-	 * Returns that part of the indentation of <code>line</code> that makes up
+	 * Returns that part of the indentation of {@code line} that makes up
 	 * a multiple of indentation units.
 	 *
 	 * @param line the line to scan
 	 * @param cu the compilation unit from which to get the formatter preferences
-	 * @return the indent part of <code>line</code>, but no odd spaces
+	 * @return the indent part of {@code line}, but no odd spaces
 	 */
 	public static String getIndentString(String line, ICompilationUnit cu) {
 		return IndentManipulation.extractIndentString(line, CodeFormatterUtil.getTabWidth(cu), CodeFormatterUtil.getIndentWidth(cu));
 	}
 
 	/**
-	 * Returns that part of the indentation of <code>line</code> that makes up
+	 * Returns that part of the indentation of {@code line} that makes up
 	 * a multiple of indentation units.
 	 *
 	 * @param line the line to scan
 	 * @param tabWidth the size of one tab in space equivalents
 	 * @param indentWidth the size of the indent in space equivalents
-	 * @return the indent part of <code>line</code>, but no odd spaces
+	 * @return the indent part of {@code line}, but no odd spaces
 	 * @since 3.1
 	 */
 	public static String getIndentString(String line, int tabWidth, int indentWidth) {
@@ -485,7 +485,7 @@ public class Strings {
 	 * @param codeIndentLevel level of indentation
 	 *
 	 * @param project the java project from which to get the formatter
-	 *        preferences, or <code>null</code> for global preferences
+	 *        preferences, or {@code null} for global preferences
 	 * @param newIndent new indent
 	 * @param lineDelim line delimiter
 	 * @return the changed code

@@ -292,7 +292,6 @@ public class NecessaryParenthesesChecker {
 	 * <li>The <code>infixExpression</code> must not have additional operands.</li>
 	 * <li>The <code>rightOperand</code> node must have bindings.</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * @param rightOperand the right operand in <code>infixExpression</code>
 	 * @param infixExpression the parent infix expression

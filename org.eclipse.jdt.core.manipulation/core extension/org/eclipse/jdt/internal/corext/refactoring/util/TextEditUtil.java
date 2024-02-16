@@ -48,7 +48,6 @@ public class TextEditUtil {
 	 *   </ul>
 	 * </li>
 	 * </ul>
-	 * </p>
 	 *
 	 * @param edit the edit to verify
 	 * @return true if edit is minimal

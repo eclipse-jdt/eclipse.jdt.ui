@@ -35,14 +35,13 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
  * variable to the variable directly preceding the <code>${otherMembers}</code>, inclusively. The
  * content of this part is used once for every processed member. All template variables are
  * available (except for <code>${otherMembers}</code>).
- * <li><b>Separator</b></li> - all the characters from the template variable directly preceding the
+ * <li><b>Separator</b> - all the characters from the template variable directly preceding the
  * <code>${otherMembers}</code> to the <code>${otherMembers}</code>, exclusively. This part does not
  * contain template variables and is used to separate members in the generated <code>String</code>.
  * <li><b>Ending</b> - all the characters from the occurrence of the <code>${otherMembers}</code>
  * variable (exclusively) to the end of the template (inclusively). This part can also contain only
  * <code>${object.*}</code> variables.</li>
  * </ul>
- * </p>
  * <p>
  * Note: for the template to work properly, it must contain at least one <code>${member.*}</code>
  * variable and exactly one <code>${otherMembers}</code> variable. Additionally, no

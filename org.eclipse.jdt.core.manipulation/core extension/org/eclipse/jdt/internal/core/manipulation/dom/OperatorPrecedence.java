@@ -51,7 +51,7 @@ public class OperatorPrecedence {
 	 * with higher precedence are executed before expressions
 	 * with lower precedence.
 	 * i.e. in:
-	 * <br><code> int a= ++3--;</code></br>
+	 * <br><code> int a= ++3--;</code><br>
 	 *
 	 * the  precedence order is
 	 * <ul>

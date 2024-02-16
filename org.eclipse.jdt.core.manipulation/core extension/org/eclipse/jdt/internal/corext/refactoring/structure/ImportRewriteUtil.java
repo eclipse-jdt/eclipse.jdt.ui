@@ -46,8 +46,8 @@ public final class ImportRewriteUtil {
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
 	 * @param context the import rewrite context, or <code>null</code> if none available
 	 * @param node the AST node specifying the element for which imports should be added
-	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
-	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
+	 * @param typeImports the map of name nodes to strings (element type: {@code Map <Name, String>}).
+	 * @param staticImports the map of name nodes to strings (element type: {@code Map <Name, String>}).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
 	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map<Name, String> typeImports, final Map<Name, String> staticImports, final boolean declarations) {
@@ -60,9 +60,9 @@ public final class ImportRewriteUtil {
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
 	 * @param context the import rewrite context, or <code>null</code> if none available
 	 * @param node the AST node specifying the element for which imports should be added
-	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
-	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
-	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
+	 * @param typeImports the map of name nodes to strings (element type: {@code Map <Name, String>}).
+	 * @param staticImports the map of name nodes to strings (element type: {@code Map <Name, String>}).
+	 * @param excludeBindings the set of bindings to exclude (element type: {@code Set <IBinding>}).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
 	public static void addImports(final CompilationUnitRewrite rewrite, ImportRewriteContext context, final ASTNode node, final Map<Name, String> typeImports, final Map<Name, String> staticImports, final Collection<IBinding> excludeBindings, final boolean declarations) {
@@ -116,8 +116,8 @@ public final class ImportRewriteUtil {
 	 *
 	 * @param project the java project containing the element
 	 * @param node the AST node specifying the element for which imports should be collected
-	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
-	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
+	 * @param typeBindings the set of type bindings (element type: {@code Set <ITypeBinding>}).
+	 * @param staticBindings the set of bindings (element type: {@code Set <IBinding>}).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
 	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection<ITypeBinding> typeBindings, final Collection<IBinding> staticBindings, final boolean declarations) {
@@ -129,9 +129,9 @@ public final class ImportRewriteUtil {
 	 *
 	 * @param project the java project containing the element
 	 * @param node the AST node specifying the element for which imports should be collected
-	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
-	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
-	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
+	 * @param typeBindings the set of type bindings (element type: {@code Set <ITypeBinding>}).
+	 * @param staticBindings the set of bindings (element type: {@code Set <IBinding>}).
+	 * @param excludeBindings the set of bindings to exclude (element type: {@code Set <IBinding>}).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
 	 */
 	public static void collectImports(final IJavaProject project, final ASTNode node, final Collection<ITypeBinding> typeBindings, final Collection<IBinding> staticBindings, final Collection<IBinding> excludeBindings, final boolean declarations) {
