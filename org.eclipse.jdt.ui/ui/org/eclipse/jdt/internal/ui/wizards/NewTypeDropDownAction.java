@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 /**
  * A type wizard is added to the type drop down if it has a paramater 'javatype':
+ * <pre>{@code
  *     <wizard
  *         name="My Type Wizard"
  *         icon="icons/wiz.png"
@@ -61,6 +62,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  *             My Type Wizard
  *         </description>
  *      </wizard>
+ * }</pre>
  */
 public class NewTypeDropDownAction extends Action implements IMenuCreator, IWorkbenchWindowPulldownDelegate2 {
 

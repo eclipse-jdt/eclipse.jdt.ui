@@ -70,7 +70,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * user. When the user hits Finish, the user-selected workspace resources
  * are exported to the user-specified zip file, the dialog closes, and the call
  * to <code>open</code> returns.
- * </p>
  */
 public class JarPackageWizard extends Wizard implements IExportWizard {
 

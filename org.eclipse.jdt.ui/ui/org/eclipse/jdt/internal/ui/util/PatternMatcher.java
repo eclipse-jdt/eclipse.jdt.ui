@@ -15,12 +15,12 @@ package org.eclipse.jdt.internal.ui.util;
 
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 /**
  * A pattern matcher can match strings against various kinds of patterns supported by {@link SearchPattern}:
- * Prefix, "*" and "?" patterns, camelCase, exact match with " " or "<" at the end of the pattern.
+ * Prefix, "*" and "?" patterns, camelCase, exact match with " " or {@code "<"} at the end of the pattern.
  *
  * @since 3.8
  */

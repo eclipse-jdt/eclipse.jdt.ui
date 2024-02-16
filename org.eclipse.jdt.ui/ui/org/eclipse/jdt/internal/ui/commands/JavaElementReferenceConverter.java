@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.Signature;
  *
  * where <code>parameterSignatures</code> uses the signature format documented
  * in the {@link org.eclipse.jdt.core.Signature Signature} class.
- * </p>
  *
  * @since 3.2
  */

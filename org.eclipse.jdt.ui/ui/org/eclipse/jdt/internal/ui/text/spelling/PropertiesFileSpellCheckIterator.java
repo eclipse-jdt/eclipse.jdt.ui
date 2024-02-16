@@ -13,9 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.spelling;
 
-import java.util.Locale;
-
 import java.text.BreakIterator;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -25,7 +24,7 @@ import org.eclipse.jface.text.IRegion;
 
 /**
  * Iterator to spell check Java properties files
- * where '&' is ignored.
+ * where {@code '&'} is ignored.
  *
  * @since 3.3
  */

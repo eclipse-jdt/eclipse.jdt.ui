@@ -18,11 +18,11 @@ package org.eclipse.jdt.internal.corext.template.java;
 /**
  * The context type for templates inside SWT code.
  * The same class is used for several context types:
- * <dl>
+ * <ul>
  * <li>templates for all Java code locations</li>
  * <li>templates for member locations</li>
  * <li>templates for statement locations</li>
- * </dl>
+ * </ul>
  * @since 3.4
  */
 public class SWTContextType extends AbstractJavaContextType {

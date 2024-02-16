@@ -18,12 +18,12 @@ package org.eclipse.jdt.internal.corext.template.java;
 /**
  * The context type for templates inside Java code.
  * The same class is used for several context types:
- * <dl>
+ * <ul>
  * <li>templates for all Java code locations</li>
  * <li>templates for member locations</li>
  * <li>templates for statement locations</li>
  * <li>templates for module-info.java files</li>
- * </dl>
+ * </ul>
  */
 public class JavaContextType extends AbstractJavaContextType {
 
