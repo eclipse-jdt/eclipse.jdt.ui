@@ -1118,7 +1118,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * not its enclosing Java element.</li>
 	 * <li>If the selection spans one or more partitions of the document, then all
 	 * partitions covered by the selection are entirely formatted.</li>
-	 * <p>
+	 * </ul>
 	 * Partitions at the end of the selection are not completed, except for comments.
 	 *
 	 * @since 3.0
@@ -3822,7 +3822,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Returns the cached selected range, which allows
 	 * to query it from a non-UI thread.
 	 * <p>
-	 * The result might be outdated if queried from a non-UI thread.</em></p>
+	 * The result might be outdated if queried from a non-UI thread.
 	 *
 	 * @return the caret offset in the master document
 	 * @see ITextViewer#getSelectedRange()

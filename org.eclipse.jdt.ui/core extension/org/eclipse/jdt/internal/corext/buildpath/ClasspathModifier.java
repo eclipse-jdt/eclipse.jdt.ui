@@ -857,7 +857,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 *
-	 * @return the resulting <code>IResource<code>
+	 * @return the resulting <code>IResource</code>
 	 */
 	public static IResource exclude(IJavaElement javaElement, CPListElement entry, IJavaProject project, IProgressMonitor monitor) {
 		if (monitor == null)
@@ -1031,8 +1031,10 @@ public class ClasspathModifier {
 	 *
 	 * @param entries a list of entries to find an appropriate representation
 	 * for. The list can contain elements of two types:
+	 * <ul>
 	 * <li><code>IResource</code></li>
 	 * <li><code>IJavaElement</code></li>
+	 * </ul>
 	 * @param project the Java project
 	 * @return a list of elements corresponding to the passed entries.
 	 */

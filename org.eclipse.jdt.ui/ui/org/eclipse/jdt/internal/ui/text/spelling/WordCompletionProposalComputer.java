@@ -43,10 +43,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
  * <strong>Note:</strong> This is currently not supported because the spelling engine
  * cannot return word proposals but only correction proposals.
  * <p>
- * If we enable this again we must register the computer in <code>plugin.xml</code>:
- * <pre>
- * </pre>
- * </p>
+ * If we enable this again we must register the computer in <code>plugin.xml</code>
  *
  * @since 3.0
  */

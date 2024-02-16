@@ -581,7 +581,7 @@ public class PackageExplorerPart extends ViewPart
 
 	/**
 	 * Answers whether this part shows the packages flat or hierarchical.
-	 * @return <true> if flat layout is selected
+	 * @return <code>true</code> if flat layout is selected
 	 *
 	 * @since 2.1
 	 */

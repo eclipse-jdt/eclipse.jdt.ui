@@ -1886,7 +1886,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Sets whether empty viewers should keep showing. If false, replace with fEmptyTypesViewer.
 	 *
 	 * @param keepShowingEmptyViewers <code>true</code> if the empty viewers can be shown,
-	 *            <code>false otherwise
+	 *            <code>false</code> otherwise
 	 *
 	 * @since 3.6
 	 */
@@ -1898,7 +1898,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Returns value that determines whether the empty viewers should keep showing. If false,
 	 * replace with fEmptyTypesViewer.
 	 *
-	 * @return <code>true</code> if the empty viewers can be shown, <code>false otherwise
+	 * @return <code>true</code> if the empty viewers can be shown, <code>false</code> otherwise
 	 *
 	 * @since 3.6
 	 */

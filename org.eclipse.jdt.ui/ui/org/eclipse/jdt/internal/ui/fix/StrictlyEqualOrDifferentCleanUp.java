@@ -49,7 +49,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A fix that replaces <code>(X && !Y) || (!X && Y)</code> by <code>X ^ Y</code>:
+ * A fix that replaces {@code (X && !Y) || (!X && Y)} by {@code X ^ Y}:
  * <ul>
  * <li>Only works on boolean,</li>
  * <li>Works with lazy or eager operators,</li>
