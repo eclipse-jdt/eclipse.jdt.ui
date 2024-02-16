@@ -550,7 +550,6 @@ public class CallHierarchyTestHelper {
 
     /**
      * Verifies that no error markers exist in the given resource.
-     * <p>
      *
      * @param element
      *            The resource that is searched for error markers
@@ -564,7 +563,6 @@ public class CallHierarchyTestHelper {
 
     /**
      * Verifies that no error markers exist in the given resource.
-     * <p>
      *
      * @param resource
      *            The resource that is searched for error markers
