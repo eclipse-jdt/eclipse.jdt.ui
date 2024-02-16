@@ -1598,6 +1598,63 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				+ "}\n";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
+	@Test
+	public void testConvertToLambda30() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(new IOverwriteQuery() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public String queryOverwrite(String pathString) {\n" //
+				+ "                return ALL;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf, false, null);
+
+		int offset= buf.toString().indexOf("new IOverwriteQuery");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		String expected1= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(pathString -> test.C1.IOverwriteQuery.ALL);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 	@Test
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
