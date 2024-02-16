@@ -638,7 +638,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 
 	/**
 	 * Assert two proposals ("@NonNull" and "@Nullable") on an array type in normal syntax.
-	 * A two line entry using this selector & signature exists and will be amended.
+	 * A two line entry using this selector and signature exists and will be amended.
 	 * Apply the second proposal and check the effect.
 	 *
 	 * @throws Exception multiple causes
@@ -711,7 +711,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 
 	/**
 	 * Assert two proposals ("@NonNull" and "@Nullable") on an array type in extra-dims syntax.
-	 * A two line entry using this selector & signature exists and will be amended.
+	 * A two line entry using this selector and signature exists and will be amended.
 	 * Apply the second proposal and check the effect.
 	 *
 	 * @throws Exception multiple causes
