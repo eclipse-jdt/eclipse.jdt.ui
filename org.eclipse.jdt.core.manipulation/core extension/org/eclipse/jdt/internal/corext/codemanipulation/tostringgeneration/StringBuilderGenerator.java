@@ -51,8 +51,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  * }
  * </pre>
  *
- * </p>
- *
  * @since 3.5
  */
 public class StringBuilderGenerator extends AbstractToStringGenerator {

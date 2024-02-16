@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.*;
  * </p>
  *
  * <p>
- * <b>Details:<b>
+ * <b>Details:</b>
  * </p>
  *
  * <p>

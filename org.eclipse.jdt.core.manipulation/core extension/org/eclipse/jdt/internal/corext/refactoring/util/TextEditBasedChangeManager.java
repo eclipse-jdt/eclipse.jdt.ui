@@ -72,11 +72,11 @@ public class TextEditBasedChangeManager {
 	}
 
 	/**
-	 * Removes the <tt>TextEditBasedChange</tt> managed under the given key
-	 * <code>unit<code>.
+	 * Removes the <code>TextEditBasedChange</code> managed under the given key
+	 * <code>unit</code>.
 	 *
-	 * @param unit the key determining the <tt>TextEditBasedChange</tt> to be removed.
-	 * @return the removed <tt>TextEditBasedChange</tt>.
+	 * @param unit the key determining the <code>TextEditBasedChange</code> to be removed.
+	 * @return the removed <code>TextEditBasedChange</code>.
 	 */
 	public TextEditBasedChange remove(ICompilationUnit unit) {
 		return fMap.remove(unit);

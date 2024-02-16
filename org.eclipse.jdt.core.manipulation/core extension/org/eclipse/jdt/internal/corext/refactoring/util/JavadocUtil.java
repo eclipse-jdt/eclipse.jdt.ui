@@ -78,7 +78,7 @@ public class JavadocUtil {
 	/**
 	 * Decide whether to add a "param" javadoc tag or not.
 	 * @param methodDeclaration the method declaration
-	 * @return method has javadoc && (method had no parameter before || there is already an @param tag)
+	 * @return method has javadoc {@code &&} (method had no parameter before || there is already an {@code @param} tag)
 	 */
 	public static boolean shouldAddParamJavadoc(MethodDeclaration methodDeclaration) {
 		Javadoc javadoc= methodDeclaration.getJavadoc();

@@ -1449,9 +1449,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Returns the Collection<String> of names of types that can be given to the selected declaration.
+	 * Returns the {@code Collection<String>} of names of types that can be given to the selected declaration.
 	 * (used in tests only)
-	 * @return Collection<String> of names of types that can be given to the selected declaration
+	 * @return {@code Collection<String>} of names of types that can be given to the selected declaration
 	 */
 	public Collection<String> getValidTypeNames() {
 		Collection<String> typeNames= new ArrayList<>();

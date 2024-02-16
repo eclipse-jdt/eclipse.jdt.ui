@@ -76,11 +76,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
  * which lists all selected fields and methods. What exactly is listed and how members are separated
  * is determined by a format template.
  * <p>
- *
- * <p>
  * To print out items of arrays and/or limit number items printed for arrays, collections and so on,
  * various methods are used according to actual jdk compatibility:
- * <table border="10">
+ * <table border="1">
  * <tr>
  * <td></td>
  * <th><code>java.util.List</code></th>
@@ -110,7 +108,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
  * <td>-</td>
  * <td>-</td>
  * <td>-</td>
- * <td><code>Arrays.toString()<code></td>
+ * <td><code>Arrays.toString()</code></td>
  * <td><code>Arrays.asList(member)</code></td>
  * </tr>
  * <tr>
@@ -132,7 +130,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
  * </table>
  * Additionally, if helper method is generated it is also used for other members members (even if
  * other solution could be used), as it makes the code cleaner.
- * </p>
  *
  * @since 3.5
  */
@@ -247,7 +244,7 @@ public abstract class AbstractToStringGenerator {
 	 *
 	 * @param array if true, generated method will convert array to string, otherwise -
 	 *            <code>Collection</code>
-	 * @return <code>arrayToString(Object[] array)</code> or </code>collectionToString(Collection
+	 * @return <code>arrayToString(Object[] array)</code> or <code>collectionToString(Collection
 	 *         collection)</code> method
 	 */
 	protected MethodDeclaration createHelperToStringMethod(boolean array) {

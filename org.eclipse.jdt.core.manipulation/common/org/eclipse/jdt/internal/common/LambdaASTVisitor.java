@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.*;
  *
  * @author chammer
  *
- * @param <E> - type that extends HelpVisitorProvider that provides HelperVisitor<V, T>
+ * @param <E> - type that extends HelpVisitorProvider that provides {@code HelperVisitor<V, T>}
  * @param <V> - type that HelperVisitor uses as map key type
  * @param <T> - type that HelperVisitor uses as map value type
  */
