@@ -1650,7 +1650,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public C1() {\n" //
-				+ "        ImportOperation io = new ImportOperation(pathString -> test.C1.IOverwriteQuery.ALL);\n" //
+				+ "        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);\n" //
 				+ "    }\n" //
 				+ "}\n";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });

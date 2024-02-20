@@ -466,7 +466,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public C1() {\n" //
-				+ "        ImportOperation io = new ImportOperation(pathString -> test1.C1.IOverwriteQuery.ALL);\n" //
+				+ "        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);\n" //
 				+ "    }\n" //
 				+ "}\n";
 		String expected1= sample;

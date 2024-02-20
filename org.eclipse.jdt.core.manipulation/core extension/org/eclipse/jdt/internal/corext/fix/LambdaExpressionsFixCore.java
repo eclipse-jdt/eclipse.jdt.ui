@@ -823,7 +823,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 										&& inheritedTypes.contains(variableBinding.getDeclaringClass())) {
 									ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
 									if (cicBinding != null) {
-										Name replacement= ast.newName(cicBinding.getQualifiedName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
+										Name replacement= ast.newName(cicBinding.getName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
 										rewrite.replace(node, replacement, group);
 									}
 //									Type copyOfClassName= (Type) rewrite.createCopyTarget(classInstanceCreation.getType());
