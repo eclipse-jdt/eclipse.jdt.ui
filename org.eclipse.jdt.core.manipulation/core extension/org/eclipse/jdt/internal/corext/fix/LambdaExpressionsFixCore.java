@@ -826,8 +826,6 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 										Name replacement= ast.newName(cicBinding.getName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
 										rewrite.replace(node, replacement, group);
 									}
-//									Type copyOfClassName= (Type) rewrite.createCopyTarget(classInstanceCreation.getType());
-//									QualifiedType replacement= ast.newQualifiedType(copyOfClassName, ASTNodes.createMoveTarget(rewrite, node));
 									return false;
 								}
 							}
