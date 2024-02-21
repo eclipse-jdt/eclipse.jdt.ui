@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -822,9 +821,11 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 										&& (variableBinding.getModifiers() & Modifier.STATIC) != 0
 										&& variableBinding.isField()
 										&& inheritedTypes.contains(variableBinding.getDeclaringClass())) {
-									Type copyOfClassName= (Type) rewrite.createCopyTarget(classInstanceCreation.getType());
-									QualifiedType replacement= ast.newQualifiedType(copyOfClassName, ASTNodes.createMoveTarget(rewrite, node));
-									rewrite.replace(node, replacement, group);
+									ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
+									if (cicBinding != null) {
+										Name replacement= ast.newName(cicBinding.getName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
+										rewrite.replace(node, replacement, group);
+									}
 									return false;
 								}
 							}

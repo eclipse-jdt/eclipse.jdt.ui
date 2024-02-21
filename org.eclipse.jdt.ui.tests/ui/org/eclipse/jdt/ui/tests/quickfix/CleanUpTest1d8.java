@@ -418,6 +418,63 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToLambda08() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(new IOverwriteQuery() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public String queryOverwrite(String pathString) {\n" //
+				+ "                return ALL;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String original= sample;
+		ICompilationUnit cu1= pack1.createCompilationUnit("C1.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		sample= "" //
+				+ "package test1;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testConvertToLambdaWithConstant() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
