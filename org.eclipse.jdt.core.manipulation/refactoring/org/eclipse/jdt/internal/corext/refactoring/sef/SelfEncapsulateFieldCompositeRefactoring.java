@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
@@ -65,7 +64,7 @@ public class SelfEncapsulateFieldCompositeRefactoring extends Refactoring {
 	private final HashMap<ICompilationUnit, List<TextEditGroup>> fDescriptionsMap = new HashMap<>();
 	private final List<TextChange> changes = new ArrayList<>();
 
-	private static final String NO_NAME= ""; //$NON-NLS-1$
+	private static final String CREATE_CHANGE= "Create Change"; //$NON-NLS-1$
 
 	public List<SelfEncapsulateFieldRefactoring> getRefactorings() {
 		return fRefactorings;
@@ -102,7 +101,7 @@ public class SelfEncapsulateFieldCompositeRefactoring extends Refactoring {
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask(NO_NAME, changes.size());
+		pm.beginTask(CREATE_CHANGE, changes.size());
 		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_create_changes);
 		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(getDescriptor(), getName());
 		for (TextChange change : changes) {
@@ -119,14 +118,14 @@ public class SelfEncapsulateFieldCompositeRefactoring extends Refactoring {
 		IJavaProject javaProject= getSelectedRefactorings().get(0).getField().getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, BasicElementLabels.getJavaElementName(getSelectedRefactorings().stream().map(refactoring -> refactoring.getField().getElementName()).collect(Collectors.joining(", ")))); //$NON-NLS-1$
+		String fieldLabels = (getSelectedRefactorings().size() <= 3
+				? getSelectedRefactorings()
+				: getSelectedRefactorings().subList(0, 3)).stream().map(refactoring -> refactoring.getField().getElementName()).collect(Collectors.joining(", ")) + ", ..."; //$NON-NLS-1$ //$NON-NLS-2$;
+		final String description= Messages.format(RefactoringCoreMessages.SelfEncapsulateField_descriptor_description_short, fieldLabels);
 		int flags= JavaRefactoringDescriptor.JAR_MIGRATION | JavaRefactoringDescriptor.JAR_REFACTORING | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE;
 		try {
-			boolean isAnonymousOrLocal = true;
-			for(SelfEncapsulateFieldRefactoring refactoring : getSelectedRefactorings()) {
-				IType declaring = refactoring.getField().getDeclaringType();
-				isAnonymousOrLocal &= declaring.isAnonymous() || declaring.isLocal();
-			}
+			IType declaring = getSelectedRefactorings().get(0).getField().getDeclaringType();
+			boolean isAnonymousOrLocal = declaring.isAnonymous() || declaring.isLocal();
 			if(isAnonymousOrLocal) {
 				flags|= JavaRefactoringDescriptor.JAR_SOURCE_ATTACHMENT;
 			}
