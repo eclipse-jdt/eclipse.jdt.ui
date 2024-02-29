@@ -6767,6 +6767,122 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
+	public void testSplitTryWithResources1() throws Exception { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=530208
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.BufferedReader;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"import java.io.FileReader;\n" +
+				"import java.io.IOException;\n" +
+				"import java.io.Reader;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public void foo() {\n" +
+				"        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n" +
+				"                Reader r = new BufferedReader(new FileReader(\"a.b\"));\n" +
+				"                Reader t = new BufferedReader(new FileReader(\"e.f\"))) {\n" +
+				"            r.read();\n" +
+				"            System.out.println(\"abc\");\n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        } catch (IOException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+
+		int offset= src.indexOf("\"a.b\"");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.BufferedReader;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"import java.io.FileReader;\n" +
+				"import java.io.IOException;\n" +
+				"import java.io.Reader;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public void foo() {\n" +
+				"        try (Reader s = new BufferedReader(new FileReader(\"c.d\"))) {\n" +
+				"            try (Reader r = new BufferedReader(new FileReader(\"a.b\"));\n" +
+				"                    Reader t = new BufferedReader(new FileReader(\"e.f\"))){r.read();\n" +
+				"                    System.out.println(\"abc\");} \n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        } catch (IOException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testSplitTryWithResources2() throws Exception { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=530208
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String src=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.BufferedReader;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"import java.io.FileReader;\n" +
+				"import java.io.IOException;\n" +
+				"import java.io.Reader;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public void foo() {\n" +
+				"        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n" +
+				"                Reader r = new BufferedReader(new FileReader(\"a.b\"));\n" +
+				"                Reader t = new BufferedReader(new FileReader(\"e.f\"))) {\n" +
+				"            r.read();\n" +
+				"            System.out.println(\"abc\");\n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        } catch (IOException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", src, false, null);
+
+		int offset= src.indexOf("\"e.f\"");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		String expected=
+				"package test1;\n" +
+				"\n" +
+				"import java.io.BufferedReader;\n" +
+				"import java.io.FileNotFoundException;\n" +
+				"import java.io.FileReader;\n" +
+				"import java.io.IOException;\n" +
+				"import java.io.Reader;\n" +
+				"\n" +
+				"class E {\n" +
+				"    public void foo() {\n" +
+				"        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n" +
+				"                Reader r = new BufferedReader(new FileReader(\"a.b\"))) {\n" +
+				"            try (Reader t = new BufferedReader(new FileReader(\"e.f\"))){r.read();\n" +
+				"                    System.out.println(\"abc\");} \n" +
+				"        } catch (FileNotFoundException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        } catch (IOException e) {\n" +
+				"            e.printStackTrace();\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
 	public void testInlineDeprecated_1() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
