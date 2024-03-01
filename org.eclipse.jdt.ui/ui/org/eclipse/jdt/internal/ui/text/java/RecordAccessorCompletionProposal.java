@@ -138,11 +138,9 @@ public class RecordAccessorCompletionProposal extends JavaTypeCompletionProposal
 		buf.append("() {"); //$NON-NLS-1$
 		buf.append(lineDelim);
 
-		String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", lineDelim); //$NON-NLS-1$
-		if (body != null) {
-			buf.append(body);
-			buf.append(lineDelim);
-		}
+		String returnStatement= "return " + fMethodName + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+		buf.append(returnStatement);
+		buf.append(lineDelim);
 		buf.append("}"); //$NON-NLS-1$
 		buf.append(lineDelim);
 		String stub=  buf.toString();
