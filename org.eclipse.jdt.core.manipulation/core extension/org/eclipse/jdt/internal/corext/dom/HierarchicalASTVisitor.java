@@ -668,6 +668,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
+	public boolean visit(EitherOrMultiPattern node) {
+		return visit((Pattern) node);
+	}
+
+	@Override
+	public void endVisit(EitherOrMultiPattern node) {
+		endVisit((Pattern) node);
+	}
+
+	@Override
 	public boolean visit(ParenthesizedExpression node) {
 		return visit((Expression)node);
 	}
