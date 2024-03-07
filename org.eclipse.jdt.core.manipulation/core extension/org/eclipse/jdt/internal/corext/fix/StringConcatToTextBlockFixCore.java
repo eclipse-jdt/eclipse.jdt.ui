@@ -205,7 +205,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				try {
 					buffer= cu.getBuffer();
 					for (Comment comment : trailingComments) {
-						if (comment instanceof LineComment lineComment) {
+						if (comment instanceof LineComment) {
 							if (buffer.getText(comment.getStartPosition(), comment.getLength()).contains("$NON-NLS")) { //$NON-NLS-1$
 								return true;
 							}

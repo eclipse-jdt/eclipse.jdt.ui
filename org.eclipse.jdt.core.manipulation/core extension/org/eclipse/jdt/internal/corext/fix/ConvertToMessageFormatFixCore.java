@@ -112,7 +112,7 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 				NLSLine nlsLine= scanCurrentLine(cu, operand);
 				if (nlsLine != null) {
 					for (NLSElement element : nlsLine.getElements()) {
-						if (element.getPosition().getOffset() == operand.getStartPosition()) {
+						if (element.getPosition().getOffset() == compilationUnit.getColumnNumber(operand.getStartPosition())) {
 							if (element.hasTag()) {
 								if (seenNoTag) {
 									return null;
@@ -142,10 +142,11 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 	private static NLSLine scanCurrentLine(ICompilationUnit cu, Expression exp) {
 		CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
 		int startLine= cUnit.getLineNumber(exp.getStartPosition());
+		int startLinePos= cUnit.getPosition(startLine, 0);
 		int endOfLine= cUnit.getPosition(startLine + 1, 0);
 		NLSLine[] lines;
 		try {
-			lines= NLSScanner.scan(cu.getBuffer().getText(exp.getStartPosition(), endOfLine - exp.getStartPosition()));
+			lines= NLSScanner.scan(cu.getBuffer().getText(startLinePos, endOfLine - startLinePos));
 			if (lines.length > 0) {
 				return lines[0];
 			}
@@ -205,7 +206,7 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 					NLSLine nlsLine= scanCurrentLine(cu, operand);
 					if (nlsLine != null) {
 						for (NLSElement element : nlsLine.getElements()) {
-							if (element.getPosition().getOffset() == operand.getStartPosition()) {
+							if (element.getPosition().getOffset() == root.getColumnNumber(operand.getStartPosition())) {
 								if (element.hasTag()) {
 									++tagsCount;
 								}
