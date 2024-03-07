@@ -18,8 +18,11 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.BadLocationException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -39,7 +42,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -107,28 +110,24 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			} else {
 				// ensure either all string literals are nls-tagged or none are
 				ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-				try {
-					NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
-					if (nlsLine != null) {
-						for (NLSElement element : nlsLine.getElements()) {
-							if (element.getPosition().getOffset() == operand.getStartPosition()) {
-								if (element.hasTag()) {
-									if (seenNoTag) {
-										return null;
-									}
-									seenTag= true;
-								} else {
-									if (seenTag) {
-										return null;
-									}
-									seenNoTag= true;
+				NLSLine nlsLine= scanCurrentLine(cu, operand);
+				if (nlsLine != null) {
+					for (NLSElement element : nlsLine.getElements()) {
+						if (element.getPosition().getOffset() == operand.getStartPosition()) {
+							if (element.hasTag()) {
+								if (seenNoTag) {
+									return null;
 								}
-								break;
+								seenTag= true;
+							} else {
+								if (seenTag) {
+									return null;
+								}
+								seenNoTag= true;
 							}
+							break;
 						}
 					}
-				} catch (JavaModelException e) {
-					return null;
 				}
 			}
 		}
@@ -138,6 +137,22 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 
 		return new ConvertToStringFormatFixCore(CorrectionMessages.QuickAssistProcessor_convert_to_string_format, compilationUnit,
 				new ConvertToStringFormatProposalOperation(oldInfixExpression));
+	}
+
+	private static NLSLine scanCurrentLine(ICompilationUnit cu, Expression exp) {
+		CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
+		int startLine= cUnit.getLineNumber(exp.getStartPosition());
+		int endOfLine= cUnit.getPosition(startLine + 1, 0);
+		NLSLine[] lines;
+		try {
+			lines= NLSScanner.scan(cu.getBuffer().getText(exp.getStartPosition(), endOfLine - exp.getStartPosition()));
+			if (lines.length > 0) {
+				return lines[0];
+			}
+		} catch (IndexOutOfBoundsException | JavaModelException | InvalidInputException | BadLocationException e) {
+			// fall-through
+		}
+		return null;
 	}
 
 	private static void collectInfixPlusOperands(Expression expression, List<Expression> collector) {
@@ -179,7 +194,7 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			int tagsCount= 0;
 			for (Expression operand : operands) {
 				if (operand instanceof StringLiteral) {
-					NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
+					NLSLine nlsLine= scanCurrentLine(cu, operand);
 					if (nlsLine != null) {
 						for (NLSElement element : nlsLine.getElements()) {
 							if (element.getPosition().getOffset() == operand.getStartPosition()) {
