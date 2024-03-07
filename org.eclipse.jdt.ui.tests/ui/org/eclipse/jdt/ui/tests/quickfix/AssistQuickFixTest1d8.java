@@ -5003,6 +5003,212 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
+	public void testIssue1047_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf1= new StringBuilder();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Supplier;\n");
+		buf1.append("\n");
+		buf1.append("public class E {\n");
+		buf1.append("    void func( String ... args) {\n");
+		buf1.append("    }\n");
+		buf1.append("\n");
+		buf1.append("    private void called( Supplier<Object> r ) {\n");
+		buf1.append("    }\n");
+		buf1.append("\n");
+		buf1.append("    void called( Runnable r ) {\n");
+		buf1.append("    }\n");
+		buf1.append("\n");
+		buf1.append("    void test() {\n");
+		buf1.append("        called(() -> func());\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf1.toString(), false, null);
+
+
+		int offset= buf1.toString().indexOf("func()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void func( String ... args) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void called( Supplier<Object> r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called((Runnable) this::func);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testIssue1047_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf1= new StringBuilder();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Supplier;\n");
+		buf1.append("\n");
+		buf1.append("public class E1 {\n");
+		buf1.append("    private void called( Supplier<Object> r ) {\n");
+		buf1.append("    }\n");
+		buf1.append("\n");
+		buf1.append("}\n");
+		pack1.createCompilationUnit("E1.java", buf1.toString(), false, null);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E extends E1 {\n");
+		buf.append("    void func( String ... args) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called(() -> func());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("func()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E extends E1 {\n");
+		buf.append("    void func( String ... args) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called((Runnable) this::func);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testIssue1047_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf1= new StringBuilder();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Supplier;\n");
+		buf1.append("\n");
+		buf1.append("public class E1 {\n");
+		buf1.append("    void func( String ... args) {\n");
+		buf1.append("    }\n");
+		buf1.append("    private void called( Supplier<Object> r ) {\n");
+		buf1.append("    }\n");
+		buf1.append("\n");
+		buf1.append("}\n");
+		pack1.createCompilationUnit("E1.java", buf1.toString(), false, null);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E extends E1 {\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called(() -> super.func());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("func()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E extends E1 {\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called((Runnable) super::func);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testIssue1047_4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuilder buf1= new StringBuilder();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Supplier;\n");
+		buf1.append("\n");
+		buf1.append("public class E1 {\n");
+		buf1.append("    public static void func( String ... args) {\n");
+		buf1.append("    }\n");
+		buf1.append("    private void called( Supplier<Object> r ) {\n");
+		buf1.append("    }\n");
+		buf1.append("\n");
+		buf1.append("}\n");
+		pack1.createCompilationUnit("E1.java", buf1.toString(), false, null);
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E extends E1 {\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called(() -> E1.func());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("func()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		buf= new StringBuilder();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E extends E1 {\n");
+		buf.append("\n");
+		buf.append("    void called( Runnable r ) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void test() {\n");
+		buf.append("        called((Runnable) E1::func);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
 	public void testFixParenthesesInLambdaExpressionAdd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf1= new StringBuilder();
