@@ -53,7 +53,7 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-		List<Expression> expressionsInArray= node != null && node.getInitializer().expressions() != null ?
+		List<Expression> expressionsInArray= node != null && node.getInitializer() != null && node.getInitializer().expressions() != null ?
 				node.getInitializer().expressions() : Collections.EMPTY_LIST;
 		boolean isTagged[]= new boolean[expressionsInArray.size()];
 		ICompilationUnit cu= cuRewrite.getCu();
