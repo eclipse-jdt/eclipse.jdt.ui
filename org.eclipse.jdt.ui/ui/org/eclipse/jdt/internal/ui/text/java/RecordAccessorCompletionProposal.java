@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -41,35 +40,34 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
 /**
- * Method declaration proposal.
+ * Record accessor declaration proposal.
  */
-public class MethodDeclarationCompletionProposal extends JavaTypeCompletionProposal {
+public class RecordAccessorCompletionProposal extends JavaTypeCompletionProposal {
 
 
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set<String> suggestedMethods, Collection<IJavaCompletionProposal> result) throws CoreException {
 		IMethod[] methods= type.getMethods();
-		IField[] components= type.getRecordComponents();
-		if (!type.isInterface()) {
-			String constructorName= type.getElementName();
-			if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName) && suggestedMethods.add(constructorName)) {
-				result.add(new MethodDeclarationCompletionProposal(type, constructorName, null, offset, length, relevance + 500));
-			}
+		if (!type.isRecord()) {
+			return;
 		}
-
-		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && !hasRecordComponent(components, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
+		if (prefix.length() > 0 && !hasMethod(methods, prefix)) {
 			if (!JavaConventionsUtil.validateMethodName(prefix, type).matches(IStatus.ERROR)) {
-				result.add(new MethodDeclarationCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
+				IField[] fields= type.getRecordComponents();
+				for (IField field : fields) {
+					if (field.getElementName().startsWith(prefix)) {
+						if (suggestedMethods.add(field.getElementName())) {
+							result.add(new RecordAccessorCompletionProposal(type, field.getElementName(), field.getTypeSignature(), offset, length, relevance + 1));
+						}
+					}
+				}
 			}
 		}
 	}
@@ -83,36 +81,21 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		return false;
 	}
 
-	private static boolean hasRecordComponent(IField[] components, String name) {
-		for (IField curr : components) {
-			if (curr.getElementName().equals(name)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private final IType fType;
 	private final String fReturnTypeSig;
 	private final String fMethodName;
 
-	public MethodDeclarationCompletionProposal(IType type, String methodName, String returnTypeSig, int start, int length, int relevance) {
+	public RecordAccessorCompletionProposal(IType type, String methodName, String returnTypeSig, int start, int length, int relevance) {
 		super("", type.getCompilationUnit(), start, length, null, getDisplayName(methodName, returnTypeSig), relevance); //$NON-NLS-1$
 		Assert.isNotNull(type);
 		Assert.isNotNull(methodName);
+		Assert.isNotNull(returnTypeSig);
 
 		fType= type;
 		fMethodName= methodName;
 		fReturnTypeSig= returnTypeSig;
 
-		if (returnTypeSig == null) {
-			setProposalInfo(new ProposalInfo(type));
-
-			ImageDescriptor desc= new JavaElementImageDescriptor(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
-			setImage(JavaPlugin.getImageDescriptorRegistry().get(desc));
-		} else {
-			setImage(JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE));
-		}
+		setImage(JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC));
 	}
 
 	private static StyledString getDisplayName(String methodName, String returnTypeSig) {
@@ -120,15 +103,10 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		buf.append(methodName);
 		buf.append('(');
 		buf.append(')');
-		if (returnTypeSig != null) {
-			buf.append(" : "); //$NON-NLS-1$
-			buf.append(Signature.toString(returnTypeSig));
-			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(JavaTextMessages.MethodCompletionProposal_method_label, StyledString.QUALIFIER_STYLER);
-		} else {
-			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
-			buf.append(JavaTextMessages.MethodCompletionProposal_constructor_label, StyledString.QUALIFIER_STYLER);
-		}
+		buf.append(" : "); //$NON-NLS-1$
+		buf.append(Signature.toString(returnTypeSig));
+		buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+		buf.append(JavaTextMessages.RecordAccessorCompletionProposal_accessor_label, StyledString.QUALIFIER_STYLER);
 		return buf;
 	}
 
@@ -141,7 +119,6 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		String[] empty= new String[0];
 		String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
 		String declTypeName= fType.getTypeQualifiedName('.');
-		boolean isInterface= fType.isInterface();
 
 		StringBuilder buf= new StringBuilder();
 		if (addComments) {
@@ -151,39 +128,21 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 				buf.append(lineDelim);
 			}
 		}
-		if (fReturnTypeSig != null) {
-			if (fType.isRecord()) {
-				buf.append("public "); //$NON-NLS-1$
-			} else if (!isInterface) {
-				buf.append("private "); //$NON-NLS-1$
-			}
-		} else {
-			if (fType.isEnum())
-				buf.append("private "); //$NON-NLS-1$
-			else
-				buf.append("public "); //$NON-NLS-1$
-		}
+		buf.append("public "); //$NON-NLS-1$
 
 		if (fReturnTypeSig != null) {
 			buf.append(Signature.toString(fReturnTypeSig));
 		}
 		buf.append(' ');
 		buf.append(fMethodName);
-		if (isInterface) {
-			buf.append("();"); //$NON-NLS-1$
-			buf.append(lineDelim);
-		} else {
-			buf.append("() {"); //$NON-NLS-1$
-			buf.append(lineDelim);
+		buf.append("() {"); //$NON-NLS-1$
+		buf.append(lineDelim);
 
-			String body= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), declTypeName, fMethodName, fReturnTypeSig == null, "", lineDelim); //$NON-NLS-1$
-			if (body != null) {
-				buf.append(body);
-				buf.append(lineDelim);
-			}
-			buf.append("}"); //$NON-NLS-1$
-			buf.append(lineDelim);
-		}
+		String returnStatement= "return " + fMethodName + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+		buf.append(returnStatement);
+		buf.append(lineDelim);
+		buf.append("}"); //$NON-NLS-1$
+		buf.append(lineDelim);
 		String stub=  buf.toString();
 
 		// use the code formatter
