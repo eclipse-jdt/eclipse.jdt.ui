@@ -405,12 +405,12 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (unescaped.charAt(whitespaceStart) == ' ') {
 				whitespaceStart--;
 				trailingWhitespace.append("\\s"); //$NON-NLS-1$
+				continue;
 			} else if (unescaped.charAt(whitespaceStart) == '\t') {
 				whitespaceStart--;
 				trailingWhitespace.append("\\t"); //$NON-NLS-1$
-			} else {
-				break;
 			}
+			break;
 		}
 
 		return unescaped.substring(0, whitespaceStart + 1) + trailingWhitespace;
