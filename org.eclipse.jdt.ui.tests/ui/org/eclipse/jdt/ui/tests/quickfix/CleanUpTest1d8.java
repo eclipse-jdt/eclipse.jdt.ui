@@ -6481,4 +6481,79 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
 	}
 
+	@Test
+	public void testRemoveThisIssue1211() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1211
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public interface PropertyChangeListener {\n" //
+				+ "        void propertyChange(Object evt);\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private final PropertyChangeListener listener = evt -> {\n" //
+				+ "        this.clientCache.get();\n" //
+				+ "    };\n" //
+				+ "\n" //
+				+ "    public void x() {\n" //
+				+ "        PropertyChangeListener listener = evt -> {\n" //
+				+ "            this.clientCache.get();\n" //
+				+ "        };\n" //
+				+ "        listener.propertyChange(listener);\n" //
+				+ "    }\n" //
+				+ "    interface Cache<V> {\n" //
+				+ "        V get();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    final Cache<String> clientCache = new Cache<>() {\n" //
+				+ "        @Override\n" //
+				+ "        public String get() {\n" //
+				+ "            listener.propertyChange(null);\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public interface PropertyChangeListener {\n" //
+				+ "        void propertyChange(Object evt);\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private final PropertyChangeListener listener = evt -> {\n" //
+				+ "        this.clientCache.get();\n" //
+				+ "    };\n" //
+				+ "\n" //
+				+ "    public void x() {\n" //
+				+ "        PropertyChangeListener listener = evt -> {\n" //
+				+ "            clientCache.get();\n" //
+				+ "        };\n" //
+				+ "        listener.propertyChange(listener);\n" //
+				+ "    }\n" //
+				+ "    interface Cache<V> {\n" //
+				+ "        V get();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    final Cache<String> clientCache = new Cache<>() {\n" //
+				+ "        @Override\n" //
+				+ "        public String get() {\n" //
+				+ "            listener.propertyChange(null);\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "}\n";
+		String expected1= sample;
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+    }
+
 }

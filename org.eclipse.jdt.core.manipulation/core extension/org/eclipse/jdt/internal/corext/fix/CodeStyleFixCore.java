@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,16 +31,19 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -266,6 +269,12 @@ public class CodeStyleFixCore extends CompilationUnitRewriteOperationsFixCore {
 			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY))
 				return true;
 
+			ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(node, LambdaExpression.class, BodyDeclaration.class);
+			if (ancestor instanceof LambdaExpression lambdaAncestor) {
+				if (ASTNodes.getFirstAncestorOrNull(lambdaAncestor, FieldDeclaration.class) != null) {
+					return false;
+				}
+			}
 			Name qualifier= ((ThisExpression) expression).getQualifier();
 			if (qualifier != null) {
 				ITypeBinding outerClass= (ITypeBinding) qualifier.resolveBinding();
