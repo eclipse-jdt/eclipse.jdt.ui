@@ -168,6 +168,7 @@ import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.RemoveVarOrInferredLambdaParameterTypesFixCore;
+import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
@@ -340,6 +341,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getStringConcatToTextBlockProposal(context, coveringNode, null)
 					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null)
+					|| getSplitTryResourceProposal(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null);
 		}
 		return false;
@@ -416,6 +418,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertToSwitchExpressionProposals(context, coveringNode, resultingCollections);
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
+				getSplitTryResourceProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -3695,6 +3698,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		return true;
+	}
+
+	private static boolean getSplitTryResourceProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
+		if (proposals == null) {
+			return SplitTryResourceFixCore.initialConditionsCheck(context.getCompilationUnit(), coveringNode);
+		}
+		SplitTryResourceFixCore fix= SplitTryResourceFixCore.createSplitVariableFix(context.getASTRoot(), coveringNode);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, IProposalRelevance.INVERT_EQUALS, image, context);
+			proposals.add(proposal);
+			return true;
+		}
+		return false;
 	}
 
 	private boolean getConvertFieldNamingConventionProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
