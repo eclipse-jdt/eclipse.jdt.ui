@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
@@ -402,7 +403,8 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 
 					typeMethodRef.setType(copyType(cuRewrite, ast, typeMethodInvocation, classBinding));
 					typeMethodRef.setName(ASTNodes.createMoveTarget(rewrite, typeMethodInvocation.getName()));
-					ASTNodes.replaceButKeepComment(rewrite, visited, typeMethodRef, group);
+					ASTNode replacementNode1= castMethodRefIfNeeded(cuRewrite, ast, typeMethodRef);
+					ASTNodes.replaceButKeepComment(rewrite, visited, replacementNode1, group);
 					break;
 
 				case METHOD_REF:
@@ -416,7 +418,8 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 					}
 
 					methodRef.setName(ASTNodes.createMoveTarget(rewrite, methodInvocation.getName()));
-					ASTNodes.replaceButKeepComment(rewrite, visited, methodRef, group);
+					ASTNode replacementNode2= castMethodRefIfNeeded(cuRewrite, ast, methodRef);
+					ASTNodes.replaceButKeepComment(rewrite, visited, replacementNode2, group);
 					break;
 
 				case SUPER_METHOD_REF:
@@ -424,7 +427,8 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 					SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) bodyExpression;
 
 					superMethodRef.setName(ASTNodes.createMoveTarget(rewrite, superMethodInvocation.getName()));
-					ASTNodes.replaceButKeepComment(rewrite, visited, superMethodRef, group);
+					ASTNode replacementNode3= castMethodRefIfNeeded(cuRewrite, ast, superMethodRef);
+					ASTNodes.replaceButKeepComment(rewrite, visited, replacementNode3, group);
 					break;
 
 				case CLASS_INSTANCE_REF:
@@ -443,7 +447,8 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 
 					instanceOfMethodRef.setExpression(typeLiteral);
 					instanceOfMethodRef.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
-					ASTNodes.replaceButKeepComment(rewrite, visited, instanceOfMethodRef, group);
+					ASTNode replacementNode4= castMethodRefIfNeeded(cuRewrite, ast, instanceOfMethodRef);
+					ASTNodes.replaceButKeepComment(rewrite, visited, replacementNode4, group);
 					break;
 
 				case DO_NOTHING:
@@ -460,6 +465,50 @@ public class LambdaExpressionAndMethodRefFixCore extends CompilationUnitRewriteO
 					break;
 
 			}
+		}
+
+		private ASTNode castMethodRefIfNeeded(final CompilationUnitRewrite cuRewrite, AST ast, Expression methodRef) {
+			boolean needCast= false;
+			ASTNode replacementNode= methodRef;
+			if (visited.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				MethodInvocation parent= (MethodInvocation) visited.getParent();
+				List<Expression> args= parent.arguments();
+				IMethodBinding parentBinding= parent.resolveMethodBinding();
+				if (parentBinding != null) {
+					ITypeBinding parentTypeBinding= parentBinding.getDeclaringClass();
+					while (parentTypeBinding != null) {
+						IMethodBinding[] parentTypeMethods= parentTypeBinding.getDeclaredMethods();
+						for (IMethodBinding parentTypeMethod : parentTypeMethods) {
+							if (parentTypeMethod.getName().equals(parentBinding.getName()) && !parentTypeMethod.isEqualTo(parentBinding)) {
+								needCast= true;
+								break;
+							}
+						}
+						if (!needCast) {
+							parentTypeBinding= parentTypeBinding.getSuperclass();
+						} else {
+							break;
+						}
+					}
+					if (needCast) {
+						for (Expression arg : args) {
+							if (arg == visited) {
+								CastExpression cast= ast.newCastExpression();
+								cast.setExpression(methodRef);
+								ITypeBinding argTypeBinding= arg.resolveTypeBinding();
+								if (argTypeBinding == null) {
+									return replacementNode;
+								}
+								ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+								Type argType= importRewriter.addImport(argTypeBinding, ast);
+								cast.setType(argType);
+								replacementNode= cast;
+							}
+						}
+					}
+				}
+			}
+			return replacementNode;
 		}
 
 		private void copyParameters(final ASTRewrite rewrite, final LambdaExpression oldLambdaExpression, final LambdaExpression copyOfLambdaExpression) {
