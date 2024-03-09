@@ -2262,6 +2262,41 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDoNotConvertGenericInterface() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class C2 {\n" //
+				+ "\n" //
+				+ "    public interface IInteractionContext {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public interface IAdaptable {\n" //
+				+ "        public <T> T getAdapter(Class<T> adapter);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @SuppressWarnings(\"unchecked\")\n" //
+				+ "    public IAdaptable asAdaptable(final IInteractionContext result) {\n" //
+				+ "        return new IAdaptable() {\n" //
+				+ "            public Object getAdapter(Class adapter) {\n" //
+				+ "                if (adapter == IInteractionContext.class) {\n" //
+				+ "                    return result;\n" //
+				+ "                }\n" //
+				+ "                return null;\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", sample, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
 	public void testComparingOnCriteria() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
