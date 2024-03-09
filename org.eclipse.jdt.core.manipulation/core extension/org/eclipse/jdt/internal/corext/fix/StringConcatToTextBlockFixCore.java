@@ -308,6 +308,22 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (newLine) {
 				buf.append(fIndent);
 			}
+			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+			int i= buf.length() - 1;
+			int count= 0;
+			while (i >= 0 && buf.charAt(i) == '"' && count <= 3) {
+				--i;
+				++count;
+			}
+			if (i >= 0 && buf.charAt(i) == '\\') {
+				--count;
+			}
+			for (i= count; i > 0; --i) {
+				buf.deleteCharAt(buf.length() - 1);
+			}
+			for (i= count; i > 0; --i) {
+				buf.append("\\\""); //$NON-NLS-1$
+			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			if (!isTagged) {
 				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
@@ -370,7 +386,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				for (int j = 0; j < quoteCount % 3; j++) {
 					transformed.append("\""); //$NON-NLS-1$
 				}
-
 				readIndex= bsIndex + 2 * quoteCount;
 			} else if (escapedText.startsWith("\\t", bsIndex)) { //$NON-NLS-1$ "\t"
 				transformed.append(escapedText.substring(readIndex, bsIndex));
@@ -728,6 +743,23 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			if (newLine) {
 				buf.append(fIndent);
+			}
+
+			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+			int readIndex= buf.length() - 1;
+			int count= 0;
+			while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
+				--readIndex;
+				++count;
+			}
+			if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
+				--count;
+			}
+			for (int i= count; i > 0; --i) {
+				buf.deleteCharAt(buf.length() - 1);
+			}
+			for (int i= count; i > 0; --i) {
+				buf.append("\\\""); //$NON-NLS-1$
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			MethodInvocation firstToStringCall= fToStringList.get(0);
