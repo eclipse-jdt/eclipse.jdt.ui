@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
@@ -33,7 +34,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
@@ -238,7 +238,7 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			AST ast= cuRewrite.getAST();
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			MethodReference replacement;
+			ASTNode replacement;
 
 			if (exprBody instanceof ClassInstanceCreation) {
 				CreationReference creationReference= ast.newCreationReference();
@@ -253,11 +253,11 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 				creationReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, cic.typeArguments()));
 			} else if (exprBody instanceof ArrayCreation) {
 				CreationReference creationReference= ast.newCreationReference();
-				replacement= creationReference;
 
 				ArrayType arrayType= ((ArrayCreation) exprBody).getType();
 				Type copiedElementType= (Type) rewrite.createCopyTarget(arrayType.getElementType());
 				creationReference.setType(ast.newArrayType(copiedElementType, arrayType.getDimensions()));
+				replacement= castMethodRefIfNeeded(cuRewrite, ast, creationReference);
 			} else if (exprBody instanceof SuperMethodInvocation) {
 				SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) exprBody;
 				IMethodBinding methodBinding= superMethodInvocation.resolveMethodBinding();
@@ -265,22 +265,22 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 
 				if (Modifier.isStatic(methodBinding.getModifiers())) {
 					TypeMethodReference typeMethodReference= ast.newTypeMethodReference();
-					replacement= typeMethodReference;
 
 					typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 					ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(superMethodInvocation, methodBinding, superQualifier);
 					typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding.getTypeDeclaration(), ast));
 					typeMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
+					replacement= castMethodRefIfNeeded(cuRewrite, ast, typeMethodReference);
 				} else {
 					SuperMethodReference superMethodReference= ast.newSuperMethodReference();
-					replacement= superMethodReference;
 
 					if (superQualifier != null) {
 						superMethodReference.setQualifier((Name) rewrite.createCopyTarget(superQualifier));
 					}
 					superMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
 					superMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
+					replacement= castMethodRefIfNeeded(cuRewrite, ast, superMethodReference);
 				}
 			} else if (exprBody instanceof InstanceofExpression) {
 				InstanceofExpression instanceofExpression= (InstanceofExpression) exprBody;
@@ -291,7 +291,7 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 				typeLiteral.setType(importRewrite.addImport(instanceofTypeBinding.getTypeDeclaration(), ast));
 				expMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
 				expMethodReference.setExpression(typeLiteral);
-				replacement= expMethodReference;
+				replacement= castMethodRefIfNeeded(cuRewrite, ast, expMethodReference);
 			} else { // MethodInvocation
 				MethodInvocation methodInvocation= (MethodInvocation) exprBody;
 				IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
@@ -302,7 +302,6 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 
 				if (isStaticMethod || isTypeRefToInstanceMethod) {
 					TypeMethodReference typeMethodReference= ast.newTypeMethodReference();
-					replacement= typeMethodReference;
 
 					typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
@@ -311,10 +310,9 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(lambda, importRewrite);
 					typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast, importRewriteContext, TypeLocation.OTHER));
 					typeMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
-
+					replacement= castMethodRefIfNeeded(cuRewrite, ast, typeMethodReference);
 				} else {
 					ExpressionMethodReference exprMethodReference= ast.newExpressionMethodReference();
-					replacement= exprMethodReference;
 
 					exprMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
 					if (invocationQualifier != null) {
@@ -355,10 +353,55 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 						exprMethodReference.setExpression(newThisExpression);
 					}
 					exprMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
+					replacement= castMethodRefIfNeeded(cuRewrite, ast, exprMethodReference);
 				}
 			}
 
 			ASTNodes.replaceButKeepComment(rewrite, lambda, replacement, null);
+		}
+
+		private ASTNode castMethodRefIfNeeded(final CompilationUnitRewrite cuRewrite, AST ast, Expression methodRef) {
+			boolean needCast= false;
+			ASTNode replacementNode= methodRef;
+			if (lambda.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				MethodInvocation parent= (MethodInvocation) lambda.getParent();
+				List<Expression> args= parent.arguments();
+				IMethodBinding parentBinding= parent.resolveMethodBinding();
+				if (parentBinding != null) {
+					ITypeBinding parentTypeBinding= parentBinding.getDeclaringClass();
+					while (parentTypeBinding != null) {
+						IMethodBinding[] parentTypeMethods= parentTypeBinding.getDeclaredMethods();
+						for (IMethodBinding parentTypeMethod : parentTypeMethods) {
+							if (parentTypeMethod.getName().equals(parentBinding.getName()) && !parentTypeMethod.isEqualTo(parentBinding)) {
+								needCast= true;
+								break;
+							}
+						}
+						if (!needCast) {
+							parentTypeBinding= parentTypeBinding.getSuperclass();
+						} else {
+							break;
+						}
+					}
+					if (needCast) {
+						for (Expression arg : args) {
+							if (arg == lambda) {
+								CastExpression cast= ast.newCastExpression();
+								cast.setExpression(methodRef);
+								ITypeBinding argTypeBinding= arg.resolveTypeBinding();
+								if (argTypeBinding == null) {
+									return replacementNode;
+								}
+								ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+								Type argType= importRewriter.addImport(argTypeBinding, ast);
+								cast.setType(argType);
+								replacementNode= cast;
+							}
+						}
+					}
+				}
+			}
+			return replacementNode;
 		}
 
 		/*

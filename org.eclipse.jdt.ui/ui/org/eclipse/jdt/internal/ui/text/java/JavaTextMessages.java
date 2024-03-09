@@ -44,6 +44,7 @@ final class JavaTextMessages extends NLS {
 	public static String GetterSetterCompletionProposal_setter_label;
 	public static String MethodCompletionProposal_constructor_label;
 	public static String MethodCompletionProposal_method_label;
+	public static String RecordAccessorCompletionProposal_accessor_label;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaTextMessages.class);

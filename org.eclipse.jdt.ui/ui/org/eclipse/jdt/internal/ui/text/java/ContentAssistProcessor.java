@@ -93,7 +93,6 @@ import org.eclipse.jdt.internal.ui.util.Progress;
  * contexts are provided)</li>
  * <li><code>getErrorMessage</code> to change error reporting</li>
  * </ul>
- * </p>
  *
  * @since 3.2
  */

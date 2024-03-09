@@ -19,8 +19,12 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.BadLocationException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -52,7 +56,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -256,12 +260,13 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 
 			Statement lastAppend= insertAfter;
 			int tagsCount= 0;
+			CompilationUnit compilationUnit= (CompilationUnit)oldInfixExpression.getRoot();
 			for (Expression operand : operands) {
 				boolean tagged= false;
-				NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
+				NLSLine nlsLine= scanCurrentLine(cu, operand);
 				if (nlsLine != null) {
 					for (NLSElement element : nlsLine.getElements()) {
-						if (element.getPosition().getOffset() == operand.getStartPosition()) {
+						if (element.getPosition().getOffset() == compilationUnit.getColumnNumber(operand.getStartPosition())) {
 							if (element.hasTag()) {
 								tagged= true;
 								++tagsCount;
@@ -318,5 +323,23 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 				linkedModel.setEndPosition(rewrite.track(bufferToString));
 			}
 		}
+
+		private static NLSLine scanCurrentLine(ICompilationUnit cu, Expression exp) {
+			CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
+			int startLine= cUnit.getLineNumber(exp.getStartPosition());
+			int startLinePos= cUnit.getPosition(startLine, 0);
+			int endOfLine= cUnit.getPosition(startLine + 1, 0);
+			NLSLine[] lines;
+			try {
+				lines= NLSScanner.scan(cu.getBuffer().getText(startLinePos, endOfLine - startLinePos));
+				if (lines.length > 0) {
+					return lines[0];
+				}
+			} catch (IndexOutOfBoundsException | JavaModelException | InvalidInputException | BadLocationException e) {
+				// fall-through
+			}
+			return null;
+		}
+
 	}
 }

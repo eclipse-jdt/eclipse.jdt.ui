@@ -64,7 +64,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * <li>Provides a result method (usually <code>toString()</code>), that is a method that takes no
  * arguments and returns a String</li>
  * </ul>
- * </p>
  * <p>
  * Generated methods look like this:
  *
@@ -76,8 +75,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * 	return builder.toString();
  * }
  * </pre>
- *
- * </p>
  *
  * @since 3.5
  */

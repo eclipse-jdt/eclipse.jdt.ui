@@ -52,7 +52,6 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * {@link PropertiesFileEscapes#containsInvalidEscapeSequence(String)}</li>
  * <li>a character which requires Unicode escapes</li>
  * </ul>
- * </p>
  *
  * @since 3.7
  */

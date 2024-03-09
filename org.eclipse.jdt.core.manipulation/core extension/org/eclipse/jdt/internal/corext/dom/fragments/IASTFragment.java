@@ -51,7 +51,7 @@ public interface IASTFragment {
 	 * are the same, or that they map (via getAssociatedNode()) to the
 	 * same node.
 	 * @param other the element to test with
-	 * @return return <code> true if the passed element matches the current element.
+	 * @return return <code>true</code> if the passed element matches the current element.
 	 */
 	boolean matches(IASTFragment other);
 

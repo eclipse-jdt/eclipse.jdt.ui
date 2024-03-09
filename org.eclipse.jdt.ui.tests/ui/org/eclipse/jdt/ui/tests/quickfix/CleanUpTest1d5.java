@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3090,6 +3090,52 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 					+ "        }\n" //
 					+ "    }\n" //
 					+ "}\n";
+
+			// When
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", given, false, null);
+			enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+			// Then
+			assertNotEquals("The class must be changed", given, expected);
+			assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+					new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+		} catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            fail(sw.toString());
+		}
+	}
+
+	@Test
+	public void testUnnecessaryArrayNLS() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1213
+		try {
+			// Given
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
+			String given= "" //
+					+ "import java.util.Arrays;\n" //
+					+ "import java.util.List;\n" //
+					+ "\n" //
+					+ "public class NLS {\n" //
+					+ "    private static final List<String> WHITELISTED_IDS = Arrays\n" //
+					+ "            .asList(new String[] { \"org.eclipse.search.text.FileSearchResultPage\", //$NON-NLS-1$\n" //
+					+ "                    \"org.eclipse.jdt.ui.JavaSearchResultPage\", //$NON-NLS-1$\n" //
+					+ "                    \"org.eclipse.jdt.ui.CodeGeneration\", \n" //
+					+ "                    \"org.eclipse.jdt.ui.ISharedImages\", //$NON-NLS-1$\n" //
+					+ "                    \"org.eclipse.jdt.ui.IWorkingCopyManager\" }); //$NON-NLS-1$\n" //
+					+ "}\n"; //
+			String expected= "" //
+					+ "import java.util.Arrays;\n" //
+					+ "import java.util.List;\n" //
+					+ "\n" //
+					+ "public class NLS {\n" //
+					+ "    private static final List<String> WHITELISTED_IDS = Arrays\n" //
+					+ "                .asList(\"org.eclipse.search.text.FileSearchResultPage\", //$NON-NLS-1$\n" //
+					+ "                        \"org.eclipse.jdt.ui.JavaSearchResultPage\", //$NON-NLS-1$\n" //
+					+ "                        \"org.eclipse.jdt.ui.CodeGeneration\", \n" //
+					+ "                        \"org.eclipse.jdt.ui.ISharedImages\", //$NON-NLS-1$\n" //
+					+ "                        \"org.eclipse.jdt.ui.IWorkingCopyManager\"); //$NON-NLS-1$\n" //
+					+ "}\n"; //
 
 			// When
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", given, false, null);

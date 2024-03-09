@@ -52,7 +52,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>Within an interface modifiers <code>public</code>, <code>static</code> and <code>final</code>
  * are redundant for field declarations.</li>
  * <li>Within an interface modifier <code>public</code> and
- * <code>abstract</code are redundant for method declarations.</li>
+ * <code>abstract</code> are redundant for method declarations.</li>
  * <li>Within a final class the <code>final</code> modifier is redundant for method
  * declarations.</li>
  * <li>For nested interfaces the <code>static</code> modifier is redundant.</li>

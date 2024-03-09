@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.*;
  * </p>
  *
  * <p>
- * <b>Details:<b>
+ * <b>Details:</b>
  * </p>
  *
  * <p>
@@ -665,6 +665,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 
 	public void endVisit(Pattern node) {
 		endVisit((Expression)node);
+	}
+
+	@Override
+	public boolean visit(EitherOrMultiPattern node) {
+		return visit((Pattern) node);
+	}
+
+	@Override
+	public void endVisit(EitherOrMultiPattern node) {
+		endVisit((Pattern) node);
 	}
 
 	@Override

@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 /**
  * Matches two pieces of code on semantic (not on syntax).
  * ASTSemanticMatcher.java matches more cases than ASTMatcher.java:
+ * <pre>{@code
  * - Inverted commutative operations:
  *   k + 1
  *   1 + k
@@ -91,6 +92,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * - Inverted if statements or ternary expressions:
  *   if (isValid) k++; else m--;
  *   if (!isValid) m--; else k++;
+ * }</pre>
  *
  * You can also match opposite boolean expressions:
  * ASTSemanticMatcher.matchOpposite()

@@ -418,6 +418,63 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToLambda08() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(new IOverwriteQuery() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public String queryOverwrite(String pathString) {\n" //
+				+ "                return ALL;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String original= sample;
+		ICompilationUnit cu1= pack1.createCompilationUnit("C1.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		sample= "" //
+				+ "package test1;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testConvertToLambdaWithConstant() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= "" //
@@ -1817,6 +1874,219 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testIssue1047_1() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    void func( String ... args) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Supplier<Object> r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called(() -> func());\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		String expected= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    void func( String ... args) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Supplier<Object> r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called((Runnable) this::func);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
+	public void testIssue1047_2() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given1= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    void called( Supplier<Object> r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack.createCompilationUnit("E1.java", given1, false, null);
+
+		String given= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends E1 {\n" //
+				+ "\n" //
+				+ "    void func( String ... args) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called(() -> func());\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		String expected= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends E1 {\n" //
+				+ "\n" //
+				+ "    void func( String ... args) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called((Runnable) this::func);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
+	public void testIssue1047_3() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given1= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    void func( String ... args) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Supplier<Object> r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack.createCompilationUnit("E1.java", given1, false, null);
+
+		String given= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends E1 {\n" //
+				+ "\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called(() -> super.func());\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		String expected= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends E1 {\n" //
+				+ "\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called((Runnable) super::func);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
+	public void testIssue1047_4() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given1= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E1 {\n" //
+				+ "\n" //
+				+ "    static void func( String ... args) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void called( Supplier<Object> r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu1= pack.createCompilationUnit("E1.java", given1, false, null);
+
+		String given= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends E1 {\n" //
+				+ "\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called(() -> E1.func());\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+
+		String expected= "" //
+				+ "import java.util.function.Supplier;\n" //
+				+ "\n" //
+				+ "public class E extends E1 {\n" //
+				+ "\n" //
+				+ "    void called( Runnable r ) {\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "    void test() {\n" //
+				+ "        called((Runnable) E1::func);\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
 	public void testBug579393() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1987,6 +2257,41 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", sample, false, null);
 
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testDoNotConvertGenericInterface() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class C2 {\n" //
+				+ "\n" //
+				+ "    public interface IInteractionContext {\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public interface IAdaptable {\n" //
+				+ "        public <T> T getAdapter(Class<T> adapter);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    @SuppressWarnings(\"unchecked\")\n" //
+				+ "    public IAdaptable asAdaptable(final IInteractionContext result) {\n" //
+				+ "        return new IAdaptable() {\n" //
+				+ "            public Object getAdapter(Class adapter) {\n" //
+				+ "                if (adapter == IInteractionContext.class) {\n" //
+				+ "                    return result;\n" //
+				+ "                }\n" //
+				+ "                return null;\n" //
+				+ "            }\n" //
+				+ "        };\n" //
+				+ "    }\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", sample, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
@@ -6210,5 +6515,80 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1, cu2 });
 	}
+
+	@Test
+	public void testRemoveThisIssue1211() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1211
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public interface PropertyChangeListener {\n" //
+				+ "        void propertyChange(Object evt);\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private final PropertyChangeListener listener = evt -> {\n" //
+				+ "        this.clientCache.get();\n" //
+				+ "    };\n" //
+				+ "\n" //
+				+ "    public void x() {\n" //
+				+ "        PropertyChangeListener listener = evt -> {\n" //
+				+ "            this.clientCache.get();\n" //
+				+ "        };\n" //
+				+ "        listener.propertyChange(listener);\n" //
+				+ "    }\n" //
+				+ "    interface Cache<V> {\n" //
+				+ "        V get();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    final Cache<String> clientCache = new Cache<>() {\n" //
+				+ "        @Override\n" //
+				+ "        public String get() {\n" //
+				+ "            listener.propertyChange(null);\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
+		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_IF_NECESSARY);
+
+		sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class A {\n" //
+				+ "    public interface PropertyChangeListener {\n" //
+				+ "        void propertyChange(Object evt);\n" //
+				+ "\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    private final PropertyChangeListener listener = evt -> {\n" //
+				+ "        this.clientCache.get();\n" //
+				+ "    };\n" //
+				+ "\n" //
+				+ "    public void x() {\n" //
+				+ "        PropertyChangeListener listener = evt -> {\n" //
+				+ "            clientCache.get();\n" //
+				+ "        };\n" //
+				+ "        listener.propertyChange(listener);\n" //
+				+ "    }\n" //
+				+ "    interface Cache<V> {\n" //
+				+ "        V get();\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    final Cache<String> clientCache = new Cache<>() {\n" //
+				+ "        @Override\n" //
+				+ "        public String get() {\n" //
+				+ "            listener.propertyChange(null);\n" //
+				+ "            return \"\";\n" //
+				+ "        }\n" //
+				+ "    };\n" //
+				+ "}\n";
+		String expected1= sample;
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+    }
 
 }

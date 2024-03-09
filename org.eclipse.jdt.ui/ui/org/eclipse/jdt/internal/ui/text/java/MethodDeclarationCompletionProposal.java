@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
@@ -58,6 +59,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 
 	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set<String> suggestedMethods, Collection<IJavaCompletionProposal> result) throws CoreException {
 		IMethod[] methods= type.getMethods();
+		IField[] components= type.getRecordComponents();
 		if (!type.isInterface()) {
 			String constructorName= type.getElementName();
 			if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName) && suggestedMethods.add(constructorName)) {
@@ -65,15 +67,25 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 			}
 		}
 
-		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
-			if (!JavaConventionsUtil.validateMethodName(prefix, type).matches(IStatus.ERROR))
+		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && !hasRecordComponent(components, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
+			if (!JavaConventionsUtil.validateMethodName(prefix, type).matches(IStatus.ERROR)) {
 				result.add(new MethodDeclarationCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
+			}
 		}
 	}
 
 	private static boolean hasMethod(IMethod[] methods, String name) {
 		for (IMethod curr : methods) {
 			if (curr.getElementName().equals(name) && curr.getParameterTypes().length == 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean hasRecordComponent(IField[] components, String name) {
+		for (IField curr : components) {
+			if (curr.getElementName().equals(name)) {
 				return true;
 			}
 		}
@@ -140,7 +152,9 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 			}
 		}
 		if (fReturnTypeSig != null) {
-			if (!isInterface) {
+			if (fType.isRecord()) {
+				buf.append("public "); //$NON-NLS-1$
+			} else if (!isInterface) {
 				buf.append("private "); //$NON-NLS-1$
 			}
 		} else {

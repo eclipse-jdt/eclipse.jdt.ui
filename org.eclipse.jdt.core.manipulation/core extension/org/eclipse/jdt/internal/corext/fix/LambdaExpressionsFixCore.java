@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2023 IBM Corporation and others.
+ * Copyright (c) 2013, 2024 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -751,12 +750,12 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 									methodRef.setExpression(ast.newThisExpression());
 								}
 								methodRef.setName(ASTNodes.createMoveTarget(rewrite, methodInvocation.getName()));
-								cicReplacement= methodRef;
+								cicReplacement= castMethodRefIfNeeded(cuRewrite, ast, methodRef, classInstanceCreation);
 							} else if (methodInvocationCheck.status() == MethodRefStatus.TYPE_REF) {
 								TypeMethodReference typeMethodRef= ast.newTypeMethodReference();
 								typeMethodRef.setType(copyType(cuRewrite, ast, methodInvocation, methodInvocationCheck.classBinding()));
 								typeMethodRef.setName(ASTNodes.createMoveTarget(rewrite, methodInvocation.getName()));
-								cicReplacement= typeMethodRef;
+								cicReplacement= castMethodRefIfNeeded(cuRewrite, ast, typeMethodRef, classInstanceCreation);
 							}
 						}
 					} else if (lambdaBody instanceof ClassInstanceCreation invokedClassInstanceCreation) {
@@ -775,7 +774,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						if (methodDeclaration.parameters().size() == arguments.size() && areSameIdentifiers(methodDeclaration, arguments)) {
 							SuperMethodReference superMethodRef= ast.newSuperMethodReference();
 							superMethodRef.setName(ASTNodes.createMoveTarget(rewrite, superMethodInvocation.getName()));
-							cicReplacement= superMethodRef;
+							cicReplacement= castMethodRefIfNeeded(cuRewrite, ast, superMethodRef, classInstanceCreation);
 						}
 					} else if (lambdaBody instanceof InstanceofExpression instanceofExpression) {
 						Expression leftOp= instanceofExpression.getLeftOperand();
@@ -785,7 +784,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 							typeLiteral.setType(copyType(cuRewrite, ast, instanceofExpression, instanceofExpression.getRightOperand().resolveBinding()));
 							instanceofMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
 							instanceofMethodReference.setExpression(typeLiteral);
-							cicReplacement= instanceofMethodReference;
+							cicReplacement= castMethodRefIfNeeded(cuRewrite, ast, instanceofMethodReference, classInstanceCreation);
 						}
 					}
 				}
@@ -822,9 +821,11 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 										&& (variableBinding.getModifiers() & Modifier.STATIC) != 0
 										&& variableBinding.isField()
 										&& inheritedTypes.contains(variableBinding.getDeclaringClass())) {
-									Type copyOfClassName= (Type) rewrite.createCopyTarget(classInstanceCreation.getType());
-									QualifiedType replacement= ast.newQualifiedType(copyOfClassName, ASTNodes.createMoveTarget(rewrite, node));
-									rewrite.replace(node, replacement, group);
+									ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
+									if (cicBinding != null) {
+										Name replacement= ast.newName(cicBinding.getName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
+										rewrite.replace(node, replacement, group);
+									}
 									return false;
 								}
 							}
@@ -959,6 +960,50 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				importRemover.registerRemovedNode(classInstanceCreation);
 				importRemover.registerRetainedNode(lambdaBody);
 			}
+		}
+
+		private Expression castMethodRefIfNeeded(final CompilationUnitRewrite cuRewrite, AST ast, Expression methodRef, Expression visited) {
+			boolean needCast= false;
+			Expression replacementNode= methodRef;
+			if (visited.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				MethodInvocation parent= (MethodInvocation) visited.getParent();
+				List<Expression> args= parent.arguments();
+				IMethodBinding parentBinding= parent.resolveMethodBinding();
+				if (parentBinding != null) {
+					ITypeBinding parentTypeBinding= parentBinding.getDeclaringClass();
+					while (parentTypeBinding != null) {
+						IMethodBinding[] parentTypeMethods= parentTypeBinding.getDeclaredMethods();
+						for (IMethodBinding parentTypeMethod : parentTypeMethods) {
+							if (parentTypeMethod.getName().equals(parentBinding.getName()) && !parentTypeMethod.isEqualTo(parentBinding)) {
+								needCast= true;
+								break;
+							}
+						}
+						if (!needCast) {
+							parentTypeBinding= parentTypeBinding.getSuperclass();
+						} else {
+							break;
+						}
+					}
+					if (needCast) {
+						for (Expression arg : args) {
+							if (arg == visited) {
+								CastExpression cast= ast.newCastExpression();
+								cast.setExpression(methodRef);
+								ITypeBinding argTypeBinding= arg.resolveTypeBinding();
+								if (argTypeBinding == null) {
+									return replacementNode;
+								}
+								ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+								Type argType= importRewriter.addImport(argTypeBinding, ast);
+								cast.setType(argType);
+								replacementNode= cast;
+							}
+						}
+					}
+				}
+			}
+			return replacementNode;
 		}
 
 		private static void collectInheritedTypes(final ITypeBinding anonymType, final Set<ITypeBinding> inheritedTypes) {
@@ -1247,7 +1292,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		if (interfaces.length != 1) {
 			return false;
 		}
-		if (interfaces[0].getFunctionalInterfaceMethod() == null) {
+		if (interfaces[0].getFunctionalInterfaceMethod() == null || interfaces[0].getFunctionalInterfaceMethod().isGenericMethod()) {
 			return false;
 		}
 

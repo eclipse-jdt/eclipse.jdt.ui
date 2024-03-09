@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -160,17 +160,6 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "\n" //
-				+ "    public long matchPatternInAndExpression(Object object, boolean isValid) {\n" //
-				+ "        if (object instanceof Date & isValid) {\n" //
-				+ "            // Keep this comment\n" //
-				+ "            Date date = (Date) object;\n" //
-				+ "            return date.getTime();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return 0;\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public long matchPatternInElse(Object object) {\n" //
 				+ "        if (!(object instanceof Date)) {\n" //
 				+ "            return 0;\n" //
@@ -182,15 +171,6 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInConditionalOrExpression(Object object, boolean isValid) {\n" //
 				+ "        if (!(object instanceof Date) || isValid) {\n" //
-				+ "            return 0;\n" //
-				+ "        } else {\n" //
-				+ "            Date date = (Date) object;\n" //
-				+ "            return date.getTime();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public long matchPatternInOrExpression(Object object, boolean isValid) {\n" //
-				+ "        if (isValid | !(object instanceof Date)) {\n" //
 				+ "            return 0;\n" //
 				+ "        } else {\n" //
 				+ "            Date date = (Date) object;\n" //
@@ -254,16 +234,6 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "        return 0;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "\n" //
-				+ "    public long matchPatternInAndExpression(Object object, boolean isValid) {\n" //
-				+ "        if (object instanceof Date date & isValid) {\n" //
-				+ "            // Keep this comment\n" //
-				+ "            return date.getTime();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return 0;\n" //
-				+ "    }\n" //
-				+ "\n" //
 				+ "    public long matchPatternInElse(Object object) {\n" //
 				+ "        if (!(object instanceof Date date)) {\n" //
 				+ "            return 0;\n" //
@@ -274,14 +244,6 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long matchPatternInConditionalOrExpression(Object object, boolean isValid) {\n" //
 				+ "        if (!(object instanceof Date date) || isValid) {\n" //
-				+ "            return 0;\n" //
-				+ "        } else {\n" //
-				+ "            return date.getTime();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public long matchPatternInOrExpression(Object object, boolean isValid) {\n" //
-				+ "        if (isValid | !(object instanceof Date date)) {\n" //
 				+ "            return 0;\n" //
 				+ "        } else {\n" //
 				+ "            return date.getTime();\n" //
@@ -368,6 +330,68 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		+ "}\n"; //
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
+	}
+
+	@Test
+	public void testOneIfWithPatternInstanceof() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1200
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    protected String getString(Number number) {\n" //
+				+ "\n" //
+				+ "        if (number instanceof Long n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Float n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Double n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Float n && n.isInfinite()) {\n" //
+				+ "            return \"Inf\"; //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Double m && m.isInfinite()) {\n" //
+				+ "            return \"Inf\"; //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH);
+
+		String expected= "" //
+				+ "package test1;\n" //
+				+ "\n" //
+				+ "public class E {\n" //
+				+ "\n" //
+				+ "    protected String getString(Number number) {\n" //
+				+ "\n" //
+				+ "        if (number instanceof Long n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Float n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if (number instanceof Double n) {\n" //
+				+ "            return n.toString();\n" //
+				+ "        }\n" //
+				+ "        if ((number instanceof Float n && n.isInfinite()) || (number instanceof Double m && m.isInfinite())) {\n" //
+				+ "            return \"Inf\"; //$NON-NLS-1$\n" //
+				+ "        }\n" //
+				+ "\n" //
+				+ "        return null;\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "}\n"; //
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.OneIfRatherThanDuplicateBlocksThatFallThroughCleanUp_description)));
 	}
 
 	@Test
@@ -478,7 +502,25 @@ public class CleanUpTest16 extends CleanUpTestCase {
 				+ "        Integer i = (Integer) bah;\n" //
 				+ "        System.out.println(i);\n" //
 				+ "    }\n" //
-				+ "}\n";
+				+ "\n" //
+				+ "    public void doNotMatchBitWiseAnd(boolean useStrikethroughForCompleted, Object data) {\n" //
+				+ "        if (data instanceof Long & useStrikethroughForCompleted) {\n" //
+				+ "            Long task = (Long)data;\n" //
+				+ "            if (task.intValue() == 0) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public void doNotMatchBitWiseOr(boolean useStrikethroughForCompleted, Object data) {\n" //
+				+ "        if (data instanceof Long | useStrikethroughForCompleted) {\n" //
+				+ "            Long task = (Long)data;\n" //
+				+ "            if (task.intValue() == 0) {\n" //
+				+ "                int i = 0;\n" //
+				+ "            }\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+			+ "}\n";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF);

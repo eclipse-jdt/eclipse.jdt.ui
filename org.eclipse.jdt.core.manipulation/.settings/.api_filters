@@ -59,6 +59,15 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="core extension/org/eclipse/jdt/internal/corext/fix/OneIfRatherThanDuplicateBlocksThatFallThroughFixCore.java" type="org.eclipse.jdt.internal.corext.fix.OneIfRatherThanDuplicateBlocksThatFallThroughFixCore$OneIfRatherThanDuplicateBlocksThatFallThroughFinder$SuccessiveIfVisitor$PatternNameVisitor">
+        <filter comment="Allow TypePattern.patternVariables() call" id="640712815">
+            <message_arguments>
+                <message_argument value="TypePattern"/>
+                <message_argument value="PatternNameVisitor"/>
+                <message_argument value="patternVariables()"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="core extension/org/eclipse/jdt/internal/corext/fix/PatternMatchingForInstanceofFixCore.java" type="org.eclipse.jdt.internal.corext.fix.PatternMatchingForInstanceofFixCore$PatternMatchingForInstanceofFixOperation">
         <filter comment="Need to set pattern of TypePatter" id="640712815">
             <message_arguments>

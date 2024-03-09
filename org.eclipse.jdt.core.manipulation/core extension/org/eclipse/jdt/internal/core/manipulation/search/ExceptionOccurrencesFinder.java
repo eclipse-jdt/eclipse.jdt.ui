@@ -285,7 +285,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			for (TagElement tag : tags) {
 				String tagName= tag.getTagName();
 				if (TagElement.TAG_EXCEPTION.equals(tagName) || TagElement.TAG_THROWS.equals(tagName)) {
-					ASTNode name= (ASTNode) tag.fragments().get(0);
+					ASTNode name= tag.fragments().isEmpty() ? null : (ASTNode) tag.fragments().get(0);
 					if (name instanceof Name) {
 						if (name != fSelectedNode && Bindings.equals(fException, ((Name) name).resolveBinding())) {
 							fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fDescription));

@@ -27,6 +27,7 @@ import org.eclipse.ui.IActionDelegate;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /** In plugin.xml:
+ * <pre>{@code
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
@@ -42,6 +43,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
          </action>
       </objectContribution>
    </extension>
+   }</pre>
  */
 
 public class AddJavaNatureAction extends Action implements IActionDelegate {

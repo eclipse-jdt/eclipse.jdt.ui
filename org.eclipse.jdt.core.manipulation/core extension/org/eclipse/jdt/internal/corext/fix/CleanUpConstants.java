@@ -645,10 +645,9 @@ public class CleanUpConstants {
 	public static String CONTROL_STATMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED= CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED;
 
 	/**
-	 * Replaces <code>if</code>/<code>else if</code>/<code>else</code> blocks to use <code>switch</code> where possible.
+	 * Replaces {@code if}/{@code else if}/{@code else} blocks to use {@code switch} where possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -763,10 +762,9 @@ public class CleanUpConstants {
 	public static final String USE_LAZY_LOGICAL_OPERATOR= "cleanup.lazy_logical_operator"; //$NON-NLS-1$
 
 	/**
-	 * Replace unnecessary primitive wrappers instance creations by using static factory <code>valueOf()</code> method.
+	 * Replace unnecessary primitive wrappers instance creations by using static factory {@code valueOf()} method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -775,10 +773,9 @@ public class CleanUpConstants {
 	public static final String VALUEOF_RATHER_THAN_INSTANTIATION= "cleanup.valueof_rather_than_instantiation"; //$NON-NLS-1$
 
 	/**
-	 * Replaces the <code>compareTo()</code> method by a comparison on primitive.
+	 * Replaces the {@code compareTo()} method by a comparison on primitive.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -790,7 +787,6 @@ public class CleanUpConstants {
 	 * Avoids to create primitive wrapper when parsing a string.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -799,10 +795,9 @@ public class CleanUpConstants {
 	public static final String PRIMITIVE_PARSING= "cleanup.primitive_parsing"; //$NON-NLS-1$
 
 	/**
-	 * Replaces a primitive boxing to serialize by a call to the static <code>toString()</code> method.
+	 * Replaces a primitive boxing to serialize by a call to the static {@code toString()} method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -814,7 +809,6 @@ public class CleanUpConstants {
 	 * Replace wrapper object by primitive type when an object is not necessary.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -911,7 +905,6 @@ public class CleanUpConstants {
 	 * Uses pattern matching for the instanceof operator when possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -975,7 +968,6 @@ public class CleanUpConstants {
 	 * method references.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -984,10 +976,9 @@ public class CleanUpConstants {
 	public static final String SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF= "cleanup.simplify_lambda_expression_and_method_ref"; //$NON-NLS-1$
 
 	/**
-	 * Replaces a plain comparator instance by a lambda expression passed to a <code>Comparator.comparing()</code> method.
+	 * Replaces a plain comparator instance by a lambda expression passed to a {@code Comparator.comparing()} method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -999,7 +990,6 @@ public class CleanUpConstants {
 	 * Precompiles the regular expressions.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1008,10 +998,9 @@ public class CleanUpConstants {
 	public static final String PRECOMPILE_REGEX= "cleanup.precompile_regex"; //$NON-NLS-1$
 
 	/**
-	 * Invert calls to <code>Object.equals(Object)</code> and <code>String.equalsIgnoreCase(String)</code> when it is known that the second operand is not null and the first can be null.
+	 * Invert calls to {@code Object.equals(Object)} and {@code String.equalsIgnoreCase(String)} when it is known that the second operand is not null and the first can be null.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1023,7 +1012,6 @@ public class CleanUpConstants {
 	 * Check for sign of bitwise operation.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1032,10 +1020,9 @@ public class CleanUpConstants {
 	public static final String CHECK_SIGN_OF_BITWISE_OPERATION= "cleanup.bitwise_conditional_expression"; //$NON-NLS-1$
 
 	/**
-	 * Fixes <code>Comparable.compareTo()</code> usage.
+	 * Fixes {@code Comparable.compareTo()} usage.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1047,7 +1034,6 @@ public class CleanUpConstants {
 	 * Removes a String instance from a String literal.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1059,7 +1045,6 @@ public class CleanUpConstants {
 	 * Refactor access to system properties to use constants or methods
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1069,14 +1054,13 @@ public class CleanUpConstants {
 
 	/**
 	 * Replace
-	 * <code>System.getProperty("file.separator")</code>
+	 * {@code System.getProperty("file.separator")}
 	 * by
 	 * <p>
-	 * <code>File.separator</code><br> or<br>
-	 * <code>FileSystems.getDefault().getSeparator()</code> (Java 7).
+	 * {@code File.separator}<br> or<br>
+	 * {@code FileSystems.getDefault().getSeparator()} (Java 7).
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1085,11 +1069,10 @@ public class CleanUpConstants {
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR= "cleanup.system_property_file_separator"; //$NON-NLS-1$
 
 	/**
-	 * Replace <code>System.getProperty("file.encoding")</code> by<p>
-	 * <code>Charset.defaultCharset().displayName()</code>
+	 * Replace {@code System.getProperty("file.encoding")} by<p>
+	 * {@code Charset.defaultCharset().displayName()}
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1098,11 +1081,10 @@ public class CleanUpConstants {
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING= "cleanup.system_property_file_encoding"; //$NON-NLS-1$
 
 	/**
-	 * Replace <code>System.getProperty("path.separator")</code> by<p>
-	 * <code>File.pathSeparator</code>
+	 * Replace {@code System.getProperty("path.separator")} by<p>
+	 * {@code File.pathSeparator}
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1111,11 +1093,10 @@ public class CleanUpConstants {
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR= "cleanup.system_property_path_separator"; //$NON-NLS-1$
 
 	/**
-	 * Replace <code>System.getProperty("line.separator")</code> by<p>
-	 * <code>System.lineSeparator()</code>
+	 * Replace {@code System.getProperty("line.separator")} by<p>
+	 * {@code System.lineSeparator()}
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1125,11 +1106,10 @@ public class CleanUpConstants {
 
 	/**
 	 * Replace Boolean/Long/Integer conversions using System properties to methods designed
-	 * for the purpose.  For example, replace: <p><code>Boolean.parseBoolean(System.getProperty("arbitrarykey"))</code></p> by<p>
-	 * <code>Boolean.getBoolean("arbitrarykey")</code>
+	 * for the purpose.  For example, replace: <p>{@code Boolean.parseBoolean(System.getProperty("arbitrarykey"))}</p> by<p>
+	 * {@code Boolean.getBoolean("arbitrarykey")}
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1141,7 +1121,6 @@ public class CleanUpConstants {
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1170,7 +1149,6 @@ public class CleanUpConstants {
 	 * Refactors a field into a local variable if its use is only local.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1182,7 +1160,6 @@ public class CleanUpConstants {
 	 * Add a break to avoid passive for loop iterations.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1191,10 +1168,9 @@ public class CleanUpConstants {
 	public static final String BREAK_LOOP= "cleanup.break_loop"; //$NON-NLS-1$
 
 	/**
-	 * Replace <code>while</code> by <code>do</code>/<code>while</code>.
+	 * Replace {@code while} by {@code do}/{@code while}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1203,10 +1179,9 @@ public class CleanUpConstants {
 	public static final String DO_WHILE_RATHER_THAN_WHILE= "cleanup.do_while_rather_than_while"; //$NON-NLS-1$
 
 	/**
-	 * Make inner <code>class</code> static.
+	 * Make inner {@code class} static.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1218,7 +1193,6 @@ public class CleanUpConstants {
 	 * Replaces String concatenation by StringBuilder when possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1233,7 +1207,6 @@ public class CleanUpConstants {
 	 * {@link #STRINGBUFFER_TO_STRINGBUILDER_FOR_LOCALS}<br>
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1290,7 +1263,6 @@ public class CleanUpConstants {
 	 * Replace deprecated method call with specified replacement if possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1299,10 +1271,9 @@ public class CleanUpConstants {
 	public static final String REPLACE_DEPRECATED_CALLS= "cleanup.replace_deprecated_calls"; //$NON-NLS-1$
 
 	/**
-	 * Replaces <code>String.replaceAll()</code> by <code>String.replace()</code>.
+	 * Replaces {@code String.replaceAll()} by {@code String.replace()}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1312,12 +1283,11 @@ public class CleanUpConstants {
 
 	/**
 	 * Replace
-	 * <code>s.strip().length() == 0</code>
+	 * {@code s.strip().length() == 0}
 	 * by
-	 * <code>s.isBlank()</code> (Java 11).
+	 * {@code s.isBlank()} (Java 11).
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1499,7 +1469,6 @@ public class CleanUpConstants {
 	 * Rewrites Eclipse-autogenerated hashcode method by Eclipse-autogenerated hashcode method for Java 7.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1520,10 +1489,9 @@ public class CleanUpConstants {
 	public static final String REMOVE_REDUNDANT_MODIFIERS= "cleanup.remove_redundant_modifiers"; //$NON-NLS-1$
 
 	/**
-	 * Removes the second <code>substring()</code> parameter if this parameter is the length of the string.
+	 * Removes the second {@code substring()} parameter if this parameter is the length of the string.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1535,7 +1503,6 @@ public class CleanUpConstants {
 	 * Replaces for loops to use String.join() where possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1547,7 +1514,6 @@ public class CleanUpConstants {
 	 * Replaces a for loop on an array that assigns the same value by a call to Arrays.fill().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1559,7 +1525,6 @@ public class CleanUpConstants {
 	 * Removes redundant null checks.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1571,7 +1536,6 @@ public class CleanUpConstants {
 	 * Raises embedded if into parent if.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1616,10 +1580,9 @@ public class CleanUpConstants {
 	public static final String PUSH_DOWN_NEGATION= "cleanup.push_down_negation"; //$NON-NLS-1$
 
 	/**
-	 * Directly checks boolean values instead of comparing them with <code>true</code>/<code>false</code>.
+	 * Directly checks boolean values instead of comparing them with {@code true}/{@code false}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1631,7 +1594,6 @@ public class CleanUpConstants {
 	 * Reduces double negation in boolean expression.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1643,7 +1605,6 @@ public class CleanUpConstants {
 	 * Removes useless bad value checks before assignments or return statements.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1655,7 +1616,6 @@ public class CleanUpConstants {
 	 * Remove super() call in constructor.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1664,10 +1624,9 @@ public class CleanUpConstants {
 	public static final String REDUNDANT_SUPER_CALL= "cleanup.no_super"; //$NON-NLS-1$
 
 	/**
-	 * Detect two successive <code>if</code> conditions that are identical and remove the second one.
+	 * Detect two successive {@code if} conditions that are identical and remove the second one.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1676,10 +1635,9 @@ public class CleanUpConstants {
 	public static final String UNREACHABLE_BLOCK= "cleanup.unreachable_block"; //$NON-NLS-1$
 
 	/**
-	 * Replaces (X && Y) || (X && Z) by (X && (Y || Z)).
+	 * Replaces {@code (X && Y) || (X && Z) by (X && (Y || Z))}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1688,10 +1646,9 @@ public class CleanUpConstants {
 	public static final String OPERAND_FACTORIZATION= "cleanup.operand_factorization"; //$NON-NLS-1$
 
 	/**
-	 * Replaces (X && Y) || (!X && Z) by X ? Y : Z.
+	 * Replaces {@code (X && Y) || (!X && Z) by X ? Y : Z}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1700,11 +1657,10 @@ public class CleanUpConstants {
 	public static final String TERNARY_OPERATOR= "cleanup.ternary_operator"; //$NON-NLS-1$
 
 	/**
-	 * Replaces <code>(X && !Y) || (!X && Y)</code> by <code>X ^ Y</code>.
-	 * Replaces also <code>(X && Y) || (!X && !Y)</code> by <code>X == Y</code>.
+	 * Replaces {@code (X && !Y) || (!X && Y)} by {@code X ^ Y}.
+	 * Replaces also {@code (X && Y) || (!X && !Y)} by {@code X == Y}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1716,7 +1672,6 @@ public class CleanUpConstants {
 	 * Merge conditions of if/else if/else that have the same blocks.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1729,7 +1684,6 @@ public class CleanUpConstants {
 	 * Ultimately it removes the empty and passive if conditions.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1738,10 +1692,9 @@ public class CleanUpConstants {
 	public static final String CONTROLFLOW_MERGE= "cleanup.controlflow_merge"; //$NON-NLS-1$
 
 	/**
-	 * Merge consecutive <code>if</code> statements with same code block that end with a jump statement.
+	 * Merge consecutive {@code if} statements with same code block that end with a jump statement.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1750,10 +1703,9 @@ public class CleanUpConstants {
 	public static final String ONE_IF_RATHER_THAN_DUPLICATE_BLOCKS_THAT_FALL_THROUGH= "cleanup.one_if_rather_than_duplicate_blocks_that_fall_through"; //$NON-NLS-1$
 
 	/**
-	 * Moves an inner <code>if</code> statement around the outer <code>if</code> condition.
+	 * Moves an inner {@code if} statement around the outer {@code if} condition.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1765,7 +1717,6 @@ public class CleanUpConstants {
 	 * Merges blocks that end with a jump statement into the following same code.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1777,7 +1728,6 @@ public class CleanUpConstants {
 	 * Remove a condition on an else that is negative to the condition of the previous if.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1801,7 +1751,6 @@ public class CleanUpConstants {
 	 * Replaces creating a new Collection, then invoking Collection.addAll() on it, by creating the new Collection with the other Collection as parameter.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1813,7 +1762,6 @@ public class CleanUpConstants {
 	 * Replaces creating a new Map, then invoking Map.putAll() on it, by creating the new Map with the other Map as parameter.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1825,7 +1773,6 @@ public class CleanUpConstants {
 	 * Remove passive assignment when the variable is reassigned before being read.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1838,7 +1785,6 @@ public class CleanUpConstants {
 	 * if necessary.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1862,7 +1808,6 @@ public class CleanUpConstants {
 	 * Remove the comparator declaration if it is the default one.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1886,7 +1831,6 @@ public class CleanUpConstants {
 	 * Replace the new instance syntax by curly brackets to create an array.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1898,7 +1842,6 @@ public class CleanUpConstants {
 	 * Removes unnecessary local variable declaration or unnecessary variable assignment before a return statement.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1910,7 +1853,6 @@ public class CleanUpConstants {
 	 * Removes useless lone return at the end of a method.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1922,7 +1864,6 @@ public class CleanUpConstants {
 	 * Removes useless lone continue at the end of a loop.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1931,10 +1872,9 @@ public class CleanUpConstants {
 	public static final String REMOVE_USELESS_CONTINUE= "cleanup.useless_continue"; //$NON-NLS-1$
 
 	/**
-	 * Replaces a <code>while</code> loop that always terminates during the first iteration by an <code>if</code>.
+	 * Replaces a {@code while} loop that always terminates during the first iteration by an {@code if}.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1946,7 +1886,6 @@ public class CleanUpConstants {
 	 * Replaces a loop on elements by Collection.addAll(), Collection.addAll(Arrays.asList()) or Collections.addAll().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -1958,7 +1897,6 @@ public class CleanUpConstants {
 	 * Reduces the code of the equals method implementation by using Objects.equals().
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2110,7 +2048,6 @@ public class CleanUpConstants {
 	 * Moves increment or decrement outside an expression when possible.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2122,7 +2059,6 @@ public class CleanUpConstants {
 	 * Moves assignments inside an if condition above the if node.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2131,10 +2067,9 @@ public class CleanUpConstants {
 	public static final String PULL_UP_ASSIGNMENT= "cleanup.pull_up_assignment"; //$NON-NLS-1$
 
 	/**
-	 * Uses the <code>else if</code> pseudo keyword.
+	 * Uses the {@code else if} pseudo keyword.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2146,7 +2081,6 @@ public class CleanUpConstants {
 	 * Removes useless indentation when the opposite workflow falls through.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2155,10 +2089,9 @@ public class CleanUpConstants {
 	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
 
 	/**
-	 * Uses an <code>instanceof</code> expression to check an object against a hardcoded class.
+	 * Uses an {@code instanceof} expression to check an object against a hardcoded class.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2259,7 +2192,6 @@ public class CleanUpConstants {
 	 * Changes code to make use of Java 7 try-with-resources feature. In particular, it removes now useless finally clauses.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2268,10 +2200,9 @@ public class CleanUpConstants {
 	public static final String TRY_WITH_RESOURCE= "cleanup.try_with_resource"; //$NON-NLS-1$
 
 	/**
-	 * Refactors <code>catch</code> clauses with the same body to use Java 7's multi-catch.
+	 * Refactors {@code catch} clauses with the same body to use Java 7's multi-catch.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}
-	 * <p>
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
@@ -2282,8 +2213,8 @@ public class CleanUpConstants {
 	/**
 	 * Should the Clean Up Wizard be shown when executing the Clean Up Action? <br>
 	 * <br>
-	 * Possible values: {<code><b>true</b></code>, <code><b>false</b></code>} <br>
-	 * Default value: <code><b>true</b></code><br>
+	 * Possible values: {@code <b>true</b>}, {@code <b>false</b>} <br>
+	 * Default value: {@code <b>true</b>}<br>
 	 * <br>
 	 *
 	 * @since 3.3
@@ -2291,7 +2222,7 @@ public class CleanUpConstants {
 	public static final String SHOW_CLEAN_UP_WIZARD= "cleanup.showwizard"; //$NON-NLS-1$
 
 	/**
-	 * A key to a serialized string in the <code>InstanceScope</code> containing all the profiles.<br>
+	 * A key to a serialized string in the {@code InstanceScope} containing all the profiles.<br>
 	 * Following code snippet can load the profiles:
 	 *
 	 * <pre>

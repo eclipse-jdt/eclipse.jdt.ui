@@ -132,7 +132,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	 * [0] move up
 	 * [1] move down
 	 * [2] copy up (duplicate)
-	 * [3] copy down (duplicate & select)
+	 * [3] copy down (duplicate and select)
 	 * @param bundle the resource bundle
 	 * @param editor the editor
 	 * @return the quadruple of actions

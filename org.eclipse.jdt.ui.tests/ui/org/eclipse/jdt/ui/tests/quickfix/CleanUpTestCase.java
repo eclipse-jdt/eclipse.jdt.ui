@@ -176,45 +176,6 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		}
 	}
 
-	/**
-	 * @param cus The compilation units
-	 * @param setOfExpectedGroupCategories The expected group categories
-	 * @throws CoreException The core exception
-	 * @deprecated Use assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected, Set<String> expectedGroupCategories) instead.
-	 */
-	@Deprecated
-	protected void assertGroupCategoryUsed(ICompilationUnit[] cus, Set<String> setOfExpectedGroupCategories) throws CoreException {
-		final CleanUpRefactoring ref= new CleanUpRefactoring();
-		ref.setUseOptionsFromProfile(true);
-		ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
-
-		for (ICompilationUnit cu : cus) {
-			assertNotNull("No compilation unit should be null", cu);
-			ref.addCompilationUnit(cu);
-		}
-
-		for (ICleanUp cleanUp : cleanUps) {
-			ref.addCleanUp(cleanUp);
-		}
-
-		final CreateChangeOperation create= new CreateChangeOperation(
-			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
-			RefactoringStatus.FATAL);
-
-		create.run(new NullProgressMonitor());
-		Change change= create.getChange();
-
-		Set<GroupCategory> actualCategories= new HashSet<>();
-
-		collectGroupCategories(actualCategories, change);
-
-		for (GroupCategory actualCategory : actualCategories) {
-			if (!setOfExpectedGroupCategories.contains(actualCategory.getName())) {
-				fail("Unexpected group category: " + actualCategory.getName() + ", should find: " + String.join(", ", setOfExpectedGroupCategories));
-			}
-		}
-	}
-
 	protected RefactoringStatus assertRefactoringResultAsExpected(ICompilationUnit[] cus, String[] expected) throws CoreException {
 		return assertRefactoringResultAsExpected(cus, expected, null);
 	}

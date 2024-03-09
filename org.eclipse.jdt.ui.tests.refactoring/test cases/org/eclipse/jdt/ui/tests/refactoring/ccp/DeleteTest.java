@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
@@ -621,7 +620,6 @@ public class DeleteTest extends GenericRefactoringTest {
 		ParticipantTesting.testDelete(handles);
 	}
 
-	@Ignore("testDeleteWithinCu16 disabled for bug#55221")
 	@Test
 	public void testDeleteWithinCu16() throws Exception{
 		ParticipantTesting.reset();

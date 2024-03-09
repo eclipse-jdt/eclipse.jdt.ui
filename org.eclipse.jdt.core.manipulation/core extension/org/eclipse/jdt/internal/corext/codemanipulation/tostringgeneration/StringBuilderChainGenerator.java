@@ -20,10 +20,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 /**
  * <p>
@@ -41,8 +41,6 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
  * 	return builder.toString();
  * }
  * </pre>
- *
- * </p>
  *
  * @since 3.5
  */

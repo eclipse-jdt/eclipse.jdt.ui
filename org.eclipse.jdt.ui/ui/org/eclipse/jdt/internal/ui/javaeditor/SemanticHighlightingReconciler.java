@@ -512,7 +512,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		IDocument document= fSourceViewer.getDocument();
 		display.asyncExec(() -> {
 			// check Editor not reused otherwise meanwhile
-			if (document == fSourceViewer.getDocument()) {
+			if (fSourceViewer != null && document == fSourceViewer.getDocument()) {
 				runnable.run();
 			}
 		});

@@ -26,11 +26,15 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jface.text.BadLocationException;
+
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -66,7 +70,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -119,7 +123,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			StringLiteral rightLiteral= (StringLiteral)leftHand;
-			hasComments= hasComments || !ASTNodes.getTrailingComments(rightLiteral).isEmpty();
+			ICompilationUnit cu= (ICompilationUnit)cUnit.getJavaElement();
+			hasComments= hasComments || hasNLS(ASTNodes.getTrailingComments(rightLiteral), cu);
 			literal= rightLiteral.getLiteralValue();
 			if (!literal.isEmpty() && !fAllConcats && !literal.endsWith("\n")) { //$NON-NLS-1$
 				return false;
@@ -130,17 +135,17 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			}
 			int lineNo= getLineOfOffset(cUnit, leftLiteral.getStartPosition());
 			int endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
-			hasComments= hasComments || !ASTNodes.getCommentsForRegion(cUnit, leftLiteral.getStartPosition(), endPosition - leftLiteral.getStartPosition()).isEmpty();
+			hasComments= hasComments || hasNLS(ASTNodes.getCommentsForRegion(cUnit, leftLiteral.getStartPosition(), endPosition - leftLiteral.getStartPosition()), cu);
 			lineNo= getLineOfOffset(cUnit, rightLiteral.getStartPosition());
 			endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
-			hasComments= hasComments || !ASTNodes.getCommentsForRegion(cUnit, rightLiteral.getStartPosition(), endPosition - rightLiteral.getStartPosition()).isEmpty();
+			hasComments= hasComments || hasNLS(ASTNodes.getCommentsForRegion(cUnit, rightLiteral.getStartPosition(), endPosition - rightLiteral.getStartPosition()), cu);
 			for (int i= 0; i < extendedOperands.size(); ++i) {
 				Expression operand= extendedOperands.get(i);
 				if (operand instanceof StringLiteral) {
 					StringLiteral stringLiteral= (StringLiteral)operand;
 					lineNo= getLineOfOffset(cUnit, stringLiteral.getStartPosition());
 					endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
-					hasComments= hasComments || !ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()).isEmpty();
+					hasComments= hasComments || hasNLS(ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()), cu);
 					String string= stringLiteral.getLiteralValue();
 					if (!string.isEmpty() && (fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1)) { //$NON-NLS-1$
 						continue;
@@ -150,36 +155,65 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			}
 			boolean isTagged= false;
 			if (hasComments && ASTNodes.getFirstAncestorOrNull(visited, Annotation.class) == null) {
-				// we must ensure that NLS comments are consistent for all string literals in concatenation
-				ICompilationUnit cu= (ICompilationUnit)((CompilationUnit)leftHand.getRoot()).getJavaElement();
-				try {
-				   NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, leftHand.getStartPosition());
-				   if (nlsLine == null) {
-					   return false;
-				   }
-				   isTagged= nlsLine.getElements()[0].hasTag();
-				   if (!isConsistent(nlsLine, isTagged)) {
-					   return false;
-				   }
-				   nlsLine= NLSUtil.scanCurrentLine(cu, rightHand.getStartPosition());
-				   if (!isConsistent(nlsLine, isTagged)) {
-					   return false;
-				   }
-				   for (int i= 0; i < extendedOperands.size(); ++i) {
-					   Expression operand= extendedOperands.get(i);
-					   nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
-					   if (!isConsistent(nlsLine, isTagged)) {
-						   return false;
-					   }
-				   }
-				} catch (JavaModelException e) {
+				NLSLine nlsLine= scanCurrentLine(cu, leftHand);
+				if (nlsLine == null) {
 					return false;
+				}
+				isTagged= nlsLine.getElements()[0].hasTag();
+				if (!isConsistent(nlsLine, isTagged)) {
+					return false;
+				}
+				nlsLine= scanCurrentLine(cu, rightHand);
+				if (nlsLine == null || !isConsistent(nlsLine, isTagged)) {
+					return false;
+				}
+				for (int i= 0; i < extendedOperands.size(); ++i) {
+					Expression operand= extendedOperands.get(i);
+					nlsLine= scanCurrentLine(cu, operand);
+					if (nlsLine == null || !isConsistent(nlsLine, isTagged)) {
+						return false;
+					}
 				}
 			}
 			// check if we are untagged or else if tagged, make sure we have a Statement or FieldDeclaration
 			// ancestor so we can recreate with proper single NLS tag
 			if (!isTagged || ASTNodes.getFirstAncestorOrNull(visited, Statement.class, FieldDeclaration.class) != null) {
 				fOperations.add(new ChangeStringConcatToTextBlock(visited, isTagged));
+			}
+			return false;
+		}
+
+		private NLSLine scanCurrentLine(ICompilationUnit cu, Expression exp) {
+			CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
+			int startLine= cUnit.getLineNumber(exp.getStartPosition());
+			int endOfLine= cUnit.getPosition(startLine + 1, 0);
+			NLSLine[] lines;
+			try {
+				lines= NLSScanner.scan(cu.getBuffer().getText(exp.getStartPosition(), endOfLine - exp.getStartPosition()));
+				if (lines.length > 0) {
+					return lines[0];
+				}
+			} catch (IndexOutOfBoundsException | JavaModelException | InvalidInputException | BadLocationException e) {
+				// fall-through
+			}
+			return null;
+		}
+
+		private boolean hasNLS(List<Comment> trailingComments, ICompilationUnit cu) {
+			if (!trailingComments.isEmpty() && cu != null) {
+				IBuffer buffer;
+				try {
+					buffer= cu.getBuffer();
+					for (Comment comment : trailingComments) {
+						if (comment instanceof LineComment) {
+							if (buffer.getText(comment.getStartPosition(), comment.getLength()).contains("$NON-NLS")) { //$NON-NLS-1$
+								return true;
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					// fall through
+				}
 			}
 			return false;
 		}
@@ -274,6 +308,22 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (newLine) {
 				buf.append(fIndent);
 			}
+			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+			int i= buf.length() - 1;
+			int count= 0;
+			while (i >= 0 && buf.charAt(i) == '"' && count <= 3) {
+				--i;
+				++count;
+			}
+			if (i >= 0 && buf.charAt(i) == '\\') {
+				--count;
+			}
+			for (i= count; i > 0; --i) {
+				buf.deleteCharAt(buf.length() - 1);
+			}
+			for (i= count; i > 0; --i) {
+				buf.append("\\\""); //$NON-NLS-1$
+			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			if (!isTagged) {
 				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
@@ -336,7 +386,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				for (int j = 0; j < quoteCount % 3; j++) {
 					transformed.append("\""); //$NON-NLS-1$
 				}
-
 				readIndex= bsIndex + 2 * quoteCount;
 			} else if (escapedText.startsWith("\\t", bsIndex)) { //$NON-NLS-1$ "\t"
 				transformed.append(escapedText.substring(readIndex, bsIndex));
@@ -371,12 +420,12 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (unescaped.charAt(whitespaceStart) == ' ') {
 				whitespaceStart--;
 				trailingWhitespace.append("\\s"); //$NON-NLS-1$
+				continue;
 			} else if (unescaped.charAt(whitespaceStart) == '\t') {
 				whitespaceStart--;
 				trailingWhitespace.append("\\t"); //$NON-NLS-1$
-			} else {
-				break;
 			}
+			break;
 		}
 
 		return unescaped.substring(0, whitespaceStart + 1) + trailingWhitespace;
@@ -694,6 +743,23 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			if (newLine) {
 				buf.append(fIndent);
+			}
+
+			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+			int readIndex= buf.length() - 1;
+			int count= 0;
+			while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
+				--readIndex;
+				++count;
+			}
+			if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
+				--count;
+			}
+			for (int i= count; i > 0; --i) {
+				buf.deleteCharAt(buf.length() - 1);
+			}
+			for (int i= count; i > 0; --i) {
+				buf.append("\\\""); //$NON-NLS-1$
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			MethodInvocation firstToStringCall= fToStringList.get(0);

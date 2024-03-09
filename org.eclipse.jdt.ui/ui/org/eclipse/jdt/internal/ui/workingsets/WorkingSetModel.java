@@ -417,8 +417,7 @@ public class WorkingSetModel {
 	 * <p>
 	 * Note : All the active working sets must be contained in allWorkingSets and the relative
 	 * ordering of the active working sets must be same in both allWorkingSets and activeWorkingSets
-	 * arrays, else the method throws an <code>IllegalArgumentException</code.
-	 * </p>
+	 * arrays, else the method throws an <code>IllegalArgumentException</code>.
 	 *
 	 * @param allWorkingSets the array of all working sets
 	 * @param isSortingEnabled <code>true</code> if sorting is enabled, <code>false</code> otherwise

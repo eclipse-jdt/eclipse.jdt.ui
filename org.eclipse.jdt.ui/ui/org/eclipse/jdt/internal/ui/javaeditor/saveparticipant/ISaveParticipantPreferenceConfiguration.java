@@ -89,7 +89,7 @@ public interface ISaveParticipantPreferenceConfiguration {
 
 	/**
 	 * Called when a compilation unit is saved.
-	 * <p>
+	 *
 	 * @param context the context in which the compilation unit is saved
 	 * @return true if the corresponding {@link IPostSaveListener} needs to be informed
 	 */

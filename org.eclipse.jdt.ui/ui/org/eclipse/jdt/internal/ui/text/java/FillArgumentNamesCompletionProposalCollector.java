@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>
  * This collector is used when
  * {@link PreferenceConstants#CODEASSIST_FILL_ARGUMENT_NAMES} is enabled.
- * <p/>
  */
 public final class FillArgumentNamesCompletionProposalCollector extends CompletionProposalCollector {
 

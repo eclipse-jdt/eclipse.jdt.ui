@@ -973,7 +973,7 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Returns the existing visibility adjustments (element type: Map <IMember, IVisibilityAdjustment>).
+	 * Returns the existing visibility adjustments (element type: {@code Map <IMember, IVisibilityAdjustment>}).
 	 *
 	 * @return the visibility adjustments
 	 */
@@ -1097,7 +1097,7 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Sets the existing visibility adjustments to be taken into account (element type: Map <IMember, IVisibilityAdjustment>).
+	 * Sets the existing visibility adjustments to be taken into account (element type: {@code Map <IMember, IVisibilityAdjustment>}).
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to take no existing adjustments into account.
 	 *
@@ -1156,7 +1156,7 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Sets the compilation unit rewrites used by this adjustor (element type: Map <ICompilationUnit, CompilationUnitRewrite>).
+	 * Sets the compilation unit rewrites used by this adjustor (element type: {@code Map <ICompilationUnit, CompilationUnitRewrite>}).
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use no existing rewrites.
 	 *

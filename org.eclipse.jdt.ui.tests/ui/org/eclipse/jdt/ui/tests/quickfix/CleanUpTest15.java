@@ -110,7 +110,21 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "    public void testConcatInConstructor() {\n" //
     	        + "        new StringBuffer(\"abc\\n\" + \"def\\n\" + \"ghi\");\n" //
     	        + "    }\n" //
-				+ "}\n";
+    	        + "    public void testTabStart() {\n" //
+    	        + "        String x =\"\\tif (true) {\\n\" +\n" //
+    	        + "                \"\\t\\tstuff();\\n\" +\n" //
+    	        + "                \"\\t} else\\n\" +\n" //
+    	        + "                \"\\t\\tnoStuff\";\n" //
+    	        + "    }\n" //
+    	        + "    public void testEndEscapedQuotes() {\n" //
+    	        + "        String a =\n" //
+    	        + "                \"1\\n\" +\n" //
+    	        + "                \"2\\n\" +\n" //
+    	        + "                \"3\\n\" +\n" //
+    	        + "                \"4\\n\" +\n" //
+    	        + "                \"\\\"\\\"\\\"\\\"\";\n" //
+    	        + "    }\n" //
+    	        + "}\n";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
@@ -182,7 +196,23 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            def\n" //
     	        + "            ghi\"\"\");\n" //
     	        + "    }\n" //
-				+ "}\n";
+    	        + "    public void testTabStart() {\n" //
+    	        + "        String x =\"\"\"\n" //
+    	        + "            \tif (true) {\n" //
+    	        + "            \t\tstuff();\n" //
+    	        + "            \t} else\n" //
+    	        + "            \t\tnoStuff\"\"\";\n" //
+    	        + "    }\n" //
+    	        + "    public void testEndEscapedQuotes() {\n" //
+    	        + "        String a =\n" //
+    	        + "                \"\"\"\n" //
+    	        + "            1\n" //
+    	        + "            2\n" //
+    	        + "            3\n" //
+    	        + "            4\n" //
+    	        + "            \\\"\"\"\\\"\"\"\";\n" //
+    	        + "    }\n" //
+    	        + "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
@@ -230,6 +260,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "            \"def\\n\" +\n" //
 				+ "            \"ghi\\n\";\n" //
     	        + "        new StringBuffer(\"abc\\n\" + \"def\\n\" + \"ghi\");\n" //
+    	        + "        new StringBuffer(\"1\\n\" +\n" //
+    	        + "                \"2\\n\" +\n" //
+    	        + "                \"3\\n\" +\n" //
+    	        + "                \"4\\n\" +\n" //
+    	        + "                \"\\\"\\\"\\\"\");\n" //
 				+ "    }\n" //
 				+ "}";
 
@@ -288,7 +323,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            abc\n" //
     	        + "            def\n" //
     	        + "            ghi\"\"\");\n" //
-				+ "    }\n" //
+    	        + "        new StringBuffer(\"\"\"\n" //
+    	        + "            1\n" //
+    	        + "            2\n" //
+    	        + "            3\n" //
+    	        + "            4\n" //
+    	        + "            \\\"\\\"\\\"\"\"\");\n" //
+    	        + "    }\n" //
 				+ "}";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
