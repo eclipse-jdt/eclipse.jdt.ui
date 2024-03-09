@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -31,19 +32,20 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
+import org.eclipse.jdt.internal.ui.viewsupport.ReappearingMenuToolbarAction.IReappearingMenuItem;
 
 /**
  * Menu item action for building & presenting color preferences sub-menu of javadoc styling menu.
  */
-class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, IMenuVisibilityMenuItemAction {
+class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, IMenuVisibilityMenuItemAction, IReappearingMenuItem {
 	private final Shell parentShell;
 	private final Supplier<String> javadocContentSupplier;
 	private Menu menu= null;
 
 	public SignatureStylingColorSubMenuItem(Shell parent, Supplier<String> javadocContentSupplier) {
 		super(JavadocStylingMessages.JavadocStyling_colorPreferences_menu, AS_DROP_DOWN_MENU);
-		this.parentShell= parent;
-		this.javadocContentSupplier= javadocContentSupplier;
+		this.parentShell= Objects.requireNonNull(parent);
+		this.javadocContentSupplier= Objects.requireNonNull(javadocContentSupplier);
 		setMenuCreator(this);
 	}
 

@@ -19,8 +19,8 @@ import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.jface.action.IAction;
 
-import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
 import org.eclipse.jdt.internal.ui.viewsupport.ArmListeningMenuItemsConfigurer.IArmListeningMenuItemAction;
+import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
 
 /**
  * Base class for actions that toggle specific styling inside browser HTML content controlled by specified checkbox and support

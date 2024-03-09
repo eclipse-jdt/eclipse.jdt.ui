@@ -13,6 +13,7 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -41,12 +42,12 @@ class SignatureStylingColorPreferenceMenuItem extends Action implements ImageDat
 	private final Function<Integer, RGB> colorPreferenceGetter;
 	private final BiConsumer<Integer, RGB> colorPreferenceSetter;
 
-	SignatureStylingColorPreferenceMenuItem(Shell shell, String textPrefix, Integer colorIdx, Function<Integer, RGB> colorPreferenceGetter, BiConsumer<Integer, RGB> colorPreferenceSetter) {
+	SignatureStylingColorPreferenceMenuItem(Shell shell, String textPrefix, int colorIdx, Function<Integer, RGB> colorPreferenceGetter, BiConsumer<Integer, RGB> colorPreferenceSetter) {
 		super(Messages.format(textPrefix, colorIdx));
-		this.shell= shell;
+		this.shell= Objects.requireNonNull(shell);
 		this.colorIdx= colorIdx;
-		this.colorPreferenceGetter= colorPreferenceGetter;
-		this.colorPreferenceSetter= colorPreferenceSetter;
+		this.colorPreferenceGetter= Objects.requireNonNull(colorPreferenceGetter);
+		this.colorPreferenceSetter= Objects.requireNonNull(colorPreferenceSetter);
 		setId(SignatureStylingColorPreferenceMenuItem.class.getSimpleName() + "_" + colorIdx); //$NON-NLS-1$
 		setImageDescriptor(ImageDescriptor.createFromImageDataProvider(this));
 	}

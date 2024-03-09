@@ -13,6 +13,8 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport.browser;
 
+import java.util.Objects;
+
 import org.eclipse.jface.action.Action;
 
 /**
@@ -23,7 +25,7 @@ public abstract class CheckboxToggleInBrowserAction extends Action {
 
 	public CheckboxToggleInBrowserAction(String text, int style, BrowserTextAccessor browserTextAccessor, String checkboxId) {
 		super(text, style);
-		checkboxToggler= new CheckboxInBrowserToggler(browserTextAccessor, checkboxId);
+		checkboxToggler= new CheckboxInBrowserToggler(Objects.requireNonNull(browserTextAccessor), Objects.requireNonNull(checkboxId));
 	}
 
 	protected void toggleBrowserCheckbox(boolean enabled) {

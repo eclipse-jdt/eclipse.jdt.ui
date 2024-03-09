@@ -385,7 +385,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				tbmSecondary.createControl(toolbarComposite).setLayoutData(new GridData(SWT.END, SWT.BEGINNING, false, false));
 				BrowserTextAccessor browserAccessor= new BrowserTextAccessor(iControl);
 				var stylingMenuAction= new SignatureStylingMenuToolbarAction(parent, browserAccessor, HTML_STYLING_PREFERENCE_KEY_PREFIX,
-						() -> iControl.getInput() == null ? null : iControl.getInput().getHtml());
+						() -> iControl.getInput() == null ? null : iControl.getInput().getHtml(),
+						() -> iControl.setVisible(false)); // close hover viewer on enhancements toggle
 				tbmSecondary.add(stylingMenuAction);
 				tbmSecondary.update(true);
 				stylingMenuAction.setupMenuReopen(tbmSecondary.getControl());

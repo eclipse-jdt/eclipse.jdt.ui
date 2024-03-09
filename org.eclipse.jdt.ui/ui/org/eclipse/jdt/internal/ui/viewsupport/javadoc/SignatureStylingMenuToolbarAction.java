@@ -13,6 +13,7 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -23,30 +24,41 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer;
 import org.eclipse.jdt.internal.ui.viewsupport.ArmListeningMenuItemsConfigurer;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.IStylingConfigurationListener;
+import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer;
 import org.eclipse.jdt.internal.ui.viewsupport.MouseListeningToolItemsConfigurer.IMouseListeningToolbarItemAction;
 import org.eclipse.jdt.internal.ui.viewsupport.ReappearingMenuToolbarAction;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor.IBrowserContentChangeListener;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.CheckboxInBrowserToggler;
+import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverPreferenceStylingInBrowserAction;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverStylingInBrowserMenuAction;
 
 /**
  * Toolbar item action for building & presenting javadoc styling menu.
  */
 public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAction implements IMouseListeningToolbarItemAction, MenuListener, IBrowserContentChangeListener {
+	private final EnhancemnetsToggleAction enableAction= new EnhancemnetsToggleAction();
+	private final Action[] enabledActions= { actions[0], actions[1], actions[2], actions[3], actions[4], enableAction };
+	private final Action[] disabledActions= { enableAction } ;
+	private final Action[] noStylingActions= { new NoStylingEnhancementsAction(), enableAction };
 	private final CheckboxInBrowserToggler previewCheckboxToggler;
+	private final Shell parent;
+	private final Runnable enhancementsToggledTask;
+
 	private boolean mouseExitCalled= false;
 
-	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, String preferenceKeyPrefix, Supplier<String> javadocContentSupplier) {
+	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, String preferenceKeyPrefix, Supplier<String> javadocContentSupplier,  Runnable enhancementsEnabledTask) {
 		super(JavadocStylingMessages.JavadocStyling_stylingMenu, JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT,
 				new ToggleSignatureTypeParametersColoringAction(browserAccessor, preferenceKeyPrefix),
 				new ToggleSignatureTypeLevelsColoringAction(browserAccessor, preferenceKeyPrefix),
@@ -54,39 +66,42 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 				new ToggleSignatureWrappingAction(browserAccessor, preferenceKeyPrefix),
 				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
 				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier));
+		Objects.requireNonNull(parent);
+		this.parent= parent;
+		this.enhancementsToggledTask= enhancementsEnabledTask;
 		previewCheckboxToggler= new CheckboxInBrowserToggler(browserAccessor, JavaElementLinks.CHECKBOX_ID_PREVIEW);
 		setId(SignatureStylingMenuToolbarAction.class.getSimpleName());
-		// disable until content is loaded in browser
-		setEnabled(false);
-		setToolTipText(JavadocStylingMessages.JavadocStyling_noEnhancementsTooltip);
-		browserAccessor.addContentChangedListener(this);
-
+		browserAccessor.addContentChangedListener(this); // remove not necessary since lifecycle of this action is the same as that of the browser widget
+		JavaElementLinks.addStylingConfigurationListener(enableAction);
 		// make sure actions have loaded preferences for hover to work
 		Stream.of(actions)
-			.filter(HoverStylingInBrowserMenuAction.class::isInstance)
-			.forEach(a -> ((HoverStylingInBrowserMenuAction) a).loadCurentPreference());
+			.filter(HoverPreferenceStylingInBrowserAction.class::isInstance)
+			.forEach(a -> ((HoverPreferenceStylingInBrowserAction) a).loadCurentPreference());
 	}
 
 	@Override
 	public void browserContentChanged(Supplier<String> contentAccessor) {
-		var content= contentAccessor.get();
-		if (content != null && !content.isBlank() // fail-fast
-				&& previewCheckboxToggler.isCheckboxPresentInBrowser()) {
-			setEnabled(true);
-			setToolTipText(null);
+		if (enableAction.isChecked()) {
+			var content= contentAccessor.get();
+			if (content != null && !content.isBlank() // fail-fast
+					&& previewCheckboxToggler.isCheckboxPresentInBrowser()) {
+				reAddActionItems(enabledActions);
+				setToolTipText(null);
+			} else {
+				reAddActionItems(noStylingActions);
+				setToolTipText(JavadocStylingMessages.JavadocStyling_noEnhancementsTooltip);
+			}
 		} else {
-			setEnabled(false);
-			setToolTipText(JavadocStylingMessages.JavadocStyling_noEnhancementsTooltip);
+			setToolTipText(JavadocStylingMessages.JavadocStyling_disabledTooltip);
+			reAddActionItems(disabledActions);
 		}
 	}
 
 	@Override
 	public Menu getMenu(Control p) {
-		if (!menuCreated()) {
+		if (menu == null) {
 			Menu retVal= super.getMenu(p);
-			Runnable browserContentSetter= previewCheckboxToggler.getBrowserTextAccessor()::applyChanges;
-			ArmListeningMenuItemsConfigurer.registerForMenu(retVal, browserContentSetter);
-			MenuVisibilityMenuItemsConfigurer.registerForMenu(retVal, browserContentSetter);
+			MenuVisibilityMenuItemsConfigurer.registerForMenu(retVal, previewCheckboxToggler.getBrowserTextAccessor()::applyChanges);
 			retVal.addMenuListener(this); // must be last listener, since it commits browser text changes
 			return retVal;
 		} else {
@@ -95,8 +110,14 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 	}
 
 	@Override
+	protected void addMenuItems() {
+		super.addMenuItems();
+		ArmListeningMenuItemsConfigurer.registerForMenu(menu, previewCheckboxToggler.getBrowserTextAccessor()::applyChanges);
+	}
+
+	@Override
 	public boolean mouseEnter(Event event) {
-		if (!isEnabled()) {
+		if (!enableAction.isChecked()) {
 			return false;
 		}
 		boolean retVal= false;
@@ -111,7 +132,7 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 
 	@Override
 	public boolean mouseExit(Event event) {
-		if (!isEnabled()) {
+		if (!enableAction.isChecked()) {
 			return false;
 		}
 		for (Action action : actions) {
@@ -135,7 +156,7 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 	@Override
 	public void menuShown(MenuEvent e) {
 		toggleBrowserPreviewCheckbox(true);
-		previewCheckboxToggler.getBrowserTextAccessor().applyChanges();
+		applyBrowserChanges();
 	}
 
 	@Override
@@ -143,11 +164,65 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 		toggleBrowserPreviewCheckbox(false);
 		if (mouseExitCalled) {
 			// mouseExit() is not called after this when menu is being hidden after re-appearing, so trigger applyChanges() here
-			previewCheckboxToggler.getBrowserTextAccessor().applyChanges();
+			applyBrowserChanges();
 		} // else applyChanges() will be triggered from mouseExit() that will be executed after this
 	}
 
 	private void toggleBrowserPreviewCheckbox(boolean enabled) {
 		previewCheckboxToggler.toggleCheckboxInBrowser(enabled);
+	}
+
+	private void applyBrowserChanges() {
+		previewCheckboxToggler.getBrowserTextAccessor().applyChanges();
+	}
+
+	private void reAddActionItems(Action[] newActions) {
+		if (actions != newActions) {
+			actions= newActions;
+			if (menu != null) {
+				Stream.of(menu.getItems()).forEach(MenuItem::dispose);
+				addMenuItems();
+			}
+		}
+	}
+
+	@Override
+	public void setupMenuReopen(ToolBar toolbar) {
+		super.setupMenuReopen(toolbar);
+		toolbar.addDisposeListener(e -> JavaElementLinks.removeStylingConfigurationListener(enableAction));
+	}
+
+	private class EnhancemnetsToggleAction extends Action implements IStylingConfigurationListener {
+		public EnhancemnetsToggleAction() {
+			super(JavadocStylingMessages.JavadocStyling_toggle, AS_CHECK_BOX);
+			setChecked(JavaElementLinks.getStylingEnabledPreference());
+		}
+
+		@Override
+		public void run() {
+			JavaElementLinks.setStylingEnabledPreference(isChecked());
+			if (enhancementsToggledTask != null) {
+				enhancementsToggledTask.run();
+			}
+		}
+
+		@Override
+		public void stylingStateChanged(boolean isEnabled) {
+			parent.getDisplay().execute(() -> {
+				if (isChecked() != isEnabled) {
+					setChecked(isEnabled);
+					if (enhancementsToggledTask != null) {
+						enhancementsToggledTask.run();
+					}
+				}
+			});
+		}
+	}
+
+	private class NoStylingEnhancementsAction extends Action {
+		public NoStylingEnhancementsAction() {
+			super(JavadocStylingMessages.JavadocStyling_noEnhancements);
+			setEnabled(false);
+		}
 	}
 }

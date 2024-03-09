@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -100,6 +101,7 @@ public class JavaElementLinks {
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsReferencesColoring"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING= "typeParamsLevelsColoring"; //$NON-NLS-1$
 
+	private static final String PREFERENCE_KEY_ENABLED= "javadocElementsStyling.enabled"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS= "javadocElementsStyling.darkModeDefaultColors"; //$NON-NLS-1$
 	// both use 1-based indexing
 	private static final String PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR= "javadocElementsStyling.typesParamsReference_"; //$NON-NLS-1$
@@ -128,6 +130,7 @@ public class JavaElementLinks {
 	private static String[] CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS= new String[4];
 	private static final ReentrantLock CSS_FRAGMENTS_CACHE_LOCK= new ReentrantLock();
 	private static final IPropertyChangeListener COLOR_PROPERTIES_CHANGE_LISTENER= JavaElementLinks::cssFragmentsCacheResetListener;
+	private static final ListenerList<IStylingConfigurationListener> configListener = new ListenerList<>();
 
 	/**
 	 * A handler is asked to handle links to targets.
@@ -201,7 +204,7 @@ public class JavaElementLinks {
 			} else {
 				fElement= member;
 			}
-			if (stylingPreferenceKeysPrefix != null) {
+			if (getStylingEnabledPreference() && stylingPreferenceKeysPrefix != null) {
 				noEnhancements= false;
 				enableWrapping= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_WRAPPING);
 				enableFormatting= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
@@ -565,9 +568,10 @@ public class JavaElementLinks {
 
 	public static void initDefaultPreferences(IPreferenceStore store) {
 		initDefaultColors(store);
+		store.setDefault(PREFERENCE_KEY_ENABLED, true);
 		store.addPropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
 		// taking advantage of PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS change instead of more complicated OSGi event listener
-		store.addPropertyChangeListener(JavaElementLinks::darkThemeChangeListener);
+		store.addPropertyChangeListener(JavaElementLinks::propertyChanged);
 	}
 
 	public static void initDefaultColors(IPreferenceStore store) {
@@ -614,10 +618,12 @@ public class JavaElementLinks {
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING, StylingPreference.OFF.name());
 	}
 
-	private static void darkThemeChangeListener(PropertyChangeEvent event) {
+	private static void propertyChanged(PropertyChangeEvent event) {
 		if (PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS.equals(event.getProperty())) {
 			initDefaultColors(preferenceStore());
 			cssFragmentsCacheResetListener(null);
+		} else if (PREFERENCE_KEY_ENABLED.equals(event.getProperty())) {
+			configListener.forEach(l -> l.stylingStateChanged((Boolean) event.getNewValue()));
 		}
 	}
 
@@ -912,6 +918,10 @@ public class JavaElementLinks {
 		return StylingPreference.ALWAYS == getPreference(key);
 	}
 
+	public static boolean getStylingEnabledPreference() {
+		return preferenceStore().getBoolean(PREFERENCE_KEY_ENABLED);
+	}
+
 	public static StylingPreference getPreferenceForFormatting(String keyPrefix) {
 		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
 	}
@@ -930,6 +940,10 @@ public class JavaElementLinks {
 
 	private static StylingPreference getPreference(String key) {
 		return StylingPreference.valueOf(preferenceStore().getString(key));
+	}
+
+	public static void setStylingEnabledPreference(boolean value) {
+		preferenceStore().setValue(PREFERENCE_KEY_ENABLED, value);
 	}
 
 	public static void setPreferenceForFormatting(String keyPrefix, StylingPreference value) {
@@ -1134,6 +1148,25 @@ public class JavaElementLinks {
 
 	private static IPreferenceStore preferenceStore() {
 		return PreferenceConstants.getPreferenceStore();
+	}
+
+	public static void addStylingConfigurationListener(IStylingConfigurationListener listener) {
+		configListener.add(listener);
+	}
+
+	public static void removeStylingConfigurationListener(IStylingConfigurationListener listener) {
+		configListener.remove(listener);
+	}
+
+	/**
+	 * Styling configuration listener is notified when Javadoc styling enhancements are switched on or off via preference.
+	 */
+	public static interface IStylingConfigurationListener {
+		/**
+		 * Called when Javadoc styling enhancements have been toggled.
+		 * @param isEnabled whether styling enhancements were turned on or off
+		 */
+		void stylingStateChanged(boolean isEnabled);
 	}
 
 }

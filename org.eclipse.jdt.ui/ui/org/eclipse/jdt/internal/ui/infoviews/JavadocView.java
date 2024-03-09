@@ -432,6 +432,11 @@ public class JavadocView extends AbstractInfoView {
 	private ISelectionProvider fInputSelectionProvider;
 
 	/**
+	 * Flag to force isIgnoringNewInput() to return <code>false</code> on next execution.
+	 */
+	private boolean fIgnoringNewInputOverride;
+
+	/**
 	 * The Javadoc view's select all action.
 	 */
 	private class SelectAllAction extends Action {
@@ -690,8 +695,12 @@ public class JavadocView extends AbstractInfoView {
 
 		if (fIsUsingBrowserWidget) {
 			BrowserTextAccessor browserAccessor= new BrowserTextAccessor(fBrowser);
+			Runnable viewRefreshTask = () -> {
+				fIgnoringNewInputOverride= true;
+				setLinkingEnabled(isLinkingEnabled()); // triggers refresh of the view using last set selection
+			};
 			// toolbar widget is being re-created later so we need to do our setup then
-			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(), browserAccessor, HTML_STYLING_PREFERENCE_KEY_PREFIX, () -> fOriginalInput) {
+			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(), browserAccessor, HTML_STYLING_PREFERENCE_KEY_PREFIX, () -> fOriginalInput, viewRefreshTask) {
 				// we take advantage of this method being called after toolbar item creation (in ActionContributionItem.fill()) which happens when whole toolbar is being re-created to be displayed
 				@Override
 				public void addPropertyChangeListener(IPropertyChangeListener listener) {
@@ -1145,6 +1154,10 @@ public class JavadocView extends AbstractInfoView {
 		if (fCurrent != null && fCurrent.getInputElement() instanceof URL)
 			return false;
 
+		if (fIgnoringNewInputOverride) {
+			fIgnoringNewInputOverride= false;
+			return false;
+		}
 		if (super.isIgnoringNewInput(je, part, selection)
 				&& part instanceof ITextEditor editor
 				&& selection instanceof ITextSelection textSel) {

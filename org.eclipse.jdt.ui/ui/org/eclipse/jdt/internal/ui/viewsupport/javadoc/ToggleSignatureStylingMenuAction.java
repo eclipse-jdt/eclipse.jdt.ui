@@ -13,6 +13,7 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -23,6 +24,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.viewsupport.ReappearingMenuToolbarAction.IReappearingMenuItem;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverStylingInBrowserMenuAction;
 
@@ -31,7 +33,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverStylingInBrowserMenu
  * and support mouse hovering and {@link org.eclipse.jdt.internal.ui.viewsupport.browser.HoverPreferenceStylingInBrowserAction.StylingPreference} states
  * persisted in preference store and presented via different icons.
  */
-public class ToggleSignatureStylingMenuAction extends HoverStylingInBrowserMenuAction {
+public class ToggleSignatureStylingMenuAction extends HoverStylingInBrowserMenuAction implements IReappearingMenuItem {
 	final Function<String, StylingPreference> stylingPreferenceGetter;
 	final BiConsumer<String, StylingPreference> stylingPreferenceSaver;
 	final String preferenceKeyPrefix;
@@ -43,9 +45,9 @@ public class ToggleSignatureStylingMenuAction extends HoverStylingInBrowserMenuA
 			Function<String, StylingPreference> preferenceGetter, BiConsumer<String, StylingPreference> preferenceSaver, String preferenceKeyPrefix,
 			ImageDescriptor toggleOffImage, ImageDescriptor toggleOnImage, ImageDescriptor preferenceHoverImage) {
 		super(text, browserAccessor, checkboxId);
-		this.stylingPreferenceGetter= preferenceGetter;
-		this.stylingPreferenceSaver= preferenceSaver;
-		this.preferenceKeyPrefix= preferenceKeyPrefix;
+		this.stylingPreferenceGetter= Objects.requireNonNull(preferenceGetter);
+		this.stylingPreferenceSaver= Objects.requireNonNull(preferenceSaver);
+		this.preferenceKeyPrefix= Objects.requireNonNull(preferenceKeyPrefix);
 		this.preferenceOffImage= toggleOffImage;
 		this.preferenceAlwaysImage= toggleOnImage;
 		this.preferenceHoverImage= preferenceHoverImage;
