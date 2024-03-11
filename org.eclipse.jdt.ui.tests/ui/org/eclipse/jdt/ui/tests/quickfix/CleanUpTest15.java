@@ -124,6 +124,12 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                \"4\\n\" +\n" //
     	        + "                \"\\\"\\\"\\\"\\\"\";\n" //
     	        + "    }\n" //
+    	        + "    public void testNoEndNewlineIndented() {\n" //
+    	        + "        String x= \"\"\n" //
+    	        + "                + \"    /** bar\\n\" //\n" //
+    	        + "                + \"     * foo\\n\" //\n" //
+    	        + "                + \"     */\"; //\n" //
+    	        + "    }\n" //
     	        + "}\n";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -201,7 +207,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            \tif (true) {\n" //
     	        + "            \t\tstuff();\n" //
     	        + "            \t} else\n" //
-    	        + "            \t\tnoStuff\"\"\";\n" //
+    	        + "            \t\tnoStuff\\\n" //
+    	        + "            \"\"\";\n" //
     	        + "    }\n" //
     	        + "    public void testEndEscapedQuotes() {\n" //
     	        + "        String a =\n" //
@@ -211,6 +218,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            3\n" //
     	        + "            4\n" //
     	        + "            \\\"\"\"\\\"\"\"\";\n" //
+    	        + "    }\n" //
+    	        + "    public void testNoEndNewlineIndented() {\n" //
+    	        + "        String x= \"\"\"\n" //
+    	        + "                /** bar\n" //
+    	        + "                 * foo\n" //
+    	        + "                 */\\\n" //
+    	        + "            \"\"\"; //\n" //
     	        + "    }\n" //
     	        + "}\n";
 
@@ -265,6 +279,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                \"3\\n\" +\n" //
     	        + "                \"4\\n\" +\n" //
     	        + "                \"\\\"\\\"\\\"\");\n" //
+    	        + "        StringBuilder buf4= new StringBuilder();\n" //
+    	        + "        buf4.append(\"    /** bar\\n\");\n" //
+    	        + "        buf4.append(\"     * foo\\n\");\n" //
+    	        + "        buf4.append(\"     */\");\n" //
+    	        + "        String expected= buf4.toString();\n" //
 				+ "    }\n" //
 				+ "}";
 
@@ -329,6 +348,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            3\n" //
     	        + "            4\n" //
     	        + "            \\\"\\\"\\\"\"\"\");\n" //
+    	        + "        String expected= \"\"\"\n" //
+    	        + "                /** bar\n" //
+    	        + "                 * foo\n" //
+    	        + "                 */\\\n" //
+    	        + "            \"\"\";\n" //
     	        + "    }\n" //
 				+ "}";
 

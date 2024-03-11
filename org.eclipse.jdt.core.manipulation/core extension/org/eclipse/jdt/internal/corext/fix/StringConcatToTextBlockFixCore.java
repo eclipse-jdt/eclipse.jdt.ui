@@ -294,6 +294,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			buf.append("\"\"\"\n"); //$NON-NLS-1$
 			boolean newLine= false;
+			boolean allWhiteSpaceStart= true;
 			for (String part : parts) {
 				if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
 					if (!newLine) {
@@ -302,27 +303,32 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					}
 				}
 				newLine= part.endsWith(System.lineSeparator());
+				allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
 				buf.append(fIndent).append(part);
 			}
 
 			if (newLine) {
 				buf.append(fIndent);
-			}
-			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
-			int i= buf.length() - 1;
-			int count= 0;
-			while (i >= 0 && buf.charAt(i) == '"' && count <= 3) {
-				--i;
-				++count;
-			}
-			if (i >= 0 && buf.charAt(i) == '\\') {
-				--count;
-			}
-			for (i= count; i > 0; --i) {
-				buf.deleteCharAt(buf.length() - 1);
-			}
-			for (i= count; i > 0; --i) {
-				buf.append("\\\""); //$NON-NLS-1$
+			} else if (allWhiteSpaceStart) {
+				buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
+				buf.append(fIndent);
+			} else {
+				// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+				int i= buf.length() - 1;
+				int count= 0;
+				while (i >= 0 && buf.charAt(i) == '"' && count <= 3) {
+					--i;
+					++count;
+				}
+				if (i >= 0 && buf.charAt(i) == '\\') {
+					--count;
+				}
+				for (i= count; i > 0; --i) {
+					buf.deleteCharAt(buf.length() - 1);
+				}
+				for (i= count; i > 0; --i) {
+					buf.append("\\\""); //$NON-NLS-1$
+				}
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			if (!isTagged) {
@@ -730,6 +736,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			buf.append("\"\"\"\n"); //$NON-NLS-1$
 			boolean newLine= false;
+			boolean allWhiteSpaceStart= true;
 			for (String part : parts) {
 				if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
 					if (!newLine) {
@@ -738,28 +745,32 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					}
 				}
 				newLine= part.endsWith(System.lineSeparator());
+				allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
 				buf.append(fIndent).append(part);
 			}
 
 			if (newLine) {
 				buf.append(fIndent);
-			}
-
-			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
-			int readIndex= buf.length() - 1;
-			int count= 0;
-			while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
-				--readIndex;
-				++count;
-			}
-			if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
-				--count;
-			}
-			for (int i= count; i > 0; --i) {
-				buf.deleteCharAt(buf.length() - 1);
-			}
-			for (int i= count; i > 0; --i) {
-				buf.append("\\\""); //$NON-NLS-1$
+			} else if (allWhiteSpaceStart) {
+				buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
+				buf.append(fIndent);
+			} else {
+				// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+				int readIndex= buf.length() - 1;
+				int count= 0;
+				while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
+					--readIndex;
+					++count;
+				}
+				if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
+					--count;
+				}
+				for (int i= count; i > 0; --i) {
+					buf.deleteCharAt(buf.length() - 1);
+				}
+				for (int i= count; i > 0; --i) {
+					buf.append("\\\""); //$NON-NLS-1$
+				}
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
 			MethodInvocation firstToStringCall= fToStringList.get(0);

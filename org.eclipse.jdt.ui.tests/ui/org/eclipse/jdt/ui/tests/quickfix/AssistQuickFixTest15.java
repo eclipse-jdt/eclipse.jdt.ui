@@ -586,6 +586,61 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConcatToTextBlock11() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1240
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
+		hashtable.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
+		JavaCore.setOptions(hashtable);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String x =\"\\tif (true) {\\n\" +\n");
+		buf.append("                \"\\t\\tstuff();\\n\" +\n");
+		buf.append("                \"\\t} else\\n\" +\n");
+		buf.append("                \"\\t\\tnoStuff\";\n");
+		buf.append("        System.out.println(x);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int index= buf.indexOf("x");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String x =\"\"\"\n");
+		buf.append("            \tif (true) {\n");
+		buf.append("            \t\tstuff();\n");
+		buf.append("            \t} else\n");
+		buf.append("            \t\tnoStuff\\\n");
+		buf.append("            \"\"\";\n");
+		buf.append("        System.out.println(x);\n");		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
 	public void testNoConcatToTextBlock1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
