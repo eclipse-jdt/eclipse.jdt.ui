@@ -28,6 +28,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
@@ -192,9 +193,21 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 		String firstSearchStr= "-testNameFile";
 		int indexTestNameFile= showCommandLine.indexOf(firstSearchStr);
 		assertThat(indexTestNameFile).overridingErrorMessage("-testNameFile argument not found").isGreaterThan(-1);
-		String filePath= showCommandLine.substring(indexTestNameFile + firstSearchStr.length() + 1);
+		String filePath= extractPathForArgumentFile(showCommandLine, firstSearchStr, indexTestNameFile);
 		List<String> fileLines= Files.readAllLines(Paths.get(filePath));
 		return fileLines;
+	}
+
+	private String extractPathForArgumentFile(String showCommandLine, String firstSearchStr, int indexTestNameFile) {
+		String filePath= showCommandLine.substring(indexTestNameFile + firstSearchStr.length() + 1);
+		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			filePath = removeQuotationMarks(filePath);
+		}
+		return filePath;
+	}
+
+	private String removeQuotationMarks(String filePath) {
+		return filePath.substring(1, filePath.length()-1);
 	}
 
 }
