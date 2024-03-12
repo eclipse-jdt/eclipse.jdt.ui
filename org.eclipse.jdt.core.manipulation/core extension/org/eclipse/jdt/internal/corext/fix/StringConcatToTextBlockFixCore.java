@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -446,6 +448,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private Map<ExpressionStatement, ChangeStringBufferToTextBlock> conversions= new HashMap<>();
 		private static final String APPEND= "append"; //$NON-NLS-1$
 		private static final String TO_STRING= "toString"; //$NON-NLS-1$
+		private BodyDeclaration fLastBodyDecl;
 		private final Set<String> fExcludedNames;
 
 		public StringBufferFinder(List<CompilationUnitRewriteOperation> operations, Set<String> excludedNames) {
@@ -570,7 +573,37 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 								}
 								fLiterals.add((StringLiteral)arg);
 								statementList.add(s);
-							} else {
+							} else if (arg instanceof InfixExpression infix) {
+								if (infix.getOperator() == Operator.PLUS) {
+									Expression left= infix.getLeftOperand();
+									Expression right= infix.getRightOperand();
+									List<Expression> extendedOps= infix.extendedOperands();
+									if (left instanceof StringLiteral && right instanceof StringLiteral) {
+										List<StringLiteral> extendedLiterals= new ArrayList<>();
+										for (Expression extendedOp : extendedOps) {
+											if (extendedOp instanceof StringLiteral) {
+												extendedLiterals.add((StringLiteral)extendedOp);
+											} else {
+												statementList.clear();
+												fLiterals.clear();
+												return false;
+											}
+
+										}
+										fLiterals.add((StringLiteral)left);
+										fLiterals.add((StringLiteral)right);
+										fLiterals.addAll(extendedLiterals);
+										statementList.add(s);
+									} else {
+										statementList.clear();
+										fLiterals.clear();
+										return false;
+									}
+								}
+							}
+							else {
+								statementList.clear();
+								fLiterals.clear();
 								return false;
 							}
 						} else {
@@ -604,7 +637,9 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			List<Statement> statements= new ArrayList<>(statementList);
 			List<StringLiteral> literals= new ArrayList<>(fLiterals);
 			List<MethodInvocation> toStringList= new ArrayList<>(checkValidityVisitor.getToStringList());
-			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, statements, literals, assignmentToConvert, fExcludedNames, nonNLS);
+			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(node, BodyDeclaration.class);
+			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, statements, literals, assignmentToConvert, fExcludedNames, fLastBodyDecl, nonNLS);
+			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
 			conversions.put(assignmentToConvert, operation);
 			statementList.clear();
@@ -677,17 +712,19 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final List<StringLiteral> fLiterals;
 		private String fIndent;
 		private final Set<String> fExcludedNames;
+		private final BodyDeclaration fLastBodyDecl;
 		private final boolean fNonNLS;
 		private ExpressionStatement fAssignmentToConvert;
 
 		public ChangeStringBufferToTextBlock(final List<MethodInvocation> toStringList, List<Statement> statements,
-				List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, boolean nonNLS) {
+				List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, BodyDeclaration lastBodyDecl, boolean nonNLS) {
 			this.fToStringList= toStringList;
 			this.fStatements= statements;
 			this.fLiterals= literals;
 			this.fAssignmentToConvert= assignmentToConvert;
 			this.fIndent= "\t"; //$NON-NLS-1$
 			this.fExcludedNames= excludedNames;
+			this.fLastBodyDecl= lastBodyDecl;
 			this.fNonNLS= nonNLS;
 		}
 
@@ -702,6 +739,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			String DEFAULT_NAME= "str"; //$NON-NLS-1$
+			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(fToStringList.get(0), BodyDeclaration.class);
+			if (bodyDecl != null && bodyDecl != fLastBodyDecl) {
+				fExcludedNames.clear();
+			}
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			IJavaElement root= cuRewrite.getRoot().getJavaElement();
 			if (root != null) {
