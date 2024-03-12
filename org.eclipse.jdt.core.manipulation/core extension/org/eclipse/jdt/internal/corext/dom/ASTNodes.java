@@ -4130,6 +4130,25 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns a list of all variable names used in the block containing the given node.
+	 *
+	 * @param node the AST node
+	 * @return a list of local variable names in the block of the given node
+	 * @see ScopeAnalyzer#getUsedVariableNames(int, int)
+	 */
+	public static List<String> getAllLocalVariablesInBlock(ASTNode node) {
+		List<String> variableNames= new ArrayList<>();
+		CompilationUnit root= (CompilationUnit) node.getRoot();
+		Block block= ASTNodes.getFirstAncestorOrNull(node, Block.class);
+		if (block != null) {
+			Collection<String> names= new ScopeAnalyzer(root).
+					getUsedVariableNames(block.getStartPosition(), block.getLength());
+			variableNames.addAll(names);
+		}
+		return variableNames;
+	}
+
+	/**
 	 * Checks whether the given <code>exprStatement</code> has a semicolon at the end.
 	 *
 	 * @param exprStatement the {@link ExpressionStatement} to check the semicolon
