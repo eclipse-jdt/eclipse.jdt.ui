@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -81,7 +80,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -98,6 +96,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -821,9 +821,11 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 										&& (variableBinding.getModifiers() & Modifier.STATIC) != 0
 										&& variableBinding.isField()
 										&& inheritedTypes.contains(variableBinding.getDeclaringClass())) {
-									Type copyOfClassName= (Type) rewrite.createCopyTarget(classInstanceCreation.getType());
-									QualifiedType replacement= ast.newQualifiedType(copyOfClassName, ASTNodes.createMoveTarget(rewrite, node));
-									rewrite.replace(node, replacement, group);
+									ITypeBinding cicBinding= classInstanceCreation.getType().resolveBinding();
+									if (cicBinding != null) {
+										Name replacement= ast.newName(cicBinding.getName() + "." + node.getFullyQualifiedName()); //$NON-NLS-1$
+										rewrite.replace(node, replacement, group);
+									}
 									return false;
 								}
 							}
@@ -1204,7 +1206,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 		return new LambdaExpressionsFixCore(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation, root, new CompilationUnitRewriteOperation[] { op });
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, boolean useLambda, boolean useAnonymous, boolean simplifyLambda) {
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean useLambda, boolean useAnonymous, boolean simplifyLambda) {
 		if (!JavaModelUtil.is1d8OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			return null;
 		}

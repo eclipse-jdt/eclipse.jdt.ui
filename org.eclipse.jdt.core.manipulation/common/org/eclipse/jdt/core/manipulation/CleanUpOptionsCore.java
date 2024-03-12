@@ -28,8 +28,10 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
  * Allows to set and retrieve clean up settings for given options keys.
  *
  * @since 1.12
+ * @deprecated Please use CleanUpOptions in the future
  * This class is not intended to be subclassed by clients.
  */
+@Deprecated
 public class CleanUpOptionsCore {
 
 	private final Map<String, String> fOptions;

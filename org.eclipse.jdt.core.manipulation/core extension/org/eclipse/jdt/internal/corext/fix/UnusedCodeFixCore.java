@@ -81,8 +81,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -93,10 +91,13 @@ import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessorCore;
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Fix which removes unused code.
@@ -706,26 +707,26 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	public static UnusedCodeFixCore createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static UnusedCodeFixCore createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (isUnusedImport(problem)) {
 			ImportDeclaration node= getImportDeclaration(problem, compilationUnit);
 			if (node != null) {
 				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
 				RemoveImportOperation operation= new RemoveImportOperation(node);
 				Map<String, String> options= new Hashtable<>();
-				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptionsCore.TRUE);
+				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 				return new UnusedCodeFixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] { operation }, options);
 			}
 		}
 		return null;
 	}
 
-	public static boolean isUnusedImport(IProblemLocationCore problem) {
+	public static boolean isUnusedImport(IProblemLocation problem) {
 		int id= problem.getProblemId();
 		return id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport || id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound;
 	}
 
-	public static UnusedCodeFixCore createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocationCore problem, boolean removeAllAssignements) {
+	public static UnusedCodeFixCore createUnusedMemberFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeAllAssignements) {
 		if (isUnusedMember(problem)) {
 			SimpleName name= getUnusedName(compilationUnit, problem);
 			if (name != null) {
@@ -743,7 +744,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return null;
 	}
 
-	public static UnusedCodeFixCore createUnusedParameterFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static UnusedCodeFixCore createUnusedParameterFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (isUnusedParameter(problem)) {
 			SimpleName name= getUnusedName(compilationUnit, problem);
 			if (name != null) {
@@ -772,7 +773,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return null;
 	}
 
-	public static UnusedCodeFixCore createUnusedTypeParameterFix(CompilationUnit compilationUnit, IProblemLocationCore problemLoc) {
+	public static UnusedCodeFixCore createUnusedTypeParameterFix(CompilationUnit compilationUnit, IProblemLocation problemLoc) {
 		if (problemLoc.getProblemId() == IProblem.UnusedTypeParameter) {
 			SimpleName name= getUnusedName(compilationUnit, problemLoc);
 			if (name != null) {
@@ -787,17 +788,17 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return null;
 	}
 
-	public static boolean isUnusedMember(IProblemLocationCore problem) {
+	public static boolean isUnusedMember(IProblemLocation problem) {
 		int id= problem.getProblemId();
 		return id == IProblem.UnusedPrivateMethod || id == IProblem.UnusedPrivateConstructor || id == IProblem.UnusedPrivateField || id == IProblem.UnusedPrivateType
 				|| id == IProblem.LocalVariableIsNeverUsed;
 	}
 
-	public static boolean isUnusedParameter(IProblemLocationCore problem) {
+	public static boolean isUnusedParameter(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
 	}
 
-	public static UnusedCodeFixCore createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static UnusedCodeFixCore createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() != IProblem.UnnecessaryCast)
 			return null;
 
@@ -811,7 +812,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return new UnusedCodeFixCore(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new CompilationUnitRewriteOperation[] { new RemoveCastOperation((CastExpression) curr) });
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
 			boolean removeUnusedPrivateMethods,
 			boolean removeUnusedPrivateConstructors,
 			boolean removeUnusedPrivateFields,
@@ -822,9 +823,9 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 			boolean removeUnusedParameter) {
 
 		IProblem[] problems= compilationUnit.getProblems();
-		IProblemLocationCore[] locations= new IProblemLocationCore[problems.length];
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			locations[i]= new ProblemLocationCore(problems[i]);
+			locations[i]= new ProblemLocation(problems[i]);
 		}
 
 		return createCleanUp(compilationUnit, locations,
@@ -874,7 +875,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit compilationUnit, IProblemLocationCore[] problems,
+	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean removeUnusedPrivateMethods,
 			boolean removeUnusedPrivateConstructors,
 			boolean removeUnusedPrivateFields,
@@ -889,7 +890,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		LinkedHashSet<CastExpression> unnecessaryCasts= new LinkedHashSet<>();
 		Set<SimpleName> removedMembers= new HashSet<>();
 		Map<MethodDeclaration, Set<SimpleName>> parametersToRemove= new HashMap<>();
-		for (IProblemLocationCore problem : problems) {
+		for (IProblemLocation problem : problems) {
 			int id= problem.getProblemId();
 
 			if (removeUnusedImports && (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
@@ -1087,7 +1088,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return sideEffects.size() > 0;
 	}
 
-	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 
 		if (selectedNode instanceof MethodDeclaration) {
@@ -1124,25 +1125,25 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 	public static Map<String, String> getCleanUpOptions(IBinding binding, boolean removeAll) {
 		Map<String, String> result= new Hashtable<>();
 
-		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptionsCore.TRUE);
+		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.TRUE);
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpOptionsCore.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES, CleanUpOptions.TRUE);
 				break;
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpOptionsCore.TRUE);
+					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS, CleanUpOptions.TRUE);
 				} else {
-					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpOptionsCore.TRUE);
+					result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS, CleanUpOptions.TRUE);
 				}
 				break;
 			case IBinding.VARIABLE:
 				if (removeAll)
 					return null;
 
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpOptionsCore.TRUE);
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpOptionsCore.TRUE);
-				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS, CleanUpOptionsCore.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS, CleanUpOptions.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES, CleanUpOptions.TRUE);
+				result.put(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS, CleanUpOptions.TRUE);
 				break;
 			default:
 				break;
@@ -1151,7 +1152,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		return result;
 	}
 
-	public static ImportDeclaration getImportDeclaration(IProblemLocationCore problem, CompilationUnit compilationUnit) {
+	public static ImportDeclaration getImportDeclaration(IProblemLocation problem, CompilationUnit compilationUnit) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 		if (selectedNode != null) {
 			ASTNode node= ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);

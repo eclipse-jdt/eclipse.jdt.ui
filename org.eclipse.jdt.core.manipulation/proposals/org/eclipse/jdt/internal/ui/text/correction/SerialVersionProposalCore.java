@@ -19,29 +19,30 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
-
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUpCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 
 public class SerialVersionProposalCore extends FixCorrectionProposalCore {
 	private boolean fIsDefaultProposal;
-	public SerialVersionProposalCore(IProposableFix fix, int relevance, IInvocationContextCore context, boolean isDefault) {
+	public SerialVersionProposalCore(IProposableFix fix, int relevance, IInvocationContext context, boolean isDefault) {
 		super(fix, createCleanUp(isDefault), relevance, context);
 		fIsDefaultProposal= isDefault;
 	}
 
-	private static ICleanUpCore createCleanUp(boolean isDefault) {
+	private static ICleanUp createCleanUp(boolean isDefault) {
 		Map<String, String> options= new Hashtable<>();
-		options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptionsCore.TRUE);
+		options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID, CleanUpOptions.TRUE);
 		if (isDefault) {
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpOptionsCore.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT, CleanUpOptions.TRUE);
 		} else {
-			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpOptionsCore.TRUE);
+			options.put(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED, CleanUpOptions.TRUE);
 		}
 		return new PotentialProgrammingProblemsCleanUpCore(options);
 	}

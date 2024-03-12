@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2023 IBM Corporation and others.
+ * Copyright (c) 2013, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1598,6 +1598,63 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				+ "}\n";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
+	@Test
+	public void testConvertToLambda30() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String buf= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(new IOverwriteQuery() {\n" //
+				+ "\n" //
+				+ "            @Override\n" //
+				+ "            public String queryOverwrite(String pathString) {\n" //
+				+ "                return ALL;\n" //
+				+ "            }\n" //
+				+ "\n" //
+				+ "        });\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf, false, null);
+
+		int offset= buf.toString().indexOf("new IOverwriteQuery");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		String expected1= ""
+				+ "package test;\n"
+				+ "public class C1 {\n"
+				+ "    interface IOverwriteQuery {\n" //
+				+ "        String ALL = \"ALL\";\n" //
+				+ "\n" //
+				+ "        String queryOverwrite(String pathString);\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    class ImportOperation {\n" //
+				+ "        public ImportOperation(IOverwriteQuery query) {\n" //
+				+ "        }\n" //
+				+ "    }\n" //
+				+ "\n" //
+				+ "    public C1() {\n" //
+				+ "        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);\n" //
+				+ "    }\n" //
+				+ "}\n";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 	@Test
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
@@ -1666,7 +1723,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -1765,7 +1822,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 6);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -5023,7 +5080,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
 	}

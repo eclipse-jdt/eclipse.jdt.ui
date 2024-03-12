@@ -55,11 +55,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
@@ -355,7 +356,7 @@ public class DoWhileRatherThanWhileFixCore extends CompilationUnitRewriteOperati
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		DoWhileRatherThanWhileFinder finder= new DoWhileRatherThanWhileFinder(operations);
 		compilationUnit.accept(finder);
@@ -368,7 +369,7 @@ public class DoWhileRatherThanWhileFixCore extends CompilationUnitRewriteOperati
 		return new DoWhileRatherThanWhileFixCore(FixMessages.DoWhileRatherThanWhileFix_description, compilationUnit, ops);
 	}
 
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit, final WhileStatement whileStatement) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit, final WhileStatement whileStatement) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		DoWhileRatherThanWhileFinder finder= new DoWhileRatherThanWhileFinder(operations);
 		whileStatement.accept(finder);

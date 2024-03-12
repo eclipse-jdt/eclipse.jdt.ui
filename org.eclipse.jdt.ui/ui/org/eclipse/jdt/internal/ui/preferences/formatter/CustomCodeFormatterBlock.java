@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
  * Shows a combo box to choose the formatter. If there are no contributed
  * formatters, nothing is shown.
  */
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public class CustomCodeFormatterBlock extends Observable {
 
 	private static class FormatterContribution {

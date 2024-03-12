@@ -66,7 +66,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
@@ -88,6 +87,8 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithR
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoringCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -396,9 +397,9 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 			boolean safeActionsEnabled= Platform.getPreferencesService().getBoolean(JavaManipulation.getPreferenceNodeId(), saveActionsKey, false, scopes);
 			String prefix = CleanUpPreferenceUtilCore.SAVE_PARTICIPANT_KEY_PREFIX;
 			if (safeActionsEnabled
-					&& CleanUpOptionsCore.TRUE.equals(JavaManipulation.getPreference(prefix + CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, project))
-					&& CleanUpOptionsCore.TRUE.equals(JavaManipulation.getPreference(prefix + CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, project))
-					&& CleanUpOptionsCore.TRUE.equals(JavaManipulation.getPreference(prefix + CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, project))
+					&& CleanUpOptions.TRUE.equals(JavaManipulation.getPreference(prefix + CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, project))
+					&& CleanUpOptions.TRUE.equals(JavaManipulation.getPreference(prefix + CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, project))
+					&& CleanUpOptions.TRUE.equals(JavaManipulation.getPreference(prefix + CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, project))
 					) {
 				int constructors= 0;
 				if (newTypeDecl instanceof AbstractTypeDeclaration) {

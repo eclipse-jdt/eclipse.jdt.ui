@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandHandler;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
 
@@ -111,16 +111,16 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	public static final String ASSIST_ID= "org.eclipse.jdt.ui.correction.renameInFile.assist"; //$NON-NLS-1$
 
 	private SimpleName fNode;
-	private IInvocationContextCore fContext;
+	private IInvocationContext fContext;
 	private String fLabel;
 	private String fValueSuggestion;
 	private int fRelevance;
 
-	public LinkedNamesAssistProposal(IInvocationContextCore context, SimpleName node) {
+	public LinkedNamesAssistProposal(IInvocationContext context, SimpleName node) {
 		this(CorrectionMessages.LinkedNamesAssistProposal_description, context, node, null);
 	}
 
-	public LinkedNamesAssistProposal(String label, IInvocationContextCore context, SimpleName node, String valueSuggestion) {
+	public LinkedNamesAssistProposal(String label, IInvocationContext context, SimpleName node, String valueSuggestion) {
 		fLabel= label;
 		fNode= node;
 		fContext= context;

@@ -25,15 +25,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Create fixes which can solve problems in connection with Strings
@@ -68,25 +66,25 @@ public class StringCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
+		ICleanUpFix coreFix= StringFixCore.createCleanUp(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
-		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
+		return coreFix;
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
-		List<IProblemLocationCore> coreProblems= new ArrayList<>();
-		for (IProblemLocationCore problem : problems) {
+		List<IProblemLocation> coreProblems= new ArrayList<>();
+		for (IProblemLocation problem : problems) {
 			coreProblems.add(problem);
 		}
-		ICleanUpFixCore coreFix= StringFixCore.createCleanUp(compilationUnit,
+		ICleanUpFix coreFix= StringFixCore.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS),
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
-		return coreFix == null ? null : new CleanUpFixWrapper(coreFix);
+		return coreFix;
 	}
 
 	private Map<String, String> getRequiredOptions() {
@@ -122,7 +120,7 @@ public class StringCleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.UnnecessaryNLSTag)
 			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 

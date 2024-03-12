@@ -17,10 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 public class PrimitiveRatherThanWrapperFixCore extends CompilationUnitRewriteOperationsFixCore {
-	public static ICleanUpFixCore createCleanUp(final CompilationUnit compilationUnit) {
+	public static ICleanUpFix createCleanUp(final CompilationUnit compilationUnit) {
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		compilationUnit.accept(new PrimitiveBooleanRatherThanWrapperFinder(operations));
 		compilationUnit.accept(new PrimitiveCharRatherThanWrapperFinder(operations));

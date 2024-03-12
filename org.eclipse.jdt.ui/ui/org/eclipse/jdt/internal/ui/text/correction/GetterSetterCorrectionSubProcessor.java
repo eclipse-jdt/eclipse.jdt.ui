@@ -43,6 +43,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -134,11 +136,11 @@ public class GetterSetterCorrectionSubProcessor extends GetterSetterCorrectionBa
 	 * @param resultingCollections the resulting proposals
 	 * @return <code>true</code> if the quick assist is applicable at this offset
 	 */
-	public static boolean addGetterSetterProposal(IInvocationContextCore context, ASTNode coveringNode, IProblemLocationCore[] locations, ArrayList<ICommandAccess> resultingCollections) {
+	public static boolean addGetterSetterProposal(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, ArrayList<ICommandAccess> resultingCollections) {
 		return new GetterSetterCorrectionSubProcessor().addGetterSetterProposals(context, coveringNode, locations, resultingCollections);
 	}
 
-	public static void addGetterSetterProposal(IInvocationContextCore context, IProblemLocationCore location, Collection<ICommandAccess> proposals, int relevance) {
+	public static void addGetterSetterProposal(IInvocationContext context, IProblemLocation location, Collection<ICommandAccess> proposals, int relevance) {
 		new GetterSetterCorrectionSubProcessor().addGetterSetterProposals(context, location, proposals, relevance);
 	}
 

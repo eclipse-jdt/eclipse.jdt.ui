@@ -51,14 +51,13 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
 import org.eclipse.jdt.internal.ui.text.correction.IStatusLineProposal;
-import org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
 
 /**
@@ -70,12 +69,12 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	private ICleanUp fCleanUp;
 
-	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContextCore context) {
-		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image, new FixCorrectionProposalCore(fix, CleanUpCoreWrapper.wrap(cleanUp), relevance, context));
+	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
+		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image, new FixCorrectionProposalCore(fix, cleanUp, relevance, context));
 		this.fCleanUp= cleanUp;
 	}
 
-	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContextCore context, FixCorrectionProposalCore delegate) {
+	public FixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context, FixCorrectionProposalCore delegate) {
 		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance, image, delegate);
 		this.fCleanUp= cleanUp;
 	}

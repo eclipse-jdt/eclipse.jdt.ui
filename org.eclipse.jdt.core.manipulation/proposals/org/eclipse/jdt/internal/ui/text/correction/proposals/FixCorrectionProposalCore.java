@@ -24,26 +24,27 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.fix.ICleanUpCore;
-import org.eclipse.jdt.internal.corext.fix.ILinkedFixCore;
+import org.eclipse.jdt.internal.corext.fix.ILinkedFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IInvocationContextCore;
 
 public class FixCorrectionProposalCore extends LinkedCorrectionProposalCore {
 
 	private final IProposableFix fFix;
-	private final ICleanUpCore fCleanUp;
+	private final ICleanUp fCleanUp;
 	private CompilationUnit fCompilationUnit;
 
-	public FixCorrectionProposalCore(IProposableFix fix, ICleanUpCore cleanUp, int relevance, IInvocationContextCore context) {
+	public FixCorrectionProposalCore(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context) {
 		super(fix.getDisplayString(), context.getCompilationUnit(), null, relevance);
 		fFix= fix;
 		fCleanUp= cleanUp;
 		fCompilationUnit= context.getASTRoot();
 	}
-	public ICleanUpCore getCleanUp() {
+	public ICleanUp getCleanUp() {
 		return fCleanUp;
 	}
 	public CompilationUnit getAstCompilationUnit() {
@@ -96,8 +97,8 @@ public class FixCorrectionProposalCore extends LinkedCorrectionProposalCore {
 		CompilationUnitChange createChange= fFix.createChange(null);
 		createChange.setSaveMode(TextFileChange.LEAVE_DIRTY);
 
-		if (fFix instanceof ILinkedFixCore) {
-			setLinkedProposalModel(((ILinkedFixCore) fFix).getLinkedPositionsCore());
+		if (fFix instanceof ILinkedFix) {
+			setLinkedProposalModel(((ILinkedFix) fFix).getLinkedPositions());
 		}
 
 		return createChange;

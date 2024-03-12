@@ -20,14 +20,15 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ReturnExpressionFixCore;
 
-public class ReturnExpressionCleanUpCore extends AbstractCleanUpCore {
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
+public class ReturnExpressionCleanUpCore extends AbstractCleanUp {
 	public ReturnExpressionCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
@@ -36,8 +37,8 @@ public class ReturnExpressionCleanUpCore extends AbstractCleanUpCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
-		return new CleanUpRequirementsCore(requireAST(), false, false, null);
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(requireAST(), false, false, null);
 	}
 
 	public boolean requireAST() {
@@ -45,7 +46,7 @@ public class ReturnExpressionCleanUpCore extends AbstractCleanUpCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFixCore(final CleanUpContextCore context) throws CoreException {
+	public ICleanUpFix createFix(final CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 
 		if (compilationUnit == null || !isEnabled(CleanUpConstants.RETURN_EXPRESSION)) {

@@ -10,7 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
- *     Red Hat Inc. - use AbstractCleanUpCoreWrapper to access core cleanup
+ *     Red Hat Inc. - use AbstractCleanUpWrapper to access core cleanup
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 

@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.manipulation.CleanUpOptionsCore;
  * @since 1.21
  * @noextend This class is not intended to be subclassed by clients.
  */
+@SuppressWarnings("deprecation")
 public class CleanUpOptions extends CleanUpOptionsCore {
 
 	/**

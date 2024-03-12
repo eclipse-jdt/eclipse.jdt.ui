@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
  * A <code>ICleanUpFix</code> which can be used in a
@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
  *
  * @since 1.10
  */
-public interface IProposableFix extends ICleanUpFixCore {
+public interface IProposableFix extends ICleanUpFix {
 
 	/**
 	 * Returns the string to be displayed in the list of completion proposals.

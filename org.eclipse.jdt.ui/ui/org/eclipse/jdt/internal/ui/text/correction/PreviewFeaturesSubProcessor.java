@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -218,7 +219,7 @@ public class PreviewFeaturesSubProcessor {
 		}
 	}
 
-	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void getNeedHigherComplianceProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		String[] args= problem.getProblemArguments();
 		if (args != null && args.length > 0) {
 			String supportedVersion= JavaCore.latestSupportedJavaVersion();

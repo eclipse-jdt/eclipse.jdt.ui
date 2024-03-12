@@ -18,6 +18,7 @@ import java.util.Collection;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -37,29 +38,29 @@ public class ReturnTypeSubProcessor extends ReturnTypeBaseSubProcessor<ICommandA
 	protected ReturnTypeSubProcessor() {
 	}
 
-	public static void addMethodWithConstrNameProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addMethodWithConstrNameProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new ReturnTypeSubProcessor().collectMethodWithConstrNameProposals(context, problem, proposals);
 	}
 
-	public static void addVoidMethodReturnsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addVoidMethodReturnsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new ReturnTypeSubProcessor().collectVoidMethodReturnsProposals(context, problem, proposals);
 	}
 
 
 
-	public static void addMissingReturnTypeProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addMissingReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new ReturnTypeSubProcessor().collectMissingReturnTypeProposals(context, problem, proposals);
 	}
 
-	public static void addMissingReturnStatementProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addMissingReturnStatementProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new ReturnTypeSubProcessor().collectMissingReturnStatementProposals(context, problem, proposals);
 	}
 
-	public static void replaceReturnWithYieldStatementProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void replaceReturnWithYieldStatementProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new ReturnTypeSubProcessor().collectReplaceReturnWithYieldStatementProposals(context, problem, proposals);
 	}
 
-	public static void addMethodRetunsVoidProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) throws JavaModelException {
+	public static void addMethodRetunsVoidProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws JavaModelException {
 		new ReturnTypeSubProcessor().collectMethodReturnsVoidProposals(context, problem, proposals);
 	}
 

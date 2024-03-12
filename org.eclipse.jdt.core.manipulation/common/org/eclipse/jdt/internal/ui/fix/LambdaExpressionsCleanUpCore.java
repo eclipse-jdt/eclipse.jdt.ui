@@ -18,14 +18,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 
-public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
+public class LambdaExpressionsCleanUpCore extends AbstractCleanUp {
 
 	public LambdaExpressionsCleanUpCore(Map<String, String> options) {
 		super(options);
@@ -36,8 +39,8 @@ public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
-		return new CleanUpRequirementsCore(requireAST(), false, false, null);
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(requireAST(), false, false, null);
 	}
 
 	public boolean requireAST() {
@@ -50,7 +53,7 @@ public class LambdaExpressionsCleanUpCore extends AbstractCleanUpCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFixCore(CleanUpContextCore context) throws CoreException {
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
 		if (compilationUnit == null)
 			return null;

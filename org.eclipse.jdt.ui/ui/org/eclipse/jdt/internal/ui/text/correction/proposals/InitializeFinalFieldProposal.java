@@ -25,15 +25,15 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
-	public InitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
+	public InitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
 		super(Messages.format(CorrectionMessages.InitializeFieldAtDeclarationCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance,
 				JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new InitializeFinalFieldProposalCore(problem, cu, astNode, variableBinding, relevance));
 	}
 
-	public InitializeFinalFieldProposal(IProblemLocationCore problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
+	public InitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
 		super(Messages.format(CorrectionMessages.InitializeFieldInConstructorCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance,
 				JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new InitializeFinalFieldProposalCore(problem, cu, astNode, relevance, updateType));
 	}

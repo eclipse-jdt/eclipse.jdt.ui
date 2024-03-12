@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -34,7 +35,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 public final class SerialVersionSubProcessor extends SerialVersionBaseSubProcessor<ICommandAccess> {
 
 	public static final class SerialVersionProposal extends FixCorrectionProposal {
-		public SerialVersionProposal(IProposableFix fix, int relevance, IInvocationContextCore context, boolean isDefault) {
+		public SerialVersionProposal(IProposableFix fix, int relevance, IInvocationContext context, boolean isDefault) {
 			super(fix, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD), context, new SerialVersionProposalCore(fix, relevance, context, isDefault));
 		}
 
@@ -55,7 +56,7 @@ public final class SerialVersionSubProcessor extends SerialVersionBaseSubProcess
 	 * @param location the problem location
 	 * @param proposals the proposal collection to extend
 	 */
-	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocationCore location, final Collection<ICommandAccess> proposals) {
+	public static void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection<ICommandAccess> proposals) {
 		new SerialVersionSubProcessor().addSerialVersionProposals(context, location, proposals);
 	}
 
@@ -63,7 +64,7 @@ public final class SerialVersionSubProcessor extends SerialVersionBaseSubProcess
 	}
 
 	@Override
-	protected ICommandAccess createSerialVersionProposal(IProposableFix iProposableFix, int missingSerialVersion, IInvocationContextCore context, boolean b) {
+	protected ICommandAccess createSerialVersionProposal(IProposableFix iProposableFix, int missingSerialVersion, IInvocationContext context, boolean b) {
 		return new SerialVersionProposal(iProposableFix, missingSerialVersion, context, b);
 	}
 }

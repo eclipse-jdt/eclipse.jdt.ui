@@ -24,16 +24,15 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocationCore;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 
 /**
@@ -69,33 +68,33 @@ public class Java50CleanUp extends AbstractMultiFix {
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		boolean addOverride= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-		ICleanUpFixCore cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit,
+		ICleanUpFix cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit,
 				addAnotations && addOverride,
 				addAnotations && addOverride && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION),
 				addAnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		return cleanUpFixCore;
 	}
 
 	@Override
-	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
-		ProblemLocationCore[] coreProblems= new ProblemLocationCore[problems.length];
+		ProblemLocation[] coreProblems= new ProblemLocation[problems.length];
 		for (int i= 0; i < coreProblems.length; i++) {
-			coreProblems[i]= new ProblemLocationCore(problems[i].getOffset(), problems[i].getLength(), problems[i].getProblemId(), problems[i].getProblemArguments(), problems[i].isError(),
+			coreProblems[i]= new ProblemLocation(problems[i].getOffset(), problems[i].getLength(), problems[i].getProblemId(), problems[i].getProblemArguments(), problems[i].isError(),
 					problems[i].getMarkerType());
 		}
 
 		boolean addAnnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		boolean addOverride= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
-		ICleanUpFixCore cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit, coreProblems,
+		ICleanUpFix cleanUpFixCore= Java50FixCore.createCleanUp(compilationUnit, coreProblems,
 				addAnnotations && addOverride,
 				addAnnotations && addOverride && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION),
 				addAnnotations && isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED),
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES));
-		return cleanUpFixCore == null ? null : new CleanUpFixWrapper(cleanUpFixCore);
+		return cleanUpFixCore;
 	}
 
 	private Map<String, String> getRequiredOptions() {
@@ -171,7 +170,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 
 		if (Java50FixCore.isMissingOverrideAnnotationProblem(id)) {

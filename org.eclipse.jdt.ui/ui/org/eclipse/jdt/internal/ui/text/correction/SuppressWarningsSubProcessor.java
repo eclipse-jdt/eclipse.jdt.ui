@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
@@ -35,7 +36,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcessor<ICommandAccess> {
 
-	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addSuppressWarningsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new SuppressWarningsSubProcessor().getSuppressWarningsProposals(context, problem, proposals);
 	}
 
@@ -46,12 +47,12 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		}
 	}
 
-	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new SuppressWarningsSubProcessor().getUnknownSuppressWarningProposals(context, problem, proposals);
 	}
 
 
-	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocationCore problem, Collection<ICommandAccess> proposals) {
+	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new SuppressWarningsSubProcessor().getRemoveUnusedSuppressWarningProposals(context, problem, proposals);
 	}
 

@@ -52,7 +52,7 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 		boolean convertForLoops= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 		boolean checkIfLoopVarUsed= isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED);
 
-		return CleanUpFixWrapper.create(ConvertLoopFixCore.createCleanUp(compilationUnit, convertForLoops, convertForLoops, isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES), checkIfLoopVarUsed));
+		return ConvertLoopFixCore.createCleanUp(compilationUnit, convertForLoops, convertForLoops, isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES), checkIfLoopVarUsed);
 	}
 
 	@Override

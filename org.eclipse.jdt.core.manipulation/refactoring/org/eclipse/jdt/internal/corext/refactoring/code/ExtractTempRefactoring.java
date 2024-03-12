@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.text.edits.CopySourceEdit;
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.text.edits.TextEditVisitor;
@@ -526,6 +527,10 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private CompilationUnitChange fChange;
 
+	private boolean fCheckFinal;
+
+	private RefactoringStatus fCheckFinalResult;
+
 	private LinkedProposalModelCore fLinkedProposalModel;
 
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
@@ -709,52 +714,70 @@ public class ExtractTempRefactoring extends Refactoring {
 		try {
 			pm.beginTask(RefactoringCoreMessages.ExtractTempRefactoring_checking_preconditions, 4);
 
-			fCURewrite= new CompilationUnitRewrite(null, fCu, fCompilationUnitNode, fFormatterOptions);
-			fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
+			if (!fCheckFinal) {
 
-			RefactoringStatus result= new RefactoringStatus();
-			fStartPoint= -1;
-			fEndPoint= -1;
-			fSeen.clear();
-			boolean replaceAll= fReplaceAllOccurrences;
+				fCURewrite= new CompilationUnitRewrite(null, fCu, fCompilationUnitNode, fFormatterOptions);
+				fCURewrite.getASTRewrite().setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 
-			if (fReplaceAllOccurrences) {
-				RefactoringStatus checkSideEffectsInSelectedExpression= checkSideEffectsInSelectedExpression();
-				if (checkSideEffectsInSelectedExpression.hasInfo()) {
-					fReplaceAllOccurrences= false;
-					result.merge(checkSideEffectsInSelectedExpression);
+				RefactoringStatus result= new RefactoringStatus();
+				fStartPoint= -1;
+				fEndPoint= -1;
+				fSeen.clear();
+				boolean replaceAll= fReplaceAllOccurrences;
+
+				if (fReplaceAllOccurrences) {
+					RefactoringStatus checkSideEffectsInSelectedExpression= checkSideEffectsInSelectedExpression();
+					if (checkSideEffectsInSelectedExpression.hasInfo()) {
+						fReplaceAllOccurrences= false;
+						result.merge(checkSideEffectsInSelectedExpression);
+					}
 				}
-			}
 
-			doCreateChange(Progress.subMonitor(pm, 2));
+				doCreateChange(Progress.subMonitor(pm, 2));
 
-			fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, Progress.subMonitor(pm, 1));
+				fChange= fCURewrite.createChange(RefactoringCoreMessages.ExtractTempRefactoring_change_name, true, Progress.subMonitor(pm, 1));
 
-			fChange.getEdit().accept(new TextEditVisitor() {
-				@Override
-				public void preVisit(TextEdit edit) {
-					TextEdit[] children= edit.getChildren();
-					for (TextEdit te : children)
-						if (te instanceof CopySourceEdit) {
-							CopySourceEdit cse= (CopySourceEdit) te;
-							if (cse.getTargetEdit() == null || cse.getTargetEdit().getOffset() == 0) {
-								edit.removeChild(te);
+				fChange.getEdit().accept(new TextEditVisitor() {
+					@Override
+					public void preVisit(TextEdit edit) {
+						TextEdit[] children= edit.getChildren();
+						for (TextEdit te : children)
+							if (te instanceof CopySourceEdit) {
+								CopySourceEdit cse= (CopySourceEdit) te;
+								if (cse.getTargetEdit() == null || cse.getTargetEdit().getOffset() == 0) {
+									edit.removeChild(te);
+								}
 							}
+						super.preVisit(edit);
+					}
+				});
+				if (fChange.getEdit() instanceof MultiTextEdit topEdit) {
+					TextEdit[] children= topEdit.getChildren();
+					if (children.length == 1 && children[0] instanceof MultiTextEdit childEdit) {
+						if (childEdit.hasChildren() == false) {
+							fCURewrite.clearASTAndImportRewrites();
+							if (fLinkedProposalModel != null) {
+								fLinkedProposalModel.clear();
+							}
+							fLinkedProposalModel= null;
+							result.addEntry(RefactoringStatus.FATAL, RefactoringCoreMessages.ExtractTempRefactoring_side_effects_possible, null, JavaManipulationPlugin.getPluginId(), RefactoringStatusCodes.EXPRESSION_MAY_CAUSE_SIDE_EFFECTS, null);
 						}
-					super.preVisit(edit);
+					}
 				}
-			});
-			if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
-				result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, BasicElementLabels.getJavaElementName(fTempName)));
+				if (Arrays.asList(getExcludedVariableNames()).contains(fTempName))
+					result.addWarning(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_another_variable, BasicElementLabels.getJavaElementName(fTempName)));
 
-			result.merge(checkMatchingFragments());
-			fChange.setKeepPreviewEdits(false);
+				result.merge(checkMatchingFragments());
+				fChange.setKeepPreviewEdits(false);
 
-			if (fCheckResultForCompileProblems) {
-				result.merge(RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCompilationUnitNode, pm));
+				if (fCheckResultForCompileProblems) {
+					result.merge(RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fCompilationUnitNode, pm));
+				}
+				fReplaceAllOccurrences= replaceAll;
+				fCheckFinal= true;
+				fCheckFinalResult= result;
 			}
-			fReplaceAllOccurrences= replaceAll;
-			return result;
+			return fCheckFinalResult;
 		} finally {
 			pm.done();
 		}
@@ -1096,7 +1119,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void createAndInsertTempDeclaration() throws CoreException {
 		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite(), true);
-		VariableDeclarationStatement vds= createTempDeclaration(initializer);
+		VariableDeclarationExpression vds= createTempDeclaration(initializer);
 
 		boolean insertAtSelection;
 		if (!fReplaceAllOccurrences) {
@@ -1117,6 +1140,44 @@ public class ExtractTempRefactoring extends Refactoring {
 			fDeclareFinal= true;
 		}
 
+		if (node instanceof TryStatement tryStatement) {
+			if (getSelectedExpression().getAssociatedNode() instanceof Expression originalexp) {
+				ITypeBinding vdsBinding= originalexp.resolveTypeBinding();
+				if (vdsBinding != null) {
+					boolean isAutoCloseable= false;
+					for (ITypeBinding superType : Bindings.getAllSuperTypes(vdsBinding)) {
+						if ("java.lang.AutoCloseable".equals(superType.getQualifiedName())) { //$NON-NLS-1$
+							isAutoCloseable= true;
+							break;
+						}
+					}
+					if (isAutoCloseable) {
+						List<Expression> resources= tryStatement.resources();
+						ASTNode originalNode= getSelectedExpression().getAssociatedNode();
+						boolean resourceFound= false;
+						for (Expression resource : resources) {
+							int offset= resource.getStartPosition();
+							ASTNode parent= originalNode.getParent();
+							while (parent != null) {
+								if (parent == resource) {
+									resourceFound= true;
+									node= resource;
+									fReplaceAllOccurrences= false;
+									break;
+								} else if (parent.getStartPosition() < offset) {
+									break;
+								}
+								parent= parent.getParent();
+							}
+							if (resourceFound) {
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
 		IASTFragment[] retainOnlyReplacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
 		if (retainOnlyReplacableMatches == null) {
 			return;
@@ -1130,11 +1191,18 @@ public class ExtractTempRefactoring extends Refactoring {
 				break;
 			}
 		}
-		if (node instanceof SwitchStatement || node instanceof EnhancedForStatement) {
+		AST ast= fCURewrite.getAST();
+		if (node instanceof SwitchStatement || node instanceof EnhancedForStatement || node instanceof TryStatement) {
 			/* must insert above switch statement */
 			fStartPoint= 0;
 			fEndPoint= retainOnlyReplacableMatches.length - 1;
-			insertAt(node, vds);
+			ExpressionStatement exs= ast.newExpressionStatement(vds);
+			insertAt(node, exs);
+			return;
+		} else if (node != null && node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+			fStartPoint= 0;
+			fEndPoint= retainOnlyReplacableMatches.length - 1;
+			insertResourceAt(node, vds);
 			return;
 		} else {
 			if (insertAtSelection) {
@@ -1144,18 +1212,20 @@ public class ExtractTempRefactoring extends Refactoring {
 					fSeen.add(retainOnlyReplacableMatches[selectNumber]);
 				}
 				if (realCommonASTNode != null || retainOnlyReplacableMatches.length == 0) {
-					insertAt(getSelectedExpression().getAssociatedNode(), vds);
+					ExpressionStatement exs= ast.newExpressionStatement(vds);
+					insertAt(getSelectedExpression().getAssociatedNode(), exs);
 				}
 				return;
 			}
 		}
 		ASTNode realCommonASTNode= null;
+		ExpressionStatement exs= ast.newExpressionStatement(vds);
 		realCommonASTNode= evalStartAndEnd(retainOnlyReplacableMatches, selectNumber, null);
 		if (realCommonASTNode == null && selectNumber >= 0) {
 			fSeen.add(retainOnlyReplacableMatches[selectNumber]);
 		}
 		if (realCommonASTNode != null) {
-			insertAt(realCommonASTNode, vds);
+			insertAt(realCommonASTNode, exs);
 		}
 		return;
 	}
@@ -1258,14 +1328,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		return target;
 	}
 
-	private VariableDeclarationStatement createTempDeclaration(Expression initializer) throws CoreException {
+	private VariableDeclarationExpression createTempDeclaration(Expression initializer) throws CoreException {
 		AST ast= fCURewrite.getAST();
 
 		VariableDeclarationFragment vdf= ast.newVariableDeclarationFragment();
 		vdf.setName(ast.newSimpleName(fTempName));
 		vdf.setInitializer(initializer);
 
-		VariableDeclarationStatement vds= ast.newVariableDeclarationStatement(vdf);
+		VariableDeclarationExpression vds= ast.newVariableDeclarationExpression(vdf);
 		if (fDeclareFinal) {
 			if (!hasFinalModifer(vds.modifiers())) {
 				vds.modifiers().add(ast.newModifier(ModifierKeyword.FINAL_KEYWORD));
@@ -1289,12 +1359,22 @@ public class ExtractTempRefactoring extends Refactoring {
 		return vds;
 	}
 
+	private void insertResourceAt(ASTNode target, VariableDeclarationExpression exp) {
+		ASTRewrite rewrite= fCURewrite.getASTRewrite();
+		TextEditGroup groupDescription= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable);
+		StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
+		ASTNode parent= target.getParent();
+		ListRewrite listRewrite= rewrite.getListRewrite(parent, (ChildListPropertyDescriptor) locationInParent);
+		listRewrite.insertBefore(exp, target, groupDescription);
+	}
+
 	private void insertAt(ASTNode target, Statement declaration) {
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
 		TextEditGroup groupDescription= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable);
 		ASTNode parent= target.getParent();
 		StructuralPropertyDescriptor locationInParent= target.getLocationInParent();
-		while (locationInParent != Block.STATEMENTS_PROPERTY && locationInParent != SwitchStatement.STATEMENTS_PROPERTY) {
+		while (locationInParent != Block.STATEMENTS_PROPERTY && locationInParent != SwitchStatement.STATEMENTS_PROPERTY
+				&& locationInParent != TryStatement.RESOURCES2_PROPERTY) {
 			if (locationInParent == IfStatement.THEN_STATEMENT_PROPERTY
 					|| locationInParent == IfStatement.ELSE_STATEMENT_PROPERTY
 					|| locationInParent == ForStatement.BODY_PROPERTY
@@ -1672,17 +1752,18 @@ public class ExtractTempRefactoring extends Refactoring {
 		evalStartAndEnd(retainOnlyReplacableMatches(getMatchingFragments()), 0, Integer.valueOf(selectedExpression.getStartPosition() + selectedExpression.getLength()));
 
 		Expression initializer= (Expression) rewrite.createMoveTarget(selectedExpression);
-		VariableDeclarationStatement tempDeclaration= createTempDeclaration(initializer);
+		VariableDeclarationExpression tempDeclarationExpression= createTempDeclaration(initializer);
 		ASTNode replacement;
 
 		ASTNode parent= selectedExpression.getParent();
 		boolean isParentLambda= parent instanceof LambdaExpression;
 		AST ast= rewrite.getAST();
+		ExpressionStatement tempDeclaration= ast.newExpressionStatement(tempDeclarationExpression);
 		if (isParentLambda) {
 			Block blockBody= ast.newBlock();
 			blockBody.statements().add(tempDeclaration);
 			if (!Bindings.isVoidType(((LambdaExpression) parent).resolveMethodBinding().getReturnType())) {
-				List<VariableDeclarationFragment> fragments= tempDeclaration.fragments();
+				List<VariableDeclarationFragment> fragments= tempDeclarationExpression.fragments();
 				SimpleName varName= fragments.get(0).getName();
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(ast.newSimpleName(varName.getIdentifier()));

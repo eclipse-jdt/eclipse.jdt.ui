@@ -121,19 +121,19 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/util/CleanUpCoreWrapper.java" type="org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper">
-        <filter id="571519004">
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/AssistContext.java" type="org.eclipse.jdt.internal.ui.text.correction.AssistContext">
+        <filter id="574619656">
             <message_arguments>
-                <message_argument value="org.eclipse.jdt.internal.ui.util.CleanUpCoreWrapper.wrapOptions(CleanUpOptionsCore)"/>
-                <message_argument value="CleanUpOptions"/>
+                <message_argument value="IInvocationContext"/>
+                <message_argument value="AssistContext"/>
             </message_arguments>
         </filter>
     </resource>
-    <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
-        <filter id="571473929">
+    <resource path="ui/org/eclipse/jdt/internal/ui/text/correction/NullAnnotationsCorrectionProcessor.java" type="org.eclipse.jdt.internal.ui.text.correction.NullAnnotationsCorrectionProcessor">
+        <filter id="574664731">
             <message_arguments>
-                <message_argument value="ViewForm"/>
-                <message_argument value="ViewerPane"/>
+                <message_argument value="org.eclipse.jdt.internal.ui.text.correction.NullAnnotationsCorrectionProcessor.addNullAnnotationInSignatureProposal(IInvocationContext, IProblemLocation, Collection&lt;ICommandAccess&gt;, NullAnnotationsRewriteOperationsChangeKind, boolean)"/>
+                <message_argument value="IInvocationContext"/>
             </message_arguments>
         </filter>
     </resource>

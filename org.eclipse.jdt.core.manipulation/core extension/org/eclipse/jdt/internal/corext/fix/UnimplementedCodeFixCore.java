@@ -31,14 +31,15 @@ import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
 
 public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 
@@ -64,7 +65,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 		}
 	}
 
-	public static ICleanUpFixCore createCleanUp(CompilationUnit root, boolean addMissingMethod, boolean makeTypeAbstract, IProblemLocationCore[] problems) {
+	public static ICleanUpFix createCleanUp(CompilationUnit root, boolean addMissingMethod, boolean makeTypeAbstract, IProblemLocation[] problems) {
 		Assert.isLegal(!addMissingMethod || !makeTypeAbstract);
 		if (!addMissingMethod && !makeTypeAbstract)
 			return null;
@@ -74,7 +75,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 
 		ArrayList<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
-		for (IProblemLocationCore problem : problems) {
+		for (IProblemLocation problem : problems) {
 			if (addMissingMethod) {
 				ASTNode typeNode= getSelectedTypeNode(root, problem);
 				if (typeNode != null && !isTypeBindingNull(typeNode)) {
@@ -100,7 +101,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 		return new UnimplementedCodeFixCore(label, root, operations.toArray(new CompilationUnitRewriteOperation[operations.size()]));
 	}
 
-	public static IProposableFix createAddUnimplementedMethodsFix(final CompilationUnit root, IProblemLocationCore problem) {
+	public static IProposableFix createAddUnimplementedMethodsFix(final CompilationUnit root, IProblemLocation problem) {
 		ASTNode typeNode= getSelectedTypeNode(root, problem);
 		if (typeNode == null)
 			return null;
@@ -115,7 +116,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 		return null;
 	}
 
-	public static UnimplementedCodeFixCore createMakeTypeAbstractFix(CompilationUnit root, IProblemLocationCore problem) {
+	public static UnimplementedCodeFixCore createMakeTypeAbstractFix(CompilationUnit root, IProblemLocation problem) {
 		ASTNode typeNode= getSelectedTypeNode(root, problem);
 		if (!(typeNode instanceof TypeDeclaration))
 			return null;
@@ -127,7 +128,7 @@ public class UnimplementedCodeFixCore extends CompilationUnitRewriteOperationsFi
 		return new UnimplementedCodeFixCore(label, root, new CompilationUnitRewriteOperation[] { operation });
 	}
 
-	public static ASTNode getSelectedTypeNode(CompilationUnit root, IProblemLocationCore problem) {
+	public static ASTNode getSelectedTypeNode(CompilationUnit root, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(root);
 		if (selectedNode == null)
 			return null;

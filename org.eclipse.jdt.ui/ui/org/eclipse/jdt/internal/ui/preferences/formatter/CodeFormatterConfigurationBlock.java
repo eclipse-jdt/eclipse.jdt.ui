@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
  * The code formatter preference page.
  */
 
+@SuppressWarnings("deprecation") // java.util.Observable since 9;
 public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 
 	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".codeformatter"; //$NON-NLS-1$

@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -48,8 +51,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
@@ -58,8 +60,10 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
-import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * A fix that uses the Local variable type inference:
@@ -68,7 +72,7 @@ import org.eclipse.text.edits.TextEditGroup;
  * using the <code>var</code> keyword.</li>
  * </ul>
  */
-public class VarCleanUpCore extends AbstractMultiFixCore {
+public class VarCleanUpCore extends AbstractMultiFix {
 	public VarCleanUpCore() {
 		this(Collections.emptyMap());
 	}
@@ -78,10 +82,10 @@ public class VarCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
+	public CleanUpRequirements getRequirements() {
 		boolean requireAST= isEnabled(CleanUpConstants.USE_VAR);
 		Map<String, String> requiredOptions= null;
-		return new CleanUpRequirementsCore(requireAST, false, false, requiredOptions);
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	@Override
@@ -108,7 +112,7 @@ public class VarCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(final CompilationUnit unit) throws CoreException {
+	protected ICleanUpFix createFix(final CompilationUnit unit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.USE_VAR) || !JavaModelUtil.is10OrHigher(unit.getJavaElement().getJavaProject())) {
 			return null;
 		}
@@ -342,12 +346,12 @@ public class VarCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocationCore problem) {
+	public boolean canFix(final ICompilationUnit compilationUnit, final IProblemLocation problem) {
 		return false;
 	}
 
 	@Override
-	protected ICleanUpFixCore createFix(final CompilationUnit unit, final IProblemLocationCore[] problems) throws CoreException {
+	protected ICleanUpFix createFix(final CompilationUnit unit, final IProblemLocation[] problems) throws CoreException {
 		return null;
 	}
 

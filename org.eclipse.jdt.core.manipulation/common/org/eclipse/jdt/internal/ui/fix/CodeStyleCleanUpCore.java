@@ -25,19 +25,19 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.manipulation.CleanUpRequirementsCore;
-import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 
-import org.eclipse.jdt.internal.ui.text.correction.IProblemLocationCore;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Creates fixes which can resolve code style issues
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore
  */
-public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
+public class CodeStyleCleanUpCore extends AbstractMultiFix {
 
 	public CodeStyleCleanUpCore() {
 	}
@@ -47,10 +47,10 @@ public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public CleanUpRequirementsCore getRequirementsCore() {
+	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirementsCore(requireAST, false, false, requiredOptions);
+		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -69,7 +69,7 @@ public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit) throws CoreException {
+	public org.eclipse.jdt.ui.cleanup.ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 
@@ -91,7 +91,7 @@ public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
 
 
 	@Override
-	public ICleanUpFixCore createFix(CompilationUnit compilationUnit, IProblemLocationCore[] problems) throws CoreException {
+	public ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return CodeStyleFixCore.createCleanUp(compilationUnit, problems,
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS),
 				isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS),
@@ -195,7 +195,7 @@ public class CodeStyleCleanUpCore extends AbstractMultiFixCore {
 	}
 
 	@Override
-	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocationCore problem) {
+	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (IProblem.UnqualifiedFieldAccess == problem.getProblemId())
 			return isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS) && isEnabled(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS);
 

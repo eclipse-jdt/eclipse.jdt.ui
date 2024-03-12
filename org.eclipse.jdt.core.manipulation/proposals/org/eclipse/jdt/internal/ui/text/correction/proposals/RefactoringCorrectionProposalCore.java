@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,9 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 
@@ -30,6 +32,9 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 
 public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalCore {
 
@@ -62,6 +67,9 @@ public class RefactoringCorrectionProposalCore extends LinkedCorrectionProposalC
 		if (fRefactoringStatus.hasFatalError()) {
 			TextFileChange dummyChange= new TextFileChange("fatal error", (IFile) getCompilationUnit().getResource()); //$NON-NLS-1$
 			dummyChange.setEdit(new InsertEdit(0, "")); //$NON-NLS-1$
+			if (fRefactoringStatus.getEntryAt(0).getCode() == RefactoringStatusCodes.EXPRESSION_MAY_CAUSE_SIDE_EFFECTS) {
+				JavaManipulationPlugin.log(new Status(IStatus.INFO, JavaManipulationPlugin.getPluginId(), fRefactoringStatus.getEntryAt(0).getMessage()));
+			}
 			return dummyChange;
 		}
 		Change o = fRefactoring.createChange(new NullProgressMonitor());
