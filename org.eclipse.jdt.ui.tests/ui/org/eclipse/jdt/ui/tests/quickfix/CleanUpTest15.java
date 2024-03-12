@@ -160,7 +160,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "    public void testTrailingSpacesAndInnerNewlines() {\n" //
 				+ "        String x = \"\"\"\n" //
     	        + "            public\\s\n"
-    	        + "            void foo() {\\s\\s\n" //
+    	        + "            void foo() { \\s\n" //
     	        + "                System.out.println\\\\(\"abc\");\n" //
     	        + "            }\n" //
     	        + "            \"\"\";\n" //
