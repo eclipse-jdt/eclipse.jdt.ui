@@ -293,6 +293,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                \"public class C {\\n\" +\n" //
     	        + "                \"}\");\n" //
     	        + "        System.out.println(buf5.toString());\n" //
+    	        + "        String str3= \"abc\";\n" //
     	        + "    }\n" //
 				+ "}";
 
@@ -362,14 +363,15 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                 * foo\n" //
     	        + "                 */\\\n" //
     	        + "            \"\"\";\n" //
-    	        + "        String str3 = \"\"\"\n" //
+    	        + "        String str4 = \"\"\"\n" //
     	        + "            package pack1;\n" //
     	        + "            \n" //
     	        + "            import java.util.*;\n" //
     	        + "            \n" //
     	        + "            public class C {\n" //
     	        + "            }\"\"\";\n" //
-    	        + "        System.out.println(str3);\n" //
+    	        + "        System.out.println(str4);\n" //
+    	        + "        String str3= \"abc\";\n" //
     	        + "    }\n" //
 				+ "}";
 
