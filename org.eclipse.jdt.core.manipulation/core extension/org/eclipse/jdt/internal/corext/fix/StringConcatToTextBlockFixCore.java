@@ -428,7 +428,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (unescaped.charAt(whitespaceStart) == ' ') {
 				whitespaceStart--;
 				trailingWhitespace.append("\\s"); //$NON-NLS-1$
-				continue;
 			} else if (unescaped.charAt(whitespaceStart) == '\t') {
 				whitespaceStart--;
 				trailingWhitespace.append("\\t"); //$NON-NLS-1$
@@ -834,7 +833,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 				ITypeBinding binding= firstToStringCall.resolveTypeBinding();
 				if (binding != null) {
-					Set<String> excludedNames= new HashSet<>(ASTNodes.getVisibleLocalVariablesInScope(fToStringList.get(fToStringList.size() - 1)));
+					Set<String> excludedNames= new HashSet<>(ASTNodes.getAllLocalVariablesInBlock(fStatements.get(0)));
 					excludedNames.addAll(fExcludedNames);
 					String newVarName= DEFAULT_NAME;
 					if (excludedNames.contains(DEFAULT_NAME)) {
