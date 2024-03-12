@@ -64,8 +64,6 @@ public class SelfEncapsulateFieldCompositeRefactoring extends Refactoring {
 	private final HashMap<ICompilationUnit, List<TextEditGroup>> fDescriptionsMap = new HashMap<>();
 	private final List<TextChange> changes = new ArrayList<>();
 
-	private static final String CREATE_CHANGE= "Create Change"; //$NON-NLS-1$
-
 	public List<SelfEncapsulateFieldRefactoring> getRefactorings() {
 		return fRefactorings;
 	}
@@ -101,8 +99,7 @@ public class SelfEncapsulateFieldCompositeRefactoring extends Refactoring {
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask(CREATE_CHANGE, changes.size());
-		pm.setTaskName(RefactoringCoreMessages.SelfEncapsulateField_create_changes);
+		pm.beginTask(RefactoringCoreMessages.SelfEncapsulateField_create_changes, changes.size());
 		final DynamicValidationRefactoringChange result= new DynamicValidationRefactoringChange(getDescriptor(), getName());
 		for (TextChange change : changes) {
 			result.add(change);
