@@ -284,7 +284,16 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf4.append(\"     * foo\\n\");\n" //
     	        + "        buf4.append(\"     */\");\n" //
     	        + "        String expected= buf4.toString();\n" //
-				+ "    }\n" //
+    	        + "        StringBuilder buf5= new StringBuilder();\n" //
+    	        + "        buf5.append(\n" //
+    	        + "                \"package pack1;\\n\" +\n" //
+    	        + "                \"\\n\" +\n" //
+    	        + "                \"import java.util.*;\\n\" +\n" //
+    	        + "                \"\\n\" +\n" //
+    	        + "                \"public class C {\\n\" +\n" //
+    	        + "                \"}\");\n" //
+    	        + "        System.out.println(buf5.toString());\n" //
+    	        + "    }\n" //
 				+ "}";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -353,6 +362,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                 * foo\n" //
     	        + "                 */\\\n" //
     	        + "            \"\"\";\n" //
+    	        + "        String str3 = \"\"\"\n" //
+    	        + "            package pack1;\n" //
+    	        + "            \n" //
+    	        + "            import java.util.*;\n" //
+    	        + "            \n" //
+    	        + "            public class C {\n" //
+    	        + "            }\"\"\";\n" //
+    	        + "        System.out.println(str3);\n" //
     	        + "    }\n" //
 				+ "}";
 
