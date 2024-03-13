@@ -948,6 +948,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SelfEncapsulateFieldInputPage_description;
 
+	public static String SelfEncapsulateFieldInputPage_selected_field_name;
+
 	public static String SelfEncapsulateFieldInputPage_field_access;
 
 	public static String SelfEncapsulateFieldInputPage_first_method;
@@ -971,6 +973,8 @@ public final class RefactoringMessages extends NLS {
 	public static String SelfEncapsulateFieldInputPage_protected;
 
 	public static String SelfEncapsulateFieldInputPage_public;
+
+	public static String SelfEncapsulateFieldInputPage_same;
 
 	public static String SelfEncapsulateFieldInputPage_setter_name;
 
@@ -1033,6 +1037,8 @@ public final class RefactoringMessages extends NLS {
 	public static String SelfEncapsulateFieldInputPage_useexistingsetter_label;
 
 	public static String SelfEncapsulateFieldInputPage_useexistinggetter_label;
+
+	public static String SelfEncapsulateFieldInputPage_access_warning;
 
 
 	static {
