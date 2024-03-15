@@ -62,6 +62,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "            \"   }\\n\" + //$NON-NLS-1$\n" //
 				+ "            \"}\"; //$NON-NLS-1$\n" //
 				+ "\n" //
+				+ "    private static final String CU_POSTFIX= \" {\\n\" +\n" //
+				+ "            \"	\\n\" +\n" //
+				+ "            \"}\\n\" +\n" //
+				+ "            \"}\\n\";\n" //
+				+ "\n" //
 				+ "    public void testSimple() {\n" //
 				+ "        // comment 1\n" //
 				+ "        String x = \"\" + //$NON-NLS-1$\n" //
@@ -147,6 +152,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "               System.out.println(\"abc\");\n" //
 				+ "           }\n" //
 				+ "        }\"\"\"; //$NON-NLS-1$\n" //
+				+ "\n" //
+				+ "    private static final String CU_POSTFIX= \"\"\"\n" //
+				+ "         {\n" //
+				+ "        \\t\n" //
+				+ "        }\n" //
+				+ "        }\n" //
+				+ "        \"\"\";\n" //
 				+ "\n" //
 				+ "    public void testSimple() {\n" //
 				+ "        // comment 1\n" //

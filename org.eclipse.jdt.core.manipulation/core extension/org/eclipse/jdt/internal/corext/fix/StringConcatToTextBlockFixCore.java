@@ -424,15 +424,12 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		}
 		int whitespaceStart= unescaped.length()-1;
 		StringBuilder trailingWhitespace= new StringBuilder();
-		while (whitespaceStart > 0) {
-			if (unescaped.charAt(whitespaceStart) == ' ') {
-				whitespaceStart--;
-				trailingWhitespace.append("\\s"); //$NON-NLS-1$
-			} else if (unescaped.charAt(whitespaceStart) == '\t') {
-				whitespaceStart--;
-				trailingWhitespace.append("\\t"); //$NON-NLS-1$
-			}
-			break;
+		if (unescaped.charAt(whitespaceStart) == ' ') {
+			--whitespaceStart;
+			trailingWhitespace.append("\\s"); //$NON-NLS-1$
+		} else if (unescaped.charAt(whitespaceStart) == '\t') {
+			--whitespaceStart;
+			trailingWhitespace.append("\\t"); //$NON-NLS-1$
 		}
 
 		return unescaped.substring(0, whitespaceStart + 1) + trailingWhitespace;
