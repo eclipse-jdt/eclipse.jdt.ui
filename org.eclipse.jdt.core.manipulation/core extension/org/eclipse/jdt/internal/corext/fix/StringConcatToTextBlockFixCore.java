@@ -367,20 +367,22 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		List<String> parts= new ArrayList<>();
 
 		while ((bsIndex= escapedText.indexOf("\\", readIndex)) >= 0) { //$NON-NLS-1$ "\"
-			if (escapedText.startsWith("\\n", bsIndex)) { //$NON-NLS-1$ "\n"
+			if (escapedText.startsWith("\\n", bsIndex) || escapedText.startsWith("\\u005cn", bsIndex)) { //$NON-NLS-1$ //$NON-NLS-2$ "\n"
 				transformed.append(escapedText.substring(readIndex, bsIndex));
 				parts.add(escapeTrailingWhitespace(transformed.toString())+ System.lineSeparator());
 				transformed= new StringBuilder();
-				readIndex= bsIndex + 2;
-			} else if (escapedText.startsWith("\\\"", bsIndex)) { //$NON-NLS-1$ "\""
+				readIndex= bsIndex + (escapedText.startsWith("\\n", bsIndex) ? 2 : 7); //$NON-NLS-1$
+			} else if (escapedText.startsWith("\\\"", bsIndex) || escapedText.startsWith("\\u005c\"", bsIndex)) { //$NON-NLS-1$ //$NON-NLS-2$ "\""
 				// if there are more than three quotes in a row, escape the first quote of every triplet to
 				// avoid it being interpreted as a text block terminator. This code would be much simpler if
 				// we could escape the third quote of each triplet, but the text block spec recommends this way.
 
 				transformed.append(escapedText.substring(readIndex, bsIndex));
 				int quoteCount= 1;
-				while (escapedText.startsWith("\\\"", bsIndex + 2 * quoteCount)) { //$NON-NLS-1$
+				int index= (escapedText.startsWith("\\\"", bsIndex) ? 2 : 7); //$NON-NLS-1$
+				while (escapedText.startsWith("\\\"", bsIndex + index) || escapedText.startsWith("\\u005c\"", bsIndex + index)) { //$NON-NLS-1$ //$NON-NLS-2$
 					quoteCount++;
+					index += (escapedText.startsWith("\\\"", bsIndex + index) ? 2 : 7); //$NON-NLS-1$
 				}
 				int i= 0;
 				while (i < quoteCount / 3) {
@@ -394,11 +396,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				for (int j = 0; j < quoteCount % 3; j++) {
 					transformed.append("\""); //$NON-NLS-1$
 				}
-				readIndex= bsIndex + 2 * quoteCount;
-			} else if (escapedText.startsWith("\\t", bsIndex)) { //$NON-NLS-1$ "\t"
+				readIndex= bsIndex + index;
+			} else if (escapedText.startsWith("\\t", bsIndex) || escapedText.startsWith("\\u005ct", bsIndex)) { //$NON-NLS-1$ //$NON-NLS-2$ "\t"
 				transformed.append(escapedText.substring(readIndex, bsIndex));
 				transformed.append("\t"); //$NON-NLS-1$
-				readIndex= bsIndex+2;
+				readIndex= bsIndex + (escapedText.startsWith("\\t", bsIndex) ? 2 : 7); //$NON-NLS-1$
 			} else {
 				transformed.append(escapedText.substring(readIndex, bsIndex));
 				transformed.append("\\").append(escapedText.charAt(bsIndex + 1)); //$NON-NLS-1$
@@ -424,15 +426,12 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		}
 		int whitespaceStart= unescaped.length()-1;
 		StringBuilder trailingWhitespace= new StringBuilder();
-		while (whitespaceStart > 0) {
-			if (unescaped.charAt(whitespaceStart) == ' ') {
-				whitespaceStart--;
-				trailingWhitespace.append("\\s"); //$NON-NLS-1$
-			} else if (unescaped.charAt(whitespaceStart) == '\t') {
-				whitespaceStart--;
-				trailingWhitespace.append("\\t"); //$NON-NLS-1$
-			}
-			break;
+		if (unescaped.charAt(whitespaceStart) == ' ') {
+			--whitespaceStart;
+			trailingWhitespace.append("\\s"); //$NON-NLS-1$
+		} else if (unescaped.charAt(whitespaceStart) == '\t') {
+			--whitespaceStart;
+			trailingWhitespace.append("\\t"); //$NON-NLS-1$
 		}
 
 		return unescaped.substring(0, whitespaceStart + 1) + trailingWhitespace;
