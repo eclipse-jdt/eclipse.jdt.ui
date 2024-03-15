@@ -6811,8 +6811,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				"    public void foo() {\n" +
 				"        try (Reader s = new BufferedReader(new FileReader(\"c.d\"))) {\n" +
 				"            try (Reader r = new BufferedReader(new FileReader(\"a.b\"));\n" +
-				"                    Reader t = new BufferedReader(new FileReader(\"e.f\"))){r.read();\n" +
-				"                    System.out.println(\"abc\");} \n" +
+				"            Reader t = new BufferedReader(new FileReader(\"e.f\"))) {\n" +
+				"                r.read();\n" +
+				"                System.out.println(\"abc\");\n" +
+				"            } \n" +
 				"        } catch (FileNotFoundException e) {\n" +
 				"            e.printStackTrace();\n" +
 				"        } catch (IOException e) {\n" +
@@ -6869,8 +6871,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				"    public void foo() {\n" +
 				"        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n" +
 				"                Reader r = new BufferedReader(new FileReader(\"a.b\"))) {\n" +
-				"            try (Reader t = new BufferedReader(new FileReader(\"e.f\"))){r.read();\n" +
-				"                    System.out.println(\"abc\");} \n" +
+				"            try (Reader t = new BufferedReader(new FileReader(\"e.f\"))) {\n" +
+				"                r.read();\n" +
+				"                System.out.println(\"abc\");\n" +
+				"            } \n" +
 				"        } catch (FileNotFoundException e) {\n" +
 				"            e.printStackTrace();\n" +
 				"        } catch (IOException e) {\n" +
