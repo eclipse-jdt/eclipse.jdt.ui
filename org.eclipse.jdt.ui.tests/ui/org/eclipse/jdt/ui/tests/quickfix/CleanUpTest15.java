@@ -309,6 +309,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        buf3.append(\"\\n\");\n" //
 				+ "        // comment 6\n" //
 				+ "        k = buf3.toString();\n" //
+				+ "        buf3= new StringBuilder();\n" //
+				+ "        buf3.append(4);\n" //
 				+ "\n" //
 				+ "        String x = \"abc\\n\" +\n"
 				+ "            \"def\\n\" +\n" //
@@ -325,6 +327,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf4.append(\"     */\");\n" //
     	        + "        String expected= buf4.toString();\n" //
     	        + "        StringBuilder buf5= new StringBuilder();\n" //
+    	        + "        buf5.append(3);\n" //
+    	        + "        buf5= new StringBuilder();\n" //
     	        + "        buf5.append(\n" //
     	        + "                \"package pack1;\\n\" +\n" //
     	        + "                \"\\n\" +\n" //
@@ -333,6 +337,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                \"public class C {\\n\" +\n" //
     	        + "                \"}\");\n" //
     	        + "        System.out.println(buf5.toString());\n" //
+    	        + "        buf5= new StringBuilder();\n" //
+    	        + "        buf5.append(7);\n" //
     	        + "        String str3= \"abc\";\n" //
     	        + "    }\n" //
 				+ "}";
@@ -382,6 +388,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "            }\n" //
 				+ "            \n" //
 				+ "            \"\"\";\n" //
+				+ "        StringBuilder buf3 = new StringBuilder();\n" //
+				+ "        buf3.append(4);\n" //
 				+ "\n" //
 				+ "        String x = \"\"\"\n" //
 				+ "            abc\n" //
@@ -403,6 +411,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                 * foo\n" //
     	        + "                 */\\\n" //
     	        + "            \"\"\";\n" //
+    	        + "        StringBuilder buf5= new StringBuilder();\n" //
+    	        + "        buf5.append(3);\n" //
     	        + "        String str4 = \"\"\"\n" //
     	        + "            package pack1;\n" //
     	        + "            \n" //
@@ -411,6 +421,8 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            public class C {\n" //
     	        + "            }\"\"\";\n" //
     	        + "        System.out.println(str4);\n" //
+    	        + "        buf5= new StringBuilder();\n" //
+    	        + "        buf5.append(7);\n" //
     	        + "        String str3= \"abc\";\n" //
     	        + "    }\n" //
 				+ "}";

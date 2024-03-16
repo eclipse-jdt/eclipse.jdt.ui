@@ -442,12 +442,14 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final List<CompilationUnitRewriteOperation> fOperations;
 		private List<StringLiteral> fLiterals= new ArrayList<>();
 		private List<Statement> statementList= new ArrayList<>();
+		private Set<Statement> ignoredConstructorStatements= new HashSet<>();
 		private SimpleName originalVarName;
 		private Map<ExpressionStatement, ChangeStringBufferToTextBlock> conversions= new HashMap<>();
 		private static final String APPEND= "append"; //$NON-NLS-1$
 		private static final String TO_STRING= "toString"; //$NON-NLS-1$
 		private BodyDeclaration fLastBodyDecl;
 		private final Set<String> fExcludedNames;
+		private final Set<SimpleName> fRemovedDeclarations= new HashSet<>();
 
 		public StringBufferFinder(List<CompilationUnitRewriteOperation> operations, Set<String> excludedNames) {
 			super(true);
@@ -540,6 +542,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					!(statement instanceof ExpressionStatement)) {
 				return false;
 			}
+			if (ignoredConstructorStatements.contains(statement)) {
+				statementList.remove(statement);
+				return false;
+			}
 			boolean nonNLS= false;
 			CompilationUnit cu= (CompilationUnit) node.getRoot();
 			ICompilationUnit icu= (ICompilationUnit) cu.getJavaElement();
@@ -551,6 +557,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			List<Statement> stmtList= block.statements();
 			int startIndex= stmtList.indexOf(statement);
 			int i= startIndex;
+			Statement previousStatement= null;
 			while (++i < stmtList.size()) {
 				Statement s= stmtList.get(i);
 				if (s instanceof ExpressionStatement) {
@@ -598,8 +605,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 										return false;
 									}
 								}
-							}
-							else {
+							} else {
 								statementList.clear();
 								fLiterals.clear();
 								return false;
@@ -607,12 +613,27 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 						} else {
 							break;
 						}
+					} else if (exp instanceof Assignment assignment && assignment.getLeftHandSide() instanceof SimpleName name
+							&& name.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())
+							&& (i - startIndex == 1 || ignoredConstructorStatements.contains(previousStatement))) {
+						Expression rightSide= ASTNodes.getUnparenthesedExpression(assignment.getRightHandSide());
+						if (rightSide instanceof ClassInstanceCreation cic && isStringBufferType(cic.getType())) {
+							List<Expression> cicArgs= cic.arguments();
+							ignoredConstructorStatements.add(s);
+							statementList.add(s);
+							if (!cicArgs.isEmpty() || !fLiterals.isEmpty()) {
+								statementList.clear();
+								fLiterals.clear();
+								return false;
+							}
+						}
 					} else {
 						break;
 					}
 				} else {
 					break;
 				}
+				previousStatement= s;
 			}
 			Statement endStatement= stmtList.get(i - 1);
 			int lastStatementEnd= endStatement.getStartPosition() + endStatement.getLength();
@@ -636,7 +657,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			List<StringLiteral> literals= new ArrayList<>(fLiterals);
 			List<MethodInvocation> toStringList= new ArrayList<>(checkValidityVisitor.getToStringList());
 			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(node, BodyDeclaration.class);
-			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, statements, literals, assignmentToConvert, fExcludedNames, fLastBodyDecl, nonNLS);
+			if (statements.get(0) instanceof VariableDeclarationStatement) {
+				fRemovedDeclarations.add(originalVarName);
+			}
+			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, statements, literals,
+					fRemovedDeclarations.contains(originalVarName) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, nonNLS);
 			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
 			conversions.put(assignmentToConvert, operation);
