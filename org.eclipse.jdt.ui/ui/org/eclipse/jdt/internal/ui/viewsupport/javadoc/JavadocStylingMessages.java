@@ -29,7 +29,6 @@ public class JavadocStylingMessages extends NLS {
 	public static String JavadocStyling_styling_typeParamsReferencesColoring;
 	public static String JavadocStyling_styling_typeParamsLevelsColoring;
 	public static String JavadocStyling_styling_formatting;
-	public static String JavadocStyling_styling_wrapping;
 
 	public static String JavadocStyling_enabledTooltip;
 	public static String JavadocStyling_disabledTooltip;
@@ -49,7 +48,6 @@ public class JavadocStylingMessages extends NLS {
 	public static String JavadocStyling_stylingPreview_typeParamsReferencesColoring;
 	public static String JavadocStyling_stylingPreview_typeParamsLevelsColoring;
 	public static String JavadocStyling_stylingPreview_formatting;
-	public static String JavadocStyling_stylingPreview_wrapping;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavadocStylingMessages.class);

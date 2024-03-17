@@ -80,10 +80,6 @@ public class JavaElementLinks {
 	 */
 	public static final String CHECKBOX_ID_FORMATTIG= "formattingSwitch"; //$NON-NLS-1$
 	/**
-	 * ID of the checkbox in generated HTML content that toggles wrapping inside element labels.
-	 */
-	public static final String CHECKBOX_ID_WRAPPING= "wrappingSwitch"; //$NON-NLS-1$
-	/**
 	 * ID of the checkbox in generated HTML content that toggles type parameters coloring inside element labels.
 	 */
 	public static final String CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsRefsColoringSwitch"; //$NON-NLS-1$
@@ -97,7 +93,6 @@ public class JavaElementLinks {
 	public static final String CHECKBOX_ID_PREVIEW= "previewSwitch"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_POSTFIX_FORMATTING= "formatting"; //$NON-NLS-1$
-	private static final String PREFERENCE_KEY_POSTFIX_WRAPPING= "wrapping"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsReferencesColoring"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING= "typeParamsLevelsColoring"; //$NON-NLS-1$
 
@@ -179,7 +174,6 @@ public class JavaElementLinks {
 	static class JavaElementLinkedLabelComposer extends JavaElementLabelComposer {
 		private final IJavaElement fElement;
 		private final boolean noEnhancements;
-		private final boolean enableWrapping;
 		private final boolean enableFormatting;
 		private final boolean enableTypeParamsColoring;
 		private final boolean enableTypeLevelsColoring;
@@ -206,13 +200,12 @@ public class JavaElementLinks {
 			}
 			if (getStylingEnabledPreference() && stylingPreferenceKeysPrefix != null) {
 				noEnhancements= false;
-				enableWrapping= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_WRAPPING);
 				enableFormatting= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
 				enableTypeParamsColoring= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
 				enableTypeLevelsColoring= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING);
 			} else {
 				noEnhancements= true;
-				enableWrapping= enableFormatting= enableTypeParamsColoring= enableTypeLevelsColoring= false;
+				enableFormatting= enableTypeParamsColoring= enableTypeLevelsColoring= false;
 			}
 		}
 
@@ -378,33 +371,26 @@ public class JavaElementLinks {
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_PREVIEW + //$NON-NLS-1$
 							"' style='position: absolute; top: 18px; left: -23px;'/>"); //$NON-NLS-1$
 
-				// wrapping checkbox
-				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_WRAPPING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-				if (enableWrapping) {
-					fBuffer.append("checked=true "); //$NON-NLS-1$
-				}
-				fBuffer.append("style='position: absolute; top: 32px; left: -23px;'/>"); //$NON-NLS-1$
-
 				// formatting checkbox
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_FORMATTIG + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableFormatting) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
-				fBuffer.append("style='position: absolute; top: 46px; left: -23px;'/>"); //$NON-NLS-1$
+				fBuffer.append("style='position: absolute; top: 32px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// typeLevelsColoring checkbox
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_TYPE_PARAMETERS_LEVELS_COLORING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableTypeLevelsColoring) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
-				fBuffer.append("style='position: absolute; top: 60px; left: -23px;'/>"); //$NON-NLS-1$
+				fBuffer.append("style='position: absolute; top: 46px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// typeParametersColoring checkbox
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableTypeParamsColoring) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
-				fBuffer.append("style='position: absolute; top: 74px; left: -23px;'/>"); //$NON-NLS-1$
+				fBuffer.append("style='position: absolute; top: 60px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// encompassing <span> for everything styled based on checkboxes checked state
 				fBuffer.append("<span class='" + CSS_CLASS_SWITCH_PARENT + "'>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -420,8 +406,6 @@ public class JavaElementLinks {
 						+ JavadocStylingMessages.JavadocStyling_stylingPreview_typeParamsLevelsColoring + "</div>"); //$NON-NLS-1$
 				fBuffer.append("<div id='previewFormatting'>" //$NON-NLS-1$
 						+ JavadocStylingMessages.JavadocStyling_stylingPreview_formatting + "</div>"); //$NON-NLS-1$
-				fBuffer.append("<div id='previewWrapping'>" //$NON-NLS-1$
-						+ JavadocStylingMessages.JavadocStyling_stylingPreview_wrapping + "</div>"); //$NON-NLS-1$
 				fBuffer.append("</div>"); //$NON-NLS-1$
 				fBuffer.append("</span>"); //$NON-NLS-1$
 				appendHoverParent= true;
@@ -613,7 +597,6 @@ public class JavaElementLinks {
 
 	public static void initDefaultPreferences(IPreferenceStore store, String keyPrefix) {
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING, StylingPreference.ALWAYS.name());
-		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_WRAPPING, StylingPreference.ALWAYS.name());
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, StylingPreference.HOVER.name());
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING, StylingPreference.OFF.name());
 	}
@@ -926,10 +909,6 @@ public class JavaElementLinks {
 		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
 	}
 
-	public static StylingPreference getPreferenceForWrapping(String keyPrefix) {
-		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_WRAPPING);
-	}
-
 	public static StylingPreference getPreferenceForTypeParamsReferencesColoring(String keyPrefix) {
 		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
 	}
@@ -948,10 +927,6 @@ public class JavaElementLinks {
 
 	public static void setPreferenceForFormatting(String keyPrefix, StylingPreference value) {
 		setPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING, value);
-	}
-
-	public static void setPreferenceForWrapping(String keyPrefix, StylingPreference value) {
-		setPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_WRAPPING, value);
 	}
 
 	public static void setPreferenceForTypeParamsReferencesColoring(String keyPrefix, StylingPreference value) {
