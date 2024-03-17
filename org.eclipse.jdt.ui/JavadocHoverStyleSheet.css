@@ -42,18 +42,16 @@ div#previewTypeParamsRefsColoring											{ display: inline; opacity: 0.3; mar
 
 input#previewSwitch:checked ~ .styleSwitchParent div#previewWatermark		{ display: inline; }
 input#previewSwitch:checked ~input#formattingSwitch:checked ~ .styleSwitchParent div#previewFormatting,
-input#previewSwitch:checked ~input#typeParamsLevelsColoringSwitch:checked ~ .styleSwitchParent div#previewTypeParamsLevelsColoring,
 input#previewSwitch:checked ~input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent div#previewTypeParamsRefsColoring		{ opacity: 1; color: red; }
 
 input#previewSwitch,
 input#formattingSwitch,
-input#typeParamsRefsColoringSwitch,
-input#typeParamsLevelsColoringSwitch										{ display: none; }
+input#typeParamsRefsColoringSwitch											{ display: none; }
 
 input#formattingSwitch:checked ~ .styleSwitchParent .methodPrependTypeParams	{ display: block}
 input#formattingSwitch:checked ~ .styleSwitchParent .methodParam				{ display: block; text-indent: 1em; }
 
-input#formattingSwitch:checked ~ .styleSwitchParent .typeParamsLevelNo1 .typeBracketsStart:before,
+input#formattingSwitch:checked ~ .styleSwitchParent .typeBracketsStart:before,
 input#formattingSwitch:checked ~ .styleSwitchParent .methodParams:before	{ content: " "; }
 
 input#formattingSwitch:checked ~ .styleSwitchParent .methodQualifier		{ opacity: 0.6; }
@@ -61,14 +59,8 @@ input#formattingSwitch:checked ~ .styleSwitchParent .methodParamName		{ font-sty
 input#formattingSwitch:checked ~ .styleSwitchParent .methodReturn			{ font-style: italic; }
 input#formattingSwitch:checked ~ .styleSwitchParent .methodName				{ font-weight: bold; }
 
-input#formattingSwitch:checked ~ .styleSwitchParent .typeParamsLevel		{ font-weight: 200; }
+input#formattingSwitch:checked ~ .styleSwitchParent .typeParams				{ font-weight: 200; }
 input#formattingSwitch:checked ~ .styleSwitchParent .typeBrackets			{ font-weight: bold; }
-
-/* Start of dynamic type parameters levels styling section (do not edit this line) */
-input#typeParamsLevelsColoringSwitch:checked ~ .styleSwitchParent .typeParamsLevelNo-INDEX-,
-input#typeParamsLevelsColoringSwitch:checked ~ .styleSwitchParent .typeParamsLevelNo-INDEX- a.header
-{ color: -COLOR-; }
-/* End of dynamic type parameters levels styling section (do not edit this line) */
 
 /* Start of dynamic type parameters references styling section (do not edit this line) */
 input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsReferenceNo-INDEX-,

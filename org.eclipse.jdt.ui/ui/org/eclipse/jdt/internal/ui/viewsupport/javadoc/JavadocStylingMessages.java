@@ -27,7 +27,6 @@ public class JavadocStylingMessages extends NLS {
 	}
 
 	public static String JavadocStyling_styling_typeParamsReferencesColoring;
-	public static String JavadocStyling_styling_typeParamsLevelsColoring;
 	public static String JavadocStyling_styling_formatting;
 
 	public static String JavadocStyling_enabledTooltip;
@@ -35,7 +34,6 @@ public class JavadocStylingMessages extends NLS {
 	public static String JavadocStyling_noEnhancements;
 	public static String JavadocStyling_colorPreferences_menu;
 	public static String JavadocStyling_colorPreferences_typeParameterReference;
-	public static String JavadocStyling_colorPreferences_typeParameterLevel;
 	public static String JavadocStyling_colorPreferences_resetAll;
 	public static String JavadocStyling_colorPreferences_noTypeParameters;
 	public static String JavadocStyling_colorPreferences_unusedTypeParameter;
@@ -46,7 +44,6 @@ public class JavadocStylingMessages extends NLS {
 
 	public static String JavadocStyling_stylingPreview_watermark;
 	public static String JavadocStyling_stylingPreview_typeParamsReferencesColoring;
-	public static String JavadocStyling_stylingPreview_typeParamsLevelsColoring;
 	public static String JavadocStyling_stylingPreview_formatting;
 
 	static {

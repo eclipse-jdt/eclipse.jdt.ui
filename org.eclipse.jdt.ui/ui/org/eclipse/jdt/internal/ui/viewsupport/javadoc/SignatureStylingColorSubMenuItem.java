@@ -68,25 +68,13 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 						JavaElementLinks::setColorPreferenceForTypeParamsReference));
 				item.fill(menu, -1);
 			}
-			int typeParamsLevelsCount= JavaElementLinks.getNumberOfTypeParamsLevels(content);
-			for (int i= 1; i <= typeParamsLevelsCount; i++) {
-				var item= new ActionContributionItem(new SignatureStylingColorPreferenceMenuItem(
-						parentShell,
-						JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameterLevel,
-						i,
-						JavaElementLinks::getColorPreferenceForTypeParamsLevel,
-						JavaElementLinks::setColorPreferenceForTypeParamsLevel));
-				item.fill(menu, -1);
-			}
-			if (typeParamsReferencesCount == 0 && typeParamsLevelsCount == 0) {
+			if (typeParamsReferencesCount == 0) {
 				new ActionContributionItem(new NoSignatureStylingTypeParametersMenuItem()).fill(menu, -1);
 			}
 
 			var typeParamsReferenceIndices= JavaElementLinks.getColorPreferencesIndicesForTypeParamsReference();
-			var typeParamsLevelIndices= JavaElementLinks.getColorPreferencesIndicesForTypeParamsLevel();
 
-			if (typeParamsReferenceIndices[typeParamsReferenceIndices.length - 1] > typeParamsReferencesCount
-					|| typeParamsLevelIndices[typeParamsLevelIndices.length - 1] > typeParamsLevelsCount) {
+			if (typeParamsReferenceIndices[typeParamsReferenceIndices.length - 1] > typeParamsReferencesCount) {
 				new Separator().fill(menu, -1);
 			}
 
@@ -94,13 +82,6 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 				if (typeParamsReferenceIndices[i] > typeParamsReferencesCount) {
 					new ActionContributionItem(new UnusedColorPreferenceMenuItem(
 							JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameterReference, "ref", typeParamsReferenceIndices[i])) //$NON-NLS-1$
-						.fill(menu, -1);
-				}
-			}
-			for (int i= 0; i < typeParamsLevelIndices.length; i++) {
-				if (typeParamsLevelIndices[i] > typeParamsLevelsCount) {
-					new ActionContributionItem(new UnusedColorPreferenceMenuItem(
-							JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameterLevel, "lvl", typeParamsLevelIndices[i])) //$NON-NLS-1$
 						.fill(menu, -1);
 				}
 			}

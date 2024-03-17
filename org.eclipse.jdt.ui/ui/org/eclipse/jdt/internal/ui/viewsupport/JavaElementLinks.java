@@ -84,23 +84,17 @@ public class JavaElementLinks {
 	 */
 	public static final String CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsRefsColoringSwitch"; //$NON-NLS-1$
 	/**
-	 * ID of the checkbox in generated HTML content that toggles type parameters levels coloring inside element labels.
-	 */
-	public static final String CHECKBOX_ID_TYPE_PARAMETERS_LEVELS_COLORING= "typeParamsLevelsColoringSwitch"; //$NON-NLS-1$
-	/**
 	 * ID of the checkbox in generated HTML content that toggles overlay when previewing styling.
 	 */
 	public static final String CHECKBOX_ID_PREVIEW= "previewSwitch"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_POSTFIX_FORMATTING= "formatting"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsReferencesColoring"; //$NON-NLS-1$
-	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING= "typeParamsLevelsColoring"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_ENABLED= "javadocElementsStyling.enabled"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS= "javadocElementsStyling.darkModeDefaultColors"; //$NON-NLS-1$
 	// both use 1-based indexing
 	private static final String PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR= "javadocElementsStyling.typesParamsReference_"; //$NON-NLS-1$
-	private static final String PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR= "javadocElementsStyling.typesParamsLevel_"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_POSTFIX_COLOR= ".color"; //$NON-NLS-1$
 	/**
 	 * Maximum number of type parameters references / levels for which we support setting custom color
@@ -111,18 +105,14 @@ public class JavaElementLinks {
 	private static final String CSS_CLASS_SWITCH_PARENT= "styleSwitchParent"; //$NON-NLS-1$
 	// both use 1-based indexing
 	private static final String CSS_CLASS_TYPE_PARAMETERS_REFERENCE_PREFIX= "typeParamsReference typeParamsReferenceNo"; //$NON-NLS-1$
-	private static final String CSS_CLASS_TYPE_PARAMETERS_LEVEL_PREFIX= "typeParamsLevel typeParamsLevelNo"; //$NON-NLS-1$
 
 	private static final String CSS_SECTION_START_TYPE_PARAMETERS_REFERENCES= "/* Start of dynamic type parameters references styling section (do not edit this line) */"; //$NON-NLS-1$
-	private static final String CSS_SECTION_START_TYPE_PARAMETERS_LEVELS= "/* Start of dynamic type parameters levels styling section (do not edit this line) */"; //$NON-NLS-1$
 	private static final String CSS_SECTION_END_TYPE_PARAMETERS_REFERENCES= "/* End of dynamic type parameters references styling section (do not edit this line) */"; //$NON-NLS-1$
-	private static final String CSS_SECTION_END_TYPE_PARAMETERS_LEVELS= "/* End of dynamic type parameters levels styling section (do not edit this line) */"; //$NON-NLS-1$
 	private static final String CSS_PLACEHOLDER_INDEX= "-INDEX-"; //$NON-NLS-1$
 	private static final String CSS_PLACEHOLDER_COLOR= "-COLOR-"; //$NON-NLS-1$
 
 
 	private static String[] CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES= new String[4];
-	private static String[] CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS= new String[4];
 	private static final ReentrantLock CSS_FRAGMENTS_CACHE_LOCK= new ReentrantLock();
 	private static final IPropertyChangeListener COLOR_PROPERTIES_CHANGE_LISTENER= JavaElementLinks::cssFragmentsCacheResetListener;
 	private static final ListenerList<IStylingConfigurationListener> configListener = new ListenerList<>();
@@ -176,7 +166,6 @@ public class JavaElementLinks {
 		private final boolean noEnhancements;
 		private final boolean enableFormatting;
 		private final boolean enableTypeParamsColoring;
-		private final boolean enableTypeLevelsColoring;
 
 		private boolean appendHoverParent= true;
 		private int nextNestingLevel= 1;
@@ -202,10 +191,9 @@ public class JavaElementLinks {
 				noEnhancements= false;
 				enableFormatting= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
 				enableTypeParamsColoring= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
-				enableTypeLevelsColoring= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING);
 			} else {
 				noEnhancements= true;
-				enableFormatting= enableTypeParamsColoring= enableTypeLevelsColoring= false;
+				enableFormatting= enableTypeParamsColoring= false;
 			}
 		}
 
@@ -260,10 +248,9 @@ public class JavaElementLinks {
 			if (noEnhancements) {
 				fBuffer.append("&gt;"); //$NON-NLS-1$
 			} else {
-				fBuffer.append("</span>"); //$NON-NLS-1$
-				fBuffer.append("<span class='typeBrackets typeBracketsEnd typeLevel"); //$NON-NLS-1$
-				fBuffer.append(String.valueOf(--nextNestingLevel));
-				fBuffer.append("'>&gt;</span>"); //$NON-NLS-1$
+				fBuffer.append("</span>"); // close 'typeParams' span //$NON-NLS-1$
+				fBuffer.append("<span class='typeBrackets typeBracketsEnd'>&gt;</span>"); //$NON-NLS-1$
+				nextNestingLevel--;
 			}
 
 		}
@@ -273,14 +260,9 @@ public class JavaElementLinks {
 			if (noEnhancements) {
 				fBuffer.append("&lt;"); //$NON-NLS-1$
 			} else {
-				fBuffer.append("<span class='typeBrackets typeBracketsStart typeLevel"); //$NON-NLS-1$
-				fBuffer.append(String.valueOf(nextNestingLevel));
-				fBuffer.append("'>&lt;</span>"); //$NON-NLS-1$
-
-				fBuffer.append("<span class='"); //$NON-NLS-1$
-				fBuffer.append(CSS_CLASS_TYPE_PARAMETERS_LEVEL_PREFIX);
-				fBuffer.append(String.valueOf(nextNestingLevel++));
-				fBuffer.append("'>"); //$NON-NLS-1$
+				fBuffer.append("<span class='typeBrackets typeBracketsStart'>&lt;</span>"); //$NON-NLS-1$
+				fBuffer.append("<span class='typeParams'>"); //$NON-NLS-1$
+				nextNestingLevel++;
 			}
 		}
 
@@ -378,19 +360,12 @@ public class JavaElementLinks {
 				}
 				fBuffer.append("style='position: absolute; top: 32px; left: -23px;'/>"); //$NON-NLS-1$
 
-				// typeLevelsColoring checkbox
-				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_TYPE_PARAMETERS_LEVELS_COLORING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-				if (enableTypeLevelsColoring) {
-					fBuffer.append("checked=true "); //$NON-NLS-1$
-				}
-				fBuffer.append("style='position: absolute; top: 46px; left: -23px;'/>"); //$NON-NLS-1$
-
 				// typeParametersColoring checkbox
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableTypeParamsColoring) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
-				fBuffer.append("style='position: absolute; top: 60px; left: -23px;'/>"); //$NON-NLS-1$
+				fBuffer.append("style='position: absolute; top: 46px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// encompassing <span> for everything styled based on checkboxes checked state
 				fBuffer.append("<span class='" + CSS_CLASS_SWITCH_PARENT + "'>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -402,8 +377,6 @@ public class JavaElementLinks {
 				fBuffer.append("<div id='previewWatermark'>" + JavadocStylingMessages.JavadocStyling_stylingPreview_watermark + " - "); //$NON-NLS-1$ //$NON-NLS-2$
 				fBuffer.append("<div id='previewTypeParamsRefsColoring'>" //$NON-NLS-1$
 						+ JavadocStylingMessages.JavadocStyling_stylingPreview_typeParamsReferencesColoring + "</div>"); //$NON-NLS-1$
-				fBuffer.append("<div id='previewTypeParamsLevelsColoring'>" //$NON-NLS-1$
-						+ JavadocStylingMessages.JavadocStyling_stylingPreview_typeParamsLevelsColoring + "</div>"); //$NON-NLS-1$
 				fBuffer.append("<div id='previewFormatting'>" //$NON-NLS-1$
 						+ JavadocStylingMessages.JavadocStyling_stylingPreview_formatting + "</div>"); //$NON-NLS-1$
 				fBuffer.append("</div>"); //$NON-NLS-1$
@@ -562,35 +535,27 @@ public class JavaElementLinks {
 		if (store.getBoolean(PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS)) {
 			var color= new RGB(177, 102, 218); // semanticHighlighting.typeArgument.color in css\e4-dark_jdt_syntaxhighlighting.css
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 1), color);
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 1), color);
 
 			color= new RGB(255, 140, 0); // CSS 'DarkOrange'
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 2), color);
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 2), color);
 
 			color= new RGB(144, 238, 144); // CSS 'LightGreen'
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 3), color);
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 3), color);
 
 			color= new RGB(0, 191, 255); // CSS 'DeepSkyBlue'
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 4), color);
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 4), color);
 		} else {
 			// slightly brighter than SemanticHighlightings.TypeArgumentHighlighting's default color to work better on yellow-ish background
 			var color= new RGB(60, 179, 113); // CSS 'MediumSeaGreen'
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 1), color);
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 1), color);
 
 			color= new RGB(255, 140, 0); // CSS 'DarkOrange'
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 2), color);
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 2), color);
 
 			color= new RGB(153, 50, 204); // CSS 'DarkOrchid'
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 3), color);
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 3), color);
 
 			color= new RGB(65, 105, 225); // CSS 'RoyalBlue'
-			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, 4), color);
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 4), color);
 		}
 	}
@@ -598,7 +563,6 @@ public class JavaElementLinks {
 	public static void initDefaultPreferences(IPreferenceStore store, String keyPrefix) {
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING, StylingPreference.ALWAYS.name());
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, StylingPreference.HOVER.name());
-		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING, StylingPreference.OFF.name());
 	}
 
 	private static void propertyChanged(PropertyChangeEvent event) {
@@ -611,26 +575,13 @@ public class JavaElementLinks {
 	}
 
 	private static void cssFragmentsCacheResetListener(PropertyChangeEvent event) {
-		var changeOfTypeLevelsColor= false;
-		var changeOfTypeParamsColor= false;
-		if (event == null) {
-			changeOfTypeLevelsColor= changeOfTypeParamsColor= true;
-		} else {
-			changeOfTypeLevelsColor= event.getProperty().startsWith(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR);
-			changeOfTypeParamsColor= event.getProperty().startsWith(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR);
-		}
-		if (changeOfTypeLevelsColor || changeOfTypeParamsColor) {
+		if (event == null || event.getProperty().startsWith(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR)) {
 			try {
 				if (CSS_FRAGMENTS_CACHE_LOCK.tryLock(500, TimeUnit.MILLISECONDS)) {
 					try {
-						if (changeOfTypeLevelsColor) {
-							CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS= new String[4];
-						}
-						if (changeOfTypeParamsColor) {
-							CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES= new String[4];
-						}
+						CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES= new String[4];
 					} finally {
-						CSS_FRAGMENTS_CACHE_LOCK.unlock()	;
+						CSS_FRAGMENTS_CACHE_LOCK.unlock();
 					}
 				}
 			} catch (InterruptedException e1) {
@@ -913,10 +864,6 @@ public class JavaElementLinks {
 		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
 	}
 
-	public static StylingPreference getPreferenceForTypeParamsLevelsColoring(String keyPrefix) {
-		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING);
-	}
-
 	private static StylingPreference getPreference(String key) {
 		return StylingPreference.valueOf(preferenceStore().getString(key));
 	}
@@ -933,20 +880,12 @@ public class JavaElementLinks {
 		setPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, value);
 	}
 
-	public static void setPreferenceForTypeParamsLevelsColoring(String keyPrefix, StylingPreference value) {
-		setPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_LEVELS_COLORING, value);
-	}
-
 	private static void setPreference(String key, StylingPreference value) {
 		preferenceStore().setValue(key, value.name());
 	}
 
 	public static RGB getColorPreferenceForTypeParamsReference(int referenceIndex) {
 		return getColorPreference(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, referenceIndex);
-	}
-
-	public static RGB getColorPreferenceForTypeParamsLevel(int levelIndex) {
-		return getColorPreference(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, levelIndex);
 	}
 
 	private static RGB getColorPreference(String keyPrefix, int index) {
@@ -962,10 +901,6 @@ public class JavaElementLinks {
 		setColorPreference(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, referenceIndex, color);
 	}
 
-	public static void setColorPreferenceForTypeParamsLevel(int levelIndex, RGB color) {
-		setColorPreference(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, levelIndex, color);
-	}
-
 	private static void setColorPreference(String keyPrefix, int index, RGB color) {
 		PreferenceConverter.setValue(preferenceStore(), getColorPreferenceKey(keyPrefix, index), color);
 	}
@@ -978,7 +913,6 @@ public class JavaElementLinks {
 		StringBuilder cssContent= new StringBuilder();
 
 		int maxTypeParamNo= getMaxIndexOfStyle(buffer, StringBuilder::indexOf, CSS_CLASS_TYPE_PARAMETERS_REFERENCE_PREFIX);
-		int maxTypeLevelNo= getMaxIndexOfStyle(buffer, StringBuilder::indexOf, CSS_CLASS_TYPE_PARAMETERS_LEVEL_PREFIX);
 
 		var locked= false;
 		try {
@@ -988,17 +922,11 @@ public class JavaElementLinks {
 		}
 		try {
 			if (locked) {
-				if (CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS.length < maxTypeLevelNo) {
-					CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS= Arrays.copyOf(CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS, maxTypeLevelNo);
-				}
 				if (CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES.length < maxTypeParamNo) {
 					CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES= Arrays.copyOf(CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES, maxTypeParamNo);
 				}
 			}
-			var processedUntil= processSection(css, cssContent, 0, CSS_SECTION_START_TYPE_PARAMETERS_LEVELS, CSS_SECTION_END_TYPE_PARAMETERS_LEVELS,
-					PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, maxTypeLevelNo,
-					(locked ? CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_LEVELS : null), true);
-			processedUntil= processSection(css, cssContent, processedUntil, CSS_SECTION_START_TYPE_PARAMETERS_REFERENCES, CSS_SECTION_END_TYPE_PARAMETERS_REFERENCES,
+			var processedUntil= processSection(css, cssContent, 0, CSS_SECTION_START_TYPE_PARAMETERS_REFERENCES, CSS_SECTION_END_TYPE_PARAMETERS_REFERENCES,
 					PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, maxTypeParamNo,
 					(locked ? CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES : null), false);
 			cssContent.append(css, processedUntil, css.length());
@@ -1052,10 +980,6 @@ public class JavaElementLinks {
 		return getMaxIndexOfStyle(content, String::indexOf, CSS_CLASS_TYPE_PARAMETERS_REFERENCE_PREFIX);
 	}
 
-	public static int getNumberOfTypeParamsLevels(String content) {
-		return getMaxIndexOfStyle(content, String::indexOf, CSS_CLASS_TYPE_PARAMETERS_LEVEL_PREFIX);
-	}
-
 	private static <T extends CharSequence> int getMaxIndexOfStyle(T content, BiFunction<T, String, Integer> indexOfGetter, String stylePrefix) {
 		int i= 0;
 		while (indexOfGetter.apply(content, stylePrefix + ++i) != -1) { /* no-op */ }
@@ -1064,10 +988,6 @@ public class JavaElementLinks {
 
 	public static Integer[] getColorPreferencesIndicesForTypeParamsReference() {
 		return getColorPreferencesIndices(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR);
-	}
-
-	public static Integer[] getColorPreferencesIndicesForTypeParamsLevel() {
-		return getColorPreferencesIndices(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR);
 	}
 
 	private static Integer[] getColorPreferencesIndices(String keyPrefix) {
@@ -1094,14 +1014,6 @@ public class JavaElementLinks {
 			RGB customColor= null;
 			for (int i= 1; i <= MAX_COLOR_INDEX; i++) {
 				String key= getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, i);
-				if (!store.isDefault(key)) {
-					customColor= PreferenceConverter.getColor(store, key);
-					logMessage.append("\n\t").append(key).append(" = ").append(customColor); //$NON-NLS-1$ //$NON-NLS-2$
-					store.setToDefault(key);
-				}
-			}
-			for (int i= 1; i <= MAX_COLOR_INDEX; i++) {
-				String key= getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_LEVEL_COLOR, i);
 				if (!store.isDefault(key)) {
 					customColor= PreferenceConverter.getColor(store, key);
 					logMessage.append("\n\t").append(key).append(" = ").append(customColor); //$NON-NLS-1$ //$NON-NLS-2$
