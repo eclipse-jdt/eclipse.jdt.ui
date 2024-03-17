@@ -37,15 +37,7 @@ var	         { font-style: italic; }
 th	         { font-weight: bold; }
 
 /* Styling enhancements */
-div#previewWatermark	{ background-color: white; display: none; position: fixed; bottom: 2px; right: 2px; border: 2px solid black; color: black; border-radius: 5px; padding: 4px 4px 4px 4px; }
 
-div#previewTypeParamsLevelsColoring,
-div#previewTypeParamsRefsColoring											{ display: inline; opacity: 0.3; margin-left: 3px; margin-right: 3px; font-weight: normal; }
-
-input#previewSwitch:checked ~ .styleSwitchParent div#previewWatermark		{ display: inline; }
-input#previewSwitch:checked ~input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent div#previewTypeParamsRefsColoring		{ opacity: 1; color: red; }
-
-input#previewSwitch,
 input#formattingSwitch,
 input#typeParamsRefsColoringSwitch											{ display: none; }
 

@@ -65,7 +65,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverPreferenceStylingInBrowserAction.StylingPreference;
-import org.eclipse.jdt.internal.ui.viewsupport.javadoc.JavadocStylingMessages;
 
 
 /**
@@ -83,10 +82,6 @@ public class JavaElementLinks {
 	 * ID of the checkbox in generated HTML content that toggles type parameters coloring inside element labels.
 	 */
 	public static final String CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsRefsColoringSwitch"; //$NON-NLS-1$
-	/**
-	 * ID of the checkbox in generated HTML content that toggles overlay when previewing styling.
-	 */
-	public static final String CHECKBOX_ID_PREVIEW= "previewSwitch"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsReferencesColoring"; //$NON-NLS-1$
 
@@ -348,23 +343,19 @@ public class JavaElementLinks {
 			if (appendHoverParent) {
 				appendHoverParent= false;
 
-				// styling preview checkbox
-				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_PREVIEW + //$NON-NLS-1$
-							"' style='position: absolute; top: 18px; left: -23px;'/>"); //$NON-NLS-1$
-
 				// formatting checkbox
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_FORMATTIG + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableFormatting) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
-				fBuffer.append("style='position: absolute; top: 32px; left: -23px;'/>"); //$NON-NLS-1$
+				fBuffer.append("style='position: absolute; top: 18px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// typeParametersColoring checkbox
 				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableTypeParamsColoring) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
-				fBuffer.append("style='position: absolute; top: 46px; left: -23px;'/>"); //$NON-NLS-1$
+				fBuffer.append("style='position: absolute; top: 32px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// encompassing <span> for everything styled based on checkboxes checked state
 				fBuffer.append("<span class='" + CSS_CLASS_SWITCH_PARENT + "'>"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -372,11 +363,6 @@ public class JavaElementLinks {
 				// actual signature content
 				super.appendElementLabel(element, flags);
 
-				// preview watermarks
-				fBuffer.append("<div id='previewWatermark'>" + JavadocStylingMessages.JavadocStyling_stylingPreview_watermark + " - "); //$NON-NLS-1$ //$NON-NLS-2$
-				fBuffer.append("<div id='previewTypeParamsRefsColoring'>" //$NON-NLS-1$
-						+ JavadocStylingMessages.JavadocStyling_stylingPreview_typeParamsReferencesColoring + "</div>"); //$NON-NLS-1$
-				fBuffer.append("</div>"); //$NON-NLS-1$
 				fBuffer.append("</span>"); //$NON-NLS-1$
 				appendHoverParent= true;
 			} else {

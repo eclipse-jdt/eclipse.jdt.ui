@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverStylingInBrowserMenu
 public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAction implements IMouseListeningToolbarItemAction, MenuListener, IBrowserContentChangeListener, IStylingConfigurationListener {
 	private final Action[] enabledActions= { actions[0], actions[1] };
 	private final Action[] noStylingActions= { new NoStylingEnhancementsAction() };
-	private final CheckboxInBrowserToggler previewCheckboxToggler;
+	private final CheckboxInBrowserToggler formattingCheckboxToggler;
 	private final Shell parent;
 	private final Runnable enhancementsToggledTask;
 
@@ -63,7 +63,7 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 		Objects.requireNonNull(parent);
 		this.parent= parent;
 		this.enhancementsToggledTask= enhancementsEnabledTask;
-		previewCheckboxToggler= new CheckboxInBrowserToggler(browserAccessor, JavaElementLinks.CHECKBOX_ID_PREVIEW);
+		formattingCheckboxToggler= new CheckboxInBrowserToggler(browserAccessor, JavaElementLinks.CHECKBOX_ID_FORMATTIG);
 		presentEnhancementsState();
 		setHoverImageDescriptor(null);
 		setId(SignatureStylingMenuToolbarAction.class.getSimpleName());
@@ -93,7 +93,7 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 		}
 		var content= contentAccessor.get();
 		if (content != null && !content.isBlank() // fail-fast
-				&& previewCheckboxToggler.isCheckboxPresentInBrowser()) {
+				&& formattingCheckboxToggler.isCheckboxPresentInBrowser()) {
 			reAddActionItems(enabledActions);
 		} else {
 			reAddActionItems(noStylingActions);
@@ -108,7 +108,7 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 		}
 		if (menu == null) {
 			Menu retVal= super.getMenu(p);
-			MenuVisibilityMenuItemsConfigurer.registerForMenu(retVal, previewCheckboxToggler.getBrowserTextAccessor()::applyChanges);
+			MenuVisibilityMenuItemsConfigurer.registerForMenu(retVal, formattingCheckboxToggler.getBrowserTextAccessor()::applyChanges);
 			retVal.addMenuListener(this); // must be last listener, since it commits browser text changes
 			return retVal;
 		} else {
@@ -119,7 +119,7 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 	@Override
 	protected void addMenuItems() {
 		super.addMenuItems();
-		ArmListeningMenuItemsConfigurer.registerForMenu(menu, previewCheckboxToggler.getBrowserTextAccessor()::applyChanges);
+		ArmListeningMenuItemsConfigurer.registerForMenu(menu, formattingCheckboxToggler.getBrowserTextAccessor()::applyChanges);
 	}
 
 	@Override
@@ -167,25 +167,19 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 
 	@Override
 	public void menuShown(MenuEvent e) {
-		toggleBrowserPreviewCheckbox(true);
 		applyBrowserChanges();
 	}
 
 	@Override
 	public void menuHidden(MenuEvent e) {
-		toggleBrowserPreviewCheckbox(false);
 		if (mouseExitCalled) {
 			// mouseExit() is not called after this when menu is being hidden after re-appearing, so trigger applyChanges() here
 			applyBrowserChanges();
 		} // else applyChanges() will be triggered from mouseExit() that will be executed after this
 	}
 
-	private void toggleBrowserPreviewCheckbox(boolean enabled) {
-		previewCheckboxToggler.toggleCheckboxInBrowser(enabled);
-	}
-
 	private void applyBrowserChanges() {
-		previewCheckboxToggler.getBrowserTextAccessor().applyChanges();
+		formattingCheckboxToggler.getBrowserTextAccessor().applyChanges();
 	}
 
 	private void reAddActionItems(Action[] newActions) {

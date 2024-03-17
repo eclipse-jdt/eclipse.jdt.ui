@@ -42,9 +42,6 @@ public class JavadocStylingMessages extends NLS {
 	public static String JavadocStyling_stylingTooltip_preference_hover;
 	public static String JavadocStyling_stylingTooltip_preference_always;
 
-	public static String JavadocStyling_stylingPreview_watermark;
-	public static String JavadocStyling_stylingPreview_typeParamsReferencesColoring;
-
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavadocStylingMessages.class);
 	}
