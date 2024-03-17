@@ -155,7 +155,6 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.FallbackInformat
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLinkedLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.MouseListeningToolItemsConfigurer;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolbarAction;
 
@@ -705,9 +704,7 @@ public class JavadocView extends AbstractInfoView {
 				@Override
 				public void addPropertyChangeListener(IPropertyChangeListener listener) {
 					super.addPropertyChangeListener(listener);
-					var toolbar= ((ToolBarManager) tbm).getControl();
-					setupMenuReopen(toolbar);
-					MouseListeningToolItemsConfigurer.registerForToolBarManager(toolbar, browserAccessor::applyChanges);
+					setup(((ToolBarManager) tbm).getControl());
 				}
 			};
 			stylingMenuAction.setId("JavadocView.SignatureStylingMenuToolbarAction"); //$NON-NLS-1$

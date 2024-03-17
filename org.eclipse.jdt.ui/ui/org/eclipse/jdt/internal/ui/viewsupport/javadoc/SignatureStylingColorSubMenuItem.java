@@ -32,20 +32,22 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
-import org.eclipse.jdt.internal.ui.viewsupport.ReappearingMenuToolbarAction.IReappearingMenuItem;
 
 /**
  * Menu item action for building & presenting color preferences sub-menu of javadoc styling menu.
  */
-class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, IMenuVisibilityMenuItemAction, IReappearingMenuItem {
+class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, IMenuVisibilityMenuItemAction {
 	private final Shell parentShell;
 	private final Supplier<String> javadocContentSupplier;
+	private final Runnable enhancementsReconfiguredTask;
+
 	private Menu menu= null;
 
-	public SignatureStylingColorSubMenuItem(Shell parent, Supplier<String> javadocContentSupplier) {
+	public SignatureStylingColorSubMenuItem(Shell parent, Supplier<String> javadocContentSupplier, Runnable enhancementsReconfiguredTask) {
 		super(JavadocStylingMessages.JavadocStyling_colorPreferences_menu, AS_DROP_DOWN_MENU);
 		this.parentShell= Objects.requireNonNull(parent);
 		this.javadocContentSupplier= Objects.requireNonNull(javadocContentSupplier);
+		this.enhancementsReconfiguredTask= enhancementsReconfiguredTask;
 		setMenuCreator(this);
 	}
 
@@ -62,10 +64,11 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 			for (int i= 1; i <= typeParamsReferencesCount; i++) {
 				var item= new ActionContributionItem(new SignatureStylingColorPreferenceMenuItem(
 						parentShell,
-						JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameterReference,
+						JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameter,
 						i,
 						JavaElementLinks::getColorPreferenceForTypeParamsReference,
-						JavaElementLinks::setColorPreferenceForTypeParamsReference));
+						JavaElementLinks::setColorPreferenceForTypeParamsReference,
+						enhancementsReconfiguredTask));
 				item.fill(menu, -1);
 			}
 			if (typeParamsReferencesCount == 0) {
@@ -81,7 +84,7 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 			for (int i= 0; i < typeParamsReferenceIndices.length; i++) {
 				if (typeParamsReferenceIndices[i] > typeParamsReferencesCount) {
 					new ActionContributionItem(new UnusedColorPreferenceMenuItem(
-							JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameterReference, "ref", typeParamsReferenceIndices[i])) //$NON-NLS-1$
+							JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameter, typeParamsReferenceIndices[i]))
 						.fill(menu, -1);
 				}
 			}
@@ -103,7 +106,7 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 	}
 
 	@Override
-	public boolean menuShown(MenuEvent e) {
+	public void menuShown(MenuEvent e) {
 		if (menu != null) {
 			var parentMenu= ((Menu) e.widget);
 			// jface creates & displays proxies for sub-menus so just modifying items in sub-menu we return won't work, but we have to remove whole sub-menu item from menu
@@ -120,10 +123,9 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 			var item= new ActionContributionItem(this);
 			item.fill(parentMenu, -1);
 		}
-		return false;
 	}
 
-	private static final class ResetSignatureStylingColorsPreferencesMenuItem extends Action {
+	private final class ResetSignatureStylingColorsPreferencesMenuItem extends Action {
 		public ResetSignatureStylingColorsPreferencesMenuItem() {
 			super(JavadocStylingMessages.JavadocStyling_colorPreferences_resetAll);
 			setId(ResetSignatureStylingColorsPreferencesMenuItem.class.getSimpleName());
@@ -132,6 +134,9 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 		@Override
 		public void run() {
 			JavaElementLinks.resetAllColorPreferencesToDefaults();
+			if (enhancementsReconfiguredTask != null) {
+				enhancementsReconfiguredTask.run();
+			}
 		}
 	}
 
@@ -144,9 +149,9 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 	}
 
 	private static final class UnusedColorPreferenceMenuItem extends Action {
-		public UnusedColorPreferenceMenuItem(String textPrefix, String idPostfix, int colorIdx) {
+		public UnusedColorPreferenceMenuItem(String textPrefix, int colorIdx) {
 			super(Messages.format(textPrefix, colorIdx));
-			setId(UnusedColorPreferenceMenuItem.class.getSimpleName() + "_" + idPostfix + "_" + colorIdx); //$NON-NLS-1$ //$NON-NLS-2$
+			setId(UnusedColorPreferenceMenuItem.class.getSimpleName() + "_" + colorIdx); //$NON-NLS-1$
 			setToolTipText(JavadocStylingMessages.JavadocStyling_colorPreferences_unusedTypeParameter);
 			setEnabled(false);
 		}

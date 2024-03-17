@@ -41,13 +41,15 @@ class SignatureStylingColorPreferenceMenuItem extends Action implements ImageDat
 	private final Integer colorIdx;
 	private final Function<Integer, RGB> colorPreferenceGetter;
 	private final BiConsumer<Integer, RGB> colorPreferenceSetter;
+	private final Runnable enhancementsReconfiguredTask;
 
-	SignatureStylingColorPreferenceMenuItem(Shell shell, String textPrefix, int colorIdx, Function<Integer, RGB> colorPreferenceGetter, BiConsumer<Integer, RGB> colorPreferenceSetter) {
+	SignatureStylingColorPreferenceMenuItem(Shell shell, String textPrefix, int colorIdx, Function<Integer, RGB> colorPreferenceGetter, BiConsumer<Integer, RGB> colorPreferenceSetter, Runnable enhancementsReconfiguredTask) {
 		super(Messages.format(textPrefix, colorIdx));
 		this.shell= Objects.requireNonNull(shell);
 		this.colorIdx= colorIdx;
 		this.colorPreferenceGetter= Objects.requireNonNull(colorPreferenceGetter);
 		this.colorPreferenceSetter= Objects.requireNonNull(colorPreferenceSetter);
+		this.enhancementsReconfiguredTask= enhancementsReconfiguredTask;
 		setId(SignatureStylingColorPreferenceMenuItem.class.getSimpleName() + "_" + colorIdx); //$NON-NLS-1$
 		setImageDescriptor(ImageDescriptor.createFromImageDataProvider(this));
 	}
@@ -80,6 +82,9 @@ class SignatureStylingColorPreferenceMenuItem extends Action implements ImageDat
 		RGB newColor= colorDialog.open();
 		if (newColor != null) {
 			colorPreferenceSetter.accept(colorIdx, newColor);
+			if (enhancementsReconfiguredTask != null) {
+				enhancementsReconfiguredTask.run();
+			}
 		}
 	}
 }

@@ -135,7 +135,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.MouseListeningToolItemsConfigurer;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolbarAction;
 
@@ -389,8 +388,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						() -> iControl.setVisible(false)); // close hover viewer on enhancements toggle
 				tbmSecondary.add(stylingMenuAction);
 				tbmSecondary.update(true);
-				stylingMenuAction.setupMenuReopen(tbmSecondary.getControl());
-				MouseListeningToolItemsConfigurer.registerForToolBarManager(tbmSecondary.getControl(), browserAccessor::applyChanges);
+				stylingMenuAction.setup(tbmSecondary.getControl());
 				tbmSecondary.getControl().moveAbove(toolbarComposite.getChildren()[2]); // move to be before resizeCanvas
 
 				IInputChangedListener inputChangeListener= newInput -> {

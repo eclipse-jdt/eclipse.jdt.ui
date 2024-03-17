@@ -13,23 +13,42 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
+import java.util.Objects;
 
-public class ToggleSignatureTypeParametersColoringAction extends ToggleSignatureStylingMenuAction {
+import org.eclipse.swt.events.MenuEvent;
+
+import org.eclipse.jface.action.IAction;
+
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
+import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
+import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
+import org.eclipse.jdt.internal.ui.viewsupport.browser.CheckboxToggleInBrowserAction;
+
+public class ToggleSignatureTypeParametersColoringAction extends CheckboxToggleInBrowserAction implements IMenuVisibilityMenuItemAction {
+	final String preferenceKeyPrefix;
 
 	public ToggleSignatureTypeParametersColoringAction(BrowserTextAccessor browserAccessor, String preferenceKeyPrefix) {
-		super(ToggleSignatureTypeParametersColoringAction.class.getSimpleName(),
-				JavadocStylingMessages.JavadocStyling_styling_typeParamsReferencesColoring,
-				browserAccessor,
-				JavaElementLinks.CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING,
-				JavaElementLinks::getPreferenceForTypeParamsReferencesColoring,
-				JavaElementLinks::setPreferenceForTypeParamsReferencesColoring,
-				preferenceKeyPrefix,
-				JavaPluginImages.DESC_DVIEW_MEMBERS,
-				JavaPluginImages.DESC_VIEW_MEMBERS,
-				new JavadocEnrichmentImageDescriptor(JavaPluginImages.DESC_VIEW_MEMBERS));
+		super(JavadocStylingMessages.JavadocStyling_typeParamsColoring, IAction.AS_CHECK_BOX, browserAccessor, JavaElementLinks.CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING);
+		this.preferenceKeyPrefix= Objects.requireNonNull(preferenceKeyPrefix);
+		setId(ToggleSignatureTypeParametersColoringAction.class.getSimpleName());
+		showCurentPreference();
+	}
+
+	private void showCurentPreference() {
+		setChecked(JavaElementLinks.getPreferenceForTypeParamsReferencesColoring(preferenceKeyPrefix));
+	}
+
+	@Override
+	public void menuShown(MenuEvent e) {
+		showCurentPreference();
+	}
+
+	@Override
+	public void run() {
+		super.run();
+		JavaElementLinks.setPreferenceForTypeParamsReferencesColoring(preferenceKeyPrefix, isChecked());
+		toggleBrowserCheckbox(isChecked());
+		checkboxToggler.getBrowserTextAccessor().applyChanges();
 	}
 
 }

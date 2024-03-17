@@ -26,21 +26,15 @@ public class JavadocStylingMessages extends NLS {
 		// Do not instantiate
 	}
 
-	public static String JavadocStyling_styling_typeParamsReferencesColoring;
-	public static String JavadocStyling_styling_formatting;
-
+	public static String JavadocStyling_typeParamsColoring;
 	public static String JavadocStyling_enabledTooltip;
 	public static String JavadocStyling_disabledTooltip;
 	public static String JavadocStyling_noEnhancements;
 	public static String JavadocStyling_colorPreferences_menu;
-	public static String JavadocStyling_colorPreferences_typeParameterReference;
+	public static String JavadocStyling_colorPreferences_typeParameter;
 	public static String JavadocStyling_colorPreferences_resetAll;
 	public static String JavadocStyling_colorPreferences_noTypeParameters;
 	public static String JavadocStyling_colorPreferences_unusedTypeParameter;
-	public static String JavadocStyling_stylingTooltip_prefix;
-	public static String JavadocStyling_stylingTooltip_preference_off;
-	public static String JavadocStyling_stylingTooltip_preference_hover;
-	public static String JavadocStyling_stylingTooltip_preference_always;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavadocStylingMessages.class);
