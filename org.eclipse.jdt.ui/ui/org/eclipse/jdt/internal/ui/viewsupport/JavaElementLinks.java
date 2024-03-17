@@ -88,7 +88,6 @@ public class JavaElementLinks {
 	 */
 	public static final String CHECKBOX_ID_PREVIEW= "previewSwitch"; //$NON-NLS-1$
 
-	private static final String PREFERENCE_KEY_POSTFIX_FORMATTING= "formatting"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsReferencesColoring"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_ENABLED= "javadocElementsStyling.enabled"; //$NON-NLS-1$
@@ -189,7 +188,7 @@ public class JavaElementLinks {
 			}
 			if (getStylingEnabledPreference() && stylingPreferenceKeysPrefix != null) {
 				noEnhancements= false;
-				enableFormatting= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
+				enableFormatting= true;
 				enableTypeParamsColoring= isStylingPreferenceAlways(stylingPreferenceKeysPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
 			} else {
 				noEnhancements= true;
@@ -377,8 +376,6 @@ public class JavaElementLinks {
 				fBuffer.append("<div id='previewWatermark'>" + JavadocStylingMessages.JavadocStyling_stylingPreview_watermark + " - "); //$NON-NLS-1$ //$NON-NLS-2$
 				fBuffer.append("<div id='previewTypeParamsRefsColoring'>" //$NON-NLS-1$
 						+ JavadocStylingMessages.JavadocStyling_stylingPreview_typeParamsReferencesColoring + "</div>"); //$NON-NLS-1$
-				fBuffer.append("<div id='previewFormatting'>" //$NON-NLS-1$
-						+ JavadocStylingMessages.JavadocStyling_stylingPreview_formatting + "</div>"); //$NON-NLS-1$
 				fBuffer.append("</div>"); //$NON-NLS-1$
 				fBuffer.append("</span>"); //$NON-NLS-1$
 				appendHoverParent= true;
@@ -561,7 +558,6 @@ public class JavaElementLinks {
 	}
 
 	public static void initDefaultPreferences(IPreferenceStore store, String keyPrefix) {
-		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING, StylingPreference.ALWAYS.name());
 		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, StylingPreference.HOVER.name());
 	}
 
@@ -856,10 +852,6 @@ public class JavaElementLinks {
 		return preferenceStore().getBoolean(PREFERENCE_KEY_ENABLED);
 	}
 
-	public static StylingPreference getPreferenceForFormatting(String keyPrefix) {
-		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING);
-	}
-
 	public static StylingPreference getPreferenceForTypeParamsReferencesColoring(String keyPrefix) {
 		return getPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
 	}
@@ -870,10 +862,6 @@ public class JavaElementLinks {
 
 	public static void setStylingEnabledPreference(boolean value) {
 		preferenceStore().setValue(PREFERENCE_KEY_ENABLED, value);
-	}
-
-	public static void setPreferenceForFormatting(String keyPrefix, StylingPreference value) {
-		setPreference(keyPrefix + PREFERENCE_KEY_POSTFIX_FORMATTING, value);
 	}
 
 	public static void setPreferenceForTypeParamsReferencesColoring(String keyPrefix, StylingPreference value) {

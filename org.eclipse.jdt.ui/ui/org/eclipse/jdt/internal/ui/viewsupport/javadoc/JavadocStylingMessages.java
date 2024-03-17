@@ -44,7 +44,6 @@ public class JavadocStylingMessages extends NLS {
 
 	public static String JavadocStyling_stylingPreview_watermark;
 	public static String JavadocStyling_stylingPreview_typeParamsReferencesColoring;
-	public static String JavadocStyling_stylingPreview_formatting;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavadocStylingMessages.class);

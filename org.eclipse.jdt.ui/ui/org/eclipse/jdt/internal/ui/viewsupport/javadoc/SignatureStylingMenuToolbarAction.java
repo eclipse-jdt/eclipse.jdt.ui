@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.browser.HoverStylingInBrowserMenu
  * Toolbar item action for building & presenting javadoc styling menu.
  */
 public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAction implements IMouseListeningToolbarItemAction, MenuListener, IBrowserContentChangeListener, IStylingConfigurationListener {
-	private final Action[] enabledActions= { actions[0], actions[1], actions[2] };
+	private final Action[] enabledActions= { actions[0], actions[1] };
 	private final Action[] noStylingActions= { new NoStylingEnhancementsAction() };
 	private final CheckboxInBrowserToggler previewCheckboxToggler;
 	private final Shell parent;
@@ -58,7 +58,6 @@ public class SignatureStylingMenuToolbarAction extends ReappearingMenuToolbarAct
 	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, String preferenceKeyPrefix, Supplier<String> javadocContentSupplier,  Runnable enhancementsEnabledTask) {
 		super(JavadocStylingMessages.JavadocStyling_enabledTooltip, JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT,
 				new ToggleSignatureTypeParametersColoringAction(browserAccessor, preferenceKeyPrefix),
-				new ToggleSignatureFormattingAction(browserAccessor, preferenceKeyPrefix),
 				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
 				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier));
 		Objects.requireNonNull(parent);
