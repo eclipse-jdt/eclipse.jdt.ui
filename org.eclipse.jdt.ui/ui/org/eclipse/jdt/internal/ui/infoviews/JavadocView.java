@@ -357,13 +357,6 @@ public class JavadocView extends AbstractInfoView {
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=73558
 	private static final boolean WARNING_DIALOG_ENABLED= false;
 
-	/**
-	 * Preference keys prefix for all preferences related to styling of HTML content for element labels
-	 * inside Javadoc view. Postfixes are declared as constants in {@link JavaElementLinks}.
-	 * @see JavaElementLinks
-	 */
-	private static final String HTML_STYLING_PREFERENCE_KEY_PREFIX= "javadocElementsStyling.javadocView."; //$NON-NLS-1$
-
 	/** The HTML widget. */
 	private Browser fBrowser;
 	/** The text widget. */
@@ -558,10 +551,6 @@ public class JavadocView extends AbstractInfoView {
 		}
 	}
 
-	public static void initDefaults(IPreferenceStore store) {
-		JavaElementLinks.initDefaultPreferences(store, HTML_STYLING_PREFERENCE_KEY_PREFIX);
-	}
-
 	@Override
 	protected void internalCreatePartControl(Composite parent) {
 		try {
@@ -699,7 +688,7 @@ public class JavadocView extends AbstractInfoView {
 				setLinkingEnabled(isLinkingEnabled()); // triggers refresh of the view using last set selection
 			};
 			// toolbar widget is being re-created later so we need to do our setup then
-			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(), browserAccessor, HTML_STYLING_PREFERENCE_KEY_PREFIX, () -> fOriginalInput, viewRefreshTask) {
+			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(), browserAccessor, () -> fOriginalInput, viewRefreshTask) {
 				// we take advantage of this method being called after toolbar item creation (in ActionContributionItem.fill()) which happens when whole toolbar is being re-created to be displayed
 				@Override
 				public void addPropertyChangeListener(IPropertyChangeListener listener) {
@@ -1133,9 +1122,9 @@ public class JavadocView extends AbstractInfoView {
 			// setting haveSource to false lets the JavadocView *always* show qualified type names,
 			// would need to track the source of our input to distinguish classfile/compilationUnit:
 			boolean haveSource= false;
-			new BindingLinkedLabelComposer(member, label, haveSource, HTML_STYLING_PREFERENCE_KEY_PREFIX).appendBindingLabel(binding, flags);
+			new BindingLinkedLabelComposer(member, label, haveSource, true).appendBindingLabel(binding, flags);
 		} else {
-			label= new StringBuffer(JavaElementLinks.getElementLabel(member, flags, false, HTML_STYLING_PREFERENCE_KEY_PREFIX));
+			label= new StringBuffer(JavaElementLinks.getElementLabel(member, flags, false, true));
 		}
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);

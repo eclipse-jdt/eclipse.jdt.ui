@@ -82,13 +82,12 @@ public class JavaElementLinks {
 	 */
 	public static final String CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsRefsColoringSwitch"; //$NON-NLS-1$
 
-	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsReferencesColoring"; //$NON-NLS-1$
+	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "javadocElementsStyling.typeParamsReferencesColoring"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_ENABLED= "javadocElementsStyling.enabled"; //$NON-NLS-1$
 	private static final String PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS= "javadocElementsStyling.darkModeDefaultColors"; //$NON-NLS-1$
 	// uses 1-based indexing
-	private static final String PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR= "javadocElementsStyling.typesParamsReference_"; //$NON-NLS-1$
-	private static final String PREFERENCE_KEY_POSTFIX_COLOR= ".color"; //$NON-NLS-1$
+	private static final String PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR= "javadocElementsStyling.typesParamsReferenceColor_"; //$NON-NLS-1$
 	/**
 	 * Maximum number of type parameters references for which we support setting custom color
 	 */
@@ -170,20 +169,20 @@ public class JavaElementLinks {
 		private boolean inBoundedTypeParam= false;
 
 		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf) {
-			this(member, buf, null);
+			this(member, buf, false);
 		}
 
-		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf, String stylingPreferenceKeysPrefix) {
+		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf, boolean useEnhancements) {
 			super(buf);
 			if (member instanceof IPackageDeclaration) {
 				fElement= member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			} else {
 				fElement= member;
 			}
-			if (getStylingEnabledPreference() && stylingPreferenceKeysPrefix != null) {
+			if (getStylingEnabledPreference() && useEnhancements) {
 				noEnhancements= false;
 				enableFormatting= true;
-				enableTypeParamsColoring= getPreferenceForTypeParamsReferencesColoring(stylingPreferenceKeysPrefix);
+				enableTypeParamsColoring= getPreferenceForTypeParamsColoring();
 			} else {
 				noEnhancements= true;
 				enableFormatting= enableTypeParamsColoring= false;
@@ -508,6 +507,7 @@ public class JavaElementLinks {
 	public static void initDefaultPreferences(IPreferenceStore store) {
 		initDefaultColors(store);
 		store.setDefault(PREFERENCE_KEY_ENABLED, true);
+		store.setDefault(PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, true);
 		store.addPropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
 		// taking advantage of PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS change instead of more complicated OSGi event listener
 		store.addPropertyChangeListener(JavaElementLinks::propertyChanged);
@@ -540,10 +540,6 @@ public class JavaElementLinks {
 			color= new RGB(65, 105, 225); // CSS 'RoyalBlue'
 			PreferenceConverter.setDefault(store, getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, 4), color);
 		}
-	}
-
-	public static void initDefaultPreferences(IPreferenceStore store, String keyPrefix) {
-		store.setDefault(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, true);
 	}
 
 	private static void propertyChanged(PropertyChangeEvent event) {
@@ -761,7 +757,7 @@ public class JavaElementLinks {
 	 * @since 3.6
 	 */
 	public static String getElementLabel(IJavaElement element, long flags, boolean linkAllNames) {
-		return getElementLabel(element, flags, linkAllNames, null);
+		return getElementLabel(element, flags, linkAllNames, false);
 	}
 
 	/**
@@ -777,11 +773,11 @@ public class JavaElementLinks {
 	 * @return the label of the Java element
 	 * @since 3.6
 	 */
-	public static String getElementLabel(IJavaElement element, long flags, boolean linkAllNames, String stylingPreferenceKeysPrefix) {
+	public static String getElementLabel(IJavaElement element, long flags, boolean linkAllNames, boolean useEnhancements) {
 		StringBuffer buf= new StringBuffer();
 
 		if (!Strings.USE_TEXT_PROCESSOR) {
-			new JavaElementLinkedLabelComposer(linkAllNames ? null : element, buf, stylingPreferenceKeysPrefix).appendElementLabel(element, flags);
+			new JavaElementLinkedLabelComposer(linkAllNames ? null : element, buf, useEnhancements).appendElementLabel(element, flags);
 			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);
@@ -801,7 +797,7 @@ public class JavaElementLinks {
 	 * @since 3.11
 	 */
 	public static String getBindingLabel(IBinding binding, IJavaElement element, long flags, boolean haveSource) {
-		return getBindingLabel(binding, element, flags, haveSource, null);
+		return getBindingLabel(binding, element, flags, haveSource, false);
 	}
 
 	/**
@@ -812,16 +808,15 @@ public class JavaElementLinks {
 	 * @param element the corresponding Java element, used for javadoc hyperlinks
 	 * @param flags the rendering flags
 	 * @param haveSource true when looking at an ICompilationUnit which enables the use of short type names
-	 * @param stylingPreferenceKeysPrefix prefix for preference keys related to styling of HTML content for element labels,
-	 * <code>null</code> means no enhanced styling
+	 * @param useEnhancements whether to use enhanced styling of HTML content for element labels
 	 * @return the label of the binding
 	 * @since 3.11
 	 */
-	public static String getBindingLabel(IBinding binding, IJavaElement element, long flags, boolean haveSource, String stylingPreferenceKeysPrefix) {
+	public static String getBindingLabel(IBinding binding, IJavaElement element, long flags, boolean haveSource, boolean useEnhancements) {
 		StringBuffer buf= new StringBuffer();
 
 		if (!Strings.USE_TEXT_PROCESSOR) {
-			new BindingLinkedLabelComposer(element, buf, haveSource, stylingPreferenceKeysPrefix).appendBindingLabel(binding, flags);
+			new BindingLinkedLabelComposer(element, buf, haveSource, useEnhancements).appendBindingLabel(binding, flags);
 			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);
@@ -833,16 +828,16 @@ public class JavaElementLinks {
 		return preferenceStore().getBoolean(PREFERENCE_KEY_ENABLED);
 	}
 
-	public static boolean getPreferenceForTypeParamsReferencesColoring(String keyPrefix) {
-		return preferenceStore().getBoolean(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
+	public static boolean getPreferenceForTypeParamsColoring() {
+		return preferenceStore().getBoolean(PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING);
 	}
 
 	public static void setStylingEnabledPreference(boolean value) {
 		preferenceStore().setValue(PREFERENCE_KEY_ENABLED, value);
 	}
 
-	public static void setPreferenceForTypeParamsReferencesColoring(String keyPrefix, boolean value) {
-		preferenceStore().setValue(keyPrefix + PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, value);
+	public static void setPreferenceForTypeParamsColoring(boolean value) {
+		preferenceStore().setValue(PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, value);
 	}
 
 	public static RGB getColorPreferenceForTypeParamsReference(int referenceIndex) {
@@ -975,7 +970,7 @@ public class JavaElementLinks {
 	}
 
 	private static String getColorPreferenceKey(String prefix, int index) {
-		return prefix + index + PREFERENCE_KEY_POSTFIX_COLOR;
+		return prefix + index;
 	}
 
 	private static IPreferenceStore preferenceStore() {

@@ -59,13 +59,11 @@ import org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer;
 import org.eclipse.jdt.internal.ui.PreferenceConstantsCore;
 import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.callhierarchy.ExpandWithConstructorsConfigurationBlock;
-import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
-import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
@@ -4352,8 +4350,6 @@ public class PreferenceConstants {
 
 		// Javadoc hover & view
 		JavaElementLinks.initDefaultPreferences(store);
-		JavadocHover.initDefaults(store);
-		JavadocView.initDefaults(store);
 	}
 
 	/**

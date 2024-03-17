@@ -50,7 +50,6 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -147,14 +146,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolb
 public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	public static final String CONSTANT_VALUE_SEPARATOR= " : "; //$NON-NLS-1$
-
-	/**
-	 * Preference keys prefix for all preferences related to styling of HTML content for element labels
-	 * inside Javadoc hover. Postfixes are declared as constants in {@link JavaElementLinks}.
-	 *
-	 * @see JavaElementLinks
-	 */
-	private static final String HTML_STYLING_PREFERENCE_KEY_PREFIX= "javadocElementsStyling.javadocHover."; //$NON-NLS-1$
 
 	public static class FallbackInformationPresenter extends HTMLTextPresenter {
 		public FallbackInformationPresenter() {
@@ -383,7 +374,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				ToolBarManager tbmSecondary= new ToolBarManager(SWT.FLAT);
 				tbmSecondary.createControl(toolbarComposite).setLayoutData(new GridData(SWT.END, SWT.BEGINNING, false, false));
 				BrowserTextAccessor browserAccessor= new BrowserTextAccessor(iControl);
-				var stylingMenuAction= new SignatureStylingMenuToolbarAction(parent, browserAccessor, HTML_STYLING_PREFERENCE_KEY_PREFIX,
+				var stylingMenuAction= new SignatureStylingMenuToolbarAction(parent, browserAccessor,
 						() -> iControl.getInput() == null ? null : iControl.getInput().getHtml(),
 						() -> iControl.setVisible(false)); // close hover viewer on enhancements toggle
 				tbmSecondary.add(stylingMenuAction);
@@ -563,10 +554,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (fPresenterControlCreator == null)
 			fPresenterControlCreator= new PresenterControlCreator(getSite());
 		return fPresenterControlCreator;
-	}
-
-	public static void initDefaults(IPreferenceStore store) {
-		JavaElementLinks.initDefaultPreferences(store, HTML_STYLING_PREFERENCE_KEY_PREFIX);
 	}
 
 	private IWorkbenchSite getSite() {
@@ -843,9 +830,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 		StringBuilder label;
 		if (binding != null) {
-			label= new StringBuilder(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource, HTML_STYLING_PREFERENCE_KEY_PREFIX));
+			label= new StringBuilder(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource, true));
 		} else {
-			label= new StringBuilder(JavaElementLinks.getElementLabel(element, flags, false, HTML_STYLING_PREFERENCE_KEY_PREFIX));
+			label= new StringBuilder(JavaElementLinks.getElementLabel(element, flags, false, true));
 		}
 
 		if (element.getElementType() == IJavaElement.FIELD) {

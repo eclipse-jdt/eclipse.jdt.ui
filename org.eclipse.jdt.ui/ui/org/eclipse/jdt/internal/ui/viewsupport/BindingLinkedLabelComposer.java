@@ -63,11 +63,11 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	private boolean fIsFromSource;
 
 	public BindingLinkedLabelComposer(IJavaElement enclosingElement, StringBuffer buffer, boolean isFromSource) {
-		this(enclosingElement, buffer, isFromSource, null);
+		this(enclosingElement, buffer, isFromSource, false);
 	}
 
-	public BindingLinkedLabelComposer(IJavaElement enclosingElement, StringBuffer buffer, boolean isFromSource, String stylingPreferenceKeysPrefix) {
-		super(enclosingElement, buffer, stylingPreferenceKeysPrefix);
+	public BindingLinkedLabelComposer(IJavaElement enclosingElement, StringBuffer buffer, boolean isFromSource, boolean useEnhancements) {
+		super(enclosingElement, buffer, useEnhancements);
 		fEnclosingElement= enclosingElement;
 		fIsFromSource= isFromSource;
 	}
