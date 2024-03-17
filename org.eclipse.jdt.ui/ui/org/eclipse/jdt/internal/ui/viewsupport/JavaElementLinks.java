@@ -548,6 +548,10 @@ public class JavaElementLinks {
 			cssFragmentsCacheResetListener(null);
 		} else if (PREFERENCE_KEY_ENABLED.equals(event.getProperty())) {
 			CONFIG_LISTENERS.forEach(l -> l.stylingStateChanged((Boolean) event.getNewValue()));
+		} else if (event.getProperty().startsWith(PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING)) {
+			CONFIG_LISTENERS.forEach(l -> l.parametersColoringStateChanged((Boolean) event.getNewValue()));
+		} else if (event.getProperty().startsWith(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR)) {
+			CONFIG_LISTENERS.forEach(IStylingConfigurationListener::parametersColorChanged);
 		}
 	}
 
@@ -966,6 +970,7 @@ public class JavaElementLinks {
 			}
 		} finally {
 			store.addPropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
+			CONFIG_LISTENERS.forEach(IStylingConfigurationListener::parametersColorChanged);
 		}
 	}
 
@@ -990,10 +995,21 @@ public class JavaElementLinks {
 	 */
 	public static interface IStylingConfigurationListener {
 		/**
-		 * Called when Javadoc styling enhancements have been toggled.
-		 * @param isEnabled whether styling enhancements were turned on or off
+		 * Called when all Javadoc styling enhancements have been toggled.
+		 * @param isEnabled whether all styling enhancements were turned on or off
 		 */
 		void stylingStateChanged(boolean isEnabled);
+
+		/**
+		 * Called when parameters coloring styling enhancement for Javadoc have been toggled.
+		 * @param isEnabled whether parameters coloring styling enhancement was turned on or off
+		 */
+		void parametersColoringStateChanged(boolean isEnabled);
+
+		/**
+		 * Called when some color used for parameters coloring styling enhancement for Javadoc has been changed.
+		 */
+		void parametersColorChanged();
 	}
 
 }
