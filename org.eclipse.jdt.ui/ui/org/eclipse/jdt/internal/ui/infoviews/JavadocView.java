@@ -683,7 +683,7 @@ public class JavadocView extends AbstractInfoView {
 
 		if (fIsUsingBrowserWidget) {
 			BrowserTextAccessor browserAccessor= new BrowserTextAccessor(fBrowser);
-			Runnable viewRefreshTask = () -> {
+			Runnable viewRefreshTask= () -> {
 				fIgnoringNewInputOverride= true;
 				setLinkingEnabled(isLinkingEnabled()); // triggers refresh of the view using last set selection
 			};

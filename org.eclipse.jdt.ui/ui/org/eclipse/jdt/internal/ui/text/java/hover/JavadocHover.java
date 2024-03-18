@@ -371,12 +371,19 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				layout.verticalSpacing= 0;
 				toolbarComposite.setLayout(layout);
 
+				Runnable viewRefreshTask= () -> {
+					if (iControl.getInput() instanceof JavadocHoverInformationControlInput input) {
+						iControl.setInput(input.recreateInput());
+					} else {
+						iControl.setVisible(false);
+					}
+				};
 				ToolBarManager tbmSecondary= new ToolBarManager(SWT.FLAT);
 				tbmSecondary.createControl(toolbarComposite).setLayoutData(new GridData(SWT.END, SWT.BEGINNING, false, false));
 				BrowserTextAccessor browserAccessor= new BrowserTextAccessor(iControl);
 				var stylingMenuAction= new SignatureStylingMenuToolbarAction(parent, browserAccessor,
 						() -> iControl.getInput() == null ? null : iControl.getInput().getHtml(),
-						() -> iControl.setVisible(false)); // close hover viewer on enhancements toggle
+						viewRefreshTask);
 				tbmSecondary.add(stylingMenuAction);
 				tbmSecondary.update(true);
 				stylingMenuAction.setup(tbmSecondary.getControl());
@@ -515,6 +522,21 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 
 			return true;
+		}
+	}
+
+	private static class JavadocHoverInformationControlInput extends JavadocBrowserInformationControlInput {
+		private final ITypeRoot fEditorInputElement;
+		private final IRegion fHoverRegion;
+
+		public JavadocHoverInformationControlInput(JavadocBrowserInformationControlInput previous, IJavaElement element, String html, int leadingImageWidth, ITypeRoot editorInputElement, IRegion hoverRegion) {
+			super(previous, element, html, leadingImageWidth);
+			fEditorInputElement= editorInputElement;
+			fHoverRegion= hoverRegion;
+		}
+
+		public JavadocBrowserInformationControlInput recreateInput() {
+			return JavadocHover.getHoverInfo(new IJavaElement[] { getElement() }, fEditorInputElement, fHoverRegion, (JavadocBrowserInformationControlInput) getPrevious());
 		}
 	}
 
@@ -815,7 +837,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			HTMLPrinter.addPageEpilog(buffer);
-			return new JavadocBrowserInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth);
+			return new JavadocHoverInformationControlInput(previousInput, element, buffer.toString(), leadingImageWidth, editorInputElement, hoverRegion);
 		}
 
 		return null;
