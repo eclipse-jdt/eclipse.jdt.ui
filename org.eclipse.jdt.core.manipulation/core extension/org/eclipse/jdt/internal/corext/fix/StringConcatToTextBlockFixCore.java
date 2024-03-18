@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -552,6 +553,16 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (args.size() == 1 && args.get(0) instanceof StringLiteral) {
 				fLiterals.add((StringLiteral)args.get(0));
 				nonNLS= hasNLSMarker(statement, icu);
+			} else if (args.size() > 0) {
+				if (args.get(0) instanceof InfixExpression infix) {
+					if (!processInfixExpression(statement, infix)) {
+						statementList.remove(statement);
+						return false;
+					}
+				} else if (!(args.get(0) instanceof NumberLiteral)) {
+					statementList.remove(statement);
+					return false;
+				}
 			}
 			Block block= (Block) statement.getParent();
 			List<Statement> stmtList= block.statements();
@@ -579,31 +590,8 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 								fLiterals.add((StringLiteral)arg);
 								statementList.add(s);
 							} else if (arg instanceof InfixExpression infix) {
-								if (infix.getOperator() == Operator.PLUS) {
-									Expression left= infix.getLeftOperand();
-									Expression right= infix.getRightOperand();
-									List<Expression> extendedOps= infix.extendedOperands();
-									if (left instanceof StringLiteral && right instanceof StringLiteral) {
-										List<StringLiteral> extendedLiterals= new ArrayList<>();
-										for (Expression extendedOp : extendedOps) {
-											if (extendedOp instanceof StringLiteral) {
-												extendedLiterals.add((StringLiteral)extendedOp);
-											} else {
-												statementList.clear();
-												fLiterals.clear();
-												return false;
-											}
-
-										}
-										fLiterals.add((StringLiteral)left);
-										fLiterals.add((StringLiteral)right);
-										fLiterals.addAll(extendedLiterals);
-										statementList.add(s);
-									} else {
-										statementList.clear();
-										fLiterals.clear();
-										return false;
-									}
+								if (!processInfixExpression(s, infix)) {
+									return false;
 								}
 							} else {
 								statementList.clear();
@@ -667,6 +655,38 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			conversions.put(assignmentToConvert, operation);
 			statementList.clear();
 			fLiterals.clear();
+			return true;
+		}
+
+		private boolean processInfixExpression(Statement s, InfixExpression infix) {
+			if (infix.getOperator() == Operator.PLUS) {
+				Expression left= infix.getLeftOperand();
+				Expression right= infix.getRightOperand();
+				List<Expression> extendedOps= infix.extendedOperands();
+				if (left instanceof StringLiteral && right instanceof StringLiteral) {
+					List<StringLiteral> extendedLiterals= new ArrayList<>();
+					for (Expression extendedOp : extendedOps) {
+						if (extendedOp instanceof StringLiteral) {
+							extendedLiterals.add((StringLiteral)extendedOp);
+						} else {
+							statementList.clear();
+							fLiterals.clear();
+							return false;
+						}
+
+					}
+					fLiterals.add((StringLiteral)left);
+					fLiterals.add((StringLiteral)right);
+					fLiterals.addAll(extendedLiterals);
+					if (!statementList.contains(s)) {
+						statementList.add(s);
+					}
+				} else {
+					statementList.clear();
+					fLiterals.clear();
+					return false;
+				}
+			}
 			return true;
 		}
 

@@ -340,6 +340,19 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf5= new StringBuilder();\n" //
     	        + "        buf5.append(7);\n" //
     	        + "        String str3= \"abc\";\n" //
+    	        + "        String x2= \"\" +\n" //
+    	        + "                \"abc\\n\" +\n" //
+    	        + "                \"def\\n\" +\n" //
+    	        + "                \"ghi\\n\" +\n" //
+    	        + "                \"jki\\n\";\n" //
+    	        + "        StringBuilder buf6 = new StringBuilder(x2);\n" //
+    	        + "        System.out.println(buf6.toString());\n" //
+    	        + "        StringBuilder buf7 = new StringBuilder(\"\" +\n" //
+    	        + "                \"abc\\n\" +\n" //
+    	        + "                \"def\\n\" +\n" //
+    	        + "                \"ghi\\n\" +\n" //
+    	        + "                \"jki\\n\");\n" //
+    	        + "        System.out.println(buf7.toString());\n" //
     	        + "    }\n" //
 				+ "}";
 
@@ -424,6 +437,21 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf5= new StringBuilder();\n" //
     	        + "        buf5.append(7);\n" //
     	        + "        String str3= \"abc\";\n" //
+    	        + "        String x2= \"\"\"\n" //
+    	        + "            abc\n" //
+    	        + "            def\n" //
+    	        + "            ghi\n" //
+    	        + "            jki\n" //
+    	        + "            \"\"\";\n" //
+    	        + "        StringBuilder buf6 = new StringBuilder(x2);\n" //
+    	        + "        System.out.println(buf6.toString());\n" //
+    	        + "        String str5 = \"\"\"\n" //
+    	        + "            abc\n" //
+    	        + "            def\n" //
+    	        + "            ghi\n" //
+    	        + "            jki\n" //
+    	        + "            \"\"\";\n" //
+    	        + "        System.out.println(str5);\n" //
     	        + "    }\n" //
 				+ "}";
 
