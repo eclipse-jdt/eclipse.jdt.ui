@@ -77,10 +77,6 @@ public class JavaElementLinks {
 	 * ID of the checkbox in generated HTML content that toggles formatting inside element labels.
 	 */
 	public static final String CHECKBOX_ID_FORMATTIG= "formattingSwitch"; //$NON-NLS-1$
-	/**
-	 * ID of the checkbox in generated HTML content that toggles type parameters coloring inside element labels.
-	 */
-	public static final String CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING= "typeParamsRefsColoringSwitch"; //$NON-NLS-1$
 
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "javadocElementsStyling.typeParamsReferencesColoring"; //$NON-NLS-1$
 
@@ -106,8 +102,11 @@ public class JavaElementLinks {
 
 	private static String[] CSS_FRAGMENTS_CACHE_TYPE_PARAMETERS_REFERENCES= new String[4];
 	private static final ReentrantLock CSS_FRAGMENTS_CACHE_LOCK= new ReentrantLock();
+	private static final IPropertyChangeListener ENHANCEMENTS_PROPERTIES_CHANGE_LISTENER= JavaElementLinks::enhancementsSettingsChangeListener;
 	private static final IPropertyChangeListener COLOR_PROPERTIES_CHANGE_LISTENER= JavaElementLinks::cssFragmentsCacheResetListener;
 	private static final ListenerList<IStylingConfigurationListener> CONFIG_LISTENERS = new ListenerList<>();
+
+//	private static boolean
 
 	/**
 	 * A handler is asked to handle links to targets.
@@ -349,7 +348,7 @@ public class JavaElementLinks {
 				fBuffer.append("style='position: absolute; top: 18px; left: -23px;'/>"); //$NON-NLS-1$
 
 				// typeParametersColoring checkbox
-				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+				fBuffer.append("<input type='checkbox' id='typeParamsRefsColoringSwitch' "); //$NON-NLS-1$
 				if (enableTypeParamsColoring) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
@@ -509,8 +508,7 @@ public class JavaElementLinks {
 		store.setDefault(PREFERENCE_KEY_ENABLED, true);
 		store.setDefault(PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING, true);
 		store.addPropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
-		// taking advantage of PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS change instead of more complicated OSGi event listener
-		store.addPropertyChangeListener(JavaElementLinks::propertyChanged);
+		store.addPropertyChangeListener(ENHANCEMENTS_PROPERTIES_CHANGE_LISTENER);
 	}
 
 	public static void initDefaultColors(IPreferenceStore store) {
@@ -542,8 +540,9 @@ public class JavaElementLinks {
 		}
 	}
 
-	private static void propertyChanged(PropertyChangeEvent event) {
+	private static void enhancementsSettingsChangeListener(PropertyChangeEvent event) {
 		if (PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS.equals(event.getProperty())) {
+			// taking advantage of PREFERENCE_KEY_DARK_MODE_DEFAULT_COLORS change instead of more complicated OSGi event listener
 			initDefaultColors(preferenceStore());
 			cssFragmentsCacheResetListener(null);
 		} else if (PREFERENCE_KEY_ENABLED.equals(event.getProperty())) {
@@ -952,6 +951,7 @@ public class JavaElementLinks {
 	public static void resetAllColorPreferencesToDefaults() {
 		var store= preferenceStore();
 		store.removePropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
+		store.removePropertyChangeListener(ENHANCEMENTS_PROPERTIES_CHANGE_LISTENER);
 		try {
 			StringBuffer logMessage= new StringBuffer("Following custom color preferences were removed:"); //$NON-NLS-1$
 			RGB customColor= null;
@@ -969,6 +969,7 @@ public class JavaElementLinks {
 			}
 		} finally {
 			store.addPropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
+			store.addPropertyChangeListener(ENHANCEMENTS_PROPERTIES_CHANGE_LISTENER);
 			CONFIG_LISTENERS.forEach(IStylingConfigurationListener::parametersColorChanged);
 		}
 	}

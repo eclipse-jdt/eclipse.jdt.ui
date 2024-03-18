@@ -37,8 +37,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer
 import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor.IBrowserContentChangeListener;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.CheckboxInBrowserToggler;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.CheckboxToggleInBrowserAction;
 
 /**
  * Toolbar item action for building & presenting javadoc styling menu.
@@ -46,7 +44,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.browser.CheckboxToggleInBrowserAc
 public class SignatureStylingMenuToolbarAction extends Action implements IMenuCreator, IBrowserContentChangeListener, IStylingConfigurationListener {
 	private final Action[] noStylingActions= { new NoStylingEnhancementsAction() };
 	private final Action[] enabledActions;
-	private final CheckboxInBrowserToggler formattingCheckboxToggler;
 	private final Shell parent;
 	private final Runnable enhancementsReconfiguredTask;
 
@@ -54,21 +51,19 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	protected Menu menu= null;
 	private boolean isEnabledOverride= false;
 	private boolean enhancementsEnabled= JavaElementLinks.getStylingEnabledPreference();
-	private boolean ignoreRunTask;
 
-	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, Supplier<String> javadocContentSupplier,  Runnable enhancementsReconfiguredTask) {
+	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, Supplier<String> javadocContentSupplier, Runnable enhancementsReconfiguredTask) {
 		super(JavadocStylingMessages.JavadocStyling_enabledTooltip, IAction.AS_DROP_DOWN_MENU);
 		Objects.requireNonNull(parent);
 		setImageDescriptor(JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT);
 		enabledActions= new Action[] {
-				new ToggleSignatureTypeParametersColoringAction(browserAccessor),
+				new ToggleSignatureTypeParametersColoringAction(),
 				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
-				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier, enhancementsReconfiguredTask)};
+				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier)};
 		actions= enabledActions;
 		setMenuCreator(this);
 		this.parent= parent;
 		this.enhancementsReconfiguredTask= enhancementsReconfiguredTask;
-		formattingCheckboxToggler= new CheckboxInBrowserToggler(browserAccessor, JavaElementLinks.CHECKBOX_ID_FORMATTIG);
 		presentEnhancementsState();
 		setHoverImageDescriptor(null);
 		setId(SignatureStylingMenuToolbarAction.class.getSimpleName());
@@ -82,8 +77,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 			return;
 		}
 		var content= contentAccessor.get();
-		if (content != null && !content.isBlank() // fail-fast
-				&& formattingCheckboxToggler.isCheckboxPresentInBrowser()) {
+		if (content != null && !content.isBlank() && content.contains(JavaElementLinks.CHECKBOX_ID_FORMATTIG)) {
 			reAddActionItems(enabledActions);
 		} else {
 			reAddActionItems(noStylingActions);
@@ -146,14 +140,12 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	@Override
 	public void runWithEvent(Event event) {
 		enhancementsEnabled = !enhancementsEnabled;
-		JavaElementLinks.setStylingEnabledPreference(enhancementsEnabled);
-		presentEnhancementsState();
-		runEnhancementsReconfiguredTask();
+		JavaElementLinks.setStylingEnabledPreference(enhancementsEnabled); // triggers call to stylingStateChanged()
 	}
 
 	private void runEnhancementsReconfiguredTask() {
-		if (!ignoreRunTask && enhancementsReconfiguredTask != null) {
-			enhancementsReconfiguredTask.run();
+		if (enhancementsReconfiguredTask != null) {
+			parent.getDisplay().execute(enhancementsReconfiguredTask);
 		}
 	}
 
@@ -165,11 +157,9 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	@Override
 	public void stylingStateChanged(boolean isEnabled) {
 		parent.getDisplay().execute(() -> {
-			if (enhancementsEnabled != isEnabled) {
-				enhancementsEnabled= isEnabled;
-				presentEnhancementsState();
-				runEnhancementsReconfiguredTask();
-			}
+			enhancementsEnabled= isEnabled;
+			presentEnhancementsState();
+			runEnhancementsReconfiguredTask();
 		});
 	}
 
@@ -194,10 +184,10 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		}
 	}
 
-	private class ToggleSignatureTypeParametersColoringAction extends CheckboxToggleInBrowserAction implements IMenuVisibilityMenuItemAction {
+	private static class ToggleSignatureTypeParametersColoringAction extends Action implements IMenuVisibilityMenuItemAction {
 
-		public ToggleSignatureTypeParametersColoringAction(BrowserTextAccessor browserAccessor) {
-			super(JavadocStylingMessages.JavadocStyling_typeParamsColoring, IAction.AS_CHECK_BOX, browserAccessor, JavaElementLinks.CHECKBOX_ID_TYPE_PARAMETERS_REFERENCES_COLORING);
+		public ToggleSignatureTypeParametersColoringAction() {
+			super(JavadocStylingMessages.JavadocStyling_typeParamsColoring, IAction.AS_CHECK_BOX);
 			setId(ToggleSignatureTypeParametersColoringAction.class.getSimpleName());
 			showCurentPreference();
 		}
@@ -214,11 +204,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		@Override
 		public void run() {
 			super.run();
-			ignoreRunTask= true;
-			JavaElementLinks.setPreferenceForTypeParamsColoring(isChecked());
-			ignoreRunTask= false;
-			toggleBrowserCheckbox(isChecked());
-			checkboxToggler.getBrowserTextAccessor().applyChanges();
+			JavaElementLinks.setPreferenceForTypeParamsColoring(isChecked()); // triggers call to parametersColoringStateChanged()
 		}
 
 	}

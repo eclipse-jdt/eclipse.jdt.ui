@@ -24,22 +24,12 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 
 /**
- * Cache over text content of a {@link Browser} widget for situations when multiple accesses & changes to it's content need
- * to be done in rapid succession on SWT display thread before browser widget backend gets a chance to update it's model.
- * <br><br>
- * This facility addresses the fact that at least for some browser backends (e.g. <code>org.eclipse.swt.browser.IE</code>)
- * setting content to browser is delayed - setting content via call to {@link Browser#setText(String)} is not immediate
- * as it requires some future work on SWT display thread, and therefore is not right away reflected in return value of
- * to {@link Browser#getText()}.
- * <br><br>
- * <b>Attention:</b><br>
- * This class in not thread-safe as it is assumed it's used always only from SWT display thread.
+ * Provides access to the text of the {@link Browser} internally created & used by {@link BrowserInformationControl}.
  */
 public class BrowserTextAccessor {
 
 	private final ListenerList<IBrowserContentChangeListener> listeners= new ListenerList<>();
 	private Browser browser;
-	private String textCache;
 
 	public BrowserTextAccessor(BrowserInformationControl iControl) {
 		// only way so far to get hold of reference to browser is to get it through LocationListener
@@ -51,40 +41,8 @@ public class BrowserTextAccessor {
 		browser.addLocationListener(new BrowserTextAccessorLocationListener());
 	}
 
-	protected boolean isInitlaized() {
-		return browser != null;
-	}
-
-	/**
-	 * Gets the working content of the browser, i.e. content set via last call to {@link #setText(String)}, if one was made,
-	 * otherwise content fetched from browser if no {@link #setText(String)} call was made since last time actual content inside
-	 * browser was changed (e.g. by {@link #applyChanges()}).
-	 * @return working content of the browser
-	 */
-	protected String getText() {
-		if (textCache == null) {
-			textCache= browser.getText();
-		}
-		return textCache;
-	}
-
-	/**
-	 * Sets working content of the browser, i.e. content to be set inside the browser on next call to {@link #applyChanges()}.
-	 * @param text new content
-	 */
-	protected void setText(String text) {
-		textCache= text;
-	}
-
-	/**
-	 * Commits working content to the browser if any was set since last time actual content inside browser was changed
-	 * (e.g. by {@link #applyChanges()}).
-	 */
-	public void applyChanges() {
-		if (textCache != null) {
-			browser.setText(textCache);
-			textCache= null;
-		}
+	public String getText() {
+		return browser.getText();
 	}
 
 	public void addContentChangedListener(IBrowserContentChangeListener listener) {
@@ -107,8 +65,6 @@ public class BrowserTextAccessor {
 
 		@Override
 		public void changed(LocationEvent event) {
-			// expected to already be NULL (since call to applyChanges()), otherwise we (may have) lost some uncommitted changes
-			textCache= null;
 			listeners.forEach(listener -> listener.browserContentChanged(BrowserTextAccessor.this::getText));
 		}
 	}

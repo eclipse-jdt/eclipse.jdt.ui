@@ -39,15 +39,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer
 class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, IMenuVisibilityMenuItemAction {
 	private final Shell parentShell;
 	private final Supplier<String> javadocContentSupplier;
-	private final Runnable enhancementsReconfiguredTask;
 
 	private Menu menu= null;
 
-	public SignatureStylingColorSubMenuItem(Shell parent, Supplier<String> javadocContentSupplier, Runnable enhancementsReconfiguredTask) {
+	public SignatureStylingColorSubMenuItem(Shell parent, Supplier<String> javadocContentSupplier) {
 		super(JavadocStylingMessages.JavadocStyling_colorPreferences_menu, AS_DROP_DOWN_MENU);
 		this.parentShell= Objects.requireNonNull(parent);
 		this.javadocContentSupplier= Objects.requireNonNull(javadocContentSupplier);
-		this.enhancementsReconfiguredTask= enhancementsReconfiguredTask;
 		setMenuCreator(this);
 	}
 
@@ -67,8 +65,7 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 						JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameter,
 						i,
 						JavaElementLinks::getColorPreferenceForTypeParamsReference,
-						JavaElementLinks::setColorPreferenceForTypeParamsReference,
-						enhancementsReconfiguredTask));
+						JavaElementLinks::setColorPreferenceForTypeParamsReference));
 				item.fill(menu, -1);
 			}
 			if (typeParamsReferencesCount == 0) {
@@ -125,7 +122,7 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 		}
 	}
 
-	private final class ResetSignatureStylingColorsPreferencesMenuItem extends Action {
+	private static final class ResetSignatureStylingColorsPreferencesMenuItem extends Action {
 		public ResetSignatureStylingColorsPreferencesMenuItem() {
 			super(JavadocStylingMessages.JavadocStyling_colorPreferences_resetAll);
 			setId(ResetSignatureStylingColorsPreferencesMenuItem.class.getSimpleName());
@@ -133,10 +130,7 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 
 		@Override
 		public void run() {
-			JavaElementLinks.resetAllColorPreferencesToDefaults();
-			if (enhancementsReconfiguredTask != null) {
-				enhancementsReconfiguredTask.run();
-			}
+			JavaElementLinks.resetAllColorPreferencesToDefaults(); // triggers call to SignatureStylingMenuToolbarAction.parametersColorChanged()
 		}
 	}
 
