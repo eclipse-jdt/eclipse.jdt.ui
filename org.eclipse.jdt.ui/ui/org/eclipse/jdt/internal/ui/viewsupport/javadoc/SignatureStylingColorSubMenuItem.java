@@ -119,7 +119,7 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 			// can't be done in menuHidden() since SWT.Selection is fired after SWT.Hide, thus run() action would not be executed since item would be disposed
 			menuItem.dispose();
 
-			// re-add the sub-mebu as new menu item (it's OK we don't do ReappearingMenuToolbarAction.addMenuItem() since for sub-menu items following is effectively the same)
+			// re-add the sub-mebu as new menu item
 			var item= new ActionContributionItem(this);
 			item.fill(parentMenu, -1);
 		}

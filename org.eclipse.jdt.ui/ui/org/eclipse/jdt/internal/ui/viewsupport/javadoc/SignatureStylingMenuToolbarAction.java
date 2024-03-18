@@ -60,7 +60,6 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		super(JavadocStylingMessages.JavadocStyling_enabledTooltip, IAction.AS_DROP_DOWN_MENU);
 		Objects.requireNonNull(parent);
 		setImageDescriptor(JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT);
-		setHoverImageDescriptor(JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT); // TODO necessary ?;
 		enabledActions= new Action[] {
 				new ToggleSignatureTypeParametersColoringAction(browserAccessor),
 				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
@@ -129,7 +128,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	}
 
 	@Override
-	public Menu getMenu(Menu parent) {
+	public Menu getMenu(Menu p) {
 		return null;
 	}
 

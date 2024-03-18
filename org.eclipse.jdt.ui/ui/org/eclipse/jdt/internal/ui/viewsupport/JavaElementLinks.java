@@ -772,7 +772,6 @@ public class JavaElementLinks {
 	 * @param element the element to render
 	 * @param flags the rendering flags
 	 * @param linkAllNames if <code>true</code>, link all names; if <code>false</code>, link all names except original element's name
-	 * @param stylingPreferenceKeysPrefix prefix for preference keys related to styling of HTML content for element labels,
 	 * <code>null</code> means no enhanced styling
 	 * @return the label of the Java element
 	 * @since 3.6
