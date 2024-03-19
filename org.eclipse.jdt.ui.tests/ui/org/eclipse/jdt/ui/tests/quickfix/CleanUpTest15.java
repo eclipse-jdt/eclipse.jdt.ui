@@ -353,10 +353,15 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                \"ghi\\n\" +\n" //
     	        + "                \"jki\\n\");\n" //
     	        + "        System.out.println(buf7.toString());\n" //
+    	        + "        buf7 = new StringBuilder();\n" //
+    	        + "        buf7.append(\"abc\" + x2 + \"def\");\n" //
+    	        + "        StringBuilder buf8 = new StringBuilder(\"\");\n" //
+    	        + "        System.out.println(buf8.toString());\n" //
     	        + "    }\n" //
 				+ "}";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+		assertNoCompilationError(cu1);
 
 		enable(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK);
 		enable(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER);
@@ -452,6 +457,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            jki\n" //
     	        + "            \"\"\";\n" //
     	        + "        System.out.println(str5);\n" //
+    	        + "        StringBuilder buf7 = new StringBuilder();\n" //
+    	        + "        buf7.append(\"abc\" + x2 + \"def\");\n" //
+    	        + "        String str6 = \"\"\"\n" //
+    	        + "            \"\"\";\n" //
+    	        + "        System.out.println(str6);\n" //
     	        + "    }\n" //
 				+ "}";
 
