@@ -298,6 +298,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			buf.append("\"\"\"\n"); //$NON-NLS-1$
 			boolean newLine= false;
 			boolean allWhiteSpaceStart= true;
+			boolean allEmpty= true;
 			for (String part : parts) {
 				if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
 					if (!newLine) {
@@ -307,10 +308,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 				newLine= part.endsWith(System.lineSeparator());
 				allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
+				allEmpty= allEmpty && part.isEmpty();
 				buf.append(fIndent).append(part);
 			}
 
-			if (newLine) {
+			if (newLine || allEmpty) {
 				buf.append(fIndent);
 			} else if (allWhiteSpaceStart) {
 				buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
@@ -450,7 +452,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private static final String TO_STRING= "toString"; //$NON-NLS-1$
 		private BodyDeclaration fLastBodyDecl;
 		private final Set<String> fExcludedNames;
-		private final Set<SimpleName> fRemovedDeclarations= new HashSet<>();
+		private final Set<IBinding> fRemovedDeclarations= new HashSet<>();
 
 		public StringBufferFinder(List<CompilationUnitRewriteOperation> operations, Set<String> excludedNames) {
 			super(true);
@@ -646,10 +648,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			List<MethodInvocation> toStringList= new ArrayList<>(checkValidityVisitor.getToStringList());
 			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(node, BodyDeclaration.class);
 			if (statements.get(0) instanceof VariableDeclarationStatement) {
-				fRemovedDeclarations.add(originalVarName);
+				fRemovedDeclarations.add(originalVarName.resolveBinding());
 			}
 			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, statements, literals,
-					fRemovedDeclarations.contains(originalVarName) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, nonNLS);
+					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, nonNLS);
 			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
 			conversions.put(assignmentToConvert, operation);
@@ -707,6 +709,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			originalVarName= node.getName();
+			statementList.clear();
 			statementList.add(varDeclStmt);
 			return true;
 		}
@@ -821,6 +824,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			buf.append("\"\"\"\n"); //$NON-NLS-1$
 			boolean newLine= false;
 			boolean allWhiteSpaceStart= true;
+			boolean allEmpty= true;
 			for (String part : parts) {
 				if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
 					if (!newLine) {
@@ -830,10 +834,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 				newLine= part.endsWith(System.lineSeparator());
 				allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
+				allEmpty= allEmpty && part.isEmpty();
 				buf.append(fIndent).append(part);
 			}
 
-			if (newLine) {
+			if (newLine || allEmpty) {
 				buf.append(fIndent);
 			} else if (allWhiteSpaceStart) {
 				buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
