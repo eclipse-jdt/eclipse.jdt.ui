@@ -870,12 +870,12 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
-		buf.append("    public void combinedAppend() {\n");
+		buf.append("    public void combinedAppendWithNLS() {\n");
 		buf.append("        StringBuffer buf3= new StringBuffer();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\");\n");
-		buf.append("        buf3.append(\"    return null;\\n\");\n");
-		buf.append("        buf3.append(\"}\\n\");\n");
-		buf.append("        buf3.append(\"\\n\").append(\"extra append\\n\");\n");
+		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
+		buf.append("        buf3.append(\"    return null;\\n\"); //$NON-NLS-1$\n");
+		buf.append("        buf3.append(\"}\\n\"); //$NON-NLS-1$\n");
+		buf.append("        buf3.append(\"\\n\").append(\"extra append\\n\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
 		buf.append("        String k = buf3.toString();\n");
 		buf.append("        \n");
 		buf.append("    }\n");

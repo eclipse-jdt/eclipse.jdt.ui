@@ -88,6 +88,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 	private final static String JAVA_STRINGBUFFER= "java.lang.StringBuffer"; //$NON-NLS-1$
 	private final static String JAVA_STRINGBUILDER= "java.lang.StringBuilder"; //$NON-NLS-1$
 	private final static String NLSComment= "$NON-NLS-1$"; //$NON-NLS-1$
+	private final static String NLSCommentPrefix= "$NON-NLS-"; //$NON-NLS-1$
 
 	public static final class StringConcatFinder extends ASTVisitor {
 
@@ -554,17 +555,20 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			ICompilationUnit icu= (ICompilationUnit) cu.getJavaElement();
 			if (args.size() == 1 && args.get(0) instanceof StringLiteral) {
 				fLiterals.add((StringLiteral)args.get(0));
-				nonNLS= hasNLSMarker(statement, icu);
 			} else if (args.size() > 0) {
 				if (args.get(0) instanceof InfixExpression infix) {
-					if (!processInfixExpression(statement, infix)) {
-						statementList.remove(statement);
-						return false;
+					if (!processInfixExpression(infix)) {
+						return failure();
 					}
 				} else if (!(args.get(0) instanceof NumberLiteral)) {
 					statementList.remove(statement);
 					return false;
 				}
+			}
+			try {
+				extractConcatenatedAppends(node);
+			} catch (AbortSearchException e) {
+				return failure();
 			}
 			Block block= (Block) statement.getParent();
 			List<Statement> stmtList= block.statements();
@@ -576,32 +580,34 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				if (s instanceof ExpressionStatement) {
 					Expression exp= ((ExpressionStatement)s).getExpression();
 					if (exp instanceof MethodInvocation) {
-						MethodInvocation method= (MethodInvocation)exp;
-						Expression invocationExp= method.getExpression();
-						if (invocationExp instanceof SimpleName &&
-								((SimpleName)invocationExp).getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName()) &&
-								method.getName().getFullyQualifiedName().equals(APPEND)) {
-							Expression arg= (Expression) method.arguments().get(0);
-							if (arg instanceof StringLiteral) {
-								if (nonNLS != hasNLSMarker(s, icu)) {
-									nonNLS= !nonNLS;
-									if (i - startIndex > 1 || args.size() == 1) {
-										return false;
-									}
+						class MethodVisitor extends ASTVisitor {
+							private boolean valid= false;
+							public boolean isValid() {
+								return valid;
+							}
+							@Override
+							public boolean visit(SimpleName simpleName) {
+								if (simpleName.getFullyQualifiedName().equals(APPEND) && simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
+									return true;
 								}
-								fLiterals.add((StringLiteral)arg);
-								statementList.add(s);
-							} else if (arg instanceof InfixExpression infix) {
-								if (!processInfixExpression(s, infix)) {
+								if (simpleName.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY && simpleName.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())
+										&& ((MethodInvocation)simpleName.getParent()).getName().getFullyQualifiedName().equals(APPEND)) {
+									extractConcatenatedAppends(simpleName);
+									valid= true;
 									return false;
 								}
-							} else {
-								statementList.clear();
-								fLiterals.clear();
-								return false;
+								return true;
 							}
-						} else {
-							break;
+						}
+						MethodVisitor methodVisitor= new MethodVisitor();
+						try {
+							s.accept(methodVisitor);
+							if (!methodVisitor.isValid()) {
+								break;
+							}
+							statementList.add(s);
+						} catch (AbortSearchException e) {
+							return failure();
 						}
 					} else if (exp instanceof Assignment assignment && assignment.getLeftHandSide() instanceof SimpleName name
 							&& name.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())
@@ -612,9 +618,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 							ignoredConstructorStatements.add(s);
 							statementList.add(s);
 							if (!cicArgs.isEmpty() || !fLiterals.isEmpty()) {
-								statementList.clear();
-								fLiterals.clear();
-								return false;
+								return failure();
 							}
 						}
 					} else {
@@ -629,7 +633,20 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			int lastStatementEnd= endStatement.getStartPosition() + endStatement.getLength();
 			IBinding varBinding= null;
 			if (originalVarName == null || (varBinding= originalVarName.resolveBinding()) == null) {
-				return false;
+				return failure();
+			}
+			// verify NLS markers are consistent for all string literals
+			if (!fLiterals.isEmpty()) {
+				try {
+					nonNLS= hasNLSMarker(fLiterals.get(0), icu);
+					for (int j= 1; j < fLiterals.size(); ++j) {
+						if (nonNLS != hasNLSMarker(fLiterals.get(j), icu)) {
+							return failure();
+						}
+					}
+				} catch (AbortSearchException e) {
+					return failure();
+				}
 			}
 			CheckValidityVisitor checkValidityVisitor= new CheckValidityVisitor(lastStatementEnd, varBinding);
 			try {
@@ -638,9 +655,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				// do nothing
 			}
 			if (!checkValidityVisitor.isValid() || checkValidityVisitor.getToStringList().size() == 0) {
-				statementList.clear();
-				fLiterals.clear();
-				return false;
+				return failure();
 			}
 			ExpressionStatement assignmentToConvert= checkValidityVisitor.getNextAssignment();
 			List<Statement> statements= new ArrayList<>(statementList);
@@ -660,7 +675,35 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			return true;
 		}
 
-		private boolean processInfixExpression(Statement s, InfixExpression infix) {
+		private void extractConcatenatedAppends(ASTNode node) throws AbortSearchException {
+			ASTNode parent= node.getParent();
+			while (!(parent instanceof Statement)) {
+				if (parent instanceof MethodInvocation methodCall) {
+					if (!methodCall.getName().getFullyQualifiedName().equals(APPEND)) {
+						throw new AbortSearchException();
+					}
+					Expression arg= (Expression) methodCall.arguments().get(0);
+					if (arg instanceof StringLiteral) {
+						fLiterals.add((StringLiteral)arg);
+					} else if (arg instanceof InfixExpression infix) {
+						if (!processInfixExpression(infix)) {
+							throw new AbortSearchException();
+						}
+					} else {
+						throw new AbortSearchException();
+					}
+				}
+				parent= parent.getParent();
+			}
+		}
+
+		private boolean failure() {
+			statementList.clear();
+			fLiterals.clear();
+			return false;
+		}
+
+		private boolean processInfixExpression(InfixExpression infix) {
 			if (infix.getOperator() == Operator.PLUS) {
 				Expression left= infix.getLeftOperand();
 				Expression right= infix.getRightOperand();
@@ -671,8 +714,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 						if (extendedOp instanceof StringLiteral) {
 							extendedLiterals.add((StringLiteral)extendedOp);
 						} else {
-							statementList.clear();
-							fLiterals.clear();
 							return false;
 						}
 
@@ -680,12 +721,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					fLiterals.add((StringLiteral)left);
 					fLiterals.add((StringLiteral)right);
 					fLiterals.addAll(extendedLiterals);
-					if (!statementList.contains(s)) {
-						statementList.add(s);
-					}
 				} else {
-					statementList.clear();
-					fLiterals.clear();
 					return false;
 				}
 			}
@@ -734,17 +770,27 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 	}
 
-	private static boolean hasNLSMarker(Statement statement, ICompilationUnit cu) {
+	private static boolean hasNLSMarker(ASTNode node, ICompilationUnit cu) throws AbortSearchException {
 		boolean hasNLS= false;
-		List<Comment> commentList= ASTNodes.getTrailingComments(statement);
+		List<Comment> commentList= ASTNodes.getTrailingComments(node);
+		if (commentList.isEmpty()) {
+			ASTNode n= node;
+			while (!(n instanceof Statement) && commentList.isEmpty()) {
+				n= n.getParent();
+				commentList= ASTNodes.getTrailingComments(n);
+			}
+		}
 		if (commentList.size() > 0) {
 			if (commentList.get(0) instanceof LineComment) {
 				LineComment lineComment= (LineComment) commentList.get(0);
 				try {
 					String comment= cu.getBuffer().getText(lineComment.getStartPosition() + 2, lineComment.getLength() - 2).trim();
-					hasNLS= comment.equals(NLSComment);
+					hasNLS= comment.startsWith(NLSComment);
+					if (comment.substring(NLSComment.length()).contains(NLSCommentPrefix)) {
+						throw new AbortSearchException();
+					}
 				} catch (IndexOutOfBoundsException | JavaModelException e) {
-					return false;
+					throw new AbortSearchException();
 				}
 			}
 		}

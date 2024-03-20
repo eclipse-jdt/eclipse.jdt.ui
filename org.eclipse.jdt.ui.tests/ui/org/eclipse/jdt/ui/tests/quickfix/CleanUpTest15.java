@@ -357,6 +357,9 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        buf7.append(\"abc\" + x2 + \"def\");\n" //
     	        + "        StringBuilder buf8 = new StringBuilder(\"\");\n" //
     	        + "        System.out.println(buf8.toString());\n" //
+    	        + "        StringBuilder buf9 = new StringBuilder(\"abc\\n\").append(\"def\\n\").append(\"ghi\");\n" //
+    	        + "        buf9.append(\"jkl\\n\").append(\"mno\");\n" //
+    	        + "        System.out.println(buf9.toString());\n" //
     	        + "    }\n" //
 				+ "}";
 
@@ -462,6 +465,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "        String str6 = \"\"\"\n" //
     	        + "            \"\"\";\n" //
     	        + "        System.out.println(str6);\n" //
+    	        + "        String str7 = \"\"\"\n" //
+    	        + "            abc\n" //
+    	        + "            def\n" //
+    	        + "            ghi\\\n" //
+    	        + "            jkl\n" //
+    	        + "            mno\"\"\";\n" //
+    	        + "        System.out.println(str7);\n" //
     	        + "    }\n" //
 				+ "}";
 
@@ -686,11 +696,11 @@ public class CleanUpTest15 extends CleanUpTestCase {
 				+ "        String x = buf.toString();\n" //
     	        + "    }\n" //
     	        + "\n" //
-   	            + "    public void testSerialCallsNotSupported() {\n" //
+   	            + "    public void testSerialNLSCallsNotSupported() {\n" //
 				+ "        StringBuffer buf = new StringBuffer();\n" //
-    	        + "        buf.append(\"abcdef\\n\");\n" //
-    	        + "        buf.append(\"123456\\n\");\n" //
-    	        + "        buf.append(\"ghijkl\\n\").append(\"mnopqrst\\n\");\n" //
+    	        + "        buf.append(\"abcdef\\n\"); //$NON-NLS-1$\n" //
+    	        + "        buf.append(\"123456\\n\"); //$NON-NLS-1$\n" //
+    	        + "        buf.append(\"ghijkl\\n\").append(\"mnopqrst\\n\"); //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        String x = buf.toString();\n" //
     	        + "    }\n" //
     	        + "\n" //
