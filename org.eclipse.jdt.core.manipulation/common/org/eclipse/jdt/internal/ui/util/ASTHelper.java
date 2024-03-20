@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,7 @@ public class ASTHelper {
 	public static final int JLS19 = AST.JLS19;
 	public static final int JLS20 = AST.JLS20;
 	public static final int JLS21 = AST.JLS21;
+	public static final int JLS22 = AST.JLS22;
 
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {

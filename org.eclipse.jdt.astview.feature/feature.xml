@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="Java AST View"
-      version="1.2.200.qualifier"
+      version="1.2.250.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

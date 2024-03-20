@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -78,7 +78,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_21; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_22; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -864,6 +864,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_21);
 	}
 
+	public static boolean is22OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_22);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.2 or greater.
 	 *
@@ -1048,6 +1052,17 @@ public final class JavaModelUtil {
 		return is21OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 22 or greater.
+	 *
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 22 or
+	 *         greater.
+	 */
+	public static boolean is22OrHigher(IJavaProject project) {
+		return is22OrHigher(getSourceCompliance(project));
+	}
+
 	public static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
@@ -1098,6 +1113,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_22)) {
+			return JavaCore.VERSION_22;
 		} else if (version.startsWith(JavaCore.VERSION_21)) {
 			return JavaCore.VERSION_21;
 		} else if (version.startsWith(JavaCore.VERSION_20)) {
@@ -1152,7 +1169,9 @@ public final class JavaModelUtil {
 
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_21) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_22) != -1) {
+			return JavaCore.VERSION_22;
+		} else if (desc.indexOf(JavaCore.VERSION_21) != -1) {
 			return JavaCore.VERSION_21;
 		} else if (desc.indexOf(JavaCore.VERSION_20) != -1) {
 			return JavaCore.VERSION_20;
