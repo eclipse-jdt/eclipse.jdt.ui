@@ -565,24 +565,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					return false;
 				}
 			}
-			ASTNode parent= node.getParent();
-			while (parent != statement) {
-				if (parent instanceof MethodInvocation methodCall) {
-					if (!methodCall.getName().getFullyQualifiedName().equals(APPEND)) {
-						return failure();
-					}
-					Expression arg= (Expression) methodCall.arguments().get(0);
-					if (arg instanceof StringLiteral) {
-						fLiterals.add((StringLiteral)arg);
-					} else if (arg instanceof InfixExpression infix) {
-						if (!processInfixExpression(infix)) {
-							return failure();
-						}
-					} else {
-						return failure();
-					}
-				}
-				parent= parent.getParent();
+			try {
+				extractConcatenatedAppends(node);
+			} catch (AbortSearchException e) {
+				return failure();
 			}
 			Block block= (Block) statement.getParent();
 			List<Statement> stmtList= block.statements();
@@ -594,25 +580,34 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				if (s instanceof ExpressionStatement) {
 					Expression exp= ((ExpressionStatement)s).getExpression();
 					if (exp instanceof MethodInvocation) {
-						MethodInvocation method= (MethodInvocation)exp;
-						Expression invocationExp= method.getExpression();
-						if (invocationExp instanceof SimpleName &&
-								((SimpleName)invocationExp).getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName()) &&
-								method.getName().getFullyQualifiedName().equals(APPEND)) {
-							Expression arg= (Expression) method.arguments().get(0);
-							if (arg instanceof StringLiteral) {
-								fLiterals.add((StringLiteral)arg);
-								statementList.add(s);
-							} else if (arg instanceof InfixExpression infix) {
-								if (!processInfixExpression(infix)) {
-									return failure();
-								}
-								statementList.add(s);
-							} else {
-								return failure();
+						class MethodVisitor extends ASTVisitor {
+							private boolean valid= false;
+							public boolean isValid() {
+								return valid;
 							}
-						} else {
-							break;
+							@Override
+							public boolean visit(SimpleName simpleName) {
+								if (simpleName.getFullyQualifiedName().equals(APPEND) && simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
+									return true;
+								}
+								if (simpleName.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY && simpleName.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())
+										&& ((MethodInvocation)simpleName.getParent()).getName().getFullyQualifiedName().equals(APPEND)) {
+									extractConcatenatedAppends(simpleName);
+									valid= true;
+									return false;
+								}
+								return true;
+							}
+						}
+						MethodVisitor methodVisitor= new MethodVisitor();
+						try {
+							s.accept(methodVisitor);
+							if (!methodVisitor.isValid()) {
+								break;
+							}
+							statementList.add(s);
+						} catch (AbortSearchException e) {
+							return failure();
 						}
 					} else if (exp instanceof Assignment assignment && assignment.getLeftHandSide() instanceof SimpleName name
 							&& name.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())
@@ -678,6 +673,28 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			statementList.clear();
 			fLiterals.clear();
 			return true;
+		}
+
+		private void extractConcatenatedAppends(ASTNode node) throws AbortSearchException {
+			ASTNode parent= node.getParent();
+			while (!(parent instanceof Statement)) {
+				if (parent instanceof MethodInvocation methodCall) {
+					if (!methodCall.getName().getFullyQualifiedName().equals(APPEND)) {
+						throw new AbortSearchException();
+					}
+					Expression arg= (Expression) methodCall.arguments().get(0);
+					if (arg instanceof StringLiteral) {
+						fLiterals.add((StringLiteral)arg);
+					} else if (arg instanceof InfixExpression infix) {
+						if (!processInfixExpression(infix)) {
+							throw new AbortSearchException();
+						}
+					} else {
+						throw new AbortSearchException();
+					}
+				}
+				parent= parent.getParent();
+			}
 		}
 
 		private boolean failure() {
