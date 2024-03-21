@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -115,11 +115,11 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 
 	//---- Begin AbstractTypeDeclaration Hierarchy ---------------------------
 	public boolean visit(AbstractTypeDeclaration node) {
-		return visit((BodyDeclaration)node);
+		return visit((AbstractUnnamedTypeDeclaration)node);
 	}
 
 	public void endVisit(AbstractTypeDeclaration node) {
-		endVisit((BodyDeclaration)node);
+		endVisit((AbstractUnnamedTypeDeclaration)node);
 	}
 
 	@Override
@@ -153,6 +153,29 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	//---- End AbstractTypeDeclaration Hierarchy ---------------------------
+
+	//---- Begin AbstractUnnamedTypeDeclaration Hierarchy ---------------------------
+
+	public boolean visit(AbstractUnnamedTypeDeclaration node) {
+		return visit((BodyDeclaration)node);
+	}
+
+	public void endVisit(AbstractUnnamedTypeDeclaration node) {
+		endVisit((BodyDeclaration)node);
+	}
+
+	@Override
+	public boolean visit(UnnamedClass node) {
+		return visit((AbstractUnnamedTypeDeclaration)node);
+	}
+
+	@Override
+	public void endVisit(UnnamedClass node) {
+		endVisit((AbstractUnnamedTypeDeclaration)node);
+	}
+
+	//---- End AbstractUnnamedTypeDeclaration Hierarchy ---------------------------
+
 
 	@Override
 	public boolean visit(AnnotationTypeMemberDeclaration node) {

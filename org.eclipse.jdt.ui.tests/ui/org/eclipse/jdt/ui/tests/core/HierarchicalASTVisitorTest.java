@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTagElement;
 import org.eclipse.jdt.core.dom.AbstractTextElement;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AbstractUnnamedTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -164,6 +165,24 @@ public class HierarchicalASTVisitorTest {
 		}
 		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(AbstractTextElement node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(AbstractUnnamedTypeDeclaration node) {
+			registerCall(AbstractUnnamedTypeDeclaration.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(AbstractUnnamedTypeDeclaration node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(AbstractUnnamedTypeDeclaration node) {
+			registerCall(AbstractUnnamedTypeDeclaration.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(AbstractUnnamedTypeDeclaration node) {
 			super.visit(node);
 		}
 
