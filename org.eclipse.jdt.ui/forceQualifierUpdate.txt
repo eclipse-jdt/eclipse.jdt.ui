@@ -18,3 +18,4 @@ Comparator errors in I20230607-0720
 Bug 527899 [9] Implement JEP 280: Indify String Concatenation
 Comparator errors in I20230906-0400
 Comparator errors in I20231127-0750
+https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/1923
