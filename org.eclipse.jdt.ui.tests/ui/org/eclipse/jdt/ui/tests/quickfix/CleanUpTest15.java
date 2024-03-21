@@ -149,7 +149,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                + \"     * foo\\n\" //\n" //
     	        + "                + \"     */\"; //\n" //
     	        + "    }\n" //
-    	        + "}\n";
+      	        + "    public void testNoEndNewlineWithSpace() {\n" //
+    	        + "        String x= \"\"\n" //
+    	        + "                + \"/** bar\\n\" //\n" //
+    	        + "                + \" * foo\\n\" //\n" //
+    	        + "                + \" */ \"; //\n" //
+    	        + "    }\n" //
+  	        + "}\n";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
@@ -266,7 +272,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                 */\\\n" //
     	        + "            \"\"\"; //\n" //
     	        + "    }\n" //
-    	        + "}\n";
+     	        + "    public void testNoEndNewlineWithSpace() {\n" //
+    	        + "        String x= \"\"\"\n" //
+    	        + "            /** bar\n" //
+    	        + "             * foo\n" //
+    	        + "             */\\s\"\"\"; //\n" //
+    	        + "    }\n" //
+   	        + "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
@@ -657,6 +669,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "            \"ghijkl\" + //$NON-NLS-1$\n" //
     	        + "            \"mnop\"};\n" //
     	        + "    }\n" //
+    	        + "\n" //
+   	            + "    public void testCommentsThatWillBeLost() {\n" //
+				+ "        String x = \"\" +\n" //
+    	        + "            \"abcdef\" +\n" //
+    	        + "            \"ghijkl\" + // a comment\n" //
+    	        + "            \"mnop\";\n" //
+    	        + "    }\n" //
+    	        + "\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
