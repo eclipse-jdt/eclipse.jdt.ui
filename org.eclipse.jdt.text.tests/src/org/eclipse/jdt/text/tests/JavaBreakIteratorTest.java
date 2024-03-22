@@ -57,19 +57,21 @@ public class JavaBreakIteratorTest extends BreakIteratorTest {
 
 	@Test
 	public void testMultiNextLn() {
-		String s= "word \n" +
-				"\n" +
-				"\n" +
-				"  word2";
+		String s= """
+			word\s
+			
+			
+			  word2""";
 		assertNextPositions(s, new int[] { 4, 5, 6, 7, 8, 10, 15 });
 	}
 
 	@Test
 	public void testMultiNextLn2() {
-		String s= "word \r\n" +
-				"\r\n" +
-				"\r\n" +
-				"  word2";
+		String s= """
+			word \r
+			\r
+			\r
+			  word2""";
 		assertNextPositions(s, new int[] { 4, 5, 7, 9, 11, 13, 18 });
 	}
 
@@ -112,19 +114,21 @@ public class JavaBreakIteratorTest extends BreakIteratorTest {
 
 	@Test
 	public void testMultiPreviousLn() {
-		String s= "word \n" +
-				"\n" +
-				"\n" +
-				"  word2";
+		String s= """
+			word\s
+			
+			
+			  word2""";
 		assertPreviousPositions(s, new int[] { 0, 4, 5, 6, 7, 8, 10 });
 	}
 
 	@Test
 	public void testMultiPreviousLn2() {
-		String s= "word \r\n" +
-				"\r\n" +
-				"\r\n" +
-				"  word2";
+		String s= """
+			word \r
+			\r
+			\r
+			  word2""";
 		assertPreviousPositions(s, new int[] { 0, 4, 5, 7, 9, 11, 13 });
 	}
 

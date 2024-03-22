@@ -55,1018 +55,1020 @@ public class CleanUpTest12 extends CleanUpTestCase {
 	@Test
 	public void testSwitch() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static final int CONSTANT_1 = 0;\n" //
-				+ "    public static final int CONSTANT_2 = 1;\n" //
-				+ "\n" //
-				+ "    public int i2 = 0;\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnParameter(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            i = 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (i1 == 1) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (2 == i1) {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else if (i1 == 3) {\n" //
-				+ "            i = 25;\n" //
-				+ "            i = 30;\n" //
-				+ "        } else if (i1 == 4)\n" //
-				+ "            i = 40;\n" //
-				+ "        else if ((i1 == 5) || (i1 == 6)) {\n" //
-				+ "            i = 60;\n" //
-				+ "        } else if ((i1 == 7) ^ (i1 == 8)) {\n" //
-				+ "            i = 80;\n" //
-				+ "        } else if ((i1 == 9) | (i1 == 10)) {\n" //
-				+ "            i = 100;\n" //
-				+ "        } else if ((i1 == 11) || i1 == 12 || (i1 == 13)) {\n" //
-				+ "            i = 130;\n" //
-				+ "        } else if (14 == i1) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                i = 140;\n" //
-				+ "            }\n" //
-				+ "        } else if (i2 == 2) {\n" //
-				+ "            i = 150;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchUsingConstants(int date) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (date == CONSTANT_1) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            i = 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (CONSTANT_2 == date) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (date == 3) {\n" //
-				+ "            i = 60;\n" //
-				+ "        } else if (date == 4) {\n" //
-				+ "            i = 80;\n" //
-				+ "        } else {\n" //
-				+ "            i = 150;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnLocalVariable() {\n" //
-				+ "        int i1 = 0;\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            i = 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (i1 == 1) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (2 == i1) {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else if (i1 == 3) {\n" //
-				+ "            i = 25;\n" //
-				+ "            i = 30;\n" //
-				+ "        } else if (i1 == 5) {\n" //
-				+ "            // Do nothing\n" //
-				+ "        } else if (i1 == 4)\n" //
-				+ "            i = 40;\n" //
-				+ "        else {\n" //
-				+ "            i = 50;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnField() {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i2 == 0) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            i = 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (i2 == 1) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (i2 == 2) {\n" //
-				+ "            i = 20;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWithSwitchOnField() {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (this.i2 == 0) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            i = 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (this.i2 == 1) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (this.i2 == 2) {\n" //
-				+ "            i = 20;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnCharacter(char character) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (character == 'a') {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            i = 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (character == 'b')\n" //
-				+ "            i = 10;\n" //
-				+ "        else if ('c' == character) {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else if (character == 'd') {\n" //
-				+ "            i = 30;\n" //
-				+ "        } else\n" //
-				+ "            i = 40;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfRemoveDuplicateConditions(char aCharacter) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (aCharacter == 'a') {\n" //
-				+ "            i = 0;\n" //
-				+ "        } else if (aCharacter == 'b') {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (aCharacter == 'a') {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else if (aCharacter == 'b') {\n" //
-				+ "            i = 30;\n" //
-				+ "        } else if ('c' == aCharacter) {\n" //
-				+ "            i = 40;\n" //
-				+ "        } else if (aCharacter == 'd' || aCharacter == 'b' || ('c' == aCharacter)) {\n" //
-				+ "            i = 50;\n" //
-				+ "        } else {\n" //
-				+ "            i = 60;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSeveralConditions(char myCharacter) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (myCharacter == 'a') {\n" //
-				+ "            i = 0;\n" //
-				+ "        } else if (myCharacter == 'z') {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (myCharacter == 'a') {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else if ((myCharacter == 'd') || (myCharacter == 'b') || ('c' == myCharacter) || ('f' == myCharacter)) {\n" //
-				+ "            i = 50;\n" //
-				+ "        } else {\n" //
-				+ "            i = 60;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfKeepExistingControlFlowBreaks(byte i1) {\n" //
-				+ "        byte j = 0;\n" //
-				+ "        loop: for (byte i = 0; i < 10; i++) {\n" //
-				+ "            if (i1 == 0) {\n" //
-				+ "                j = 0;\n" //
-				+ "                return;\n" //
-				+ "            } else if (i1 == 1) {\n" //
-				+ "                j = 10;\n" //
-				+ "                continue;\n" //
-				+ "            } else if (2 == i1) {\n" //
-				+ "                j = 20;\n" //
-				+ "                break loop;\n" //
-				+ "            } else if (i1 == 3) {\n" //
-				+ "                j = 25;\n" //
-				+ "                j = 30;\n" //
-				+ "            } else if (4 == i1) {\n" //
-				+ "                j = 40;\n" //
-				+ "                throw new RuntimeException();\n" //
-				+ "            } else if (5 == i1) {\n" //
-				+ "                j = 50;\n" //
-				+ "                if (i == 5) {\n" //
-				+ "                    throw new RuntimeException();\n" //
-				+ "                } else {\n" //
-				+ "                    return;\n" //
-				+ "                }\n" //
-				+ "            } else if (6 == i1) {\n" //
-				+ "                j = 60;\n" //
-				+ "                if (i == 5) {\n" //
-				+ "                    throw new RuntimeException();\n" //
-				+ "                }\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWithInnerLoopBreak(short i1) {\n" //
-				+ "        short j = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            j = 0;\n" //
-				+ "        } else if (i1 == 1) {\n" //
-				+ "            j = 10;\n" //
-				+ "            short k = 0;\n" //
-				+ "            do {\n" //
-				+ "                if (j == i1) {\n" //
-				+ "                    break;\n" //
-				+ "                }\n" //
-				+ "                k++;\n" //
-				+ "            } while (k < j);\n" //
-				+ "        } else if (2 == i1) {\n" //
-				+ "            j = 20;\n" //
-				+ "            for (short l = 0; l < j; l++) {\n" //
-				+ "                if (j == i1) {\n" //
-				+ "                    break;\n" //
-				+ "                }\n" //
-				+ "            }\n" //
-				+ "        } else if (i1 == 3) {\n" //
-				+ "            j = 25;\n" //
-				+ "            j = 30;\n" //
-				+ "            short m = 0;\n" //
-				+ "            while (m < j) {\n" //
-				+ "                if (j == i1) {\n" //
-				+ "                    break;\n" //
-				+ "                }\n" //
-				+ "                m++;\n" //
-				+ "            }\n" //
-				+ "        } else if (4 == i1) {\n" //
-				+ "            j = 40;\n" //
-				+ "            for (short o : new short[] { 1, 2, 3 }) {\n" //
-				+ "                if (o == i1) {\n" //
-				+ "                    break;\n" //
-				+ "                }\n" //
-				+ "            }\n" //
-				+ "        } else if (5 == i1) {\n" //
-				+ "            j = 50;\n" //
-				+ "            switch (j) {\n" //
-				+ "            case 0 :\n" //
-				+ "                j = 0;\n" //
-				+ "                break;\n" //
-				+ "            case 1 :\n" //
-				+ "                j = 10;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWhenNoVariableNameConflictExists(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            int newVariable1 = 0;\n" //
-				+ "            i = newVariable1;\n" //
-				+ "        } else if (i1 == 1) {\n" //
-				+ "            int newVariable2 = 10;\n" //
-				+ "            i = newVariable2;\n" //
-				+ "        } else if (2 == i1) {\n" //
-				+ "            char newVariable3 = 'a';\n" //
-				+ "            i = newVariable3;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWhenOutOfScopeVariableNameConflicts(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            for (int l = 0; l < i; l++) {\n" //
-				+ "                int integer1 = 0;\n" //
-				+ "                i = integer1;\n" //
-				+ "            }\n" //
-				+ "        } else if (i1 == 1) {\n" //
-				+ "            int integer1 = 10;\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (i1 == 2) {\n" //
-				+ "            int i2 = 20;\n" //
-				+ "            i = i2;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceIfSuite(int i1) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            return 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 1) {\n" //
-				+ "            return 10;\n" //
-				+ "        }\n" //
-				+ "        if (2 == i1) {\n" //
-				+ "            return 20;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 3) {\n" //
-				+ "            return 30;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 4)\n" //
-				+ "            return 40;\n" //
-				+ "        if ((i1 == 5) || (i1 == 6)) {\n" //
-				+ "            return 60;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 7) ^ (i1 == 8)) {\n" //
-				+ "            return 80;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 9) | (i1 == 10)) {\n" //
-				+ "            return 100;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {\n" //
-				+ "            return 130;\n" //
-				+ "        }\n" //
-				+ "        if (14 == i1) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                return 140;\n" //
-				+ "            }\n" //
-				+ "            return 145;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceSuiteThatDoNotFallThrough(int i1) {\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                return 0;\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i1 == 1) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            return 10;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        }\n" //
-				+ "        if (2 == i1) {\n" //
-				+ "            return 20;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 3) {\n" //
-				+ "            return 30;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 4)\n" //
-				+ "            return 40;\n" //
-				+ "        if ((i1 == 5) || (i1 == 6)) {\n" //
-				+ "            return 60;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 7) ^ (i1 == 8)) {\n" //
-				+ "            return 80;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 9) | (i1 == 10)) {\n" //
-				+ "            return 100;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {\n" //
-				+ "            return 130;\n" //
-				+ "        }\n" //
-				+ "        if (14 == i1) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                return 140;\n" //
-				+ "            }\n" //
-				+ "            return 145;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceSuiteIgnoring(int i1) {\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            return 0;\n" //
-				+ "        } else if (i2 == 1) {\n" //
-				+ "            return 140;\n" //
-				+ "        }\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i1 == 1) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            return 10;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        }\n" //
-				+ "        if (2 == i1) {\n" //
-				+ "            return 20;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 3) {\n" //
-				+ "            return 30;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 4)\n" //
-				+ "            return 40;\n" //
-				+ "        if ((i1 == 5) || (i1 == 6)) {\n" //
-				+ "            return 60;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 7) ^ (i1 == 8)) {\n" //
-				+ "            return 80;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 9) | (i1 == 10)) {\n" //
-				+ "            return 100;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {\n" //
-				+ "            return 130;\n" //
-				+ "        }\n" //
-				+ "        if (14 == i1) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                return 140;\n" //
-				+ "            }\n" //
-				+ "            return 145;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWhenVariableTypesConflict(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            int integer1 = 0;\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (i1 == 2) {\n" //
-				+ "            char integer1 = 'a';\n" //
-				+ "            i = integer1;\n" //
-				+ "        } else if (i1 == 3) {\n" //
-				+ "            char c = 'a';\n" //
-				+ "            i = c;\n" //
-				+ "        } else {\n" //
-				+ "            char c = 'b';\n" //
-				+ "            i = c;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceMeltCases(int i1) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            // Keep this comment too\n" //
-				+ "            return 0;\n" //
-				+ "            // Keep this comment also\n" //
-				+ "        } else if (i1 == 1) {\n" //
-				+ "            return 10;\n" //
-				+ "        } else if (2 == i1) {\n" //
-				+ "            return 20;\n" //
-				+ "        } else if (i1 == 3) {\n" //
-				+ "            return 30;\n" //
-				+ "        }\n" //
-				+ "        if (i1 == 4)\n" //
-				+ "            return 40;\n" //
-				+ "        if ((i1 == 5) || (i1 == 6)) {\n" //
-				+ "            return 60;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 7) ^ (i1 == 8)) {\n" //
-				+ "            return 80;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 9) | (i1 == 10)) {\n" //
-				+ "            return 100;\n" //
-				+ "        }\n" //
-				+ "        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {\n" //
-				+ "            return 130;\n" //
-				+ "        }\n" //
-				+ "        if (14 == i1) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                return 140;\n" //
-				+ "            }\n" //
-				+ "            return 145;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			public class E {
+			    public static final int CONSTANT_1 = 0;
+			    public static final int CONSTANT_2 = 1;
+			
+			    public int i2 = 0;
+			
+			    public void replaceIfWithSwitchOnParameter(int i1) {
+			        int i = 0;
+			        // Keep this comment
+			        if (i1 == 0) {
+			            // Keep this comment too
+			            i = 0;
+			            // Keep this comment also
+			        } else if (i1 == 1) {
+			            i = 10;
+			        } else if (2 == i1) {
+			            i = 20;
+			        } else if (i1 == 3) {
+			            i = 25;
+			            i = 30;
+			        } else if (i1 == 4)
+			            i = 40;
+			        else if ((i1 == 5) || (i1 == 6)) {
+			            i = 60;
+			        } else if ((i1 == 7) ^ (i1 == 8)) {
+			            i = 80;
+			        } else if ((i1 == 9) | (i1 == 10)) {
+			            i = 100;
+			        } else if ((i1 == 11) || i1 == 12 || (i1 == 13)) {
+			            i = 130;
+			        } else if (14 == i1) {
+			            if (i2 == 1) {
+			                i = 140;
+			            }
+			        } else if (i2 == 2) {
+			            i = 150;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchUsingConstants(int date) {
+			        int i = 0;
+			        // Keep this comment
+			        if (date == CONSTANT_1) {
+			            // Keep this comment too
+			            i = 0;
+			            // Keep this comment also
+			        } else if (CONSTANT_2 == date) {
+			            i = 10;
+			        } else if (date == 3) {
+			            i = 60;
+			        } else if (date == 4) {
+			            i = 80;
+			        } else {
+			            i = 150;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchOnLocalVariable() {
+			        int i1 = 0;
+			        int i = 0;
+			        // Keep this comment
+			        if (i1 == 0) {
+			            // Keep this comment too
+			            i = 0;
+			            // Keep this comment also
+			        } else if (i1 == 1) {
+			            i = 10;
+			        } else if (2 == i1) {
+			            i = 20;
+			        } else if (i1 == 3) {
+			            i = 25;
+			            i = 30;
+			        } else if (i1 == 5) {
+			            // Do nothing
+			        } else if (i1 == 4)
+			            i = 40;
+			        else {
+			            i = 50;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchOnField() {
+			        int i = 0;
+			        // Keep this comment
+			        if (i2 == 0) {
+			            // Keep this comment too
+			            i = 0;
+			            // Keep this comment also
+			        } else if (i2 == 1) {
+			            i = 10;
+			        } else if (i2 == 2) {
+			            i = 20;
+			        }
+			    }
+			
+			    public void replaceWithSwitchOnField() {
+			        int i = 0;
+			        // Keep this comment
+			        if (this.i2 == 0) {
+			            // Keep this comment too
+			            i = 0;
+			            // Keep this comment also
+			        } else if (this.i2 == 1) {
+			            i = 10;
+			        } else if (this.i2 == 2) {
+			            i = 20;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchOnCharacter(char character) {
+			        int i = 0;
+			        // Keep this comment
+			        if (character == 'a') {
+			            // Keep this comment too
+			            i = 0;
+			            // Keep this comment also
+			        } else if (character == 'b')
+			            i = 10;
+			        else if ('c' == character) {
+			            i = 20;
+			        } else if (character == 'd') {
+			            i = 30;
+			        } else
+			            i = 40;
+			    }
+			
+			    public void replaceIfRemoveDuplicateConditions(char aCharacter) {
+			        int i = 0;
+			        if (aCharacter == 'a') {
+			            i = 0;
+			        } else if (aCharacter == 'b') {
+			            i = 10;
+			        } else if (aCharacter == 'a') {
+			            i = 20;
+			        } else if (aCharacter == 'b') {
+			            i = 30;
+			        } else if ('c' == aCharacter) {
+			            i = 40;
+			        } else if (aCharacter == 'd' || aCharacter == 'b' || ('c' == aCharacter)) {
+			            i = 50;
+			        } else {
+			            i = 60;
+			        }
+			    }
+			
+			    public void replaceIfWithSeveralConditions(char myCharacter) {
+			        int i = 0;
+			        if (myCharacter == 'a') {
+			            i = 0;
+			        } else if (myCharacter == 'z') {
+			            i = 10;
+			        } else if (myCharacter == 'a') {
+			            i = 20;
+			        } else if ((myCharacter == 'd') || (myCharacter == 'b') || ('c' == myCharacter) || ('f' == myCharacter)) {
+			            i = 50;
+			        } else {
+			            i = 60;
+			        }
+			    }
+			
+			    public void replaceIfKeepExistingControlFlowBreaks(byte i1) {
+			        byte j = 0;
+			        loop: for (byte i = 0; i < 10; i++) {
+			            if (i1 == 0) {
+			                j = 0;
+			                return;
+			            } else if (i1 == 1) {
+			                j = 10;
+			                continue;
+			            } else if (2 == i1) {
+			                j = 20;
+			                break loop;
+			            } else if (i1 == 3) {
+			                j = 25;
+			                j = 30;
+			            } else if (4 == i1) {
+			                j = 40;
+			                throw new RuntimeException();
+			            } else if (5 == i1) {
+			                j = 50;
+			                if (i == 5) {
+			                    throw new RuntimeException();
+			                } else {
+			                    return;
+			                }
+			            } else if (6 == i1) {
+			                j = 60;
+			                if (i == 5) {
+			                    throw new RuntimeException();
+			                }
+			            }
+			        }
+			    }
+			
+			    public void replaceWithInnerLoopBreak(short i1) {
+			        short j = 0;
+			        if (i1 == 0) {
+			            j = 0;
+			        } else if (i1 == 1) {
+			            j = 10;
+			            short k = 0;
+			            do {
+			                if (j == i1) {
+			                    break;
+			                }
+			                k++;
+			            } while (k < j);
+			        } else if (2 == i1) {
+			            j = 20;
+			            for (short l = 0; l < j; l++) {
+			                if (j == i1) {
+			                    break;
+			                }
+			            }
+			        } else if (i1 == 3) {
+			            j = 25;
+			            j = 30;
+			            short m = 0;
+			            while (m < j) {
+			                if (j == i1) {
+			                    break;
+			                }
+			                m++;
+			            }
+			        } else if (4 == i1) {
+			            j = 40;
+			            for (short o : new short[] { 1, 2, 3 }) {
+			                if (o == i1) {
+			                    break;
+			                }
+			            }
+			        } else if (5 == i1) {
+			            j = 50;
+			            switch (j) {
+			            case 0 :
+			                j = 0;
+			                break;
+			            case 1 :
+			                j = 10;
+			                break;
+			            }
+			        }
+			    }
+			
+			    public void replaceIfWhenNoVariableNameConflictExists(int i1) {
+			        int i = 0;
+			        if (i1 == 0) {
+			            int newVariable1 = 0;
+			            i = newVariable1;
+			        } else if (i1 == 1) {
+			            int newVariable2 = 10;
+			            i = newVariable2;
+			        } else if (2 == i1) {
+			            char newVariable3 = 'a';
+			            i = newVariable3;
+			        }
+			    }
+			
+			    public void replaceWhenOutOfScopeVariableNameConflicts(int i1) {
+			        int i = 0;
+			        if (i1 == 0) {
+			            for (int l = 0; l < i; l++) {
+			                int integer1 = 0;
+			                i = integer1;
+			            }
+			        } else if (i1 == 1) {
+			            int integer1 = 10;
+			            i = integer1;
+			        } else if (i1 == 2) {
+			            int i2 = 20;
+			            i = i2;
+			        }
+			    }
+			
+			    public int replaceIfSuite(int i1) {
+			        // Keep this comment
+			        if (i1 == 0) {
+			            // Keep this comment too
+			            return 0;
+			            // Keep this comment also
+			        }
+			        if (i1 == 1) {
+			            return 10;
+			        }
+			        if (2 == i1) {
+			            return 20;
+			        }
+			        if (i1 == 3) {
+			            return 30;
+			        }
+			        if (i1 == 4)
+			            return 40;
+			        if ((i1 == 5) || (i1 == 6)) {
+			            return 60;
+			        }
+			        if ((i1 == 7) ^ (i1 == 8)) {
+			            return 80;
+			        }
+			        if ((i1 == 9) | (i1 == 10)) {
+			            return 100;
+			        }
+			        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {
+			            return 130;
+			        }
+			        if (14 == i1) {
+			            if (i2 == 1) {
+			                return 140;
+			            }
+			            return 145;
+			        }
+			        return 155;
+			    }
+			
+			    public int replaceSuiteThatDoNotFallThrough(int i1) {
+			        if (i1 == 0) {
+			            if (i2 == 1) {
+			                return 0;
+			            }
+			        }
+			        // Keep this comment
+			        if (i1 == 1) {
+			            // Keep this comment too
+			            return 10;
+			            // Keep this comment also
+			        }
+			        if (2 == i1) {
+			            return 20;
+			        }
+			        if (i1 == 3) {
+			            return 30;
+			        }
+			        if (i1 == 4)
+			            return 40;
+			        if ((i1 == 5) || (i1 == 6)) {
+			            return 60;
+			        }
+			        if ((i1 == 7) ^ (i1 == 8)) {
+			            return 80;
+			        }
+			        if ((i1 == 9) | (i1 == 10)) {
+			            return 100;
+			        }
+			        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {
+			            return 130;
+			        }
+			        if (14 == i1) {
+			            if (i2 == 1) {
+			                return 140;
+			            }
+			            return 145;
+			        }
+			        return 155;
+			    }
+			
+			    public int replaceSuiteIgnoring(int i1) {
+			        if (i1 == 0) {
+			            return 0;
+			        } else if (i2 == 1) {
+			            return 140;
+			        }
+			        // Keep this comment
+			        if (i1 == 1) {
+			            // Keep this comment too
+			            return 10;
+			            // Keep this comment also
+			        }
+			        if (2 == i1) {
+			            return 20;
+			        }
+			        if (i1 == 3) {
+			            return 30;
+			        }
+			        if (i1 == 4)
+			            return 40;
+			        if ((i1 == 5) || (i1 == 6)) {
+			            return 60;
+			        }
+			        if ((i1 == 7) ^ (i1 == 8)) {
+			            return 80;
+			        }
+			        if ((i1 == 9) | (i1 == 10)) {
+			            return 100;
+			        }
+			        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {
+			            return 130;
+			        }
+			        if (14 == i1) {
+			            if (i2 == 1) {
+			                return 140;
+			            }
+			            return 145;
+			        }
+			        return 155;
+			    }
+			
+			    public void replaceWhenVariableTypesConflict(int i1) {
+			        int i = 0;
+			        if (i1 == 0) {
+			            int integer1 = 0;
+			            i = integer1;
+			        } else if (i1 == 2) {
+			            char integer1 = 'a';
+			            i = integer1;
+			        } else if (i1 == 3) {
+			            char c = 'a';
+			            i = c;
+			        } else {
+			            char c = 'b';
+			            i = c;
+			        }
+			    }
+			
+			    public int replaceMeltCases(int i1) {
+			        // Keep this comment
+			        if (i1 == 0) {
+			            // Keep this comment too
+			            return 0;
+			            // Keep this comment also
+			        } else if (i1 == 1) {
+			            return 10;
+			        } else if (2 == i1) {
+			            return 20;
+			        } else if (i1 == 3) {
+			            return 30;
+			        }
+			        if (i1 == 4)
+			            return 40;
+			        if ((i1 == 5) || (i1 == 6)) {
+			            return 60;
+			        }
+			        if ((i1 == 7) ^ (i1 == 8)) {
+			            return 80;
+			        }
+			        if ((i1 == 9) | (i1 == 10)) {
+			            return 100;
+			        }
+			        if ((i1 == 11) || i1 == 12 || (i1 == 13)) {
+			            return 130;
+			        }
+			        if (14 == i1) {
+			            if (i2 == 1) {
+			                return 140;
+			            }
+			            return 145;
+			        }
+			        return 155;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.USE_SWITCH);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public static final int CONSTANT_1 = 0;\n" //
-				+ "    public static final int CONSTANT_2 = 1;\n" //
-				+ "\n" //
-				+ "    public int i2 = 0;\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnParameter(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                i = 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "                break;\n" //
-				+ "            case 1 :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 2 :\n" //
-				+ "                i = 20;\n" //
-				+ "                break;\n" //
-				+ "            case 3 :\n" //
-				+ "                i = 25;\n" //
-				+ "                i = 30;\n" //
-				+ "                break;\n" //
-				+ "            case 4 :\n" //
-				+ "                i = 40;\n" //
-				+ "                break;\n" //
-				+ "            case 5 :\n" //
-				+ "            case 6 :\n" //
-				+ "                i = 60;\n" //
-				+ "                break;\n" //
-				+ "            case 7 :\n" //
-				+ "            case 8 :\n" //
-				+ "                i = 80;\n" //
-				+ "                break;\n" //
-				+ "            case 9 :\n" //
-				+ "            case 10 :\n" //
-				+ "                i = 100;\n" //
-				+ "                break;\n" //
-				+ "            case 11 :\n" //
-				+ "            case 12 :\n" //
-				+ "            case 13 :\n" //
-				+ "                i = 130;\n" //
-				+ "                break;\n" //
-				+ "            case 14 :\n" //
-				+ "                if (i2 == 1) {\n" //
-				+ "                    i = 140;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                if (i2 == 2) {\n" //
-				+ "                    i = 150;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchUsingConstants(int date) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (date) {\n" //
-				+ "            case CONSTANT_1 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                i = 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "                break;\n" //
-				+ "            case CONSTANT_2 :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 3 :\n" //
-				+ "                i = 60;\n" //
-				+ "                break;\n" //
-				+ "            case 4 :\n" //
-				+ "                i = 80;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                i = 150;\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnLocalVariable() {\n" //
-				+ "        int i1 = 0;\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                i = 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "                break;\n" //
-				+ "            case 1 :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 2 :\n" //
-				+ "                i = 20;\n" //
-				+ "                break;\n" //
-				+ "            case 3 :\n" //
-				+ "                i = 25;\n" //
-				+ "                i = 30;\n" //
-				+ "                break;\n" //
-				+ "            case 5 :\n" //
-				+ "                break;\n" //
-				+ "            case 4 :\n" //
-				+ "                i = 40;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                i = 50;\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnField() {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i2) {\n" //
-				+ "            case 0 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                i = 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "                break;\n" //
-				+ "            case 1 :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 2 :\n" //
-				+ "                i = 20;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWithSwitchOnField() {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (this.i2) {\n" //
-				+ "            case 0 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                i = 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "                break;\n" //
-				+ "            case 1 :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 2 :\n" //
-				+ "                i = 20;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSwitchOnCharacter(char character) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (character) {\n" //
-				+ "            case 'a' :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                i = 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "                break;\n" //
-				+ "            case 'b' :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 'c' :\n" //
-				+ "                i = 20;\n" //
-				+ "                break;\n" //
-				+ "            case 'd' :\n" //
-				+ "                i = 30;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                i = 40;\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfRemoveDuplicateConditions(char aCharacter) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (aCharacter) {\n" //
-				+ "            case 'a' :\n" //
-				+ "                i = 0;\n" //
-				+ "                break;\n" //
-				+ "            case 'b' :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 'c' :\n" //
-				+ "                i = 40;\n" //
-				+ "                break;\n" //
-				+ "            case 'd' :\n" //
-				+ "                i = 50;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                i = 60;\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWithSeveralConditions(char myCharacter) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (myCharacter) {\n" //
-				+ "            case 'a' :\n" //
-				+ "                i = 0;\n" //
-				+ "                break;\n" //
-				+ "            case 'z' :\n" //
-				+ "                i = 10;\n" //
-				+ "                break;\n" //
-				+ "            case 'd' :\n" //
-				+ "            case 'b' :\n" //
-				+ "            case 'c' :\n" //
-				+ "            case 'f' :\n" //
-				+ "                i = 50;\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                i = 60;\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfKeepExistingControlFlowBreaks(byte i1) {\n" //
-				+ "        byte j = 0;\n" //
-				+ "        loop: for (byte i = 0; i < 10; i++) {\n" //
-				+ "            switch (i1) {\n" //
-				+ "                case 0 :\n" //
-				+ "                    j = 0;\n" //
-				+ "                    return;\n" //
-				+ "                case 1 :\n" //
-				+ "                    j = 10;\n" //
-				+ "                    continue;\n" //
-				+ "                case 2 :\n" //
-				+ "                    j = 20;\n" //
-				+ "                    break loop;\n" //
-				+ "                case 3 :\n" //
-				+ "                    j = 25;\n" //
-				+ "                    j = 30;\n" //
-				+ "                    break;\n" //
-				+ "                case 4 :\n" //
-				+ "                    j = 40;\n" //
-				+ "                    throw new RuntimeException();\n" //
-				+ "                case 5 :\n" //
-				+ "                    j = 50;\n" //
-				+ "                    if (i == 5) {\n" //
-				+ "                        throw new RuntimeException();\n" //
-				+ "                    } else {\n" //
-				+ "                        return;\n" //
-				+ "                    }\n" //
-				+ "                case 6 :\n" //
-				+ "                    j = 60;\n" //
-				+ "                    if (i == 5) {\n" //
-				+ "                        throw new RuntimeException();\n" //
-				+ "                    }\n" //
-				+ "                    break;\n" //
-				+ "                default :\n" //
-				+ "                    break;\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWithInnerLoopBreak(short i1) {\n" //
-				+ "        short j = 0;\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
-				+ "                j = 0;\n" //
-				+ "                break;\n" //
-				+ "            case 1 : {\n" //
-				+ "                j = 10;\n" //
-				+ "                short k = 0;\n" //
-				+ "                do {\n" //
-				+ "                    if (j == i1) {\n" //
-				+ "                        break;\n" //
-				+ "                    }\n" //
-				+ "                    k++;\n" //
-				+ "                } while (k < j);\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 2 :\n" //
-				+ "                j = 20;\n" //
-				+ "                for (short l = 0; l < j; l++) {\n" //
-				+ "                    if (j == i1) {\n" //
-				+ "                        break;\n" //
-				+ "                    }\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            case 3 : {\n" //
-				+ "                j = 25;\n" //
-				+ "                j = 30;\n" //
-				+ "                short m = 0;\n" //
-				+ "                while (m < j) {\n" //
-				+ "                    if (j == i1) {\n" //
-				+ "                        break;\n" //
-				+ "                    }\n" //
-				+ "                    m++;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 4 :\n" //
-				+ "                j = 40;\n" //
-				+ "                for (short o : new short[] { 1, 2, 3 }) {\n" //
-				+ "                    if (o == i1) {\n" //
-				+ "                        break;\n" //
-				+ "                    }\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            case 5 :\n" //
-				+ "                j = 50;\n" //
-				+ "                switch (j) {\n" //
-				+ "                case 0 :\n" //
-				+ "                    j = 0;\n" //
-				+ "                    break;\n" //
-				+ "                case 1 :\n" //
-				+ "                    j = 10;\n" //
-				+ "                    break;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceIfWhenNoVariableNameConflictExists(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 : {\n" //
-				+ "                int newVariable1 = 0;\n" //
-				+ "                i = newVariable1;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 1 : {\n" //
-				+ "                int newVariable2 = 10;\n" //
-				+ "                i = newVariable2;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 2 : {\n" //
-				+ "                char newVariable3 = 'a';\n" //
-				+ "                i = newVariable3;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWhenOutOfScopeVariableNameConflicts(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
-				+ "                for (int l = 0; l < i; l++) {\n" //
-				+ "                    int integer1 = 0;\n" //
-				+ "                    i = integer1;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            case 1 : {\n" //
-				+ "                int integer1 = 10;\n" //
-				+ "                i = integer1;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 2 : {\n" //
-				+ "                int i2 = 20;\n" //
-				+ "                i = i2;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceIfSuite(int i1) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                return 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "            case 1 :\n" //
-				+ "                return 10;\n" //
-				+ "            case 2 :\n" //
-				+ "                return 20;\n" //
-				+ "            case 3 :\n" //
-				+ "                return 30;\n" //
-				+ "            case 4 :\n" //
-				+ "                return 40;\n" //
-				+ "            case 5 :\n" //
-				+ "            case 6 :\n" //
-				+ "                return 60;\n" //
-				+ "            case 7 :\n" //
-				+ "            case 8 :\n" //
-				+ "                return 80;\n" //
-				+ "            case 9 :\n" //
-				+ "            case 10 :\n" //
-				+ "                return 100;\n" //
-				+ "            case 11 :\n" //
-				+ "            case 12 :\n" //
-				+ "            case 13 :\n" //
-				+ "                return 130;\n" //
-				+ "            case 14 :\n" //
-				+ "                if (i2 == 1) {\n" //
-				+ "                    return 140;\n" //
-				+ "                }\n" //
-				+ "                return 145;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceSuiteThatDoNotFallThrough(int i1) {\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            if (i2 == 1) {\n" //
-				+ "                return 0;\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 1 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                return 10;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "            case 2 :\n" //
-				+ "                return 20;\n" //
-				+ "            case 3 :\n" //
-				+ "                return 30;\n" //
-				+ "            case 4 :\n" //
-				+ "                return 40;\n" //
-				+ "            case 5 :\n" //
-				+ "            case 6 :\n" //
-				+ "                return 60;\n" //
-				+ "            case 7 :\n" //
-				+ "            case 8 :\n" //
-				+ "                return 80;\n" //
-				+ "            case 9 :\n" //
-				+ "            case 10 :\n" //
-				+ "                return 100;\n" //
-				+ "            case 11 :\n" //
-				+ "            case 12 :\n" //
-				+ "            case 13 :\n" //
-				+ "                return 130;\n" //
-				+ "            case 14 :\n" //
-				+ "                if (i2 == 1) {\n" //
-				+ "                    return 140;\n" //
-				+ "                }\n" //
-				+ "                return 145;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceSuiteIgnoring(int i1) {\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            return 0;\n" //
-				+ "        } else if (i2 == 1) {\n" //
-				+ "            return 140;\n" //
-				+ "        }\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 1 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                return 10;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "            case 2 :\n" //
-				+ "                return 20;\n" //
-				+ "            case 3 :\n" //
-				+ "                return 30;\n" //
-				+ "            case 4 :\n" //
-				+ "                return 40;\n" //
-				+ "            case 5 :\n" //
-				+ "            case 6 :\n" //
-				+ "                return 60;\n" //
-				+ "            case 7 :\n" //
-				+ "            case 8 :\n" //
-				+ "                return 80;\n" //
-				+ "            case 9 :\n" //
-				+ "            case 10 :\n" //
-				+ "                return 100;\n" //
-				+ "            case 11 :\n" //
-				+ "            case 12 :\n" //
-				+ "            case 13 :\n" //
-				+ "                return 130;\n" //
-				+ "            case 14 :\n" //
-				+ "                if (i2 == 1) {\n" //
-				+ "                    return 140;\n" //
-				+ "                }\n" //
-				+ "                return 145;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void replaceWhenVariableTypesConflict(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 : {\n" //
-				+ "                int integer1 = 0;\n" //
-				+ "                i = integer1;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 2 : {\n" //
-				+ "                char integer1 = 'a';\n" //
-				+ "                i = integer1;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            case 3 : {\n" //
-				+ "                char c = 'a';\n" //
-				+ "                i = c;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "            default : {\n" //
-				+ "                char c = 'b';\n" //
-				+ "                i = c;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int replaceMeltCases(int i1) {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        switch (i1) {\n" //
-				+ "            case 0 :\n" //
-				+ "                // Keep this comment too\n" //
-				+ "                return 0;\n" //
-				+ "                // Keep this comment also\n" //
-				+ "            case 1 :\n" //
-				+ "                return 10;\n" //
-				+ "            case 2 :\n" //
-				+ "                return 20;\n" //
-				+ "            case 3 :\n" //
-				+ "                return 30;\n" //
-				+ "            case 4 :\n" //
-				+ "                return 40;\n" //
-				+ "            case 5 :\n" //
-				+ "            case 6 :\n" //
-				+ "                return 60;\n" //
-				+ "            case 7 :\n" //
-				+ "            case 8 :\n" //
-				+ "                return 80;\n" //
-				+ "            case 9 :\n" //
-				+ "            case 10 :\n" //
-				+ "                return 100;\n" //
-				+ "            case 11 :\n" //
-				+ "            case 12 :\n" //
-				+ "            case 13 :\n" //
-				+ "                return 130;\n" //
-				+ "            case 14 :\n" //
-				+ "                if (i2 == 1) {\n" //
-				+ "                    return 140;\n" //
-				+ "                }\n" //
-				+ "                return 145;\n" //
-				+ "            default :\n" //
-				+ "                break;\n" //
-				+ "        }\n" //
-				+ "        return 155;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public static final int CONSTANT_1 = 0;
+			    public static final int CONSTANT_2 = 1;
+			
+			    public int i2 = 0;
+			
+			    public void replaceIfWithSwitchOnParameter(int i1) {
+			        int i = 0;
+			        // Keep this comment
+			        switch (i1) {
+			            case 0 :
+			                // Keep this comment too
+			                i = 0;
+			                // Keep this comment also
+			                break;
+			            case 1 :
+			                i = 10;
+			                break;
+			            case 2 :
+			                i = 20;
+			                break;
+			            case 3 :
+			                i = 25;
+			                i = 30;
+			                break;
+			            case 4 :
+			                i = 40;
+			                break;
+			            case 5 :
+			            case 6 :
+			                i = 60;
+			                break;
+			            case 7 :
+			            case 8 :
+			                i = 80;
+			                break;
+			            case 9 :
+			            case 10 :
+			                i = 100;
+			                break;
+			            case 11 :
+			            case 12 :
+			            case 13 :
+			                i = 130;
+			                break;
+			            case 14 :
+			                if (i2 == 1) {
+			                    i = 140;
+			                }
+			                break;
+			            default :
+			                if (i2 == 2) {
+			                    i = 150;
+			                }
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchUsingConstants(int date) {
+			        int i = 0;
+			        // Keep this comment
+			        switch (date) {
+			            case CONSTANT_1 :
+			                // Keep this comment too
+			                i = 0;
+			                // Keep this comment also
+			                break;
+			            case CONSTANT_2 :
+			                i = 10;
+			                break;
+			            case 3 :
+			                i = 60;
+			                break;
+			            case 4 :
+			                i = 80;
+			                break;
+			            default :
+			                i = 150;
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchOnLocalVariable() {
+			        int i1 = 0;
+			        int i = 0;
+			        // Keep this comment
+			        switch (i1) {
+			            case 0 :
+			                // Keep this comment too
+			                i = 0;
+			                // Keep this comment also
+			                break;
+			            case 1 :
+			                i = 10;
+			                break;
+			            case 2 :
+			                i = 20;
+			                break;
+			            case 3 :
+			                i = 25;
+			                i = 30;
+			                break;
+			            case 5 :
+			                break;
+			            case 4 :
+			                i = 40;
+			                break;
+			            default :
+			                i = 50;
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchOnField() {
+			        int i = 0;
+			        // Keep this comment
+			        switch (i2) {
+			            case 0 :
+			                // Keep this comment too
+			                i = 0;
+			                // Keep this comment also
+			                break;
+			            case 1 :
+			                i = 10;
+			                break;
+			            case 2 :
+			                i = 20;
+			                break;
+			            default :
+			                break;
+			        }
+			    }
+			
+			    public void replaceWithSwitchOnField() {
+			        int i = 0;
+			        // Keep this comment
+			        switch (this.i2) {
+			            case 0 :
+			                // Keep this comment too
+			                i = 0;
+			                // Keep this comment also
+			                break;
+			            case 1 :
+			                i = 10;
+			                break;
+			            case 2 :
+			                i = 20;
+			                break;
+			            default :
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfWithSwitchOnCharacter(char character) {
+			        int i = 0;
+			        // Keep this comment
+			        switch (character) {
+			            case 'a' :
+			                // Keep this comment too
+			                i = 0;
+			                // Keep this comment also
+			                break;
+			            case 'b' :
+			                i = 10;
+			                break;
+			            case 'c' :
+			                i = 20;
+			                break;
+			            case 'd' :
+			                i = 30;
+			                break;
+			            default :
+			                i = 40;
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfRemoveDuplicateConditions(char aCharacter) {
+			        int i = 0;
+			        switch (aCharacter) {
+			            case 'a' :
+			                i = 0;
+			                break;
+			            case 'b' :
+			                i = 10;
+			                break;
+			            case 'c' :
+			                i = 40;
+			                break;
+			            case 'd' :
+			                i = 50;
+			                break;
+			            default :
+			                i = 60;
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfWithSeveralConditions(char myCharacter) {
+			        int i = 0;
+			        switch (myCharacter) {
+			            case 'a' :
+			                i = 0;
+			                break;
+			            case 'z' :
+			                i = 10;
+			                break;
+			            case 'd' :
+			            case 'b' :
+			            case 'c' :
+			            case 'f' :
+			                i = 50;
+			                break;
+			            default :
+			                i = 60;
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfKeepExistingControlFlowBreaks(byte i1) {
+			        byte j = 0;
+			        loop: for (byte i = 0; i < 10; i++) {
+			            switch (i1) {
+			                case 0 :
+			                    j = 0;
+			                    return;
+			                case 1 :
+			                    j = 10;
+			                    continue;
+			                case 2 :
+			                    j = 20;
+			                    break loop;
+			                case 3 :
+			                    j = 25;
+			                    j = 30;
+			                    break;
+			                case 4 :
+			                    j = 40;
+			                    throw new RuntimeException();
+			                case 5 :
+			                    j = 50;
+			                    if (i == 5) {
+			                        throw new RuntimeException();
+			                    } else {
+			                        return;
+			                    }
+			                case 6 :
+			                    j = 60;
+			                    if (i == 5) {
+			                        throw new RuntimeException();
+			                    }
+			                    break;
+			                default :
+			                    break;
+			            }
+			        }
+			    }
+			
+			    public void replaceWithInnerLoopBreak(short i1) {
+			        short j = 0;
+			        switch (i1) {
+			            case 0 :
+			                j = 0;
+			                break;
+			            case 1 : {
+			                j = 10;
+			                short k = 0;
+			                do {
+			                    if (j == i1) {
+			                        break;
+			                    }
+			                    k++;
+			                } while (k < j);
+			                break;
+			            }
+			            case 2 :
+			                j = 20;
+			                for (short l = 0; l < j; l++) {
+			                    if (j == i1) {
+			                        break;
+			                    }
+			                }
+			                break;
+			            case 3 : {
+			                j = 25;
+			                j = 30;
+			                short m = 0;
+			                while (m < j) {
+			                    if (j == i1) {
+			                        break;
+			                    }
+			                    m++;
+			                }
+			                break;
+			            }
+			            case 4 :
+			                j = 40;
+			                for (short o : new short[] { 1, 2, 3 }) {
+			                    if (o == i1) {
+			                        break;
+			                    }
+			                }
+			                break;
+			            case 5 :
+			                j = 50;
+			                switch (j) {
+			                case 0 :
+			                    j = 0;
+			                    break;
+			                case 1 :
+			                    j = 10;
+			                    break;
+			                }
+			                break;
+			            default :
+			                break;
+			        }
+			    }
+			
+			    public void replaceIfWhenNoVariableNameConflictExists(int i1) {
+			        int i = 0;
+			        switch (i1) {
+			            case 0 : {
+			                int newVariable1 = 0;
+			                i = newVariable1;
+			                break;
+			            }
+			            case 1 : {
+			                int newVariable2 = 10;
+			                i = newVariable2;
+			                break;
+			            }
+			            case 2 : {
+			                char newVariable3 = 'a';
+			                i = newVariable3;
+			                break;
+			            }
+			            default :
+			                break;
+			        }
+			    }
+			
+			    public void replaceWhenOutOfScopeVariableNameConflicts(int i1) {
+			        int i = 0;
+			        switch (i1) {
+			            case 0 :
+			                for (int l = 0; l < i; l++) {
+			                    int integer1 = 0;
+			                    i = integer1;
+			                }
+			                break;
+			            case 1 : {
+			                int integer1 = 10;
+			                i = integer1;
+			                break;
+			            }
+			            case 2 : {
+			                int i2 = 20;
+			                i = i2;
+			                break;
+			            }
+			            default :
+			                break;
+			        }
+			    }
+			
+			    public int replaceIfSuite(int i1) {
+			        // Keep this comment
+			        switch (i1) {
+			            case 0 :
+			                // Keep this comment too
+			                return 0;
+			                // Keep this comment also
+			            case 1 :
+			                return 10;
+			            case 2 :
+			                return 20;
+			            case 3 :
+			                return 30;
+			            case 4 :
+			                return 40;
+			            case 5 :
+			            case 6 :
+			                return 60;
+			            case 7 :
+			            case 8 :
+			                return 80;
+			            case 9 :
+			            case 10 :
+			                return 100;
+			            case 11 :
+			            case 12 :
+			            case 13 :
+			                return 130;
+			            case 14 :
+			                if (i2 == 1) {
+			                    return 140;
+			                }
+			                return 145;
+			            default :
+			                break;
+			        }
+			        return 155;
+			    }
+			
+			    public int replaceSuiteThatDoNotFallThrough(int i1) {
+			        if (i1 == 0) {
+			            if (i2 == 1) {
+			                return 0;
+			            }
+			        }
+			        // Keep this comment
+			        switch (i1) {
+			            case 1 :
+			                // Keep this comment too
+			                return 10;
+			                // Keep this comment also
+			            case 2 :
+			                return 20;
+			            case 3 :
+			                return 30;
+			            case 4 :
+			                return 40;
+			            case 5 :
+			            case 6 :
+			                return 60;
+			            case 7 :
+			            case 8 :
+			                return 80;
+			            case 9 :
+			            case 10 :
+			                return 100;
+			            case 11 :
+			            case 12 :
+			            case 13 :
+			                return 130;
+			            case 14 :
+			                if (i2 == 1) {
+			                    return 140;
+			                }
+			                return 145;
+			            default :
+			                break;
+			        }
+			        return 155;
+			    }
+			
+			    public int replaceSuiteIgnoring(int i1) {
+			        if (i1 == 0) {
+			            return 0;
+			        } else if (i2 == 1) {
+			            return 140;
+			        }
+			        // Keep this comment
+			        switch (i1) {
+			            case 1 :
+			                // Keep this comment too
+			                return 10;
+			                // Keep this comment also
+			            case 2 :
+			                return 20;
+			            case 3 :
+			                return 30;
+			            case 4 :
+			                return 40;
+			            case 5 :
+			            case 6 :
+			                return 60;
+			            case 7 :
+			            case 8 :
+			                return 80;
+			            case 9 :
+			            case 10 :
+			                return 100;
+			            case 11 :
+			            case 12 :
+			            case 13 :
+			                return 130;
+			            case 14 :
+			                if (i2 == 1) {
+			                    return 140;
+			                }
+			                return 145;
+			            default :
+			                break;
+			        }
+			        return 155;
+			    }
+			
+			    public void replaceWhenVariableTypesConflict(int i1) {
+			        int i = 0;
+			        switch (i1) {
+			            case 0 : {
+			                int integer1 = 0;
+			                i = integer1;
+			                break;
+			            }
+			            case 2 : {
+			                char integer1 = 'a';
+			                i = integer1;
+			                break;
+			            }
+			            case 3 : {
+			                char c = 'a';
+			                i = c;
+			                break;
+			            }
+			            default : {
+			                char c = 'b';
+			                i = c;
+			                break;
+			            }
+			        }
+			    }
+			
+			    public int replaceMeltCases(int i1) {
+			        // Keep this comment
+			        switch (i1) {
+			            case 0 :
+			                // Keep this comment too
+			                return 0;
+			                // Keep this comment also
+			            case 1 :
+			                return 10;
+			            case 2 :
+			                return 20;
+			            case 3 :
+			                return 30;
+			            case 4 :
+			                return 40;
+			            case 5 :
+			            case 6 :
+			                return 60;
+			            case 7 :
+			            case 8 :
+			                return 80;
+			            case 9 :
+			            case 10 :
+			                return 100;
+			            case 11 :
+			            case 12 :
+			            case 13 :
+			                return 130;
+			            case 14 :
+			                if (i2 == 1) {
+			                    return 140;
+			                }
+			                return 145;
+			            default :
+			                break;
+			        }
+			        return 155;
+			    }
+			}
+			""";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -1076,73 +1078,74 @@ public class CleanUpTest12 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseSwitch() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void doNotReplaceWithOuterLoopBreak(int i1) {\n" //
-				+ "        int j = 0;\n" //
-				+ "        for (int i = 0; i < 10; i++) {\n" //
-				+ "            if (i1 == 0) {\n" //
-				+ "                j = 0;\n" //
-				+ "            } else if (i1 == 1) {\n" //
-				+ "                j = 10;\n" //
-				+ "            } else if (2 == i1) {\n" //
-				+ "                j = 20;\n" //
-				+ "            } else if (i1 == 3) {\n" //
-				+ "                j = 25;\n" //
-				+ "                j = 30;\n" //
-				+ "            } else if (4 == i1) {\n" //
-				+ "                j = 40;\n" //
-				+ "            } else if (5 == i1) {\n" //
-				+ "                j = 50;\n" //
-				+ "                break;\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotReplaceIfWithoutElseIf(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            i = 0;\n" //
-				+ "        } else {\n" //
-				+ "            i = 10;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotReplaceIfWithoutElse(int i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            i = 10;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotReplaceWithSwitchOnPrimitiveWrapper(Integer i1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (i1 == 0) {\n" //
-				+ "            i = 0;\n" //
-				+ "        } else if (i1 == 10) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (i1 == 20) {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else {\n" //
-				+ "            i = 30;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorLongVar(long l1) {\n" //
-				+ "        int i = 0;\n" //
-				+ "        if (l1 == 0) {\n" //
-				+ "            i = 0;\n" //
-				+ "        } else if (l1 == 1) {\n" //
-				+ "            i = 10;\n" //
-				+ "        } else if (l1 == 2) {\n" //
-				+ "            i = 20;\n" //
-				+ "        } else if (l1 == 3) {\n" //
-				+ "            i = 30;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void doNotReplaceWithOuterLoopBreak(int i1) {
+			        int j = 0;
+			        for (int i = 0; i < 10; i++) {
+			            if (i1 == 0) {
+			                j = 0;
+			            } else if (i1 == 1) {
+			                j = 10;
+			            } else if (2 == i1) {
+			                j = 20;
+			            } else if (i1 == 3) {
+			                j = 25;
+			                j = 30;
+			            } else if (4 == i1) {
+			                j = 40;
+			            } else if (5 == i1) {
+			                j = 50;
+			                break;
+			            }
+			        }
+			    }
+			
+			    public void doNotReplaceIfWithoutElseIf(int i1) {
+			        int i = 0;
+			        if (i1 == 0) {
+			            i = 0;
+			        } else {
+			            i = 10;
+			        }
+			    }
+			
+			    public void doNotReplaceIfWithoutElse(int i1) {
+			        int i = 0;
+			        if (i1 == 0) {
+			            i = 10;
+			        }
+			    }
+			
+			    public void doNotReplaceWithSwitchOnPrimitiveWrapper(Integer i1) {
+			        int i = 0;
+			        if (i1 == 0) {
+			            i = 0;
+			        } else if (i1 == 10) {
+			            i = 10;
+			        } else if (i1 == 20) {
+			            i = 20;
+			        } else {
+			            i = 30;
+			        }
+			    }
+			
+			    public void doNotRefactorLongVar(long l1) {
+			        int i = 0;
+			        if (l1 == 0) {
+			            i = 0;
+			        } else if (l1 == 1) {
+			            i = 10;
+			        } else if (l1 == 2) {
+			            i = 20;
+			        } else if (l1 == 3) {
+			            i = 30;
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_SWITCH);

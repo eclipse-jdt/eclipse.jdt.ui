@@ -78,12 +78,12 @@ public class AddUnimplementedMethodsTest1d8 {
 
 	@Test
 	public void testBug460521() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("interface I {\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= fPackage.createCompilationUnit("I.java", buf.toString(), true, null);
-		IType testClass= cu.createType(buf.toString(), null, true, null);
+		String str= """
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("I.java", str, true, null);
+		IType testClass= cu.createType(str, null, true, null);
 
 		testHelper(testClass, -1, true);
 
@@ -93,20 +93,21 @@ public class AddUnimplementedMethodsTest1d8 {
 
 	@Test
 	public void testBug478563() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("import java.util.Optional;\n");
-		buf.append("interface I {\n");
-		buf.append("    public Optional<String> foo();\n");
-		buf.append("}\n");
+		String str= """
+			import java.util.Optional;
+			interface I {
+			    public Optional<String> foo();
+			}
+			""";
+		fPackage.createCompilationUnit("I.java", str, true, null);
 
-		fPackage.createCompilationUnit("I.java", buf.toString(), true, null);
+		String str1= """
+			public class A implements I {
+			}
+			""";
+		ICompilationUnit cu2= fPackage.createCompilationUnit("A.java", str1, true, null);
 
-		StringBuilder buf2= new StringBuilder();
-		buf2.append("public class A implements I {\n");
-		buf2.append("}\n");
-		ICompilationUnit cu2= fPackage.createCompilationUnit("A.java", buf2.toString(), true, null);
-
-		IType testClass= cu2.createType(buf2.toString(), null, true, null);
+		IType testClass= cu2.createType(str1, null, true, null);
 
 		testHelper(testClass, -1, true);
 
@@ -117,30 +118,34 @@ public class AddUnimplementedMethodsTest1d8 {
 
 	@Test
 	public void testIssue863() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("abstract class C1<T> {\n");
-		buf.append("    public void a(T x) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		fPackage.createCompilationUnit("C1.java", buf.toString(), true, null);
+		String str= """
+			abstract class C1<T> {
+			    public void a(T x) {
+			    }
+			}
+			""";
+		fPackage.createCompilationUnit("C1.java", str, true, null);
 
-		StringBuilder buf2= new StringBuilder();
-		buf2.append("interface I1 {\n");
-		buf2.append("    void a(String x);\n");
-		buf2.append("}\n");
-		fPackage.createCompilationUnit("I1.java", buf2.toString(), true, null);
+		String str1= """
+			interface I1 {
+			    void a(String x);
+			}
+			""";
+		fPackage.createCompilationUnit("I1.java", str1, true, null);
 
-		StringBuilder buf3= new StringBuilder();
-		buf3.append("abstract class C2 extends C1<String> implements I1 {\n");
-		buf3.append("    abstract void b();\n");
-		buf3.append("}\n");
-		fPackage.createCompilationUnit("C2.java", buf3.toString(), true, null);
+		String str2= """
+			abstract class C2 extends C1<String> implements I1 {
+			    abstract void b();
+			}
+			""";
+		fPackage.createCompilationUnit("C2.java", str2, true, null);
 
-		StringBuilder buf4= new StringBuilder();
-		buf4.append("class C3 extends C2 {\n");
-		buf4.append("}\n");
-		ICompilationUnit cu2= fPackage.createCompilationUnit("C3.java", buf4.toString(), true, null);
-		IType testClass= cu2.createType(buf4.toString(), null, true, null);
+		String str3= """
+			class C3 extends C2 {
+			}
+			""";
+		ICompilationUnit cu2= fPackage.createCompilationUnit("C3.java", str3, true, null);
+		IType testClass= cu2.createType(str3, null, true, null);
 
 		testHelper(testClass, -1, true);
 

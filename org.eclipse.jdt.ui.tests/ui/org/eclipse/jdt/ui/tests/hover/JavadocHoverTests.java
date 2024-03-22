@@ -87,23 +87,25 @@ public class JavadocHoverTests extends CoreTests {
 	@Test
 	public void testValueTag() throws Exception {
 		String source=
-				"package p;\n" +
-				"public class TestClass {\n" +
-				"  /**\n" +
-				"   * The value of this constant is {@value}.\n" +
-				"   */\n" +
-				"  public static final String SCRIPT_START = \"<script>\";\n" +
-				"  /**\n" +
-				"   * Evaluates the script starting with {@value TestClass#SCRIPT_START}.\n" +
-				"   */\n" +
-				"  public void test1() {\n" +
-				"  }\n" +
-				"  /**\n" +
-				"   * Evaluates the script starting with {@value #SCRIPT_START}.\n" +
-				"   */\n" +
-				"  public void test2() {\n" +
-				"  }\n" +
-				"}\n";
+				"""
+			package p;
+			public class TestClass {
+			  /**
+			   * The value of this constant is {@value}.
+			   */
+			  public static final String SCRIPT_START = "<script>";
+			  /**
+			   * Evaluates the script starting with {@value TestClass#SCRIPT_START}.
+			   */
+			  public void test1() {
+			  }
+			  /**
+			   * Evaluates the script starting with {@value #SCRIPT_START}.
+			   */
+			  public void test2() {
+			  }
+			}
+			""";
 		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
 		assertNotNull("TestClass.java", cu);
 
@@ -147,33 +149,35 @@ public class JavadocHoverTests extends CoreTests {
 	@Test
 	public void testCodeTagWithPre() throws Exception {
 		String source=
-				"package p;\n" +
-				"public class TestClass {\n" +
-			    "/**\n" +
-			    " * Performs:\n" +
-			    " * <pre>{@code\n" +
-			    " *    for (String s : strings) {\n" +
-			    " *        if (s.equals(value)) {\n" +
-			    " *            return 0;\n" +
-			    " *        }\n" +
-			    " *        if (s.startsWith(value)) {\n" +
-			    " *            return 1;\n" +
-			    " *        }\n" +
-			    " *    }\n" +
-			    " *    return -1;\n" +
-			    " * }</pre>\n" +
-			    " */\n" +
-				"int check (String value, String[] strings) {\n" +
-				"	for (String s : strings) {\n" +
-				"		if (s.equals(value)) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"		if (s.startsWith(value)) {\n" +
-				"			return 1;\n" +
-				"		}\n" +
-				"	}\n" +
-				"	return -1;\n" +
-				"}\n";
+				"""
+			package p;
+			public class TestClass {
+			/**
+			 * Performs:
+			 * <pre>{@code
+			 *    for (String s : strings) {
+			 *        if (s.equals(value)) {
+			 *            return 0;
+			 *        }
+			 *        if (s.startsWith(value)) {
+			 *            return 1;
+			 *        }
+			 *    }
+			 *    return -1;
+			 * }</pre>
+			 */
+			int check (String value, String[] strings) {
+				for (String s : strings) {
+					if (s.equals(value)) {
+						return 0;
+					}
+					if (s.startsWith(value)) {
+						return 1;
+					}
+				}
+				return -1;
+			}
+			""";
 		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
 		assertNotNull("TestClass.java", cu);
 
@@ -185,17 +189,18 @@ public class JavadocHoverTests extends CoreTests {
 			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
 			String actualHtmlContent= hoverInfo.getHtml();
 
-			String expectedCodeSequence= "<pre><code>\n"
-					+ "    for (String s : strings) {\n"
-					+ "        if (s.equals(value)) {\n"
-					+ "            return 0;\n"
-					+ "        }\n"
-					+ "        if (s.startsWith(value)) {\n"
-					+ "            return 1;\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "    return -1;\n"
-					+ " </code></pre>";
+			String expectedCodeSequence= """
+				<pre><code>
+				    for (String s : strings) {
+				        if (s.equals(value)) {
+				            return 0;
+				        }
+				        if (s.startsWith(value)) {
+				            return 1;
+				        }
+				    }
+				    return -1;
+				 </code></pre>""";
 
 			// value should be expanded:
 			int index= actualHtmlContent.indexOf("<pre><code>");
@@ -208,33 +213,35 @@ public class JavadocHoverTests extends CoreTests {
 	@Test
 	public void testUnicode() throws Exception {
 		String source=
-				"package p;\n" +
-				"public class TestClass {\n" +
-			    "/**\n" +
-			    " * Performs:\u005cn" +
-			    " * <pre>{@code\n" +
-			    " *    for (String s : strings) {\u005cn" +
-			    " *        if (s.equals(value)) {\n" +
-			    " *            return \u0030;\n" +
-			    " *        }\n" +
-			    " *        if (s.startsWith(value)) {\n" +
-			    " *            return 1;\n" +
-			    " *        }\n" +
-			    " *    }\n" +
-			    " *    return -1;\n" +
-			    " * }</pre>\n" +
-			    " */\n" +
-				"int check (String value, String[] strings) {\n" +
-				"	for (String s : strings) {\n" +
-				"		if (s.equals(value)) {\n" +
-				"			return 0;\n" +
-				"		}\n" +
-				"		if (s.startsWith(value)) {\n" +
-				"			return 1;\n" +
-				"		}\n" +
-				"	}\n" +
-				"	return -1;\n" +
-				"}\n";
+				"""
+			package p;
+			public class TestClass {
+			/**
+			 * Performs:
+			 * <pre>{@code
+			 *    for (String s : strings) {
+			 *        if (s.equals(value)) {
+			 *            return \u0030;
+			 *        }
+			 *        if (s.startsWith(value)) {
+			 *            return 1;
+			 *        }
+			 *    }
+			 *    return -1;
+			 * }</pre>
+			 */
+			int check (String value, String[] strings) {
+				for (String s : strings) {
+					if (s.equals(value)) {
+						return 0;
+					}
+					if (s.startsWith(value)) {
+						return 1;
+					}
+				}
+				return -1;
+			}
+			""";
 		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
 		assertNotNull("TestClass.java", cu);
 
@@ -246,17 +253,18 @@ public class JavadocHoverTests extends CoreTests {
 			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
 			String actualHtmlContent= hoverInfo.getHtml();
 
-			String expectedCodeSequence= "<pre><code>\n"
-					+ "    for (String s : strings) {\n"
-					+ "        if (s.equals(value)) {\n"
-					+ "            return 0;\n"
-					+ "        }\n"
-					+ "        if (s.startsWith(value)) {\n"
-					+ "            return 1;\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "    return -1;\n"
-					+ " </code></pre>";
+			String expectedCodeSequence= """
+				<pre><code>
+				    for (String s : strings) {
+				        if (s.equals(value)) {
+				            return 0;
+				        }
+				        if (s.startsWith(value)) {
+				            return 1;
+				        }
+				    }
+				    return -1;
+				 </code></pre>""";
 
 			// value should be expanded:
 			int index= actualHtmlContent.indexOf("<pre><code>");

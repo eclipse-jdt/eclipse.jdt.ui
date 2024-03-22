@@ -80,16 +80,17 @@ public class ASTRewriteSnippet {
 			// create a test file
 			IPackageFragmentRoot root= javaProject.getPackageFragmentRoot(project);
 			IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    public void foo(int i) {\n");
-			buf.append("        while (--i > 0) {\n");
-			buf.append("            System.beep();\n");
-			buf.append("        }\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E {
+				    public void foo(int i) {
+				        while (--i > 0) {
+				            System.beep();
+				        }
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 			// create an AST
 			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
@@ -132,18 +133,19 @@ public class ASTRewriteSnippet {
 			// test result
 			String preview= cu.getSource();
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    public void foo(int i) {\n");
-			buf.append("        bar1();\n");
-			buf.append("        while (--i > 0) {\n");
-			buf.append("            System.beep();\n");
-			buf.append("        }\n");
-			buf.append("        bar2();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEquals(preview, buf.toString());
+			String str1= """
+				package test1;
+				public class E {
+				    public void foo(int i) {
+				        bar1();
+				        while (--i > 0) {
+				            System.beep();
+				        }
+				        bar2();
+				    }
+				}
+				""";
+			assertEquals(preview, str1);
 		} finally {
 			project.delete(true, null);
 		}

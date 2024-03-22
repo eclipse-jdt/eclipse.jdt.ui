@@ -83,13 +83,14 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 	@Test
 	public void testRemoveTypeParameter() throws Exception {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("import java.util.*;\n");
-			buf.append("public class A {\n");
-			buf.append("}\n");
-			buf.append("class B extends A<String> {\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+			String str= """
+				import java.util.*;
+				public class A {
+				}
+				class B extends A<String> {
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -98,13 +99,13 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 			assertNumberOfProposals(proposals, 1);
 
 			String[] expected= new String[1];
-			buf= new StringBuilder();
-			buf.append("import java.util.*;\n");
-			buf.append("public class A {\n");
-			buf.append("}\n");
-			buf.append("class B extends A {\n");
-			buf.append("}\n");
-			expected[0]= buf.toString();
+			expected[0]= """
+				import java.util.*;
+				public class A {
+				}
+				class B extends A {
+				}
+				""";
 
 			assertExpectedExistInProposals(proposals, expected);
 	}
@@ -112,13 +113,14 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 	@Test
 	public void testRemoveTypeParameter2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("import java.util.*;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		buf.append("class C extends A<Set<String>>{\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			import java.util.*;
+			public class A {
+			}
+			class C extends A<Set<String>>{
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -127,13 +129,13 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("import java.util.*;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		buf.append("class C extends A{\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			import java.util.*;
+			public class A {
+			}
+			class C extends A{
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -141,14 +143,15 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 	@Test
 	public void testInferDiamondArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("import java.util.*;\n");
-		buf.append("public class A {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        List<String> a= new ArrayList<>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			import java.util.*;
+			public class A {
+			    void foo() {
+			        List<String> a= new ArrayList<>();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -157,14 +160,14 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("import java.util.*;\n");
-		buf.append("public class A {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        List<String> a= new ArrayList<String>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			import java.util.*;
+			public class A {
+			    void foo() {
+			        List<String> a= new ArrayList<String>();
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

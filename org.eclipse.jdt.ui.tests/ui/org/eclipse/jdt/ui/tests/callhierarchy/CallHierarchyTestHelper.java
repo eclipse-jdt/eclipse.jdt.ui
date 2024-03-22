@@ -116,21 +116,29 @@ public class CallHierarchyTestHelper {
 
         fType1=
             cu1.createType(
-                "public class A {\n" +
-                "public A() {\n" +
-                "}\n " +
-                "public void method1() {\n" +
-                "}\n " +
-                "public void method2() {\n" +
-                "  method1();\n" +
-                "}\n " +
-                "public void recursiveMethod1() {\n" +
-                "  recursiveMethod2();\n " +
-                "}\n " +
-                "public void recursiveMethod2() {\n" +
-                "  recursiveMethod1();\n " +
-                "}\n" +
-                "}\n",
+                """
+					public class A {
+					public A() {
+					}
+					 \
+					public void method1() {
+					}
+					 \
+					public void method2() {
+					  method1();
+					}
+					 \
+					public void recursiveMethod1() {
+					  recursiveMethod2();
+					 \
+					}
+					 \
+					public void recursiveMethod2() {
+					  recursiveMethod1();
+					 \
+					}
+					}
+					""",
                 null,
                 true,
                 null);
@@ -180,11 +188,15 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu1= fPack1.getCompilationUnit("Outer.java");
         fType1=
             cu1.createType(
-                "public class Outer {\n" +
-                "private Inner inner= new Inner();\n" +
-                "class Inner { public void innerMethod1() { outerMethod1(); }\n public void innerMethod2() { innerMethod1(); }\n }\n" +
-                "public void outerMethod1() { }\n public void outerMethod2() { inner.innerMethod2(); }\n" +
-                "}",
+                """
+					public class Outer {
+					private Inner inner= new Inner();
+					class Inner { public void innerMethod1() { outerMethod1(); }
+					 public void innerMethod2() { innerMethod1(); }
+					 }
+					public void outerMethod1() { }
+					 public void outerMethod2() { inner.innerMethod2(); }
+					}""",
                 null,
                 true,
                 null);
@@ -200,15 +212,17 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu1= fPack1.getCompilationUnit("AnonymousInner.java");
         fType1=
             cu1.createType(
-                "public class AnonymousInner {\n" +
-                "  Object anonClass = new Object() {\n" +
-                "    void anotherMethod() {\n" +
-                "      someMethod();\n" +
-                "    }\n" +
-                "  };\n" +
-                "  void someMethod() {\n" +
-                "  }\n" +
-                "}\n",
+                """
+					public class AnonymousInner {
+					  Object anonClass = new Object() {
+					    void anotherMethod() {
+					      someMethod();
+					    }
+					  };
+					  void someMethod() {
+					  }
+					}
+					""",
                 null,
                 true,
                 null);
@@ -216,29 +230,31 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu2= fPack2.getCompilationUnit("Outer.java");
         fType2=
             cu2.createType(
-                "public class Outer {\n" +
-                "    interface Intf {\n" +
-                "         public void foo();\n" +
-                "    }\n" +
-                "    class Clazz {\n" +
-                "         public void foo() { };\n" +
-                "    }\n" +
-                "    public void anonymousOnInterface() {\n" +
-                "        new Intf() {\n"+
-                "            public void foo() {\n"+
-                "                someMethod();\n"+
-                "            }\n"+
-                "        };\n"+
-                "    }\n" +
-                "    public void anonymousOnClass() {\n" +
-                "        new Clazz() {\n"+
-                "            public void foo() {\n"+
-                "                someMethod();\n"+
-                "            }\n"+
-                "        };\n"+
-                "    }\n" +
-                "    public void someMethod() { }\n"+
-                "}\n",
+                """
+					public class Outer {
+					    interface Intf {
+					         public void foo();
+					    }
+					    class Clazz {
+					         public void foo() { };
+					    }
+					    public void anonymousOnInterface() {
+					        new Intf() {
+					            public void foo() {
+					                someMethod();
+					            }
+					        };
+					    }
+					    public void anonymousOnClass() {
+					        new Clazz() {
+					            public void foo() {
+					                someMethod();
+					            }
+					        };
+					    }
+					    public void someMethod() { }
+					}
+					""",
                 null,
                 true,
                 null);
@@ -254,17 +270,19 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu1= fPack1.getCompilationUnit("AnonymousInnerInsideMethod.java");
         fType1=
             cu1.createType(
-                "public class AnonymousInnerInsideMethod {\n" +
-                "  void m() {\n" +
-                "    System.out.println(\"before\");\n"+
-                "    Runnable runnable = new Runnable() {\n"+
-                "      public void run() {\n"+
-                "        System.out.println(\"run\");\n"+
-                "      }\n"+
-                "    };\n"+
-                "    runnable.run();\n"+
-                "  }\n"+
-                "}\n",
+                """
+					public class AnonymousInnerInsideMethod {
+					  void m() {
+					    System.out.println("before");
+					    Runnable runnable = new Runnable() {
+					      public void run() {
+					        System.out.println("run");
+					      }
+					    };
+					    runnable.run();
+					  }
+					}
+					""",
                 null,
                 true,
                 null);
@@ -278,34 +296,35 @@ public class CallHierarchyTestHelper {
 		createPackages();
 
 		ICompilationUnit cu= fPack1.getCompilationUnit("Snippet.java");
-		fType1= cu.createType("public class Snippet {\n"
-				+ "	static Function<? super String, ? extends String> mapper1 = y -> transform(y);\n"
-				+ "	Function<? super String, ? extends String> mapper2 = y -> transform(y);\n"
-				+ "\n"
-				+ "	static {\n"
-				+ "		 mapper1 = y -> transform(y);\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	public Snippet() {\n"
-				+ "		mapper2 = y -> transform(y);\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	public static void main(String[] args) {\n"
-				+ "		mapper1 = y -> transform(y);\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	Object[] funcCall() {\n"
-				+ "		return List.of(\"aaa\").stream().map(y -> transform(y)).toArray();\n"
-				+ "	}\n"
-				+ "\n"
-				+ "	static String transform(String s) {\n"
-				+ "     x();\n"
-				+ "		return s.toUpperCase();\n"
-				+ "	}\n"
-				+ " static String x() {"
-				+ "     return null;\n"
-				+ "}\n"
-				+ "}",
+		fType1= cu.createType("""
+			public class Snippet {
+				static Function<? super String, ? extends String> mapper1 = y -> transform(y);
+				Function<? super String, ? extends String> mapper2 = y -> transform(y);
+			
+				static {
+					 mapper1 = y -> transform(y);
+				}
+			
+				public Snippet() {
+					mapper2 = y -> transform(y);
+				}
+			
+				public static void main(String[] args) {
+					mapper1 = y -> transform(y);
+				}
+			
+				Object[] funcCall() {
+					return List.of("aaa").stream().map(y -> transform(y)).toArray();
+				}
+			
+				static String transform(String s) {
+			     x();
+					return s.toUpperCase();
+				}
+			 static String x() {\
+			     return null;
+			}
+			}""",
 				null,
 				true,
 				null);
@@ -344,9 +363,10 @@ public class CallHierarchyTestHelper {
 
 		IPackageFragmentRoot fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject3, "src");
 
-		String MODULE_INFO_FILE_CONTENT = ""
-				+ "module test {\n"
-				+ "}\n";
+		String MODULE_INFO_FILE_CONTENT = """
+			module test {
+			}
+			""";
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
@@ -359,21 +379,24 @@ public class CallHierarchyTestHelper {
 
         fType1=
             cu1.createType(
-                    "public class Outer {\n" +
-                    "record OneRecord(int number1, int number2) {\n" +
-                    "  OneRecord() { this(1, 2); }\n" +
-                    "}\n " +
-                    "    public static void method1() {\n" +
-                    "        new OneRecord(3, 5);\n" +
-                    "    }\n" +
-                    "    public static void method2() {\n" +
-                    "        new OneRecord();\n" +
-                    "    }\n" +
-                    "    public static void method3() {\n" +
-                    "        method1();\n" +
-                    "        method2();\n" +
-                    "    }\n" +
-                    "}\n",
+                    """
+						public class Outer {
+						record OneRecord(int number1, int number2) {
+						  OneRecord() { this(1, 2); }
+						}
+						 \
+						    public static void method1() {
+						        new OneRecord(3, 5);
+						    }
+						    public static void method2() {
+						        new OneRecord();
+						    }
+						    public static void method3() {
+						        method1();
+						        method2();
+						    }
+						}
+						""",
                 null,
                 true,
                 null);
@@ -390,9 +413,10 @@ public class CallHierarchyTestHelper {
 
 		IPackageFragmentRoot fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject3, "src");
 
-		String MODULE_INFO_FILE_CONTENT= ""
-				+ "module test {\n"
-				+ "}\n";
+		String MODULE_INFO_FILE_CONTENT= """
+			module test {
+			}
+			""";
 
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
@@ -432,68 +456,81 @@ public class CallHierarchyTestHelper {
         ICompilationUnit cu3= fPack2.getCompilationUnit("P.java");
         fTypeP=
         		cu3.createType(
-                    "public class P {\n"
-                    + "  private A handler;\n"
-                    + "  private Abs absHandler;\n"
-                    + "\n"
-                    + "  public void callFoo() {\n"
-                    + "     handler.foo();\n"
-                    + "  }\n"
-                    + "  public void callAbsFoo() {\n"
-                    + "     absHandler.absFoo();\n"
-                    + "  }\n"
-                    + "\n"
-                    + "}",
+                    """
+						public class P {
+						  private A handler;
+						  private Abs absHandler;
+						
+						  public void callFoo() {
+						     handler.foo();
+						  }
+						  public void callAbsFoo() {
+						     absHandler.absFoo();
+						  }
+						
+						}""",
                     null,
                     true,
                     null);
 
         ICompilationUnit cu4= fPack2.getCompilationUnit("A.java");
         fFooType= cu4.createType(
-        		"public interface A {\n"
-                + "   void foo();\n"
-                + "}\n"
+        		"""
+					public interface A {
+					   void foo();
+					}
+					"""
                 , null, true, null);
 
 
         ICompilationUnit cu5= fPack2.getCompilationUnit("AImpl.java");
         fFooImplAType= cu5.createType(
-                "public class AImpl implements A {\n"
-                + "  public void foo() {\n"
-                + "      System.out.println();\n"
-                + "  }\n"
-                + "}\n"
+                """
+					public class AImpl implements A {
+					  public void foo() {
+					      System.out.println();
+					  }
+					}
+					"""
                 , null, true, null);
 
         ICompilationUnit cu6= fPack2.getCompilationUnit("BImpl.java");
         fFooImplBType= cu6.createType(
-                "public class BImpl implements A {\n"
-                + "  public void foo() {\n"
-                + "      System.out.printf(\"\");\n"
-                + "  }\n"
-                + "}\n"
+                """
+					public class BImpl implements A {
+					  public void foo() {
+					      System.out.printf("");
+					  }
+					}
+					"""
                 , null, true, null);
 
 
         ICompilationUnit cu7= fPack2.getCompilationUnit("Abs.java");
         fAbsType= cu7.createType(
-        		"public abstract class Abs {\n"
-                + "   abstract void absFoo();\n"
-                + "}\n"
+        		"""
+					public abstract class Abs {
+					   abstract void absFoo();
+					}
+					"""
                 , null, true, null);
 
         ICompilationUnit cu8= fPack2.getCompilationUnit("AbsI1.java");
         fAbsI1Type= cu8.createType(
-        		"public class AbsI1 extends Abs {\n"
-                + "   void absFoo() {}\n"
-                + "}\n"
+        		"""
+					public class AbsI1 extends Abs {
+					   void absFoo() {}
+					}
+					"""
                 , null, true, null);
 
         ICompilationUnit cu9= fPack2.getCompilationUnit("AbsI2.java");
         fAbsI2Type= cu9.createType(
-        		"public class AbsI2 extends Abs {\n"
-                + "   void absFoo() {}\n"
-                + "}\n"
+        		"""
+					public class AbsI2 extends Abs {
+					   void absFoo() {}
+					}
+					"""
                 , null, true, null);
 
         assertBuildWithoutErrors(fJavaProject1);

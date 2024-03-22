@@ -85,22 +85,23 @@ public class GenerateGettersSettersTest16 extends SourceTestCase16 {
 
 		runOperation(fRecordA.getRecordComponents(), NOFIELDS, NOFIELDS);
 
-		String expected= "public record A(int x, String y) {\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the x.\r\n" +
-				"	 */\r\n" +
-				"	public int x() {\r\n" +
-				"		return x;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the y.\r\n" +
-				"	 */\r\n" +
-				"	public String y() {\r\n" +
-				"		return y;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public record A(int x, String y) {\r
+			\r
+				/**\r
+				 * @return Returns the x.\r
+				 */\r
+				public int x() {\r
+					return x;\r
+				}\r
+			\r
+				/**\r
+				 * @return Returns the y.\r
+				 */\r
+				public String y() {\r
+					return y;\r
+				}\r
+			}""";
 
 		compareSource(expected, fRecordA.getSource());
 	}

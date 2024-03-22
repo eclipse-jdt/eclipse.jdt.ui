@@ -77,15 +77,20 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
 		IPackageFragment def= java9Src.createPackageFragment("", false, null);
 		IPackageFragment pkgFrag= java9Src.createPackageFragment("java.defaultProject", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("module java.defaultProject {\n");
-		buf.append("     exports java.defaultProject; \n");
-		buf.append("}\n");
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-		StringBuilder buf2= new StringBuilder();
-		buf2.append("package java.defaultProject; \n\n public class One { \n\n");
-		buf2.append("}\n");
-		pkgFrag.createCompilationUnit("One.java", buf2.toString(), false, null);
+		String str= """
+			module java.defaultProject {
+			     exports java.defaultProject;\s
+			}
+			""";
+		def.createCompilationUnit("module-info.java", str, false, null);
+		String str1= """
+			package java.defaultProject;\s
+			
+			 public class One {\s
+			
+			}
+			""";
+		pkgFrag.createCompilationUnit("One.java", str1, false, null);
 
 		fJProject3= projectSetup3.getProject();
 		JavaProjectHelper.set9CompilerOptions(fJProject3);
@@ -112,19 +117,21 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testAddModuleRequiresAndImportProposal() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    One one;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    One one;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -141,20 +148,24 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testAddModuleRequiresProposal() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("import java.defaultProject.One;\n\n");
-		buf.append("public class Cls {\n");
-		buf.append("    One one;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			
+			import java.defaultProject.One;
+			
+			public class Cls {
+			    One one;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0);
 
@@ -169,19 +180,22 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testAddModuleRequiresProposalForFullyQualifiedType() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public class Cls {\n");
-		buf.append("    java.defaultProject.One one;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			
+			public class Cls {
+			    java.defaultProject.One one;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
 
@@ -193,12 +207,13 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testAddNewTypeProposals() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("  exports test.examples;");
-		buf.append("}\n");
+		String str= """
+			module test {
+			  exports test.examples;\
+			}
+			""";
 		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
@@ -216,21 +231,24 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testBasicNewServiceProvider() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("import java.sql.Driver;\n");
-		buf.append("module test {\n");
-		buf.append("provides Driver with test.IFoo;\n");
-		buf.append("}\n");
+		String str= """
+			import java.sql.Driver;
+			module test {
+			provides Driver with test.IFoo;
+			}
+			""";
 		IPackageFragment def= fSourceFolder3.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder3.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.sql.Driver;\n");
-		buf.append("package test;\n\n");
-		buf.append("public interface IFoo extends Driver {\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+		String str1= """
+			import java.sql.Driver;
+			package test;
+			
+			public interface IFoo extends Driver {
+			}
+			""";
+		pack.createCompilationUnit("IFoo.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
@@ -240,19 +258,21 @@ public class QuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String actual= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.sql.Driver;\n");
-		buf.append("package test;\n\n");
-		buf.append("public interface IFoo extends Driver {\n\n");
-		buf.append("	/**\n");
-		buf.append("	 * @return\n");
-		buf.append("	 */\n");
-		buf.append("	public static Driver provider() {\n");
-		buf.append("		// TODO Auto-generated method stub\n");
-		buf.append("		return null;\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			import java.sql.Driver;
+			package test;
+			
+			public interface IFoo extends Driver {
+			
+				/**
+				 * @return
+				 */
+				public static Driver provider() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+			}
+			""";
 		assertEquals(expected, actual);
 	}
 
@@ -263,37 +283,46 @@ public class QuickFixTest9 extends QuickFixTest {
 		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
 		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("provides test.IFoo with test.Foo;\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			provides test.IFoo with test.Foo;
+			}
+			""";
 		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface IFoo {\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			
+			public interface IFoo {
+			}
+			""";
+		pack.createCompilationUnit("IFoo.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface Foo extends test.IFoo {\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("Foo.java", buf.toString(), false, null));
+		String str2= """
+			package test;
+			
+			public interface Foo extends test.IFoo {
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("Foo.java", str2, false, null));
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface Bar extends test.IFoo {\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("Bar.java", buf.toString(), false, null);
+		String str3= """
+			package test;
+			
+			public interface Bar extends test.IFoo {
+			}
+			""";
+		pack.createCompilationUnit("Bar.java", str3, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface FooFoo extends test.Foo {\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("FooFoo.java", buf.toString(), false, null);
+		String str4= """
+			package test;
+			
+			public interface FooFoo extends test.Foo {
+			}
+			""";
+		pack.createCompilationUnit("FooFoo.java", str4, false, null);
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
@@ -316,19 +345,22 @@ public class QuickFixTest9 extends QuickFixTest {
 		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
 		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test1 {\n");
-		buf.append("exports test1;");
-		buf.append("}\n");
+		String str= """
+			module test1 {
+			exports test1;\
+			}
+			""";
 		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fProject1Src.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n\n");
-		buf.append("public interface IFoo {\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("IFoo.java", buf.toString(), false, null));
+		String str1= """
+			package test1;
+			
+			public interface IFoo {
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("IFoo.java", str1, false, null));
 
 		// Project 2 (The HiddenFoo class is a valid proposal, if visible)
 		IJavaProject jProject2= JavaProjectHelper.createJavaProject("TestProject_2", "bin");
@@ -337,19 +369,22 @@ public class QuickFixTest9 extends QuickFixTest {
 		JavaProjectHelper.addRequiredModularProject(jProject2, projectSetup1.getProject());
 		IPackageFragmentRoot fProject2Src = JavaProjectHelper.addSourceContainer(jProject2, "src");
 
-		buf= new StringBuilder();
-		buf.append("module test2 {\n");
-		buf.append("requires test1;");
-		buf.append("}\n");
+		String str2= """
+			module test2 {
+			requires test1;\
+			}
+			""";
 		def= fProject2Src.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str2, false, null);
 
 		pack= fProject2Src.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n\n");
-		buf.append("public interface HiddenFoo extends test1.IFoo {\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("HiddenFoo.java", buf.toString(), false, null));
+		String str3= """
+			package test2;
+			
+			public interface HiddenFoo extends test1.IFoo {
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("HiddenFoo.java", str3, false, null));
 
 		// Project 3  (The client toggles visibility to HiddenFoo, of Project 2)
 		IJavaProject jProject3= JavaProjectHelper.createJavaProject("TestProject_3", "bin");
@@ -359,19 +394,22 @@ public class QuickFixTest9 extends QuickFixTest {
 		IPackageFragmentRoot fProject3Src = JavaProjectHelper.addSourceContainer(jProject3, "src");
 
 		pack= fProject3Src.createPackageFragment("test3", false, null);
-		buf= new StringBuilder();
-		buf.append("package test3;\n\n");
-		buf.append("public interface Foo extends test1.IFoo {\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("Foo.java", buf.toString(), false, null));
+		String str4= """
+			package test3;
+			
+			public interface Foo extends test1.IFoo {
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("Foo.java", str4, false, null));
 
-		buf= new StringBuilder();
-		buf.append("module test3 {\n");
-		buf.append("requires test1;");
-		buf.append("provides test1.IFoo with test3.Foo;\n");
-		buf.append("}\n");
+		String str5= """
+			module test3 {
+			requires test1;\
+			provides test1.IFoo with test3.Foo;
+			}
+			""";
 		def= fProject3Src.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str5, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
@@ -403,29 +441,34 @@ public class QuickFixTest9 extends QuickFixTest {
 		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
 		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("provides test.IFoo with test.IFoo;\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			provides test.IFoo with test.IFoo;
+			}
+			""";
 		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fProject1Src.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface IFoo {\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("IFoo.java", buf.toString(), false, null));
+		String str1= """
+			package test;
+			
+			public interface IFoo {
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("IFoo.java", str1, false, null));
 
 		// NonPublicFoo should be accessible
 		// PrivateFoo should not be accessible
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("class NonPublicFoo implements test.IFoo {\n");
-		buf.append("private interface PrivateFoo extends test.IFoo {\n");
-		buf.append("}\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("Foo.java", buf.toString(), false, null);
+		String str2= """
+			package test;
+			
+			class NonPublicFoo implements test.IFoo {
+			private interface PrivateFoo extends test.IFoo {
+			}
+			}
+			""";
+		pack.createCompilationUnit("Foo.java", str2, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
@@ -445,27 +488,32 @@ public class QuickFixTest9 extends QuickFixTest {
 		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
 		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("provides test.IFoo with test.Foo;\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			provides test.IFoo with test.Foo;
+			}
+			""";
 		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface IFoo {\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			
+			public interface IFoo {
+			}
+			""";
+		pack.createCompilationUnit("IFoo.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public class Foo implements test.IFoo {\n");
-		buf.append("public Foo (String arg) {\n");
-		buf.append("}\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("Foo.java", buf.toString(), false, null));
+		String str2= """
+			package test;
+			
+			public class Foo implements test.IFoo {
+			public Foo (String arg) {
+			}
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("Foo.java", str2, false, null));
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
@@ -475,19 +523,21 @@ public class QuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String actual= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public class Foo implements test.IFoo {\n");
-		buf.append("public Foo (String arg) {\n");
-		buf.append("}\n\n");
-		buf.append("/**\n");
-		buf.append(" * \n");
-		buf.append(" */\n");
-		buf.append("public Foo() {\n");
-		buf.append("\t// TODO Auto-generated constructor stub\n");
-		buf.append("}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			public class Foo implements test.IFoo {
+			public Foo (String arg) {
+			}
+			
+			/**
+			 *\s
+			 */
+			public Foo() {
+				// TODO Auto-generated constructor stub
+			}
+			}
+			""";
 		assertEquals(expected, actual);
 	}
 
@@ -498,27 +548,32 @@ public class QuickFixTest9 extends QuickFixTest {
 		JavaProjectHelper.addRequiredModularProject(jProject1, projectSetup1.getProject());
 		IPackageFragmentRoot fProject1Src = JavaProjectHelper.addSourceContainer(jProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("provides test.IFoo with test.Foo;\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			provides test.IFoo with test.Foo;
+			}
+			""";
 		IPackageFragment def= fProject1Src.createPackageFragment("", false, null);
-		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack=fProject1Src.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public interface IFoo {\n");
-		buf.append("}\n");
-		pack.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			
+			public interface IFoo {
+			}
+			""";
+		pack.createCompilationUnit("IFoo.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public class Foo implements test.IFoo {\n");
-		buf.append("private Foo () {\n");
-		buf.append("}\n");
-		buf.append("}\n");
-		fCus.add(pack.createCompilationUnit("Foo.java", buf.toString(), false, null));
+		String str2= """
+			package test;
+			
+			public class Foo implements test.IFoo {
+			private Foo () {
+			}
+			}
+			""";
+		fCus.add(pack.createCompilationUnit("Foo.java", str2, false, null));
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
@@ -528,13 +583,14 @@ public class QuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String actual= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("public class Foo implements test.IFoo {\n");
-		buf.append("public Foo () {\n");
-		buf.append("}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			public class Foo implements test.IFoo {
+			public Foo () {
+			}
+			}
+			""";
 		assertEquals(expected, actual);
 	}
 }

@@ -53,17 +53,21 @@ public class MissingTypeCompletionTest extends AbstractCompletionTest {
 
 	@Test
 	public void testGenericType_method() throws Exception {
-		createMissingType("public class MissingType<T> {\n" +
-				"  public static void foo() {}\n" +
-				"}\n");
+		createMissingType("""
+			public class MissingType<T> {
+			  public static void foo() {}
+			}
+			""");
 		assertMethodBodyProposal("MissingType.", "foo", "MissingType.foo();");
 	}
 
 	@Test
 	public void testGenericType_innerClass() throws Exception {
-		createMissingType("public class MissingType<T> {\n" +
-				"  public static class Member {}\n" +
-				"}\n");
+		createMissingType("""
+			public class MissingType<T> {
+			  public static class Member {}
+			}
+			""");
 		assertMethodBodyProposal("MissingType.", "Member", "MissingType.Member");
 	}
 

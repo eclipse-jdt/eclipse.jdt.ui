@@ -69,32 +69,33 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testVariableDeclarations1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    int[] fGlobal;\n");
-		buf.append("    public int goo(int param1, int param2) {\n");
-		buf.append("        int count= 0;\n");
-		buf.append("        fGlobal= new int[] { 1, 2, 3};\n");
-		buf.append("        for (int i= 0; i < fGlobal.length; i++) {\n");
-		buf.append("            int insideFor= 0;\n");
-		buf.append("            count= insideFor + fGlobal[i];\n");
-		buf.append("            return -1;\n");
-		buf.append("        }\n");
-		buf.append("        count++;\n");
-		buf.append("        int count2= 0;\n");
-		buf.append("        count+= count2;\n");
-		buf.append("        return count;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    int[] fGlobal;
+			    public int goo(int param1, int param2) {
+			        int count= 0;
+			        fGlobal= new int[] { 1, 2, 3};
+			        for (int i= 0; i < fGlobal.length; i++) {
+			            int insideFor= 0;
+			            count= insideFor + fGlobal[i];
+			            return -1;
+			        }
+			        count++;
+			        int count2= 0;
+			        count+= count2;
+			        return count;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
 			String str= "count+= count2;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -104,7 +105,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "count++;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -114,7 +115,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return -1;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -127,36 +128,37 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testVariableDeclarations2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int goo(int param1) {\n");
-		buf.append("        int count= 9, count2= 0;\n");
-		buf.append("        try {\n");
-		buf.append("            for (int i= 0, j= 0; i < 9; i++) {\n");
-		buf.append("                System.out.println(i + j);\n");
-		buf.append("                j++;\n");
-		buf.append("                throw new IOException();\n");
-		buf.append("            }\n");
-		buf.append("            return 8;\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("           int k= 0;\n");
-		buf.append("           return k;\n");
-		buf.append("        } catch (Exception x) {\n");
-		buf.append("           x= null;\n");
-		buf.append("        };\n");
-		buf.append("        return count;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			import java.io.IOException;
+			public class E {
+			    public int goo(int param1) {
+			        int count= 9, count2= 0;
+			        try {
+			            for (int i= 0, j= 0; i < 9; i++) {
+			                System.out.println(i + j);
+			                j++;
+			                throw new IOException();
+			            }
+			            return 8;
+			        } catch (IOException e) {
+			           int k= 0;
+			           return k;
+			        } catch (Exception x) {
+			           x= null;
+			        };
+			        return count;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
 			String str= "j++;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -166,7 +168,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 8;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -176,7 +178,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return k;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -186,7 +188,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "x= null;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -196,7 +198,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return count;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -210,30 +212,31 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testVariableDeclarations3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fVar1, fVar2;\n");
-		buf.append("    public int goo(int param1) {\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            int fInner;\n");
-		buf.append("            public void run() {\n");
-		buf.append("                int k= 0;\n");
-		buf.append("                fVar1= k;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("        int k= 0;\n");
-		buf.append("        return k;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    private int fVar1, fVar2;
+			    public int goo(int param1) {
+			        Runnable run= new Runnable() {
+			            int fInner;
+			            public void run() {
+			                int k= 0;
+			                fVar1= k;
+			            }
+			        };
+			        int k= 0;
+			        return k;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
 			String str= "fVar1= k;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -243,7 +246,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return k;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -256,34 +259,36 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testVariableDeclarations4() throws Exception {
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class Rectangle {\n");
-		buf.append("  public int x;\n");
-		buf.append("  public int y;\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("Rectangle.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class Rectangle {
+			  public int x;
+			  public int y;
+			}
+			""";
+		pack0.createCompilationUnit("Rectangle.java", str1, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("import pack1.Rectangle;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fVar1, fVar2;\n");
-		buf.append("    public int goo(int param1) {\n");
-		buf.append("        int k= 0;\n");
-		buf.append("        Rectangle r= new Rectangle();\n");
-		buf.append("        return r.x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str2= """
+			package test1.ae;
+			import pack1.Rectangle;
+			public class E {
+			    private int fVar1, fVar2;
+			    public int goo(int param1) {
+			        int k= 0;
+			        Rectangle r= new Rectangle();
+			        return r.x;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str2, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return r.x;";
-			int offset= buf.toString().indexOf(str) + "return r.".length();
+			int offset= str2.indexOf(str) + "return r.".length();
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -297,44 +302,45 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testVariableDeclarations5() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public interface IConstants {\n");
-		buf.append("  public final int CONST= 1;\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("IConstants.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public interface IConstants {
+			  public final int CONST= 1;
+			}
+			""";
+		pack0.createCompilationUnit("IConstants.java", str1, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fVar1, fVar2;\n");
-
-		buf.append("    private class A {\n");
-		buf.append("        int fCount;\n");
-		buf.append("        public int foo(int param1) {\n");
-		buf.append("            return 1;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public int goo(int param0) {\n");
-		buf.append("        int k= 0;\n");
-		buf.append("        class B extends A implements pack1.IConstants {\n");
-		buf.append("            int fCount2;\n");
-		buf.append("            public int foo(int param1) {\n");
-		buf.append("                return 2;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        return 3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str2= """
+			package test1.ae;
+			public class E {
+			    private int fVar1, fVar2;
+			    private class A {
+			        int fCount;
+			        public int foo(int param1) {
+			            return 1;
+			        }
+			    }
+			    public int goo(int param0) {
+			        int k= 0;
+			        class B extends A implements pack1.IConstants {
+			            int fCount2;
+			            public int foo(int param1) {
+			                return 2;
+			            }
+			        }
+			        return 3;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str2, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return 1;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str2.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -344,7 +350,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 2;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str2.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -357,37 +363,41 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testVariableDeclarations6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    int[] fGlobal;\n");
-		buf.append("    public int goo(int param1, int param2) {\n");
-		buf.append("        switch (param1) {\n");
-		buf.append("            case 1:\n;");
-		buf.append("                fGlobal= new int[] { 1, 2, 3};\n");
-		buf.append("                int temp= 9;\n");
-		buf.append("                break;\n");
-		buf.append("            case 2:\n;");
-		buf.append("                do {\n");
-		buf.append("                   int insideDo= 0;\n");
-		buf.append("                   return -1;\n");
-		buf.append("                } while (true);\n");
-		buf.append("            case 3:\n;");
-		buf.append("                int temp2= 9;\n");
-		buf.append("                Math.min(1.0f, 2.0f);\n");
-		buf.append("                return 3;\n");
-		buf.append("        }\n");
-		buf.append("        return 4;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    int[] fGlobal;
+			    public int goo(int param1, int param2) {
+			        switch (param1) {
+			            case 1:
+			;\
+			                fGlobal= new int[] { 1, 2, 3};
+			                int temp= 9;
+			                break;
+			            case 2:
+			;\
+			                do {
+			                   int insideDo= 0;
+			                   return -1;
+			                } while (true);
+			            case 3:
+			;\
+			                int temp2= 9;
+			                Math.min(1.0f, 2.0f);
+			                return 3;
+			        }
+			        return 4;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
 			String str= "break;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -397,7 +407,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return -1;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -407,7 +417,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "Math";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -417,7 +427,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "min";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -427,7 +437,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 4;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -441,24 +451,25 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testVariableDeclarations7() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void goo() {\n");
-		buf.append("        try {\n");
-		buf.append("        } catch (Exception x) {\n");
-		buf.append("        }\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    public void goo() {
+			        try {
+			        } catch (Exception x) {
+			        }
+			        return;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
 			String str= "return;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -470,27 +481,29 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testSwitchOnEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public enum E {\n");
-		buf.append("    A, B, C;\n");
-		buf.append("    public static final int X=1;\n");
-		buf.append("}\n");
-		buf.append("class A {\n");
-		buf.append("    public void goo(E e) {\n");
-		buf.append("        switch (e) {\n");
-		buf.append("            case A:\n;");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public enum E {
+			    A, B, C;
+			    public static final int X=1;
+			}
+			class A {
+			    public void goo(E e) {
+			        switch (e) {
+			            case A:
+			;\
+			                break;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "A:";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -499,7 +512,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}
 		{
 			String str= "break;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -512,41 +525,42 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testDeclarationsAfter() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int goo(final int param0) {\n");
-		buf.append("        int k= 0;\n");
-		buf.append("        try {\n");
-		buf.append("            for (int i= 0; i < 10; i++) {\n");
-		buf.append("                k += i;\n");
-		buf.append("            }\n");
-		buf.append("        } catch (Exception x) {\n");
-		buf.append("           return 9;\n");
-		buf.append("        };\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            int fInner;\n");
-		buf.append("            public void run() {\n");
-		buf.append("                int x1= 0;\n");
-		buf.append("                x1 += param0;\n");
-		buf.append("                {\n");
-		buf.append("                    for (int i= 0, j= 0; i < 10; i++) {\n");
-		buf.append("                        x1 += i;\n");
-		buf.append("                        int x2= 0;\n");
-		buf.append("                    }\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("        return 3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    public int goo(final int param0) {
+			        int k= 0;
+			        try {
+			            for (int i= 0; i < 10; i++) {
+			                k += i;
+			            }
+			        } catch (Exception x) {
+			           return 9;
+			        };
+			        Runnable run= new Runnable() {
+			            int fInner;
+			            public void run() {
+			                int x1= 0;
+			                x1 += param0;
+			                {
+			                    for (int i= 0, j= 0; i < 10; i++) {
+			                        x1 += i;
+			                        int x2= 0;
+			                    }
+			                }
+			            }
+			        };
+			        return 3;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "int k= 0;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsAfter(offset, flags);
@@ -556,7 +570,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 9;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsAfter(offset, flags);
@@ -566,7 +580,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "x1 += param0;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.VARIABLES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsAfter(offset, flags);
@@ -580,40 +594,41 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testTypeDeclarations1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static class A {\n");
-		buf.append("        public class A1 {\n");
-		buf.append("            public int foo() {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        public class A2 {\n");
-		buf.append("        }\n");
-		buf.append("        public int foo() {\n");
-		buf.append("            return 2;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class F {\n");
-		buf.append("    public int goo(int param0) {\n");
-		buf.append("        class C extends E.A {\n");
-		buf.append("            A1 b;\n");
-		buf.append("            public int foo() {\n");
-		buf.append("                return 3;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        return 4;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    public static class A {
+			        public class A1 {
+			            public int foo() {
+			                return 1;
+			            }
+			        }
+			        public class A2 {
+			        }
+			        public int foo() {
+			            return 2;
+			        }
+			    }
+			}
+			class F {
+			    public int goo(int param0) {
+			        class C extends E.A {
+			            A1 b;
+			            public int foo() {
+			                return 3;
+			            }
+			        }
+			        return 4;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return 1;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -623,7 +638,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 2;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -633,7 +648,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 3;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -643,7 +658,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 4;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -657,32 +672,33 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testTypeDeclarations2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static class E1 extends G {\n");
-		buf.append("        public static class EE1 {\n");
-		buf.append("        }\n");
-		buf.append("        public static class EE2 {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public static class E2 {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class F extends E.E1{\n");
-		buf.append("    F f1;\n");
-		buf.append("}\n");
-		buf.append("class G {\n");
-		buf.append("    public static class G1 {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    public static class E1 extends G {
+			        public static class EE1 {
+			        }
+			        public static class EE2 {
+			        }
+			    }
+			    public static class E2 {
+			    }
+			}
+			class F extends E.E1{
+			    F f1;
+			}
+			class G {
+			    public static class G1 {
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "F f1;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -695,30 +711,31 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testTypeDeclarationsTypeParameters() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class H<M> {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("H.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class H<M> {
+			}
+			""";
+		pack0.createCompilationUnit("H.java", str1, false, null);
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("import test0.ae.H;\n");
-		buf.append("public class G<X, Y> extends H<String> {\n");
-		buf.append("    public <A, B> void foo() {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("G.java", buf.toString(), false, null);
+		String str2= """
+			package test1.ae;
+			import test0.ae.H;
+			public class G<X, Y> extends H<String> {
+			    public <A, B> void foo() {
+			        return;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("G.java", str2, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str2.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -730,30 +747,31 @@ public class ScopeAnalyzerTest extends CoreTests {
 	@Test
 	public void testClassInstanceCreation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    public Object foo(G g) {\n");
-		buf.append("        return g.new G1();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class G extends H {\n");
-		buf.append("    public class G1 {\n");
-		buf.append("    }\n");
-		buf.append("    public class G2 {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class H {\n");
-		buf.append("    public class H1 {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    public Object foo(G g) {
+			        return g.new G1();
+			    }
+			}
+			class G extends H {
+			    public class G1 {
+			    }
+			    public class G2 {
+			    }
+			}
+			class H {
+			    public class H1 {
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "G1()";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -768,28 +786,26 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testMethodDeclarations1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-
-		buf.append("    public void goo() {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
-
-		buf.append("    public String toString() {\n");
-		buf.append("        return String.valueOf(1);\n");
-		buf.append("    }\n");
-
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    public void foo() {
+			    }
+			    public void goo() {
+			        return;
+			    }
+			    public String toString() {
+			        return String.valueOf(1);
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -803,37 +819,38 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testMethodDeclarations2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    int fVar1, fVar2;\n");
-		buf.append("    public int goo(int param1) {\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            int fInner;\n");
-		buf.append("            public void run() {\n");
-		buf.append("                return;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("        int k= 0;\n");
-		buf.append("        return k;\n");
-		buf.append("    }\n");
-		buf.append("    private class A extends E {\n");
-		buf.append("        { // initializer\n");
-		buf.append("           fVar1= 9; \n");
-		buf.append("        }\n");
-		buf.append("        public int foo(int param1) {\n");
-		buf.append("            return 1;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			public class E {
+			    int fVar1, fVar2;
+			    public int goo(int param1) {
+			        Runnable run= new Runnable() {
+			            int fInner;
+			            public void run() {
+			                return;
+			            }
+			        };
+			        int k= 0;
+			        return k;
+			    }
+			    private class A extends E {
+			        { // initializer
+			           fVar1= 9;\s
+			        }
+			        public int foo(int param1) {
+			            return 1;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
 			String str= "return;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -843,7 +860,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return k;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -853,7 +870,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 
 		{
 			String str= "return 1;";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.METHODS;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
@@ -888,25 +905,26 @@ public class ScopeAnalyzerTest extends CoreTests {
 	public void testEnumConstantDeclaration1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("public enum TestEnum {\n");
-		buf.append("    A(11);\n");
-		buf.append("\n");
-		buf.append("    TestEnum(int value) {}\n");
-		buf.append("\n");
-		buf.append("    private static int getDefaultValue() {\n");
-		buf.append("        return -1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			
+			public enum TestEnum {
+			    A(11);
+			
+			    TestEnum(int value) {}
+			
+			    private static int getDefaultValue() {
+			        return -1;
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("TestEnum.java", str1, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "11";
-			int offset= buf.toString().indexOf(str);
+			int offset= str1.indexOf(str);
 
 			int flags= ScopeAnalyzer.METHODS;
 			for (IBinding binding : new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags)) {

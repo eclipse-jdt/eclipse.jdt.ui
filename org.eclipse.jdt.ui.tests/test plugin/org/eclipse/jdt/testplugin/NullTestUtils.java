@@ -34,28 +34,31 @@ public class NullTestUtils {
 		sourceFolder.getJavaProject().setOptions(options);
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
-		buf.append("public @interface NonNull {}\n");
-		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+		String str= """
+			package annots;
+			
+			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
+			public @interface NonNull {}
+			""";
+		pack0.createCompilationUnit("NonNull.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
-		buf.append("public @interface Nullable {}\n");
-		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+		String str1= """
+			package annots;
+			
+			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
+			public @interface Nullable {}
+			""";
+		pack0.createCompilationUnit("Nullable.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.*;\n");
-		buf.append("@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })\n");
-		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
-		buf.append("public @interface NonNullByDefault { boolean value() default true; }\n");
-		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+		String str2= """
+			package annots;
+			
+			import java.lang.annotation.*;
+			@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })
+			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
+			public @interface NonNullByDefault { boolean value() default true; }
+			""";
+		pack0.createCompilationUnit("NonNullByDefault.java", str2, false, null);
 	}
 
 	// note: use disableAnnotationBasedNullAnalysis, if the project is reused between test cases
@@ -69,42 +72,46 @@ public class NullTestUtils {
 		project.setOptions(options);
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.*;\n");
-		buf.append("\n");
-		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
-		buf.append("@Target({ ElementType.TYPE_USE })\n");
-		buf.append("public @interface NonNull {}\n");
-		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+		String str= """
+			package annots;
+			
+			import java.lang.annotation.*;
+			
+			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
+			@Target({ ElementType.TYPE_USE })
+			public @interface NonNull {}
+			""";
+		pack0.createCompilationUnit("NonNull.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.*;\n");
-		buf.append("\n");
-		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
-		buf.append("@Target({ ElementType.TYPE_USE })\n");
-		buf.append("public @interface Nullable {}\n");
-		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+		String str1= """
+			package annots;
+			
+			import java.lang.annotation.*;
+			
+			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
+			@Target({ ElementType.TYPE_USE })
+			public @interface Nullable {}
+			""";
+		pack0.createCompilationUnit("Nullable.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }\n");
-		pack0.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
+		String str2= """
+			package annots;
+			
+			public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }
+			""";
+		pack0.createCompilationUnit("DefaultLocation.java", str2, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.*;\n");
-		buf.append("import static annots.DefaultLocation.*;\n");
-		buf.append("\n");
-		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
-		buf.append("@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.LOCAL_VARIABLE })\n");
-		buf.append("public @interface NonNullByDefault { DefaultLocation[] value() default {PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT}; }\n");
-		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+		String str3= """
+			package annots;
+			
+			import java.lang.annotation.*;
+			import static annots.DefaultLocation.*;
+			
+			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
+			@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.LOCAL_VARIABLE })
+			public @interface NonNullByDefault { DefaultLocation[] value() default {PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT}; }
+			""";
+		pack0.createCompilationUnit("NonNullByDefault.java", str3, false, null);
 	}
 
 	// for test classes where the project is not deleted for each test case

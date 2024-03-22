@@ -56,11 +56,12 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testOK() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import junit.framework.TestCase;\n" +
-				"public class ATestCase extends TestCase {\n" +
-				"    public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import junit.framework.TestCase;
+			public class ATestCase extends TestCase {
+			    public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -75,11 +76,12 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testFail() throws Exception {
 		String source=
-			"package pack;\n" +
-			"import junit.framework.TestCase;\n" +
-			"public class ATestCase extends TestCase {\n" +
-			"    public void testFail() { fail(); }\n" +
-			"}";
+			"""
+			package pack;
+			import junit.framework.TestCase;
+			public class ATestCase extends TestCase {
+			    public void testFail() { fail(); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -94,48 +96,49 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testSimpleTest() throws Exception {
 		String source=
-			"package pack;\n" +
-			"import junit.framework.*;\n" +
-			"\n" +
-			"public class ATestCase extends TestCase {\n" +
-			"	protected int fValue1;\n" +
-			"	protected int fValue2;\n" +
-			"\n" +
-			"	public ATestCase(String name) {\n" +
-			"		super(name);\n" +
-			"	}\n" +
-			"	protected void setUp() {\n" +
-			"		fValue1= 2;\n" +
-			"		fValue2= 3;\n" +
-			"	}\n" +
-			"	public static Test suite() {\n" +
-			"		// ensure ordering:\n" +
-			"		TestSuite result= new TestSuite(\"ATestCase\");\n" +
-			"		result.addTest(new ATestCase(\"testAdd\"));\n" +
-			"		result.addTest(new ATestCase(\"testDivideByZero\"));\n" +
-			"		result.addTest(new ATestCase(\"testEquals\"));\n" +
-			"		return result;\n" +
-			"	}\n" +
-			"	public void testAdd() {\n" +
-			"		double result= fValue1 + fValue2;\n" +
-			"		// forced failure result == 5\n" +
-			"		assertTrue(result == 6);\n" +
-			"	}\n" +
-			"	public void testDivideByZero() {\n" +
-			"		int zero= 0;\n" +
-			"		int result= 8/zero;\n" +
-			"	}\n" +
-			"	public void testEquals() {\n" +
-			"		assertEquals(12, 12);\n" +
-			"		assertEquals(12L, 12L);\n" +
-			"		assertEquals(new Long(12), new Long(12));\n" +
-			"\n" +
-			"		assertEquals(\"Size\", String.valueOf(12), String.valueOf(13));\n" +
-			"	}\n" +
-			"	public static void main (String[] args) {\n" +
-			"		junit.textui.TestRunner.run(suite());\n" +
-			"	}\n" +
-			"}";
+			"""
+			package pack;
+			import junit.framework.*;
+			
+			public class ATestCase extends TestCase {
+				protected int fValue1;
+				protected int fValue2;
+			
+				public ATestCase(String name) {
+					super(name);
+				}
+				protected void setUp() {
+					fValue1= 2;
+					fValue2= 3;
+				}
+				public static Test suite() {
+					// ensure ordering:
+					TestSuite result= new TestSuite("ATestCase");
+					result.addTest(new ATestCase("testAdd"));
+					result.addTest(new ATestCase("testDivideByZero"));
+					result.addTest(new ATestCase("testEquals"));
+					return result;
+				}
+				public void testAdd() {
+					double result= fValue1 + fValue2;
+					// forced failure result == 5
+					assertTrue(result == 6);
+				}
+				public void testDivideByZero() {
+					int zero= 0;
+					int result= 8/zero;
+				}
+				public void testEquals() {
+					assertEquals(12, 12);
+					assertEquals(12L, 12L);
+					assertEquals(new Long(12), new Long(12));
+			
+					assertEquals("Size", String.valueOf(12), String.valueOf(13));
+				}
+				public static void main (String[] args) {
+					junit.textui.TestRunner.run(suite());
+				}
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -155,11 +158,12 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSessionStarted() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import junit.framework.TestCase;\n" +
-				"public class ATestCase extends TestCase {\n" +
-				"    public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import junit.framework.TestCase;
+			public class ATestCase extends TestCase {
+			    public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -173,11 +177,12 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSessionEnded() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import junit.framework.TestCase;\n" +
-				"public class ATestCase extends TestCase {\n" +
-				"    public void testFail() { fail(); }\n" +
-				"}";
+				"""
+			package pack;
+			import junit.framework.TestCase;
+			public class ATestCase extends TestCase {
+			    public void testFail() { fail(); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -191,22 +196,23 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSecondTestStarted() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import junit.framework.*;\n" +
-				"public class ATestCase extends TestCase {\n" +
-				"    public static Test suite() {\n" +
-				"        // ensure ordering:\n" +
-				"        TestSuite result= new TestSuite(\"pack.ATestCase\");\n" +
-				"        result.addTest(new ATestCase(\"testSucceed\"));\n" +
-				"        result.addTest(new ATestCase(\"testFail\"));\n" +
-				"        return result;\n" +
-				"    }\n" +
-				"    public ATestCase(String name) {\n" +
-				"        super(name);\n" +
-				"    }\n" +
-				"    public void testSucceed() { }\n" +
-				"    public void testFail() { fail(); }\n" +
-				"}";
+				"""
+			package pack;
+			import junit.framework.*;
+			public class ATestCase extends TestCase {
+			    public static Test suite() {
+			        // ensure ordering:
+			        TestSuite result= new TestSuite("pack.ATestCase");
+			        result.addTest(new ATestCase("testSucceed"));
+			        result.addTest(new ATestCase("testFail"));
+			        return result;
+			    }
+			    public ATestCase(String name) {
+			        super(name);
+			    }
+			    public void testSucceed() { }
+			    public void testFail() { fail(); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -221,22 +227,23 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSecondTestStarted2() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import junit.framework.*;\n" +
-				"public class ATestCase extends TestCase {\n" +
-				"    public static Test suite() {\n" +
-				"        // ensure ordering:\n" +
-				"        TestSuite result= new TestSuite(\"pack.ATestCase\");\n" +
-				"        result.addTest(new ATestCase(\"testFail\"));\n" +
-				"        result.addTest(new ATestCase(\"testSucceed\"));\n" +
-				"        return result;\n" +
-				"    }\n" +
-				"    public ATestCase(String name) {\n" +
-				"        super(name);\n" +
-				"    }\n" +
-				"    public void testFail() { fail(); }\n" +
-				"    public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import junit.framework.*;
+			public class ATestCase extends TestCase {
+			    public static Test suite() {
+			        // ensure ordering:
+			        TestSuite result= new TestSuite("pack.ATestCase");
+			        result.addTest(new ATestCase("testFail"));
+			        result.addTest(new ATestCase("testSucceed"));
+			        return result;
+			    }
+			    public ATestCase(String name) {
+			        super(name);
+			    }
+			    public void testFail() { fail(); }
+			    public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -252,34 +259,35 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 	public void testTreeUnrootedEnded() throws Exception {
 		// regression test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=153807
 		String source=
-				"package pack;\n" +
-				"\n" +
-				"import junit.framework.TestCase;\n" +
-				"import junit.framework.TestResult;\n" +
-				"import junit.framework.TestSuite;\n" +
-				"\n" +
-				"public class ATestCase extends TestCase {\n" +
-				"    public static class RealTest extends TestCase {\n" +
-				"        public RealTest(String name) {\n" +
-				"            super(name);\n" +
-				"        }\n" +
-				"\n" +
-				"        public void myTest1() throws Exception { }\n" +
-				"\n" +
-				"        public void myTest2() throws Exception {\n" +
-				"            fail();\n" +
-				"        }\n" +
-				"    }\n" +
-				"\n" +
-				"    public void testAllTests() { }\n" +
-				"\n" +
-				"    public void run(TestResult result) {\n" +
-				"        TestSuite suite = new TestSuite(\"MySuite\");\n" +
-				"        suite.addTest(new RealTest(\"myTest1\"));\n" +
-				"        suite.addTest(new RealTest(\"myTest2\"));\n" +
-				"        suite.run(result);\n" +
-				"    }\n" +
-				"}";
+				"""
+			package pack;
+			
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			
+			public class ATestCase extends TestCase {
+			    public static class RealTest extends TestCase {
+			        public RealTest(String name) {
+			            super(name);
+			        }
+			
+			        public void myTest1() throws Exception { }
+			
+			        public void myTest2() throws Exception {
+			            fail();
+			        }
+			    }
+			
+			    public void testAllTests() { }
+			
+			    public void run(TestResult result) {
+			        TestSuite suite = new TestSuite("MySuite");
+			        suite.addTest(new RealTest("myTest1"));
+			        suite.addTest(new RealTest("myTest2"));
+			        suite.run(result);
+			    }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -301,40 +309,42 @@ public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 		JavaProjectHelper.addRTJar15(fProject);
 
 		String source=
-				"package test;\n" +
-				"\n" +
-				"import junit.framework.JUnit4TestAdapter;\n" +
-				"import junit.framework.TestCase;\n" +
-				"import junit.framework.TestSuite;\n" +
-				"\n" +
-				"import org.junit.Test;\n" +
-				"import org.junit.runner.RunWith;\n" +
-				"import org.junit.runners.Suite;\n" +
-				"import org.junit.runners.Suite.SuiteClasses;\n" +
-				"\n" +
-				"public class MyTestSuite {\n" +
-				"	public static junit.framework.Test suite() {\n" +
-				"		TestSuite suite = new TestSuite();\n" +
-				"		suite.addTest(new JUnit4TestAdapter(JUnit4TestSuite.class));\n" +
-				"		suite.addTestSuite(JUnit3TestCase.class);\n" +
-				"		return suite;\n" +
-				"	}\n" +
-				"	\n" +
-				"	@RunWith(Suite.class)\n" +
-				"	@SuiteClasses({JUnit4TestCase.class})\n" +
-				"	public static class JUnit4TestSuite {}\n" +
-				"	\n" +
-				"	public static class JUnit4TestCase {\n" +
-				"		@Test public void testA() {}\n" +
-				"		@Test public void testB() {}\n" +
-				"	}\n" +
-				"	\n" +
-				"	public static class JUnit3TestCase extends TestCase {\n" +
-				"		public void testC() {}\n" +
-				"		public void testD() {}\n" +
-				"		public void testE() {}\n" +
-				"	}\n" +
-				"}\n";
+				"""
+			package test;
+			
+			import junit.framework.JUnit4TestAdapter;
+			import junit.framework.TestCase;
+			import junit.framework.TestSuite;
+			
+			import org.junit.Test;
+			import org.junit.runner.RunWith;
+			import org.junit.runners.Suite;
+			import org.junit.runners.Suite.SuiteClasses;
+			
+			public class MyTestSuite {
+				public static junit.framework.Test suite() {
+					TestSuite suite = new TestSuite();
+					suite.addTest(new JUnit4TestAdapter(JUnit4TestSuite.class));
+					suite.addTestSuite(JUnit3TestCase.class);
+					return suite;
+				}
+			\t
+				@RunWith(Suite.class)
+				@SuiteClasses({JUnit4TestCase.class})
+				public static class JUnit4TestSuite {}
+			\t
+				public static class JUnit4TestCase {
+					@Test public void testA() {}
+					@Test public void testB() {}
+				}
+			\t
+				public static class JUnit3TestCase extends TestCase {
+					public void testC() {}
+					public void testD() {}
+					public void testE() {}
+				}
+			}
+			""";
 		IType aTestCase= createType(source, "test", "MyTestSuite.java");
 
 		String[] expectedTree= new String[] {

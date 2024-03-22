@@ -68,10 +68,11 @@ public class QuickFixTest16 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public record Rec1() {\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public record Rec1() {
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -91,15 +92,16 @@ public class QuickFixTest16 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-					"package test;\n" +
-					"\n" +
-					"public record Rec1(int a){\n" +
-					"\n" +
-					"	public static void main(String[] args) {\n" +
-					"		Rec1 abc = new Rec1();\n" +
-					"	}\n" +
-					"}\n";
+		String test= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1();
+				}
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -110,35 +112,37 @@ public class QuickFixTest16 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-						"package test;\n" +
-						"\n" +
-						"public record Rec1(int a){\n" +
-						"\n" +
-						"	public static void main(String[] args) {\n" +
-						"		Rec1 abc = new Rec1(a);\n" +
-						"	}\n" +
-						"}\n";
+		String expected1= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1(a);
+				}
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		String expected2= "" +
-						"package test;\n" +
-						"\n" +
-						"public record Rec1(int a){\n" +
-						"\n" +
-						"	/**\n" +
-						"	 * \n" +
-						"	 */\n" +
-						"	public Rec1() {\n" +
-						"		// TODO Auto-generated constructor stub\n" +
-						"	}\n" +
-						"\n" +
-						"	public static void main(String[] args) {\n" +
-						"		Rec1 abc = new Rec1();\n" +
-						"	}\n" +
-						"}\n";
+		String expected2= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				/**
+				 *\s
+				 */
+				public Rec1() {
+					// TODO Auto-generated constructor stub
+				}
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1();
+				}
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -152,15 +156,16 @@ public class QuickFixTest16 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-					"package test;\n" +
-					"\n" +
-					"public record Rec1(int a){\n" +
-					"\n" +
-					"	public static void main(String[] args) {\n" +
-					"		Rec1 abc = new Rec1(10, 20);\n" +
-					"	}\n" +
-					"}\n";
+		String test= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1(10, 20);
+				}
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -171,36 +176,38 @@ public class QuickFixTest16 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-						"package test;\n" +
-						"\n" +
-						"public record Rec1(int a){\n" +
-						"\n" +
-						"	public static void main(String[] args) {\n" +
-						"		Rec1 abc = new Rec1(10);\n" +
-						"	}\n" +
-						"}\n";
+		String expected1= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1(10);
+				}
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		String expected2= "" +
-						"package test;\n" +
-						"\n" +
-						"public record Rec1(int a){\n" +
-						"\n" +
-						"	/**\n" +
-						"	 * @param i\n" +
-						"	 * @param j\n" +
-						"	 */\n" +
-						"	public Rec1(int i, int j) {\n" +
-						"		// TODO Auto-generated constructor stub\n" +
-						"	}\n" +
-						"\n" +
-						"	public static void main(String[] args) {\n" +
-						"		Rec1 abc = new Rec1(10, 20);\n" +
-						"	}\n" +
-						"}\n";
+		String expected2= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				/**
+				 * @param i
+				 * @param j
+				 */
+				public Rec1(int i, int j) {
+					// TODO Auto-generated constructor stub
+				}
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1(10, 20);
+				}
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -214,15 +221,16 @@ public class QuickFixTest16 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-					"package test;\n" +
-					"\n" +
-					"public record Rec1(int a){\n" +
-					"\n" +
-					"	public static void main(String[] args) {\n" +
-					"		Rec1 abc = new Rec1(\"str\");\n" +
-					"	}\n" +
-					"}\n";
+		String test= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1("str");
+				}
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -233,22 +241,23 @@ public class QuickFixTest16 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-						"package test;\n" +
-						"\n" +
-						"public record Rec1(int a){\n" +
-						"\n" +
-						"	/**\n" +
-						"	 * @param string\n" +
-						"	 */\n" +
-						"	public Rec1(String string) {\n" +
-						"		// TODO Auto-generated constructor stub\n" +
-						"	}\n" +
-						"\n" +
-						"	public static void main(String[] args) {\n" +
-						"		Rec1 abc = new Rec1(\"str\");\n" +
-						"	}\n" +
-						"}\n";
+		String expected1= """
+			package test;
+			
+			public record Rec1(int a){
+			
+				/**
+				 * @param string
+				 */
+				public Rec1(String string) {
+					// TODO Auto-generated constructor stub
+				}
+			
+				public static void main(String[] args) {
+					Rec1 abc = new Rec1("str");
+				}
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
@@ -262,21 +271,25 @@ public class QuickFixTest16 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-					"package test;\n" +
-					"\n" +
-					"public record Rec1(int a, int b){\n" +
-					"\n" +
-					"	public Rec1(int a, int b) {\n" +
-					"		\n" +
-					"	}\n\n" +
-					"	public Rec1(int a) {\n" +
-					"		this(a, a);\n" +
-					"	}\n\n" +
-					"	public Rec1(int a, int b, int c) {\n" +
-					"		this(a, b+c);\n" +
-					"	}\n\n" +
-					"}\n";
+		String test= """
+			package test;
+			
+			public record Rec1(int a, int b){
+			
+				public Rec1(int a, int b) {
+				\t
+				}
+			
+				public Rec1(int a) {
+					this(a, a);
+				}
+			
+				public Rec1(int a, int b, int c) {
+					this(a, b+c);
+				}
+			
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Rec1.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -287,22 +300,26 @@ public class QuickFixTest16 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-					"package test;\n" +
-					"\n" +
-					"public record Rec1(int a, int b){\n" +
-					"\n" +
-					"	public Rec1(int a, int b) {\n" +
-					"		this.a = 0;\n" +
-					"		\n" +
-					"	}\n\n" +
-					"	public Rec1(int a) {\n" +
-					"		this(a, a);\n" +
-					"	}\n\n" +
-					"	public Rec1(int a, int b, int c) {\n" +
-					"		this(a, b+c);\n" +
-					"	}\n\n" +
-					"}\n";
+		String expected1= """
+			package test;
+			
+			public record Rec1(int a, int b){
+			
+				public Rec1(int a, int b) {
+					this.a = 0;
+				\t
+				}
+			
+				public Rec1(int a) {
+					this(a, a);
+				}
+			
+				public Rec1(int a, int b, int c) {
+					this(a, b+c);
+				}
+			
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}

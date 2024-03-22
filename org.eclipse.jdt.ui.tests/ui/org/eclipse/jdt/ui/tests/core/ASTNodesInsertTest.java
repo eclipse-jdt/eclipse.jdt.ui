@@ -73,14 +73,15 @@ public class ASTNodesInsertTest extends CoreTests {
 	@Test
 	public void testInsert1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    int[] fGlobal;\n");
-		buf.append("    public void goo(int param1, int param2) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1.ae;
+			public class E {
+			    int[] fGlobal;
+			    public void goo(int param1, int param2) {
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 
@@ -122,16 +123,17 @@ public class ASTNodesInsertTest extends CoreTests {
 	@Test
 	public void testInsert2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    class Inner {\n");
-		buf.append("    }\n");
-		buf.append("    static final int CONST= 1;\n");
-		buf.append("    public E() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1.ae;
+			public class E {
+			    class Inner {
+			    }
+			    static final int CONST= 1;
+			    public E() {
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 
@@ -172,19 +174,20 @@ public class ASTNodesInsertTest extends CoreTests {
 	@Test
 	public void testInsert3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    static final int CONST= 1;\n");
-		buf.append("    static int fgStatic= 1;\n");
-		buf.append("    public E() {\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("    class Inner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1.ae;
+			public class E {
+			    static final int CONST= 1;
+			    static int fgStatic= 1;
+			    public E() {
+			    }
+			    public void foo() {
+			    }
+			    class Inner {
+			    }
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 
@@ -225,19 +228,20 @@ public class ASTNodesInsertTest extends CoreTests {
 	@Test
 	public void testInsert4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fInt;\n");
-		buf.append("    private int fInt1;\n");
-		buf.append("    private int fInt2;\n");
-		buf.append("\n");
-		buf.append("    private static final int THREE = 3;\n");
-		buf.append("    private static final int FOUR = 4;\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1.ae;
+			public class E {
+			    private int fInt;
+			    private int fInt1;
+			    private int fInt2;
+			
+			    private static final int THREE = 3;
+			    private static final int FOUR = 4;
+			    public void foo() {}
+			
+			}
+			""";
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(compilationUnit);
 

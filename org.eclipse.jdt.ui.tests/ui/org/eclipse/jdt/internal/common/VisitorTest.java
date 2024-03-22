@@ -54,20 +54,21 @@ public class VisitorTest {
 	@BeforeAll
 	public static void init() {
 		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
-		String code ="package test;\n"
-				+"import java.util.Collection;\n"
-				+ "\n"
-				+ "public class E {\n"
-				+ "	public void hui(Collection<String> arr) {\n"
-				+ "		Collection coll = null;\n"
-				+ "		for (String var : arr) {\n"
-				+ "			 coll.add(var);\n"
-				+ "			 System.out.println(var);\n"
-				+ "			 System.err.println(var);\n"
-				+ "		}\n"
-				+ "		System.out.println(arr);\n"
-				+ "	}\n"
-				+ "}";
+		String code ="""
+			package test;
+			import java.util.Collection;
+			
+			public class E {
+				public void hui(Collection<String> arr) {
+					Collection coll = null;
+					for (String var : arr) {
+						 coll.add(var);
+						 System.out.println(var);
+						 System.err.println(var);
+					}
+					System.out.println(arr);
+				}
+			}""";
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setEnvironment(new String[]{}, new String[]{}, null, true);
 		parser.setBindingsRecovery(true);
@@ -80,24 +81,26 @@ public class VisitorTest {
 		result = (CompilationUnit) parser.createAST(null);
 
 
-		String code2="package test;\n"
-        + "import java.util.*;\n"
-        + "public class Test {\n"
-        + "    void m(List<String> strings,List<String> strings2) {\n"
-        + "        Collections.reverse(strings);\n"
-        + "        Iterator it = strings.iterator();\n"
-        + "        while (it.hasNext()) {\n"
-        + "            Iterator it2 = strings2.iterator();\n"
-        + "            while (it2.hasNext()) {\n"
-        + "                String s2 = (String) it2.next();\n"
-        + "                System.out.println(s2);\n"
-        + "            }\n"
-        + "            // OK\n"
-        + "            System.out.println(it.next());\n"
-        + "        }\n"
-        + "        System.out.println();\n"
-        + "    }\n"
-        + "}\n";
+		String code2="""
+			package test;
+			import java.util.*;
+			public class Test {
+			    void m(List<String> strings,List<String> strings2) {
+			        Collections.reverse(strings);
+			        Iterator it = strings.iterator();
+			        while (it.hasNext()) {
+			            Iterator it2 = strings2.iterator();
+			            while (it2.hasNext()) {
+			                String s2 = (String) it2.next();
+			                System.out.println(s2);
+			            }
+			            // OK
+			            System.out.println(it.next());
+			        }
+			        System.out.println();
+			    }
+			}
+			""";
 		parser.setEnvironment(new String[]{}, new String[]{}, null, true);
 		parser.setBindingsRecovery(true);
 		parser.setResolveBindings(true);

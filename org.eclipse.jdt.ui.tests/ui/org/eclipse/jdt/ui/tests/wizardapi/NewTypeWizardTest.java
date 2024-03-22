@@ -140,19 +140,19 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public class E {\n");
-		buf.append("    /* class body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public class E {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -182,21 +182,21 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public class E extends ArrayList<String> {\n");
-		buf.append("    /* class body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			/**
+			 * Type
+			 */
+			public class E extends ArrayList<String> {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -205,12 +205,13 @@ public class NewTypeWizardTest {
 	public void testCreateClass3() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class A<T> {\n");
-		buf.append("    public abstract void foo(T t);\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class A<T> {
+			    public abstract void foo(T t);
+			}
+			""";
+		pack0.createCompilationUnit("A.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -235,28 +236,28 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import pack.A;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public class E extends A<String> {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * Overridden\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(String t) {\n");
-		buf.append("    }\n");
-		buf.append("    /* class body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			import pack.A;
+			
+			/**
+			 * Type
+			 */
+			public class E extends A<String> {
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public void foo(String t) {
+			    }
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
@@ -266,12 +267,13 @@ public class NewTypeWizardTest {
 	public void testCreateClass4() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class A<T> {\n");
-		buf.append("    public A(T t);\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class A<T> {
+			    public A(T t);
+			}
+			""";
+		pack0.createCompilationUnit("A.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -296,35 +298,35 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import pack.A;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public class E extends A<String> {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * Constructor\n");
-		buf.append("     */\n");
-		buf.append("    public E(String t) {\n");
-		buf.append("        super(t);\n");
-		buf.append("    }\n");
-		buf.append("    /* class body */\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * Method\n");
-		buf.append("     */\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			import pack.A;
+			
+			/**
+			 * Type
+			 */
+			public class E extends A<String> {
+			
+			    /**
+			     * Constructor
+			     */
+			    public E(String t) {
+			        super(t);
+			    }
+			    /* class body */
+			
+			    /**
+			     * Method
+			     */
+			    public static void main(String[] args) {
+			
+			    }
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
@@ -334,12 +336,13 @@ public class NewTypeWizardTest {
 	public void testCreateInnerClass1() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class A<T> {\n");
-		buf.append("    public abstract void foo(T t);\n");
-		buf.append("}\n");
-		ICompilationUnit outer= pack0.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class A<T> {
+			    public abstract void foo(T t);
+			}
+			""";
+		ICompilationUnit outer= pack0.createCompilationUnit("A.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
@@ -365,23 +368,22 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class A<T> {\n");
-		buf.append("    /**\n");
-		buf.append("     * Type\n");
-		buf.append("     */\n");
-		buf.append("    public class E<S> extends ArrayList<S> {\n");
-		buf.append("        /* class body */\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public abstract void foo(T t);\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			package pack;
+			
+			import java.util.ArrayList;
+			
+			public class A<T> {
+			    /**
+			     * Type
+			     */
+			    public class E<S> extends ArrayList<S> {
+			        /* class body */
+			    }
+			
+			    public abstract void foo(T t);
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -416,23 +418,23 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public class E implements List<File> {\n");
-		buf.append("    /* class body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			import java.io.File;
+			import java.util.List;
+			import java.util.Map;
+			
+			/**
+			 * Type
+			 */
+			public class E implements List<File> {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
@@ -442,14 +444,15 @@ public class NewTypeWizardTest {
 	public void testCreateClassExtraImports2() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class A {\n");
-		buf.append("    public static class Inner {\n");
-		buf.append("    }\n");
-		buf.append("    public abstract void foo(Inner inner);\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class A {
+			    public static class Inner {
+			    }
+			    public abstract void foo(Inner inner);
+			}
+			""";
+		pack0.createCompilationUnit("A.java", str, false, null);
 
 
 		String newFileTemplate= "${filecomment}\n${package_declaration}\n\nimport java.util.Map;\n\n${typecomment}\n${type_declaration}";
@@ -478,30 +481,30 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("\n");
-		buf.append("import pack.A;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public class E extends A {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * Overridden\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(Inner inner) {\n");
-		buf.append("    }\n");
-		buf.append("    /* class body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			import java.util.Map;
+			
+			import pack.A;
+			
+			/**
+			 * Type
+			 */
+			public class E extends A {
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public void foo(Inner inner) {
+			    }
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -510,24 +513,26 @@ public class NewTypeWizardTest {
 	public void testCreateClassExtraImports3() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class A {\n");
-		buf.append("    public static class Inner {\n");
-		buf.append("    }\n");
-		buf.append("    public abstract void foo(Inner inner);\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class A {
+			    public static class Inner {
+			    }
+			    public abstract void foo(Inner inner);
+			}
+			""";
+		pack0.createCompilationUnit("A.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.Map;\n"); // an unused import: should not be touched
-		buf.append("\n");
-		buf.append("public class B {\n");
-		buf.append("}\n");
-		ICompilationUnit outer= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			import java.util.Map;
+			
+			public class B {
+			}
+			""";
+		ICompilationUnit outer= pack1.createCompilationUnit("B.java", str1, false, null);
 
 		NewClassWizardPage wizardPage= new NewClassWizardPage();
 		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
@@ -551,31 +556,30 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("\n");
-		buf.append("import pack.A;\n");
-		buf.append("\n");
-		buf.append("public class B {\n");
-		buf.append("\n");
-		buf.append("    /**\n");
-		buf.append("     * Type\n");
-		buf.append("     */\n");
-		buf.append("    public class E extends A {\n");
-		buf.append("\n");
-		buf.append("        /**\n");
-		buf.append("         * Overridden\n");
-		buf.append("         */\n");
-		buf.append("        @Override\n");
-		buf.append("        public void foo(Inner inner) {\n");
-		buf.append("        }\n");
-		buf.append("        /* class body */\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			
+			import java.util.Map;
+			
+			import pack.A;
+			
+			public class B {
+			
+			    /**
+			     * Type
+			     */
+			    public class E extends A {
+			
+			        /**
+			         * Overridden
+			         */
+			        @Override
+			        public void foo(Inner inner) {
+			        }
+			        /* class body */
+			    }
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -603,21 +607,21 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public interface E extends List<String>, Runnable {\n");
-		buf.append("    /* interface body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			import java.util.List;
+			
+			/**
+			 * Type
+			 */
+			public interface E extends List<String>, Runnable {
+			    /* interface body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -643,19 +647,19 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public enum E {\n");
-		buf.append("    /* enum body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public enum E {
+			    /* enum body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -681,19 +685,19 @@ public class NewTypeWizardTest {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append(" * File\n");
-		buf.append(" */\n");
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("/**\n");
-		buf.append(" * Type\n");
-		buf.append(" */\n");
-		buf.append("public @interface E {\n");
-		buf.append("    /* annotation body */\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public @interface E {
+			    /* annotation body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -805,20 +809,26 @@ public class NewTypeWizardTest {
 	{
 		// Foo1.java and Foo2.java in test1
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n\n");
-		buf.append("public class Foo1 {\n\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Foo1.java", buf.toString(), false, null);
-		pack1.createCompilationUnit("Foo2.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			public class Foo1 {
+			
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Foo1.java", str, false, null);
+		pack1.createCompilationUnit("Foo2.java", str, false, null);
 
 		// Foo3.java in test2
 		pack1= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n\n");
-		buf.append("public class Foo3 {\n\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("Foo3.java", buf.toString(), false, null);
+		String str1= """
+			package test2;
+			
+			public class Foo3 {
+			
+			}
+			""";
+		pack1.createCompilationUnit("Foo3.java", str1, false, null);
 
 		IEditorPart part= EditorUtility.openInEditor(cu);
 		part.getSite().getSelectionProvider().setSelection(new TextSelection(29, 4)); // Foo1
@@ -837,11 +847,12 @@ public class NewTypeWizardTest {
 	@Test
 	public void testAddFinalSuperClassError1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String test= "" +
-				"package test1;\n" +
-				"\n" +
-				"public final class A{\n" +
-				"}\n";
+		String test= """
+			package test1;
+			
+			public final class A{
+			}
+			""";
 		ICompilationUnit superClsUnit= pack1.createCompilationUnit("A.java", test, false, null);
 		ITypeBinding superCls= getTypeBinding(superClsUnit);
 

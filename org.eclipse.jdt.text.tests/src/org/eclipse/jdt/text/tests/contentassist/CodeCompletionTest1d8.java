@@ -155,12 +155,14 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents=
-			"package test1\n" +
-			"public class X {\n" +
-			"    void foo() {\n" +
-			"        java.util.Comparator.reverseOrder().  // content assist after '.' => NPE\n" +
-			"    }\n" +
-			"}\n";
+			"""
+			package test1
+			public class X {
+			    void foo() {
+			        java.util.Comparator.reverseOrder().  // content assist after '.' => NPE
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("X.java", contents, false, null);
 
 
@@ -188,12 +190,14 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		proposal.apply(doc);
 
 		String expectedContents=
-				"package test1\n" +
-				"public class X {\n" +
-				"    void foo() {\n" +
-				"        java.util.Comparator.reverseOrder().thenComparingLong()  // content assist after '.' => NPE\n" +
-				"    }\n" +
-				"}\n";
+				"""
+			package test1
+			public class X {
+			    void foo() {
+			        java.util.Comparator.reverseOrder().thenComparingLong()  // content assist after '.' => NPE
+			    }
+			}
+			""";
 		assertEquals(expectedContents, doc.get());
 	}
 
@@ -201,22 +205,23 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	public void testOverride1() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Main {\n");
-		buf.append("    private static class Cls implements Interface {\n");
-		buf.append("        hello\n");
-		buf.append("    }\n");
-		buf.append("    private static interface Interface {\n");
-		buf.append("        default void hello() {\n");
-		buf.append("            System.out.println(\"Hello\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class Main {
+			    private static class Cls implements Interface {
+			        hello
+			    }
+			    private static interface Interface {
+			        default void hello() {
+			            System.out.println("Hello");
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", str1, false, null);
 
 		String str= "hello";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -228,48 +233,50 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Main {\n");
-		buf.append("    private static class Cls implements Interface {\n");
-		buf.append("        /* (non-Javadoc)\n");
-		buf.append("         * @see test1.Main.Interface#hello()\n");
-		buf.append("         */\n");
-		buf.append("        @Override\n");
-		buf.append("        public void hello() {\n");
-		buf.append("            //TODO\n");
-		buf.append("            Interface.super.hello();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private static interface Interface {\n");
-		buf.append("        default void hello() {\n");
-		buf.append("            System.out.println(\"Hello\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			public class Main {
+			    private static class Cls implements Interface {
+			        /* (non-Javadoc)
+			         * @see test1.Main.Interface#hello()
+			         */
+			        @Override
+			        public void hello() {
+			            //TODO
+			            Interface.super.hello();
+			        }
+			    }
+			    private static interface Interface {
+			        default void hello() {
+			            System.out.println("Hello");
+			        }
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride2() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Main {\n");
-		buf.append("    private static interface Bar extends Foo {\n");
-		buf.append("        hello\n");
-		buf.append("    }\n");
-		buf.append("    private static interface Foo {\n");
-		buf.append("        default void hello() {\n");
-		buf.append("            System.out.println(\"Hello\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class Main {
+			    private static interface Bar extends Foo {
+			        hello
+			    }
+			    private static interface Foo {
+			        default void hello() {
+			            System.out.println("Hello");
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", str1, false, null);
 
 		String str= "hello";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -281,46 +288,48 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Main {\n");
-		buf.append("    private static interface Bar extends Foo {\n");
-		buf.append("        /* (non-Javadoc)\n");
-		buf.append("         * @see test1.Main.Foo#hello()\n");
-		buf.append("         */\n");
-		buf.append("        @Override\n");
-		buf.append("        default void hello() {\n");
-		buf.append("            //TODO\n");
-		buf.append("            Foo.super.hello();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private static interface Foo {\n");
-		buf.append("        default void hello() {\n");
-		buf.append("            System.out.println(\"Hello\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			public class Main {
+			    private static interface Bar extends Foo {
+			        /* (non-Javadoc)
+			         * @see test1.Main.Foo#hello()
+			         */
+			        @Override
+			        default void hello() {
+			            //TODO
+			            Foo.super.hello();
+			        }
+			    }
+			    private static interface Foo {
+			        default void hello() {
+			            System.out.println("Hello");
+			        }
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride3() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface I {\n");
-		buf.append("    default int getSize(String name) {\n");
-		buf.append("        return name.length();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I2 extends I {\n");
-		buf.append("    getSize\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public interface I {
+			    default int getSize(String name) {
+			        return name.length();
+			    }
+			}
+			interface I2 extends I {
+			    getSize
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", str1, false, null);
 
 		String str= "getSize";
-		int offset= buf.toString().lastIndexOf(str) + str.length();
+		int offset= str1.lastIndexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -332,40 +341,42 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface I {\n");
-		buf.append("    default int getSize(String name) {\n");
-		buf.append("        return name.length();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I2 extends I {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see test1.I#getSize(java.lang.String)\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    default int getSize(String name) {\n");
-		buf.append("        //TODO\n");
-		buf.append("        return I.super.getSize(name);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			public interface I {
+			    default int getSize(String name) {
+			        return name.length();
+			    }
+			}
+			interface I2 extends I {
+			    /* (non-Javadoc)
+			     * @see test1.I#getSize(java.lang.String)
+			     */
+			    @Override
+			    default int getSize(String name) {
+			        //TODO
+			        return I.super.getSize(name);
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride0() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collection;\n");
-		buf.append("abstract class X implements Collection<Integer> {\n");
-		buf.append("    parallelStre\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import java.util.Collection;
+			abstract class X implements Collection<Integer> {
+			    parallelStre
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", str1, false, null);
 
 		String str= "parallelStre";
-		int offset= buf.toString().lastIndexOf(str) + str.length();
+		int offset= str1.lastIndexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -376,37 +387,39 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collection;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("abstract class X implements Collection<Integer> {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see java.util.Collection#parallelStream()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    public Stream<Integer> parallelStream() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        return Collection.super.parallelStream();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			import java.util.Collection;
+			import java.util.stream.Stream;
+			abstract class X implements Collection<Integer> {
+			    /* (non-Javadoc)
+			     * @see java.util.Collection#parallelStream()
+			     */
+			    @Override
+			    public Stream<Integer> parallelStream() {
+			        //TODO
+			        return Collection.super.parallelStream();
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride5() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I1 {\n");
-		buf.append("    equals\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			public interface I1 {
+			    equals
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", str1, false, null);
 
 		String str= "equals";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -418,33 +431,35 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I1 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see java.lang.Object#equals(java.lang.Object)\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    boolean equals(Object arg0);\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			
+			public interface I1 {
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#equals(java.lang.Object)
+			     */
+			    @Override
+			    boolean equals(Object arg0);
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride6() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I2 {\n");
-		buf.append("    hashCode\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			public interface I2 {
+			    hashCode
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I2.java", str1, false, null);
 
 		String str= "hashCode";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -456,33 +471,35 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I2 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see java.lang.Object#hashCode()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    int hashCode();\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			
+			public interface I2 {
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#hashCode()
+			     */
+			    @Override
+			    int hashCode();
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride7() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I3 {\n");
-		buf.append("    toString\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I3.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			public interface I3 {
+			    toString
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I3.java", str1, false, null);
 
 		String str= "toString";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -494,33 +511,35 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I3 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see java.lang.Object#toString()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    String toString();\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			
+			public interface I3 {
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#toString()
+			     */
+			    @Override
+			    String toString();
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride8() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I4 {\n");
-		buf.append("    clone\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I4.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			public interface I4 {
+			    clone
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I4.java", str1, false, null);
 
 		String str= "clone";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -532,32 +551,34 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[2].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I4 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see java.lang.Object#clone()\n");
-		buf.append("     */\n");
-		buf.append("    Object clone() throws CloneNotSupportedException;\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			
+			public interface I4 {
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#clone()
+			     */
+			    Object clone() throws CloneNotSupportedException;
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride9() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I5 {\n");
-		buf.append("    finalize\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I5.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			public interface I5 {
+			    finalize
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I5.java", str1, false, null);
 
 		String str= "finalize";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -569,36 +590,38 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[1].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I5 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see java.lang.Object#finalize()\n");
-		buf.append("     */\n");
-		buf.append("    void finalize() throws Throwable;\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			
+			public interface I5 {
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#finalize()
+			     */
+			    void finalize() throws Throwable;
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride10() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I6 extends A {\n");
-		buf.append("    myAbs\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("interface A {\n");
-		buf.append("    void myAbstractM();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I6.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			
+			public interface I6 extends A {
+			    myAbs
+			}
+			
+			interface A {
+			    void myAbstractM();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I6.java", str1, false, null);
 
 		String str= "myAbs";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -610,44 +633,46 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 		proposals[0].apply(doc);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface I6 extends A {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see test1.A#myAbstractM()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    default void myAbstractM() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("interface A {\n");
-		buf.append("    void myAbstractM();\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package test1;
+			
+			public interface I6 extends A {
+			    /* (non-Javadoc)
+			     * @see test1.A#myAbstractM()
+			     */
+			    @Override
+			    default void myAbstractM() {
+			        //TODO
+			       \s
+			    }
+			}
+			
+			interface A {
+			    void myAbstractM();
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride11() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pp;\n");
-		buf.append("\n");
-		buf.append("public class CC implements I2 {\n");
-		buf.append("    dispose\n");
-		buf.append("}\n");
-		buf.append("interface I2 {\n");
-		buf.append("    default void dispose2() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+		String str1= """
+			package pp;
+			
+			public class CC implements I2 {
+			    dispose
+			}
+			interface I2 {
+			    default void dispose2() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", str1, false, null);
 
 		String str= "dispose";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -659,44 +684,46 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
 		proposals[0].apply(doc);
-		buf= new StringBuilder();
-		buf.append("package pp;\n");
-		buf.append("\n");
-		buf.append("public class CC implements I2 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see pp.I2#dispose2()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    public void dispose2() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        I2.super.dispose2();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I2 {\n");
-		buf.append("    default void dispose2() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package pp;
+			
+			public class CC implements I2 {
+			    /* (non-Javadoc)
+			     * @see pp.I2#dispose2()
+			     */
+			    @Override
+			    public void dispose2() {
+			        //TODO
+			        I2.super.dispose2();
+			    }
+			}
+			interface I2 {
+			    default void dispose2() {
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride12() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pp;\n");
-		buf.append("\n");
-		buf.append("public class CC extends S1 {\n");
-		buf.append("    dispose\n");
-		buf.append("}\n");
-		buf.append("class S1 {\n");
-		buf.append("    void dispose1() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+		String str1= """
+			package pp;
+			
+			public class CC extends S1 {
+			    dispose
+			}
+			class S1 {
+			    void dispose1() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", str1, false, null);
 
 		String str= "dispose";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -708,48 +735,50 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
 		proposals[0].apply(doc);
-		buf= new StringBuilder();
-		buf.append("package pp;\n");
-		buf.append("\n");
-		buf.append("public class CC extends S1 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see pp.S1#dispose1()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    void dispose1() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        super.dispose1();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class S1 {\n");
-		buf.append("    void dispose1() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package pp;
+			
+			public class CC extends S1 {
+			    /* (non-Javadoc)
+			     * @see pp.S1#dispose1()
+			     */
+			    @Override
+			    void dispose1() {
+			        //TODO
+			        super.dispose1();
+			    }
+			}
+			class S1 {
+			    void dispose1() {
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 
 	@Test
 	public void testOverride13() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pp;\n");
-		buf.append("\n");
-		buf.append("public class CC extends S1 {\n");
-		buf.append("    dispose\n");
-		buf.append("}\n");
-		buf.append("class S1 implements I1 {\n");
-		buf.append("    void dispose1() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void dispose() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+		String str1= """
+			package pp;
+			
+			public class CC extends S1 {
+			    dispose
+			}
+			class S1 implements I1 {
+			    void dispose1() {
+			    }
+			}
+			interface I1 {
+			    default void dispose() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", str1, false, null);
 
 		String str= "dispose";
-		int offset= buf.toString().indexOf(str) + str.length();
+		int offset= str1.indexOf(str) + str.length();
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
@@ -761,28 +790,29 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
 		proposals[1].apply(doc);
-		buf= new StringBuilder();
-		buf.append("package pp;\n");
-		buf.append("\n");
-		buf.append("public class CC extends S1 {\n");
-		buf.append("    /* (non-Javadoc)\n");
-		buf.append("     * @see pp.I1#dispose()\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    public void dispose() {\n");
-		buf.append("        //TODO\n");
-		buf.append("        super.dispose();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class S1 implements I1 {\n");
-		buf.append("    void dispose1() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void dispose() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEquals(buf.toString(), doc.get());
+		String str2= """
+			package pp;
+			
+			public class CC extends S1 {
+			    /* (non-Javadoc)
+			     * @see pp.I1#dispose()
+			     */
+			    @Override
+			    public void dispose() {
+			        //TODO
+			        super.dispose();
+			    }
+			}
+			class S1 implements I1 {
+			    void dispose1() {
+			    }
+			}
+			interface I1 {
+			    default void dispose() {
+			    }
+			}
+			""";
+		assertEquals(str2, doc.get());
 	}
 	private static void assertNumberOf(String name, int is, int expected) {
 		assertEquals("Wrong number of " + name + ", is: " + is + ", expected: " + expected, expected, is);
@@ -794,24 +824,23 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		NullTestUtils.prepareNullTypeAnnotations(sourceFolder);
 		try {
 			IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import annots.NonNull;\n");
-			buf.append("import annots.NonNullByDefault;\n");
-			buf.append("\n");
-			buf.append("interface A {\n");
-			buf.append("    @NonNull String m();\n");
-			buf.append("}\n");
-			buf.append("\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class Test {\n");
-			buf.append("    void f() {\n");
-			buf.append("        new A()\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			buf.append("");
-			String contents= buf.toString();
+			String contents= """
+				package test1;
+				
+				import annots.NonNull;
+				import annots.NonNullByDefault;
+				
+				interface A {
+				    @NonNull String m();
+				}
+				
+				@NonNullByDefault
+				public class Test {
+				    void f() {
+				        new A()
+				    }
+				}
+				""";
 
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
@@ -832,31 +861,31 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			proposals[0].apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import annots.NonNull;\n");
-			buf.append("import annots.NonNullByDefault;\n");
-			buf.append("\n");
-			buf.append("interface A {\n");
-			buf.append("    @NonNull String m();\n");
-			buf.append("}\n");
-			buf.append("\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class Test {\n");
-			buf.append("    void f() {\n");
-			buf.append("        new A() {\n");
-			buf.append("            \n");
-			buf.append("            @Override\n");
-			buf.append("            public String m() {\n");
-			buf.append("                //TODO\n");
-			buf.append("                return null;\n");
-			buf.append("            }\n");
-			buf.append("        }\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			buf.append("");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				import annots.NonNull;
+				import annots.NonNullByDefault;
+				
+				interface A {
+				    @NonNull String m();
+				}
+				
+				@NonNullByDefault
+				public class Test {
+				    void f() {
+				        new A() {
+				           \s
+				            @Override
+				            public String m() {
+				                //TODO
+				                return null;
+				            }
+				        }
+				    }
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(sourceFolder);
 		}
@@ -867,20 +896,20 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable r = () -> {\n");
-		buf.append("        };\n");
-		buf.append("        add(o -> r.)\n");
-		buf.append("    }\n");
-		buf.append("    static void add(Consumer<Object> consumer) {}\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			import java.util.function.Consumer;
+			
+			public class A {
+			    public void foo() {
+			        Runnable r = () -> {
+			        };
+			        add(o -> r.)
+			    }
+			    static void add(Consumer<Object> consumer) {}
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
@@ -907,20 +936,21 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			proposal.apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import java.util.function.Consumer;\n");
-			buf.append("\n");
-			buf.append("public class A {\n");
-			buf.append("    public void foo() {\n");
-			buf.append("        Runnable r = () -> {\n");
-			buf.append("        };\n");
-			buf.append("        add(o -> r.run())\n");
-			buf.append("    }\n");
-			buf.append("    static void add(Consumer<Object> consumer) {}\n");
-			buf.append("}\n");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				import java.util.function.Consumer;
+				
+				public class A {
+				    public void foo() {
+				        Runnable r = () -> {
+				        };
+				        add(o -> r.run())
+				    }
+				    static void add(Consumer<Object> consumer) {}
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -931,16 +961,16 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("class Strong {}\n");
-		buf.append("public class A {\n");
-		buf.append("    void lambda(Object o) {\n");
-		buf.append("        Runnable r = () -> ((Stron))\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			class Strong {}
+			public class A {
+			    void lambda(Object o) {
+			        Runnable r = () -> ((Stron))
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
 
@@ -966,16 +996,17 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
 			proposal.apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("class Strong {}\n");
-			buf.append("public class A {\n");
-			buf.append("    void lambda(Object o) {\n");
-			buf.append("        Runnable r = () -> ((Strong))\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				class Strong {}
+				public class A {
+				    void lambda(Object o) {
+				        Runnable r = () -> ((Strong))
+				    }
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -986,17 +1017,17 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class Bug443091 {\n");
-		buf.append("	void foo(Consumer<Integer> c){}\n");
-		buf.append("    void test() {\n");
-		buf.append("        this.foo()\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			import java.util.function.Consumer;
+			public class Bug443091 {
+				void foo(Consumer<Integer> c){}
+			    void test() {
+			        this.foo()
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
 
@@ -1020,17 +1051,18 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
 			proposal.apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import java.util.function.Consumer;\n");
-			buf.append("public class Bug443091 {\n");
-			buf.append("	void foo(Consumer<Integer> c){}\n");
-			buf.append("    void test() {\n");
-			buf.append("        this.foo(arg0 -> )\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				import java.util.function.Consumer;
+				public class Bug443091 {
+					void foo(Consumer<Integer> c){}
+				    void test() {
+				        this.foo(arg0 -> )
+				    }
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -1041,16 +1073,16 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class Bug443091 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Consumer<Integer> c =\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			import java.util.function.Consumer;
+			public class Bug443091 {
+			    void test() {
+			        Consumer<Integer> c =
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
 
@@ -1074,16 +1106,17 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
 			proposal.apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import java.util.function.Consumer;\n");
-			buf.append("public class Bug443091 {\n");
-			buf.append("    void test() {\n");
-			buf.append("        Consumer<Integer> c =arg0 -> \n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				import java.util.function.Consumer;
+				public class Bug443091 {
+				    void test() {
+				        Consumer<Integer> c =arg0 ->\s
+				    }
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -1094,15 +1127,15 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class Bug443091 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Runnable run =\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			public class Bug443091 {
+			    void test() {
+			        Runnable run =
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
 
@@ -1126,15 +1159,16 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
 			proposal.apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("public class Bug443091 {\n");
-			buf.append("    void test() {\n");
-			buf.append("        Runnable run =() -> \n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				public class Bug443091 {
+				    void test() {
+				        Runnable run =() ->\s
+				    }
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}
@@ -1144,16 +1178,16 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.function.BiConsumer;\n");
-		buf.append("public class Bug443091 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        BiConsumer<Integer, String> bi =\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			import java.util.function.BiConsumer;
+			public class Bug443091 {
+			    void test() {
+			        BiConsumer<Integer, String> bi =
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("Bug443091.java", contents, false, null);
 
@@ -1177,16 +1211,17 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
 			proposal.apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import java.util.function.BiConsumer;\n");
-			buf.append("public class Bug443091 {\n");
-			buf.append("    void test() {\n");
-			buf.append("        BiConsumer<Integer, String> bi =(arg0, arg1) -> \n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEquals(buf.toString(), doc.get());
+			String str1= """
+				package test1;
+				
+				import java.util.function.BiConsumer;
+				public class Bug443091 {
+				    void test() {
+				        BiConsumer<Integer, String> bi =(arg0, arg1) ->\s
+				    }
+				}
+				""";
+			assertEquals(str1, doc.get());
 		} finally {
 			part.getSite().getPage().closeAllEditors(false);
 		}

@@ -112,16 +112,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		int[] array = {1,2,3,4};\n");
-		buf.append("		for (int element : array) {\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					int[] array = {1,2,3,4};
+					for (int element : array) {
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -143,17 +143,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNotNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("public class B {\n");
-		bld.append("    public void foo() {\n");
-		bld.append("        int[] array = {5, 6, 7, 8};\n");
-		bld.append("        for (int element : array) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			public class B {
+			    public void foo() {
+			        int[] array = {5, 6, 7, 8};
+			        for (int element : array) {
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -175,17 +175,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNotNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("public class C {\n");
-		bld.append("    public void foo() {\n");
-		bld.append("        int[] array = {5, 6, 7, 8};\n");
-		bld.append("        for (int element : array) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			public class C {
+			    public void foo() {
+			        int[] array = {5, 6, 7, 8};
+			        for (int element : array) {
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -207,17 +207,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNotNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("public class D {\n");
-		bld.append("    public void foo() {\n");
-		bld.append("        int[] array = {5, 6, 7, 8};\n");
-		bld.append("        for (int element : array) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			public class D {
+			    public void foo() {
+			        int[] array = {5, 6, 7, 8};
+			        for (int element : array) {
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -263,18 +263,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNotNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("import java.util.List;\n");
-		bld.append("\n");
-		bld.append("public class F {\n");
-		bld.append("    public void foo(List<?> wildcardList) {\n");
-		bld.append("        for (Object element : wildcardList) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			import java.util.List;
+			
+			public class F {
+			    public void foo(List<?> wildcardList) {
+			        for (Object element : wildcardList) {
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -298,18 +298,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNotNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("import java.util.List;\n");
-		bld.append("\n");
-		bld.append("public class G {\n");
-		bld.append("    public void foo(List<? extends String> wildcardList) {\n");
-		bld.append("        for (String element : wildcardList) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			import java.util.List;
+			
+			public class G {
+			    public void foo(List<? extends String> wildcardList) {
+			        for (String element : wildcardList) {
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -333,18 +333,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertNotNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("import java.util.List;\n");
-		bld.append("\n");
-		bld.append("public class H {\n");
-		bld.append("    public void foo(List<? super String> wildcardList) {\n");
-		bld.append("        for (Object element : wildcardList) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			import java.util.List;
+			
+			public class H {
+			    public void foo(List<? super String> wildcardList) {
+			        for (Object element : wildcardList) {
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -370,18 +370,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		bld= new StringBuilder();
-		bld.append("package test1;\n");
-		bld.append("\n");
-		bld.append("import java.util.Collection;\n");
-		bld.append("\n");
-		bld.append("public class I {\n");
-		bld.append("    public void foo(Collection<? super String> wildcardCollection) {\n");
-		bld.append("        for (Object element : wildcardCollection) {\n");
-		bld.append("        }\n");
-		bld.append("    }\n");
-		bld.append("}\n");
-		String expected= bld.toString();
+		String expected= """
+			package test1;
+			
+			import java.util.Collection;
+			
+			public class I {
+			    public void foo(Collection<? super String> wildcardCollection) {
+			        for (Object element : wildcardCollection) {
+			        }
+			    }
+			}
+			""";
 
 		assertEqualString(preview1, expected);
 	}
@@ -408,16 +408,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		int[] children = {1,2,3,4};\n");
-		buf.append("		for (int child : children) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+				public void foo() {
+					int[] children = {1,2,3,4};
+					for (int child : children) {
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -443,16 +443,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		int[] locations = {1,2,3,4};\n");
-		buf.append("		for (int location : locations) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+				public void foo() {
+					int[] locations = {1,2,3,4};
+					for (int location : locations) {
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -478,16 +478,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		int[] locationEntries = {1,2,3,4};\n");
-		buf.append("		for (int locationEntry : locationEntries) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+				public void foo() {
+					int[] locationEntries = {1,2,3,4};
+					for (int locationEntry : locationEntries) {
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -513,16 +513,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		int[] Entries = {1,2,3,4};\n");
-		buf.append("		for (int entry : Entries) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+				public void foo() {
+					int[] Entries = {1,2,3,4};
+					for (int entry : Entries) {
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -548,16 +548,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		int[] proxies = {1,2,3,4};\n");
-		buf.append("		for (int proxy : proxies) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+				public void foo() {
+					int[] proxies = {1,2,3,4};
+					for (int proxy : proxies) {
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -584,17 +584,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		String[] AllChildren = {\"aaa\",\"bbb\",\"ccc\"};\n");
-		buf.append("		for (String child : AllChildren) {\n");
-		buf.append("			System.out.println(child);\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+				public void foo() {
+					String[] AllChildren = {"aaa","bbb","ccc"};
+					for (String child : AllChildren) {
+						System.out.println(child);
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -620,16 +620,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		char[] array = {'1','2'};\n");
-		buf.append("		for (char element : array) {\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					char[] array = {'1','2'};
+					for (char element : array) {
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -655,16 +655,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		String[] array = {\"1\",\"2\"};\n");
-		buf.append("		for (String element : array) {\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					String[] array = {"1","2"};
+					for (String element : array) {
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -691,17 +691,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		String[] array = {\"1\",\"2\"};\n");
-		buf.append("		for (String element : array) {\n");
-		buf.append("			System.out.println(element);\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					String[] array = {"1","2"};
+					for (String element : array) {
+						System.out.println(element);
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -732,21 +732,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		String[] array = {\"1\",\"2\"};\n");
-		buf.append("		for (String element : array) {\n");
-		buf.append("			if (element.equals(\"2\"))\n");
-		buf.append("				System.out.println(element);\n");
-		buf.append("			else if ((element + 2) == \"4\"){\n");
-		buf.append("				int k = Integer.parseInt(element) - 2;\n");
-		buf.append("			}\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					String[] array = {"1","2"};
+					for (String element : array) {
+						if (element.equals("2"))
+							System.out.println(element);
+						else if ((element + 2) == "4"){
+							int k = Integer.parseInt(element) - 2;
+						}
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -777,21 +777,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		String[] array = {\"1\",\"2\"};\n");
-		buf.append("		for (String element : array) {\n");
-		buf.append("			if (element.equals(\"2\"))\n");
-		buf.append("				System.out.println(element);\n");
-		buf.append("			else if ((element + 2) == \"4\"){\n");
-		buf.append("				int k = Integer.parseInt(element) - 2;\n");
-		buf.append("			}\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					String[] array = {"1","2"};
+					for (String element : array) {
+						if (element.equals("2"))
+							System.out.println(element);
+						else if ((element + 2) == "4"){
+							int k = Integer.parseInt(element) - 2;
+						}
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -823,21 +823,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class Weirdy{}\n");
-		buf.append("private Weirdy[] weirdies;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("		for (Weirdy p : weirdies) {\n");
-		buf.append("			System.out.println();\n");
-		buf.append("		    if (p != null){\n");
-		buf.append("				System.out.println(p);\n");
-		buf.append("	    	}\n");
-		buf.append("	    }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			class Weirdy{}
+			private Weirdy[] weirdies;
+			public class A {
+			    public void foo(){
+					for (Weirdy p : weirdies) {
+						System.out.println();
+					    if (p != null){
+							System.out.println(p);
+				    	}
+				    }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -869,21 +869,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class Weirdy{}\n");
-		buf.append("public class A {\n");
-		buf.append("	private Weirdy[] weirdies;\n");
-		buf.append("    public void foo(){\n");
-		buf.append("		for (Weirdy p : weirdies) {\n");
-		buf.append("			System.out.println();\n");
-		buf.append("		    if (p != null){\n");
-		buf.append("				System.out.println(p);\n");
-		buf.append("	    	}\n");
-		buf.append("	    }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			class Weirdy{}
+			public class A {
+				private Weirdy[] weirdies;
+			    public void foo(){
+					for (Weirdy p : weirdies) {
+						System.out.println();
+					    if (p != null){
+							System.out.println(p);
+				    	}
+				    }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -915,21 +915,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class Weirdy{}\n");
-		buf.append("public class A {\n");
-		buf.append("	private Weirdy[] weirdies;\n");
-		buf.append("    public void foo(){\n");
-		buf.append("		for (Weirdy p : this.weirdies) {\n");
-		buf.append("			System.out.println();\n");
-		buf.append("		    if (p != null){\n");
-		buf.append("				System.out.println(p);\n");
-		buf.append("	    	}\n");
-		buf.append("	    }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			class Weirdy{}
+			public class A {
+				private Weirdy[] weirdies;
+			    public void foo(){
+					for (Weirdy p : this.weirdies) {
+						System.out.println();
+					    if (p != null){
+							System.out.println(p);
+				    	}
+				    }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -1017,17 +1017,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		int[][] matrix = {{1,2},{3,4}};\n");
-		buf.append("		for (int[] element : matrix) {\n");
-		buf.append("			System.out.println(element);\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					int[][] matrix = {{1,2},{3,4}};
+					for (int[] element : matrix) {
+						System.out.println(element);
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -1056,19 +1056,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		int[][] matrix = {{1,2},{3,4}};\n");
-		buf.append("		for (int[] element : matrix) {\n");
-		buf.append("			for(int j = 0; j < element.length; j++){\n");
-		buf.append("				System.out.println(element[j]);\n");
-		buf.append("			}\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					int[][] matrix = {{1,2},{3,4}};
+					for (int[] element : matrix) {
+						for(int j = 0; j < element.length; j++){
+							System.out.println(element[j]);
+						}
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -1319,18 +1319,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		java.util.List list = new ArrayList();\n");
-		buf.append("		list.add(null);\n");
-		buf.append("		for (Object element : list) {\n");
-		buf.append("			System.out.println(element);\n");
-		buf.append("		}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+					java.util.List list = new ArrayList();
+					list.add(null);
+					for (Object element : list) {
+						System.out.println(element);
+					}
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		assertCorrectLabels(proposals);
@@ -1470,17 +1470,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		List strings= new ArrayList();\n");
-		buf.append("		for (Object string : strings);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.List;
+			import java.util.ArrayList;
+			public class A {
+			    public void foo() {
+					List strings= new ArrayList();
+					for (Object string : strings);
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		assertCorrectLabels(proposals);
@@ -1507,17 +1507,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		List<String> strings= new ArrayList<>();\n");
-		buf.append("		for (String string : strings);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.List;
+			import java.util.ArrayList;
+			public class A {
+			    public void foo() {
+					List<String> strings= new ArrayList<>();
+					for (String string : strings);
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		assertCorrectLabels(proposals);
@@ -1544,17 +1544,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Set;\n");
-		buf.append("import java.util.TreeSet;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		Set<String> strings= new TreeSet<>();\n");
-		buf.append("		for (String string : strings);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Set;
+			import java.util.TreeSet;
+			public class A {
+			    public void foo() {
+					Set<String> strings= new TreeSet<>();
+					for (String string : strings);
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		assertCorrectLabels(proposals);
@@ -1631,20 +1631,20 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        List<File> a = new ArrayList<>();\n");
-		buf.append("        for (File element : a) {\n");
-		buf.append("            System.out.print(a);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.io.File;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class A {
+			    public static void main(String[] args) {
+			        List<File> a = new ArrayList<>();
+			        for (File element : a) {
+			            System.out.print(a);
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		assertCorrectLabels(proposals);
@@ -1784,17 +1784,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private int[] arr;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int element : this.arr) {\n");
-		buf.append("            System.out.println(element);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    private int[] arr;
+			    public void foo() {
+			        for (int element : this.arr) {
+			            System.out.println(element);
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -1824,20 +1824,20 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    private class E1Sub {\n");
-		buf.append("        public int[] array;\n");
-		buf.append("    }\n");
-		buf.append("    private E1Sub e1sub;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int element : this.e1sub.array) {\n");
-		buf.append("            System.out.println(element);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    private class E1Sub {
+			        public int[] array;
+			    }
+			    private E1Sub e1sub;
+			    public void foo() {
+			        for (int element : this.e1sub.array) {
+			            System.out.println(element);
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -1964,17 +1964,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Object[] x) {\n");
-		buf.append("        int i = 0;\n");
-		buf.append("        for (Object element : x) {\n");
-		buf.append("            System.out.println(x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class E {
+			    void foo(Object[] x) {
+			        int i = 0;
+			        for (Object element : x) {
+			            System.out.println(x[i]);
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -2000,16 +2000,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Object[] x) {\n");
-		buf.append("        for (Object element : x) {\n");
-		buf.append("            System.out.println(x[0]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class E {
+			    void foo(Object[] x) {
+			        for (Object element : x) {
+			            System.out.println(x[0]);
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -2035,16 +2035,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    void foo(Object[] x, Object[] y) {\n");
-		buf.append("        for (Object element2 : y)\n");
-		buf.append("            for (Object element : x)\n");
-		buf.append("                System.out.println(element2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class E1 {
+			    void foo(Object[] x, Object[] y) {
+			        for (Object element2 : y)
+			            for (Object element : x)
+			                System.out.println(element2);
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -2070,14 +2070,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInitializerPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2085,14 +2086,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInitializerPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 1; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 1; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2100,15 +2102,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInitializerPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        int i;");
-		buf.append("        for (i = 0; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        int i;\
+			        for (i = 0; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2116,15 +2119,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInitializerPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        int i, f;\n");
-		buf.append("        for (i = 0, f= 0; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        int i, f;
+			        for (i = 0, f= 0; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2132,14 +2136,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInitializerPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0, length= x.length; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0, length= x.length; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2147,18 +2152,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInitializerPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    void foo(Object[] x) {\n");
-		buf.append("        for (int j = 0, a = init(); j < x.length; j++) {\n");
-		buf.append("            System.out.println(x[j]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int init() {return 0;}\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    void foo(Object[] x) {
+			        for (int j = 0, a = init(); j < x.length; j++) {
+			            System.out.println(x[j]);
+			        }
+			    }
+			    private int init() {return 0;}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2166,14 +2171,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; x.length > i; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; x.length > i; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2181,14 +2187,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; x.length <= i; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; x.length <= i; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2196,14 +2203,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; x.length < j; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; x.length < j; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2211,17 +2219,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    private static class MyClass {\n");
-		buf.append("        public int length;\n");
-		buf.append("    }\n");
-		buf.append("    public void foo(MyClass x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    private static class MyClass {
+			        public int length;
+			    }
+			    public void foo(MyClass x) {
+			        for (int i = 0; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2229,15 +2238,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2245,15 +2255,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < this.x.length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < this.x.length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2261,14 +2272,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0, length= x.length; i < length; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0, length= x.length; i < length; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2276,14 +2288,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExpressionPrecondition08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0, length= x.length; length > i; i++) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0, length= x.length; length > i; i++) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2291,14 +2304,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUpdatePrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i+= 1) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i+= 1) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2306,14 +2320,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUpdatePrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i= 1 + i) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i= 1 + i) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2321,14 +2336,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUpdatePrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i= i + 1) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i= i + 1) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2336,14 +2352,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUpdatePrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i= i + 2) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i= i + 2) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2351,15 +2368,16 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testUpdatePrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("		int j= 0");
-		buf.append("        for (int i = 0; i < x.length; i= j + 1) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+					int j= 0\
+			        for (int i = 0; i < x.length; i= j + 1) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2368,14 +2386,15 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testUpdatePrecondition07() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349782
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; ++i) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; ++i) {}
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2383,16 +2402,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            System.out.println(x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i++) {
+			            System.out.println(x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2400,17 +2420,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            System.out.println(x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {
+			            System.out.println(x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2418,17 +2439,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            System.out.println(this.x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {
+			            System.out.println(this.x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2436,18 +2458,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("			i++;");
-		buf.append("            System.out.println(this.x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {
+						i++;\
+			            System.out.println(this.x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2455,18 +2478,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("			System.out.println(i);");
-		buf.append("            System.out.println(this.x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {
+						System.out.println(i);\
+			            System.out.println(this.x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2474,17 +2498,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            this.x= null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {
+			            this.x= null;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2492,16 +2517,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            x= null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i++) {
+			            x= null;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2509,17 +2535,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            x= null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < x.length; i++) {
+			            x= null;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2527,16 +2554,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            x[i]= null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0; i < x.length; i++) {
+			            x[i]= null;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2544,16 +2572,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPreconditio10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            --x[i];\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(int[] x) {
+			        for (int i = 0; i < x.length; i++) {
+			            --x[i];
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2561,16 +2590,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int[] x) {\n");
-		buf.append("        for (int i = 0; i < x.length; i++) {\n");
-		buf.append("            x[i]++;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(int[] x) {
+			        for (int i = 0; i < x.length; i++) {
+			            x[i]++;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2578,16 +2608,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object[] x) {\n");
-		buf.append("        for (int i = 0, length= x.length; length > i; i++) {\n");
-		buf.append("            System.out.println(length);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo(Object[] x) {
+			        for (int i = 0, length= x.length; length > i; i++) {
+			            System.out.println(length);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2595,19 +2626,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBodyPrecondition13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(List<String> data) {\n");
-		buf.append("        for (Iterator<String> iterator = data.iterator(); iterator.hasNext();) {\n");
-		buf.append("            String row = iterator.next();\n");
-		buf.append("            row.equals(iterator.hasNext());\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.util.Iterator;
+			import java.util.List;
+			public class E {
+			    void foo(List<String> data) {
+			        for (Iterator<String> iterator = data.iterator(); iterator.hasNext();) {
+			            String row = iterator.next();
+			            row.equals(iterator.hasNext());
+			        }
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2616,17 +2649,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_1() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < this.x.length; i++) {\n");
-		buf.append("            System.out.println(x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < this.x.length; i++) {
+			            System.out.println(x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2635,17 +2669,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_2() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < this.x.length; i++) {\n");
-		buf.append("            System.out.println(this.x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo() {
+			        for (int i = 0; i < this.x.length; i++) {
+			            System.out.println(this.x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2654,17 +2689,18 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_3() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object[] x;\n");
-		buf.append("    public void foo(Object obj) {\n");
-		buf.append("        for (int i = 0; i < ((E) obj).x.length; i++) {\n");
-		buf.append("            System.out.println(((E) obj).x[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    Object[] x;
+			    public void foo(Object obj) {
+			        for (int i = 0; i < ((E) obj).x.length; i++) {
+			            System.out.println(((E) obj).x[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertTrue(satisfiesPrecondition(cu));
 	}
@@ -2673,24 +2709,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E implements Comparable<Object> {\n");
-		buf.append("    private int[] tokens;\n");
-		buf.append("    public int compareTo(Object obj) {\n");
-		buf.append("        for (int i = 0; i < tokens.length; i++) {\n");
-		buf.append("            int v = compare(tokens[i], ((E) obj).tokens[i]);\n");
-		buf.append("            if (v != 0)\n");
-		buf.append("                return v;\n");
-		buf.append("        }\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("    private int compare(int i, int j) {\n");
-		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E implements Comparable<Object> {
+			    private int[] tokens;
+			    public int compareTo(Object obj) {
+			        for (int i = 0; i < tokens.length; i++) {
+			            int v = compare(tokens[i], ((E) obj).tokens[i]);
+			            if (v != 0)
+			                return v;
+			        }
+			        return 0;
+			    }
+			    private int compare(int i, int j) {
+			        return i < j ? -1 : i == j ? 0 : 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2699,24 +2735,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_5() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E implements Comparable<Object> {\n");
-		buf.append("    private int[] tokens;\n");
-		buf.append("    public int compareTo(Object obj) {\n");
-		buf.append("        for (int i = 0; i < this.tokens.length; i++) {\n");
-		buf.append("            int v = compare(tokens[i], ((E) obj).tokens[i]);\n");
-		buf.append("            if (v != 0)\n");
-		buf.append("                return v;\n");
-		buf.append("        }\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("    private int compare(int i, int j) {\n");
-		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E implements Comparable<Object> {
+			    private int[] tokens;
+			    public int compareTo(Object obj) {
+			        for (int i = 0; i < this.tokens.length; i++) {
+			            int v = compare(tokens[i], ((E) obj).tokens[i]);
+			            if (v != 0)
+			                return v;
+			        }
+			        return 0;
+			    }
+			    private int compare(int i, int j) {
+			        return i < j ? -1 : i == j ? 0 : 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2725,24 +2761,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E implements Comparable<Object> {\n");
-		buf.append("    private int[] tokens;\n");
-		buf.append("    public int compareTo(Object obj) {\n");
-		buf.append("        for (int i = 0; i < ((E) obj).tokens.length; i++) {\n");
-		buf.append("            int v = compare(((E) obj).tokens[i], tokens[i]);\n");
-		buf.append("            if (v != 0)\n");
-		buf.append("                return v;\n");
-		buf.append("        }\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("    private int compare(int i, int j) {\n");
-		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E implements Comparable<Object> {
+			    private int[] tokens;
+			    public int compareTo(Object obj) {
+			        for (int i = 0; i < ((E) obj).tokens.length; i++) {
+			            int v = compare(((E) obj).tokens[i], tokens[i]);
+			            if (v != 0)
+			                return v;
+			        }
+			        return 0;
+			    }
+			    private int compare(int i, int j) {
+			        return i < j ? -1 : i == j ? 0 : 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2751,24 +2787,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_7() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E implements Comparable<Object> {\n");
-		buf.append("    private int[] tokens;\n");
-		buf.append("    public int compareTo(Object obj) {\n");
-		buf.append("        for (int i = 0; i < ((E) obj).tokens.length; i++) {\n");
-		buf.append("            int v = compare(((E) obj).tokens[i], this.tokens[i]);\n");
-		buf.append("            if (v != 0)\n");
-		buf.append("                return v;\n");
-		buf.append("        }\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("    private int compare(int i, int j) {\n");
-		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E implements Comparable<Object> {
+			    private int[] tokens;
+			    public int compareTo(Object obj) {
+			        for (int i = 0; i < ((E) obj).tokens.length; i++) {
+			            int v = compare(((E) obj).tokens[i], this.tokens[i]);
+			            if (v != 0)
+			                return v;
+			        }
+			        return 0;
+			    }
+			    private int compare(int i, int j) {
+			        return i < j ? -1 : i == j ? 0 : 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2777,24 +2813,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_8() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E implements Comparable<E> {\n");
-		buf.append("    private int[] tokens;\n");
-		buf.append("    public int compareTo(E obj) {\n");
-		buf.append("        for (int i = 0; i < obj.tokens.length; i++) {\n");
-		buf.append("            int v = compare(obj.tokens[i], this.tokens[i]);\n");
-		buf.append("            if (v != 0)\n");
-		buf.append("                return v;\n");
-		buf.append("        }\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("    private int compare(int i, int j) {\n");
-		buf.append("        return i < j ? -1 : i == j ? 0 : 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E implements Comparable<E> {
+			    private int[] tokens;
+			    public int compareTo(E obj) {
+			        for (int i = 0; i < obj.tokens.length; i++) {
+			            int v = compare(obj.tokens[i], this.tokens[i]);
+			            if (v != 0)
+			                return v;
+			        }
+			        return 0;
+			    }
+			    private int compare(int i, int j) {
+			        return i < j ? -1 : i == j ? 0 : 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2803,23 +2839,23 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	public void testBodyPrecondition344674_9() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=344674
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    String[] tokens;\n");
-		buf.append("    E other;\n");
-		buf.append("    private E get(E a) {\n");
-		buf.append("        return a;\n");
-		buf.append("    }\n");
-		buf.append("    public void foo(E arg) {\n");
-		buf.append("        for (int i = 0; i < get(other).tokens.length; i++) {\n");
-		buf.append("            E other = this; // local var shadows field\n");
-		buf.append("            System.out.println(get(other).tokens[i]);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    String[] tokens;
+			    E other;
+			    private E get(E a) {
+			        return a;
+			    }
+			    public void foo(E arg) {
+			        for (int i = 0; i < get(other).tokens.length; i++) {
+			            E other = this; // local var shadows field
+			            System.out.println(get(other).tokens[i]);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2847,17 +2883,17 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void a(int[] ints) {\n");
-		buf.append("        //Comment\n");
-		buf.append("        for (int j : ints) {\n");
-		buf.append("            System.out.println(j);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class E1 {
+			    public void a(int[] ints) {
+			        //Comment
+			        for (int j : ints) {
+			            System.out.println(j);
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -2885,38 +2921,39 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void a(int[] ints) {\n");
-		buf.append("        //Comment\n");
-		buf.append("        for (int j : ints) {\n");
-		buf.append("            System.out.println(j);\n");
-		buf.append("        }\n");
-		buf.append("        //Comment\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class E1 {
+			    public void a(int[] ints) {
+			        //Comment
+			        for (int j : ints) {
+			            System.out.println(j);
+			        }
+			        //Comment
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testBug214340_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int[] array = new int[3];\n");
-		buf.append("\n");
-		buf.append("    boolean same(E1 that) {\n");
-		buf.append("        for (int i = 0; i < array.length; i++) {\n");
-		buf.append("            if (this.array[i] != that.array[i])\n");
-		buf.append("                return false;\n");
-		buf.append("        }\n");
-		buf.append("        return true;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    int[] array = new int[3];
+			
+			    boolean same(E1 that) {
+			        for (int i = 0; i < array.length; i++) {
+			            if (this.array[i] != that.array[i])
+			                return false;
+			        }
+			        return true;
+			    }
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2924,20 +2961,21 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBug214340_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int[] array = new int[3];\n");
-		buf.append("    static boolean same(E1 one, E1 two) {\n");
-		buf.append("        for (int i = 0; i < one.array.length; i++) {\n");
-		buf.append("            if (one.array[i] != two.array[i])\n");
-		buf.append("                return false;\n");
-		buf.append("        }\n");
-		buf.append("        return true;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    int[] array = new int[3];
+			    static boolean same(E1 one, E1 two) {
+			        for (int i = 0; i < one.array.length; i++) {
+			            if (one.array[i] != two.array[i])
+			                return false;
+			        }
+			        return true;
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -2967,36 +3005,37 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    int[] array = new int[3];\n");
-		buf.append("    static boolean same(E1 one, E1 two) {\n");
-		buf.append("        for (int element : one.array) {\n");
-		buf.append("            System.out.println(element);\n");
-		buf.append("        }\n");
-		buf.append("        return true;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class E1 {
+			    int[] array = new int[3];
+			    static boolean same(E1 one, E1 two) {
+			        for (int element : one.array) {
+			            System.out.println(element);
+			        }
+			        return true;
+			    }
+			}
+			
+			""";
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testBug231575_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private Object[] array;\n");
-		buf.append("    public void method(E1 copy) {\n");
-		buf.append("        for (int i = 0; i < copy.array.length; i++) {\n");
-		buf.append("            array[i].equals(null);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    private Object[] array;
+			    public void method(E1 copy) {
+			        for (int i = 0; i < copy.array.length; i++) {
+			            array[i].equals(null);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
@@ -3033,23 +3072,23 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private Object[] array;\n");
-		buf.append("    public boolean isNull(Object object ) {\n");
-		buf.append("        boolean isNull= (object != null) ? false : true;\n");
-		buf.append("        return isNull; \n");
-		buf.append("    }\n");
-		buf.append("    public void method() {\n");
-		buf.append("        for (Object element : array) {\n");
-		buf.append("            if (!isNull(element)) {\n");
-		buf.append("                System.out.println(element.toString()) ");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class E1 {
+			    private Object[] array;
+			    public boolean isNull(Object object ) {
+			        boolean isNull= (object != null) ? false : true;
+			        return isNull;\s
+			    }
+			    public void method() {
+			        for (Object element : array) {
+			            if (!isNull(element)) {
+			                System.out.println(element.toString()) \
+			            }
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -3149,24 +3188,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private Object[] array1;\n");
-		buf.append("    private Object[] array2;\n");
-		buf.append("    public void method() {\n");
-		buf.append("        outer:\n");
-		buf.append("        for (Object o1 : array1) {\n");
-		buf.append("            for (int j = 0; j < array2.length; j++) {\n");
-		buf.append("                Object o2= array2[j];\n");
-		buf.append("                if (o2.equals(o1)) {\n");
-		buf.append("                    continue outer;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class E1 {
+			    private Object[] array1;
+			    private Object[] array2;
+			    public void method() {
+			        outer:
+			        for (Object o1 : array1) {
+			            for (int j = 0; j < array2.length; j++) {
+			                Object o2= array2[j];
+			                if (o2.equals(o1)) {
+			                    continue outer;
+			                }
+			            }
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		proposals= fetchConvertingProposal2(orig, cu);
@@ -3177,24 +3216,24 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview2= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private Object[] array1;\n");
-		buf.append("    private Object[] array2;\n");
-		buf.append("    public void method() {\n");
-		buf.append("        outer:\n");
-		buf.append("        for (int i = 0; i < array1.length; i++) {\n");
-		buf.append("            Object o1= array1[i];\n");
-		buf.append("            for (Object o2 : array2) {\n");
-		buf.append("                if (o2.equals(o1)) {\n");
-		buf.append("                    continue outer;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected= buf.toString();
+		expected= """
+			package test1;
+			public class E1 {
+			    private Object[] array1;
+			    private Object[] array2;
+			    public void method() {
+			        outer:
+			        for (int i = 0; i < array1.length; i++) {
+			            Object o1= array1[i];
+			            for (Object o2 : array2) {
+			                if (o2.equals(o1)) {
+			                    continue outer;
+			                }
+			            }
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview2, expected);
 	}
 
@@ -3203,17 +3242,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
 		buf.append(
-				"package test1;\n" +
-				"import java.io.Serializable;\n" +
-				"public class A {\n" +
-				"	public void test() {\n" +
-				"		Object[] foo= new Object[5];\n" +
-				"		for (int i= 0; i < foo.length; i++) {\n" +
-				"			if (!(foo[i] instanceof Serializable)) {\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}\n" +
-				"}\n");
+				"""
+					package test1;
+					import java.io.Serializable;
+					public class A {
+						public void test() {
+							Object[] foo= new Object[5];
+							for (int i= 0; i < foo.length; i++) {
+								if (!(foo[i] instanceof Serializable)) {
+								}
+							}
+						}
+					}
+					""");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
@@ -3224,20 +3265,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append(
-				"package test1;\n" +
-				"import java.io.Serializable;\n" +
-				"public class A {\n" +
-				"	public void test() {\n" +
-				"		Object[] foo= new Object[5];\n" +
-				"		for (Object element : foo) {\n" +
-				"			if (!(element instanceof Serializable)) {\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}\n" +
-				"}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.io.Serializable;
+			public class A {
+				public void test() {
+					Object[] foo= new Object[5];
+					for (Object element : foo) {
+						if (!(element instanceof Serializable)) {
+						}
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -3246,17 +3286,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuilder buf= new StringBuilder();
 		buf.append(
-				"package test1;\n" +
-				"import java.io.Serializable;\n" +
-				"public class A {\n" +
-				"	public void test() {\n" +
-				"		boolean[] foo= new boolean[5];\n" +
-				"		for (int i= 0; i < foo.length; i++) {\n" +
-				"			if (!foo[i]) {\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}\n" +
-				"}\n");
+				"""
+					package test1;
+					import java.io.Serializable;
+					public class A {
+						public void test() {
+							boolean[] foo= new boolean[5];
+							for (int i= 0; i < foo.length; i++) {
+								if (!foo[i]) {
+								}
+							}
+						}
+					}
+					""");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
@@ -3267,20 +3309,19 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fConvertLoopProposal);
 
-		buf= new StringBuilder();
-		buf.append(
-				"package test1;\n" +
-				"import java.io.Serializable;\n" +
-				"public class A {\n" +
-				"	public void test() {\n" +
-				"		boolean[] foo= new boolean[5];\n" +
-				"		for (boolean element : foo) {\n" +
-				"			if (!element) {\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}\n" +
-				"}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.io.Serializable;
+			public class A {
+				public void test() {
+					boolean[] foo= new boolean[5];
+					for (boolean element : foo) {
+						if (!element) {
+						}
+					}
+				}
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 

@@ -52,10 +52,10 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("/** @category test */\n");
-		buf.append("module mymod {}\n");
-		String content= buf.toString();
+		String content= """
+			/** @category test */
+			module mymod {}
+			""";
 		ICompilationUnit cu= sourceFolder.getPackageFragment("").createCompilationUnit("module-info.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("mymod"), 5);
@@ -69,10 +69,10 @@ public class BindingLabels9Test extends AbstractBindingLabelsTest {
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("@Deprecated\n");
-		buf.append("module mymod {}\n");
-		String content= buf.toString();
+		String content= """
+			@Deprecated
+			module mymod {}
+			""";
 		ICompilationUnit cu= sourceFolder.getPackageFragment("").createCompilationUnit("module-info.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("mymod"), 5);

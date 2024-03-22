@@ -89,20 +89,19 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String existing= buf.toString();
+		String existing= """
+			package test1;
+			import java.util.Vector;
+			public class E {
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() {
+			        fField1 = fField2;
+			    }
+			    public int foo1(int i) {
+			        return i;
+			    }
+			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
 
 		String statement= "fField1 = fField2;";
@@ -111,19 +110,18 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Vector;
+			public class E {
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() {
+			        fField1 = fField2;
+			    }
+			    public int foo1(int i) {
+			    }
+			}""";
 
 		assertEqualString(string, expected);
 
@@ -175,35 +173,34 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("            return i;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("        if (fField1 == 0) {\n");
-		buf.append("            fField2++;\n");
-		buf.append("        }\n");
-		buf.append("        EInner inner = new EInner();\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return i;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String existing= buf.toString();
+		String existing= """
+			package test1;
+			import java.util.Vector;
+			public class E {
+			    private class EInner {
+			        public int inner(int i) {
+			            return i;
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() {
+			        fField1 = fField2;
+			        if (fField1 == 0) {
+			            fField2++;
+			        }
+			        EInner inner = new EInner();
+			    }
+			    public int foo1(int i) {
+			        private class Local {
+			            public int local(int i) {
+			                return i;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
 
 		int offset= existing.indexOf("fField1 = fField2;");
@@ -211,27 +208,26 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("        if (fField1 == 0) {\n");
-		buf.append("            fField2++;\n");
-		buf.append("        }\n");
-		buf.append("        EInner inner = new EInner();\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Vector;
+			public class E {
+			    private class EInner {
+			        public int inner(int i) {
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() {
+			        fField1 = fField2;
+			        if (fField1 == 0) {
+			            fField2++;
+			        }
+			        EInner inner = new EInner();
+			    }
+			    public int foo1(int i) {
+			    }
+			}""";
 
 		assertEqualString(string, expected);
 		assertAllBindings(astRoot);
@@ -240,36 +236,35 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner implements Serializable {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("            return i;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("        if (fField1 == 0) {\n");
-		buf.append("            fField2++;\n");
-		buf.append("        }\n");
-		buf.append("        EInner inner = new EInner();\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String existing= buf.toString();
+		String existing= """
+			package test1;
+			import java.util.Vector;
+			import java.io.Serializable;
+			public class E {
+			    private class EInner implements Serializable {
+			        public int inner(int i) {
+			            return i;
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() {
+			        fField1 = fField2;
+			        if (fField1 == 0) {
+			            fField2++;
+			        }
+			        EInner inner = new EInner();
+			    }
+			    public int foo1(int i) {
+			        private class Local {
+			            public int local(int i) {
+			                return 1;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
 
 		int offset= existing.indexOf("return 1;");
@@ -277,30 +272,29 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner implements Serializable {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() {\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Vector;
+			import java.io.Serializable;
+			public class E {
+			    private class EInner implements Serializable {
+			        public int inner(int i) {
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() {
+			    }
+			    public int foo1(int i) {
+			        private class Local {
+			            public int local(int i) {
+			                return 1;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 
 		assertEqualString(string, expected);
 		assertAllBindings(astRoot);
@@ -309,37 +303,36 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCU4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("            return 0;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() throws IOException, ParseException {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("        if (fField1 == 0) {\n");
-		buf.append("            fField2++;\n");
-		buf.append("        }\n");
-		buf.append("        EInner inner = new EInner();\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String existing= buf.toString();
+		String existing= """
+			package test1;
+			import java.util.Vector;
+			import java.io.IOException;
+			import java.text.ParseException;
+			public class E {
+			    private class EInner {
+			        public int inner(int i) {
+			            return 0;
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() throws IOException, ParseException {
+			        fField1 = fField2;
+			        if (fField1 == 0) {
+			            fField2++;
+			        }
+			        EInner inner = new EInner();
+			    }
+			    public int foo1(int i) {
+			        private class Local {
+			            public int local(int i) {
+			                return 1;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
 
 		int offset= existing.indexOf("return 0;");
@@ -347,25 +340,24 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("            return 0;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() throws IOException, ParseException {\n");
-		buf.append("    }\n");
-		buf.append("    public int foo1(int i) {\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Vector;
+			import java.io.IOException;
+			import java.text.ParseException;
+			public class E {
+			    private class EInner {
+			        public int inner(int i) {
+			            return 0;
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() throws IOException, ParseException {
+			    }
+			    public int foo1(int i) {
+			    }
+			}""";
 
 		assertEqualString(string, expected);
 		assertAllBindings(astRoot);
@@ -374,37 +366,36 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCUPositionNotInMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("            return 0;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() throws IOException, ParseException {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("        if (fField1 == 0) {\n");
-		buf.append("            fField2++;\n");
-		buf.append("        }\n");
-		buf.append("        EInner inner = new EInner();\n");
-		buf.append("    }\n");
-		buf.append("    public int foo2(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String existing= buf.toString();
+		String existing= """
+			package test1;
+			import java.util.Vector;
+			import java.io.IOException;
+			import java.text.ParseException;
+			public class E {
+			    private class EInner {
+			        public int inner(int i) {
+			            return 0;
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() throws IOException, ParseException {
+			        fField1 = fField2;
+			        if (fField1 == 0) {
+			            fField2++;
+			        }
+			        EInner inner = new EInner();
+			    }
+			    public int foo2(int i) {
+			        private class Local {
+			            public int local(int i) {
+			                return 1;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
 
 		int offset= existing.indexOf("private int fField1;");
@@ -412,24 +403,23 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        public int inner(int i) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() throws IOException, ParseException {\n");
-		buf.append("    }\n");
-		buf.append("    public int foo2(int i) {\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Vector;
+			import java.io.IOException;
+			import java.text.ParseException;
+			public class E {
+			    private class EInner {
+			        public int inner(int i) {
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() throws IOException, ParseException {
+			    }
+			    public int foo2(int i) {
+			    }
+			}""";
 
 		assertEqualString(string, expected);
 		assertAllBindings(astRoot);
@@ -438,38 +428,37 @@ public class PartialASTTest extends CoreTests {
 	@Test
 	public void testPartialCUPositionNotInMethod2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() throws IOException, ParseException {\n");
-		buf.append("        fField1 = fField2;\n");
-		buf.append("        if (fField1 == 0) {\n");
-		buf.append("            fField2++;\n");
-		buf.append("        }\n");
-		buf.append("        EInner inner = new EInner();\n");
-		buf.append("    }\n");
-		buf.append("    public int foo2(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            private int fField3;\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String existing= buf.toString();
+		String existing= """
+			package test1;
+			import java.util.Vector;
+			import java.io.IOException;
+			import java.text.ParseException;
+			public class E {
+			    private class EInner {
+			        {
+			            System.out.println();
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() throws IOException, ParseException {
+			        fField1 = fField2;
+			        if (fField1 == 0) {
+			            fField2++;
+			        }
+			        EInner inner = new EInner();
+			    }
+			    public int foo2(int i) {
+			        private class Local {
+			            private int fField3;
+			            public int local(int i) {
+			                return 1;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", existing, false, null);
 
 		int offset= existing.indexOf("private int fField3;");
@@ -477,32 +466,31 @@ public class PartialASTTest extends CoreTests {
 		CompilationUnit astRoot= getPartialCompilationUnit(cu, offset);
 		String string= ASTNodes.asFormattedString(astRoot, 0, String.valueOf('\n'), null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("public class E {\n");
-		buf.append("    private class EInner {\n");
-		buf.append("        {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private int fField1;\n");
-		buf.append("    private int fField2;\n");
-		buf.append("    public void foo1() throws IOException, ParseException {\n");
-		buf.append("    }\n");
-		buf.append("    public int foo2(int i) {\n");
-		buf.append("        private class Local {\n");
-		buf.append("            private int fField3;\n");
-		buf.append("            public int local(int i) {\n");
-		buf.append("                return 1;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("        Local local = new Local();\n");
-		buf.append("        return i;\n");
-		buf.append("    }\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Vector;
+			import java.io.IOException;
+			import java.text.ParseException;
+			public class E {
+			    private class EInner {
+			        {
+			        }
+			    }
+			    private int fField1;
+			    private int fField2;
+			    public void foo1() throws IOException, ParseException {
+			    }
+			    public int foo2(int i) {
+			        private class Local {
+			            private int fField3;
+			            public int local(int i) {
+			                return 1;
+			            }
+			        }
+			        Local local = new Local();
+			        return i;
+			    }
+			}""";
 
 		assertEqualString(string, expected);
 		assertAllBindings(astRoot);

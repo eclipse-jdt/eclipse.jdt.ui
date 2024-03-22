@@ -254,13 +254,15 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName1f() throws Exception {
 	    String source=
-			"package test;\n" +
-			"public class TestMessages {\n" +
-			"	private static final String BUNDLE_NAME = \"test.test\";\n" +
-			"	public static String getString(String s) {" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			public class TestMessages {
+				private static final String BUNDLE_NAME = "test.test";
+				public static String getString(String s) {\
+					return "";
+				}
+			}
+			""";
 
 
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
@@ -269,16 +271,18 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName1s() throws Exception {
 	    String source=
-			"package test;\n" +
-			"public class TestMessages {\n" +
-			"	private static String BUNDLE_NAME;\n" +
-			"   static {\n" +
-			"		BUNDLE_NAME= \"test.test\";\n" +
-			"   }\n" +
-			"	public static String getString(String s) {" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			public class TestMessages {
+				private static String BUNDLE_NAME;
+			   static {
+					BUNDLE_NAME= "test.test";
+			   }
+				public static String getString(String s) {\
+					return "";
+				}
+			}
+			""";
 
 
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
@@ -287,13 +291,15 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName2f() throws Exception {
 	    String source=
-			"package test;\n" +
-			"public class TestMessages {\n" +
-			"	private static final String BUNDLE_NAME = TestMessages.class.getName();\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			public class TestMessages {
+				private static final String BUNDLE_NAME = TestMessages.class.getName();
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -301,16 +307,18 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName2s() throws Exception {
 	    String source=
-			"package test;\n" +
-			"public class TestMessages {\n" +
-			"	private static String BUNDLE_NAME;\n" +
-			"   static {\n" +
-			"		BUNDLE_NAME = TestMessages.class.getName();\n" +
-			"   }\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			public class TestMessages {
+				private static String BUNDLE_NAME;
+			   static {
+					BUNDLE_NAME = TestMessages.class.getName();
+			   }
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -318,14 +326,16 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName3f() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static final ResourceBundle b= ResourceBundle.getBundle(TestMessages.class.getName());\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static final ResourceBundle b= ResourceBundle.getBundle(TestMessages.class.getName());
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -333,17 +343,19 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName3s() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static ResourceBundle b;\n" +
-			"   static {\n" +
-			"		b= ResourceBundle.getBundle(TestMessages.class.getName());\n" +
-			"   }\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static ResourceBundle b;
+			   static {
+					b= ResourceBundle.getBundle(TestMessages.class.getName());
+			   }
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -351,14 +363,16 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName4f() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static final ResourceBundle b= ResourceBundle.getBundle(\"test.test\");\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static final ResourceBundle b= ResourceBundle.getBundle("test.test");
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -366,17 +380,19 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName4s() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static ResourceBundle b;\n" +
-			"   static {\n" +
-			"		b= ResourceBundle.getBundle(\"test.test\");\n" +
-			"   }\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static ResourceBundle b;
+			   static {
+					b= ResourceBundle.getBundle("test.test");
+			   }
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.test", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -384,15 +400,17 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName5f() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static final String RESOURCE_BUNDLE= TestMessages.class.getName();\n" +
-			"	private static final ResourceBundle b= ResourceBundle.getBundle(RESOURCE_BUNDLE);\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static final String RESOURCE_BUNDLE= TestMessages.class.getName();
+				private static final ResourceBundle b= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -400,18 +418,20 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName5s() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static final String RESOURCE_BUNDLE= TestMessages.class.getName();\n" +
-			"	private static ResourceBundle b;\n" +
-			"   static {\n" +
-			"		b= ResourceBundle.getBundle(RESOURCE_BUNDLE);\n" +
-			"   }\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static final String RESOURCE_BUNDLE= TestMessages.class.getName();
+				private static ResourceBundle b;
+			   static {
+					b= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+			   }
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}
@@ -419,15 +439,17 @@ public class NLSHintHelperTest {
 	@Test
 	public void findResourceBundleName6() throws Exception {
 	    String source=
-			"package test;\n" +
-			"import java.util.ResourceBundle;\n" +
-			"public class TestMessages {\n" +
-			"	private static final String RESOURCE_BUNDLE= TestMessages.class.getName();\n" +
-			"	private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);\n" +
-			"	public static String getString(String s) {\n" +
-			"		return \"\";\n" +
-			"	}\n" +
-			"}\n";
+			"""
+			package test;
+			import java.util.ResourceBundle;
+			public class TestMessages {
+				private static final String RESOURCE_BUNDLE= TestMessages.class.getName();
+				private static ResourceBundle fgResourceBundle= ResourceBundle.getBundle(RESOURCE_BUNDLE);
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
 	    assertEquals("test.TestMessages", getResourceBundleName(source, "TestMessages", "test"));
 	}

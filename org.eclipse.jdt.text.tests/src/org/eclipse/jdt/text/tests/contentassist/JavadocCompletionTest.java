@@ -26,9 +26,11 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
  */
 public class JavadocCompletionTest extends AbstractCompletionTest {
 	private static final String METHOD=
-			"	public int method(int param) {\n" +
-			"		return 0;\n" +
-			"	}\n";
+			"""
+			public int method(int param) {
+				return 0;
+			}
+		""";
 	private static final String FIELD= "	public int fField\n";
 
 	private static final String[] TYPE_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@serial", "@author", "@version", "@param", };

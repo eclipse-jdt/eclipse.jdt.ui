@@ -130,11 +130,13 @@ public class CodeMiningTriggerTest {
 
 	@Test
 	public void testPullCodeMining() throws Exception {
-		String contents= "public class Foo {\n" +
-				"	int ab, ba;\n" +
-				"	void m() {\n" +
-				"	}\n" +
-				"}\n";
+		String contents= """
+			public class Foo {
+				int ab, ba;
+				void m() {
+				}
+			}
+			""";
 		ICompilationUnit compilationUnit= pack.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		disableCodeMiningReconciler(editor);

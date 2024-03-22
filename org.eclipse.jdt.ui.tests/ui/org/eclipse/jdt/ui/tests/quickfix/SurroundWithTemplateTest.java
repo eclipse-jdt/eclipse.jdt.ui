@@ -95,18 +95,17 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 
 	private static List<IJavaCompletionProposal> getRunnableProposal(AssistContext context) throws CoreException {
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("Runnable runnable = new Runnable() {\n");
-		buf.append("    public void run() {\n");
-		buf.append("        ${line_selection}\n");
-		buf.append("    }\n");
-		buf.append("};");
-
+		String str= """
+			Runnable runnable = new Runnable() {
+			    public void run() {
+			        ${line_selection}
+			    }
+			};""";
 		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
 		for (TemplatePersistenceData t : templateStore.getTemplateData(false)) {
 			templateStore.delete(t);
 		}
-		TemplatePersistenceData surroundWithRunnableTemplate= new TemplatePersistenceData(new Template("runnable", "surround with runnable", "java", buf.toString(), false), true);
+		TemplatePersistenceData surroundWithRunnableTemplate= new TemplatePersistenceData(new Template("runnable", "surround with runnable", "java", str, false), true);
 		templateStore.add(surroundWithRunnableTemplate);
 
 		IJavaCompletionProposal[] templateProposals= (new QuickTemplateProcessor()).getAssists(context, null);
@@ -120,1070 +119,1118 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	public void testSurroundWithRunnable1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(1);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        System.out.println(1);
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(1);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(1);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(1);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(1);
+			            }
+			        };
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10;\n");
-		buf.append("        final int j = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("        int k = 10;\n");
-		buf.append("        k++;\n");
-		buf.append("        System.out.println(k);\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10;
+			        final int j = 10;
+			        System.out.println(i);
+			        System.out.println(j);
+			        int k = 10;
+			        k++;
+			        System.out.println(k);
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-		selection.append("        System.out.println(j);\n");
-		selection.append("        int k = 10;\n");
-		selection.append("        k++;\n");
-		selection.append("        System.out.println(k);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			        System.out.println(j);
+			        int k = 10;
+			        k++;
+			        System.out.println(k);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int i = 10;\n");
-		expected1.append("        final int j = 10;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("                System.out.println(j);\n");
-		expected1.append("                int k = 10;\n");
-		expected1.append("                k++;\n");
-		expected1.append("                System.out.println(k);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(i);\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int i = 10;
+			        final int j = 10;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			                System.out.println(j);
+			                int k = 10;
+			                k++;
+			                System.out.println(k);
+			            }
+			        };
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10;\n");
-		buf.append("        int k = 10;\n");
-		buf.append("        k++;\n");
-		buf.append("        int h = 10;\n");
-		buf.append("        int j = 10;\n");
-		buf.append("        j++;\n");
-		buf.append("        System.out.println(k);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(h);\n");
-		buf.append("        i++;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10;
+			        int k = 10;
+			        k++;
+			        int h = 10;
+			        int j = 10;
+			        j++;
+			        System.out.println(k);
+			        System.out.println(j);
+			        System.out.println(i);
+			        System.out.println(h);
+			        i++;
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        j++;\n");
-		selection.append("        System.out.println(k);\n");
-		selection.append("        System.out.println(j);\n");
-		selection.append("        System.out.println(i);\n");
-		selection.append("        System.out.println(h);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        j++;
+			        System.out.println(k);
+			        System.out.println(j);
+			        System.out.println(i);
+			        System.out.println(h);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int i = 10;\n");
-		expected1.append("        final int k = 10;\n");
-		expected1.append("        k++;\n");
-		expected1.append("        final int h = 10;\n");
-		expected1.append("        final int j = 10;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                j++;\n");
-		expected1.append("                System.out.println(k);\n");
-		expected1.append("                System.out.println(j);\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("                System.out.println(h);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        i++;\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int i = 10;
+			        final int k = 10;
+			        k++;
+			        final int h = 10;
+			        final int j = 10;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                j++;
+			                System.out.println(k);
+			                System.out.println(j);
+			                System.out.println(i);
+			                System.out.println(h);
+			            }
+			        };
+			        i++;
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable4() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int j = 10;\n");
-		buf.append("        while (j > 0) {\n");
-		buf.append("            System.out.println(j);\n");
-		buf.append("            j--;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j = 10;
+			        while (j > 0) {
+			            System.out.println(j);
+			            j--;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("            System.out.println(j);\n");
-		selection.append("            j--;\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			            System.out.println(j);
+			            j--;
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int j = 10;\n");
-		expected1.append("        while (j > 0) {\n");
-		expected1.append("            Runnable runnable = new Runnable() {\n");
-		expected1.append("                public void run() {\n");
-		expected1.append("                    System.out.println(j);\n");
-		expected1.append("                    j--;\n");
-		expected1.append("                }\n");
-		expected1.append("            };\n");
-		expected1.append("        }\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int j = 10;
+			        while (j > 0) {
+			            Runnable runnable = new Runnable() {
+			                public void run() {
+			                    System.out.println(j);
+			                    j--;
+			                }
+			            };
+			        }
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable5() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10;
+			        System.out.println(i);
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        int i = 10;\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        int i = 10;
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int i;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                i = 10;\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(i);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                i = 10;
+			            }
+			        };
+			        System.out.println(i);
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable6() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        /***/ int i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        /***/ int i = 10;
+			        System.out.println(i);
+			        System.out.println(i);
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        /***/ int i = 10;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        /***/ int i = 10;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        /***/ int i;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                i = 10;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(i);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        /***/ int i;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                i = 10;
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(i);
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable7() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        /***/ int i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        /***/ int i = 10;
+			        System.out.println(i);
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        /***/ final int i = 10;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        /***/ final int i = 10;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			            }
+			        };
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable8() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        //TextTextText\n");
-		buf.append("        \n");
-		buf.append("        //TextTextText\n");
-		buf.append("        //\n");
-		buf.append("        //TextTextText\n");
-		buf.append("        /***/ int i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        //TextTextText
+			       \s
+			        //TextTextText
+			        //
+			        //TextTextText
+			        /***/ int i = 10;
+			        System.out.println(i);
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("int i = 10;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			int i = 10;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        //TextTextText\n");
-		expected1.append("        \n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                //TextTextText\n");
-		expected1.append("                //\n");
-		expected1.append("                //TextTextText\n");
-		expected1.append("                /***/\n");
-		expected1.append("                int i = 10;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        //TextTextText
+			       \s
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                //TextTextText
+			                //
+			                //TextTextText
+			                /***/
+			                int i = 10;
+			                System.out.println(i);
+			            }
+			        };
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable9() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        /***/ int i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        /***/ int i = 10;
+			        System.out.println(i);
+			        System.out.println(i);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("int i = 10;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			int i = 10;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        /***/ int i;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                i = 10;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(i);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        /***/ int i;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                i = 10;
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(i);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable10() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10;\n");
-		buf.append("        int j;\n");
-		buf.append("        System.out.println(10);\n");
-		buf.append("        j = 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10;
+			        int j;
+			        System.out.println(10);
+			        j = 10;
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        int i = 10;\n");
-		selection.append("        int j;\n");
-		selection.append("        System.out.println(10);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        int i = 10;
+			        int j;
+			        System.out.println(10);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int j;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                int i = 10;\n");
-		expected1.append("                System.out.println(10);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        j = 10;\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		expected1.append("\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                int i = 10;
+			                System.out.println(10);
+			            }
+			        };
+			        j = 10;
+			    }
+			}
+			
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable11() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i;
+			        System.out.println(i);
+			        System.out.println(i);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        int i;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        int i;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int i;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(i);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int i;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(i);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable12() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, String s) {\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(s);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(int i, String s) {
+			        System.out.println(i);
+			        System.out.println(s);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-		selection.append("        System.out.println(s);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			        System.out.println(s);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo(final int i, final String s) {\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("                System.out.println(s);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo(final int i, final String s) {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			                System.out.println(s);
+			            }
+			        };
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable13() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, String s) {\n");
-		buf.append("        i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(s);\n");
-		buf.append("        s = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(int i, String s) {
+			        i = 10;
+			        System.out.println(i);
+			        System.out.println(s);
+			        s = "";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-		selection.append("        System.out.println(s);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			        System.out.println(s);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo(final int i, final String s) {\n");
-		expected1.append("        i = 10;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("                System.out.println(s);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        s = \"\";\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo(final int i, final String s) {
+			        i = 10;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			                System.out.println(s);
+			            }
+			        };
+			        s = "";
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable14() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int j,i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j,i = 10;
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int j;\n");
-		expected1.append("        final int i = 10;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j;
+			        final int i = 10;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(j);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable15() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int j,i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        j = 10;\n");
-		buf.append("        j++;\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j,i = 10;
+			        System.out.println(i);
+			        j = 10;
+			        j++;
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int j;\n");
-		expected1.append("        final int i = 10;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        j = 10;\n");
-		expected1.append("        j++;\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j;
+			        final int i = 10;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			            }
+			        };
+			        j = 10;
+			        j++;
+			        System.out.println(j);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable16() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int j, i = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j, i = 10;
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        int j, i = 10;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        int j, i = 10;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int j;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                int i = 10;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                int i = 10;
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(j);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable17() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10, j = i;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10, j = i;
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int i = 10;\n");
-		expected1.append("        int j = i;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int i = 10;
+			        int j = i;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(j);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable18() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10, j = i;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10, j = i;
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(i);\n");
-		selection.append("        System.out.println(j);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(i);
+			        System.out.println(j);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int i = 10, j = i;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("                System.out.println(j);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int i = 10, j = i;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(i);
+			                System.out.println(j);
+			            }
+			        };
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable19() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10, k = i, j = k;\n");
-		buf.append("        System.out.println(k);\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10, k = i, j = k;
+			        System.out.println(k);
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(k);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(k);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int i = 10;\n");
-		expected1.append("        final int k = i;\n");
-		expected1.append("        int j = k;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(k);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(i);\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10;
+			        final int k = i;
+			        int j = k;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(k);
+			            }
+			        };
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable20() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10, j = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10, j = 10;
+			        System.out.println(i);
+			        System.out.println(j);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        int i = 10, j = 10;\n");
-		selection.append("        System.out.println(i);\n");
-		selection.append("        System.out.println(j);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        int i = 10, j = 10;
+			        System.out.println(i);
+			        System.out.println(j);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                int i = 10, j = 10;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("                System.out.println(j);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                int i = 10, j = 10;
+			                System.out.println(i);
+			                System.out.println(j);
+			            }
+			        };
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable21() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            int j = 10;\n");
-		buf.append("            System.out.println(j);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        if (true) {
+			            int j = 10;
+			            System.out.println(j);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("            int j = 10;\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			            int j = 10;
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        if (true) {\n");
-		expected1.append("            int j;\n");
-		expected1.append("            Runnable runnable = new Runnable() {\n");
-		expected1.append("                public void run() {\n");
-		expected1.append("                    j = 10;\n");
-		expected1.append("                }\n");
-		expected1.append("            };\n");
-		expected1.append("            System.out.println(j);\n");
-		expected1.append("        }\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        if (true) {
+			            int j;
+			            Runnable runnable = new Runnable() {
+			                public void run() {
+			                    j = 10;
+			                }
+			            };
+			            System.out.println(j);
+			        }
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable22() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            int j = 10;\n");
-		buf.append("            while (j == 10) {\n");
-		buf.append("                System.out.println(j);\n");
-		buf.append("                j--;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        if (true) {
+			            int j = 10;
+			            while (j == 10) {
+			                System.out.println(j);
+			                j--;
+			            }
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("            while (j == 10) {\n");
-		selection.append("                System.out.println(j);\n");
-		selection.append("                j--;\n");
-		selection.append("            }\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			            while (j == 10) {
+			                System.out.println(j);
+			                j--;
+			            }
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        if (true) {\n");
-		expected1.append("            final int j = 10;\n");
-		expected1.append("            Runnable runnable = new Runnable() {\n");
-		expected1.append("                public void run() {\n");
-		expected1.append("                    while (j == 10) {\n");
-		expected1.append("                        System.out.println(j);\n");
-		expected1.append("                        j--;\n");
-		expected1.append("                    }\n");
-		expected1.append("                }\n");
-		expected1.append("            };\n");
-		expected1.append("        }\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        if (true) {
+			            final int j = 10;
+			            Runnable runnable = new Runnable() {
+			                public void run() {
+			                    while (j == 10) {
+			                        System.out.println(j);
+			                        j--;
+			                    }
+			                }
+			            };
+			        }
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable23() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    int i= 9;\n");
-		buf.append("    {\n");
-		buf.append("        /***/ int k = 10;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    int i= 9;
+			    {
+			        /***/ int k = 10;
+			        System.out.println(i);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        /***/ int k = 10;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        /***/ int k = 10;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    int i= 9;\n");
-		expected1.append("    {\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                /***/\n");
-		expected1.append("                int k = 10;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    int i= 9;
+			    {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                /***/
+			                int k = 10;
+			                System.out.println(i);
+			            }
+			        };
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable24() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int k = 0, v = 0;\n");
-		buf.append("        {\n");
-		buf.append("            System.out.println(v);\n");
-		buf.append("            System.out.println(k);\n");
-		buf.append("        }\n");
-		buf.append("        k++;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int k = 0, v = 0;
+			        {
+			            System.out.println(v);
+			            System.out.println(k);
+			        }
+			        k++;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("            System.out.println(v);\n");
-		selection.append("            System.out.println(k);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			            System.out.println(v);
+			            System.out.println(k);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final int k = 0, v = 0;\n");
-		expected1.append("        {\n");
-		expected1.append("            Runnable runnable = new Runnable() {\n");
-		expected1.append("                public void run() {\n");
-		expected1.append("                    System.out.println(v);\n");
-		expected1.append("                    System.out.println(k);\n");
-		expected1.append("                }\n");
-		expected1.append("            };\n");
-		expected1.append("        }\n");
-		expected1.append("        k++;\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int k = 0, v = 0;
+			        {
+			            Runnable runnable = new Runnable() {
+			                public void run() {
+			                    System.out.println(v);
+			                    System.out.println(k);
+			                }
+			            };
+			        }
+			        k++;
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 	/*
 	@Test
@@ -1294,350 +1341,366 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 	public void testSurroundWithRunnable27() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String s = \"\", c = \"\";\n");
-		buf.append("        System.out.println(s);\n");
-		buf.append("        c = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        String s = "", c = "";
+			        System.out.println(s);
+			        c = "";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(s);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(s);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        final String s = \"\";\n");
-		expected1.append("        String c = \"\";\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                System.out.println(s);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        c = \"\";\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final String s = "";
+			        String c = "";
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(s);
+			            }
+			        };
+			        c = "";
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable28() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i = 10, j, k, v;\n");
-		buf.append("        System.out.println(i);\n");
-		buf.append("        System.out.println(j);\n");
-		buf.append("        System.out.println(v);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i = 10, j, k, v;
+			        System.out.println(i);
+			        System.out.println(j);
+			        System.out.println(v);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        int i = 10, j, k, v;\n");
-		selection.append("        System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        int i = 10, j, k, v;
+			        System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        int j;\n");
-		expected1.append("        int v;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                int i = 10;\n");
-		expected1.append("                int k;\n");
-		expected1.append("                System.out.println(i);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        System.out.println(j);\n");
-		expected1.append("        System.out.println(v);\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int j;
+			        int v;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                int i = 10;
+			                int k;
+			                System.out.println(i);
+			            }
+			        };
+			        System.out.println(j);
+			        System.out.println(v);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable29() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"nls\") String s= \"\", k = \"\";\n");
-		buf.append("        System.out.println(s);\n");
-		buf.append("        System.out.println(k);\n");
-		buf.append("        k=\"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        @SuppressWarnings("nls") String s= "", k = "";
+			        System.out.println(s);
+			        System.out.println(k);
+			        k="";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        @SuppressWarnings(\"nls\") String s= \"\", k = \"\";\n");
-		selection.append("        System.out.println(s);\n");
-		selection.append("        System.out.println(k);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        @SuppressWarnings("nls") String s= "", k = "";
+			        System.out.println(s);
+			        System.out.println(k);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test1;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        @SuppressWarnings(\"nls\")\n");
-		expected1.append("        String k;\n");
-		expected1.append("        Runnable runnable = new Runnable() {\n");
-		expected1.append("            public void run() {\n");
-		expected1.append("                @SuppressWarnings(\"nls\")\n");
-		expected1.append("                String s = \"\";\n");
-		expected1.append("                k = \"\";\n");
-		expected1.append("                System.out.println(s);\n");
-		expected1.append("                System.out.println(k);\n");
-		expected1.append("            }\n");
-		expected1.append("        };\n");
-		expected1.append("        k=\"\";\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        @SuppressWarnings("nls")
+			        String k;
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                @SuppressWarnings("nls")
+			                String s = "";
+			                k = "";
+			                System.out.println(s);
+			                System.out.println(k);
+			            }
+			        };
+			        k="";
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnable30() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        if (true) \n");
-		buf.append("            System.out.println(1);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class E {
+			    public void foo() {
+			        if (true)\s
+			            System.out.println(1);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("            System.out.println(1);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			            System.out.println(1);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		StringBuilder expected1= new StringBuilder();
-		expected1.append("package test;\n");
-		expected1.append("public class E {\n");
-		expected1.append("    public void foo() {\n");
-		expected1.append("        if (true) {\n");
-		expected1.append("            Runnable runnable = new Runnable() {\n");
-		expected1.append("                public void run() {\n");
-		expected1.append("                    System.out.println(1);\n");
-		expected1.append("                }\n");
-		expected1.append("            };\n");
-		expected1.append("        }\n");
-		expected1.append("    }\n");
-		expected1.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});
+		String str2= """
+			package test;
+			public class E {
+			    public void foo() {
+			        if (true) {
+			            Runnable runnable = new Runnable() {
+			                public void run() {
+			                    System.out.println(1);
+			                }
+			            };
+			        }
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnableBug133560() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i = 0; i < 10; i++) {\n");
-		buf.append("            System.out.println(i);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        for (int i = 0; i < 10; i++) {
+			            System.out.println(i);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("            System.out.println(i);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			            System.out.println(i);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (final int i = 0; i < 10; i++) {\n");
-		buf.append("            Runnable runnable = new Runnable() {\n");
-		buf.append("                public void run() {\n");
-		buf.append("                    System.out.println(i);\n");
-		buf.append("                }\n");
-		buf.append("            };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        for (final int i = 0; i < 10; i++) {
+			            Runnable runnable = new Runnable() {
+			                public void run() {
+			                    System.out.println(i);
+			                }
+			            };
+			        }
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnableBug233278() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("  {\n");
-		buf.append("    final int x = 0, y = 1;\n");
-		buf.append("    new Object() {\n");
-		buf.append("      void method() {\n");
-		buf.append("        if (x == y)\n");
-		buf.append("          return;\n");
-		buf.append("        toString();\n");
-		buf.append("      }\n");
-		buf.append("    };\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			  {
+			    final int x = 0, y = 1;
+			    new Object() {
+			      void method() {
+			        if (x == y)
+			          return;
+			        toString();
+			      }
+			    };
+			  }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        if (x == y)\n");
-		selection.append("          return;\n");
-		selection.append("        toString();\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        if (x == y)
+			          return;
+			        toString();
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("  {\n");
-		buf.append("    final int x = 0, y = 1;\n");
-		buf.append("    new Object() {\n");
-		buf.append("      void method() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                if (x == y)\n");
-		buf.append("                    return;\n");
-		buf.append("                toString();\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("      }\n");
-		buf.append("    };\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			  {
+			    final int x = 0, y = 1;
+			    new Object() {
+			      void method() {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                if (x == y)
+			                    return;
+			                toString();
+			            }
+			        };
+			      }
+			    };
+			  }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithRunnableBug138323() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(this);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E<I> {
+			    public void foo() {
+			        System.out.println(this);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("        System.out.println(this);\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			        System.out.println(this);
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E<I> {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                System.out.println(E.this);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		String str2= """
+			package test1;
+			public class E<I> {
+			    public void foo() {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                System.out.println(E.this);
+			            }
+			        };
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 	@Test
 	public void testSurroundWithBug162549() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void m() {\n");
-		buf.append("        if (true) {\n");
-		buf.append("            System.out.println(\"T\");\n");
-		buf.append("        } // else {\n");
-		buf.append("        // System.out.println(\"F\");\n");
-		buf.append("        // }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void m() {
+			        if (true) {
+			            System.out.println("T");
+			        } // else {
+			        // System.out.println("F");
+			        // }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		StringBuilder selection= new StringBuilder();
-		selection.append("if (true) {\n");
-		selection.append("            System.out.println(\"T\");\n");
-		selection.append("        } // else {\n");
-		selection.append("        // System.out.println(\"F\");\n");
-		selection.append("        // }\n");
-
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		String str1= """
+			if (true) {
+			            System.out.println("T");
+			        } // else {
+			        // System.out.println("F");
+			        // }
+			""";
+		AssistContext context= getCorrectionContext(cu, str.indexOf(str1), str1.length());
 		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void m() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                if (true) {\n");
-		buf.append("                    System.out.println(\"T\");\n");
-		buf.append("                } // else {\n");
-		buf.append("                  // System.out.println(\"F\");\n");
-		buf.append("                  // }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		String str2= """
+			package test1;
+			public class E {
+			    void m() {
+			        Runnable runnable = new Runnable() {
+			            public void run() {
+			                if (true) {
+			                    System.out.println("T");
+			                } // else {
+			                  // System.out.println("F");
+			                  // }
+			            }
+			        };
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str2});
 	}
 
 }

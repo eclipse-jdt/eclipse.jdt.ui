@@ -81,9 +81,10 @@ public class ChainCompletionTest {
 	@Test
 	public void testNullExpectedType() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("$package test;\n" +
-				"public class Foo {\n" +
-				"}");
+		buf.append("""
+			$package test;
+			public class Foo {
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
@@ -99,13 +100,14 @@ public class ChainCompletionTest {
 		node.put(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, "number_four");
 
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class Foo {\n" +
-				"  public void foo () {\n" +
-				"    String s = \"\";\n" +
-				"    int length = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class Foo {
+			  public void foo () {
+			    String s = "";
+			    int length = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
@@ -117,27 +119,28 @@ public class ChainCompletionTest {
 	@Test
 	public void testBasic() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class Foo {\n" +
-				"  public Bar getBar() {\n" +
-				"    return new Bar();\n" +
-				"  }\n" +
-				"  \n" +
-				"  public class Bar {\n" +
-				"    Baz getBaz () {\n" +
-				"      return new Baz();\n" +
-				"    }\n" +
-				"  }\n" +
-				"  \n" +
-				"  public class Baz {\n" +
-				"  }\n" +
-				"\n" +
-				"  public static void mainMethod () {\n" +
-				"    Foo f = new Foo();\n" +
-				"    Baz b = f.$\n" +
-				"  }\n" +
-				"\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class Foo {
+			  public Bar getBar() {
+			    return new Bar();
+			  }
+			 \s
+			  public class Bar {
+			    Baz getBaz () {
+			      return new Baz();
+			    }
+			  }
+			 \s
+			  public class Baz {
+			  }
+			
+			  public static void mainMethod () {
+			    Foo f = new Foo();
+			    Baz b = f.$
+			  }
+			
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
@@ -151,13 +154,14 @@ public class ChainCompletionTest {
 	@Test
 	public void testPrimitiveCompletion() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class Foo {\n" +
-				"  public void foo () {\n" +
-				"    String s = \"\";\n" +
-				"    int length = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class Foo {
+			  public void foo () {
+			    String s = "";
+			    int length = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
@@ -177,16 +181,17 @@ public class ChainCompletionTest {
 	@Test
 	public void testAccessMethodParameters() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.util.Iterator;\n" +
-				"import java.util.List;\n" +
-				"\n" +
-				"public class Foo {\n" +
-				"  public void method(final List list){\n" +
-				"    Iterator it = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.util.Iterator;
+			import java.util.List;
+			
+			public class Foo {
+			  public void method(final List list){
+			    Iterator it = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
@@ -206,20 +211,21 @@ public class ChainCompletionTest {
 	@Test
 	public void testAvoidRecursiveCallToMember() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.io.File;\n" +
-				"\n" +
-				"public class AvoidRecursiveCallsToMember {\n" +
-				"  public File findMe = new AtomicBoolean();\n" +
-				"  public AvoidRecursiveCallsToMember getSubElement() {\n" +
-				"    return new AvoidRecursiveCallsToMember();\n" +
-				"  }\n" +
-				"  public static void method2() {\n" +
-				"    final AvoidRecursiveCallsToMember useMe = new AvoidRecursiveCallsToMember();\n" +
-				"    final File c = useMe.get$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.io.File;
+			
+			public class AvoidRecursiveCallsToMember {
+			  public File findMe = new AtomicBoolean();
+			  public AvoidRecursiveCallsToMember getSubElement() {
+			    return new AvoidRecursiveCallsToMember();
+			  }
+			  public static void method2() {
+			    final AvoidRecursiveCallsToMember useMe = new AvoidRecursiveCallsToMember();
+			    final File c = useMe.get$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "AvoidRecursiveCallsToMember.java");
@@ -233,20 +239,21 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnArrayMemberAccessInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.lang.Boolean;\n" +
-				"import java.lang.Integer;\n" +
-				"\n" +
-				"public class CompletionOnArrayMemberAccessInMethod {\n" +
-				"  public Integer findUs[] = { new Integer(1), new Integer(2) };\n" +
-				"  public Boolean findUs1[][][] = new Boolean[1][1][1];\n" +
-				"\n" +
-				"  public static void method1() {\n" +
-				"    final CompletionOnArrayMemberAccessInMethod obj = new CompletionOnArrayMemberAccessInMethod();\n" +
-				"    final Integer c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.lang.Boolean;
+			import java.lang.Integer;
+			
+			public class CompletionOnArrayMemberAccessInMethod {
+			  public Integer findUs[] = { new Integer(1), new Integer(2) };
+			  public Boolean findUs1[][][] = new Boolean[1][1][1];
+			
+			  public static void method1() {
+			    final CompletionOnArrayMemberAccessInMethod obj = new CompletionOnArrayMemberAccessInMethod();
+			    final Integer c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnArrayMemberAccessInMethod.java");
@@ -260,20 +267,21 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnArrayWithCastsSupertype1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.lang.Integer;\n" +
-				"import java.lang.Number;\n" +
-				"\n" +
-				"public class CompletionOnArrayWithCastsSupertype {\n" +
-				"  public Integer[][][] findme;\n" +
-				"  public int i;\n" +
-				"\n" +
-				"  public static void method1() {\n" +
-				"    final CompletionOnArrayWithCastsSupertype obj = new CompletionOnArrayWithCastsSupertype();\n" +
-				"    final Number c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.lang.Integer;
+			import java.lang.Number;
+			
+			public class CompletionOnArrayWithCastsSupertype {
+			  public Integer[][][] findme;
+			  public int i;
+			
+			  public static void method1() {
+			    final CompletionOnArrayWithCastsSupertype obj = new CompletionOnArrayWithCastsSupertype();
+			    final Number c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnArrayWithCastsSupertype.java");
@@ -287,19 +295,20 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnGenericTypeInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.util.ArrayList;\n" +
-				"import java.util.List;\n" +
-				"\n" +
-				"public class CompletionOnGenericTypeInMethod {\n" +
-				"  public List<String> findMe = new ArrayList<String>();\n" +
-				"\n" +
-				"  public static void test_exactGenericType() {\n" +
-				"    final CompletionOnGenericTypeInMethod variable = new CompletionOnGenericTypeInMethod();\n" +
-				"    final List<String> c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.util.ArrayList;
+			import java.util.List;
+			
+			public class CompletionOnGenericTypeInMethod {
+			  public List<String> findMe = new ArrayList<String>();
+			
+			  public static void test_exactGenericType() {
+			    final CompletionOnGenericTypeInMethod variable = new CompletionOnGenericTypeInMethod();
+			    final List<String> c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnGenericTypeInMethod.java");
@@ -313,23 +322,24 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnMemberCallChainDepth1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.io.File;\n" +
-				"\n" +
-				"public class A {\n" +
-				"  public B b = new B();\n" +
-				"  public class B {\n" +
-				"    public File findMember = new File(\"\");\n" +
-				"    public File findMethod() {\n" +
-				"      return null;\n" +
-				"    }\n" +
-				"  }\n" +
-				"  public static void mainMethod () {\n" +
-				"    A a = new A();\n" +
-				"    File c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.io.File;
+			
+			public class A {
+			  public B b = new B();
+			  public class B {
+			    public File findMember = new File("");
+			    public File findMethod() {
+			      return null;
+			    }
+			  }
+			  public static void mainMethod () {
+			    A a = new A();
+			    File c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "A.java");
@@ -346,23 +356,24 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnMemberInMethodWithPrefix() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.io.File;\n" +
-				"\n" +
-				"public class CompletionOnMemberInMethodWithPrefix {\n" +
-				"\n" +
-				"  public File findMe;\n" +
-				"\n" +
-				"  public CompletionOnMemberInMethodWithPrefix getSubElement() {\n" +
-				"    return new CompletionOnMemberInMethodWithPrefix();\n" +
-				"  }\n" +
-				"\n" +
-				"  public static void method2() {\n" +
-				"    final CompletionOnMemberInMethodWithPrefix useMe = new CompletionOnMemberInMethodWithPrefix();\n" +
-				"    final File c = useMe.get$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.io.File;
+			
+			public class CompletionOnMemberInMethodWithPrefix {
+			
+			  public File findMe;
+			
+			  public CompletionOnMemberInMethodWithPrefix getSubElement() {
+			    return new CompletionOnMemberInMethodWithPrefix();
+			  }
+			
+			  public static void method2() {
+			    final CompletionOnMemberInMethodWithPrefix useMe = new CompletionOnMemberInMethodWithPrefix();
+			    final File c = useMe.get$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnMemberInMethodWithPrefix.java");
@@ -376,21 +387,22 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnMethodReturn() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.io.File;\n" +
-				"import java.util.Iterator;\n" +
-				"import java.util.LinkedList;\n" +
-				"import java.util.List;\n" +
-				"\n" +
-				"public class Foo {\n" +
-				"  public void method() {\n" +
-				"    final Iterator<File> c = $\n" +
-				"  }\n" +
-				"  private List<File> getList() {\n" +
-				"    return new LinkedList<File>();\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.io.File;
+			import java.util.Iterator;
+			import java.util.LinkedList;
+			import java.util.List;
+			
+			public class Foo {
+			  public void method() {
+			    final Iterator<File> c = $
+			  }
+			  private List<File> getList() {
+			    return new LinkedList<File>();
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Foo.java");
@@ -411,18 +423,19 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnNonPublicMemberInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"public class CompletionOnNonPublicMemberInMethod {\n" +
-				"  protected Boolean findMe1 = new Boolean();\n" +
-				"  Integer findMe2 = new Integer();\n" +
-				"  private final Long findMe3 = new Long();\n" +
-				"\n" +
-				"  public static void test_protected() {\n" +
-				"    final CompletionOnNonPublicMemberInMethod useMe = new CompletionOnNonPublicMemberInMethod();\n" +
-				"    final Boolean c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			public class CompletionOnNonPublicMemberInMethod {
+			  protected Boolean findMe1 = new Boolean();
+			  Integer findMe2 = new Integer();
+			  private final Long findMe3 = new Long();
+			
+			  public static void test_protected() {
+			    final CompletionOnNonPublicMemberInMethod useMe = new CompletionOnNonPublicMemberInMethod();
+			    final Boolean c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnNonPublicMemberInMethod.java");
@@ -436,19 +449,20 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnSuperTypeInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.io.ByteArrayInputStream;\n" +
-				"import java.io.InputStream;\n" +
-				"\n" +
-				"public class CompletionOnSupertypeInMethod {\n" +
-				"  public ByteArrayInputStream findMe = new ByteArrayInputStream(new byte[] { 0, 1, 2, 3 });\n" +
-				"\n" +
-				"  public static void method() {\n" +
-				"    final CompletionOnSupertypeInMethod useMe = new CompletionOnSupertypeInMethod();\n" +
-				"    final InputStream c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.InputStream;
+			
+			public class CompletionOnSupertypeInMethod {
+			  public ByteArrayInputStream findMe = new ByteArrayInputStream(new byte[] { 0, 1, 2, 3 });
+			
+			  public static void method() {
+			    final CompletionOnSupertypeInMethod useMe = new CompletionOnSupertypeInMethod();
+			    final InputStream c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnSupertypeInMethod.java");
@@ -462,20 +476,21 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnSuperTypeMemberInMethod1() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"public class CompletionOnSupertypeMemberInMethod {\n" +
-				"\n" +
-				"  public static class Subtype extends CompletionOnSupertypeMemberInMethod {\n" +
-				"  }\n" +
-				"\n" +
-				"  public Boolean findMe = new Boolean();\n" +
-				"\n" +
-				"  public static void test_onAttribute() {\n" +
-				"    final Subtype useMe = new Subtype();\n" +
-				"    final Boolean c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			public class CompletionOnSupertypeMemberInMethod {
+			
+			  public static class Subtype extends CompletionOnSupertypeMemberInMethod {
+			  }
+			
+			  public Boolean findMe = new Boolean();
+			
+			  public static void test_onAttribute() {
+			    final Subtype useMe = new Subtype();
+			    final Boolean c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnSupertypeMemberInMethod.java");
@@ -489,22 +504,23 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnSuperTypeMemberInMethod2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"public class CompletionOnSupertypeMemberInMethod {\n" +
-				"\n" +
-				"  public static class Subtype extends CompletionOnSupertypeMemberInMethod {\n" +
-				"  }\n" +
-				"\n" +
-				"  public Boolean findMe() {\n" +
-				"    return Boolean.TRUE;\n" +
-				"  }\n" +
-				"\n" +
-				"  public static void test_onAttribute() {\n" +
-				"    final Subtype useMe = new Subtype();\n" +
-				"    final Boolean c = $\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			public class CompletionOnSupertypeMemberInMethod {
+			
+			  public static class Subtype extends CompletionOnSupertypeMemberInMethod {
+			  }
+			
+			  public Boolean findMe() {
+			    return Boolean.TRUE;
+			  }
+			
+			  public static void test_onAttribute() {
+			    final Subtype useMe = new Subtype();
+			    final Boolean c = $
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "CompletionOnSupertypeMemberInMethod.java");
@@ -518,18 +534,19 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnThisAndLocal() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("import java.util.Collection;\n" +
-				"import java.util.HashMap;\n" +
-				"import java.util.Map;\n" +
-				"\n" +
-				"package test;\n" +
-				"\n" +
-				"public class TestCompletionOnThisAndLocal {\n" +
-				"  public void method() {\n" +
-				"    final Map map = new HashMap();\n" +
-				"    final Collection c = $ \n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			import java.util.Collection;
+			import java.util.HashMap;
+			import java.util.Map;
+			
+			package test;
+			
+			public class TestCompletionOnThisAndLocal {
+			  public void method() {
+			    final Map map = new HashMap();
+			    final Collection c = $\s
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "TestCompletionOnThisAndLocal.java");
@@ -547,27 +564,28 @@ public class ChainCompletionTest {
 	@Test
 	public void testCompletionOnType() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"public class TestCompletionOnType {\n" +
-				"  public class S {\n" +
-				"\n" +
-				"    private static S INSTANCE = new S();\n" +
-				"    private S () {}\n" +
-				"\n" +
-				"    public Integer findMe() {\n" +
-				"      return 0;\n" +
-				"    }\n" +
-				"\n" +
-				"    public static S getInstance() {\n" +
-				"      return INSTANCE;\n" +
-				"    }\n" +
-				"  }\n" +
-				"\n" +
-				"  public void __test() {\n" +
-				"    Integer i = S.$\n" +
-				"  } \n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			public class TestCompletionOnType {
+			  public class S {
+			
+			    private static S INSTANCE = new S();
+			    private S () {}
+			
+			    public Integer findMe() {
+			      return 0;
+			    }
+			
+			    public static S getInstance() {
+			      return INSTANCE;
+			    }
+			  }
+			
+			  public void __test() {
+			    Integer i = S.$
+			  }\s
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "TestCompletionOnType.java");
@@ -585,36 +603,40 @@ public class ChainCompletionTest {
 
 		// test.TestBug552849 -> test.Foo -> test2.Bar -> test3.Foo
 		StringBuffer buf= new StringBuffer();
-		buf.append("import java.io.File;\n" +
-				"package test3;\n" +
-				"public class Foo {\n" +
-				"	protected File fVal= \"\";\n" +
-				"}");
+		buf.append("""
+			import java.io.File;
+			package test3;
+			public class Foo {
+				protected File fVal= "";
+			}""");
 		ICompilationUnit cu= getCompilationUnit(pkg3, buf, "Foo.java");
 
 		buf= new StringBuffer();
-		buf.append("package test2;\n" +
-				"import test3.Foo;\n" +
-				"public class Bar extends Foo {\n" +
-				"}");
+		buf.append("""
+			package test2;
+			import test3.Foo;
+			public class Bar extends Foo {
+			}""");
 		cu= getCompilationUnit(pkg2, buf, "Bar.java");
 
 		buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import test2.Bar;\n" +
-				"public class Foo extends Bar {\n" +
-				"}");
+		buf.append("""
+			package test;
+			import test2.Bar;
+			public class Foo extends Bar {
+			}""");
 		cu= getCompilationUnit(pkg, buf, "Foo.java");
 
 		buf= new StringBuffer();
-		buf.append("import java.io.File;\n" +
-				"package test;\n" +
-				"public class TestBug552849 extends Foo {\n" +
-				"	public void test () {\n" +
-				"		TestBug552849 foo = new TestBug552849();\n" +
-				"		File res = $\n" +
-				"	}\n" +
-				"}");
+		buf.append("""
+			import java.io.File;
+			package test;
+			public class TestBug552849 extends Foo {
+				public void test () {
+					TestBug552849 foo = new TestBug552849();
+					File res = $
+				}
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		cu= getCompilationUnit(pkg, buf, "TestBug552849.java");
@@ -628,22 +650,24 @@ public class ChainCompletionTest {
 	@Test
 	public void testBug559385 () throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public @interface Command {\n" +
-				"	String name();\n" +
-				"}");
+		buf.append("""
+			package test;
+			public @interface Command {
+				String name();
+			}""");
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Command.java");
 
 		buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.util.concurrent.Callable;\n" +
-				"@Command(name = $\"\")\n" +
-				"public class TestBug559385 implements Callable<String> {\n" +
-				"	@Override\n" +
-				"	public String call() throws Exception {\n" +
-				"		return null;\n" +
-				"	}\n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.util.concurrent.Callable;
+			@Command(name = $"")
+			public class TestBug559385 implements Callable<String> {
+				@Override
+				public String call() throws Exception {
+					return null;
+				}
+			}""");
 		cu= getCompilationUnit(pkg, buf, "TestBug559385.java");
 		int completionIndex= getCompletionIndex(buf);
 
@@ -654,18 +678,19 @@ public class ChainCompletionTest {
 	@Test
 	public void testNoTriggerCompletionInvocation() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"import java.util.Iterator;\n" +
-				"import java.util.List;\n" +
-				"\n" +
-				"public class NoTriggerCompletionInvocation {\n" +
-				"  public void method(){\n" +
-				"    List longVariableName, longVariableName2;\n" +
-				"    Iterator it = longVariableName$\n" +
-				"    String foo = null;\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			import java.util.Iterator;
+			import java.util.List;
+			
+			public class NoTriggerCompletionInvocation {
+			  public void method(){
+			    List longVariableName, longVariableName2;
+			    Iterator it = longVariableName$
+			    String foo = null;
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "NoTriggerCompletionInvocation.java");
@@ -677,18 +702,19 @@ public class ChainCompletionTest {
 		ICompletionProposal proposal= proposals.stream().filter(p -> p.getDisplayString().equals(expectedProposal)).findFirst().get();
 		IDocument doc= new Document(buf.toString().replace("$", ""));
 		applyProposal(proposal, doc, cu, completionIndex);
-		String expectedContent = "package test;\n" +
-				"\n" +
-				"import java.util.Iterator;\n" +
-				"import java.util.List;\n" +
-				"\n" +
-				"public class NoTriggerCompletionInvocation {\n" +
-				"  public void method(){\n" +
-				"    List longVariableName, longVariableName2;\n" +
-				"    Iterator it = longVariableName.iterator()\n" +
-				"    String foo = null;\n" +
-				"  }\n" +
-				"}";
+		String expectedContent = """
+			package test;
+			
+			import java.util.Iterator;
+			import java.util.List;
+			
+			public class NoTriggerCompletionInvocation {
+			  public void method(){
+			    List longVariableName, longVariableName2;
+			    Iterator it = longVariableName.iterator()
+			    String foo = null;
+			  }
+			}""";
 		assertEquals(expectedContent,doc.get());
 	}
 

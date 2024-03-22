@@ -72,59 +72,63 @@ public class NlsRefactoringCreateChangeTest {
 		fHelper.createPackageFragment("p2", "/TestSetupProject/src2"); //$NON-NLS-1$//$NON-NLS-2$
 
 		// class to NLS
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\r\n");
-		buf.append("class Test {\n");
-		buf.append("	String hello=\"helloworld\";\n");
-		buf.append("}");
+		String str= """
+			package p;\r
+			class Test {
+				String hello="helloworld";
+			}""";
 		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$//$NON-NLS-2$
-				buf.toString());
+				str);
 
 		NLSRefactoring nls= createDefaultNls(cu);
 		nls.setAccessorClassPackage(fHelper.getPackageFragment("/TestSetupProject/src2/p2")); //$NON-NLS-1$
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("package p;\r\n\r\n");
-		buf.append("import p2.Messages;\r\n\r\n");
-		buf.append("class Test {\n");
-		buf.append("	String hello=Messages.getString(\"test0\"); //$NON-NLS-1$\n");
-		buf.append("}");
-		checkContentOfCu("manipulated class", cu, buf.toString()); //$NON-NLS-1$
+		String str1= """
+			package p;\r
+			\r
+			import p2.Messages;\r
+			\r
+			class Test {
+				String hello=Messages.getString("test0"); //$NON-NLS-1$
+			}""";
+		checkContentOfCu("manipulated class", cu, str1); //$NON-NLS-1$
 
-		buf= new StringBuilder();
-		buf.append("test0=helloworld\n");
-		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		String str2= """
+			test0=helloworld
+			""";
+		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), str2); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 
 	@Test
 	public void createChangeWithCollidingImport() throws Exception {
 		//class to NLS
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import p.another.Messages;\n");
-		buf.append("class Test {");
-		buf.append("	String hello=\"helloworld\";\r\n");
-		buf.append("}");
-		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		String str= """
+			package p;
+			import p.another.Messages;
+			class Test {\
+				String hello="helloworld";\r
+			}""";
+		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", str); //$NON-NLS-1$ //$NON-NLS-2$
 
 		NLSRefactoring nls= createDefaultNls(cu);
 
 		performChange(nls);
 
-		buf=new StringBuilder();
-		buf.append("package p;\n" );
-		buf.append("import p.another.Messages;\n");
-		buf.append("class Test {" );
-		buf.append("	String hello=p.Messages.getString(\"test0\"); //$NON-NLS-1$\n");
-		buf.append("}");
-		checkContentOfCu("manipulated class", cu, buf.toString());
+		String str1= """
+			package p;
+			import p.another.Messages;
+			class Test {\
+				String hello=p.Messages.getString("test0"); //$NON-NLS-1$
+			}""";
+		checkContentOfCu("manipulated class", cu, str1);
 
-		buf= new StringBuilder();
-		buf.append("test0=helloworld\n");
-		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		String str2= """
+			test0=helloworld
+			""";
+		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), str2); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 
@@ -132,25 +136,27 @@ public class NlsRefactoringCreateChangeTest {
 	@Test
 	public void createChangeWithExistingAccessorclassInDifferentPackage() throws Exception {
 		//Accessor class
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("public class Accessor {\n");
-		buf.append("		 private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n");
-		buf.append("		 public static String getString(String s) {\n");
-		buf.append("		 		 return \"\";\n");
-		buf.append("		 }\n");
-		buf.append("}\n");
-		GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
+		String str= """
+			package p;
+			public class Accessor {
+					 private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+					 public static String getString(String s) {
+					 		 return "";
+					 }
+			}
+			""";
+		GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", str);
 
 		//class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("class Test {\n");
-		buf.append("  String hello=\"hello\";\n");
-		buf.append("  String world=\"world\";\n");
-		buf.append("}\n");
+		String str1= """
+			package test;
+			class Test {
+			  String hello="hello";
+			  String world="world";
+			}
+			""";
 		fHelper.createPackageFragment("test", "/TestSetupProject/src1");
-		ICompilationUnit testClass= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
+		ICompilationUnit testClass= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", str1);
 
 		NLSRefactoring nls= NLSRefactoring.create(testClass);
 
@@ -170,38 +176,43 @@ public class NlsRefactoringCreateChangeTest {
 		performChange(nls);
 
 		//class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n\n");
-		buf.append("import p.Accessor;\n\n");
-		buf.append("class Test {\n");
-		buf.append("  String hello=Accessor.getString(\"test0\"); //$NON-NLS-1$\n");
-		buf.append("  String world=Accessor.getString(\"test1\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("manipulated class", testClass, buf.toString());
+		String str2= """
+			package test;
+			
+			import p.Accessor;
+			
+			class Test {
+			  String hello=Accessor.getString("test0"); //$NON-NLS-1$
+			  String world=Accessor.getString("test1"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("manipulated class", testClass, str2);
 	}
 
 	// BUG 202566
 	@Test
 	public void createChangeWithExistingAccessorclassInDifferentPackage_1() throws Exception {
 		//Accessor class
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("public class Accessor {\n");
-		buf.append("		 private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n");
-		buf.append("		 public static String getString(String s) {\n");
-		buf.append("		 		 return \"\";\n");
-		buf.append("		 }\n");
-		buf.append("}\n");
-		GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", buf.toString());
+		String str= """
+			package p;
+			public class Accessor {
+					 private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+					 public static String getString(String s) {
+					 		 return "";
+					 }
+			}
+			""";
+		GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Accessor.java", str);
 
 		//class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("class Test {\n");
-		buf.append("  String hello=\"helloworld\";\n");
-		buf.append("}\n");
+		String str1= """
+			package test;
+			class Test {
+			  String hello="helloworld";
+			}
+			""";
 		fHelper.createPackageFragment("test", "/TestSetupProject/src1");
-		ICompilationUnit testClass= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", buf.toString());
+		ICompilationUnit testClass= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/test"), "AClass.java", str1);
 
 		NLSRefactoring nls= NLSRefactoring.create(testClass);
 
@@ -217,54 +228,57 @@ public class NlsRefactoringCreateChangeTest {
 		performChange(nls);
 
 		//class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("class Test {\n");
-		buf.append("  String hello=\"helloworld\"; //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("manipulated class", testClass, buf.toString());
+		String str2= """
+			package test;
+			class Test {
+			  String hello="helloworld"; //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("manipulated class", testClass, str2);
 	}
 	@Test
 	public void createChangeWithNonDefaultSubstitution() throws Exception {
 		//class to NLS
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import p.another.Messages;\n");
-		buf.append("class Test {\n");
-		buf.append("	String hello=\"helloworld\";\n");
-		buf.append("}");
+		String str= """
+			package p;
+			import p.another.Messages;
+			class Test {
+				String hello="helloworld";
+			}""";
 		ICompilationUnit cu= GenericRefactoringTest.createCU(fHelper.getPackageFragment("/TestSetupProject/src1/p"), "Test.java", //$NON-NLS-1$ //$NON-NLS-2$
-				buf.toString());
+				str);
 		NLSRefactoring nls= createDefaultNls(cu);
 
 		String string= "nonDefault(" + NLSRefactoring.KEY + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		nls.setSubstitutionPattern(string);
 
 		performChange(nls);
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import p.another.Messages;\n");
-		buf.append("class Test {\n");
-		buf.append("	String hello=p.Messages.nonDefault(\"test0\"); //$NON-NLS-1$\n");
-		buf.append("}");
+		String str1= """
+			package p;
+			import p.another.Messages;
+			class Test {
+				String hello=p.Messages.nonDefault("test0"); //$NON-NLS-1$
+			}""";
 		checkContentOfCu("manipulated class", //$NON-NLS-1$
-				cu, buf.toString());
+				cu, str1);
 
-		buf=new StringBuilder();
-		buf.append("test0=helloworld\n");
-		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), buf.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		String str2= """
+			test0=helloworld
+			""";
+		checkContentOfFile("properties", fHelper.getFile("/TestSetupProject/src2/p/test.properties"), str2); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void createDefaultAccessor(IPackageFragment pack1) throws JavaModelException {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Accessor {\n");
-		buf.append("    private static final String BUNDLE_NAME = \"test.Accessor\";//$NON-NLS-1$\n");
-		buf.append("    public static String getString(String s) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("Accessor.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class Accessor {
+			    private static final String BUNDLE_NAME = "test.Accessor";//$NON-NLS-1$
+			    public static String getString(String s) {
+			        return null;
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("Accessor.java", str, false, null);
 	}
 
 	@Test
@@ -275,21 +289,23 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("A.1=Hello1\n");
-		buf.append("A.2=Hello2\n");
-		buf.append("A.3=Hello3\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			A.1=Hello1
+			A.2=Hello2
+			A.3=Hello3
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"A.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"A.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"A.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("A.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("A.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("A.3"); //$NON-NLS-1$
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -299,20 +315,22 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("A.2=Hello2\n");
-		buf.append("A.3=Hello3\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			A.2=Hello2
+			A.3=Hello3
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= \"Hello1\"; //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"A.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"A.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= "Hello1"; //$NON-NLS-1$
+			    String hello2= Accessor.getString("A.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("A.3"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -323,20 +341,22 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= \"Hello1\";\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= "Hello1";
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -349,20 +369,22 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.1"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -373,21 +395,23 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		buf.append("Test.3=Hello3\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			Test.3=Hello3
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -399,20 +423,22 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.1"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -423,20 +449,22 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.1"); //$NON-NLS-1$
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -448,21 +476,23 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		buf.append("Test.3=Hello3\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			Test.3=Hello3
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -473,20 +503,22 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.1"); //$NON-NLS-1$
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -497,20 +529,22 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= \"Hello1\"; \n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= "Hello1";\s
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -521,20 +555,22 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= \"Hello1\";\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= "Hello1";
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -549,20 +585,22 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= \"Hello1\"; \n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= "Hello1";\s
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.1"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 
@@ -574,20 +612,22 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -598,21 +638,23 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		buf.append("Test.3=Hello3\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			Test.3=Hello3
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -623,20 +665,22 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -650,21 +694,23 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello22\n");
-		buf.append("Test.3=Hello3\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello22
+			Test.3=Hello3
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello3= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello3= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -675,18 +721,19 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= \"Hello2\";\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= "Hello2";
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -698,19 +745,21 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	@Test
@@ -721,19 +770,20 @@ public class NlsRefactoringCreateChangeTest {
 		createDefaultAccessor(pack1);
 
 		// property file
-		StringBuilder buf= new StringBuilder();
-		buf.append("Test.1=Hello1");
-		IFile file= createPropertyFile(pack1, "Accessor.properties", buf.toString());
+		String str= """
+			Test.1=Hello1""";
+		IFile file= createPropertyFile(pack1, "Accessor.properties", str);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= \"Hello2\";\n");
-		buf.append("    String hello2= \"Hello3\";\n");
-		buf.append("}\n");
-		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= "Hello2";
+			    String hello2= "Hello3";
+			}
+			""";
+		ICompilationUnit cu = pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		NLSRefactoring nls= NLSRefactoring.create(cu);
 
@@ -749,21 +799,23 @@ public class NlsRefactoringCreateChangeTest {
 
 		performChange(nls);
 
-		buf= new StringBuilder();
-		buf.append("Test.1=Hello1\n");
-		buf.append("Test.2=Hello2\n");
-		buf.append("Test.3=Hello3\n");
-		checkContentOfFile("property file", file, buf.toString());
+		String str2= """
+			Test.1=Hello1
+			Test.2=Hello2
+			Test.3=Hello3
+			""";
+		checkContentOfFile("property file", file, str2);
 
 		// class to NLS
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Test {\n");
-		buf.append("    String hello1= Accessor.getString(\"Test.1\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.2\"); //$NON-NLS-1$\n");
-		buf.append("    String hello2= Accessor.getString(\"Test.3\"); //$NON-NLS-1$\n");
-		buf.append("}\n");
-		checkContentOfCu("nls file", cu, buf.toString());
+		String str3= """
+			package test;
+			public class Test {
+			    String hello1= Accessor.getString("Test.1"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.2"); //$NON-NLS-1$
+			    String hello2= Accessor.getString("Test.3"); //$NON-NLS-1$
+			}
+			""";
+		checkContentOfCu("nls file", cu, str3);
 	}
 
 	private IFile createPropertyFile(IPackageFragment pack, String name, String content) throws UnsupportedEncodingException, CoreException {
