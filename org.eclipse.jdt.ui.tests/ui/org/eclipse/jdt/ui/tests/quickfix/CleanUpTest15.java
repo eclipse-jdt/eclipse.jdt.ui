@@ -155,7 +155,18 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "                + \" * foo\\n\" //\n" //
     	        + "                + \" */ \"; //\n" //
     	        + "    }\n" //
-  	        + "}\n";
+      	        + "    public void testEscapedSingleQuote() {\n" //
+    	        + "        String x= \"\"\n" //
+    	        + "                + \"public class Test {\\n\"\n" //
+    	        + "                + \"  static String C = \\\"\\\\n\\\";\\n\"\n" //
+    	        + "                + \"  \\n\"\n" //
+    	        + "                + \"  public static void main(String[] args) {\\n\"\n" //
+    	        + "                + \"      System.out.print(C.length());\\n\"\n" //
+    	        + "                + \"      System.out.print(C.charAt(0) == \\'\\\\n\\');\\n\"\n" //
+    	        + "                + \"  }\\n\"\n" //
+    	        + "                + \"}\";\n" //
+    	        + "    }\n" //
+    	        + "}\n";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
@@ -278,7 +289,18 @@ public class CleanUpTest15 extends CleanUpTestCase {
     	        + "             * foo\n" //
     	        + "             */\\s\"\"\"; //\n" //
     	        + "    }\n" //
-   	        + "}\n";
+    	        + "    public void testEscapedSingleQuote() {\n" //
+    	        + "        String x= \"\"\"\n" //
+    	        + "            public class Test {\n" //
+    	        + "              static String C = \"\\\\n\";\n" //
+    	        + "             \\s\n" //
+    	        + "              public static void main(String[] args) {\n" //
+    	        + "                  System.out.print(C.length());\n" //
+    	        + "                  System.out.print(C.charAt(0) == '\\\\n');\n" //
+    	        + "              }\n" //
+    	        + "            }\"\"\";\n" //
+    	        + "    }\n" //
+    	        + "}\n";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
