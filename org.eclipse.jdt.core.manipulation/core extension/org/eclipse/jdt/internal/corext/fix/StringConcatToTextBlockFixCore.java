@@ -126,7 +126,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (!(rightHand instanceof StringLiteral)) {
 				return false;
 			}
-			StringLiteral rightLiteral= (StringLiteral)leftHand;
+			StringLiteral rightLiteral= (StringLiteral)rightHand;
 			ICompilationUnit cu= (ICompilationUnit)cUnit.getJavaElement();
 			hasComments= hasComments || hasNLS(ASTNodes.getTrailingComments(rightLiteral), cu);
 			literal= rightLiteral.getLiteralValue();
@@ -158,7 +158,26 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				return false;
 			}
 			boolean isTagged= false;
-			if (hasComments && ASTNodes.getFirstAncestorOrNull(visited, Annotation.class) == null) {
+			// if there are any block comments or non-empty line comments and we aren't NLS, abandon change
+			if (!hasComments) {
+				List<Comment> comments= ASTNodes.getCommentsForRegion(cUnit, visited.getStartPosition(), visited.getLength());
+				if (!comments.isEmpty()) {
+					IBuffer buffer;
+					try {
+						buffer= cu.getBuffer();
+						for (Comment comment : comments) {
+							if (!(comment instanceof LineComment lineComment)) {
+								return false;
+							}
+							if (!buffer.getText(comment.getStartPosition() + 2, comment.getLength() - 2).trim().isEmpty()) {
+								return false;
+							}
+						}
+					} catch (JavaModelException e) {
+						// fall through
+					}
+				}
+			} else if (ASTNodes.getFirstAncestorOrNull(visited, Annotation.class) == null) {
 				NLSLine nlsLine= scanCurrentLine(cu, leftHand);
 				if (nlsLine == null) {
 					return false;
@@ -334,6 +353,14 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 				for (i= count; i > 0; --i) {
 					buf.append("\\\""); //$NON-NLS-1$
+				}
+				i= buf.length() - 1;
+				if (buf.charAt(i) == ' ') {
+					buf.deleteCharAt(i);
+					buf.append("\\s"); //$NON-NLS-1$
+				} else if (buf.charAt(i) == '\t') {
+					buf.deleteCharAt(i);
+					buf.append("\\t"); //$NON-NLS-1$
 				}
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
