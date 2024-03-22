@@ -90,8 +90,9 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 	final private int  fVariableKind;
 	final private SimpleName fOriginalNode;
 	final private ITypeBinding fSenderBinding;
+	final private boolean fAddFinal;
 
-	public NewVariableCorrectionProposalCore(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance) {
+	public NewVariableCorrectionProposalCore(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, boolean addFinal) {
 		super(label, cu, null, relevance);
 		if (senderBinding == null) {
 			Assert.isTrue(variableKind == PARAM || variableKind == LOCAL);
@@ -102,6 +103,7 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 		fVariableKind= variableKind;
 		fOriginalNode= node;
 		fSenderBinding= senderBinding;
+		fAddFinal = addFinal;
 	}
 
 	@Override
@@ -264,6 +266,9 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 			// and replace the assignment with an VariableDeclarationExpression
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
+			if (fAddFinal) {
+				newDecl.modifiers().addAll(ast.newModifiers(Modifier.FINAL));
+			}
 			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext, TypeLocation.LOCAL_VARIABLE));
 
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
@@ -289,6 +294,10 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 			frag.setInitializer(placeholder);
 			expression.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext, TypeLocation.LOCAL_VARIABLE));
 
+			if (fAddFinal) {
+				expression.modifiers().addAll(ast.newModifiers(Modifier.FINAL));
+			}
+
 			rewrite.replace(assignment, expression, null);
 
 			addLinkedPosition(rewrite.track(expression.getType()), false, KEY_TYPE);
@@ -303,6 +312,9 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 
 			EnhancedForStatement enhancedForStatement= (EnhancedForStatement) dominantStatement;
 			SingleVariableDeclaration parameter= enhancedForStatement.getParameter();
+			if (fAddFinal) {
+				parameter.modifiers().addAll(ast.newModifiers(Modifier.FINAL));
+			}
 			Expression expression= enhancedForStatement.getExpression();
 
 			SimpleName newName= (SimpleName) rewrite.createMoveTarget(node);
@@ -348,6 +360,9 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 
 		newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
 		newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext, TypeLocation.LOCAL_VARIABLE));
+		if (fAddFinal) {
+			newDecl.modifiers().addAll(ast.newModifiers(Modifier.FINAL));
+		}
 //		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
@@ -548,6 +563,9 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 		}
 		int modifiers= 0;
 
+		if (fAddFinal) {
+			modifiers |= Modifier.FINAL;
+		}
 		if (fVariableKind == CONST_FIELD) {
 			modifiers |= Modifier.FINAL | Modifier.STATIC;
 		} else {

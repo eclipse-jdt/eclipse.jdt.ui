@@ -374,7 +374,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		if (type == ASTNode.METHOD_DECLARATION) {
 			int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? IProposalRelevance.CREATE_PARAMETER_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_PARAMETER;
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, BasicElementLabels.getJavaElementName(name));
-			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, cu, NewVariableCorrectionProposalCore.PARAM, simpleName, null, relevance);
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, cu, NewVariableCorrectionProposalCore.PARAM, simpleName, null, relevance, false);
 			T p= newVariableCorrectionProposalToT(core, NewVariableProposal1);
 			if (p != null)
 				proposals.add(p);
@@ -382,7 +382,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		if (type == ASTNode.INITIALIZER || type == ASTNode.METHOD_DECLARATION && !ASTResolving.isInsideConstructorInvocation((MethodDeclaration) bodyDeclaration, node)) {
 			int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? IProposalRelevance.CREATE_LOCAL_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_LOCAL;
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createlocal_description, BasicElementLabels.getJavaElementName(name));
-			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance);
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance, false);
 			T p= newVariableCorrectionProposalToT(core, NewVariableProposal2);
 			if (p != null)
 				proposals.add(p);
@@ -451,7 +451,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		String label;
 		if (senderDeclBinding.isEnum() && !isWriteAccess) {
 			label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createenum_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) });
-			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10);
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10, false);
 			T p1= newVariableCorrectionProposalToT(core, NewFieldForTypeProposal1);
 			if (p1 != null)
 				proposals.add(p1);
@@ -466,7 +466,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
 					uid= NewFieldForTypeProposal3;
 				}
-				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance);
+				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance, false);
 				T prop= newVariableCorrectionProposalToT(core, uid);
 				if (prop != null)
 					proposals.add(prop);
@@ -482,7 +482,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 					uid= NewFieldForTypeProposal5;
 				}
 				int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_CONSTANT_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_CONSTANT;
-				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance);
+				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, false);
 				T prop= newVariableCorrectionProposalToT(core, uid);
 				if (prop != null)
 					proposals.add(prop);
@@ -787,7 +787,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 						String name= simpleName.getIdentifier();
 						int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 						String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));
-						NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance);
+						NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, cu, NewVariableCorrectionProposalCore.LOCAL, simpleName, null, relevance, false);
 						T prop= newVariableCorrectionProposalToT(core, EnhancedForWithoutTypeProposal1);
 						if (prop != null)
 							proposals.add(prop);

@@ -37,7 +37,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 	public NewVariableCorrectionProposal(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, Image image) {
-		super(label, cu, null, relevance, image, new NewVariableCorrectionProposalCore(label, cu, variableKind, node, senderBinding, relevance));
+		super(label, cu, null, relevance, image, new NewVariableCorrectionProposalCore(label, cu, variableKind, node, senderBinding, relevance, false));
 	}
 
 	public int getVariableKind() {
