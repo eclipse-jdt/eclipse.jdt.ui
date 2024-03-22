@@ -113,8 +113,9 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 	private final List<String> fParamNames;
 
 	private VariableDeclarationFragment fExistingFragment;
+	private final boolean fAddFinal;
 
-	public AssignToVariableAssistProposalCore(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
+	public AssignToVariableAssistProposalCore(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance, boolean addFinal) {
 		super("", cu, null, relevance); //$NON-NLS-1$
 
 		fCUnit= cu;
@@ -122,6 +123,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 		fParamNames = null;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.add(node);
+		fAddFinal= addFinal;
 
 		fTypeBinding= Bindings.normalizeForDeclarationUse(typeBinding, node.getAST());
 		if (variableKind == AssignToVariableAssistProposalCore.LOCAL) {
@@ -134,7 +136,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 		createImportRewrite((CompilationUnit) node.getRoot());
 	}
 
-	public AssignToVariableAssistProposalCore(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
+	public AssignToVariableAssistProposalCore(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance, boolean addFinal) {
 		super("", cu, null, relevance); //$NON-NLS-1$
 
 		fCUnit= cu;
@@ -144,6 +146,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 		fParamNames= null;
 		fTypeBinding= typeBinding;
 		fExistingFragment= existingFragment;
+		fAddFinal= addFinal;
 
 		if (existingFragment == null) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignparamtofield_description);
@@ -152,7 +155,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 		}
 	}
 
-	public AssignToVariableAssistProposalCore(ICompilationUnit cu, List<SingleVariableDeclaration> parameters, int relevance) {
+	public AssignToVariableAssistProposalCore(ICompilationUnit cu, List<SingleVariableDeclaration> parameters, int relevance, boolean addFinal) {
 		super("", cu, null, relevance); //$NON-NLS-1$
 
 		fCUnit= cu;
@@ -161,6 +164,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 		fNodesToAssign.addAll(parameters);
 		fTypeBinding= null;
 		fParamNames= new ArrayList<>();
+		fAddFinal = addFinal;
 		populateNames(parameters);
 		setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assignallparamstofields_description);
 	}
@@ -224,11 +228,17 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 
 			if (needsSemicolon(expression)) {
 				VariableDeclarationStatement varStatement= ast.newVariableDeclarationStatement(newDeclFrag);
+				if (fAddFinal) {
+					varStatement.modifiers().addAll(ast.newModifiers(Modifier.FINAL));
+				}
 				varStatement.setType(type);
 				rewrite.replace(expression, varStatement, null);
 			} else {
 				// trick for bug 43248: use an VariableDeclarationExpression and keep the ExpressionStatement
 				VariableDeclarationExpression varExpression= ast.newVariableDeclarationExpression(newDeclFrag);
+				if (fAddFinal) {
+					varExpression.modifiers().addAll(ast.newModifiers(Modifier.FINAL));
+				}
 				varExpression.setType(type);
 				rewrite.replace(expression, varExpression, null);
 			}
@@ -389,6 +399,9 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 		boolean isStatic= Modifier.isStatic(bodyDecl.getModifiers()) && !isAnonymous;
 		boolean isConstructorParam= isParamToField && nodeToAssign.getParent() instanceof MethodDeclaration && ((MethodDeclaration) nodeToAssign.getParent()).isConstructor();
 		int modifiers= Modifier.PRIVATE;
+		if (fAddFinal) {
+			modifiers |= Modifier.FINAL;
+		}
 		if (isStatic) {
 			modifiers |= Modifier.STATIC;
 		} else if (isConstructorParam) {

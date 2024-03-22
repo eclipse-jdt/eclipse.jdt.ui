@@ -50,7 +50,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	static final String VAR_TYPE= "var"; //$NON-NLS-1$
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance) {
-		super("", cu, null, relevance, null, new AssignToVariableAssistProposalCore(cu, variableKind, node, typeBinding, relevance)); //$NON-NLS-1$
+		super("", cu, null, relevance, null, new AssignToVariableAssistProposalCore(cu, variableKind, node, typeBinding, relevance, false)); //$NON-NLS-1$
 		if (variableKind == LOCAL) {
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
 		} else if (variableKind == FIELD) {
@@ -61,11 +61,11 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
-		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameter, existingFragment, typeBinding, relevance)); //$NON-NLS-1$
+		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameter, existingFragment, typeBinding, relevance, false)); //$NON-NLS-1$
 	}
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, List<SingleVariableDeclaration> parameters, int relevance) {
-		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameters, relevance)); //$NON-NLS-1$
+		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new AssignToVariableAssistProposalCore(cu, parameters, relevance, false)); //$NON-NLS-1$
 	}
 
 	protected LinkedProposalModelCore createProposalModel() {
