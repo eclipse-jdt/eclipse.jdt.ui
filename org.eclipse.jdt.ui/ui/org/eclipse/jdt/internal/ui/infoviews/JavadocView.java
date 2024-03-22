@@ -426,7 +426,7 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * Flag to force isIgnoringNewInput() to return <code>false</code> on next execution.
 	 */
-	private boolean fIgnoringNewInputOverride;
+	private volatile boolean fIgnoringNewInputOverride;
 
 	/**
 	 * The Javadoc view's select all action.

@@ -49,7 +49,6 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 
 	private Action[] actions;
 	protected Menu menu= null;
-	private boolean isEnabledOverride= false;
 	private boolean enhancementsEnabled= JavaElementLinks.getStylingEnabledPreference();
 
 	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, Supplier<String> javadocContentSupplier, Runnable enhancementsReconfiguredTask) {
@@ -95,30 +94,13 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	}
 
 	@Override
-	public boolean isEnabled() {
-		if (isEnabledOverride) {
-			// method called from org.eclipse.jface.action.ActionContributionItem.handleWidgetSelection() after getMenu() returned NULL
-			isEnabledOverride= false;
-			return false; // make ActionContributionItem.handleWidgetSelection() to do nothing as reaction to clicking on arrow
-		} else {
-			return super.isEnabled();
-		}
-	}
-
-	@Override
 	public Menu getMenu(Control p) {
-		if (!enhancementsEnabled) {
-			isEnabledOverride= true;
-			return null;
-		}
 		if (menu == null) {
 			menu= new Menu(parent);
 			addMenuItems();
 			MenuVisibilityMenuItemsConfigurer.registerForMenu(menu);
-			return menu;
-		} else {
-			return menu;
 		}
+		return menu;
 	}
 
 	@Override
