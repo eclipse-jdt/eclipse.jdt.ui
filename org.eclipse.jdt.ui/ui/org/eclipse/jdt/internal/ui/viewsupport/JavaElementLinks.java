@@ -35,9 +35,7 @@ import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -953,20 +951,13 @@ public class JavaElementLinks {
 		store.removePropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
 		store.removePropertyChangeListener(ENHANCEMENTS_PROPERTIES_CHANGE_LISTENER);
 		try {
-			StringBuffer logMessage= new StringBuffer("Following custom color preferences were removed:"); //$NON-NLS-1$
-			RGB customColor= null;
 			for (int i= 1; i <= MAX_COLOR_INDEX; i++) {
 				String key= getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, i);
 				if (!store.isDefault(key)) {
-					customColor= PreferenceConverter.getColor(store, key);
-					logMessage.append("\n\t").append(key).append(" = ").append(customColor); //$NON-NLS-1$ //$NON-NLS-2$
 					store.setToDefault(key);
 				}
 			}
-			cssFragmentsCacheResetListener(null);
-			if (customColor != null) {
-				JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), logMessage.toString()));
-			}
+			cssFragmentsCacheResetListener(null); // clear CSS fragments cache
 		} finally {
 			store.addPropertyChangeListener(COLOR_PROPERTIES_CHANGE_LISTENER);
 			store.addPropertyChangeListener(ENHANCEMENTS_PROPERTIES_CHANGE_LISTENER);
