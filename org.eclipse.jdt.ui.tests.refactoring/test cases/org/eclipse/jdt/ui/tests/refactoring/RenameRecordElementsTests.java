@@ -416,13 +416,14 @@ public class RenameRecordElementsTests extends GenericRefactoringTest {
 
 	@Test
 	public void testRenameRecordComponentFail01() throws Exception{
-		String errorMsg = "<ERROR\n" +
-				"	\n" +
-				"ERROR: Method 'void g()' already exists in 'p.A', having same signature as the new accessor method.\n" +
-				"Context: A.java (not open) [in p [in src [in TestProject]]]\n" +
-				"code: none\n" +
-				"Data: null\n" +
-				">";
+		String errorMsg = """
+			<ERROR
+			\t
+			ERROR: Method 'void g()' already exists in 'p.A', having same signature as the new accessor method.
+			Context: A.java (not open) [in p [in src [in TestProject]]]
+			code: none
+			Data: null
+			>""";
 		renameRecordComponentFail("A","f","g",errorMsg);
 	}
 }

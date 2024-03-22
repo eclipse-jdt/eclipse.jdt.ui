@@ -102,9 +102,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testPrevIndentationUnit2() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a");
+		fDocument.set("""
+				int a;
+				if (true)
+					return a\
+			""");
 
 		int pos= fScanner.findReferencePosition(28);
 		assertEquals(21, pos);
@@ -156,12 +158,14 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testPrevIndentationUnit9() {
 		// block
-		fDocument.set("\tvoid proc (int par1, int par2) {\n" +
-			"\t\t\n" +
-			"\t\tfor (int i= 4; i < 33; i++) {\n" +
-			"\t\t}\n" +
-			"\t\t\n" +
-			"\t\tint i;\n");
+		fDocument.set("""
+				void proc (int par1, int par2) {
+				\t
+					for (int i= 4; i < 33; i++) {
+					}
+				\t
+					int i;
+			""");
 
 		int pos= fScanner.findReferencePosition(fDocument.getLength());
 		assertEquals(fDocument.getLength() - 7, pos);
@@ -211,9 +215,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testPrevIndentation2() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a");
+		fDocument.set("""
+				int a;
+				if (true)
+					return a\
+			""");
 
 		String indent= fScanner.getReferenceIndentation(28).toString();
 		assertEquals("\t\t", indent);
@@ -221,9 +227,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testPrevIndentation3() {
-		fDocument.set("\tint a;\n" +
-			"\tif (true)\n" +
-			"\t\treturn a;");
+		fDocument.set("""
+				int a;
+				if (true)
+					return a;\
+			""");
 
 		String indent= fScanner.getReferenceIndentation(29).toString();
 		assertEquals("\t\t", indent);
@@ -282,12 +290,14 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testPrevIndentation9() {
 		// block
-		fDocument.set("\tvoid proc (int par1, int par2) {\n" +
-			"\t\t\n" +
-			"\t\tfor (int i= 4; i < 33; i++) {\n" +
-			"\t\t}\n" +
-			"\t\t\n" +
-			"\t\tint i;\n");
+		fDocument.set("""
+				void proc (int par1, int par2) {
+				\t
+					for (int i= 4; i < 33; i++) {
+					}
+				\t
+					int i;
+			""");
 
 		String indent= fScanner.getReferenceIndentation(fDocument.getLength()).toString();
 		assertEquals("\t\t", indent);
@@ -388,12 +398,14 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testIndentation9() {
 		// block
-		fDocument.set("\tvoid proc (int par1, int par2) {\n" +
-			"\t\t\n" +
-			"\t\tfor (int i= 4; i < 33; i++) {\n" +
-			"\t\t}\n" +
-			"\t\t\n" +
-			"\t\tint i;\n");
+		fDocument.set("""
+				void proc (int par1, int par2) {
+				\t
+					for (int i= 4; i < 33; i++) {
+					}
+				\t
+					int i;
+			""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("\t\t", indent);
@@ -470,9 +482,11 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testIndentation15() {
 		// for
-		fDocument.set("\tfor (int i= 0; i < 10; i++) {\n" +
-			"\t\tbar(); bar(); // foo\n" +
-			"\t}\n");
+		fDocument.set("""
+				for (int i= 0; i < 10; i++) {
+					bar(); bar(); // foo
+				}
+			""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("\t", indent);
@@ -568,11 +582,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testIndentation22b() {
 		// after double if w/ brace
-		fDocument.set("\tif (true)\n" +
-			"\t\tif (true) {\n" +
-			"\t\t\tstuff();" +
-			"\t\t}\n" +
-			"a");
+		fDocument.set("""
+				if (true)
+					if (true) {
+						stuff();\
+					}
+			a""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength() - 1).toString();
 		assertEquals("\t", indent); // no dangling else possible
@@ -591,10 +606,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testIndentation24() {
 		// braceless else
-		fDocument.set("\tif (true) {\n" +
-			"\t\tstuff();\n" +
-			"\t} else\n" +
-			"\t\tnoStuff");
+		fDocument.set("""
+				if (true) {
+					stuff();
+				} else
+					noStuff\
+			""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("\t\t", indent);
@@ -603,10 +620,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testIndentation25() {
 		// braceless else
-		fDocument.set("\tif (true) {\r\n" +
-			"\t\tstuff();\r\n" +
-			"\t} else\r\n" +
-			"\t\tnoStuff;\r\n");
+		fDocument.set("""
+				if (true) {\r
+					stuff();\r
+				} else\r
+					noStuff;\r
+			""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("\t", indent);
@@ -654,9 +673,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testIndentation29() {
-		fDocument.set("\t\twhile (condition)\n" +
-				"\t\t\twhile (condition)\n" +
-				"\t\t\t\tfoo();\n");
+		fDocument.set("""
+					while (condition)
+						while (condition)
+							foo();
+			""");
 
 		int i= fScanner.findReferencePosition(fDocument.getLength());
 		assertEquals(2, i);
@@ -677,11 +698,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testIndentation31() {
 		// braceless else
-		fDocument.set("\tif (true)\n" +
-			"{\t\n" +
-			"\t\tstuff();\n" +
-			"\t} else\n" +
-			"\t\tnoStuff");
+		fDocument.set("""
+				if (true)
+			{\t
+					stuff();
+				} else
+					noStuff""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("\t\t", indent);
@@ -699,9 +721,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testAnonymousIndentation1() {
-		fDocument.set(	"		MenuItem mi= new MenuItem(\"About...\");\n" +
-						"		mi.addActionListener(\n" +
-						"			new ActionListener() {\n"
+		fDocument.set(	"""
+					MenuItem mi= new MenuItem("About...");
+					mi.addActionListener(
+						new ActionListener() {
+			"""
 						);
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
@@ -710,14 +734,15 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testAnonymousIndentation2() {
-		fDocument.set(	"		MenuItem mi= new MenuItem(\"About...\");\n" +
-						"		mi.addActionListener(\n" +
-						"			new ActionListener() {\n" +
-						"				public void actionPerformed(ActionEvent event) {\n" +
-						"					about();\n" +
-						"				}\n" +
-						"			}\n" +
-						");"
+		fDocument.set(	"""
+					MenuItem mi= new MenuItem("About...");
+					mi.addActionListener(
+						new ActionListener() {
+							public void actionPerformed(ActionEvent event) {
+								about();
+							}
+						}
+			);"""
 						);
 
 		// this is bogus, since this is really just an unfinished call argument list - how could we know
@@ -727,13 +752,14 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testExceptionIndentation1() {
-		fDocument.set("public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {\n" +
-				"			IConfigurationElement[] children= element.getChildren();\n" +
-				"			if (children != null) {\n" +
-				"				for (int i= 0; i < children.length; i++) {\n" +
-				"					Expression child= parse(children[i]);\n" +
-				"					if (child == null)\n" +
-				"						new Bla(new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId()");
+		fDocument.set("""
+			public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {
+						IConfigurationElement[] children= element.getChildren();
+						if (children != null) {
+							for (int i= 0; i < children.length; i++) {
+								Expression child= parse(children[i]);
+								if (child == null)
+									new Bla(new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId()""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("							", indent);
@@ -741,13 +767,14 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testExceptionIndentation2() {
-		fDocument.set("public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {\n" +
-				"			IConfigurationElement[] children= element.getChildren();\n" +
-				"			if (children != null) {\n" +
-				"				for (int i= 0; i < children.length; i++) {\n" +
-				"					Expression child= parse(children[i]);\n" +
-				"					if (child == null)\n" +
-				"						new Bla(new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),");
+		fDocument.set("""
+			public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {
+						IConfigurationElement[] children= element.getChildren();
+						if (children != null) {
+							for (int i= 0; i < children.length; i++) {
+								Expression child= parse(children[i]);
+								if (child == null)
+									new Bla(new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("							", indent);
@@ -755,13 +782,14 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testExceptionIndentation3() {
-		fDocument.set("public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {\n" +
-				"			IConfigurationElement[] children= element.getChildren();\n" +
-				"			if (children != null) {\n" +
-				"				for (int i= 0; i < children.length; i++) {\n" +
-				"					Expression child= parse(children[i]);\n" +
-				"					if (child == null)\n" +
-				"						new char[] { new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),");
+		fDocument.set("""
+			public void processChildren(CompositeExpression result, IConfigurationElement element) throws CoreException {
+						IConfigurationElement[] children= element.getChildren();
+						if (children != null) {
+							for (int i= 0; i < children.length; i++) {
+								Expression child= parse(children[i]);
+								if (child == null)
+									new char[] { new CoreExeption(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		assertEquals("							", indent);
@@ -809,12 +837,14 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testBraceAlignmentOfMultilineDeclaration() {
-		fDocument.set(	"	protected int foobar(int one, int two,\n" +
-						"						 int three, int four,\n" +
-						"						 int five) {\n" +
-						"		\n" +
-						"		return 0;\n" +
-						"	}");
+		fDocument.set(	"""
+				protected int foobar(int one, int two,
+									 int three, int four,
+									 int five) {
+				\t
+					return 0;
+				}\
+			""");
 
 		String indent= fScanner.computeIndentation(fDocument.getLength() - 1).toString();
 		assertEquals("	", indent);
@@ -835,9 +865,11 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testAnonymousTypeBraceNextLine() throws Exception {
 		fDocument.set(
-				"		MenuItem mi= new MenuItem(\"About...\");\n" +
-				"		mi.addActionListener(new ActionListener() " +
-				"		{\n"
+				"""
+							MenuItem mi= new MenuItem("About...");
+							mi.addActionListener(new ActionListener() \
+							{
+					"""
 				);
 
 		String indent= fScanner.computeIndentation(fDocument.getLength() - 2).toString();
@@ -876,9 +908,11 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testConditional1() throws Exception {
     	fDocument.set(
-    			"		public boolean isPrime() {\n" +
-    			"			return fPrime == true ? true\n" +
-    			"			                      : false;"
+    			"""
+							public boolean isPrime() {
+								return fPrime == true ? true
+								                      : false;\
+					"""
     	);
 
     	String indent= fScanner.computeIndentation(fDocument.getLength() - 8).toString();
@@ -889,10 +923,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testConditional2() throws Exception {
     	fDocument.set(
-    			"		public boolean isPrime() {\n" +
-    			"			return fPrime == true" +
-    			"					? true\n" +
-    			"					: false;"
+    			"""
+							public boolean isPrime() {
+								return fPrime == true\
+										? true
+										: false;\
+					"""
     	);
 
     	String indent= fScanner.computeIndentation(fDocument.getLength() - 8).toString();
@@ -912,9 +948,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testContinuationIndentationOfForStatement() throws Exception {
-		fDocument.set("\tfor (int i = (2 * 2); i < array.length; i++) {\n" +
-				"\tint i= 25;\n" +
-				"\t}");
+		fDocument.set("""
+				for (int i = (2 * 2); i < array.length; i++) {
+				int i= 25;
+				}\
+			""");
 
 		String indent= fScanner.computeIndentation(22).toString();
 		assertEquals("\t\t", indent);
@@ -935,10 +973,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testContinuationIndentationOfForEachStatement() throws Exception {
 		// Bug 331028 and Bug 331734
-		fDocument.set("\tfor (int value : values) {\n" +
-				"\t\tsum += value;\n" +
-				"\t\t\t\tSystem.out.println(sum);\n" +
-				"\t}");
+		fDocument.set("""
+				for (int value : values) {
+					sum += value;
+							System.out.println(sum);
+				}\
+			""");
 
 		String indent= fScanner.computeIndentation(44).toString();
 		assertEquals("\t\t", indent);
@@ -947,10 +987,12 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testContinuationIndentationOfForEachStatement2() throws Exception {
 		// Bug 348198
-		fDocument.set("\tfor (int value : values)\n" +
-				"\t\tsum += value;\n" +
-				"\t\t\t\tSystem.out.println(sum);\n" +
-				"\t}");
+		fDocument.set("""
+				for (int value : values)
+					sum += value;
+							System.out.println(sum);
+				}\
+			""");
 
 		String indent= fScanner.computeIndentation(44).toString();
 		assertEquals("\t", indent);
@@ -1020,29 +1062,33 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testIndentationAfterIfTryCatch() throws Exception {
-		fDocument.set("\tpublic class Bug237081 {\n" +
-				"\t\tpublic void foo() {\n" +
-				"\t\t\tif (true)\n" +
-				"\t\t\t\ttry {\n" +
-				"\t\t\t\t} catch (RuntimeException ex) {\n" +
-				"\t\t\t\t}\n" +
-				"\t\t\t\tfoo();\n" +
-				"\t\t}\n" +
-				"\t}");
+		fDocument.set("""
+				public class Bug237081 {
+					public void foo() {
+						if (true)
+							try {
+							} catch (RuntimeException ex) {
+							}
+							foo();
+					}
+				}\
+			""");
 		String indent= fScanner.computeIndentation(117).toString();
 		assertEquals("\t\t\t", indent);
 
-		fDocument.set("\tpublic class Bug237081 {\n" +
-				"\t\tpublic void foo() {\n" +
-				"\t\t\tif (true)\n" +
-				"\t\t\t\ttry {\n" +
-				"\t\t\t\t} catch (RuntimeException ex) {\n" +
-				"\t\t\t\t} catch (RuntimeException ex) {\n" +
-				"\t\t\t\t} finally {\n" +
-				"\t\t\t\t}\n" +
-				"\t\tfoo();\n" +
-				"\t\t}\n" +
-				"\t}");
+		fDocument.set("""
+				public class Bug237081 {
+					public void foo() {
+						if (true)
+							try {
+							} catch (RuntimeException ex) {
+							} catch (RuntimeException ex) {
+							} finally {
+							}
+					foo();
+					}
+				}\
+			""");
 		indent= fScanner.computeIndentation(167).toString();
 		assertEquals("\t\t\t", indent);
 	}
@@ -1072,11 +1118,13 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testContinuationIndentationOfStrings1() throws Exception {
 		fDocument.set(
-				"	String[] i = new String[] {\n" + //0-28
-				"		\"X.java\",\n" + //29-40
-				"		\"public class X extends B{\"\n" + //41-70
-				"		+ \"test\"\n" +	//71-81
-				"		+ \"    public \"};");//82-
+				"""
+						String[] i = new String[] {
+							"X.java",
+							"public class X extends B{"
+							+ "test"
+							+ "    public "};\
+					""");//82-
 
 		String indent= fScanner.computeIndentation(73).toString(); // at the beginning of 4th line
 		assertEquals("\t\t\t", indent);
@@ -1084,11 +1132,13 @@ public class JavaHeuristicScannerTest {
 		assertEquals("\t\t", indent);
 
 		fDocument.set(
-				"	String[] i = new String[] {\n" +//0-28
-				"		\"X.java\",\n" + //29-40
-				"		\"public class X extends B{\" +\n" + //41-72
-				"		\"test\" +\n" + //73-
-				"		\"    public\"\n};");
+				"""
+						String[] i = new String[] {
+							"X.java",
+							"public class X extends B{" +
+							"test" +
+							"    public"
+					};""");
 
 		indent= fScanner.computeIndentation(75).toString(); //at the beginning of 4th line
 		assertEquals("\t\t\t", indent);
@@ -1098,9 +1148,11 @@ public class JavaHeuristicScannerTest {
 	public void testContinuationIndentationOfStrings2() throws Exception {
 		//Bug 338229
 		fDocument.set(
-				"	System.out.println(\"Some\"\n" + //0-26
-				"		+ new Object()\n" + //27-43
-						"		+ \"string:\\n\" + definedType.toString());\n"); //44-
+				"""
+						System.out.println("Some"
+							+ new Object()
+							+ "string:\\n" + definedType.toString());
+					"""); //44-
 
 		String indent= fScanner.computeIndentation(59).toString(); //before the last +
 		assertEquals("\t\t", indent);
@@ -1109,9 +1161,11 @@ public class JavaHeuristicScannerTest {
 	@Test
 	public void testContinuationIndentationOfStrings3() throws Exception {
 		fDocument.set(
-				"	String test =\n" + //0-14
-				"		\"this is the 1st string\"\n" + //15-41
-				"		+ \"this is the 1st string\";\n");//42-
+				"""
+						String test =
+							"this is the 1st string"
+							+ "this is the 1st string";
+					""");//42-
 
 		String indent= fScanner.computeIndentation(44).toString();//at the beginning of 3rd line
 		assertEquals("\t\t\t", indent);
@@ -1141,9 +1195,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testContinuationIndentation3() {
-		fDocument.set("\tint a;\n" +
-				"\tif (true)\n" +
-				"\t\treturn a");
+		fDocument.set("""
+				int a;
+				if (true)
+					return a\
+			""");
 
 		String indent= fScanner.computeIndentation(28).toString();
 		assertEquals("\t\t\t", indent);
@@ -1151,9 +1207,11 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testContinuationIndentation4() {
-		fDocument.set("\tint a;\n" +
-				"\tif (true)\n" +
-				"\t\treturn a;");
+		fDocument.set("""
+				int a;
+				if (true)
+					return a;\
+			""");
 
 		String indent= fScanner.computeIndentation(29).toString();
 		assertEquals("\t\t\t", indent);
@@ -1172,19 +1230,21 @@ public class JavaHeuristicScannerTest {
 
 	@Test
 	public void testIndentationTryWithResources() throws Exception {
-		String s= "class A {\n" +
-				"	void foo() throws Throwable {\n" +
-				"		try (FileReader reader1 = new FileReader(\"file1\");\n" +
-				"			FileReader reader2 = new FileReader(\"file2\");\n" +
-				"			FileReader reader3 = new FileReader(\"file3\");\n" +
-				"			FileReader reader4 = new FileReader(\"file4\");\n" +
-				"			FileReader reader5 = new FileReader(\"file5\")) {\n" +
-				"			int ch;\n" +
-				"			while ((ch = reader1.read()) != -1) {\n" +
-				"				System.out.println(ch);\n" +
-				"			}\n" +
-				"		}\n" +
-				"	}\n";
+		String s= """
+			class A {
+				void foo() throws Throwable {
+					try (FileReader reader1 = new FileReader("file1");
+						FileReader reader2 = new FileReader("file2");
+						FileReader reader3 = new FileReader("file3");
+						FileReader reader4 = new FileReader("file4");
+						FileReader reader5 = new FileReader("file5")) {
+						int ch;
+						while ((ch = reader1.read()) != -1) {
+							System.out.println(ch);
+						}
+					}
+				}
+			""";
 
 		fDocument.set(s);
 

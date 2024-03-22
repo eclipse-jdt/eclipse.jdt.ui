@@ -99,40 +99,41 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException ex) {
+			            ex.printStackTrace();
+			        } catch (NullPointerException ex) {
+			            ex.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException | NullPointerException ex) {
+			            ex.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -140,40 +141,41 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException | NullPointerException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
@@ -182,42 +184,43 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (RuntimeException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("        // a comment at the end\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException | NullPointerException e) {
+			            e.printStackTrace();
+			        } catch (RuntimeException e) {
+			            e.printStackTrace();
+			        }
+			        // a comment at the end
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException | RuntimeException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("        // a comment at the end\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException | NullPointerException | RuntimeException e) {
+			            e.printStackTrace();
+			        }
+			        // a comment at the end
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -225,22 +228,23 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("            \n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException e) {
+			           \s
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -251,20 +255,21 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertToMultiCatch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -278,22 +283,23 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    void foo() {\n");
-			buf.append("        try {\n");
-			buf.append("            System.out.println(\"foo\");\n");
-			buf.append("        } catch (IllegalArgumentException e) {\n");
-			buf.append("            e.printStackTrace();\n");
-			buf.append("        } catch (NullPointerException e) {\n");
-			buf.append("            e.printStackTrace();\n");
-			buf.append("        }\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E {
+				    void foo() {
+				        try {
+				            System.out.println("foo");
+				        } catch (IllegalArgumentException e) {
+				            e.printStackTrace();
+				        } catch (NullPointerException e) {
+				            e.printStackTrace();
+				        }
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-			int offset= buf.toString().indexOf("catch");
+			int offset= str.indexOf("catch");
 			AssistContext context= getCorrectionContext(cu, offset, 0);
 			assertNoErrors(context);
 			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -307,40 +313,41 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException | NullPointerException ex) {
+			            ex.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException ex) {
+			            ex.printStackTrace();
+			        } catch (NullPointerException ex) {
+			            ex.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -348,44 +355,45 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (RuntimeException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException | NullPointerException e) {
+			            e.printStackTrace();
+			        } catch (RuntimeException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (RuntimeException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException e) {
+			            e.printStackTrace();
+			        } catch (RuntimeException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -393,44 +401,45 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException | ClassCastException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException | ClassCastException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch (NullPointerException");
+		int offset= str.indexOf("catch (NullPointerException");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (ClassCastException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException e) {
+			            e.printStackTrace();
+			        } catch (ClassCastException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -438,48 +447,49 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException | ClassCastException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (ArrayIndexOutOfBoundsException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException | ClassCastException e) {
+			            e.printStackTrace();
+			        } catch (ArrayIndexOutOfBoundsException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch (NullPointerException");
+		int offset= str.indexOf("catch (NullPointerException");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (ClassCastException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (ArrayIndexOutOfBoundsException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (NullPointerException e) {
+			            e.printStackTrace();
+			        } catch (ClassCastException e) {
+			            e.printStackTrace();
+			        } catch (ArrayIndexOutOfBoundsException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -487,20 +497,21 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUnrollMultiCatch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (NullPointerException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (NullPointerException ex) {
+			            ex.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -512,52 +523,53 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	public void testUnrollMultiCatch6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285#c12
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (IllegalAccessException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (InvocationTargetException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NoSuchMethodException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException e) {
+			            e.printStackTrace();
+			        } catch (IllegalAccessException e) {
+			            e.printStackTrace();
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (InvocationTargetException e) {
+			            e.printStackTrace();
+			        } catch (NoSuchMethodException e) {
+			            e.printStackTrace();
+			        } catch (SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -565,42 +577,43 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            goo();\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        try {
+			            goo();
+			        } catch (IllegalArgumentException | NullPointerException e) {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("catch");
+		int offset= str.indexOf("catch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws IllegalArgumentException, NullPointerException {\n");
-		buf.append("        goo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo() throws IllegalArgumentException, NullPointerException {
+			        goo();
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        goo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        goo();
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
@@ -608,23 +621,24 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            System.out.println(\"foo\");\n");
-		buf.append("        } catch (Outer<String>.Inner | NullPointerException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Outer<E> {\n");
-		buf.append("    class Inner extends IllegalArgumentException { }\n"); // yes, that's a compile error
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        try {
+			            System.out.println("foo");
+			        } catch (Outer<String>.Inner | NullPointerException ex) {
+			            ex.printStackTrace();
+			        }
+			    }
+			}
+			class Outer<E> {
+			    class Inner extends IllegalArgumentException { }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("Inner");
+		int offset= str.indexOf("Inner");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
@@ -636,61 +650,62 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            goo();\n");
-		buf.append("        } catch (IllegalArgumentException | NullPointerException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        try {
+			            goo();
+			        } catch (IllegalArgumentException | NullPointerException e) {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("IllegalArgumentException");
+		int offset= str.indexOf("IllegalArgumentException");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            goo();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        try {
+			            goo();
+			        } catch (NullPointerException e) {
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws IllegalArgumentException {\n");
-		buf.append("        try {\n");
-		buf.append("            goo();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public void foo() throws IllegalArgumentException {
+			        try {
+			            goo();
+			        } catch (NullPointerException e) {
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            goo();\n");
-		buf.append("        } catch (NullPointerException e) {\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        try {
+			            goo();
+			        } catch (NullPointerException e) {
+			        } catch (IllegalArgumentException e) {
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
@@ -698,78 +713,79 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceMultiCatchClauseWithThrows4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("IllegalArgumentException");
+		int offset= str.indexOf("IllegalArgumentException");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | InvocationTargetException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | InvocationTargetException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws IllegalArgumentException {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | InvocationTargetException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() throws IllegalArgumentException {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | InvocationTargetException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | InvocationTargetException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | InvocationTargetException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
@@ -777,24 +793,25 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testPickoutTypeFromMulticatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		String string= "IllegalArgumentException | InvocationTargetException";
-		int offset= buf.toString().indexOf(string);
+		int offset= str.indexOf(string);
 		int length= string.length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -802,66 +819,66 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String.class.getConstructor().newInstance();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        String.class.getConstructor().newInstance();
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {\n");
-		buf.append("        String.class.getConstructor().newInstance();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+			        String.class.getConstructor().newInstance();
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (IllegalArgumentException | InvocationTargetException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        } catch (IllegalArgumentException | InvocationTargetException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (IllegalAccessException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (InvocationTargetException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (NoSuchMethodException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
+		String expected4= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException e) {
+			            e.printStackTrace();
+			        } catch (IllegalAccessException e) {
+			            e.printStackTrace();
+			        } catch (IllegalArgumentException e) {
+			            e.printStackTrace();
+			        } catch (InvocationTargetException e) {
+			            e.printStackTrace();
+			        } catch (NoSuchMethodException e) {
+			            e.printStackTrace();
+			        } catch (SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4 });
 	}
@@ -869,79 +886,80 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testPickoutTypeFromMulticatch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | java.lang.NoSuchMethodException | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | java.lang.NoSuchMethodException | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		String string= "MethodException";
-		int offset= buf.toString().indexOf(string);
+		int offset= str.indexOf(string);
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws java.lang.NoSuchMethodException {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() throws java.lang.NoSuchMethodException {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | SecurityException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.lang.reflect.InvocationTargetException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            String.class.getConstructor().newInstance();\n");
-		buf.append("        } catch (InstantiationException | IllegalAccessException\n");
-		buf.append("                | IllegalArgumentException | InvocationTargetException\n");
-		buf.append("                | SecurityException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        } catch (java.lang.NoSuchMethodException e) {\n");
-		buf.append("            e.printStackTrace();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			import java.lang.reflect.InvocationTargetException;
+			public class E {
+			    public void foo() {
+			        try {
+			            String.class.getConstructor().newInstance();
+			        } catch (InstantiationException | IllegalAccessException
+			                | IllegalArgumentException | InvocationTargetException
+			                | SecurityException e) {
+			            e.printStackTrace();
+			        } catch (java.lang.NoSuchMethodException e) {
+			            e.printStackTrace();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
@@ -949,22 +967,23 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testSplitDeclaration1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (FileReader reader = new FileReader(\"file\")) {\n");
-		buf.append("            int ch;\n");
-		buf.append("            while ((ch = reader.read()) != -1) {\n");
-		buf.append("                System.out.println(ch);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    void foo() throws Exception {
+			        try (FileReader reader = new FileReader("file")) {
+			            int ch;
+			            while ((ch = reader.read()) != -1) {
+			                System.out.println(ch);
+			            }
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		String str= "reader";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		AssistContext context= getCorrectionContext(cu, str1.indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
@@ -977,23 +996,24 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	public void testUnwrapTryStatement() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (FileReader reader1 = new FileReader(\"file\")) {\n");
-		buf.append("            int ch;\n");
-		buf.append("            while ((ch = reader1.read()) != -1) {\n");
-		buf.append("                System.out.println(ch);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import java.io.FileReader;
+			public class E {
+			    void foo() throws Exception {
+			        try (FileReader reader1 = new FileReader("file")) {
+			            int ch;
+			            while ((ch = reader1.read()) != -1) {
+			                System.out.println(ch);
+			            }
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		String str= "try";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		AssistContext context= getCorrectionContext(cu, str1.indexOf(str) + str.length(), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
@@ -1003,40 +1023,41 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testExtractLocalInTryWithResource1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.BufferedReader;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("import java.io.Reader;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
-		buf.append("                Reader r = new BufferedReader(new FileReader(\"a.b\"))) {\n");
-		buf.append("            r.read();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import java.io.BufferedReader;
+			import java.io.FileReader;
+			import java.io.Reader;
+			public class E {
+			    void foo() throws Exception {
+			        try (Reader s = new BufferedReader(new FileReader("c.d"));
+			                Reader r = new BufferedReader(new FileReader("a.b"))) {
+			            r.read();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		String str= "new FileReader(\"a.b\")";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		AssistContext context= getCorrectionContext(cu, str1.indexOf(str) + str.length(), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.BufferedReader;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("import java.io.Reader;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
-		buf.append("                FileReader fileReader = new FileReader(\"a.b\");\n");
-		buf.append("                Reader r = new BufferedReader(fileReader)) {\n");
-		buf.append("            r.read();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.io.BufferedReader;
+			import java.io.FileReader;
+			import java.io.Reader;
+			public class E {
+			    void foo() throws Exception {
+			        try (Reader s = new BufferedReader(new FileReader("c.d"));
+			                FileReader fileReader = new FileReader("a.b");
+			                Reader r = new BufferedReader(fileReader)) {
+			            r.read();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
@@ -1044,40 +1065,41 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testExtractLocalInTryWithResource2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.BufferedReader;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("import java.io.Reader;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
-		buf.append("                Reader r = new BufferedReader(new FileReader(\"a.b\"))) {\n");
-		buf.append("            r.read();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import java.io.BufferedReader;
+			import java.io.FileReader;
+			import java.io.Reader;
+			public class E {
+			    void foo() throws Exception {
+			        try (Reader s = new BufferedReader(new FileReader("c.d"));
+			                Reader r = new BufferedReader(new FileReader("a.b"))) {
+			            r.read();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		String str= "\"a.b\"";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		AssistContext context= getCorrectionContext(cu, str1.indexOf(str) + str.length(), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.BufferedReader;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("import java.io.Reader;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        String string = \"a.b\";\n");
-		buf.append("        try (Reader s = new BufferedReader(new FileReader(\"c.d\"));\n");
-		buf.append("                Reader r = new BufferedReader(new FileReader(string))) {\n");
-		buf.append("            r.read();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.io.BufferedReader;
+			import java.io.FileReader;
+			import java.io.Reader;
+			public class E {
+			    void foo() throws Exception {
+			        String string = "a.b";
+			        try (Reader s = new BufferedReader(new FileReader("c.d"));
+			                Reader r = new BufferedReader(new FileReader(string))) {
+			            r.read();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
@@ -1086,19 +1108,20 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	public void testInferDiamondArguments() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Map<String, ? extends Number> m = new HashMap<>(12);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import java.util.HashMap;
+			import java.util.Map;
+			public class E {
+			    public void foo() {
+			        Map<String, ? extends Number> m = new HashMap<>(12);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		String str= "<>";
-		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		AssistContext context= getCorrectionContext(cu, str1.indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
@@ -1107,16 +1130,17 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Map<String, ? extends Number> m = new HashMap<String, Number>(12);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import java.util.HashMap;
+			import java.util.Map;
+			public class E {
+			    public void foo() {
+			        Map<String, ? extends Number> m = new HashMap<String, Number>(12);
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 }

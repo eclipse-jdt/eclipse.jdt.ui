@@ -51,17 +51,18 @@ public class TestRunFilteredStandardRunnerTest4 extends AbstractTestRunListenerT
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 		JavaProjectHelper.addRTJar15(fProject);
 		String source=
-				"package pack;\n" +
-				"import org.junit.Test;\n"+
-				"import org.junit.FixMethodOrder;\n"+
-				"import org.junit.runners.MethodSorters;\n"+
-				"import static org.junit.Assert.*;\n"+
-				"\n" +
-				"@FixMethodOrder(MethodSorters.NAME_ASCENDING)\n" + // workaround for http://randomallsorts.blogspot.de/2012/12/junit-411-whats-new-test-execution-order.html
-				"public class ATestCase {\n" +
-				"    @Test public void test1Succeed() { }\n" +
-				"    @Test public void test2Fail() { fail(); }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.Test;
+			import org.junit.FixMethodOrder;
+			import org.junit.runners.MethodSorters;
+			import static org.junit.Assert.*;
+			
+			@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+			public class ATestCase {
+			    @Test public void test1Succeed() { }
+			    @Test public void test2Fail() { fail(); }
+			}""";
 		fATestCase= createType(source, "pack", "ATestCase.java");
 	}
 

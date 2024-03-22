@@ -136,16 +136,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractNullableField1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(f.toUpperCase());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public void foo() {
+			        System.out.println(f.toUpperCase());
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -155,39 +156,41 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        final String f2 = f;\n");
-		buf.append("        if (f2 != null) {\n");
-		buf.append("            System.out.println(f2.toUpperCase());\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public void foo() {
+			        final String f2 = f;
+			        if (f2 != null) {
+			            System.out.println(f2.toUpperCase());
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// statement is not element of a block - need to create a new block - local name f2 already in use
 	@Test
 	public void testExtractNullableField2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo(boolean b) {\n");
-		buf.append("        @SuppressWarnings(\"unused\") boolean f2 = false;\n");
-		buf.append("        if (b)\n");
-		buf.append("          System.out.println(f.toUpperCase());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public void foo(boolean b) {
+			        @SuppressWarnings("unused") boolean f2 = false;
+			        if (b)
+			          System.out.println(f.toUpperCase());
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -197,41 +200,43 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo(boolean b) {\n");
-		buf.append("        @SuppressWarnings(\"unused\") boolean f2 = false;\n");
-		buf.append("        if (b) {\n");
-		buf.append("            final String f3 = f;\n");
-		buf.append("            if (f3 != null) {\n");
-		buf.append("                System.out.println(f3.toUpperCase());\n");
-		buf.append("            } else {\n");
-		buf.append("                // TODO handle null value\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public void foo(boolean b) {
+			        @SuppressWarnings("unused") boolean f2 = false;
+			        if (b) {
+			            final String f3 = f;
+			            if (f3 != null) {
+			                System.out.println(f3.toUpperCase());
+			            } else {
+			                // TODO handle null value
+			            }
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// field name is part of a qualified field reference - inside a return statement (type: int)
 	@Test
 	public void testExtractNullableField3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable E other;\n");
-		buf.append("    int f;\n");
-		buf.append("    public int foo(E that) {\n");
-		buf.append("        return that.other.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable E other;
+			    int f;
+			    public int foo(E that) {
+			        return that.other.f;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -241,40 +246,42 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable E other;\n");
-		buf.append("    int f;\n");
-		buf.append("    public int foo(E that) {\n");
-		buf.append("        final E other2 = that.other;\n");
-		buf.append("        if (other2 != null) {\n");
-		buf.append("            return other2.f;\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("            return 0;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable E other;
+			    int f;
+			    public int foo(E that) {
+			        final E other2 = that.other;
+			        if (other2 != null) {
+			            return other2.f;
+			        } else {
+			            // TODO handle null value
+			            return 0;
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// field name is part of a this-qualified field reference - inside a return statement (type: String)
 	@Test
 	public void testExtractNullableField4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable E other;\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        return this.other.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable E other;
+			    @Nullable String f;
+			    public String foo() {
+			        return this.other.f;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -284,42 +291,44 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable E other;\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        final E other2 = this.other;\n");
-		buf.append("        if (other2 != null) {\n");
-		buf.append("            return other2.f;\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("            return null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable E other;
+			    @Nullable String f;
+			    public String foo() {
+			        final E other2 = this.other;
+			        if (other2 != null) {
+			            return other2.f;
+			        } else {
+			            // TODO handle null value
+			            return null;
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// field referenced inside the rhs of an assignment-as-expression
 	@Test
 	public void testExtractNullableField5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable E other;\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String lo;\n");
-		buf.append("        if ((lo = this.other.f) != null)\n");
-		buf.append("            System.out.println(lo);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable E other;
+			    @Nullable String f;
+			    public void foo() {
+			        String lo;
+			        if ((lo = this.other.f) != null)
+			            System.out.println(lo);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -329,42 +338,44 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable E other;\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String lo;\n");
-		buf.append("        final E other2 = this.other;\n");
-		buf.append("        if (other2 != null) {\n");
-		buf.append("            if ((lo = other2.f) != null)\n");
-		buf.append("                System.out.println(lo);\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable E other;
+			    @Nullable String f;
+			    public void foo() {
+			        String lo;
+			        final E other2 = this.other;
+			        if (other2 != null) {
+			            if ((lo = other2.f) != null)
+			                System.out.println(lo);
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// reference to field of array type - dereferenced by f[0] and f.length
 	@Test
 	public void testExtractNullableField6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String[] f1;\n");
-		buf.append("    @Nullable String[] f2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(f1[0]);\n");
-		buf.append("        System.out.println(f2.length);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String[] f1;
+			    @Nullable String[] f2;
+			    public void foo() {
+			        System.out.println(f1[0]);
+			        System.out.println(f2.length);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0); // get correction for first of two problems
@@ -374,63 +385,66 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String[] f1;\n");
-		buf.append("    @Nullable String[] f2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        final String[] f12 = f1;\n");
-		buf.append("        if (f12 != null) {\n");
-		buf.append("            System.out.println(f12[0]);\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("        System.out.println(f2.length);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String[] f1;
+			    @Nullable String[] f2;
+			    public void foo() {
+			        final String[] f12 = f1;
+			        if (f12 != null) {
+			            System.out.println(f12[0]);
+			        } else {
+			            // TODO handle null value
+			        }
+			        System.out.println(f2.length);
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 
 		proposals= collectCorrections(cu, astRoot, 2, 1); // get correction for second of two problems
 		assertNumberOfProposals(proposals, 3);
 		proposal= (CUCorrectionProposal) proposals.get(0);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String[] f1;\n");
-		buf.append("    @Nullable String[] f2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(f1[0]);\n");
-		buf.append("        final String[] f22 = f2;\n");
-		buf.append("        if (f22 != null) {\n");
-		buf.append("            System.out.println(f22.length);\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String[] f1;
+			    @Nullable String[] f2;
+			    public void foo() {
+			        System.out.println(f1[0]);
+			        final String[] f22 = f2;
+			        if (f22 != null) {
+			            System.out.println(f22.length);
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	// field has a generic type
 	@Test
 	public void testExtractNullableField7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable List<String> f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(f.size());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			import java.util.List;
+			public class E {
+			    @Nullable List<String> f;
+			    public void foo() {
+			        System.out.println(f.size());
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -440,38 +454,40 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable List<String> f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        final List<String> f2 = f;\n");
-		buf.append("        if (f2 != null) {\n");
-		buf.append("            System.out.println(f2.size());\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			import java.util.List;
+			public class E {
+			    @Nullable List<String> f;
+			    public void foo() {
+			        final List<String> f2 = f;
+			        if (f2 != null) {
+			            System.out.println(f2.size());
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// occurrences inside a class initializer
 	@Test
 	public void testExtractNullableField8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Exception e;\n");
-		buf.append("    {\n");
-		buf.append("        e.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable Exception e;
+			    {
+			        e.printStackTrace();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -481,39 +497,41 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Exception e;\n");
-		buf.append("    {\n");
-		buf.append("        final Exception e2 = e;\n");
-		buf.append("        if (e2 != null) {\n");
-		buf.append("            e2.printStackTrace();\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable Exception e;
+			    {
+			        final Exception e2 = e;
+			        if (e2 != null) {
+			            e2.printStackTrace();
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// field reference inside a local variable initialization - ensure correct scoping of this local
 	@Test
 	public void testExtractNullableField9() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        String upper = f.toUpperCase();\n");
-		buf.append("        System.out.println(upper);\n");
-		buf.append("        return upper;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public String foo() {
+			        String upper = f.toUpperCase();
+			        System.out.println(upper);
+			        return upper;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -523,23 +541,24 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public String foo() {\n");
-		buf.append("        final String f2 = f;\n");
-		buf.append("        if (f2 != null) {\n");
-		buf.append("            String upper = f2.toUpperCase();\n");
-		buf.append("            System.out.println(upper);\n");
-		buf.append("            return upper;\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public String foo() {
+			        final String f2 = f;
+			        if (f2 != null) {
+			            String upper = f2.toUpperCase();
+			            System.out.println(upper);
+			            return upper;
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// ==== Problem:	using a @Nullable or un-annotated field in assignment/return context expecting @NonNull
@@ -549,16 +568,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testExtractPotentiallyNullField1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public @NonNull String foo() {\n");
-		buf.append("        return this.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public @NonNull String foo() {
+			        return this.f;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -569,56 +589,59 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public @NonNull String foo() {\n");
-		buf.append("        final String f2 = this.f;\n");
-		buf.append("        if (f2 != null) {\n");
-		buf.append("            return f2;\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("            return null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public @NonNull String foo() {
+			        final String f2 = this.f;
+			        if (f2 != null) {
+			            return f2;
+			        } else {
+			            // TODO handle null value
+			            return null;
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 
 
 		// secondary proposal: Change return type of 'foo(..)' to '@Nullable'
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public @Nullable String foo() {\n");
-		buf.append("        return this.f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public @Nullable String foo() {
+			        return this.f;
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	// message send argument situation, field reference is local.f
 	@Test
 	public void testExtractPotentiallyNullField2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E local = this;\n");
-		buf.append("        bar(local.f);\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(@NonNull String s) { }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public void foo() {
+			        E local = this;
+			        bar(local.f);
+			    }
+			    public void bar(@NonNull String s) { }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -628,23 +651,24 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable String f;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E local = this;\n");
-		buf.append("        final String f2 = local.f;\n");
-		buf.append("        if (f2 != null) {\n");
-		buf.append("            bar(f2);\n");
-		buf.append("        } else {\n");
-		buf.append("            // TODO handle null value\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void bar(@NonNull String s) { }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable String f;
+			    public void foo() {
+			        E local = this;
+			        final String f2 = local.f;
+			        if (f2 != null) {
+			            bar(f2);
+			        } else {
+			            // TODO handle null value
+			        }
+			    }
+			    public void bar(@NonNull String s) { }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 
@@ -652,16 +676,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter1a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Exception e1) {\n");
-		buf.append("        @NonNull Exception e = new Exception();\n");
-		buf.append("        e = e1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@Nullable Exception e1) {
+			        @NonNull Exception e = new Exception();
+			        e = e1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -672,32 +697,34 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n");
-		buf.append("        @NonNull Exception e = new Exception();\n");
-		buf.append("        e = e1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Exception e1) {
+			        @NonNull Exception e = new Exception();
+			        e = e1;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// unspec'ed argument is used where @NonNull is required -> change to @NonNull
 	@Test
 	public void testChangeParameter1b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Exception e1) {\n");
-		buf.append("        @NonNull Exception e = new Exception();\n");
-		buf.append("        e = e1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(Exception e1) {
+			        @NonNull Exception e = new Exception();
+			        e = e1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -708,30 +735,32 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n");
-		buf.append("        @NonNull Exception e = new Exception();\n");
-		buf.append("        e = e1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Exception e1) {
+			        @NonNull Exception e = new Exception();
+			        e = e1;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testChangeParameter1c() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo(@Nullable Object o) {\n");
-		buf.append("        return o;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo(@Nullable Object o) {
+			        return o;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -742,29 +771,31 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo(@NonNull Object o) {\n");
-		buf.append("        return o;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo(@NonNull Object o) {
+			        return o;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testChangeParameter1d() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo(Object o) {\n");
-		buf.append("        return o;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo(Object o) {
+			        return o;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -775,30 +806,32 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo(@NonNull Object o) {\n");
-		buf.append("        return o;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo(@NonNull Object o) {
+			        return o;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// don't propose to change argument if mismatch is in an assignment to the argument
 	@Test
 	public void testChangeParameter2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n");
-		buf.append("        e1 = null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Exception e1) {
+			        e1 = null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -811,24 +844,26 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter3a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Exception e1) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@Nullable Exception e1) {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n");
-		buf.append("        e1.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 extends E {
+			    void foo(@NonNull Exception e1) {
+			        e1.printStackTrace();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -839,15 +874,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(@Nullable Exception e1) {\n"); // change override to accept @Nullable
-		buf.append("        e1.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 extends E {
+			    void foo(@Nullable Exception e1) {
+			        e1.printStackTrace();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -855,14 +891,15 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n"); // change the overridden method to force @NonNull
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Exception e1) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 	// Attempt to override a @Nullable argument with an unspec'ed argument
@@ -870,23 +907,25 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter3b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Exception e1) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@Nullable Exception e1) {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(Exception e1) {\n");
-		buf.append("        e1.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 extends E {
+			    void foo(Exception e1) {
+			        e1.printStackTrace();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -897,17 +936,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(@Nullable Exception e1) {\n"); // change override to accept @Nullable
-		buf.append("        e1.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			public class E2 extends E {
+			    void foo(@Nullable Exception e1) {
+			        e1.printStackTrace();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	// Attempt to override a @NonNull argument with an unspec'ed argument
@@ -917,23 +957,25 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		// quickfix only offered with this warning enabled, but no need to say, because default is already "warning"
 //		this.fJProject1.setOption(JavaCore.COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, JavaCore.WARNING);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Exception e1) {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(Exception e1) {\n");
-		buf.append("        e1.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 extends E {
+			    void foo(Exception e1) {
+			        e1.printStackTrace();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -944,17 +986,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(@NonNull Exception e1) {\n"); // change override to keep @NonNull
-		buf.append("        e1.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			public class E2 extends E {
+			    void foo(@NonNull Exception e1) {
+			        e1.printStackTrace();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	// http://bugs.eclipse.org/400668 - [quick fix] The fix change parameter type to @Nonnull generated a null change
@@ -963,25 +1006,27 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Object o) {\n");
-		buf.append("        // nop\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Object o) {
+			        // nop
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    void test(E e, @Nullable Object in) {\n");
-		buf.append("        e.foo(in);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 {
+			    void test(E e, @Nullable Object in) {
+			        e.foo(in);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -992,15 +1037,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    void test(E e, @NonNull Object in) {\n");
-		buf.append("        e.foo(in);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 {
+			    void test(E e, @NonNull Object in) {
+			        e.foo(in);
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1008,15 +1054,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Object o) {\n");
-		buf.append("        // nop\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@Nullable Object o) {
+			        // nop
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 	// http://bugs.eclipse.org/400668 - [quick fix] The fix change parameter type to @Nonnull generated a null change
@@ -1026,24 +1073,26 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter4a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Object o) {\n");
-		buf.append("        // nop\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Object o) {
+			        // nop
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    void test(E e, Object in) {\n");
-		buf.append("        e.foo(in);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 {
+			    void test(E e, Object in) {
+			        e.foo(in);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1054,17 +1103,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("public class E2 {\n");
-		buf.append("    void test(E e, @NonNull Object in) {\n");
-		buf.append("        e.foo(in);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			public class E2 {
+			    void test(E e, @NonNull Object in) {
+			        e.foo(in);
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1072,15 +1122,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Object o) {\n");
-		buf.append("        // nop\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@Nullable Object o) {
+			        // nop
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 	// Bug 405086 - [quick fix] don't propose null annotations when those are disabled
@@ -1089,15 +1140,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.DISABLED);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("    void foo(Object o) {\n");
-			buf.append("        if (o == null) return;\n");
-			buf.append("        if (o != null) System.out.print(o.toString());\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E {
+				    void foo(Object o) {
+				        if (o == null) return;
+				        if (o != null) System.out.print(o.toString());
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1112,15 +1164,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("        if (o == null) return;\n");
-		buf.append("        if (o != null) System.out.print(o.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo(Object o) {
+			        if (o == null) return;
+			        if (o != null) System.out.print(o.toString());
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1132,15 +1185,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Object o) {\n");
-		buf.append("        if (o != null) System.out.print(o.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@NonNull Object o) {
+			        if (o != null) System.out.print(o.toString());
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1152,15 +1206,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Object o) {\n");
-		buf.append("        if (o != null) System.out.print(o.toString());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(@Nullable Object o) {
+			        if (o != null) System.out.print(o.toString());
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// Bug 405086 - [quick fix] don't propose null annotations when those are disabled
@@ -1168,14 +1223,15 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeParameter8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@org.eclipse.jdt.annotation.NonNull Object o) {\n");
-		buf.append("        if (o == null) System.out.print(\"NOK\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo(@org.eclipse.jdt.annotation.NonNull Object o) {
+			        if (o == null) System.out.print("NOK");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1187,17 +1243,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@Nullable Object o) {\n");
-		buf.append("        if (o == null) System.out.print(\"NOK\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			public class E {
+			    void foo(@Nullable Object o) {
+			        if (o == null) System.out.print("NOK");
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	// http://bugs.eclipse.org/395555 - [quickfix] Update null annotation quick fixes for bug 388281
@@ -1207,26 +1264,28 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("public class E {\n");
-			buf.append("    void foo(@Nullable Object o) {\n");
-			buf.append("        // nop\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				public class E {
+				    void foo(@Nullable Object o) {
+				        // nop
+				    }
+				}
+				""";
+			pack1.createCompilationUnit("E.java", str, false, null);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class E2 extends E {\n");
-			buf.append("    void foo(Object o) {\n");
-			buf.append("        System.out.print(\"E2\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+			String str1= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				@NonNullByDefault
+				public class E2 extends E {
+				    void foo(Object o) {
+				        System.out.print("E2");
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1238,16 +1297,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class E2 extends E {\n");
-			buf.append("    void foo(@Nullable Object o) {\n");
-			buf.append("        System.out.print(\"E2\");\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			String str2= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				@NonNullByDefault
+				public class E2 extends E {
+				    void foo(@Nullable Object o) {
+				        System.out.print("E2");
+				    }
+				}
+				""";
+			assertEqualString(preview, str2);
 
 			proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1255,15 +1315,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("public class E {\n");
-			buf.append("    void foo(@NonNull Object o) {\n");
-			buf.append("        // nop\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			String str3= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				public class E {
+				    void foo(@NonNull Object o) {
+				        // nop
+				    }
+				}
+				""";
+			assertEqualString(preview, str3);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.DISABLED);
 		}
@@ -1273,16 +1334,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeReturn1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo() {\n");
-		buf.append("        @Nullable Object o = null;\n");
-		buf.append("        return o;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo() {
+			        @Nullable Object o = null;
+			        return o;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1290,40 +1352,43 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Object foo() {\n");
-		buf.append("        @Nullable Object o = null;\n");
-		buf.append("        return o;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable Object foo() {
+			        @Nullable Object o = null;
+			        return o;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testChangeReturn2a() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    @Nullable Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 extends E {
+			    @Nullable Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1334,15 +1399,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    @NonNull Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 extends E {
+			    @NonNull Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1350,38 +1416,41 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @Nullable Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 	@Test
 	public void testChangeReturn2b() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNull Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 extends E {
+			    Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1389,18 +1458,19 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    @NonNull\n");
-		buf.append("    Object foo() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			public class E2 extends E {
+			    @NonNull
+			    Object foo() {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	// https://bugs.eclipse.org/395555 - [quickfix] Update null annotation quick fixes for bug 388281
@@ -1410,32 +1480,35 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.ENABLED);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("public class E {\n");
-			buf.append("    @NonNull Object foo() {\n");
-			buf.append("        // nop\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				public class E {
+				    @NonNull Object foo() {
+				        // nop
+				    }
+				}
+				""";
+			pack1.createCompilationUnit("E.java", str, false, null);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("public interface IE {\n");
-			buf.append("    @Nullable Object foo();\n");
-			buf.append("}\n");
-			pack1.createCompilationUnit("IE.java", buf.toString(), false, null);
+			String str1= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				public interface IE {
+				    @Nullable Object foo();
+				}
+				""";
+			pack1.createCompilationUnit("IE.java", str1, false, null);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E2 extends E implements IE {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("        return this;\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+			String str2= """
+				package test1;
+				public class E2 extends E implements IE {
+				    public Object foo() {
+				        return this;
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str2, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1447,17 +1520,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-			buf.append("\n");
-			buf.append("public class E2 extends E implements IE {\n");
-			buf.append("    public @Nullable Object foo() {\n");
-			buf.append("        return this;\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			String str3= """
+				package test1;
+				
+				import org.eclipse.jdt.annotation.Nullable;
+				
+				public class E2 extends E implements IE {
+				    public @Nullable Object foo() {
+				        return this;
+				    }
+				}
+				""";
+			assertEqualString(preview, str3);
 
 			proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1465,17 +1539,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-			buf.append("\n");
-			buf.append("public class E2 extends E implements IE {\n");
-			buf.append("    public @NonNull Object foo() {\n");
-			buf.append("        return this;\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			String str4= """
+				package test1;
+				
+				import org.eclipse.jdt.annotation.NonNull;
+				
+				public class E2 extends E implements IE {
+				    public @NonNull Object foo() {
+				        return this;
+				    }
+				}
+				""";
+			assertEqualString(preview, str4);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.DISABLED);
 		}
@@ -1487,26 +1562,28 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testChangeReturn4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Object bar() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    @Nullable Object bar() {
+			        return new Object();
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    @NonNull Object foo(E e) {\n");
-		buf.append("        return e.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 {
+			    @NonNull Object foo(E e) {
+			        return e.bar();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1518,15 +1595,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    @Nullable Object foo(E e) {\n");
-		buf.append("        return e.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 {
+			    @Nullable Object foo(E e) {
+			        return e.bar();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1534,16 +1612,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    Object bar() {\n"); // here's the rub: don't add redundant @NonNull, just remove @Nullable
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    Object bar() {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 	// https://bugs.eclipse.org/378724 - Null annotations are extremely hard to use in an existing project
@@ -1557,29 +1636,32 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-			StringBuilder buf= new StringBuilder();
-			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-			buf.append("package test1;\n");
-			pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+			String str= """
+				@org.eclipse.jdt.annotation.NonNullByDefault
+				package test1;
+				""";
+			pack1.createCompilationUnit("package-info.java", str, false, null);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("public class E {\n");
-			buf.append("    @Nullable Object bar() {\n");
-			buf.append("        return new Object();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str1= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				public class E {
+				    @Nullable Object bar() {
+				        return new Object();
+				    }
+				}
+				""";
+			pack1.createCompilationUnit("E.java", str1, false, null);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E2 {\n");
-			buf.append("    public Object foo(E e) {\n"); // non-null by default
-			buf.append("        return e.bar();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+			String str2= """
+				package test1;
+				public class E2 {
+				    public Object foo(E e) {
+				        return e.bar();
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str2, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1591,17 +1673,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-			buf.append("\n");
-			buf.append("public class E2 {\n");
-			buf.append("    public @Nullable Object foo(E e) {\n");
-			buf.append("        return e.bar();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			String str3= """
+				package test1;
+				
+				import org.eclipse.jdt.annotation.Nullable;
+				
+				public class E2 {
+				    public @Nullable Object foo(E e) {
+				        return e.bar();
+				    }
+				}
+				""";
+			assertEqualString(preview, str3);
 
 			proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1609,15 +1692,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("public class E {\n");
-			buf.append("    Object bar() {\n"); // here's the rub: don't add redundant @NonNull, just remove @Nullable
-			buf.append("        return new Object();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(preview, buf.toString());
+			String str4= """
+				package test1;
+				import org.eclipse.jdt.annotation.*;
+				public class E {
+				    Object bar() {
+				        return new Object();
+				    }
+				}
+				""";
+			assertEqualString(preview, str4);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, suppressOptionalErrors);
 		}
@@ -1631,12 +1715,13 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	public void testChangeReturn6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-		buf.append("package test1;\n");
-		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+		String str= """
+			@org.eclipse.jdt.annotation.NonNullByDefault
+			package test1;
+			""";
+		pack1.createCompilationUnit("package-info.java", str, false, null);
 
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test1;\n");
 		buf.append("import org.eclipse.jdt.annotation.*;\n");
 		buf.append("@NonNullByDefault(false)\n"); // <- HERE
@@ -1647,14 +1732,15 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public Object foo(E e) {\n"); // non-null by default
-		buf.append("        return e.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 {
+			    public Object foo(E e) {
+			        return e.bar();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1666,17 +1752,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public @Nullable Object foo(E e) {\n");
-		buf.append("        return e.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			public class E2 {
+			    public @Nullable Object foo(E e) {
+			        return e.bar();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -1684,30 +1771,32 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault(false)\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object bar() {\n"); // here's the rub: DO add redundant @NonNull, default is cancelled here
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault(false)
+			public class E {
+			    @NonNull Object bar() {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(@NonNull Object o) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    void foo(@NonNull Object o) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1715,31 +1804,33 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    void foo(Object o) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull\n");
-		buf.append("    Object foo(Object o) {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    @NonNull
+			    Object foo(Object o) {
+			        return new Object();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1747,32 +1838,34 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    Object foo(Object o) {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    Object foo(Object o) {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull\n");
-		buf.append("    public Object foo(Object o) {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    @NonNull
+			    public Object foo(Object o) {
+			        return new Object();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1780,31 +1873,33 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    public Object foo(Object o) {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    public Object foo(Object o) {
+			        return new Object();
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNullByDefault\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    @NonNullByDefault
+			    void foo(Object o) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1812,30 +1907,32 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    void foo(Object o) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNullByDefault\n");
-		buf.append("    class E1 {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    @NonNullByDefault
+			    class E1 {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1843,32 +1940,34 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    class E1 {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    class E1 {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNullByDefault\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("        @NonNullByDefault\n");
-		buf.append("        class E1 {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNullByDefault
+			    void foo(Object o) {
+			        @NonNullByDefault
+			        class E1 {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1876,34 +1975,37 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNullByDefault\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("        class E1 {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNullByDefault
+			    void foo(Object o) {
+			        class E1 {
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-		buf.append("package test1;\n");
-		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+		String str= """
+			@org.eclipse.jdt.annotation.NonNullByDefault
+			package test1;
+			""";
+		pack1.createCompilationUnit("package-info.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1911,31 +2013,34 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testRemoveRedundantAnnotation8() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-		buf.append("package test1;\n");
-		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+		String str= """
+			@org.eclipse.jdt.annotation.NonNullByDefault
+			package test1;
+			""";
+		pack1.createCompilationUnit("package-info.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNullByDefault\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    @NonNullByDefault
+			    void foo(Object o) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1943,30 +2048,32 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Object o) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(Object o) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 	@Test
 	public void testAddNonNull() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public <T extends Number> double foo(boolean b) {\n");
-		buf.append("        Number n=Integer.valueOf(1);\n");
-		buf.append("        if(b) {\n");
-		buf.append("          n = null;\n");
-		buf.append("        };\n");
-		buf.append("        return n.doubleValue();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public <T extends Number> double foo(boolean b) {
+			        Number n=Integer.valueOf(1);
+			        if(b) {
+			          n = null;
+			        };
+			        return n.doubleValue();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1976,22 +2083,23 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public <T extends Number> double foo(boolean b) {\n");
-		buf.append("        @NonNull\n");
-		buf.append("        Number n=Integer.valueOf(1);\n");
-		buf.append("        if(b) {\n");
-		buf.append("          n = null;\n");
-		buf.append("        };\n");
-		buf.append("        return n.doubleValue();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			public class E {
+			    public <T extends Number> double foo(boolean b) {
+			        @NonNull
+			        Number n=Integer.valueOf(1);
+			        if(b) {
+			          n = null;
+			        };
+			        return n.doubleValue();
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 	// Attempt to override an unspec'ed argument with a @NonNull argument
 	// -> change to @Nullable
@@ -2000,24 +2108,26 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testBug506108() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Exception e, Exception e1, Exception e2) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(Exception e, Exception e1, Exception e2) {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(Exception e1, @NonNull Exception e2, Exception e) {\n");
-		buf.append("        e2.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 extends E {
+			    void foo(Exception e1, @NonNull Exception e2, Exception e) {
+			        e2.printStackTrace();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2028,15 +2138,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E2 extends E {\n");
-		buf.append("    void foo(Exception e1, @Nullable Exception e2, Exception e) {\n"); // change override to accept @Nullable
-		buf.append("        e2.printStackTrace();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E2 extends E {
+			    void foo(Exception e1, @Nullable Exception e2, Exception e) {
+			        e2.printStackTrace();
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -2044,23 +2155,25 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Exception e, @NonNull Exception e1, Exception e2) {\n"); // change the overridden method to force @NonNull
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			public class E {
+			    void foo(Exception e, @NonNull Exception e1, Exception e2) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 	@Test
 	public void testBug525428a() throws Exception {
 		fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
 		try {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", str, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2071,10 +2184,11 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String preview= getPreviewContent(proposal);
 
-			buf= new StringBuilder();
-			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-			buf.append("package test1;\n");
-			assertEqualStringIgnoreDelim(preview, buf.toString());
+			String str1= """
+				@org.eclipse.jdt.annotation.NonNullByDefault
+				package test1;
+				""";
+			assertEqualStringIgnoreDelim(preview, str1);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 		}
@@ -2089,11 +2203,12 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/**\n * Type\n */", null);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E {
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 			IMarker[] markers= pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
 			assertEquals(1, markers.length);
@@ -2115,16 +2230,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			assertEquals(0, pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
 
 			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
-			StringBuilder expected=new StringBuilder();
-			expected.append("/**\n");
-			expected.append(" * File\n");
-			expected.append(" */\n");
-			expected.append("/**\n");
-			expected.append(" * Type\n");
-			expected.append(" */\n");
-			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-			expected.append("package test1;\n");
-			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
+			String str1= """
+				/**
+				 * File
+				 */
+				/**
+				 * Type
+				 */
+				@org.eclipse.jdt.annotation.NonNullByDefault
+				package test1;
+				""";
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), str1);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
@@ -2142,22 +2258,24 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/**\n * Type\n */", null);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E {\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E {
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 			IPackageFragmentRoot testSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src-tests");
 			IPackageFragment pack2= testSourceFolder.createPackageFragment("test1", false, null);
 
 			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
-			buf=new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class ETest {\n");
-			buf.append("}\n");
-			ICompilationUnit cu2= pack2.createCompilationUnit("ETest.java", buf.toString(), false, null);
+			String str1= """
+				package test1;
+				public class ETest {
+				}
+				""";
+			ICompilationUnit cu2= pack2.createCompilationUnit("ETest.java", str1, false, null);
 
 			// after the incremental, there is also a problem marker on the package in the src-tests directory
 			cu2.getJavaProject().getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
@@ -2201,16 +2319,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			assertTrue("a package-info.java should have been created in src", packageInfoCU.exists());
 			assertFalse("no package-info.java should have been created in src-tests", packageInfoCU2.exists());
 
-			StringBuilder expected= new StringBuilder();
-			expected.append("/**\n");
-			expected.append(" * File\n");
-			expected.append(" */\n");
-			expected.append("/**\n");
-			expected.append(" * Type\n");
-			expected.append(" */\n");
-			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-			expected.append("package test1;\n");
-			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
+			String str2= """
+				/**
+				 * File
+				 */
+				/**
+				 * Type
+				 */
+				@org.eclipse.jdt.annotation.NonNullByDefault
+				package test1;
+				""";
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), str2);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
@@ -2238,19 +2357,21 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			proj2.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
 
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E1 {
+				}
+				""";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 			IPackageFragment pack2= sourceFolder2.createPackageFragment("test1", false, null);
 
-			buf=new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E2 {\n");
-			buf.append("}\n");
-			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+			String str1= """
+				package test1;
+				public class E2 {
+				}
+				""";
+			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", str1, false, null);
 
 			cu2.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -2295,16 +2416,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			assertTrue("a package-info.java should have been created in fJProject1", packageInfoCU.exists());
 			assertFalse("no package-info.java should have been created in proj2", packageInfoCU2.exists());
 
-			StringBuilder expected= new StringBuilder();
-			expected.append("/**\n");
-			expected.append(" * File\n");
-			expected.append(" */\n");
-			expected.append("/**\n");
-			expected.append(" * Type\n");
-			expected.append(" */\n");
-			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-			expected.append("package test1;\n");
-			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
+			String str2= """
+				/**
+				 * File
+				 */
+				/**
+				 * Type
+				 */
+				@org.eclipse.jdt.annotation.NonNullByDefault
+				package test1;
+				""";
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), str2);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
@@ -2334,19 +2456,21 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			proj2.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
 
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E1 {\n");
-			buf.append("}\n");
-			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+			String str= """
+				package test1;
+				public class E1 {
+				}
+				""";
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 			IPackageFragment pack2= sourceFolder2.createPackageFragment("test1", false, null);
 
-			buf=new StringBuilder();
-			buf.append("package test1;\n");
-			buf.append("public class E2 {\n");
-			buf.append("}\n");
-			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+			String str1= """
+				package test1;
+				public class E2 {
+				}
+				""";
+			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", str1, false, null);
 
 			cu2.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -2391,16 +2515,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			assertTrue("a package-info.java should have been created in fJProject1", packageInfoCU.exists());
 			assertTrue("a package-info.java should have been created in proj2", packageInfoCU2.exists());
 
-			StringBuilder expected= new StringBuilder();
-			expected.append("/**\n");
-			expected.append(" * File\n");
-			expected.append(" */\n");
-			expected.append("/**\n");
-			expected.append(" * Type\n");
-			expected.append(" */\n");
-			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-			expected.append("package test1;\n");
-			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
+			String str2= """
+				/**
+				 * File
+				 */
+				/**
+				 * Type
+				 */
+				@org.eclipse.jdt.annotation.NonNullByDefault
+				package test1;
+				""";
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), str2);
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);

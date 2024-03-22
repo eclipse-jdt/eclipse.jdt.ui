@@ -66,12 +66,13 @@ public class ImportOrganizeTest16 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("record E(List<?> list, Map<?,?> map){\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack1;
+			
+			record E(List<?> list, Map<?,?> map){
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("E", new String[] {}, new int[] {});
@@ -90,13 +91,14 @@ public class ImportOrganizeTest16 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("record E(E1 b){\n");
-		buf.append("  class E1 {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack1;
+			
+			record E(E1 b){
+			  class E1 {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("E", new String[] {}, new int[] {});
@@ -114,21 +116,21 @@ public class ImportOrganizeTest16 extends ImportOrganizeTest {
 		node.put(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, "org.junit.Assert.*");
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("import foo.bar.MyDriverAction;\n");
-		buf.append("import java.sql.DriverAction;\n");
-		buf.append("import java.sql.SQLException;\n");
-		buf.append("\n");
-		buf.append("module mymodule.nine {\n");
-		buf.append("    requires java.sql;\n");
-		buf.append("    exports foo.bar;\n");
-		buf.append("    provides DriverAction with MyDriverAction;\n");
-		buf.append("}\n");
-
+		String str= """
+			import foo.bar.MyDriverAction;
+			import java.sql.DriverAction;
+			import java.sql.SQLException;
+			
+			module mymodule.nine {
+			    requires java.sql;
+			    exports foo.bar;
+			    provides DriverAction with MyDriverAction;
+			}
+			""";
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str, false, null);
 
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("import foo.bar.MyDriverAction;\n");
 		buf.append("\n");
 		buf.append("import java.sql.DriverAction;\n");

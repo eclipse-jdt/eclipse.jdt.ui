@@ -64,14 +64,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(Day day) {\n");
@@ -105,26 +106,25 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("	public int foo(Day day) {\n");
-		buf.append("		// return variable\n");
-		buf.append("		int i = switch (day) {\n");
-		buf.append("			case SATURDAY, SUNDAY -> 5;\n");
-		buf.append("			case MONDAY, TUESDAY, WEDNESDAY -> 7;\n");
-		buf.append("			case THURSDAY, FRIDAY -> 14;\n");
-		buf.append("			default -> 22;\n");
-		buf.append("		};\n");
-		buf.append("		return i;\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo(Day day) {
+					// return variable
+					int i = switch (day) {
+						case SATURDAY, SUNDAY -> 5;
+						case MONDAY, TUESDAY, WEDNESDAY -> 7;
+						case THURSDAY, FRIDAY -> 14;
+						default -> 22;
+					};
+					return i;
+				}
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -136,14 +136,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(Day day) {\n");
@@ -178,32 +179,31 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("	public int foo(Day day) {\n");
-		buf.append("		// return variable\n");
-		buf.append("		int i;\n");
-		buf.append("		int j = 4;\n");
-		buf.append("		// logic comment\n");
-		buf.append("		i = switch (day) {\n");
-		buf.append("			case SATURDAY, SUNDAY -> 5;\n");
-		buf.append("			case MONDAY, TUESDAY, WEDNESDAY -> {\n");
-		buf.append("				System.out.println(\"here\");\n");
-		buf.append("				yield 7;\n");
-		buf.append("			}\n");
-		buf.append("			case THURSDAY, FRIDAY -> 14;\n");
-		buf.append("			default -> 22;\n");
-		buf.append("		};\n");
-		buf.append("		return i;\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo(Day day) {
+					// return variable
+					int i;
+					int j = 4;
+					// logic comment
+					i = switch (day) {
+						case SATURDAY, SUNDAY -> 5;
+						case MONDAY, TUESDAY, WEDNESDAY -> {
+							System.out.println("here");
+							yield 7;
+						}
+						case THURSDAY, FRIDAY -> 14;
+						default -> 22;
+					};
+					return i;
+				}
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -215,14 +215,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	static int i;\n");
@@ -256,28 +257,27 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("	static int i;\n");
-		buf.append("	static {\n");
-		buf.append("		// var comment\n");
-		buf.append("		int j = 4;\n");
-		buf.append("		// logic comment\n");
-		buf.append("		i = switch (j) {\n");
-		buf.append("			case 0, 1 -> 5;\n");
-		buf.append("			case 2, 3, 4 -> {\n");
-		buf.append("				System.out.println(\"here\"); // comment 1\n");
-		buf.append("				// comment 2\n");
-		buf.append("				yield 7; // comment 3\n");
-		buf.append("			}\n");
-		buf.append("			case 5, 6 -> 14;\n");
-		buf.append("			default -> 22;\n");
-		buf.append("		};\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+				static int i;
+				static {
+					// var comment
+					int j = 4;
+					// logic comment
+					i = switch (j) {
+						case 0, 1 -> 5;
+						case 2, 3, 4 -> {
+							System.out.println("here"); // comment 1
+							// comment 2
+							yield 7; // comment 3
+						}
+						case 5, 6 -> 14;
+						default -> 22;
+					};
+				}
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -289,14 +289,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(int j, int k) {\n");
@@ -326,25 +327,24 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("	public int foo(int j, int k) {\n");
-		buf.append("		// var comment\n");
-		buf.append("		int i = switch (j) {\n");
-		buf.append("			case 0, 1 -> k > 7 ? 5 : 6;\n");
-		buf.append("			case 2, 3, 4 -> {\n");
-		buf.append("				System.out.println(\"here\");\n");
-		buf.append("				yield 7;\n");
-		buf.append("			}\n");
-		buf.append("			case 5, 6 -> 14;\n");
-		buf.append("			default -> 22;\n");
-		buf.append("		};\n");
-		buf.append("		return i;\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+				public int foo(int j, int k) {
+					// var comment
+					int i = switch (j) {
+						case 0, 1 -> k > 7 ? 5 : 6;
+						case 2, 3, 4 -> {
+							System.out.println("here");
+							yield 7;
+						}
+						case 5, 6 -> 14;
+						default -> 22;
+					};
+					return i;
+				}
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -356,14 +356,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public int foo(int i) {\n");
@@ -385,20 +386,19 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public int foo(int i) {\n");
-		buf.append("        return switch (i) {\n");
-		buf.append("			case 0: // comment\n");
-		buf.append("				yield 0;\n");
-		buf.append("			default:\n");
-		buf.append("				yield 1;\n");
-		buf.append("		};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public int foo(int i) {
+			        return switch (i) {
+						case 0: // comment
+							yield 0;
+						default:
+							yield 1;
+					};
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -410,14 +410,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	static int i;\n");
@@ -454,14 +455,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(int k) {\n");
@@ -499,14 +501,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(int k) {\n");
@@ -544,14 +547,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(int k) {\n");
@@ -589,14 +593,15 @@ public class AssistQuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("	public int foo(int k) {\n");

@@ -53,11 +53,12 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			import java.io.Serializable;
+			public class E1 implements Serializable {
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
 		getProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
@@ -81,15 +82,16 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "    public class B1 implements Serializable {\n" //
-				+ "    }\n" //
-				+ "    public class B2 extends B1 {\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			import java.io.Serializable;
+			public class E1 implements Serializable {
+			    public class B1 implements Serializable {
+			    }
+			    public class B2 extends B1 {
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
 
@@ -121,19 +123,21 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			import java.io.Serializable;
+			public class E1 implements Serializable {
+			}
+			""";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", given, false, null);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Externalizable;\n" //
-				+ "public class E2 implements Externalizable {\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			import java.io.Externalizable;
+			public class E2 implements Externalizable {
+			}
+			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", expected, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
@@ -148,11 +152,12 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    private static final long serialVersionUID = 1L;\n" //
 				+ "}\n";
 
-		String expected1= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Externalizable;\n" //
-				+ "public class E2 implements Externalizable {\n" //
-				+ "}\n";
+		String expected1= """
+			package test1;
+			import java.io.Externalizable;
+			public class E2 implements Externalizable {
+			}
+			""";
 
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu1, cu2}, new String[] {expected1, expected2});
 	}
@@ -160,15 +165,16 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Serializable s= new Serializable() {\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			import java.io.Serializable;
+			public class E1 implements Serializable {
+			    public void foo() {
+			        Serializable s= new Serializable() {
+			        };
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
 
@@ -198,15 +204,16 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Test
 	public void testSerialVersion05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "\n" //
-				+ "    private Serializable s= new Serializable() {\n" //
-				+ "        \n" //
-				+ "    };\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			import java.io.Serializable;
+			public class E1 implements Serializable {
+			
+			    private Serializable s= new Serializable() {
+			       \s
+			    };
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
 
@@ -235,21 +242,22 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Test
 	public void testSerialVersionBug139381() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 {\n" //
-				+ "    void foo1() {\n" //
-				+ "        new Serializable() {\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "    void foo2() {\n" //
-				+ "        new Object() {\n" //
-				+ "        };\n" //
-				+ "        new Serializable() {\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			import java.io.Serializable;
+			public class E1 {
+			    void foo1() {
+			        new Serializable() {
+			        };
+			    }
+			    void foo2() {
+			        new Object() {
+			        };
+			        new Serializable() {
+			        };
+			    }
+			}
+			""";
 
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
 

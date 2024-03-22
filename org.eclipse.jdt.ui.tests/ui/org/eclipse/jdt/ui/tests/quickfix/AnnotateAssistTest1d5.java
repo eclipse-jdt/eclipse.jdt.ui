@@ -83,10 +83,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String MY_MAP_PATH= "pack/age/MyMap";
 		String[] pathAndContents= {
 					MY_MAP_PATH + ".java",
-					"package pack.age;\n" +
-					"public interface MyMap<K,V> {\n" +
-					"    public V get(K key);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						public interface MyMap<K,V> {
+						    public V get(K key);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
@@ -125,10 +127,11 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			assertEquals("expect proposal", "Annotate as '@NonNull V'", proposal.getDisplayString());
 			String expectedInfo=
-					"<dl><dt>get</dt>" +
-					"<dd>(TK;)TV;</dd>" +
-					"<dd>(TK;)T<b>1</b>V;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>get</dt>\
+				<dd>(TK;)TV;</dd>\
+				<dd>(TK;)T<b>1</b>V;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -138,10 +141,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/MyMap\n" +
-					"get\n" +
-					" (TK;)TV;\n" +
-					" (TK;)T1V;\n";
+					"""
+				class pack/age/MyMap
+				get
+				 (TK;)TV;
+				 (TK;)T1V;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -159,10 +164,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String MY_MAP_PATH= "pack/age/MyMap";
 		String[] pathAndContents= new String[] {
 					MY_MAP_PATH+".java",
-					"package pack.age;\n" +
-					"public interface MyMap<K,V> {\n" +
-					"    public V get(K key);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						public interface MyMap<K,V> {
+						    public V get(K key);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
@@ -178,18 +185,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull V'", list);
 			String expectedInfo=
-					"<dl><dt>get</dt>" +
-					"<dd>(TK;)TV;</dd>" +
-					"<dd>(TK;)T<b>1</b>V;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>get</dt>\
+				<dd>(TK;)TV;</dd>\
+				<dd>(TK;)T<b>1</b>V;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Annotate as '@Nullable V'", list);
 			expectedInfo=
-					"<dl><dt>get</dt>" +
-					"<dd>(TK;)TV;</dd>" +
-					"<dd>(TK;)T<b>0</b>V;</dd>" + // <= 0
-					"</dl>";
+					"""
+						<dl><dt>get</dt>\
+						<dd>(TK;)TV;</dd>\
+						<dd>(TK;)T<b>0</b>V;</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -199,10 +208,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/MyMap\n" +
-					"get\n" +
-					" (TK;)TV;\n" +
-					" (TK;)T0V;\n";
+					"""
+				class pack/age/MyMap
+				get
+				 (TK;)TV;
+				 (TK;)T0V;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -221,19 +232,23 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 		String[] pathAndContents= {
 				MY_MAP_PATH + ".java",
-				"package pack.age;\n" +
-				"public interface MyMap<K,V> {\n" +
-				"    public V get(K key);\n" +
-				"}\n"
+				"""
+					package pack.age;
+					public interface MyMap<K,V> {
+					    public V get(K key);
+					}
+					"""
 			};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(MY_MAP_PATH + ".eea"));
 		String initialContent=
-				"class pack/age/MyMap\n" +
-				"get\n" +
-				" (TK;)TV;\n" +
-				" (TK;)T0V;\n";
+				"""
+			class pack/age/MyMap
+			get
+			 (TK;)TV;
+			 (TK;)T0V;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -249,18 +264,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull V'", list);
 			String expectedInfo=
-					"<dl><dt>get</dt>" +
-					"<dd>(TK;)TV;</dd>" +
-					"<dd>(TK;)T<b>1</b>V;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>get</dt>\
+				<dd>(TK;)TV;</dd>\
+				<dd>(TK;)T<b>1</b>V;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Remove nullness annotation from type 'V'", list);
 			expectedInfo=
-					"<dl><dt>get</dt>" +
-					"<dd>(TK;)TV;</dd>" +
-					"<dd>(TK;)T<del>0</del>V;</dd>" + // <= <strike>0</strike>
-					"</dl>";
+					"""
+						<dl><dt>get</dt>\
+						<dd>(TK;)TV;</dd>\
+						<dd>(TK;)T<del>0</del>V;</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -269,10 +286,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should still exist", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/MyMap\n" +
-					"get\n" +
-					" (TK;)TV;\n" +
-					" (TK;)TV;\n";
+					"""
+				class pack/age/MyMap
+				get
+				 (TK;)TV;
+				 (TK;)TV;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -291,19 +310,23 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= {
 					X_PATH + ".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int[][] ints, List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int[][] ints, List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -320,18 +343,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as 'int @NonNull [][]'", list);
 			String expectedInfo=
-					"<dl><dt>test</dt>" +
-					"<dd>([[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>" +
-					"<dd>([<b>1</b>[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>test</dt>\
+				<dd>([[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>\
+				<dd>([<b>1</b>[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Annotate as 'int @Nullable [][]'", list);
 			expectedInfo=
-					"<dl><dt>test</dt>" +
-					"<dd>([[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>" +
-					"<dd>([<b>0</b>[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>" + // <= 0
-					"</dl>";
+					"""
+						<dl><dt>test</dt>\
+						<dd>([[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>\
+						<dd>([<b>0</b>[ILjava/util/List&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -341,10 +366,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-					" ([0[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				 ([0[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -364,19 +391,23 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(List<String> list, int ... ints);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(List<String> list, int ... ints);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH + ".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -393,18 +424,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as 'int @NonNull ...'", list);
 			String expectedInfo=
-					"<dl><dt>test</dt>" +
-					"<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[I)Ljava/lang/String;</dd>" +
-					"<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[<b>1</b>I)Ljava/lang/String;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>test</dt>\
+				<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[I)Ljava/lang/String;</dd>\
+				<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[<b>1</b>I)Ljava/lang/String;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Annotate as 'int @Nullable ...'", list);
 			expectedInfo=
-					"<dl><dt>test</dt>" +
-					"<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[I)Ljava/lang/String;</dd>" +
-					"<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[<b>0</b>I)Ljava/lang/String;</dd>" + // <= 0
-					"</dl>";
+					"""
+						<dl><dt>test</dt>\
+						<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[I)Ljava/lang/String;</dd>\
+						<dd>(Ljava/util/List&lt;Ljava/lang/String;&gt;;[<b>0</b>I)Ljava/lang/String;</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -414,10 +447,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[0I)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
+				 (Ljava/util/List<Ljava/lang/String;>;[0I)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -435,19 +470,23 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= {
 					X_PATH + ".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public class X {\n" +
-					"    public X(String p) {}\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public class X {
+						    public X(String p) {}
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH + ".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"<init>\n" +
-				" (Ljava/lang/String;)V\n";
+				"""
+			class pack/age/X
+			<init>
+			 (Ljava/lang/String;)V
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -464,18 +503,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull String'", list);
 			String expectedInfo=
-					"<dl><dt>&lt;init&gt;</dt>" +
-					"<dd>(Ljava/lang/String;)V</dd>" +
-					"<dd>(L<b>1</b>java/lang/String;)V</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>&lt;init&gt;</dt>\
+				<dd>(Ljava/lang/String;)V</dd>\
+				<dd>(L<b>1</b>java/lang/String;)V</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Annotate as '@Nullable String'", list);
 			expectedInfo=
-					"<dl><dt>&lt;init&gt;</dt>" +
-					"<dd>(Ljava/lang/String;)V</dd>" +
-					"<dd>(L<b>0</b>java/lang/String;)V</dd>" + // <= 0
-					"</dl>";
+					"""
+						<dl><dt>&lt;init&gt;</dt>\
+						<dd>(Ljava/lang/String;)V</dd>\
+						<dd>(L<b>0</b>java/lang/String;)V</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -485,10 +526,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"<init>\n" +
-					" (Ljava/lang/String;)V\n" +
-					" (L0java/lang/String;)V\n";
+					"""
+				class pack/age/X
+				<init>
+				 (Ljava/lang/String;)V
+				 (L0java/lang/String;)V
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -506,10 +549,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String NODE_PATH= "pack/age/Node";
 		String[] pathAndContents= {
 					NODE_PATH+".java",
-					"package pack.age;\n" +
-					"public class Node<V> {\n" +
-					"    V value;\n" +
-					"}\n"
+					"""
+						package pack.age;
+						public class Node<V> {
+						    V value;
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
@@ -525,18 +570,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull V'", list);
 			String expectedInfo=
-					"<dl><dt>value</dt>" +
-					"<dd>TV;</dd>" +
-					"<dd>T<b>1</b>V;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>value</dt>\
+				<dd>TV;</dd>\
+				<dd>T<b>1</b>V;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Annotate as '@Nullable V'", list);
 			expectedInfo=
-					"<dl><dt>value</dt>" +
-					"<dd>TV;</dd>" +
-					"<dd>T<b>0</b>V;</dd>" + // <= 0
-					"</dl>";
+					"""
+						<dl><dt>value</dt>\
+						<dd>TV;</dd>\
+						<dd>T<b>0</b>V;</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -546,10 +593,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/Node\n" +
-					"value\n" +
-					" TV;\n" +
-					" T0V;\n";
+					"""
+				class pack/age/Node
+				value
+				 TV;
+				 T0V;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -567,10 +616,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String NODE_PATH= "pack/age/Node";
 		String[] pathAndContents= {
 					NODE_PATH+".java",
-					"package pack.age;\n" +
-					"public class Node<V> {\n" +
-					"    Node<String> next;\n" +
-					"}\n"
+					"""
+						package pack.age;
+						public class Node<V> {
+						    Node<String> next;
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
@@ -586,18 +637,20 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 
 			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull Node'", list);
 			String expectedInfo=
-					"<dl><dt>next</dt>" +
-					"<dd>Lpack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" +
-					"<dd>L<b>1</b>pack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" + // <= 1
-					"</dl>";
+					"""
+				<dl><dt>next</dt>\
+				<dd>Lpack/age/Node&lt;Ljava/lang/String;&gt;;</dd>\
+				<dd>L<b>1</b>pack/age/Node&lt;Ljava/lang/String;&gt;;</dd>\
+				</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			proposal= findProposalByName("Annotate as '@Nullable Node'", list);
 			expectedInfo=
-					"<dl><dt>next</dt>" +
-					"<dd>Lpack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" +
-					"<dd>L<b>0</b>pack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" + // <= 0
-					"</dl>";
+					"""
+						<dl><dt>next</dt>\
+						<dd>Lpack/age/Node&lt;Ljava/lang/String;&gt;;</dd>\
+						<dd>L<b>0</b>pack/age/Node&lt;Ljava/lang/String;&gt;;</dd>\
+						</dl>""";
 			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
 
 			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
@@ -607,10 +660,12 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/Node\n" +
-					"next\n" +
-					" Lpack/age/Node<Ljava/lang/String;>;\n" +
-					" L0pack/age/Node<Ljava/lang/String;>;\n";
+					"""
+				class pack/age/Node
+				next
+				 Lpack/age/Node<Ljava/lang/String;>;
+				 L0pack/age/Node<Ljava/lang/String;>;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -623,18 +678,22 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		String CLASS2_PATH= "pack/age/Class2";
 		String[] pathAndContents= {
 					MISSINGPATH+".java",
-					"package pack.age;\n" +
-					"public class Missing {\n" +
-					"    Missing foo() { return this; }\n" +
-					"}\n",
+					"""
+						package pack.age;
+						public class Missing {
+						    Missing foo() { return this; }
+						}
+						""",
 					CLASS2_PATH+".java",
-					"package pack.age;\n" +
-					"import pack.age.Missing;\n" +
-					"public class Class2 {\n" +
-					"    void test(Missing c1) {\n" + // Will get a RecoveredTypeBinding for "Missing"
-					"        c1 = c1.foo();\n" +
-					"    }\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import pack.age.Missing;
+						public class Class2 {
+						    void test(Missing c1) {
+						        c1 = c1.foo();
+						    }
+						}
+						"""
 				};
 
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, unitResult -> !new Path(MISSINGPATH + ".java").equals(new Path(String.valueOf(unitResult.getFileName()))));

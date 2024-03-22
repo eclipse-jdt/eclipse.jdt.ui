@@ -119,27 +119,28 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 	@Test
 	public void testBug473068_elided() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @NonNull Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @NonNull Object data) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -149,54 +150,56 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @Nullable Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @Nullable Object data) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	@SuppressWarnings(\"null\")\n");
-		buf.append("    public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @NonNull Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				@SuppressWarnings("null")
+			    public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @NonNull Object data) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	// ==== Problem:	unchecked conversion, explicitly typed lambda arg
@@ -207,27 +210,28 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 	@Test
 	public void testBug473068_explicit_type() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (Object data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @NonNull Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (Object data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @NonNull Object data) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -237,78 +241,81 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (@NonNull Object data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @NonNull Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (@NonNull Object data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @NonNull Object data) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (Object data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @Nullable Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (Object data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @Nullable Object data) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package testNullAnnotations;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
-		buf.append("\n");
-		buf.append("interface Consumer<T> {\n");
-		buf.append("    void accept(T t);\n");
-		buf.append("}\n");
-		buf.append("public class Snippet {\n");
-		buf.append("	\n");
-		buf.append("	@SuppressWarnings(\"null\")\n");
-		buf.append("    public void select(final double min, final double max) {\n");
-		buf.append("	    doStuff(0, 1, min, max, (Object data) -> updateSelectionData(data));\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {\n");
-		buf.append("\n");
-		buf.append("	}\n");
-		buf.append("    private void updateSelectionData(final @NonNull Object data) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package testNullAnnotations;
+			
+			import org.eclipse.jdt.annotation.NonNull;
+			
+			interface Consumer<T> {
+			    void accept(T t);
+			}
+			public class Snippet {
+			\t
+				@SuppressWarnings("null")
+			    public void select(final double min, final double max) {
+				    doStuff(0, 1, min, max, (Object data) -> updateSelectionData(data));
+				}
+			\t
+				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
+			
+				}
+			    private void updateSelectionData(final @NonNull Object data) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str3);
 	}
 }

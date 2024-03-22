@@ -110,9 +110,11 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testParameterNamesOK() throws Exception {
-		String contents= "public class Foo {\n" +
-				"	int n= System.out.append(\"abc\", 0, 3);\n" +
-				"}\n";
+		String contents= """
+			public class Foo {
+				int n= System.out.append("abc", 0, 3);
+			}
+			""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -124,9 +126,11 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testVarargs() throws Exception {
-		String contents= "public class Foo {\n" +
-				"	String s= String.format(\"%d %d\", 1, 2);\n" +
-				"}\n";
+		String contents= """
+			public class Foo {
+				String s= String.format("%d %d", 1, 2);
+			}
+			""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -138,15 +142,16 @@ public class ParameterNamesCodeMiningTest {
 	@Test
 	public void testMultiLines() throws Exception {
 		String contents =
-				"class Foo {\n" +
-				"   public int max(long a, long b) {\n" +
-				"      return a - b;\n" +
-				"   }\n" +
-				"   public void foo() {\n" +
-				"	  int n= max(System.currentTimeMillis(\n" +
-				"					), 0);\n" +
-				"   }\n" +
-				"}";
+				"""
+			class Foo {
+			   public int max(long a, long b) {
+			      return a - b;
+			   }
+			   public void foo() {
+				  int n= max(System.currentTimeMillis(
+								), 0);
+			   }
+			}""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		CompilationUnitEditor editor= (CompilationUnitEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -173,12 +178,13 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testUnresolvedMethodBinding() throws Exception {
-		String contents= "public class Foo {\n" +
-		"	public void mehod() {\n" +
-		"		List<String> list= Arrays.asList(\"foo\", \"bar\");\n" +
-		"		System.out.printf(\"%s %s\", list.get(0), list.get(1));\n" +
-		"	}\n" +
-		"}";
+		String contents= """
+			public class Foo {
+				public void mehod() {
+					List<String> list= Arrays.asList("foo", "bar");
+					System.out.printf("%s %s", list.get(0), list.get(1));
+				}
+			}""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -190,19 +196,20 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testCollapsedFolding() throws Exception {
-		String contents= "/**\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n" +
-				" */" +
-				"public class Foo {\n" +
-				"	int n= Math.max(1, 2);\n" +
-				"}";
+		String contents= """
+			/**
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 * aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+			 */\
+			public class Foo {
+				int n= Math.max(1, 2);
+			}""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -230,12 +237,13 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testCollapsedFoldingAndToggleHighlight() throws Exception {
-		String contents= "/**\n" +
-				" *\n" +
-				" */" +
-				"public class Foo {\n" +
-				"	int n= Integer.divideUnsigned(1, 2);\n" +
-				"}";
+		String contents= """
+			/**
+			 *
+			 */\
+			public class Foo {
+				int n= Integer.divideUnsigned(1, 2);
+			}""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -385,18 +393,19 @@ public class ParameterNamesCodeMiningTest {
 				+ "";
 		fPackage.createCompilationUnit("Edge.java", contents, true, new NullProgressMonitor());
 
-		contents = "import java.util.Map;\n"
-				+ "public class Test {\n"
-				+ "    public void test () {\n"
-				+ "        Edge e = new Edge(\n"
-				+ "        0,\n"
-				+ "        1,\n"
-				+ "        Map.entry(0, 0),\n"
-				+ "        Map.entry(1, 1),\n"
-				+ "        1,\n"
-				+ "        \"dev\");\n"
-				+ "    }\n"
-				+ "}";
+		contents = """
+			import java.util.Map;
+			public class Test {
+			    public void test () {
+			        Edge e = new Edge(
+			        0,
+			        1,
+			        Map.entry(0, 0),
+			        Map.entry(1, 1),
+			        1,
+			        "dev");
+			    }
+			}""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Test.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -411,34 +420,36 @@ public class ParameterNamesCodeMiningTest {
 	@Test
 	public void testIssue457() throws Exception {
 		String contents=
-				"import java.util.List;\n" +
-				"public class Foo {\n" +
-				"  public void messageError(String message, int error) {}\n" +
-				"  public void beginEnd(String beginObject, String endObject) {}\n" +
-				"  public void startEnd(String startObject, String endObject) {}\n" +
-				"  public void firstSecond(String firstMsg, String secondMsg) {}\n" +
-				"  public void firstLast(String firstMsg, String lastMsg) {}\n" +
-				"  public void keyValue(int key, int value) {}\n" +
-				"  public void minMax(int minValue, int maxValue) {}\n" +
-				"  public void setProperty(int key, int value) {}\n" +
-				"  public void fromTo(int fromValue, int toValue) {}\n" +
-				"  public void printf(String format, Object arguments) {}\n" +
-				"  public void foo() {\n" +
-				"    int x = Math.max(1, 2);\n" +
-				"    int y = Double.compare(1.8, 2.5);\n" +
-				"    List<String> list= List.of(\"abc\", \"def\", \"ghi\");\n" +
-				"    messageError(\"errormsg\", 3);\n" +
-				"	 beginEnd(\"abc\", \"def\");\n" +
-				"	 startEnd(\"abc\", \"def\");\n" +
-				"    firstSecond(\"abc\", \"def\");\n" +
-				"    firstLast(\"abc\", \"def\");\n" +
-				"    keyValue(2, 4);\n" +
-				"    minMax(5, 6);\n" +
-				"    setProperty(1, 3);\n" +
-				"    fromTo(1, 2);\n" +
-				"    printf(\"%d\", 5);\n" +
-				"  }\n" +
-				"}\n";
+				"""
+			import java.util.List;
+			public class Foo {
+			  public void messageError(String message, int error) {}
+			  public void beginEnd(String beginObject, String endObject) {}
+			  public void startEnd(String startObject, String endObject) {}
+			  public void firstSecond(String firstMsg, String secondMsg) {}
+			  public void firstLast(String firstMsg, String lastMsg) {}
+			  public void keyValue(int key, int value) {}
+			  public void minMax(int minValue, int maxValue) {}
+			  public void setProperty(int key, int value) {}
+			  public void fromTo(int fromValue, int toValue) {}
+			  public void printf(String format, Object arguments) {}
+			  public void foo() {
+			    int x = Math.max(1, 2);
+			    int y = Double.compare(1.8, 2.5);
+			    List<String> list= List.of("abc", "def", "ghi");
+			    messageError("errormsg", 3);
+				 beginEnd("abc", "def");
+				 startEnd("abc", "def");
+			    firstSecond("abc", "def");
+			    firstLast("abc", "def");
+			    keyValue(2, 4);
+			    minMax(5, 6);
+			    setProperty(1, 3);
+			    fromTo(1, 2);
+			    printf("%d", 5);
+			  }
+			}
+			""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Foo.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);

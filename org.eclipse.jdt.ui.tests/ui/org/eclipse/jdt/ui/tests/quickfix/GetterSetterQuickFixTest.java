@@ -79,28 +79,29 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetter() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package b112441;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private byte test;\n");
-		buf.append("\n");
-		buf.append("    public byte getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(byte test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        ++c.test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package b112441;
+			
+			public class C {
+			    private byte test;
+			
+			    public byte getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(byte test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        ++c.test;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -109,51 +110,51 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package b112441;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private byte test;\n");
-		buf.append("\n");
-		buf.append("    public byte getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(byte test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.setTest((byte) (c.getTest() + 1));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package b112441;
+			
+			public class C {
+			    private byte test;
+			
+			    public byte getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(byte test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.setTest((byte) (c.getTest() + 1));
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package b112441;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    byte test;\n");
-		buf.append("\n");
-		buf.append("    public byte getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(byte test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        ++c.test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package b112441;
+			
+			public class C {
+			    byte test;
+			
+			    public byte getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(byte test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        ++c.test;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -161,28 +162,29 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(int x){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.test+= x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(int x){
+			        C c=new C();
+			        c.test+= x;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -191,28 +193,28 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(int x){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.setTest(c.getTest() + x);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(int x){
+			        C c=new C();
+			        c.setTest(c.getTest() + x);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -220,28 +222,29 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.test+= 1 + 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.test+= 1 + 2;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -250,28 +253,28 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.setTest(c.getTest() + 1 + 2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.setTest(c.getTest() + 1 + 2);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -279,28 +282,29 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.test-= 1 + 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.test-= 1 + 2;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -309,28 +313,28 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.setTest(c.getTest() - (1 + 2));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.setTest(c.getTest() - (1 + 2));
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -338,28 +342,29 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleFieldToGetterSetterBug335173_4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.test*= 1 + 2;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.test*= 1 + 2;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -368,28 +373,28 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private int test;\n");
-		buf.append("\n");
-		buf.append("    public int getTest() {\n");
-		buf.append("        return this.test;\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void setTest(int test) {\n");
-		buf.append("        this.test = test;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D {\n");
-		buf.append("    public void foo(){\n");
-		buf.append("        C c=new C();\n");
-		buf.append("        c.setTest(c.getTest() * (1 + 2));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			public class C {
+			    private int test;
+			
+			    public int getTest() {
+			        return this.test;
+			    }
+			
+			    public void setTest(int test) {
+			        this.test = test;
+			    }
+			}
+			
+			class D {
+			    public void foo(){
+			        C c=new C();
+			        c.setTest(c.getTest() * (1 + 2));
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -397,21 +402,22 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 	@Test
 	public void testCreateFieldUsingSef() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    private int t;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(t);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B {\n");
-		buf.append("    {\n");
-		buf.append("        new A().t=5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			
+			public class A {
+			    private int t;
+			    {
+			        System.out.println(t);
+			    }
+			}
+			
+			class B {
+			    {
+			        new A().t=5;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -420,43 +426,43 @@ public class GetterSetterQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    int t;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(t);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B {\n");
-		buf.append("    {\n");
-		buf.append("        new A().t=5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			
+			public class A {
+			    int t;
+			    {
+			        System.out.println(t);
+			    }
+			}
+			
+			class B {
+			    {
+			        new A().t=5;
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    private int t;\n");
-		buf.append("    {\n");
-		buf.append("        System.out.println(getT());\n");
-		buf.append("    }\n");
-		buf.append("    public int getT() {\n");
-		buf.append("        return t;\n");
-		buf.append("    }\n");
-		buf.append("    public void setT(int t) {\n");
-		buf.append("        this.t = t;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B {\n");
-		buf.append("    {\n");
-		buf.append("        new A().setT(5);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			
+			public class A {
+			    private int t;
+			    {
+			        System.out.println(getT());
+			    }
+			    public int getT() {
+			        return t;
+			    }
+			    public void setT(int t) {
+			        this.t = t;
+			    }
+			}
+			
+			class B {
+			    {
+			        new A().setT(5);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

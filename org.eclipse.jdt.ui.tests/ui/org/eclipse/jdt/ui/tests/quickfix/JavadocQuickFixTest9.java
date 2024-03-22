@@ -63,42 +63,41 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		options.put(JavaCore.COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING, JavaCore.ENABLED);
 		JavaCore.setOptions(options);
 
-		StringBuilder comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * A comment.\n");
-		comment.append(" * ${tags}\n");
-		comment.append(" */");
-		String res= comment.toString();
+		String res= """
+			/**
+			 * A comment.
+			 * ${tags}
+			 */""";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, res, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, res, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, res, null);
 
-		comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * A field comment for ${field}.\n");
-		comment.append(" */");
-		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, comment.toString(), null);
+		String str= """
+			/**
+			 * A field comment for ${field}.
+			 */""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, str, null);
 
-		comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * A override comment.\n");
-		comment.append(" * ${see_to_overridden}\n");
-		comment.append(" */");
-		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, comment.toString(), null);
+		String str1= """
+			/**
+			 * A override comment.
+			 * ${see_to_overridden}
+			 */""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, str1, null);
 
-		comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * A delegate comment.\n");
-		comment.append(" * ${see_to_target}\n");
-		comment.append(" */");
-		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, comment.toString(), null);
+		String str2= """
+			/**
+			 * A delegate comment.
+			 * ${see_to_target}
+			 */""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, str2, null);
 
-		comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * A module comment.\n");
-		comment.append(" * ${tags}\n");
-		comment.append(" */");
-		StubUtility.setCodeTemplate(CodeTemplateContextType.MODULECOMMENT_ID, comment.toString(), null);
+		String str3= """
+			/**
+			 * A module comment.
+			 * ${tags}
+			 */""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.MODULECOMMENT_ID, str3, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject1);
@@ -115,27 +114,29 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 	@Test
 	public void testMissingModuleComment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -146,51 +147,53 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * A module comment.\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * A module comment.
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testMissingUsesTag1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -201,75 +204,76 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal2);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview2, expected2);
 	}
 
 	@Test
 	public void testMissingUsesTag2() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.utio.Formatter;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			import java.utio.Formatter;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.lang.Appendable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  uses Appendable;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import java.lang.Appendable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  uses Appendable;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -280,80 +284,81 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.lang.Appendable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses Appendable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  uses Appendable;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import java.lang.Appendable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses Appendable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  uses Appendable;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal2);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.lang.Appendable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses Appendable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  uses Appendable;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import java.lang.Appendable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses Appendable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  uses Appendable;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview2, expected2);
 	}
 
 	@Test
 	public void testMissingUsesTag3() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.utio.Formatter;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			import java.utio.Formatter;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.lang.Appendable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  uses Appendable;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import java.lang.Appendable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 */
+			module test {
+			  uses EventListener;
+			  uses Appendable;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
@@ -364,76 +369,77 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.lang.Appendable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  uses Appendable;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import java.lang.Appendable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  uses Appendable;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal2);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import java.lang.Appendable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses Appendable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  uses Appendable;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import java.lang.Appendable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses Appendable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  uses Appendable;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview2, expected2);
 	}
 
 	@Test
 	public void testMissingProvidesTag1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -444,84 +450,85 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal2);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview2, expected2);
 	}
 
 	@Test
 	public void testMissingProvidesTag2() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable, Appendable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("  @Override\n");
-		buf.append("  public Appendable append(CharSequence csq) throws IOException {\n");
-		buf.append("    return null;\n");
-		buf.append("  }\n");
-		buf.append("  @Override\n");
-		buf.append("  public Appendable append(CharSequence csq, int start, int end) throws IOException {\n");
-		buf.append("    return null;\n");
-		buf.append("  }\n");
-		buf.append("  @Override\n");
-		buf.append("  public Appendable append(char c) throws IOException {\n");
-		buf.append("   	return null;\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable, Appendable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			  @Override
+			  public Appendable append(CharSequence csq) throws IOException {
+			    return null;
+			  }
+			  @Override
+			  public Appendable append(CharSequence csq, int start, int end) throws IOException {
+			    return null;
+			  }
+			  @Override
+			  public Appendable append(char c) throws IOException {
+			   	return null;
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  provides Appendable with MyFormattable;\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @uses EventListener
+			 */
+			module test {
+			  provides Appendable with MyFormattable;
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
@@ -532,76 +539,77 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Appendable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  provides Appendable with MyFormattable;\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Appendable
+			 * @uses EventListener
+			 */
+			module test {
+			  provides Appendable with MyFormattable;
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 
 		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal2);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @provides Appendable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  provides Appendable with MyFormattable;\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @provides Appendable
+			 * @uses EventListener
+			 */
+			module test {
+			  provides Appendable with MyFormattable;
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview2, expected2);
 	}
 
 	@Test
 	public void testDuplicateUsesTag1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @uses EventListener
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -612,53 +620,54 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @uses EventListener
+			 * @provides Formattable
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testDuplicateUsesTag2() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @uses EventListener
+			 * @provides Formattable
+			 * @uses EventListener */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -669,53 +678,54 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" * @provides Formattable*/\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @uses EventListener
+			 * @provides Formattable*/
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testDuplicateProvidesTag1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 * @provides Formattable
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -726,53 +736,54 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
 	@Test
 	public void testDuplicateProvidesTag2() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("public class MyFormattable implements Formattable {\n");
-		buf.append("  @Override\n");
-		buf.append("  public void formatTo(Formatter formatter, int flags, int width, int precision) {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
+		String str= """
+			package test;
+			import java.util.Formattable;
+			public class MyFormattable implements Formattable {
+			  @Override
+			  public void formatTo(Formatter formatter, int flags, int width, int precision) {
+			  }
+			}
+			""";
 		@SuppressWarnings("unused")
-		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", buf.toString(), false, null);
+		ICompilationUnit cu1= pack.createCompilationUnit("MyFormattable.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener\n");
-		buf.append(" * @provides Formattable */\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str1= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener
+			 * @provides Formattable */
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("module-info.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -783,20 +794,19 @@ public class JavadocQuickFixTest9 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("import java.util.EventListener;\n");
-		buf.append("import java.util.Formattable;\n");
-		buf.append("import test.MyFormattable;\n");
-		buf.append("/**\n");
-		buf.append(" * module test\n");
-		buf.append(" * @provides Formattable\n");
-		buf.append(" * @uses EventListener*/\n");
-		buf.append("module test {\n");
-		buf.append("  uses EventListener;\n");
-		buf.append("  provides Formattable with MyFormattable;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			import java.util.EventListener;
+			import java.util.Formattable;
+			import test.MyFormattable;
+			/**
+			 * module test
+			 * @provides Formattable
+			 * @uses EventListener*/
+			module test {
+			  uses EventListener;
+			  provides Formattable with MyFormattable;
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 

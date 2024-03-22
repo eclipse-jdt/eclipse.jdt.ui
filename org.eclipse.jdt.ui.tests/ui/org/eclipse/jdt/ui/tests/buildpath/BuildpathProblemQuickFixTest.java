@@ -105,15 +105,14 @@ public class BuildpathProblemQuickFixTest {
 		fJavaProject1= JavaProjectHelper.createJavaProject("1_Incomplete", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
 
-		StringBuilder sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\"/>\n");
-		sb.append("	<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/1_MissingProject\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>");
-		String classpath= sb.toString();
+		String classpath= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" path="src"/>
+				<classpathentry combineaccessrules="false" kind="src" path="/1_MissingProject"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>""";
 		addFile(fJavaProject1.getPath(), ".classpath", classpath);
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -132,30 +131,28 @@ public class BuildpathProblemQuickFixTest {
 		fJavaProject1= JavaProjectHelper.createJavaProject("2_CyclicA", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
 
-		StringBuilder sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\"/>\n");
-		sb.append("	<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/2_CyclicB\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath= sb.toString();
+		String classpath= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" path="src"/>
+				<classpathentry combineaccessrules="false" kind="src" path="/2_CyclicB"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject1.getPath(), ".classpath", classpath);
 		fJavaProject2= JavaProjectHelper.createJavaProject("2_CyclicB", "bin");
 		fJavaProject2.getProject().getFolder("src").create(true, true, null);
 
-		sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\"/>\n");
-		sb.append("	<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/2_CyclicA\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath2= sb.toString();
+		String classpath2= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" path="src"/>
+				<classpathentry combineaccessrules="false" kind="src" path="/2_CyclicA"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject2.getPath(), ".classpath", classpath2);
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -193,16 +190,15 @@ public class BuildpathProblemQuickFixTest {
 		IFolder src1= fJavaProject1.getProject().getFolder("src");
 		src1.create(true, true, null);
 
-		StringBuilder sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\"/>\n");
-		sb.append("	<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/3_JDKLevelHigh\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath= sb.toString();
+		String classpath= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+				<classpathentry kind="src" path="src"/>
+				<classpathentry combineaccessrules="false" kind="src" path="/3_JDKLevelHigh"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject1.getPath(), ".classpath", classpath);
 		addFile(src1.getFullPath(), "LowClass.java", "public class LowClass{HighClass x;}");
 		fJavaProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
@@ -215,15 +211,14 @@ public class BuildpathProblemQuickFixTest {
 		IFolder src2= fJavaProject2.getProject().getFolder("src");
 		src2.create(true, true, null);
 
-		sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath2= sb.toString();
+		String classpath2= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" path="src"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject2.getPath(), ".classpath", classpath2);
 		addFile(src2.getFullPath(), "HighClass.java", "public class HighClass{}");
 		fJavaProject2.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
@@ -249,16 +244,15 @@ public class BuildpathProblemQuickFixTest {
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
 		fJavaProject1.getProject().getFolder("other").create(true, true, null);
 
-		StringBuilder sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" output=\"other\" path=\"src\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"other\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath= sb.toString();
+		String classpath= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" output="other" path="src"/>
+				<classpathentry kind="src" path="other"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject1.getPath(), ".classpath", classpath);
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
@@ -276,33 +270,31 @@ public class BuildpathProblemQuickFixTest {
 		fJavaProject1= JavaProjectHelper.createJavaProject("7_OnlyMain", "bin");
 		fJavaProject1.getProject().getFolder("src").create(true, true, null);
 
-		StringBuilder sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\"/>\n");
-		sb.append("	<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/7_OnlyTest\"/>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath= sb.toString();
+		String classpath= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" path="src"/>
+				<classpathentry combineaccessrules="false" kind="src" path="/7_OnlyTest"/>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject1.getPath(), ".classpath", classpath);
 		fJavaProject2= JavaProjectHelper.createJavaProject("7_OnlyTest", "bin");
 		fJavaProject2.getProject().getFolder("src").create(true, true, null);
 
-		sb= new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<classpath>\n");
-		sb.append("	<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n");
-		sb.append("	<classpathentry kind=\"src\" path=\"src\">\n");
-		sb.append("		<attributes>\n");
-		sb.append("			<attribute name=\"test\" value=\"true\"/>\n");
-		sb.append("		</attributes>\n");
-		sb.append("	</classpathentry>\n");
-		sb.append("	<classpathentry kind=\"output\" path=\"bin\"/>\n");
-		sb.append("</classpath>\n");
-		sb.append("");
-		String classpath2= sb.toString();
+		String classpath2= """
+			<?xml version="1.0" encoding="UTF-8"?>
+			<classpath>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+				<classpathentry kind="src" path="src">
+					<attributes>
+						<attribute name="test" value="true"/>
+					</attributes>
+				</classpathentry>
+				<classpathentry kind="output" path="bin"/>
+			</classpath>
+			""";
 		addFile(fJavaProject2.getPath(), ".classpath", classpath2);
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 

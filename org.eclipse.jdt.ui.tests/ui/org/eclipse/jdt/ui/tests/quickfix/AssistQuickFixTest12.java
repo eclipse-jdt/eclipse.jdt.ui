@@ -61,31 +61,33 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("            case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n");
-		buf.append("            case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n");
-		buf.append("            case THURSDAY, FRIDAY: System.out.println(\"Weekday\");\n");
-		buf.append("            default :\n");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			            case SATURDAY, SUNDAY: System.out.println("Weekend");
+			            case MONDAY, TUESDAY, WEDNESDAY: System.out.println("Weekday");
+			            case THURSDAY, FRIDAY: System.out.println("Weekday");
+			            default :
+			                break;
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
 
 		IInvocationContext ctx= getCorrectionContext(cu, 185, 0);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
@@ -93,29 +95,29 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        switch (day) {\n");
-		buf.append("            case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n");
-		buf.append("            case MONDAY :\n");
-		buf.append("				System.out.println(\"Weekday\");\n");
-		buf.append("			case TUESDAY :\n");
-		buf.append("				System.out.println(\"Weekday\");\n");
-		buf.append("			case WEDNESDAY :\n");
-		buf.append("				System.out.println(\"Weekday\");\n");
-		buf.append("			case THURSDAY, FRIDAY: System.out.println(\"Weekday\");\n");
-		buf.append("            default :\n");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			            case SATURDAY, SUNDAY: System.out.println("Weekend");
+			            case MONDAY :
+							System.out.println("Weekday");
+						case TUESDAY :
+							System.out.println("Weekday");
+						case WEDNESDAY :
+							System.out.println("Weekday");
+						case THURSDAY, FRIDAY: System.out.println("Weekday");
+			            default :
+			                break;
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -127,29 +129,31 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        String weekDayOrEnd = switch (day) {\n");
-		buf.append("            case SATURDAY, SUNDAY -> \"Weekend\";\n");
-		buf.append("            case MONDAY, TUESDAY, WEDNESDAY -> \"Weekday\";\n");
-		buf.append("            case THURSDAY, FRIDAY -> \"Weekday\";\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String str1= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        String weekDayOrEnd = switch (day) {
+			            case SATURDAY, SUNDAY -> "Weekend";
+			            case MONDAY, TUESDAY, WEDNESDAY -> "Weekday";
+			            case THURSDAY, FRIDAY -> "Weekday";
+			        };
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", str1, false, null);
 
 		IInvocationContext ctx= getCorrectionContext(cu, 239, 0);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
@@ -157,23 +161,23 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public static void foo(Day day) {\n");
-		buf.append("        String weekDayOrEnd = switch (day) {\n");
-		buf.append("            case SATURDAY, SUNDAY -> \"Weekend\";\n");
-		buf.append("            case MONDAY, TUESDAY, WEDNESDAY -> \"Weekday\";\n");
-		buf.append("            case THURSDAY -> \"Weekday\";\n");
-		buf.append("			case FRIDAY -> \"Weekday\";\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("enum Day {\n");
-		buf.append("    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        String weekDayOrEnd = switch (day) {
+			            case SATURDAY, SUNDAY -> "Weekend";
+			            case MONDAY, TUESDAY, WEDNESDAY -> "Weekday";
+			            case THURSDAY -> "Weekday";
+						case FRIDAY -> "Weekday";
+			        };
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}

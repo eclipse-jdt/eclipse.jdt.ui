@@ -27,24 +27,26 @@ import org.eclipse.jface.text.templates.Template;
  * @since 3.1
  */
 public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
-	public static final String INNER_CLASS_DECLARATIONS= "	private static class Inner {\n" +
-			"	}\n" +
-			"	\n" +
-			"	private static abstract class Inner2<E> implements Iterable<E> {\n" +
-			"	}\n" +
-			"	\n" +
-			"	private static abstract class Inner3 implements Iterable<Serializable> {\n" +
-			"	}\n" +
-			"	\n" +
-			"	private static abstract class Inner4<T> implements Iterable<String> {\n" +
-			"	}\n" +
-			"	\n" +
-			"	private static abstract class Transi1<T extends Collection> implements Iterable<T> {\n" +
-			"	}\n" +
-			"	\n" +
-			"	private static abstract class Transi2<T extends List> extends Transi1<T> {\n" +
-			"	}\n" +
-			"	\n";
+	public static final String INNER_CLASS_DECLARATIONS= """
+			private static class Inner {
+			}
+		\t
+			private static abstract class Inner2<E> implements Iterable<E> {
+			}
+		\t
+			private static abstract class Inner3 implements Iterable<Serializable> {
+			}
+		\t
+			private static abstract class Inner4<T> implements Iterable<String> {
+			}
+		\t
+			private static abstract class Transi1<T extends Collection> implements Iterable<T> {
+			}
+		\t
+			private static abstract class Transi2<T extends List> extends Transi1<T> {
+			}
+		\t
+		""";
 
 	@Override
 	protected String getInnerClasses() {
@@ -60,18 +62,22 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 	public void array() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Number[] array)");
 		assertEquals(
-				"	for (Number number : array) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Number number : array) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void innerArray() throws Exception {
 		String template= evaluateTemplateInMethod("void array(Inner[] array)");
 		assertEquals(
-				"	for (Inner inner : array) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Inner inner : array) {
+						\t
+						}\
+					""", template);
 	}
 
 
@@ -79,108 +85,132 @@ public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 	public void superList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number> list)");
 		assertEquals(
-				"	for (Object object : list) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Object object : list) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void superArrayList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? super Number[]> list)");
 		assertEquals(
-				"	for (Object object : list) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Object object : list) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void multiList() throws Exception {
 		String template= evaluateTemplateInMethod("<T extends Comparable<T> & Iterable<? extends Number>> void method(List<T> list)");
 		assertEquals(
-				"	for (T t : list) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (T t : list) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void innerIterable() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner2<Number> inner)");
 		assertEquals(
-				"	for (Number number : inner) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Number number : inner) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void innerIterable2() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner3 inner)");
 		assertEquals(
-				"	for (Serializable serializable : inner) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Serializable serializable : inner) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void innerMixedParameters() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner4<Number> inner)");
 		assertEquals(
-				"	for (String string : inner) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (String string : inner) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void genericList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<E> list)");
 		assertEquals(
-				"	for (E e : list) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (E e : list) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void wildcardList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Transi1<?> transi)");
 		assertEquals(
-				"	for (Collection collection : transi) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Collection collection : transi) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void concreteList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<String> list)");
 		assertEquals(
-				"	for (String string : list) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (String string : list) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void upperboundList() throws Exception {
 		String template= evaluateTemplateInMethod("void method(List<? extends Number> list)");
 		assertEquals(
-				"	for (Number number : list) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Number number : list) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void proposeField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method()", "Collection<String> strings");
 		assertEquals(
-				"	for (String string : strings) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (String string : strings) {
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void proposeParamWithField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method(List<Number> numbers)", "Collection<String> strings");
 		assertEquals(
-				"	for (Number number : numbers) {\n" +
-				"		\n" +
-				"	}", template);
+				"""
+						for (Number number : numbers) {
+						\t
+						}\
+					""", template);
 	}
 
 }

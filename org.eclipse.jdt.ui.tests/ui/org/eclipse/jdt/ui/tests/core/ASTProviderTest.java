@@ -118,11 +118,12 @@ public class ASTProviderTest extends CoreTests {
 	@Test
 	public void testBug181257() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("}\n");
-		final ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			}
+			""";
+		final ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		JavaUI.openInEditor(cu);
 

@@ -60,12 +60,13 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {}\n" +
-				"\n" +
-				"class Square extends Shape {}\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape permits Square {}
+			
+			class Square extends Shape {}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -76,32 +77,35 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {}\n" +
-				"\n" +
-				"final class Square extends Shape {}\n";
+		String expected1= """
+			package test;
+			
+			public sealed class Shape permits Square {}
+			
+			final class Square extends Shape {}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		String expected2= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {}\n" +
-				"\n" +
-				"non-sealed class Square extends Shape {}\n";
+		String expected2= """
+			package test;
+			
+			public sealed class Shape permits Square {}
+			
+			non-sealed class Square extends Shape {}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
-		String expected3= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {}\n" +
-				"\n" +
-				"sealed class Square extends Shape {}\n";
+		String expected3= """
+			package test;
+			
+			public sealed class Shape permits Square {}
+			
+			sealed class Square extends Shape {}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 
@@ -116,12 +120,13 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square {}\n" +
-				"\n" +
-				"interface Square extends Shape {}\n";
+		String test= """
+			package test;
+			
+			public sealed interface Shape permits Square {}
+			
+			interface Square extends Shape {}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -132,22 +137,24 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square {}\n" +
-				"\n" +
-				"sealed interface Square extends Shape {}\n";
+		String expected1= """
+			package test;
+			
+			public sealed interface Shape permits Square {}
+			
+			sealed interface Square extends Shape {}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		String expected2= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square {}\n" +
-				"\n" +
-				"non-sealed interface Square extends Shape {}\n";
+		String expected2= """
+			package test;
+			
+			public sealed interface Shape permits Square {}
+			
+			non-sealed interface Square extends Shape {}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
@@ -162,25 +169,28 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape permits Square {
+			}
+			""";
 		pack1.createCompilationUnit("Shape.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Square extends Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Square extends Shape {
+			}
+			""";
 		pack1.createCompilationUnit("Square.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Circle extends Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Circle extends Shape {
+			}
+			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("Circle.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu2);
@@ -191,11 +201,12 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square, Circle {\n" +
-				"}\n";
+		String expected= """
+			package test;
+			
+			public sealed class Shape permits Square, Circle {
+			}
+			""";
 
 		assertEqualString(preview, expected);
 	}
@@ -209,25 +220,28 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square {\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed interface Shape permits Square {
+			}
+			""";
 		pack1.createCompilationUnit("Shape.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Square implements Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Square implements Shape {
+			}
+			""";
 		pack1.createCompilationUnit("Square.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Circle implements Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Circle implements Shape {
+			}
+			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("Circle.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu2);
@@ -238,11 +252,12 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square, Circle {\n" +
-				"}\n";
+		String expected= """
+			package test;
+			
+			public sealed interface Shape permits Square, Circle {
+			}
+			""";
 
 		assertEqualString(preview, expected);
 	}
@@ -256,25 +271,28 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square {\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed interface Shape permits Square {
+			}
+			""";
 		pack1.createCompilationUnit("Shape.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Square implements Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Square implements Shape {
+			}
+			""";
 		pack1.createCompilationUnit("Square.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed interface Circle extends Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed interface Circle extends Shape {
+			}
+			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("Circle.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu2);
@@ -285,11 +303,12 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square, Circle {\n" +
-				"}\n";
+		String expected= """
+			package test;
+			
+			public sealed interface Shape permits Square, Circle {
+			}
+			""";
 
 		assertEqualString(preview, expected);
 	}
@@ -307,30 +326,33 @@ public class QuickFixTest17 extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square {\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed interface Shape permits Square {
+			}
+			""";
 		pack1.createCompilationUnit("Shape.java", test, false, null);
 
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Square implements Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Square implements Shape {
+			}
+			""";
 		pack1.createCompilationUnit("Square.java", test, false, null);
 
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		test= "" +
-				"package test2;\n" +
-				"\n" +
-				"import test.Shape;\n" +
-				"\n" +
-				"public non-sealed interface Circle extends Shape {\n" +
-				"}\n";
+		test= """
+			package test2;
+			
+			import test.Shape;
+			
+			public non-sealed interface Circle extends Shape {
+			}
+			""";
 		ICompilationUnit cu2= pack2.createCompilationUnit("Circle.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu2);
@@ -341,13 +363,14 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= "" +
-				"package test;\n" +
-				"\n" +
-				"import test2.Circle;\n" +
-				"\n" +
-				"public sealed interface Shape permits Square, Circle {\n" +
-				"}\n";
+		String expected= """
+			package test;
+			
+			import test2.Circle;
+			
+			public sealed interface Shape permits Square, Circle {
+			}
+			""";
 
 		assertEqualString(preview, expected);
 	}
@@ -361,16 +384,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits Circle {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"class Circle {\n" +
-				"    \n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed interface IShape permits Circle {\\n\
+			
+			}
+			
+			class Circle {
+			   \s
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -381,16 +405,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits Circle {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"class Circle implements IShape {\n" +
-				"    \n" +
-				"}\n";
+		String expected1= """
+			package test;
+			
+			public sealed interface IShape permits Circle {\\n\
+			
+			}
+			
+			class Circle implements IShape {
+			   \s
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
@@ -404,16 +429,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits IRectangle {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"interface IRectangle {\n" +
-				"    \n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed interface IShape permits IRectangle {\\n\
+			
+			}
+			
+			interface IRectangle {
+			   \s
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -424,16 +450,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits IRectangle {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"interface IRectangle extends IShape {\n" +
-				"    \n" +
-				"}\n";
+		String expected1= """
+			package test;
+			
+			public sealed interface IShape permits IRectangle {\\n\
+			
+			}
+			
+			interface IRectangle extends IShape {
+			   \s
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
@@ -447,14 +474,15 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"import java.lang.annotation.IncompleteAnnotationException;\n" +
-				"\n" +
-				"public sealed interface IShape permits IncompleteAnnotationException {\\n" +
-				"\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			import java.lang.annotation.IncompleteAnnotationException;
+			
+			public sealed interface IShape permits IncompleteAnnotationException {\\n\
+			
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -474,21 +502,23 @@ public class QuickFixTest17 extends QuickFixTest {
 		defaultPkg.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String test= "" +
-				"package test1;\n" +
-				"\n" +
-				"import test2.IRectangle;\n" +
-				"\n" +
-				"public sealed interface IShape permits IRectangle {\n" +
-				"}\n";
+		String test= """
+			package test1;
+			
+			import test2.IRectangle;
+			
+			public sealed interface IShape permits IRectangle {
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("IShape.java", test, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		test= "" +
-				"package test2;\n" +
-				"\n" +
-				"public interface IRectangle {\n" +
-				"}\n";
+		test= """
+			package test2;
+			
+			public interface IRectangle {
+			}
+			""";
 		pack2.createCompilationUnit("IRectangle.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu1);
@@ -499,13 +529,14 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= "" +
-				"package test2;\n" +
-				"\n" +
-				"import test1.IShape;\n" +
-				"\n" +
-				"public interface IRectangle extends IShape {\n" +
-				"}\n";
+		String expected= """
+			package test2;
+			
+			import test1.IShape;
+			
+			public interface IRectangle extends IShape {
+			}
+			""";
 		assertEqualString(preview, expected);
 	}
 
@@ -518,16 +549,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Circle {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"class Circle extends AssertionError {\n" +
-				"    \n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape permits Circle {\\n\
+			
+			}
+			
+			class Circle extends AssertionError {
+			   \s
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -538,16 +570,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		String expected1= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Circle {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"class Circle extends Shape {\n" +
-				"    \n" +
-				"}\n";
+		String expected1= """
+			package test;
+			
+			public sealed class Shape permits Circle {\\n\
+			
+			}
+			
+			class Circle extends Shape {
+			   \s
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
@@ -561,16 +594,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test=  "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits Circle, Square {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"class Circle implements IShape {\n" +
-				"    \n" +
-				"}\n";
+		String test=  """
+			package test;
+			
+			public sealed interface IShape permits Circle, Square {\\n\
+			
+			}
+			
+			class Circle implements IShape {
+			   \s
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
 		String expectedProposal= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
 
@@ -588,16 +622,17 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Circle, Square {\\n" +
-				"\n" +
-				"}\n" +
-				"\n" +
-				"class Circle extends Shape {\n" +
-				"    \n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape permits Circle, Square {\\n\
+			
+			}
+			
+			class Circle extends Shape {
+			   \s
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
 		String expectedProposal= NLS.bind(CorrectionMessages.NewCUCompletionUsingWizardProposal_createrecord_description, "Square");
 
@@ -615,13 +650,14 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape {\n" +
-				"\n" +
-				"}\n" +
-				"\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape {
+			
+			}
+			
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Shape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -643,13 +679,14 @@ public class QuickFixTest17 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape {\n" +
-				"\n" +
-				"}\n" +
-				"\n";
+		String test= """
+			package test;
+			
+			public sealed interface IShape {
+			
+			}
+			
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("IShape.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
