@@ -432,6 +432,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				transformed.append(escapedText.substring(readIndex, bsIndex));
 				transformed.append("\t"); //$NON-NLS-1$
 				readIndex= bsIndex + (escapedText.startsWith("\\t", bsIndex) ? 2 : 7); //$NON-NLS-1$
+			} else if (escapedText.startsWith("\\'", bsIndex) || escapedText.startsWith("\\u005c'", bsIndex)) { //$NON-NLS-1$ //$NON-NLS-2$
+				transformed.append(escapedText.substring(readIndex, bsIndex));
+				transformed.append("'"); //$NON-NLS-1$
+				readIndex= bsIndex + (escapedText.startsWith("\\'", bsIndex) ? 2 : 7); //$NON-NLS-1$
 			} else {
 				transformed.append(escapedText.substring(readIndex, bsIndex));
 				transformed.append("\\").append(escapedText.charAt(bsIndex + 1)); //$NON-NLS-1$
