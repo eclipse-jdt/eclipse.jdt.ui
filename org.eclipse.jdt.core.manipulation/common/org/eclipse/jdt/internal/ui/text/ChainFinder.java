@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
-
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.ui.text.ChainElement.ElementType;
 
 public class ChainFinder {
@@ -40,11 +40,19 @@ public class ChainFinder {
 
 	private volatile boolean isCanceled;
 
+	private String token;
+
 	public ChainFinder(final List<ChainType> expectedTypes, final List<String> excludedTypes,
 			final IType receiverType) {
+		this(expectedTypes, excludedTypes, receiverType, null);
+	}
+
+	public ChainFinder(final List<ChainType> expectedTypes, final List<String> excludedTypes,
+			final IType receiverType, final String token) {
 		this.expectedTypes= expectedTypes;
 		this.excludedTypes= excludedTypes;
 		this.receiverType= receiverType;
+		this.token= token;
 	}
 
 	public void startChainSearch(final List<ChainElement> entrypoints, final int maxChains, final int minDepth,
@@ -73,7 +81,8 @@ public class ChainFinder {
 		while (!incompleteChains.isEmpty() && !isCanceled) {
 			final LinkedList<ChainElement> chain= incompleteChains.poll();
 			final ChainElement edge= chain.getLast();
-			if (isValidEndOfChain(edge, expectedType, expectedDimensions)) {
+			final ChainElement start= chain.getFirst();
+			if (isValidEndOfChain(edge, start, expectedType, expectedDimensions)) {
 				if (chain.size() >= minDepth) {
 					chains.add(new Chain(chain, expectedDimensions));
 					if (chains.size() == maxChains) {
@@ -123,9 +132,13 @@ public class ChainFinder {
 		return excluded.contains(element.getPrimitiveType());
 	}
 
-	private boolean isValidEndOfChain(final ChainElement edge, final ChainType expectedType,
+	private boolean isValidEndOfChain(final ChainElement edge, ChainElement start, final ChainType expectedType,
 			final int expectedDimension) {
 		if (edge.getElementType() == ElementType.TYPE) {
+			return false;
+		}
+		if (token != null && !token.isBlank() && !CharOperation.subWordMatch(token.toCharArray(), edge.getElement().getElementName().toCharArray())
+				&& !CharOperation.subWordMatch(token.toCharArray(), start.getElement().getElementName().toCharArray())) {
 			return false;
 		}
 		if ((edge.getReturnType().getPrimitiveType() != null)) {
