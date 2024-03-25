@@ -107,6 +107,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					|| visited.extendedOperands().isEmpty()) {
 				return false;
 			}
+			if (visited.getLocationInParent() == InfixExpression.LEFT_OPERAND_PROPERTY ||
+					visited.getLocationInParent() == InfixExpression.RIGHT_OPERAND_PROPERTY) {
+				return false;
+			}
 			ITypeBinding typeBinding= visited.resolveTypeBinding();
 			if (typeBinding == null || !typeBinding.getQualifiedName().equals(JAVA_STRING)) {
 				return false;
