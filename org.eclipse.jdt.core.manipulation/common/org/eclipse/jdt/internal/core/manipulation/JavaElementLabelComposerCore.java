@@ -249,202 +249,40 @@ public class JavaElementLabelComposerCore {
 
 			// type parameters
 			if (getFlag(flags, JavaElementLabelsCore.M_PRE_TYPE_PARAMETERS)) {
-				if (resolvedKey != null) {
-					if (resolvedKey.isParameterizedMethod()) {
-						String[] typeArgRefs= resolvedKey.getTypeArguments();
-						if (typeArgRefs.length > 0) {
-							appendTypeArgumentSignaturesLabel(method, typeArgRefs, flags);
-							fBuffer.append(' ');
-						}
-					} else {
-						String[] typeParameterSigs= Signature.getTypeParameters(resolvedSig);
-						if (typeParameterSigs.length > 0) {
-							appendTypeParameterSignaturesLabel(typeParameterSigs, flags);
-							fBuffer.append(' ');
-						}
-					}
-				} else if (method.exists()) {
-					ITypeParameter[] typeParameters= method.getTypeParameters();
-					if (typeParameters.length > 0) {
-						appendTypeParametersLabels(typeParameters, flags);
-						fBuffer.append(' ');
-					}
-				}
+				appendMethodPrependedTypeParams(method, flags, resolvedKey, resolvedSig);
 			}
 
 			// return type
 			if (getFlag(flags, JavaElementLabelsCore.M_PRE_RETURNTYPE) && method.exists() && !method.isConstructor()) {
-				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
-				appendTypeSignatureLabel(method, returnTypeSig, flags);
-				fBuffer.append(' ');
+				appendMethodPrependedReturnType(method, flags, resolvedSig);
 			}
 
 			// qualification
 			if (getFlag(flags, JavaElementLabelsCore.M_FULLY_QUALIFIED)) {
-				appendTypeLabel(method.getDeclaringType(), JavaElementLabelsCore.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
-				fBuffer.append('.');
+				appendMethodQualification(method, flags);
 			}
 
-			fBuffer.append(getElementName(method));
+			appendMethodName(method);
 
 			// constructor type arguments
 			if (getFlag(flags, JavaElementLabelsCore.T_TYPE_PARAMETERS) && method.exists() && method.isConstructor()) {
-				if (resolvedKey != null && resolvedSig != null && resolvedKey.isParameterizedType()) {
-					BindingKey declaringType= resolvedKey.getDeclaringType();
-					if (declaringType != null) {
-						String[] declaringTypeArguments= declaringType.getTypeArguments();
-						appendTypeArgumentSignaturesLabel(method, declaringTypeArguments, flags);
-					}
-				}
+				appendMethodConstructorTypeParams(method, flags, resolvedKey, resolvedSig);
 			}
 
 			// parameters
-			fBuffer.append('(');
-			String[] declaredParameterTypes= method.getParameterTypes();
-			if (getFlag(flags, JavaElementLabelsCore.M_PARAMETER_TYPES | JavaElementLabelsCore.M_PARAMETER_NAMES)) {
-				String[] types= null;
-				int nParams= 0;
-				boolean renderVarargs= false;
-				boolean isPolymorphic= false;
-				if (getFlag(flags, JavaElementLabelsCore.M_PARAMETER_TYPES)) {
-					if (resolvedSig != null) {
-						types= Signature.getParameterTypes(resolvedSig);
-					} else {
-						types= declaredParameterTypes;
-					}
-					nParams= types.length;
-					renderVarargs= method.exists() && Flags.isVarargs(method.getFlags());
-					if (renderVarargs
-							&& resolvedSig != null
-							&& declaredParameterTypes.length == 1
-							&& JavaModelUtil.isPolymorphicSignature(method)) {
-						renderVarargs= false;
-						isPolymorphic= true;
-					}
-				}
-				String[] names= null;
-				if (getFlag(flags, JavaElementLabelsCore.M_PARAMETER_NAMES) && method.exists()) {
-					names= method.getParameterNames();
-					if (isPolymorphic) {
-						// handled specially below
-					} else	if (types == null) {
-						nParams= names.length;
-					} else { // types != null
-						if (nParams != names.length) {
-							if (resolvedSig != null && types.length > names.length) {
-								// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=99137
-								nParams= names.length;
-								String[] typesWithoutSyntheticParams= new String[nParams];
-								System.arraycopy(types, types.length - nParams, typesWithoutSyntheticParams, 0, nParams);
-								types= typesWithoutSyntheticParams;
-							} else {
-								// https://bugs.eclipse.org/bugs/show_bug.cgi?id=101029
-								// JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-								names= null; // no names rendered
-							}
-						}
-					}
-				}
-
-				ILocalVariable[] annotatedParameters= null;
-				if (nParams > 0 && getFlag(flags, JavaElementLabelsCore.M_PARAMETER_ANNOTATIONS)) {
-					annotatedParameters= method.getParameters();
-				}
-
-				for (int i= 0; i < nParams; i++) {
-					if (i > 0) {
-						fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
-					}
-					if (annotatedParameters != null && i < annotatedParameters.length) {
-						appendAnnotationLabels(annotatedParameters[i].getAnnotations(), flags);
-					}
-
-					if (types != null) {
-						String paramSig= types[i];
-						if (renderVarargs && (i == nParams - 1)) {
-							int newDim= Signature.getArrayCount(paramSig) - 1;
-							appendTypeSignatureLabel(method, Signature.getElementType(paramSig), flags);
-							for (int k= 0; k < newDim; k++) {
-								fBuffer.append('[').append(']');
-							}
-							fBuffer.append(JavaElementLabelsCore.ELLIPSIS_STRING);
-						} else {
-							appendTypeSignatureLabel(method, paramSig, flags);
-						}
-					}
-					if (names != null) {
-						if (types != null) {
-							fBuffer.append(' ');
-						}
-						if (isPolymorphic) {
-							fBuffer.append(names[0] + i);
-						} else {
-							fBuffer.append(names[i]);
-						}
-					}
-				}
-			} else {
-				if (declaredParameterTypes.length > 0) {
-					fBuffer.append(JavaElementLabelsCore.ELLIPSIS_STRING);
-				}
-			}
-			fBuffer.append(')');
+			appendMethodParams(method, flags, resolvedSig);
 
 			if (getFlag(flags, JavaElementLabelsCore.M_EXCEPTIONS)) {
-				String[] types;
-				if (resolvedKey != null) {
-					types= resolvedKey.getThrownExceptions();
-				} else {
-					types= method.exists() ? method.getExceptionTypes() : new String[0];
-				}
-				if (types.length > 0) {
-					fBuffer.append(" throws "); //$NON-NLS-1$
-					for (int i= 0; i < types.length; i++) {
-						if (i > 0) {
-							fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
-						}
-						appendTypeSignatureLabel(method, types[i], flags);
-					}
-				}
+				appendMethodExceptions(method, flags, resolvedKey);
 			}
 
 
 			if (getFlag(flags, JavaElementLabelsCore.M_APP_TYPE_PARAMETERS)) {
-				int offset= fBuffer.length();
-				if (resolvedKey != null) {
-					if (resolvedKey.isParameterizedMethod()) {
-						String[] typeArgRefs= resolvedKey.getTypeArguments();
-						if (typeArgRefs.length > 0) {
-							fBuffer.append(' ');
-							appendTypeArgumentSignaturesLabel(method, typeArgRefs, flags);
-						}
-					} else {
-						String[] typeParameterSigs= Signature.getTypeParameters(resolvedSig);
-						if (typeParameterSigs.length > 0) {
-							fBuffer.append(' ');
-							appendTypeParameterSignaturesLabel(typeParameterSigs, flags);
-						}
-					}
-				} else if (method.exists()) {
-					ITypeParameter[] typeParameters= method.getTypeParameters();
-					if (typeParameters.length > 0) {
-						fBuffer.append(' ');
-						appendTypeParametersLabels(typeParameters, flags);
-					}
-				}
-				if (getFlag(flags, JavaElementLabelsCore.COLORIZE) && offset != fBuffer.length()) {
-					setDecorationsStyle(offset);
-				}
+				appendMethodAppendedTypeParams(method, flags, resolvedKey, resolvedSig);
 			}
 
 			if (getFlag(flags, JavaElementLabelsCore.M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
-				int offset= fBuffer.length();
-				fBuffer.append(JavaElementLabelsCore.DECL_STRING);
-				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
-				appendTypeSignatureLabel(method, returnTypeSig, flags);
-				if (getFlag(flags, JavaElementLabelsCore.COLORIZE)) {
-					setDecorationsStyle(offset);
-				}
+				appendMethodAppendedReturnType(method, flags, resolvedSig);
 			}
 
 			// category
@@ -453,12 +291,7 @@ public class JavaElementLabelComposerCore {
 
 			// post qualification
 			if (getFlag(flags, JavaElementLabelsCore.M_POST_QUALIFIED)) {
-				int offset= fBuffer.length();
-				fBuffer.append(JavaElementLabelsCore.CONCAT_STRING);
-				appendTypeLabel(method.getDeclaringType(), JavaElementLabelsCore.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
-				if (getFlag(flags, JavaElementLabelsCore.COLORIZE)) {
-					setQualifierStyle(offset);
-				}
+				appendMethodPostQualification(method, flags);
 			}
 
 		} catch (JavaModelException e) {
@@ -467,6 +300,230 @@ public class JavaElementLabelComposerCore {
 				return;
 			}
 			ILog.of(this.getClass()).error("Error rendering method label", e); //$NON-NLS-1$ // NotExistsException will not reach this point
+		}
+	}
+
+	protected void appendMethodPrependedTypeParams(IMethod method, long flags, BindingKey resolvedKey, String resolvedSignature) throws JavaModelException {
+		if (resolvedKey != null) {
+			if (resolvedKey.isParameterizedMethod()) {
+				String[] typeArgRefs= resolvedKey.getTypeArguments();
+				if (typeArgRefs.length > 0) {
+					appendTypeArgumentSignaturesLabel(method, typeArgRefs, flags);
+					fBuffer.append(' ');
+				}
+			} else {
+				String[] typeParameterSigs= Signature.getTypeParameters(resolvedSignature);
+				if (typeParameterSigs.length > 0) {
+					appendTypeParameterSignaturesLabel(typeParameterSigs, flags);
+					fBuffer.append(' ');
+				}
+			}
+		} else if (method.exists()) {
+			ITypeParameter[] typeParameters= method.getTypeParameters();
+			if (typeParameters.length > 0) {
+				appendTypeParametersLabels(typeParameters, flags);
+				fBuffer.append(' ');
+			}
+		}
+	}
+
+	protected void appendMethodPrependedReturnType(IMethod method, long flags, String resolvedSignature) throws JavaModelException {
+		String returnTypeSig= resolvedSignature != null ? Signature.getReturnType(resolvedSignature) : method.getReturnType();
+		appendMethodParamTypeSignature(method, flags, returnTypeSig);
+		fBuffer.append(' ');
+	}
+
+	protected void appendMethodName(IMethod method) {
+		fBuffer.append(getElementName(method));
+	}
+
+	protected void appendMethodQualification(IMethod method, long flags) {
+		appendTypeLabel(method.getDeclaringType(), JavaElementLabelsCore.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+		fBuffer.append('.');
+	}
+
+	protected void appendMethodConstructorTypeParams(IMethod method, long flags, BindingKey resolvedKey, String resolvedSignature) {
+		if (resolvedKey != null && resolvedSignature != null && resolvedKey.isParameterizedType()) {
+			BindingKey declaringType= resolvedKey.getDeclaringType();
+			if (declaringType != null) {
+				String[] declaringTypeArguments= declaringType.getTypeArguments();
+				appendTypeArgumentSignaturesLabel(method, declaringTypeArguments, flags);
+			}
+		}
+	}
+
+	protected void appendMethodParams(IMethod method, long flags, String resolvedSignature) throws JavaModelException {
+		fBuffer.append('(');
+		if (getFlag(flags, JavaElementLabelsCore.M_PARAMETER_TYPES | JavaElementLabelsCore.M_PARAMETER_NAMES)) {
+			appendMethodParamsList(method, flags, resolvedSignature);
+		} else {
+			if (method.getParameterTypes().length > 0) {
+				fBuffer.append(JavaElementLabelsCore.ELLIPSIS_STRING);
+			}
+		}
+		fBuffer.append(')');
+	}
+
+	protected void appendMethodParamsList(IMethod method, long flags, String resolvedSignature) throws JavaModelException {
+		String[] declaredParameterTypes= method.getParameterTypes();
+		String[] types= null;
+		int nParams= 0;
+		boolean renderVarargs= false;
+		boolean isPolymorphic= false;
+		if (getFlag(flags, JavaElementLabelsCore.M_PARAMETER_TYPES)) {
+			if (resolvedSignature != null) {
+				types= Signature.getParameterTypes(resolvedSignature);
+			} else {
+				types= declaredParameterTypes;
+			}
+			nParams= types.length;
+			renderVarargs= method.exists() && Flags.isVarargs(method.getFlags());
+			if (renderVarargs
+					&& resolvedSignature != null
+					&& declaredParameterTypes.length == 1
+					&& JavaModelUtil.isPolymorphicSignature(method)) {
+				renderVarargs= false;
+				isPolymorphic= true;
+			}
+		}
+		String[] names= null;
+		if (getFlag(flags, JavaElementLabelsCore.M_PARAMETER_NAMES) && method.exists()) {
+			names= method.getParameterNames();
+			if (isPolymorphic) {
+				// handled specially below
+			} else	if (types == null) {
+				nParams= names.length;
+			} else { // types != null
+				if (nParams != names.length) {
+					if (resolvedSignature != null && types.length > names.length) {
+						// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=99137
+						nParams= names.length;
+						String[] typesWithoutSyntheticParams= new String[nParams];
+						System.arraycopy(types, types.length - nParams, typesWithoutSyntheticParams, 0, nParams);
+						types= typesWithoutSyntheticParams;
+					} else {
+						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=101029
+						// JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						names= null; // no names rendered
+					}
+				}
+			}
+		}
+
+		ILocalVariable[] annotatedParameters= null;
+		if (nParams > 0 && getFlag(flags, JavaElementLabelsCore.M_PARAMETER_ANNOTATIONS)) {
+			annotatedParameters= method.getParameters();
+		}
+
+		for (int i= 0; i < nParams; i++) {
+			IAnnotation[] annotations= null;
+			if (annotatedParameters != null && i < annotatedParameters.length) {
+				annotations= annotatedParameters[i].getAnnotations();
+			}
+			String type= types == null ? null : types[i];
+			String name= names == null ? null : (isPolymorphic ? names[0] + i : names[i]);
+			appendMethodParam(method, flags, annotations, type, name, renderVarargs, (i == nParams - 1));
+		}
+	}
+
+	protected void appendMethodParam(IMethod method, long flags, IAnnotation[] annotations, String paramSignature, String name, boolean renderVarargs, boolean isLast) throws JavaModelException {
+		if (annotations != null) {
+			appendAnnotationLabels(annotations, flags);
+		}
+
+		if (paramSignature != null) {
+			if (renderVarargs && isLast) {
+				int newDim= Signature.getArrayCount(paramSignature) - 1;
+				appendMethodParamTypeSignature(method, flags, Signature.getElementType(paramSignature));
+				for (int k= 0; k < newDim; k++) {
+					fBuffer.append('[').append(']');
+				}
+				fBuffer.append(JavaElementLabelsCore.ELLIPSIS_STRING);
+			} else {
+				appendMethodParamTypeSignature(method, flags, paramSignature);
+			}
+		}
+		if (name != null) {
+			if (paramSignature != null) {
+				fBuffer.append(' ');
+			}
+			appendMethodParamName(name);
+		}
+		if (!isLast) {
+			fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
+		}
+	}
+
+	protected void appendMethodParamTypeSignature(IMethod method, long flags, String paramSignature) {
+		appendTypeSignatureLabel(method, paramSignature, flags);
+	}
+
+	protected void appendMethodParamName(String name) {
+		fBuffer.append(name);
+	}
+
+	protected void appendMethodExceptions(IMethod method, long flags, BindingKey resolvedKey) throws JavaModelException {
+		String[] types;
+		if (resolvedKey != null) {
+			types= resolvedKey.getThrownExceptions();
+		} else {
+			types= method.exists() ? method.getExceptionTypes() : new String[0];
+		}
+		if (types.length > 0) {
+			fBuffer.append(" throws "); //$NON-NLS-1$
+			for (int i= 0; i < types.length; i++) {
+				if (i > 0) {
+					fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
+				}
+				appendTypeSignatureLabel(method, types[i], flags);
+			}
+		}
+	}
+
+	protected void appendMethodAppendedTypeParams(IMethod method, long flags, BindingKey resolvedKey, String resolvedSignature) throws JavaModelException {
+		int offset= fBuffer.length();
+		if (resolvedKey != null) {
+			if (resolvedKey.isParameterizedMethod()) {
+				String[] typeArgRefs= resolvedKey.getTypeArguments();
+				if (typeArgRefs.length > 0) {
+					fBuffer.append(' ');
+					appendTypeArgumentSignaturesLabel(method, typeArgRefs, flags);
+				}
+			} else {
+				String[] typeParameterSigs= Signature.getTypeParameters(resolvedSignature);
+				if (typeParameterSigs.length > 0) {
+					fBuffer.append(' ');
+					appendTypeParameterSignaturesLabel(typeParameterSigs, flags);
+				}
+			}
+		} else if (method.exists()) {
+			ITypeParameter[] typeParameters= method.getTypeParameters();
+			if (typeParameters.length > 0) {
+				fBuffer.append(' ');
+				appendTypeParametersLabels(typeParameters, flags);
+			}
+		}
+		if (getFlag(flags, JavaElementLabelsCore.COLORIZE) && offset != fBuffer.length()) {
+			setDecorationsStyle(offset);
+		}
+	}
+
+	protected void appendMethodAppendedReturnType(IMethod method, long flags, String resolvedSignature) throws JavaModelException {
+		int offset= fBuffer.length();
+		fBuffer.append(JavaElementLabelsCore.DECL_STRING);
+		String returnTypeSig= resolvedSignature != null ? Signature.getReturnType(resolvedSignature) : method.getReturnType();
+		appendMethodParamTypeSignature(method, flags, returnTypeSig);
+		if (getFlag(flags, JavaElementLabelsCore.COLORIZE)) {
+			setDecorationsStyle(offset);
+		}
+	}
+
+	protected void appendMethodPostQualification(IMethod method, long flags) {
+		int offset= fBuffer.length();
+		fBuffer.append(JavaElementLabelsCore.CONCAT_STRING);
+		appendTypeLabel(method.getDeclaringType(), JavaElementLabelsCore.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+		if (getFlag(flags, JavaElementLabelsCore.COLORIZE)) {
+			setQualifierStyle(offset);
 		}
 	}
 
@@ -558,16 +615,16 @@ public class JavaElementLabelComposerCore {
 	 * @param flags flags with render options
 	 * @throws JavaModelException ...
 	 */
-	private void appendTypeParametersLabels(ITypeParameter[] typeParameters, long flags) throws JavaModelException {
+	protected void appendTypeParametersLabels(ITypeParameter[] typeParameters, long flags) throws JavaModelException {
 		if (typeParameters.length > 0) {
-			fBuffer.append(getLT());
+			appendLT();
 			for (int i = 0; i < typeParameters.length; i++) {
 				if (i > 0) {
 					fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
 				}
 				appendTypeParameterWithBounds(typeParameters[i], flags);
 			}
-			fBuffer.append(getGT());
+			appendGT();
 		}
 	}
 
@@ -685,7 +742,7 @@ public class JavaElementLabelComposerCore {
 		}
 	}
 
-	private void appendTypeParameterWithBounds(ITypeParameter typeParameter, long flags) throws JavaModelException {
+	protected void appendTypeParameterWithBounds(ITypeParameter typeParameter, long flags) throws JavaModelException {
 		fBuffer.append(getElementName(typeParameter));
 
 		if (typeParameter.exists()) {
@@ -756,11 +813,9 @@ public class JavaElementLabelComposerCore {
 					fBuffer.append('?');
 				} else {
 					if (ch == Signature.C_EXTENDS) {
-						fBuffer.append("? extends "); //$NON-NLS-1$
-						appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
+						appendWildcardTypeSignature("? extends ", enclosingElement, typeSig.substring(1), flags); //$NON-NLS-1$
 					} else if (ch == Signature.C_SUPER) {
-						fBuffer.append("? super "); //$NON-NLS-1$
-						appendTypeSignatureLabel(enclosingElement, typeSig.substring(1), flags);
+						appendWildcardTypeSignature("? super ", enclosingElement, typeSig.substring(1), flags); //$NON-NLS-1$
 					}
 				}
 				break;
@@ -778,6 +833,11 @@ public class JavaElementLabelComposerCore {
 			default:
 				// unknown
 		}
+	}
+
+	protected void appendWildcardTypeSignature(String prefix, IJavaElement enclosingElement, String typeSignature, long flags) {
+		fBuffer.append(prefix);
+		appendTypeSignatureLabel(enclosingElement, typeSignature, flags);
 	}
 
 	private void appendTypeBoundsSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags, boolean isIntersection) {
@@ -818,16 +878,16 @@ public class JavaElementLabelComposerCore {
 		return memberName;
 	}
 
-	private void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
+	protected void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
 		if (typeArgsSig.length > 0) {
-			fBuffer.append(getLT());
+			appendLT();
 			for (int i = 0; i < typeArgsSig.length; i++) {
 				if (i > 0) {
 					fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
 				}
 				appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags);
 			}
-			fBuffer.append(getGT());
+			appendGT();
 		}
 	}
 
@@ -837,19 +897,26 @@ public class JavaElementLabelComposerCore {
 	 * @param typeParamSigs the type parameter signature
 	 * @param flags flags with render options
 	 */
-	private void appendTypeParameterSignaturesLabel(String[] typeParamSigs, long flags) {
+	protected void appendTypeParameterSignaturesLabel(String[] typeParamSigs, long flags) {
 		if (typeParamSigs.length > 0) {
-			fBuffer.append(getLT());
+			appendLT();
 			for (int i = 0; i < typeParamSigs.length; i++) {
 				if (i > 0) {
 					fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
 				}
 				fBuffer.append(Signature.getTypeVariable(typeParamSigs[i]));
 			}
-			fBuffer.append(getGT());
+			appendGT();
 		}
 	}
 
+	/**
+	 * Appends the string for rendering the '<code>&lt;</code>' character.
+	 */
+	protected void appendLT() {
+		fBuffer.append(getLT());
+	}
+	
 	/**
 	 * Returns the string for rendering the '<code>&lt;</code>' character.
 	 *
@@ -859,6 +926,13 @@ public class JavaElementLabelComposerCore {
 		return "<"; //$NON-NLS-1$
 	}
 
+	/**
+	 * Appends the string for rendering the '<code>&gt;</code>' character.
+	 */
+	protected void appendGT() {
+		fBuffer.append(getGT());
+	}
+	
 	/**
 	 * Returns the string for rendering the '<code>&gt;</code>' character.
 	 *

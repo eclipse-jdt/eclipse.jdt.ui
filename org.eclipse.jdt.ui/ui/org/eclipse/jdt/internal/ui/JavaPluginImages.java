@@ -59,6 +59,7 @@ public class JavaPluginImages {
 	private static final String T_ELCL= "elcl16"; 	//$NON-NLS-1$
 	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
 	private static final String T_ETOOL= "etool16"; 	//$NON-NLS-1$
+	private static final String T_DTOOL= "dtool16"; 	//$NON-NLS-1$
 	private static final String T_EVIEW= "eview16"; //$NON-NLS-1$
 
 	/*
@@ -549,6 +550,9 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_DLCL_WRAP_NECESSARY= createUnManaged(T_DLCL, "wrap_necessary.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_NOT= createUnManaged(T_ELCL, "wrap_not.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_DLCL_WRAP_NOT= createUnManaged(T_DLCL, "wrap_not.png"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_ETOOL_JDOC_HOVER_EDIT= createUnManaged(T_ETOOL, "jdoc_hover_edit.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DTOOL_JDOC_HOVER_EDIT= createUnManaged(T_DTOOL, "jdoc_hover_edit.png"); //$NON-NLS-1$
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no chance to dispose icons.

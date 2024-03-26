@@ -36,6 +36,32 @@ em	         { font-style: italic; }
 var	         { font-style: italic; }
 th	         { font-weight: bold; }
 
+/* Styling enhancements */
+
+input#formattingSwitch,
+input#typeParamsRefsColoringSwitch											{ display: none; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .methodPrependTypeParams	{ display: block}
+input#formattingSwitch:checked ~ .styleSwitchParent .methodParam				{ display: block; text-indent: 1em; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .typeBracketsStart:before,
+input#formattingSwitch:checked ~ .styleSwitchParent .methodParams:before	{ content: " "; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .methodQualifier		{ opacity: 0.6; }
+input#formattingSwitch:checked ~ .styleSwitchParent .methodParamName		{ font-style: italic; }
+input#formattingSwitch:checked ~ .styleSwitchParent .methodReturn			{ font-style: italic; }
+input#formattingSwitch:checked ~ .styleSwitchParent .methodName				{ font-weight: bold; }
+
+input#formattingSwitch:checked ~ .styleSwitchParent .typeParams				{ font-weight: 200; }
+input#formattingSwitch:checked ~ .styleSwitchParent .typeBrackets			{ font-weight: bold; }
+
+/* Start of dynamic type parameters references styling section (do not edit this line) */
+input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsReferenceNo-INDEX-,
+input#typeParamsRefsColoringSwitch:checked ~ .styleSwitchParent .typeParamsReferenceNo-INDEX- a.header
+{ color: -COLOR-; }
+/* End of dynamic type parameters references styling section (do not edit this line) */
+
+
 /* Workarounds for new Javadoc stylesheet (1.7) */ 
 ul.blockList li.blockList, ul.blockListLast li.blockList {
     list-style:none;

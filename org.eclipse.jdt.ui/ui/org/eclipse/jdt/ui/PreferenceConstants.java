@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
 /**
@@ -4346,6 +4347,9 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES, false);
+
+		// Javadoc hover & view
+		JavaElementLinks.initDefaultPreferences(store);
 	}
 
 	/**

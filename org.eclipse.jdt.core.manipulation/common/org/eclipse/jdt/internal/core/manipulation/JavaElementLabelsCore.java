@@ -89,7 +89,7 @@ public final class JavaElementLabelsCore {
 	public final static long M_APP_RETURNTYPE= 1L << 5;
 
 	/**
-	 * Method names contain return type (appended)
+	 * Method names contain return type (prepended)
 	 * e.g. <code>int foo</code>
 	 */
 	public final static long M_PRE_RETURNTYPE= 1L << 6;

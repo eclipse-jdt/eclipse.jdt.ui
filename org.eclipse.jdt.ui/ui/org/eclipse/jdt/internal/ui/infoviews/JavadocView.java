@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,7 @@
  *     Brock Janiczak <brockj@tpg.com.au> - [implementation] Streams not being closed in Javadoc views - https://bugs.eclipse.org/bugs/show_bug.cgi?id=214854
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [javadoc view] NPE on enumerations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=223586
  *     Stephan Herrmann - Contribution for Bug 403917 - [1.8] Render TYPE_USE annotations in Javadoc hover/view
+ *     Jozef Tomek - add styling enhancements (issue 1073)
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
@@ -50,6 +51,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -153,6 +155,8 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.FallbackInformat
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLinkedLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
+import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
+import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolbarAction;
 
 
 /**
@@ -420,6 +424,11 @@ public class JavadocView extends AbstractInfoView {
 	private ISelectionProvider fInputSelectionProvider;
 
 	/**
+	 * Flag to force isIgnoringNewInput() to return <code>false</code> on next execution.
+	 */
+	private volatile boolean fIgnoringNewInputOverride;
+
+	/**
 	 * The Javadoc view's select all action.
 	 */
 	private class SelectAllAction extends Action {
@@ -671,6 +680,26 @@ public class JavadocView extends AbstractInfoView {
 		tbm.add(fBackAction);
 		tbm.add(fForthAction);
 		tbm.add(new Separator());
+
+		if (fIsUsingBrowserWidget) {
+			BrowserTextAccessor browserAccessor= new BrowserTextAccessor(fBrowser);
+			Runnable viewRefreshTask= () -> {
+				fIgnoringNewInputOverride= true;
+				setLinkingEnabled(isLinkingEnabled()); // triggers refresh of the view using last set selection
+			};
+			// toolbar widget is being re-created later so we need to do our setup then
+			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(), browserAccessor, () -> fOriginalInput, viewRefreshTask) {
+				// we take advantage of this method being called after toolbar item creation (in ActionContributionItem.fill()) which happens when whole toolbar is being re-created to be displayed
+				@Override
+				public void addPropertyChangeListener(IPropertyChangeListener listener) {
+					super.addPropertyChangeListener(listener);
+					setup(((ToolBarManager) tbm).getControl());
+				}
+			};
+			stylingMenuAction.setId("JavadocView.SignatureStylingMenuToolbarAction"); //$NON-NLS-1$
+			tbm.add(stylingMenuAction);
+			tbm.add(new Separator());
+		}
 
 		super.fillToolBar(tbm);
 		tbm.add(fOpenBrowserAction);
@@ -1065,7 +1094,7 @@ public class JavadocView extends AbstractInfoView {
 		if (buffer.length() == 0)
 			return null;
 
-		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, fgStyleSheet);
+		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, JavaElementLinks.modifyCssStyleSheet(fgStyleSheet, buffer));
 		if (base != null) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1093,9 +1122,9 @@ public class JavadocView extends AbstractInfoView {
 			// setting haveSource to false lets the JavadocView *always* show qualified type names,
 			// would need to track the source of our input to distinguish classfile/compilationUnit:
 			boolean haveSource= false;
-			new BindingLinkedLabelComposer(member, label, haveSource).appendBindingLabel(binding, flags);
+			new BindingLinkedLabelComposer(member, label, haveSource, true).appendBindingLabel(binding, flags);
 		} else {
-			label= new StringBuffer(JavaElementLinks.getElementLabel(member, flags));
+			label= new StringBuffer(JavaElementLinks.getElementLabel(member, flags, false, true));
 		}
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
@@ -1111,6 +1140,10 @@ public class JavadocView extends AbstractInfoView {
 		if (fCurrent != null && fCurrent.getInputElement() instanceof URL)
 			return false;
 
+		if (fIgnoringNewInputOverride) {
+			fIgnoringNewInputOverride= false;
+			return false;
+		}
 		if (super.isIgnoringNewInput(je, part, selection)
 				&& part instanceof ITextEditor editor
 				&& selection instanceof ITextSelection textSel) {
