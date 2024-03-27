@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
  *
  * @since 2.1
  */
+@SuppressWarnings("deprecation") // Preferences
 class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	/**

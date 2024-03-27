@@ -73,13 +73,12 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAss
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 
+@SuppressWarnings("deprecation") // Preferences
 public class AssistQuickFixTest extends QuickFixTest {
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
-	private static final String EXTRACT_TO_LOCAL= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
-	private static final String EXTRACT_TO_LOCAL_REPLACE= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
 	private static final String EXTRACT_TO_CONSTANT= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 
 	private IJavaProject fJProject1;

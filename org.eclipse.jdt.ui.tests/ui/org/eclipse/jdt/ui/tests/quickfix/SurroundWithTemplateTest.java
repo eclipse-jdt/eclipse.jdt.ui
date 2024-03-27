@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
+@SuppressWarnings("deprecation") // Preferences
 public class SurroundWithTemplateTest extends QuickFixTest {
 
 	@Rule
