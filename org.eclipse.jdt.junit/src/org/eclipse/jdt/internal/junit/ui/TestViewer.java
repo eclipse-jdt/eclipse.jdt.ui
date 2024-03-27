@@ -452,6 +452,14 @@ public class TestViewer {
 			// a group of parameterized tests
 			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0], null);
 		}
+		if (children.length == 0) {
+			// check if we have applied the workaround for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/945
+			TestCaseElement child= testSuite.getSingleDynamicChild();
+			if (child != null) {
+				// a parameterized test that ran only one test
+				return new OpenTestAction(fTestRunnerPart, child, null);
+			}
+		}
 
 		int index= testName.indexOf('(');
 		// test factory method

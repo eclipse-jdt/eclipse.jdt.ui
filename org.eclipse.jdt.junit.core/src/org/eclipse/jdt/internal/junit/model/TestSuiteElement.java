@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,10 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	@Override
 	public Result getTestResult(boolean includeChildren) {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child != null) {
+			return child.getStatus().convertToResult();
+		}
 		if (includeChildren) {
 			return getStatus().convertToResult();
 		} else {
@@ -47,7 +51,12 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	@Override
 	public ITestElement[] getChildren() {
-		return fChildren.toArray(new ITestElement[fChildren.size()]);
+		TestElement[] elements= fChildren.toArray(new TestElement[fChildren.size()]);
+		if (elements.length != 1 || !isSingleDynamicTest(elements[0])) {
+			return elements;
+		}
+		// Filter out if this is a single dynamic test inside a testsuite
+		return new ITestElement[0];
 	}
 
 	public void addChild(TestElement child) {
@@ -154,4 +163,84 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		return "TestSuite: " + getTestName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
+	private boolean isSingleDynamicTest(TestElement element) {
+		if (element instanceof TestCaseElement testCase) {
+			if (testCase.isDynamicTest() && fChildren.size() == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * If this test suite is a {@code @TestTemplate} test case with a single child, return that child.
+	 * @return The single dynamic test case child or {@code null} if the suite has no children or multiple or non-dynamid children.
+	 */
+	public TestCaseElement getSingleDynamicChild() {
+		try {
+			if (fChildren.size() == 1) {
+				TestElement child= fChildren.get(0);
+				if (isSingleDynamicTest(child)) {
+					return (TestCaseElement) child;
+				}
+			}
+		} catch (IndexOutOfBoundsException e) {
+			// don't care, children changed concurrently
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isComparisonFailure() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child == null) {
+			return super.isComparisonFailure();
+		}
+		return child.isComparisonFailure();
+	}
+
+	@Override
+	public boolean isAssumptionFailure() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child == null) {
+			return super.isAssumptionFailure();
+		}
+		return child.isAssumptionFailure();
+	}
+
+	@Override
+	public FailureTrace getFailureTrace() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child == null) {
+			return super.getFailureTrace();
+		}
+		return child.getFailureTrace();
+	}
+
+	@Override
+	public String getTrace() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child != null) {
+			return child.getTrace();
+		}
+		return super.getTrace();
+	}
+
+	@Override
+	public String getExpected() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child == null) {
+			return super.getExpected();
+		}
+		return child.getExpected();
+	}
+
+	@Override
+	public String getActual() {
+		TestCaseElement child= getSingleDynamicChild();
+		if (child == null) {
+			return super.getActual();
+		}
+		return child.getActual();
+	}
 }
