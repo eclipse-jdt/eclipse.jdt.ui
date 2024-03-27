@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -90,22 +91,15 @@ public final class SplitTryResourceFixCore extends CompilationUnitRewriteOperati
 			TextEditGroup group= null;
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			final AST ast= cuRewrite.getAST();
-
+			ICompilationUnit cu= cuRewrite.getCu();
+			CompilationUnit root= (CompilationUnit) tryStatement.getRoot();
+			IBuffer cuBuffer= cu.getBuffer();
 			List<VariableDeclarationExpression> resources= tryStatement.resources();
 			TryStatement newTryStatement= ast.newTryStatement();
-			ListRewrite listRewrite= rewrite.getListRewrite(newTryStatement, TryStatement.RESOURCES2_PROPERTY);
-			ListRewrite oldResourcesListRewrite= rewrite.getListRewrite(tryStatement, TryStatement.RESOURCES2_PROPERTY);
-			listRewrite.insertFirst(oldResourcesListRewrite.createMoveTarget(expression, (ASTNode)oldResourcesListRewrite.getOriginalList().get(resources.size() - 1)), group);
-			Block originalBlock= tryStatement.getBody();
-			List<Statement> originalStatements= originalBlock.statements();
-//			int size= originalStatements.size();
-			ListRewrite originalBlockListRewrite= rewrite.getListRewrite(originalBlock, Block.STATEMENTS_PROPERTY);
-			StringBuilder buf= new StringBuilder();
-			buf.append("{\n"); //$NON-NLS-1$
-			IJavaElement root= cuRewrite.getRoot().getJavaElement();
+			IJavaElement rootElement= cuRewrite.getRoot().getJavaElement();
 			String fIndent= "\t"; //$NON-NLS-1$
-			if (root != null) {
-				IJavaProject project= root.getJavaProject();
+			if (rootElement != null) {
+				IJavaProject project= rootElement.getJavaProject();
 				if (project != null) {
 					String tab_option= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
 					if (JavaCore.SPACE.equals(tab_option)) {
@@ -116,20 +110,39 @@ public final class SplitTryResourceFixCore extends CompilationUnitRewriteOperati
 					}
 				}
 			}
+			boolean copyResources= false;
+			String prefix= ""; //$NON-NLS-1$
+			for (VariableDeclarationExpression resource : resources) {
+				if (resource.equals(expression)) {
+					copyResources= true;
+				}
+				if (copyResources) {
+					int start= root.getExtendedStartPosition(resource);
+					int length= root.getExtendedLength(resource);
+					StringBuffer buffer= new StringBuffer(prefix);
+					buffer.append(cuBuffer.getText(start, length));
+					VariableDeclarationExpression newVarExpression= (VariableDeclarationExpression) rewrite.createStringPlaceholder(buffer.toString(), ASTNode.VARIABLE_DECLARATION_EXPRESSION);
+					newTryStatement.resources().add(newVarExpression);
+					rewrite.remove(resource, group);
+					prefix= "\n" + fIndent + fIndent; //$NON-NLS-1$
+				}
+			}
+			Block originalBlock= tryStatement.getBody();
+			List<Statement> originalStatements= originalBlock.statements();
+			ListRewrite originalBlockListRewrite= rewrite.getListRewrite(originalBlock, Block.STATEMENTS_PROPERTY);
+			StringBuilder buf= new StringBuilder();
+			buf.append("{\n"); //$NON-NLS-1$
 			for (Statement s : originalStatements) {
-				buf.append(fIndent).append(s.toString());
+				int start= root.getExtendedStartPosition(s);
+				int length= root.getExtendedLength(s);
+				String text= cuBuffer.getText(start, length);
+				buf.append(fIndent).append(text).append("\n"); //$NON-NLS-1$
 				rewrite.remove(s, group);
 			}
 			buf.append("}"); //$NON-NLS-1$
 			Block newBlock= (Block) rewrite.createStringPlaceholder(buf.toString(), ASTNode.BLOCK);
 			newTryStatement.setBody(newBlock);
 			originalBlockListRewrite.insertFirst(newTryStatement, group);
-//			Block newBlock= ast.newBlock();
-//			Block newBlock2= ast.newBlock();
-//			newBlock2.statements().add(newTryStatement);
-//			rewrite.replace(originalBlock, newBlock2, group);
-//			ListRewrite newBlockListRewrite= rewrite.getListRewrite(newBlock, Block.STATEMENTS_PROPERTY);
-//			newBlockListRewrite.insertLast(originalBlockListRewrite.createMoveTarget(originalStatements.get(0), originalStatements.get(size - 1)), group);
 		}
 	}
 
