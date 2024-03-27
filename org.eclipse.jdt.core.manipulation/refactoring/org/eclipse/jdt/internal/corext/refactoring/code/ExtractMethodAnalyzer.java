@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -68,6 +69,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -206,6 +208,57 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		return fTypeVariables;
 	}
 
+	//==new code to prevent extraction where multiple exits exist as per https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+    private boolean hasMultipleExits;
+
+   private class ControlFlowVisitor extends ASTVisitor {
+        private boolean withinBlock;
+
+        @Override
+        public boolean visit(Block node) {
+            withinBlock = true;
+            return super.visit(node);
+        }
+
+        @Override
+        public void endVisit(Block node) {
+            withinBlock = false;
+            super.endVisit(node);
+        }
+
+        @Override
+        public boolean visit(ReturnStatement node) {
+            if (withinBlock) {
+                hasMultipleExits = true;
+            }
+            return super.visit(node);
+        }
+
+        @Override
+        public boolean visit(ThrowStatement node) {
+            if (withinBlock) {
+                hasMultipleExits = true;
+            }
+            return super.visit(node);
+        }
+
+        @Override
+        public boolean visit(BreakStatement node) {
+            if (withinBlock) {
+                hasMultipleExits = true;
+            }
+            return super.visit(node);
+        }
+
+        @Override
+        public boolean visit(ContinueStatement node) {
+            if (withinBlock) {
+                hasMultipleExits = true;
+            }
+            return super.visit(node);
+        }
+    }//===end for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+
 	//---- Activation checking ---------------------------------------------------------------------------
 
 	public boolean isValidDestination(ASTNode node) {
@@ -247,6 +300,25 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 			fReturnKind= EXPRESSION;
 			returns++;
 		}
+
+		//==new code to prevent extraction where multiple exits exist as per https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+
+		ASTNode[] selectedNodes = getSelectedNodes();
+
+		// Analyze control flow for each selected node
+		hasMultipleExits = false;
+		ControlFlowVisitor controlFlowVisitor = new ControlFlowVisitor();
+
+		for (ASTNode selectedNode : selectedNodes) {
+		    selectedNode.accept(controlFlowVisitor);
+		}
+
+		if (hasMultipleExits) {
+		    result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_multiple_exits);
+		    return result;
+		}
+		//===end for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/697
+
 
 		if (returns > 1) {
 			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_ambiguous_return_value, JavaStatusContext.create(fCUnit, getSelection()));
