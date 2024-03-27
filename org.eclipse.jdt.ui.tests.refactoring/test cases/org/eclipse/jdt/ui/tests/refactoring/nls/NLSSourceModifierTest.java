@@ -98,9 +98,11 @@ public class NLSSourceModifierTest {
 	public void fromSkippedToTranslated() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -118,9 +120,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
-            	"}\n",
+                """
+					public class Test {
+						private String str=Accessor.getString("key.0"); //$NON-NLS-1$
+					}
+					""",
             	doc.get());
     }
 
@@ -128,9 +132,11 @@ public class NLSSourceModifierTest {
 	public void fromSkippedToTranslatedEclipseNew() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -148,9 +154,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=Accessor.key_0;\n" +
-            	"}\n",
+                """
+					public class Test {
+						private String str=Accessor.key_0;
+					}
+					""",
             	doc.get());
 
       CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, defaultSubst, null);
@@ -179,9 +187,11 @@ public class NLSSourceModifierTest {
 	public void fromSkippedToNotTranslated() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -198,9 +208,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-                "}\n",
+                """
+					public class Test {
+						private String str="whatever"; //$NON-NLS-1$
+					}
+					""",
             	doc.get());
     }
 
@@ -208,9 +220,11 @@ public class NLSSourceModifierTest {
 	public void fromSkippedToNotTranslatedEclipse() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -227,9 +241,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-                "}\n",
+                """
+					public class Test {
+						private String str="whatever"; //$NON-NLS-1$
+					}
+					""",
             	doc.get());
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
@@ -261,9 +277,11 @@ public class NLSSourceModifierTest {
 	public void fromNotTranslatedToTranslated() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever"; //$NON-NLS-1$
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -282,9 +300,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
-            	"}\n",
+                """
+					public class Test {
+						private String str=Accessor.getString("key.0"); //$NON-NLS-1$
+					}
+					""",
             	doc.get());
     }
 
@@ -292,9 +312,11 @@ public class NLSSourceModifierTest {
 	public void fromNotTranslatedToTranslatedEclipse() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever"; //$NON-NLS-1$
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -313,9 +335,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=Accessor.key_0; \n" +
-            	"}\n",
+                """
+					public class Test {
+						private String str=Accessor.key_0;\s
+					}
+					""",
             	doc.get());
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
@@ -345,9 +369,11 @@ public class NLSSourceModifierTest {
 	public void fromNotTranslatedToSkipped() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever"; //$NON-NLS-1$
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -364,9 +390,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; \n" +
-                "}\n",
+                """
+					public class Test {
+						private String str="whatever";\s
+					}
+					""",
             	doc.get());
     }
 
@@ -374,9 +402,11 @@ public class NLSSourceModifierTest {
 	public void fromNotTranslatedToSkippedEclipse() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever"; //$NON-NLS-1$
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -393,9 +423,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; \n" +
-                "}\n",
+                """
+					public class Test {
+						private String str="whatever";\s
+					}
+					""",
             	doc.get());
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
@@ -429,19 +461,23 @@ public class NLSSourceModifierTest {
 	public void fromTranslatedToNotTranslated() throws Exception {
 
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			package test;
+			public class Test {
+				private String str=Accessor.getString("key.0"); //$NON-NLS-1$
+			}
+			""";
 
         String accessorKlazz =
-            "package test;\n" +
-    		"public class Accessor {\n" +
-    		"	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" +
-    		"	public static String getString(String s) {\n" +
-    		"		return \"\";\n" +
-    		"	}\n" +
-    		"}\n";
+            """
+			package test;
+			public class Accessor {
+				private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
@@ -460,10 +496,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "package test;\n" +
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-                "}\n",
+                """
+					package test;
+					public class Test {
+						private String str="whatever"; //$NON-NLS-1$
+					}
+					""",
             	doc.get());
     }
 
@@ -471,10 +509,12 @@ public class NLSSourceModifierTest {
 	public void fromTranslatedToNotTranslatedEclipse() throws Exception {
 
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	private String str=Accessor.k_0;\n" +
-            "}\n";
+            """
+			package test;
+			public class Test {
+				private String str=Accessor.k_0;
+			}
+			""";
 
         StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
@@ -512,10 +552,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "package test;\n" +
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; //$NON-NLS-1$\n" +
-                "}\n",
+                """
+					package test;
+					public class Test {
+						private String str="whatever"; //$NON-NLS-1$
+					}
+					""",
             	doc.get());
 
         TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
@@ -544,19 +586,23 @@ public class NLSSourceModifierTest {
 	public void fromTranslatedToSkipped() throws Exception {
 
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			package test;
+			public class Test {
+				private String str=Accessor.getString("key.0"); //$NON-NLS-1$
+			}
+			""";
 
         String accessorKlazz =
-            "package test;\n" +
-    		"public class Accessor {\n" +
-    		"	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" +
-    		"	public static String getString(String s) {\n" +
-    		"		return \"\";\n" +
-    		"	}\n" +
-    		"}\n";
+            """
+			package test;
+			public class Accessor {
+				private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
@@ -575,10 +621,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "package test;\n" +
-                "public class Test {\n" +
-                "	private String str=\"whatever\"; \n" +
-                "}\n",
+                """
+					package test;
+					public class Test {
+						private String str="whatever";\s
+					}
+					""",
             	doc.get());
     }
 
@@ -586,10 +634,12 @@ public class NLSSourceModifierTest {
 	public void fromTranslatedToSkippedEclipse() throws Exception {
 
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	private String str=Accessor.key_0;\n" +
-            "}\n";
+            """
+			package test;
+			public class Test {
+				private String str=Accessor.key_0;
+			}
+			""";
 
         StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
@@ -627,10 +677,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "package test;\n" +
-                "public class Test {\n" +
-                "	private String str=\"whatever\";\n" +
-                "}\n",
+                """
+					package test;
+					public class Test {
+						private String str="whatever";
+					}
+					""",
             	doc.get());
 
         TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
@@ -658,19 +710,23 @@ public class NLSSourceModifierTest {
 	@Test
 	public void replacementOfKey() throws Exception {
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
-            "}\n";
+            """
+			package test;
+			public class Test {
+				private String str=Accessor.getString("key.0"); //$NON-NLS-1$
+			}
+			""";
 
         String accessorKlazz =
-            "package test;\n" +
-    		"public class Accessor {\n" +
-    		"	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" +
-    		"	public static String getString(String s) {\n" +
-    		"		return \"\";\n" +
-    		"	}\n" +
-    		"}\n";
+            """
+			package test;
+			public class Accessor {
+				private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+				public static String getString(String s) {
+					return "";
+				}
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Accessor.java", accessorKlazz, false, null);
@@ -688,20 +744,24 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "package test;\n" +
-                "public class Test {\n" +
-                "	private String str=Accessor.getString(\"nls.0\"); //$NON-NLS-1$\n" +
-                "}\n",
+                """
+					package test;
+					public class Test {
+						private String str=Accessor.getString("nls.0"); //$NON-NLS-1$
+					}
+					""",
             	doc.get());
     }
 
 	@Test
 	public void replacementOfKeyEclipse() throws Exception {
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	private String str=Accessor.key_0; \n" +
-            "}\n";
+            """
+			package test;
+			public class Test {
+				private String str=Accessor.key_0;\s
+			}
+			""";
 
         StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
@@ -740,10 +800,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "package test;\n" +
-                "public class Test {\n" +
-                "	private String str=Accessor.nls_0; \n" +
-                "}\n",
+                """
+					package test;
+					public class Test {
+						private String str=Accessor.nls_0;\s
+					}
+					""",
             	doc.get());
 
         TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
@@ -774,11 +836,13 @@ public class NLSSourceModifierTest {
 	public void replacementOfKeysBug223865() throws Exception {
 
 		String klazz=
-			"package test;\n" +
-			"public class Test {\n" +
-			"	private String str=Accessor.key_0;\n" +
-			"	private String str=Accessor.key_1;\n" +
-			"}\n";
+			"""
+			package test;
+			public class Test {
+				private String str=Accessor.key_0;
+				private String str=Accessor.key_1;
+			}
+			""";
 
 		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
@@ -824,11 +888,13 @@ public class NLSSourceModifierTest {
 		change.getEdit().apply(doc);
 
 		assertEquals(
-				"package test;\n" +
-				"public class Test {\n" +
-				"	private String str=Accessor.key_0;\n" +
-				"	private String str=Accessor.key_0;\n" +
-				"}\n", doc.get());
+				"""
+					package test;
+					public class Test {
+						private String str=Accessor.key_0;
+						private String str=Accessor.key_0;
+					}
+					""", doc.get());
 
 		TextChange accessorChange= (TextChange) AccessorClassModifier.create(accessorCu, nlsSubstitutions);
 		Document accessorDoc= new Document(accessorKlazz);
@@ -856,10 +922,12 @@ public class NLSSourceModifierTest {
 	@Test
 	public void bug95708_1() throws Exception {
         String klazz =
-            "public class Test {\n" +
-            "	private String str1=\"whatever\";\n" +
-            "	private String str2=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str1="whatever";
+				private String str2="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -880,10 +948,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str1=Accessor.key_0;\n" +
-                "	private String str2=Accessor.key_0;\n" +
-                "}\n",
+                """
+					public class Test {
+						private String str1=Accessor.key_0;
+						private String str2=Accessor.key_0;
+					}
+					""",
             	doc.get());
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), true, nlsSubstitutions, NLSRefactoring.DEFAULT_SUBST_PATTERN, null);
@@ -911,10 +981,12 @@ public class NLSSourceModifierTest {
 	@Test
 	public void bug95708_2() throws Exception {
         String klazz =
-            "public class Test {\n" +
-            "	private String str1=Accessor.key_0;\n" +
-            "	private String str2=Accessor.key_0;\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str1=Accessor.key_0;
+				private String str2=Accessor.key_0;
+			}
+			""";
 
         StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
@@ -952,10 +1024,12 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str1=Accessor.nls_0;\n" +
-                "	private String str2=Accessor.key_0;\n" +
-                "}\n",
+                """
+					public class Test {
+						private String str1=Accessor.nls_0;
+						private String str2=Accessor.key_0;
+					}
+					""",
             	doc.get());
 
         TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
@@ -984,13 +1058,15 @@ public class NLSSourceModifierTest {
 	@Test
 	public void insertionOrder1() throws Exception {
          String klazz =
-             "public class Test {\n" +
-             "	private String str1=Accessor.key_b;\n" +
-             "	private String str2=Accessor.key_y;\n" +
-             "	private String str3=\"h\";\n" +
-             "	private String str4=\"a\";\n" +
-             "	private String str5=\"z\";\n" +
-             "}\n";
+             """
+			public class Test {
+				private String str1=Accessor.key_b;
+				private String str2=Accessor.key_y;
+				private String str3="h";
+				private String str4="a";
+				private String str5="z";
+			}
+			""";
 
          StringBuilder buf= new StringBuilder();
          buf.append("package test;\n");
@@ -1036,13 +1112,15 @@ public class NLSSourceModifierTest {
          change.getEdit().apply(doc);
 
          assertEquals(
-                 "public class Test {\n" +
-                 "	private String str1=Accessor.key_b;\n" +
-                 "	private String str2=Accessor.key_y;\n" +
-                 "	private String str3=Accessor.key_h;\n" +
-                 "	private String str4=Accessor.key_a;\n" +
-                 "	private String str5=Accessor.key_z;\n" +
-                 "}\n",
+                 """
+					public class Test {
+						private String str1=Accessor.key_b;
+						private String str2=Accessor.key_y;
+						private String str3=Accessor.key_h;
+						private String str4=Accessor.key_a;
+						private String str5=Accessor.key_z;
+					}
+					""",
              	doc.get());
 
          TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
@@ -1074,13 +1152,15 @@ public class NLSSourceModifierTest {
 	@Test
 	public void insertionOrder2() throws Exception {
         String klazz =
-            "public class Test {\n" +
-            "	private String str1=Accessor.key_b;\n" +
-            "	private String str2=Accessor.key_y;\n" +
-            "	private String str3=\"h\";\n" +
-            "	private String str4=\"a\";\n" +
-            "	private String str5=\"z\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str1=Accessor.key_b;
+				private String str2=Accessor.key_y;
+				private String str3="h";
+				private String str4="a";
+				private String str5="z";
+			}
+			""";
 
         StringBuilder buf= new StringBuilder();
         buf.append("package test;\n");
@@ -1128,13 +1208,15 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str1=Accessor.key_g;\n" +
-                "	private String str2=Accessor.key_i;\n" +
-                "	private String str3=Accessor.key_h;\n" +
-                "	private String str4=Accessor.key_a;\n" +
-                "	private String str5=Accessor.key_z;\n" +
-                "}\n",
+                """
+					public class Test {
+						private String str1=Accessor.key_g;
+						private String str2=Accessor.key_i;
+						private String str3=Accessor.key_h;
+						private String str4=Accessor.key_a;
+						private String str5=Accessor.key_z;
+					}
+					""",
             	doc.get());
 
         TextChange accessorChange= (TextChange)AccessorClassModifier.create(accessorCu, nlsSubstitutions);
@@ -1368,9 +1450,11 @@ public class NLSSourceModifierTest {
 	public void bug131323() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -1388,9 +1472,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=Accessor.getFoo(\"key.0\"); //$NON-NLS-1$\n" +
-            	"}\n",
+                """
+					public class Test {
+						private String str=Accessor.getFoo("key.0"); //$NON-NLS-1$
+					}
+					""",
             	doc.get());
 
         CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, pack.getPath().append("test.properties"), false, nlsSubstitutions, subpattern, null);
@@ -1425,9 +1511,11 @@ public class NLSSourceModifierTest {
 	@Test
 	public void checkBundleNameWhenResourceAndAccessorAreInDifferentPackages() throws Exception {
 
-		String klazz= "public class Test {\n" +
-				"	private String str=\"whatever\";\n" +
-				"}\n";
+		String klazz= """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -1445,9 +1533,11 @@ public class NLSSourceModifierTest {
 		change.getEdit().apply(doc);
 
 		assertEquals(
-				"public class Test {\n" +
-						"	private String str=Accessor.getString(\"key.0\"); //$NON-NLS-1$\n" +
-						"}\n",
+				"""
+					public class Test {
+						private String str=Accessor.getString("key.0"); //$NON-NLS-1$
+					}
+					""",
 				doc.get());
 		IPackageFragment resourcePackage= fSourceFolder.createPackageFragment("test.messages", false, null);
 		CreateTextFileChange accessorChange= (CreateTextFileChange) AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack,
@@ -1483,9 +1573,11 @@ public class NLSSourceModifierTest {
 	public void checkBundleNameWhenResourceAndAccessorAreInDifferentPackagesEclipse() throws Exception {
 
         String klazz =
-            "public class Test {\n" +
-            "	private String str=\"whatever\";\n" +
-            "}\n";
+            """
+			public class Test {
+				private String str="whatever";
+			}
+			""";
 
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
@@ -1503,9 +1595,11 @@ public class NLSSourceModifierTest {
         change.getEdit().apply(doc);
 
         assertEquals(
-                "public class Test {\n" +
-                "	private String str=Accessor.key_0;\n" +
-            	"}\n",
+                """
+					public class Test {
+						private String str=Accessor.key_0;
+					}
+					""",
             	doc.get());
       IPackageFragment resourcePackage = fSourceFolder.createPackageFragment("test.messages", false, null);
       CreateTextFileChange accessorChange= (CreateTextFileChange)AccessorClassCreator.create(cu, "Accessor", pack.getPath().append("Accessor.java"), pack, resourcePackage.getPath().append("test.properties"), true, nlsSubstitutions, defaultSubst, null);

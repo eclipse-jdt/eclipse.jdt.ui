@@ -42,7 +42,15 @@ public class NLSHolderTest {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	private final static String ACCESSOR_KLAZZ= "package test;\n" + "public class TestMessages {\n" + "	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" + "	public static String getString(String s) {" + "		return \"\";\n" + "	}\n" + "}\n";
+	private final static String ACCESSOR_KLAZZ= """
+		package test;
+		public class TestMessages {
+			private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+			public static String getString(String s) {\
+				return "";
+			}
+		}
+		""";
 
 	@Before
 	public void setUp() throws Exception {
@@ -57,7 +65,12 @@ public class NLSHolderTest {
 
 	@Test
 	public void substitutionWithAccessor() throws Exception {
-		String klazz= "package test;\n" + "public class Test {" + "	private String str=TestMessages.getString(\"Key.5\");//$NON-NLS-1$\n" + "}\n";
+		String klazz= """
+			package test;
+			public class Test {\
+				private String str=TestMessages.getString("Key.5");//$NON-NLS-1$
+			}
+			""";
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
 		pack.createCompilationUnit("TestMessages.java", ACCESSOR_KLAZZ, false, null);

@@ -89,60 +89,62 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 
 		fImport.createCompilationUnit(
 			"Provider.java",
-			"package import_in;\n" +
-			"\n" +
-			"import import_use.List;\n" +
-			"import java.io.File;\n" +
-			"import java.util.ArrayList;\n" +
-			"import java.util.Map;\n" +
-			"import static java.lang.Math.PI;\n" +
-			"\n" +
-			"public class Provider {\n" +
-			"	public File useAsReturn() {\n" +
-			"		return null;\n" +
-			"	}\n" +
-			"	public void useInArgument(File file) {\n" +
-			"		file= null;\n" +
-			"	}\n" +
-			"	public void useInDecl() {\n" +
-			"		List list= null;\n" +
-			"	}\n" +
-			"	public int useInDecl2() {\n" +
-		  	"		return new ArrayList().size();\n" +
-			"	}\n" +
-			"	public Object useInDecl3() {\n" +
-		  	"		return new java.util.HashMap();\n" +
-			"	}\n" +
-			"	public void useInClassLiteral() {\n" +
-			"		Class clazz= File.class;\n" +
-			"	}\n" +
-			"	public void useArray() {\n" +
-			"		List[] lists= null;\n" +
-			"	}\n" +
-			"	public void useInLocalClass() {\n" +
-			"		class Local extends File {\n" +
-			"			private static final long serialVersionUID = 1L;\n" +
-			"			public Local(String s) {\n" +
-			"				super(s);\n" +
-			"			}\n" +
-			"			public void foo(Map map) {\n" +
-			"			}\n" +
-			"			public void bar(Byte b) {\n" +
-			"			}\n" +
-			"		}\n" +
-			"	}\n" +
-			"	public void useStaticImport() {\n" +
-			"		double i= PI;\n" +
-			"	}\n" +
-			"}\n",
+			"""
+				package import_in;
+				
+				import import_use.List;
+				import java.io.File;
+				import java.util.ArrayList;
+				import java.util.Map;
+				import static java.lang.Math.PI;
+				
+				public class Provider {
+					public File useAsReturn() {
+						return null;
+					}
+					public void useInArgument(File file) {
+						file= null;
+					}
+					public void useInDecl() {
+						List list= null;
+					}
+					public int useInDecl2() {
+						return new ArrayList().size();
+					}
+					public Object useInDecl3() {
+						return new java.util.HashMap();
+					}
+					public void useInClassLiteral() {
+						Class clazz= File.class;
+					}
+					public void useArray() {
+						List[] lists= null;
+					}
+					public void useInLocalClass() {
+						class Local extends File {
+							private static final long serialVersionUID = 1L;
+							public Local(String s) {
+								super(s);
+							}
+							public void foo(Map map) {
+							}
+							public void bar(Byte b) {
+							}
+						}
+					}
+					public void useStaticImport() {
+						double i= PI;
+					}
+				}
+				""",
 			true, null);
 
 			IPackageFragment importUse= root.createPackageFragment("import_use", true, null);
 			importUse.createCompilationUnit("List.java",
-			"package import_use;" +
-			"" +
-			"public class List {" +
-			"}",
+			"""
+				package import_use;\
+				public class List {\
+				}""",
 			true, null);
 
 	}
