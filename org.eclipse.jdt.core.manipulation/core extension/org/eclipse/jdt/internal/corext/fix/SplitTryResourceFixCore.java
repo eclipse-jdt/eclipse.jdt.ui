@@ -19,7 +19,11 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -29,9 +33,11 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -82,31 +88,61 @@ public final class SplitTryResourceFixCore extends CompilationUnitRewriteOperati
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
-			TextEditGroup group= new TextEditGroup("abc"); //$NON-NLS-1$
+			TextEditGroup group= null;
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			final AST ast= cuRewrite.getAST();
-
-
+			ICompilationUnit cu= cuRewrite.getCu();
+			CompilationUnit root= (CompilationUnit) tryStatement.getRoot();
+			IBuffer cuBuffer= cu.getBuffer();
 			List<VariableDeclarationExpression> resources= tryStatement.resources();
-			int expIndex;
-			for (expIndex= 0; expIndex < resources.size(); ++expIndex) {
-				if (resources.get(expIndex) == expression) {
-					break;
+			TryStatement newTryStatement= ast.newTryStatement();
+			IJavaElement rootElement= cuRewrite.getRoot().getJavaElement();
+			String fIndent= "\t"; //$NON-NLS-1$
+			if (rootElement != null) {
+				IJavaProject project= rootElement.getJavaProject();
+				if (project != null) {
+					String tab_option= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
+					if (JavaCore.SPACE.equals(tab_option)) {
+						fIndent= ""; //$NON-NLS-1$
+						for (int i= 0; i < CodeFormatterUtil.getTabWidth(project); ++i) {
+							fIndent += " "; //$NON-NLS-1$
+						}
+					}
 				}
 			}
-			TryStatement newTryStatement= ast.newTryStatement();
-			Block newBlock= ast.newBlock();
-			newTryStatement.setBody(newBlock);
-			ListRewrite listRewrite= rewrite.getListRewrite(newTryStatement, TryStatement.RESOURCES2_PROPERTY);
-			ListRewrite oldResourcesListRewrite= rewrite.getListRewrite(tryStatement, TryStatement.RESOURCES2_PROPERTY);
-			listRewrite.insertFirst(oldResourcesListRewrite.createMoveTarget(expression, (ASTNode)oldResourcesListRewrite.getOriginalList().get(resources.size() - 1)), group);
+			boolean copyResources= false;
+			String prefix= ""; //$NON-NLS-1$
+			for (VariableDeclarationExpression resource : resources) {
+				if (resource.equals(expression)) {
+					copyResources= true;
+				}
+				if (copyResources) {
+					int start= root.getExtendedStartPosition(resource);
+					int length= root.getExtendedLength(resource);
+					StringBuffer buffer= new StringBuffer(prefix);
+					buffer.append(cuBuffer.getText(start, length));
+					VariableDeclarationExpression newVarExpression= (VariableDeclarationExpression) rewrite.createStringPlaceholder(buffer.toString(), ASTNode.VARIABLE_DECLARATION_EXPRESSION);
+					newTryStatement.resources().add(newVarExpression);
+					rewrite.remove(resource, group);
+					prefix= "\n" + fIndent + fIndent; //$NON-NLS-1$
+				}
+			}
 			Block originalBlock= tryStatement.getBody();
 			List<Statement> originalStatements= originalBlock.statements();
-			int size= originalStatements.size();
 			ListRewrite originalBlockListRewrite= rewrite.getListRewrite(originalBlock, Block.STATEMENTS_PROPERTY);
+			StringBuilder buf= new StringBuilder();
+			buf.append("{\n"); //$NON-NLS-1$
+			for (Statement s : originalStatements) {
+				int start= root.getExtendedStartPosition(s);
+				int length= root.getExtendedLength(s);
+				String text= cuBuffer.getText(start, length);
+				buf.append(fIndent).append(text).append("\n"); //$NON-NLS-1$
+				rewrite.remove(s, group);
+			}
+			buf.append("}"); //$NON-NLS-1$
+			Block newBlock= (Block) rewrite.createStringPlaceholder(buf.toString(), ASTNode.BLOCK);
+			newTryStatement.setBody(newBlock);
 			originalBlockListRewrite.insertFirst(newTryStatement, group);
-			ListRewrite newBlockListRewrite= rewrite.getListRewrite(newBlock, Block.STATEMENTS_PROPERTY);
-			newBlockListRewrite.insertLast(originalBlockListRewrite.createMoveTarget(originalStatements.get(0), originalStatements.get(size - 1)), group);
 		}
 	}
 
