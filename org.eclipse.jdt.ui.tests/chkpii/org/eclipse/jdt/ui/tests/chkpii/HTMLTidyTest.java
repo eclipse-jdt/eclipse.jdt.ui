@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -163,7 +164,7 @@ public class HTMLTidyTest {
 
 	private boolean checkFile(File file) throws Exception {
 		String filePath= file.getAbsolutePath();
-		String command= "tidy -eq \"" + filePath + "\"";
+		String[] command= new String[] {"tidy", "-eq", filePath};
 		final Process process= Runtime.getRuntime().exec(command);
 		long timeout= System.currentTimeMillis() + TIDY_TIMEOUT;
 
@@ -198,7 +199,7 @@ public class HTMLTidyTest {
 			return process.exitValue() == 0;
 		} catch (IllegalThreadStateException e) {
 			process.destroy();
-			fTidyResults.write("Error: '" + command + "' killed after " + TIDY_TIMEOUT +" ms\n");
+			fTidyResults.write("Error: '" + Arrays.toString(command) + "' killed after " + TIDY_TIMEOUT +" ms\n");
 			return false;
 		}
 	}

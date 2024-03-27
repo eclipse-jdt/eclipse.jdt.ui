@@ -36,6 +36,8 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.ui.tests.performance.FileTool;
+
 
 public class ResourceTestHelper {
 
