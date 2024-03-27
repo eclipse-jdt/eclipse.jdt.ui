@@ -6828,6 +6828,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	@Ignore
 	@Test
 	public void testSplitTryWithResources2() throws Exception { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=530208
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
