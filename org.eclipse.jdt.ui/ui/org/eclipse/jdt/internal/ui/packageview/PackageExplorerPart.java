@@ -256,6 +256,7 @@ public class PackageExplorerPart extends ViewPart
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
 			fPendingRefreshes= Collections.synchronizedList(new ArrayList<>());
+			setAutoExpandOnSingleChildLevels(ALL_LEVELS);
 		}
 		@Override
 		public void add(Object parentElement, Object... childElements) {
@@ -576,7 +577,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private ProblemTreeViewer createViewer(Composite composite) {
-		return new PackageExplorerProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		new PackageExplorerProblemTreeViewer(composite, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 
 	/**
