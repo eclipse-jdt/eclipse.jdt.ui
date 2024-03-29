@@ -562,8 +562,8 @@ public class JavaElementLinks {
 						CSS_FRAGMENTS_CACHE_LOCK.unlock();
 					}
 				}
-			} catch (InterruptedException e1) {
-				JavaPlugin.logErrorMessage("Interrupted while waiting for CSS fragments cache lock, cache reset unsuccessful"); //$NON-NLS-1$
+			} catch (InterruptedException e) {
+				JavaPlugin.log(new RuntimeException("Interrupted while waiting for CSS fragments cache lock, cache reset unsuccessful", e)); //$NON-NLS-1$
 			}
 		}
 	}
@@ -866,7 +866,8 @@ public class JavaElementLinks {
 		try {
 			locked= CSS_FRAGMENTS_CACHE_LOCK.tryLock(100, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
-			JavaPlugin.logErrorMessage("Interrupted while waiting for CSS fragments cache lock, proceeding without using cache"); //$NON-NLS-1$
+			Thread.currentThread().interrupt();
+			return css;
 		}
 		try {
 			if (locked) {
