@@ -904,10 +904,19 @@ public class JavaElementLabelComposerCore {
 				if (i > 0) {
 					fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
 				}
-				fBuffer.append(Signature.getTypeVariable(typeParamSigs[i]));
+				appendTypeParameteSignatureLabel(Signature.getTypeVariable(typeParamSigs[i]));
 			}
 			appendGT();
 		}
+	}
+
+	/**
+	 * Appends label for single type parameter from a signature.
+	 *
+	 * @param typeVariableName the type variable name
+	 */
+	protected void appendTypeParameteSignatureLabel(String typeVariableName) {
+		fBuffer.append(typeVariableName);
 	}
 
 	/**
@@ -916,7 +925,7 @@ public class JavaElementLabelComposerCore {
 	protected void appendLT() {
 		fBuffer.append(getLT());
 	}
-	
+
 	/**
 	 * Returns the string for rendering the '<code>&lt;</code>' character.
 	 *
@@ -932,7 +941,7 @@ public class JavaElementLabelComposerCore {
 	protected void appendGT() {
 		fBuffer.append(getGT());
 	}
-	
+
 	/**
 	 * Returns the string for rendering the '<code>&gt;</code>' character.
 	 *
