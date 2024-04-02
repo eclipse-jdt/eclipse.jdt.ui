@@ -165,12 +165,12 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(UnnamedClass node) {
+	public boolean visit(ImplicitTypeDeclaration node) {
 		return visit((AbstractUnnamedTypeDeclaration)node);
 	}
 
 	@Override
-	public void endVisit(UnnamedClass node) {
+	public void endVisit(ImplicitTypeDeclaration node) {
 		endVisit((AbstractUnnamedTypeDeclaration)node);
 	}
 
