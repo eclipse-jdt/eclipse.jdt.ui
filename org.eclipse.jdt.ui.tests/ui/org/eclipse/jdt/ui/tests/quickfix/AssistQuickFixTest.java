@@ -78,8 +78,6 @@ public class AssistQuickFixTest extends QuickFixTest {
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
 	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
-	private static final String EXTRACT_TO_LOCAL= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
-	private static final String EXTRACT_TO_LOCAL_REPLACE= CorrectionMessages.QuickAssistProcessor_extract_to_local_all_description;
 	private static final String EXTRACT_TO_CONSTANT= CorrectionMessages.QuickAssistProcessor_extract_to_constant_description;
 
 	private IJavaProject fJProject1;
@@ -2106,6 +2104,76 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		assertNumberOfProposals(proposals, 5);
 		assertProposalDoesNotExist(proposals, EXTRACT_TO_CONSTANT);
+	}
+
+	@Test
+	public void testExtractAnonymousToLocalVariable1() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1063
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    public interface K {\n");
+		buf.append("        String getName();\n");
+		buf.append("        String getValue();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo(K k) {\n");
+		buf.append("        System.out.println(k.getName());\n");
+		buf.append("        System.out.println(k.getValue());\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo2() {\n");
+		buf.append("        foo(new K() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public String getName() {\n");
+		buf.append("                return \"abc\";\n");
+		buf.append("            }\n");
+		buf.append("            @Override\n");
+		buf.append("            public String getValue() {\n");
+		buf.append("                return \"def\";\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "\"abc\"";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("\n");
+		buf.append("    public interface K {\n");
+		buf.append("        String getName();\n");
+		buf.append("        String getValue();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo(K k) {\n");
+		buf.append("        System.out.println(k.getName());\n");
+		buf.append("        System.out.println(k.getValue());\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo2() {\n");
+		buf.append("        K k = new K() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public String getName() {\n");
+		buf.append("                return \"abc\";\n");
+		buf.append("            }\n");
+		buf.append("            @Override\n");
+		buf.append("            public String getValue() {\n");
+		buf.append("                return \"def\";\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("        foo(k);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1 });
 	}
 
 	@Test

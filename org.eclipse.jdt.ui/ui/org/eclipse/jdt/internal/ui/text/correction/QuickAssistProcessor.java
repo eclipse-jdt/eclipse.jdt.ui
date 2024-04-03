@@ -310,6 +310,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getGenerateForLoopProposals(context, coveringNode, null, null)
 					|| getUnnecessaryArrayCreationProposal(context, coveringNode, null)
 					|| getExtractVariableProposal(context, false, null)
+					|| getExtractAnonymousClassProposal(context, coveringNode, null)
 					|| getExtractMethodProposal(context, coveringNode, false, null)
 					|| getExtractMethodFromLambdaProposal(context, coveringNode, false, null)
 					|| getInlineLocalProposal(context, coveringNode, null)
@@ -387,6 +388,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractVariableProposal(context, problemsAtLocation, resultingCollections);
+				getExtractAnonymousClassProposal(context, coveringNode, resultingCollections);
 				getExtractMethodProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getExtractMethodFromLambdaProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
@@ -607,6 +609,50 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposal.setCommandId(EXTRACT_CONSTANT_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
+		}
+		return false;
+	}
+
+	private boolean getExtractAnonymousClassProposal(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> proposals) throws CoreException {
+		AnonymousClassDeclaration decl= ASTNodes.getFirstAncestorOrNull(coveringNode, AnonymousClassDeclaration.class);
+		if (decl != null) {
+			ASTNode parent= decl.getParent();
+			if (parent instanceof ClassInstanceCreation expression) {
+
+				ITypeBinding binding= expression.resolveTypeBinding();
+				if (binding == null || Bindings.isVoidType(binding)) {
+					return false;
+				}
+				if (proposals == null) {
+					return true;
+				}
+
+				final ICompilationUnit cu= context.getCompilationUnit();
+
+				ExtractTempRefactoring extractTempRefactoringSelectedOnly= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+				extractTempRefactoringSelectedOnly.setReplaceAllOccurrences(false);
+				if (extractTempRefactoringSelectedOnly.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+					LinkedProposalModelCore linkedProposalModel= createProposalModel();
+					extractTempRefactoringSelectedOnly.setLinkedProposalModel(linkedProposalModel);
+					extractTempRefactoringSelectedOnly.setCheckResultForCompileProblems(false);
+
+					String label= CorrectionMessages.QuickAssistProcessor_extract_anonymous_to_local_description;
+					String preview= CorrectionMessages.QuickAssistProcessor_extract_anonymous_to_local_preview;
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+					int relevance;
+					if (context.getSelectionLength() == 0) {
+						relevance= IProposalRelevance.EXTRACT_LOCAL_ZERO_SELECTION;
+					} else {
+						relevance= IProposalRelevance.EXTRACT_LOCAL;
+					}
+					ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoringSelectedOnly, relevance, preview);
+					RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
+
+					proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
+					proposal.setLinkedProposalModel(linkedProposalModel);
+					proposals.add(proposal);
+				}
+			}
 		}
 		return false;
 	}
