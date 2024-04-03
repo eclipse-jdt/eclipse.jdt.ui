@@ -1503,7 +1503,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNoErrors(context);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -1681,7 +1681,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();
@@ -2149,7 +2149,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuilder();

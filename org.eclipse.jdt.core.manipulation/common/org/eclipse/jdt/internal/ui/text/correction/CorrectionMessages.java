@@ -439,6 +439,8 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_change_to_static_import_description;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_label;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_description;
+	public static String QuickAssistProcessor_extract_anonymous_to_local_description;
+	public static String QuickAssistProcessor_extract_anonymous_to_local_preview;
 	public static String QuickAssistProcessor_extract_to_local_all_description;
 	public static String QuickAssistProcessor_extract_to_local_all_preview;
 	public static String QuickAssistProcessor_extract_to_local_description;
