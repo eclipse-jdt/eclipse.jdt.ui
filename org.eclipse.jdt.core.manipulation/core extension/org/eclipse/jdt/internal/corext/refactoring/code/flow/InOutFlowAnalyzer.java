@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.YieldStatement;
 
 public class InOutFlowAnalyzer extends FlowAnalyzer {
 
-	private ASTNode firstNode= null;
+	private ASTNode[] fSelectedNodes= null;
 
 	public InOutFlowAnalyzer(FlowContext context) {
 		super(context);
@@ -43,7 +43,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	public FlowInfo perform(ASTNode[] selectedNodes) {
 		FlowContext context= getFlowContext();
 		GenericSequentialFlowInfo result= createSequential();
-		firstNode= selectedNodes[0];
+		fSelectedNodes= selectedNodes;
 		for (ASTNode node : selectedNodes) {
 			node.accept(this);
 			result.merge(getFlowInfo(node), context);
@@ -69,7 +69,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 		while (parent != null && !(parent instanceof SwitchExpression)) {
 			parent= parent.getParent();
 		}
-		return (parent instanceof SwitchExpression) && parent.getStartPosition() < firstNode.getStartPosition();		// we are only traversing selected nodes.
+		return (parent instanceof SwitchExpression) && fSelectedNodes.length > 0 && parent.getStartPosition() < fSelectedNodes[0].getStartPosition();	// we are only traversing selected nodes.
 	}
 
 	@Override
