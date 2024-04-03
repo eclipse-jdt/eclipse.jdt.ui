@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -91,6 +92,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -99,6 +101,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -176,6 +179,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ASTNode[] fDestinations;
 	private LinkedProposalModelCore fLinkedProposalModel;
 	private Map<String,String> fFormatterOptions;
+	private boolean fHasYield;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 
@@ -964,6 +968,58 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	//---- Code generation -----------------------------------------------------------------------
 
+	private class YieldStatementCheckerReplacer extends ASTVisitor {
+		private boolean hasYield;
+		private boolean hasReturn;
+		private final IRegion fSelectedRange;
+		private final ASTRewrite fReplaceRewriter;
+
+		public YieldStatementCheckerReplacer(IRegion selectedRange) {
+			this.fSelectedRange= selectedRange;
+			this.fReplaceRewriter= null;
+		}
+
+		public YieldStatementCheckerReplacer(ASTRewrite rewriter, IRegion selectedRange) {
+			this.fSelectedRange= selectedRange;
+			this.fReplaceRewriter= rewriter;
+		}
+
+		public boolean hasYield() {
+			return hasYield;
+		}
+
+		public boolean hasReturn() {
+			return hasReturn;
+		}
+		@Override
+		public boolean visit(YieldStatement node) {
+			if (node.getStartPosition() < fSelectedRange.getOffset() + fSelectedRange.getLength()) {
+				ASTNode parent= node.getParent();
+				if (parent != null) {
+					while (parent != null && !(parent instanceof SwitchExpression)) {
+						parent= parent.getParent();
+					}
+					if (parent.getStartPosition() < fSelectedRange.getOffset()) {
+						hasYield= true;
+						if (fReplaceRewriter != null) {
+							ReturnStatement rs= fReplaceRewriter.getAST().newReturnStatement();
+							rs.setExpression((Expression)fReplaceRewriter.createCopyTarget(node.getExpression()));
+							fReplaceRewriter.replace(node, rs, null);
+						}
+					}
+				}
+			}
+			return true;
+		}
+		@Override
+		public boolean visit(ReturnStatement node) {
+			if (node.getStartPosition() < fSelectedRange.getOffset() + fSelectedRange.getLength()) {
+				hasReturn= true;
+			}
+			return true;
+		}
+	}
+
 	private ASTNode[] createCallNodes(SnippetFinder.Match duplicate, int modifiers) {
 		List<ASTNode> result= new ArrayList<>(2);
 
@@ -1017,8 +1073,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 				}
 				break;
 			case ExtractMethodAnalyzer.RETURN_STATEMENT_VALUE:
-				ReturnStatement rs= fAST.newReturnStatement();
-				rs.setExpression(invocation);
+				YieldStatementCheckerReplacer yieldChecker= new YieldStatementCheckerReplacer(fAnalyzer.getSelectedNodeRange());
+				for (ASTNode node : fAnalyzer.getSelectedNodes()) {
+					node.accept(yieldChecker);
+				}
+				Statement rs= null;
+				if (yieldChecker.hasYield() && !yieldChecker.hasReturn()) {
+					rs= fAST.newYieldStatement();
+					((YieldStatement)rs).setExpression(invocation);
+					fHasYield= true;
+				} else {
+					rs= fAST.newReturnStatement();
+					((ReturnStatement)rs).setExpression(invocation);
+				}
 				call= rs;
 				break;
 			default:
@@ -1263,12 +1330,19 @@ public class ExtractMethodRefactoring extends Refactoring {
 					fAnalyzer.getReturnTypeBinding().equals(fAST.resolveWellKnownType("void")); //$NON-NLS-1$
 			if (selectedNodes.length == 1) {
 				if (!isReturnVoid) {
+					if (fHasYield) {
+						YieldStatementCheckerReplacer yieldChecker= new YieldStatementCheckerReplacer(fRewriter, fAnalyzer.getSelectedNodeRange());
+						selectedNodes[0].accept(yieldChecker);
+					}
 					if (selectedNodes[0] instanceof Block) {
 						Block block= (Block)selectedNodes[0];
+						ListRewrite source= fRewriter.getListRewrite(
+								block,
+								Block.STATEMENTS_PROPERTY);
 						List<Statement> blockStatements= block.statements();
-						for (Statement blockStatement : blockStatements) {
-							statements.insertLast(fRewriter.createMoveTarget(blockStatement), substitute);
-						}
+						ASTNode toMove= source.createMoveTarget(
+								blockStatements.get(0), blockStatements.get(blockStatements.size() - 1));
+						statements.insertLast(toMove, substitute);
 					} else {
 						statements.insertLast(fRewriter.createMoveTarget(selectedNodes[0]), substitute);
 					}
@@ -1291,6 +1365,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 						(ChildListPropertyDescriptor) selectedNodes[0].getLocationInParent());
 				// if last statement is a void return statement then we skip it
 				int index= isReturnVoid ? selectedNodes.length - 2 : selectedNodes.length - 1;
+				if (fHasYield) {
+					for (ASTNode selectedNode : selectedNodes) {
+						YieldStatementCheckerReplacer yieldChecker= new YieldStatementCheckerReplacer(fRewriter, fAnalyzer.getSelectedNodeRange());
+						selectedNode.accept(yieldChecker);
+					}
+				}
 				ASTNode toMove= source.createMoveTarget(
 						selectedNodes[0], selectedNodes[index],
 						replacementNode, substitute);

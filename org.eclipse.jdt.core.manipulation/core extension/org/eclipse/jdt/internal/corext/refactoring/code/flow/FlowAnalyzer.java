@@ -107,6 +107,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
@@ -154,6 +155,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	}
 
 	protected abstract boolean createReturnFlowInfo(ReturnStatement node);
+	protected abstract boolean createReturnFlowInfo(YieldStatement node);
 
 	protected abstract boolean traverseNode(ASTNode node);
 
@@ -169,6 +171,10 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	//---- Hooks to create Flow info objects. User may introduce their own infos.
 
 	protected ReturnFlowInfo createReturn(ReturnStatement statement) {
+		return new ReturnFlowInfo(statement);
+	}
+
+	protected ReturnFlowInfo createReturn(YieldStatement statement) {
 		return new ReturnFlowInfo(statement);
 	}
 
@@ -837,6 +843,20 @@ abstract class FlowAnalyzer extends GenericVisitor {
 
 	@Override
 	public void endVisit(ReturnStatement node) {
+		if (skipNode(node))
+			return;
+
+		if (createReturnFlowInfo(node)) {
+			ReturnFlowInfo info= createReturn(node);
+			setFlowInfo(node, info);
+			info.merge(getFlowInfo(node.getExpression()));
+		} else {
+			assignFlowInfo(node, node.getExpression());
+		}
+	}
+
+	@Override
+	public void endVisit(YieldStatement node) {
 		if (skipNode(node))
 			return;
 

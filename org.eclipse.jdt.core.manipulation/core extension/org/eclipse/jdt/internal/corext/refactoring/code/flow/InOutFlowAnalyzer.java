@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,11 +26,15 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 public class InOutFlowAnalyzer extends FlowAnalyzer {
+
+	private ASTNode[] fSelectedNodes= null;
 
 	public InOutFlowAnalyzer(FlowContext context) {
 		super(context);
@@ -39,6 +43,7 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	public FlowInfo perform(ASTNode[] selectedNodes) {
 		FlowContext context= getFlowContext();
 		GenericSequentialFlowInfo result= createSequential();
+		fSelectedNodes= selectedNodes;
 		for (ASTNode node : selectedNodes) {
 			node.accept(this);
 			result.merge(getFlowInfo(node), context);
@@ -56,6 +61,15 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
 		// we are only traversing selected nodes.
 		return true;
+	}
+
+	@Override
+	protected boolean createReturnFlowInfo(YieldStatement node) {
+		ASTNode parent= node.getParent();
+		while (parent != null && !(parent instanceof SwitchExpression)) {
+			parent= parent.getParent();
+		}
+		return (parent instanceof SwitchExpression) && fSelectedNodes.length > 0 && parent.getStartPosition() < fSelectedNodes[0].getStartPosition();	// we are only traversing selected nodes.
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
 
@@ -58,6 +59,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		}
 		@Override
 		protected boolean createReturnFlowInfo(ReturnStatement node) {
+			// Make sure that the whole return statement is selected or located before the selection.
+			return node.getStartPosition() + node.getLength() <= fSelection.getExclusiveEnd();
+		}
+		@Override
+		protected boolean createReturnFlowInfo(YieldStatement node) {
 			// Make sure that the whole return statement is selected or located before the selection.
 			return node.getStartPosition() + node.getLength() <= fSelection.getExclusiveEnd();
 		}
@@ -164,6 +170,13 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 
 	@Override
 	protected boolean createReturnFlowInfo(ReturnStatement node) {
+		// Make sure that the whole return statement is located after the selection. There can be cases like
+		// return i + [x + 10] * 10; In this case we must not create a return info node.
+		return node.getStartPosition() >= fSelection.getInclusiveEnd();
+	}
+
+	@Override
+	protected boolean createReturnFlowInfo(YieldStatement node) {
 		// Make sure that the whole return statement is located after the selection. There can be cases like
 		// return i + [x + 10] * 10; In this case we must not create a return info node.
 		return node.getStartPosition() >= fSelection.getInclusiveEnd();
