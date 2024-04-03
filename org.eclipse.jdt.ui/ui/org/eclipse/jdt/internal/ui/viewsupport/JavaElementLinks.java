@@ -451,7 +451,7 @@ public class JavaElementLinks {
 
 		@Override
 		protected void appendTypeParameterWithBounds(ITypeParameter typeParameter, long flags) throws JavaModelException {
-			if (noEnhancements) {
+			if (noEnhancements || nextNestingLevel == 1) {
 				super.appendTypeParameterWithBounds(typeParameter, flags);
 			} else {
 				fBuffer.append("<span class='"); //$NON-NLS-1$
@@ -494,6 +494,11 @@ public class JavaElementLinks {
 			} else {
 				super.appendTypeArgumentSignaturesLabel(enclosingElement, typeArgsSig, flags);
 			}
+		}
+
+		@Override
+		protected void appendTypeParameteSignatureLabel(String typeVariableName) {
+			super.appendTypeParameteSignatureLabel(wrapWithTypeClass(typeVariableName, typeVariableName));
 		}
 	}
 
