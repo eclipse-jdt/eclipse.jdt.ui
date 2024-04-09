@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20567,6 +20567,29 @@ public class CleanUpTest extends CleanUpTestCase {
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testRemoveParenthesesIssue1319() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Integer i = 0;\n" //
+				+ "        (i++).toString();\n" //
+				+ "        (++i).toString();\n" //
+				+ "        (i--).toString();\n" //
+				+ "        (--i).toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
+		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
 	}
 
 	@Test
