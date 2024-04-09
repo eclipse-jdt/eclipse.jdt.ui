@@ -20582,6 +20582,10 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        (++i).toString();\n" //
 				+ "        (i--).toString();\n" //
 				+ "        (--i).toString();\n" //
+				+ "        ((i++)).toString();\n" //
+				+ "        ((++i)).toString();\n" //
+				+ "        ((i--)).toString();\n" //
+				+ "        ((--i)).toString();\n" //
 				+ "    }\n" //
 				+ "}\n";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -20589,7 +20593,24 @@ public class CleanUpTest extends CleanUpTestCase {
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES);
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 
-		assertRefactoringHasNoChange(new ICompilationUnit[] {cu1});
+		sample= "" //
+				+ "package test;\n" //
+				+ "public class E {\n" //
+				+ "    public void foo() {\n" //
+				+ "        Integer i = 0;\n" //
+				+ "        (i++).toString();\n" //
+				+ "        (++i).toString();\n" //
+				+ "        (i--).toString();\n" //
+				+ "        (--i).toString();\n" //
+				+ "        (i++).toString();\n" //
+				+ "        (++i).toString();\n" //
+				+ "        (i--).toString();\n" //
+				+ "        (--i).toString();\n" //
+				+ "    }\n" //
+				+ "}\n";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
 	@Test
