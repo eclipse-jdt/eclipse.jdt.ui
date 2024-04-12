@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2022 IBM Corporation and others.
+ * Copyright (c) 2011, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,9 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -348,6 +350,10 @@ public class NecessaryParenthesesChecker {
 
 		if (parent instanceof Expression) {
 			Expression parentExpression= (Expression)parent;
+
+			if ((expression instanceof PrefixExpression || expression instanceof PostfixExpression) && locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
+				return true;
+			}
 
 			if (expression instanceof PrefixExpression) { // see bug 405096
 				return needsParenthesesForPrefixExpression(parentExpression, ((PrefixExpression) expression).getOperator());
