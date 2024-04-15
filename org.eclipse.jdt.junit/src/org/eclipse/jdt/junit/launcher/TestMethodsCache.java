@@ -24,17 +24,17 @@ import java.util.Set;
 class TestMethodsCache {
 	/**
 	 * An <code>AutoCloseable</code> that can contain nested instances and can run a
-	 * <code>Runnable</code> upon closing the <i>outer</i> instance. <br/>
+	 * <code>Runnable</code> upon creating the <i>outer</i> instance. <br/>
 	 * <br/>
 	 * Example:
 	 *
 	 * <pre>
 	 *
-	 * try (var outer= new NestedAutoCloseable(() -> System.out.println("Bye bye outer"))) {
-	 * 	try (var inner= new NestedAutoCloseable(() -> System.out.println("Bye bye inner"))) {
+	 * try (var outer= new NestedAutoCloseable(() -> System.out.println("Hello outer"))) { // prints "Hello outer"
+	 * 	try (var inner= new NestedAutoCloseable(() -> System.out.println("Hello inner"))) { // doesn't print anything
 	 * 		// ...
-	 * 	} // doesn't print anything
-	 * } // prints "Bye bye outer"
+	 * 	}
+	 * }
 	 * </pre>
 	 */
 	private static class NestedAutoCloseable implements AutoCloseable {
