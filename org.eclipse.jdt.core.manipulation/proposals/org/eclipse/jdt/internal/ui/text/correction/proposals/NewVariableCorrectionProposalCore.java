@@ -90,7 +90,7 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 	final private int  fVariableKind;
 	final private SimpleName fOriginalNode;
 	final private ITypeBinding fSenderBinding;
-	final private boolean fAddFinal;
+	private boolean fAddFinal;
 
 	public NewVariableCorrectionProposalCore(String label, ICompilationUnit cu, int variableKind, SimpleName node, ITypeBinding senderBinding, int relevance, boolean addFinal) {
 		super(label, cu, null, relevance);
@@ -103,7 +103,7 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 		fVariableKind= variableKind;
 		fOriginalNode= node;
 		fSenderBinding= senderBinding;
-		fAddFinal = addFinal;
+		fAddFinal= addFinal;
 	}
 
 	@Override
@@ -624,6 +624,10 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 	 */
 	public int getVariableKind() {
 		return fVariableKind;
+	}
+
+	public void setAddFinal(boolean addFinal) {
+		fAddFinal= addFinal;
 	}
 
 }
