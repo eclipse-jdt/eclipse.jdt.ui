@@ -113,7 +113,7 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 	private final List<String> fParamNames;
 
 	private VariableDeclarationFragment fExistingFragment;
-	private boolean fAddFinal;
+	private final boolean fAddFinal;
 
 	public AssignToVariableAssistProposalCore(ICompilationUnit cu, int variableKind, ExpressionStatement node, ITypeBinding typeBinding, int relevance, boolean addFinal) {
 		super("", cu, null, relevance); //$NON-NLS-1$
@@ -368,10 +368,6 @@ public class AssignToVariableAssistProposalCore extends LinkedCorrectionProposal
 			}
 		}
 		return false;
-	}
-
-	public void setAddFinal (boolean addFinal) {
-		this.fAddFinal= addFinal;
 	}
 
 	private ASTRewrite doAddField(ASTRewrite rewrite, ASTNode nodeToAssign, ITypeBinding typeBinding, int index) {
