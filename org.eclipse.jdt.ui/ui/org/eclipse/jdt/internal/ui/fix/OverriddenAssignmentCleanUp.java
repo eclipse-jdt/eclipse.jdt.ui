@@ -159,13 +159,11 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 								shouldMoveDown &= varDefinitionsUsesVisitor.getWrites().isEmpty();
 							}
 
-							stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
-
-//							if (fragment.getInitializer() == null) {
-//								stmtToInspect= null;
-//							} else {
-//								stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
-//							}
+							if (fragment.getInitializer() == null) {
+								stmtToInspect= null;
+							} else {
+								stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
+							}
 						}
 
 						if (overridingAssignment != null && doesNotShareLines(node) && doesNotShareLines(overridingAssignment)) {
@@ -300,7 +298,7 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 				moveUp(cuRewrite, group);
 			} else if (canMoveDown && moveDown) {
 				moveDown(cuRewrite, group);
-			} else if (fragment.getInitializer() != null) {
+			} else {
 				removeInitializer(cuRewrite, group);
 			}
 		}
@@ -377,17 +375,8 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 			Expression rhs= overridingAssignment.getRightHandSide();
 			String rhsText= cu.getBuffer().getText(rhs.getStartPosition(), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - rhs.getStartPosition());
 
-			String targetText= null;
-			if (fragment.getInitializer() == null) {
-				String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), declaration.getLength() - 1);
-				Hashtable<String, String> options= JavaCore.getOptions();
-				String spaceBeforeAssignment= options.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR) == JavaCore.INSERT ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
-				String spaceAfterAssignment= options.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR) == JavaCore.INSERT ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
-				targetText= declarationText + spaceBeforeAssignment + "=" + spaceAfterAssignment + rhsText; //$NON-NLS-1$
-			} else {
-				String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
-				targetText= declarationText + rhsText;
-			}
+			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
+			String targetText= declarationText + rhsText;
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 			overridingAssignment.getParent().setProperty(IGNORE_LEADING_COMMENT, Boolean.TRUE);

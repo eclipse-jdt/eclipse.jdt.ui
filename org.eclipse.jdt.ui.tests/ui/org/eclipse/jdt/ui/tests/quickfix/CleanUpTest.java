@@ -17755,7 +17755,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public long removeInitForLong() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        long reassignedVar;\n" //
-				+ "        System.out.println();\n" //
 				+ "        reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
@@ -17763,7 +17762,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public String removeInitForString() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        String reassignedVar;\n" //
-				+ "        System.out.println();\n" //
 				+ "        reassignedVar = File.pathSeparator;\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
@@ -17775,7 +17773,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "    public long moveDeclOnlyIfInitialized() {\n" //
 				+ "        // comment 1\n" //
 				+ "        long time;\n" //
 				+ "        // comment 2\n" //
@@ -17789,22 +17787,22 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void complexMoves(String str) {\n" //
 				+ "        // t is a String\n" //
 				+ "        String t;\n" //
+				+ "        t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
 				+ "        // s is a String\n" //
 				+ "        String s;\n" //
+				+ "        // this comment will get lost\n" //
+				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
+				+ "            \"xyz\" +\n" //
+				+ "            \"ghi\"; //$NON-NLS-1$\n" //
 				+ "        // No move for multiple declarations\n" //
 				+ "        String v = \"ppp\", w; //$NON-NLS-1$\n" //
 				+ "        // No move for multiple statements on line\n" //
 				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        int j = 7;\n" //
-				+ "        // this comment will get lost\n" //
-				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
-				+ "            \"xyz\" +\n" //
-				+ "            \"ghi\"; //$NON-NLS-1$\n" //
 				+ "        j = 4 +\n" //
 				+ "        	       // some comment\n" //
 				+ "        	       5 +\n" //
 				+ "        	       6;\n" //
-				+ "        t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
 				+ "        w = \"aaa\"; //$NON-NLS-1$\n" //
 				+ "        k = \"ttt\"; //$NON-NLS-1$\n" //
 				+ "        l = \"uuu\"; //$NON-NLS-1$\n" //
@@ -17841,16 +17839,13 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public long removeInitForLong() {\n" //
 				+ "        // Keep this comment\n" //
-				+ "        long reassignedVar;\n" //
-				+ "        System.out.println();\n" //
-				+ "        reassignedVar = System.currentTimeMillis();\n" //
+				+ "        long reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public String removeInitForString() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        String reassignedVar = File.pathSeparator;\n" //
-				+ "        System.out.println();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -17860,7 +17855,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "    public long moveDeclOnlyIfInitialized() {\n" //
 				+ "        // comment 1\n" //
 				+ "        long time;\n" //
 				+ "        // comment 2\n" //
@@ -17873,6 +17868,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void complexMoves(String str) {\n" //
 				+ "        // t is a String\n" //
 				+ "        String t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        \n" //
 				+ "        // s is a String\n" //
 				+ "        String s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
 				+ "                    \"xyz\" +\n" //
@@ -17919,10 +17915,9 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public long removeInitForLong() {\n" //
-				+ "        // This comment will be lost\n" //
-				+ "        long reassignedVar;\n" //
-				+ "        System.out.println();\n" //
 				+ "        // Keep this comment\n" //
+				+ "        long reassignedVar;\n" //
+				+ "        // This comment will be lost\n" //
 				+ "        reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
@@ -17930,7 +17925,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public String removeInitForString() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        String reassignedVar;\n" //
-				+ "        System.out.println();\n" //
 				+ "        reassignedVar = File.pathSeparator;\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
@@ -17942,7 +17936,7 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public long moveDeclOnlyIfEnabled() {\n" //
+				+ "    public long moveDeclOnlyIfInitialized() {\n" //
 				+ "        // comment 1\n" //
 				+ "        long time;\n" //
 				+ "        // comment 2\n" //
@@ -17957,22 +17951,22 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public void complexMoves(String str) {\n" //
 				+ "        // t is a String\n" //
 				+ "        String t;\n" //
+				+ "        t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
 				+ "        // s is a String\n" //
 				+ "        String s;\n" //
+				+ "        // this comment will get lost\n" //
+				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
+				+ "            \"xyz\" +\n" //
+				+ "            \"ghi\"; //$NON-NLS-1$\n" //
 				+ "        // No move for multiple declarations\n" //
 				+ "        String v = \"ppp\", w; //$NON-NLS-1$\n" //
 				+ "        // No move for multiple statements on line\n" //
 				+ "        String k = \"rrr\"; String l = \"sss\"; //$NON-NLS-1$ //$NON-NLS-2$\n" //
 				+ "        int j = 7;\n" //
-				+ "        // this comment will get lost\n" //
-				+ "        s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
-				+ "            \"xyz\" +\n" //
-				+ "            \"ghi\"; //$NON-NLS-1$\n" //
 				+ "        j = 4 +\n" //
 				+ "        	       // some comment\n" //
 				+ "        	       5 +\n" //
 				+ "        	       6;\n" //
-				+ "        t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
 				+ "        w = \"aaa\"; //$NON-NLS-1$\n" //
 				+ "        k = \"ttt\"; //$NON-NLS-1$\n" //
 				+ "        l = \"uuu\"; //$NON-NLS-1$\n" //
@@ -18007,7 +18001,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public long removeInitForLong() {\n" //
-				+ "        System.out.println();\n" //
 				+ "        // Keep this comment\n" //
 				+ "        long reassignedVar = System.currentTimeMillis();\n" //
 				+ "        return reassignedVar;\n" //
@@ -18016,7 +18009,6 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "    public String removeInitForString() {\n" //
 				+ "        // Keep this comment\n" //
 				+ "        String reassignedVar = File.pathSeparator;\n" //
-				+ "        System.out.println();\n" //
 				+ "        return reassignedVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
@@ -18026,19 +18018,21 @@ public class CleanUpTest extends CleanUpTestCase {
 				+ "        return reassignedPassiveVar;\n" //
 				+ "    }\n" //
 				+ "\n" //
-				+ "    public long moveDeclOnlyIfEnabled() {\n" //
-				+ "        \n" //
+				+ "    public long moveDeclOnlyIfInitialized() {\n" //
+				+ "        // comment 1\n" //
+				+ "        long time;\n" //
 				+ "        // comment 2\n" //
 				+ "        String separator = System.lineSeparator();\n" //
 				+ "        System.out.println(separator);\n" //
 				+ "        // comment 3\n" //
-				+ "        long time = System.currentTimeMillis();\n" //
+				+ "        time = System.currentTimeMillis();\n" //
 				+ "        return time;\n" //
 				+ "    }\n" //
 				+ "\n" //
 				+ "    public void complexMoves(String str) {\n" //
 				+ "        // t is a String\n" //
 				+ "        String t = /* abc */ \"pqr\"; //$NON-NLS-1$\n" //
+				+ "        \n" //
 				+ "        // s is a String\n" //
 				+ "        String s = /* abc */ \"def\" +	//$NON-NLS-1$\n" //
 				+ "                    \"xyz\" +\n" //
