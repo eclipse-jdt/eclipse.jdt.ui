@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -152,8 +153,9 @@ public class ChangedValueChecker extends AbstractChecker {
 		if (methodBinding == null || iTypeBinding == null) {
 			return null;
 		}
-		if (!(iTypeBinding.getJavaElement() instanceof IType))
+		if (!(iTypeBinding.getJavaElement() instanceof IType)) {
 			return null;
+		}
 		IType it= (IType) (iTypeBinding.getJavaElement());
 		try {
 			IJavaElement root= it.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -164,35 +166,54 @@ public class ChangedValueChecker extends AbstractChecker {
 					return null;
 				}
 			}
-			ITypeHierarchy ith= it.newTypeHierarchy(iTypeBinding.getJavaElement().getJavaProject(), null);
 			IMethod iMethod= (IMethod) methodBinding.getJavaElement();
-			if (iMethod == null || ith == null) {
+			if (iMethod == null) {
 				return null;
 			}
-
-			ArrayList<IType> iTypes= new ArrayList<>();
-			findTypes(it, ith, iTypes);
-			for (IType t : iTypes) {
-				IMethod tmp= JavaModelUtil.findMethod(iMethod.getElementName(),
-						iMethod.getParameterTypes(), false, t);
-				if (tmp != null) {
-					ICompilationUnit icu= tmp.getCompilationUnit();
-					if (icu == null || icu.getSource() == null) {
-						return null;
-					}
-					ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
-					parser.setKind(ASTParser.K_COMPILATION_UNIT);
-					parser.setSource(icu);
-					parser.setResolveBindings(true);
-					CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
-					final ASTNode perform= NodeFinder.perform(compilationUnit, tmp.getSourceRange());
-					if (perform instanceof MethodDeclaration && ((MethodDeclaration) perform).resolveBinding() != null) {
-						MethodDeclaration md= (MethodDeclaration) perform;
-						if (Modifier.isAbstract(md.resolveBinding().getModifiers()))
-							continue;
-						return md;
-					} else {
-						return null;
+			ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+			parser.setKind(ASTParser.K_COMPILATION_UNIT);
+			parser.setSource(iMethod.getCompilationUnit());
+			parser.setResolveBindings(true);
+			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+			ASTNode perform= NodeFinder.perform(compilationUnit, iMethod.getSourceRange());
+			if (perform instanceof MethodDeclaration && ((MethodDeclaration) perform).resolveBinding() != null) {
+				MethodDeclaration md= (MethodDeclaration) perform;
+				if (!Modifier.isAbstract(md.resolveBinding().getModifiers())) {
+					return md;
+				}
+			} else {
+				return null;
+			}
+			ICompilationUnit[] workingCopies = JavaCore.getWorkingCopies(null);
+			if (workingCopies.length < 500) {
+				ITypeHierarchy ith= it.newTypeHierarchy(iTypeBinding.getJavaElement().getJavaProject(), null);
+				if (ith == null) {
+					return null;
+				}
+				ArrayList<IType> iTypes= new ArrayList<>();
+				findTypes(it, ith, iTypes);
+				for (IType t : iTypes) {
+					IMethod tmp= JavaModelUtil.findMethod(iMethod.getElementName(),
+							iMethod.getParameterTypes(), false, t);
+					if (tmp != null) {
+						ICompilationUnit icu= tmp.getCompilationUnit();
+						if (icu == null || icu.getSource() == null) {
+							return null;
+						}
+						parser= ASTParser.newParser(AST.getJLSLatest());
+						parser.setKind(ASTParser.K_COMPILATION_UNIT);
+						parser.setSource(icu);
+						parser.setResolveBindings(true);
+						compilationUnit= (CompilationUnit) parser.createAST(null);
+						perform= NodeFinder.perform(compilationUnit, tmp.getSourceRange());
+						if (perform instanceof MethodDeclaration && ((MethodDeclaration) perform).resolveBinding() != null) {
+							MethodDeclaration md= (MethodDeclaration) perform;
+							if (Modifier.isAbstract(md.resolveBinding().getModifiers()))
+								continue;
+							return md;
+						} else {
+							return null;
+						}
 					}
 				}
 			}
@@ -489,6 +510,7 @@ public class ChangedValueChecker extends AbstractChecker {
 					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey())) {
 				return super.visit(methodInvocation);
 			}
+
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
 			if (md != null && md.getLength() < THRESHOLD) {
 				ReadVisitor rv= new ReadVisitor(false);
