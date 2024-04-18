@@ -39,7 +39,7 @@ public class AddModuleRequiresCorrectionProposal extends ChangeCorrectionProposa
 
 	@Override
 	protected Change createChange() throws CoreException {
-		return fCore.createChange();
+		return fCore.getChange();
 	}
 
 	@Override
