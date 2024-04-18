@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -41,6 +43,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
@@ -124,8 +127,8 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 				VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(node);
 
 				if (fragment != null
-						&& fragment.getInitializer() != null
-						&& ASTNodes.isPassiveWithoutFallingThrough(fragment.getInitializer())) {
+						&& (fragment.getInitializer() == null
+						|| ASTNodes.isPassiveWithoutFallingThrough(fragment.getInitializer()))) {
 					SimpleName varName= fragment.getName();
 					IVariableBinding variable= fragment.resolveBinding();
 					if (variable != null) {
@@ -156,7 +159,11 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 								shouldMoveDown &= varDefinitionsUsesVisitor.getWrites().isEmpty();
 							}
 
-							stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
+							if (fragment.getInitializer() == null) {
+								stmtToInspect= null;
+							} else {
+								stmtToInspect= ASTNodes.getNextSibling(stmtToInspect);
+							}
 						}
 
 						if (overridingAssignment != null && doesNotShareLines(node) && doesNotShareLines(overridingAssignment)) {
@@ -344,9 +351,17 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 			Expression rhs= overridingAssignment.getRightHandSide();
 			String rhsText= cu.getBuffer().getText(extendedStart(cuRewrite.getRoot(), rhs), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - extendedStart(cuRewrite.getRoot(), rhs));
 
-			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
-			String targetText= declarationText + rhsText;
-
+			String targetText= null;
+			if (fragment.getInitializer() == null) {
+				String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), declaration.getLength() - 1);
+				Hashtable<String, String> options= JavaCore.getOptions();
+				String spaceBeforeAssignment= options.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR) == JavaCore.INSERT ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
+				String spaceAfterAssignment= options.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR) == JavaCore.INSERT ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
+				targetText= declarationText + spaceBeforeAssignment + "=" + spaceAfterAssignment + rhsText; //$NON-NLS-1$
+			} else {
+				String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
+				targetText= declarationText + rhsText;
+			}
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 			declaration.setProperty(IGNORE_LEADING_COMMENT, Boolean.TRUE);
@@ -361,9 +376,7 @@ public class OverriddenAssignmentCleanUp extends AbstractCleanUp {
 			String rhsText= cu.getBuffer().getText(rhs.getStartPosition(), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - rhs.getStartPosition());
 
 			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
-
 			String targetText= declarationText + rhsText;
-
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 			overridingAssignment.getParent().setProperty(IGNORE_LEADING_COMMENT, Boolean.TRUE);
