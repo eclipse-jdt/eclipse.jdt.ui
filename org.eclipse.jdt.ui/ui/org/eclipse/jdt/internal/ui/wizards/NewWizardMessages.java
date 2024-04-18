@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -112,6 +112,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_enclosing_button;
 	public static String NewTypeWizardPage_error_InvalidPackageName;
 	public static String NewTypeWizardPage_error_ClashOutputLocation;
+	public static String NewTypeWizardPage_error_PackageNameEmptyForModule;
 	public static String NewTypeWizardPage_warning_DiscouragedPackageName;
 	public static String NewTypeWizardPage_warning_DefaultPackageDiscouraged;
 	public static String NewTypeWizardPage_warning_NotJDKCompliant;
