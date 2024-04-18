@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1900,7 +1900,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				// continue
 			}
 		} else {
-			status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged);
+			try {
+				if (project != null && project.getModuleDescription() != null) {
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_PackageNameEmptyForModule);
+				} else {
+					status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged);
+				}
+			} catch (JavaModelException e) {
+				status.setWarning(NewWizardMessages.NewTypeWizardPage_warning_DefaultPackageDiscouraged);
+			}
 		}
 
 		if (project != null && root != null) {
