@@ -37,6 +37,7 @@
             delegateDescription="%JUnitLaunchDelegate.description"
             delegateName="%JUnitLaunchDelegate.name"
             allowCommandLine="true"
+            allowPrototypes="true"
             delegate="org.eclipse.jdt.ui.unittest.junit.launcher.AdvancedJUnitLaunchConfigurationDelegate"
             modes="run, debug"
             id="org.eclipse.jdt.ui.unittest.junit.launchConfiguration"
