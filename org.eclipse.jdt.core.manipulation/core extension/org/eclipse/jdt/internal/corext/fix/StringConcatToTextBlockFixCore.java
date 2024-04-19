@@ -170,7 +170,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					try {
 						buffer= cu.getBuffer();
 						for (Comment comment : comments) {
-							if (!(comment instanceof LineComment lineComment)) {
+							if (!(comment instanceof LineComment)) {
 								return false;
 							}
 							if (!buffer.getText(comment.getStartPosition() + 2, comment.getLength() - 2).trim().isEmpty()) {
