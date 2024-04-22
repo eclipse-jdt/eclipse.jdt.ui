@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -111,10 +111,6 @@ public class MarkOccurrenceTest {
 		fMatch= null;
 		fSelWASTListener= new ISelectionListenerWithAST() {
 
-			/*
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST#selectionChanged(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.ITextSelection, org.eclipse.jdt.core.dom.CompilationUnit)
-			 * @since 3.1
-			 */
 			@Override
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
 				if (fMatch != null && selection != null && selection.getOffset() == fMatch.getOffset() && selection.getLength() == fMatch.getLength()) {
@@ -159,18 +155,14 @@ public class MarkOccurrenceTest {
 		try {
 			return (JavaEditor)EditorTestHelper.openInEditor(file, true);
 		} catch (PartInitException e) {
-			fail();
+			fail(e.getMessage());
 			return null;
 		}
 	}
 
 	@Test
-	public void markTypeOccurrences() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markTypeOccurrences() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -180,7 +172,7 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markOccurrencesAfterEditorReuse() {
+	public void markOccurrencesAfterEditorReuse() throws BadLocationException {
 		IPreferenceStore store= getPlatformUIStore();
 		store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", true);
 
@@ -198,11 +190,8 @@ public class MarkOccurrenceTest {
 			fFindReplaceDocumentAdapter= new FindReplaceDocumentAdapter(fDocument);
 			fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 
-			try {
-				fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
-			} catch (BadLocationException e) {
-				fail();
-			}
+			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
+
 			assertNotNull(fMatch);
 			fMatch= new Region(fMatch.getOffset(), 4);
 			fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -229,12 +218,8 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markMethodOccurrences() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "getClass", true, true, true, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markMethodOccurrences() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "getClass", true, true, true, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -243,12 +228,8 @@ public class MarkOccurrenceTest {
 		assertOccurrencesInWidget();
 	}
 	@Test
-	public void markFieldOccurrences() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "fName", true, true, true, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markFieldOccurrences() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "fName", true, true, true, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -258,12 +239,8 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markLocalOccurrences() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "runMethod", true, true, true, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markLocalOccurrences() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "runMethod", true, true, true, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -273,12 +250,8 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markMethodExitOccurrences() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "void runTest() throws", true, true, false, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markMethodExitOccurrences() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "void runTest() throws", true, true, false, false);
 		assertNotNull(fMatch);
 		fMatch= new Region(fMatch.getOffset(), 4);
 
@@ -289,12 +262,8 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markMethodExceptionOccurrences() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "NoSuchMethodException", true, true, true, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markMethodExceptionOccurrences() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "NoSuchMethodException", true, true, true, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -304,12 +273,8 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markImplementOccurrences1() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markImplementOccurrences1() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
 		assertNotNull(fMatch);
 		fMatch= new Region(fMatch.getOffset(), 4);
 
@@ -320,14 +285,10 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markImplementOccurrences2() {
+	public void markImplementOccurrences2() throws BadLocationException {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, false);
 
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+		fMatch= fFindReplaceDocumentAdapter.find(0, "Test {", true, true, false, false);
 		assertNotNull(fMatch);
 		fMatch= new Region(fMatch.getOffset(), 4);
 
@@ -338,12 +299,8 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void markImplementOccurrences3() {
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "Assert", true, true, false, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+	public void markImplementOccurrences3() throws BadLocationException {
+		fMatch= fFindReplaceDocumentAdapter.find(0, "Assert", true, true, false, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -353,13 +310,9 @@ public class MarkOccurrenceTest {
 	}
 
 	@Test
-	public void noOccurrencesIfDisabled() {
+	public void noOccurrencesIfDisabled() throws BadLocationException {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
-		try {
-			fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
-		} catch (BadLocationException e) {
-			fail();
-		}
+		fMatch= fFindReplaceDocumentAdapter.find(0, "TestResult", true, true, true, false);
 		assertNotNull(fMatch);
 
 		fEditor.selectAndReveal(fMatch.getOffset(), fMatch.getLength());
@@ -387,7 +340,7 @@ public class MarkOccurrenceTest {
 					return;
 			}
 		}
-		fail();
+		fail("No StyleRange with expected highlight RGB for given position(" + position.offset + "," + position.length + ")");
 	}
 
 	/**
