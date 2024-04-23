@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 
 /**
- * Provides access to the text of the {@link Browser} internally created & used by {@link BrowserInformationControl}.
+ * Provides access to the text of the {@link Browser} internally created &amp; used by {@link BrowserInformationControl}.
  */
 public class BrowserTextAccessor {
 
