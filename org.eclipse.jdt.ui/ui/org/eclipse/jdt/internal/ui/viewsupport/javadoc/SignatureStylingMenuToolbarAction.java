@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor.IBrowserContentChangeListener;
 
 /**
- * Toolbar item action for building & presenting javadoc styling menu.
+ * Toolbar item action for building &amp; presenting javadoc styling menu.
  */
 public class SignatureStylingMenuToolbarAction extends Action implements IMenuCreator, IBrowserContentChangeListener, IStylingConfigurationListener {
 	private final Action[] noStylingActions= { new NoStylingEnhancementsAction() };
