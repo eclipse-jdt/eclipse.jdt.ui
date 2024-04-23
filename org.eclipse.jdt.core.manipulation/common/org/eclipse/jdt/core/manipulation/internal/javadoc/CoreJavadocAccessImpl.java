@@ -74,17 +74,17 @@ import org.eclipse.jdt.internal.ui.viewsupport.CoreJavaElementLinks;
  * Helper to get the content of a Javadoc comment as HTML.
  */
 public class CoreJavadocAccessImpl implements IJavadocAccess {
-	protected static final String BLOCK_TAG_START= "<ul>"; //$NON-NLS-1$
+	protected static final String BLOCK_TAG_START= "<dl>"; //$NON-NLS-1$
 
-	protected static final String BLOCK_TAG_END= "</ul>"; //$NON-NLS-1$
+	protected static final String BLOCK_TAG_END= "</dl>"; //$NON-NLS-1$
 
 	protected static final String BlOCK_TAG_TITLE_START= "<dt>"; //$NON-NLS-1$
 
 	protected static final String BlOCK_TAG_TITLE_END= "</dt>"; //$NON-NLS-1$
 
-	protected static final String BlOCK_TAG_ENTRY_START= "<li>"; //$NON-NLS-1$
+	protected static final String BlOCK_TAG_ENTRY_START= "<dd>"; //$NON-NLS-1$
 
-	protected static final String BlOCK_TAG_ENTRY_END= "</li>"; //$NON-NLS-1$
+	protected static final String BlOCK_TAG_ENTRY_END= "</dd>"; //$NON-NLS-1$
 
 	protected static final String PARAM_NAME_START= "<b>"; //$NON-NLS-1$
 
