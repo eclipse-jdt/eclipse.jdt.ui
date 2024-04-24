@@ -36,7 +36,7 @@ public class OpenCallHierarchyHyperlinkDetector extends JavaElementHyperlinkDete
 
 	@Override
 	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
-		if ((element.getElementType() == IJavaElement.METHOD || element.getElementType() == IJavaElement.FIELD) && (element instanceof IMember imember)) {
+		if (CallHierarchy.isPossibleInputElement(element) && (element instanceof IMember imember)) {
 			hyperlinksCollector.add(new OpenCallHierarchyHyperlink(wordRegion, openAction.getSite().getWorkbenchWindow(), imember));
 		}
 	}
