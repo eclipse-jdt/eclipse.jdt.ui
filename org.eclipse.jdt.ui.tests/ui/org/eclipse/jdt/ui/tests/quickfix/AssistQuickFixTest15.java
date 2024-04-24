@@ -1023,10 +1023,10 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
 		buf.append("                \"/***********\\n\" +\n");
-		buf.append("                \" * simple   \\n\" +\n");
+		buf.append("                \" * simple {} \\n\" +\n");
 		buf.append("                \" * copyright\\n\" +\n");
 		buf.append("                statement +\n");
-		buf.append("                \" * notice\\n\" +\n");
+		buf.append("                \" * notice {0}\\n\" +\n");
 		buf.append("                \"***********/\\n\"; // comment 2\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1048,10 +1048,10 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String copyright=\n");
 		buf.append("                MessageFormat.format(\"\"\"\n");
 		buf.append("		                /***********\n");
-		buf.append("		                 * simple  \\s\n");
+		buf.append("		                 * simple '{}'\\s\n");
 		buf.append("		                 * copyright\n");
 		buf.append("		                {0}\\\n");
-		buf.append("		                 * notice\n");
+		buf.append("		                 * notice '{'0'}'\n");
 		buf.append("		                ***********/\n");
 		buf.append("		                \"\"\", statement); // comment 2\n");
 		buf.append("    }\n");
@@ -1263,7 +1263,7 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String copyright=\n");
 		buf.append("                \"/***********\\n\" +\n");
 		buf.append("                \" * simple   \\n\" +\n");
-		buf.append("                \" * copyright\\n\" +\n");
+		buf.append("                \" * copyright %\\n\" +\n");
 		buf.append("                statement +\n");
 		buf.append("                \" * notice\\n\" +\n");
 		buf.append("                \"***********/\\n\"; // comment 2\n");
@@ -1285,7 +1285,7 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("                String.format(\"\"\"\n");
 		buf.append("		                /***********\n");
 		buf.append("		                 * simple  \\s\n");
-		buf.append("		                 * copyright\n");
+		buf.append("		                 * copyright %%\n");
 		buf.append("		                %s\\\n");
 		buf.append("		                 * notice\n");
 		buf.append("		                ***********/\n");

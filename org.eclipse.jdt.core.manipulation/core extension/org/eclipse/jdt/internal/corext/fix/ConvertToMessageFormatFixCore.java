@@ -255,9 +255,12 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 						}
 					}
 					String value= ((StringLiteral) operand).getEscapedValue();
+					value= value.replace("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+					value= value.replace("{", "'{'"); //$NON-NLS-1$ //$NON-NLS-2$
+					value= value.replace("}", "'}'"); //$NON-NLS-1$ //$NON-NLS-2$
+					value= value.replace("'{''}'", "'{}'"); //$NON-NLS-1$ //$NON-NLS-2$
 					fLiterals.add(value);
 					value= value.substring(1, value.length() - 1);
-					value= value.replace("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 					formatString.append(value);
 				} else {
 					fLiterals.add("\"{" + Integer.toString(i) + "}\""); //$NON-NLS-1$ //$NON-NLS-2$
