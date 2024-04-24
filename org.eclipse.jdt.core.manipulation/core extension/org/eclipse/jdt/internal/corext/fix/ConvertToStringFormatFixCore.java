@@ -247,6 +247,7 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 						}
 					}
 					String value= ((StringLiteral) operand).getEscapedValue();
+					value= value.replace("%", "%%"); //$NON-NLS-1$ //$NON-NLS-2$
 					fLiterals.add(value);
 					value= value.substring(1, value.length() - 1);
 					formatString.append(value);
