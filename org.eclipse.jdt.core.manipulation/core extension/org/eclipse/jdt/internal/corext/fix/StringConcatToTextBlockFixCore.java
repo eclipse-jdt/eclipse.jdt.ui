@@ -394,7 +394,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 	 * 3. Transform any trailing spaces into \s escapes
 	 * 4. Transform any non-trailing \t characters into tab characters
 	 */
-	private static List<String> unescapeBlock(String escapedText) {
+	public static List<String> unescapeBlock(String escapedText) {
 		StringBuilder transformed= new StringBuilder();
 		int readIndex= 0;
 		int bsIndex= 0;
