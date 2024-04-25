@@ -7377,7 +7377,7 @@
             runAfter="org.eclipse.jdt.ui.boolean_value_rather_than_comparison">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.overridden_assignment"
             runAfter="org.eclipse.jdt.ui.cleanup.double_negation">
       </cleanUp>
