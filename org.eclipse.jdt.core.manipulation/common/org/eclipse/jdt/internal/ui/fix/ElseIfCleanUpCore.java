@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,34 +10,22 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
-import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.fix.ElseIfFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -46,12 +34,12 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that uses the <code>else if</code> pseudo keyword.
  */
-public class ElseIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
-	public ElseIfCleanUp() {
+public class ElseIfCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
+	public ElseIfCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public ElseIfCleanUp(Map<String, String> options) {
+	public ElseIfCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -97,32 +85,7 @@ public class ElseIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
-
-		unit.accept(new ASTVisitor() {
-			@Override
-			public boolean visit(final IfStatement visited) {
-				Statement elseStatement= visited.getElseStatement();
-
-				if (elseStatement instanceof Block) {
-					IfStatement innerIf= ASTNodes.as(elseStatement, IfStatement.class);
-
-					if (innerIf != null) {
-						rewriteOperations.add(new ElseIfOperation(visited, innerIf));
-						return false;
-					}
-				}
-
-				return true;
-			}
-		});
-
-		if (rewriteOperations.isEmpty()) {
-			return null;
-		}
-
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CodeStyleCleanUp_ElseIf_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+		return ElseIfFixCore.createCleanUp(unit);
 	}
 
 	@Override
@@ -140,21 +103,4 @@ public class ElseIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		return null;
 	}
 
-	private static class ElseIfOperation extends CompilationUnitRewriteOperation {
-		private final IfStatement visited;
-		private final IfStatement innerIf;
-
-		public ElseIfOperation(final IfStatement visited, final IfStatement innerIf) {
-			this.visited= visited;
-			this.innerIf= innerIf;
-		}
-
-		@Override
-		public void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_ElseIf_description, cuRewrite);
-
-			rewrite.replace(visited.getElseStatement(), ASTNodes.createMoveTarget(rewrite, innerIf), group);
-		}
-	}
 }

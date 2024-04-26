@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.AddAllCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExtractIncrementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.InstanceofCleanUp;
@@ -43,7 +43,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new ControlStatementsCleanUp(values),
 				new SwitchCleanUpCore(values),
 				new AddAllCleanUp(values),
-				new ElseIfCleanUp(values),
+				new ElseIfCleanUpCore(values),
 				new ReduceIndentationCleanUp(values),
 				new ExpressionsCleanUp(values),
 				new ExtractIncrementCleanUp(values),

@@ -74,7 +74,7 @@ import org.eclipse.jdt.internal.ui.fix.ConstantsForSystemPropertyCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ElseIfCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
@@ -721,7 +721,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCaseCommon {
 
 		storeSettings(node);
 
-		cleanUpRefactoring.addCleanUp(new ElseIfCleanUp());
+		cleanUpRefactoring.addCleanUp(new ElseIfCleanUpCore());
 
 		doCleanUp(cleanUpRefactoring);
 	}
