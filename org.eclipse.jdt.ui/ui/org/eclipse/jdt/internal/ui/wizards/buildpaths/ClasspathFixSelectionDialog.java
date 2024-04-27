@@ -109,6 +109,8 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 						throw new InterruptedException();
 					} catch (CoreException e2) {
 						throw new InvocationTargetException(e2);
+					} catch(RuntimeException e3) {
+						throw new InvocationTargetException(e3);
 					} finally {
 						monitor.done();
 					}
