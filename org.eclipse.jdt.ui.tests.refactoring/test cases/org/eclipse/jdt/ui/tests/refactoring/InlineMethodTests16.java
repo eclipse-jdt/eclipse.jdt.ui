@@ -84,4 +84,19 @@ public class InlineMethodTests16 extends InlineMethodTests {
 	public void testSwitchExpression4() throws Exception {
 		performSimpleTest();
 	}
+
+	@Test
+	public void testSwitchExpression5() throws Exception {
+		performSimpleTest();
+	}
+
+	@Test
+	public void testSwitchExpression6() throws Exception {
+		performSimpleTest();
+	}
+
+	@Test
+	public void testSwitchExpression7() throws Exception {
+		performSimpleTest();
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fGeneric;
 	private IPackageFragment fBinary;
 	private IPackageFragment fOperator;
+	private IPackageFragment fWarning;
 
 	@Override
 	public void before() throws Exception {
@@ -74,6 +75,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		fGeneric= root.createPackageFragment("generic_in", true, null);
 		fBinary= root.createPackageFragment("binary_in", true, null);
 		fOperator= root.createPackageFragment("operator_in", true, null);
+		fWarning= root.createPackageFragment("warning_in", true, null);
 
 		IJavaProject javaProject= getProject();
 		IProject project= javaProject.getProject();
@@ -228,5 +230,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 
 	public IPackageFragment getOperatorPackage() {
 		return fOperator;
+	}
+
+	public IPackageFragment getWarningPackage() {
+		return fWarning;
 	}
 }

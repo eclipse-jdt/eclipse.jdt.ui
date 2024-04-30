@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -294,6 +295,26 @@ public class SourceProvider {
 
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
+	}
+
+	public boolean isSynchronized() {
+		List<IExtendedModifier> modifierList= fDeclaration.modifiers();
+		for (IExtendedModifier modifier : modifierList) {
+			if (modifier instanceof Modifier m && m.isSynchronized()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isStatic() {
+		List<IExtendedModifier> modifierList= fDeclaration.modifiers();
+		for (IExtendedModifier modifier : modifierList) {
+			if (modifier instanceof Modifier m && m.isStatic()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getMethodName() {

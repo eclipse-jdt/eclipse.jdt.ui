@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,9 +31,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.refactoring.refactoring";//$NON-NLS-1$
 
+	public static String CallInliner_cannot_synchronize_error;
+
 	public static String CallInliner_cast_analysis_error;
 
 	public static String CallInliner_constructors;
+
+	public static String CallInliner_create_sync_block_error;
 
 	public static String CallInliner_execution_flow;
 
