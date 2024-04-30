@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,7 +58,7 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 	public static final String SQUARE_BRACKET_CLOSE=   "/*]*/";
 	public static final int    SQUARE_BRACKET_CLOSE_LENGTH= SQUARE_BRACKET_CLOSE.length();
 
-	enum TestMode { VALID_SELECTION, INVALID_SELECTION, COMPARE_WITH_OUTPUT }
+	enum TestMode { VALID_SELECTION, INVALID_SELECTION, COMPARE_WITH_OUTPUT, WARNING_FOR_SELECTION }
 
 	private final boolean fIgnoreSelectionMarker;
 	private int[] fSelection;
@@ -110,6 +110,9 @@ public abstract class AbstractJunit4SelectionTestCase extends AbstractJunit4CUTe
 				break;
 			case INVALID_SELECTION:
 				assertFalse(checkPreconditions(refactoring, pm).isOK());
+				break;
+			case WARNING_FOR_SELECTION:
+				assertTrue(checkPreconditions(refactoring, pm).hasWarning());
 				break;
 			case COMPARE_WITH_OUTPUT:
 				IUndoManager undoManager= RefactoringCore.getUndoManager();

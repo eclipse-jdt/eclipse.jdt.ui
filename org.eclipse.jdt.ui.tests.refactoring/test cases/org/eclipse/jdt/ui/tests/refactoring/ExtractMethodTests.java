@@ -107,6 +107,10 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 				if (!status.isOK())
 					return;
 				break;
+			case WARNING_FOR_SELECTION:
+				if (!status.hasWarning())
+					return;
+				break;
 			case COMPARE_WITH_OUTPUT:
 			default:
 				break;
