@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
-import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
@@ -70,7 +70,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new MapMethodCleanUp(values),
 				new CollectionCloningCleanUp(values),
 				new MapCloningCleanUp(values),
-				new OverriddenAssignmentCleanUp(values),
+				new OverriddenAssignmentCleanUpCore(values),
 				new RedundantModifiersCleanUp(values),
 				new EmbeddedIfCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
