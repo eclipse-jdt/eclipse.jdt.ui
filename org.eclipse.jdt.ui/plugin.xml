@@ -7512,7 +7512,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.join">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.multi_catch"
             runAfter="org.eclipse.jdt.ui.cleanup.try_with_resource">
       </cleanUp>
