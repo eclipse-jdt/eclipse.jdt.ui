@@ -2521,6 +2521,27 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the top-level AbstractTypeDeclaration that is the parent of the node.
+	 *
+	 * @param node the node
+	 * @return the top-level AbstractTypeDeclaration node for the file that node is in
+	 */
+	public static ASTNode getTopLevelTypeDeclaration(ASTNode node) {
+		ASTNode result= null;
+		if (node instanceof AbstractTypeDeclaration) {
+			result= node;
+		}
+		ASTNode parent= node.getParent();
+		while (parent != null) {
+			if (parent instanceof AbstractTypeDeclaration) {
+				result= parent;
+			}
+			parent= parent.getParent();
+		}
+		return result;
+	}
+
+	/**
 	 * Returns the closest ancestor of <code>node</code> whose type is <code>nodeType</code>, or <code>null</code> if none.
 	 * <p>
 	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
