@@ -229,13 +229,20 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			List<String> formatArguments= new ArrayList<>();
 			StringBuilder formatString= new StringBuilder();
 			int tagsCount= 0;
-			boolean firstStringLiteral= true;
+			boolean isFirstStringLiteral= true;
+			boolean isFirstArgument= true;
+			Expression firstStringLiteral= operands.get(0);
+			Expression lastStringLiteral= firstStringLiteral;
+			Expression firstArgumentExpression= operands.get(0);
+			Expression lastArgumentExpression= firstArgumentExpression;
 			for (Expression operand : operands) {
 				if (operand instanceof StringLiteral) {
-					if (firstStringLiteral) {
+					if (isFirstStringLiteral) {
 						fIndent= indentOf(cu, operand);
-						firstStringLiteral= false;
+						isFirstStringLiteral= false;
+						firstStringLiteral= operand;
 					}
+					lastStringLiteral= operand;
 					NLSLine nlsLine= scanCurrentLine(cu, operand);
 					if (nlsLine != null) {
 						for (NLSElement element : nlsLine.getElements()) {
@@ -252,6 +259,11 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 					value= value.substring(1, value.length() - 1);
 					formatString.append(value);
 				} else {
+					if (isFirstArgument) {
+						firstArgumentExpression= operand;
+						isFirstArgument= false;
+					}
+					lastArgumentExpression= operand;
 					ITypeBinding binding= operand.resolveTypeBinding();
 					fLiterals.add("\"%" + stringFormatConversion(binding) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 					formatString.append("%").append(stringFormatConversion(binding)); //$NON-NLS-1$
@@ -265,7 +277,13 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			StringBuilder buffer= new StringBuilder();
 			buffer.append("String.format("); //$NON-NLS-1$
 
-			if (is15OrHigher) {
+			int minOffset= firstStringLiteral.getStartPosition() < firstArgumentExpression.getStartPosition() ? firstStringLiteral.getStartPosition() : firstArgumentExpression.getStartPosition();
+			int maxOffset= lastStringLiteral.getStartPosition() > lastArgumentExpression.getStartPosition() ?
+					lastStringLiteral.getStartPosition() + lastStringLiteral.getLength() : lastArgumentExpression.getStartPosition() + lastArgumentExpression.getLength();
+
+			boolean isSingleLine= root.getLineNumber(maxOffset) == root.getLineNumber(minOffset);
+
+			if (is15OrHigher && !isSingleLine) {
 				StringBuilder buf= new StringBuilder();
 
 				List<String> parts= new ArrayList<>();

@@ -237,13 +237,20 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			StringBuilder formatString= new StringBuilder();
 			int i= 0;
 			int tagsCount= 0;
-			boolean firstStringLiteral= true;
+			boolean isFirstStringLiteral= true;
+			boolean isFirstArgument= true;
+			Expression firstStringLiteral= operands.get(0);
+			Expression lastStringLiteral= firstStringLiteral;
+			Expression firstArgumentExpression= operands.get(0);
+			Expression lastArgumentExpression= firstArgumentExpression;
 			for (Expression operand : operands) {
 				if (operand instanceof StringLiteral) {
-					if (firstStringLiteral) {
+					if (isFirstStringLiteral) {
 						fIndent= indentOf(cu, operand);
-						firstStringLiteral= false;
+						isFirstStringLiteral= false;
+						firstStringLiteral= operand;
 					}
+					lastStringLiteral= operand;
 					NLSLine nlsLine= scanCurrentLine(cu, operand);
 					if (nlsLine != null) {
 						for (NLSElement element : nlsLine.getElements()) {
@@ -263,6 +270,11 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 					value= value.substring(1, value.length() - 1);
 					formatString.append(value);
 				} else {
+					if (isFirstArgument) {
+						firstArgumentExpression= operand;
+						isFirstArgument= false;
+					}
+					lastArgumentExpression= operand;
 					fLiterals.add("\"{" + Integer.toString(i) + "}\""); //$NON-NLS-1$ //$NON-NLS-2$
 					formatString.append("{").append(i).append("}"); //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -298,7 +310,13 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			StringBuilder buffer= new StringBuilder();
 			buffer.append("MessageFormat.format("); //$NON-NLS-1$
 
-			if (is15OrHigher) {
+			int minOffset= firstStringLiteral.getStartPosition() < firstArgumentExpression.getStartPosition() ? firstStringLiteral.getStartPosition() : firstArgumentExpression.getStartPosition();
+			int maxOffset= lastStringLiteral.getStartPosition() > lastArgumentExpression.getStartPosition() ?
+					lastStringLiteral.getStartPosition() + lastStringLiteral.getLength() : lastArgumentExpression.getStartPosition() + lastArgumentExpression.getLength();
+
+			boolean isSingleLine= root.getLineNumber(maxOffset) == root.getLineNumber(minOffset);
+
+			if (is15OrHigher && !isSingleLine) {
 				StringBuilder buf= new StringBuilder();
 
 				List<String> parts= new ArrayList<>();
@@ -419,5 +437,6 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 				rewrite.replace(infixExpression, formatInvocation, null);
 			}
 		}
+
 	}
 }
