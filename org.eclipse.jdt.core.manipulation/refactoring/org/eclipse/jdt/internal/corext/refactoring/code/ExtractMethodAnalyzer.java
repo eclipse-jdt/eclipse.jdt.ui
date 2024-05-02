@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -388,7 +389,7 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		if (fInputFlowInfo.isValueReturn()) {
 			fReturnKind= RETURN_STATEMENT_VALUE;
 		} else  if (fInputFlowInfo.isVoidReturn() || (fInputFlowInfo.isPartialReturn() && isVoidMethod() && isLastStatementSelected())) {
-			if (getSelectedNodes().length == 1) {
+			if (getSelectedNodes().length == 1 && getSelectedNodes()[0] instanceof ReturnStatement) {
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_return, JavaStatusContext.create(fCUnit, getSelection()));
 				fReturnKind= ERROR;
 				return status;

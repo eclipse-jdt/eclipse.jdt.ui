@@ -1838,7 +1838,7 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void test700() throws Exception {
-		returnTest();
+		invalidSelectionTest();
 	}
 
 	@Test
