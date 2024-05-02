@@ -388,6 +388,11 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		if (fInputFlowInfo.isValueReturn()) {
 			fReturnKind= RETURN_STATEMENT_VALUE;
 		} else  if (fInputFlowInfo.isVoidReturn() || (fInputFlowInfo.isPartialReturn() && isVoidMethod() && isLastStatementSelected())) {
+			if (getSelectedNodes().length == 1) {
+				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_return, JavaStatusContext.create(fCUnit, getSelection()));
+				fReturnKind= ERROR;
+				return status;
+			}
 			fReturnKind= RETURN_STATEMENT_VOID;
 		} else if (fInputFlowInfo.isNoReturn() || fInputFlowInfo.isThrow() || fInputFlowInfo.isUndefined()) {
 			fReturnKind= NO;
