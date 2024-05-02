@@ -373,6 +373,21 @@ class SourceAnalyzer  {
 				boolean isPublic= Modifier.isPublic(modifiers);
 				boolean isPrivate= Modifier.isPrivate(modifiers);
 				boolean isProtected= Modifier.isProtected(modifiers);
+				if (!isPublic) {
+					if (binding instanceof IVariableBinding varBinding) {
+						ITypeBinding declClass= varBinding.getDeclaringClass();
+						if (!varBinding.isField() || declClass == null || declClass.isLocal()) {
+							return true;
+						}
+					} else if (binding instanceof IMethodBinding methodBinding) {
+						ITypeBinding declClass= methodBinding.getDeclaringClass();
+						if (declClass == null || declClass.isLocal()) {
+							return true;
+						}
+					} else {
+						return true;
+					}
+				}
 				accessesPrivate= accessesPrivate || isPrivate;
 				accessesProtected= accessesProtected || isProtected;
 				accessesPackagePrivate= accessesPackagePrivate || (!isPublic && !isPrivate && !isProtected);

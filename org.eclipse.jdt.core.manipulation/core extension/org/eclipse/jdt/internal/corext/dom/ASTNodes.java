@@ -2526,15 +2526,15 @@ public class ASTNodes {
 	 * @param node the node
 	 * @return the top-level AbstractTypeDeclaration node for the file that node is in
 	 */
-	public static ASTNode getTopLevelTypeDeclaration(ASTNode node) {
-		ASTNode result= null;
+	public static AbstractTypeDeclaration getTopLevelTypeDeclaration(ASTNode node) {
+		AbstractTypeDeclaration result= null;
 		if (node instanceof AbstractTypeDeclaration) {
-			result= node;
+			result= (AbstractTypeDeclaration) node;
 		}
 		ASTNode parent= node.getParent();
 		while (parent != null) {
 			if (parent instanceof AbstractTypeDeclaration) {
-				result= parent;
+				result= (AbstractTypeDeclaration) parent;
 			}
 			parent= parent.getParent();
 		}

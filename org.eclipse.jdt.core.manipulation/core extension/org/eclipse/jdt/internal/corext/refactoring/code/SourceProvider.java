@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -820,10 +819,16 @@ public class SourceProvider {
 		}
 		ASTNode targetRoot= targetNode.getRoot();
 		if (targetRoot instanceof CompilationUnit cu && (fTypeRoot instanceof ICompilationUnit rootICU)) {
-			ASTNode typeNode= ASTNodes.getTopLevelTypeDeclaration(targetNode);
-			ASTNode declTypeNode= ASTNodes.getTopLevelTypeDeclaration(fDeclaration);
-			if (typeNode != null && declTypeNode.subtreeMatch(new ASTMatcher(), typeNode)) {
-				return result;
+			AbstractTypeDeclaration typeNode= ASTNodes.getTopLevelTypeDeclaration(targetNode);
+			AbstractTypeDeclaration declTypeNode= ASTNodes.getTopLevelTypeDeclaration(fDeclaration);
+			if (typeNode != null && declTypeNode != null) {
+				ITypeBinding typeNodeBinding= typeNode.resolveBinding();
+				ITypeBinding declTypeNodeBinding= declTypeNode.resolveBinding();
+				if (typeNodeBinding != null && declTypeNodeBinding != null) {
+					if (typeNodeBinding.isEqualTo(declTypeNodeBinding)) {
+						return result;
+					}
+				}
 			}
 			if (fAnalyzer.accessesPrivate()) {
 				result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_private, JavaStatusContext.create(fTypeRoot));
@@ -844,7 +849,7 @@ public class SourceProvider {
 				return result;
 			}
 			if (typeNode != null) {
-				ITypeBinding targetTypeBinding= ((AbstractTypeDeclaration)typeNode).resolveBinding();
+				ITypeBinding targetTypeBinding= typeNode.resolveBinding();
 				if (targetTypeBinding != null) {
 					if (ASTNodes.findImplementedType(targetTypeBinding, typeBinding.getQualifiedName()) == null
 							|| (targetNode instanceof MethodInvocation invocation && invocation.getExpression() != null && !(invocation.getExpression() instanceof ThisExpression))) {
