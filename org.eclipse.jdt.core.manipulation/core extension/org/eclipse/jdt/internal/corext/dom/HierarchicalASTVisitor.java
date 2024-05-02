@@ -1097,16 +1097,6 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(EnhancedForWithRecordPattern node) {
-		return visit((Statement)node);
-	}
-
-	@Override
-	public void endVisit(EnhancedForWithRecordPattern node) {
-		endVisit((Statement)node);
-	}
-
-	@Override
 	public boolean visit(ExpressionStatement node) {
 		return visit((Statement)node);
 	}

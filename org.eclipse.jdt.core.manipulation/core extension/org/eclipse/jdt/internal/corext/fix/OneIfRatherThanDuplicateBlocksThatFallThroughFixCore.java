@@ -106,10 +106,8 @@ public class OneIfRatherThanDuplicateBlocksThatFallThroughFixCore extends Compil
 				public boolean visit(PatternInstanceofExpression node) {
 					Pattern p= node.getPattern();
 					if (p instanceof TypePattern typePattern) {
-						List<SingleVariableDeclaration> patternVariables= typePattern.patternVariables();
-						for (SingleVariableDeclaration patternVariable : patternVariables) {
-							patternNames.add(patternVariable.getName().getFullyQualifiedName());
-						}
+						SingleVariableDeclaration patternVariable= typePattern.getPatternVariable();
+						patternNames.add(patternVariable.getName().getFullyQualifiedName());
 					}
 					return true;
 				}
