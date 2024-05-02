@@ -57,6 +57,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CallInliner_super_into_this_expression;
 
+	public static String CallInliner_unexpected_model_exception;
+
 	public static String Change_does_not_exist;
 
 	public static String ChangeSignatureRefactoring_add_constructor;
@@ -854,6 +856,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineMethodRefactoring_SourceAnalyzer_abstract_methods;
 
 	public static String InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_package_private;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_private;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_protected;
 
 	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors;
 

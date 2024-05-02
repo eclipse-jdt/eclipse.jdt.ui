@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -361,6 +361,41 @@ class SourceAnalyzer  {
 		}
 	}
 
+	private class AccessAnalyzer extends ASTVisitor {
+		public boolean accessesPrivate;
+		public boolean accessesProtected;
+		public boolean accessesPackagePrivate;
+		@Override
+		public boolean visit(SimpleName node) {
+			IBinding binding= node.resolveBinding();
+			if (binding != null) {
+				int modifiers= binding.getModifiers();
+				boolean isPublic= Modifier.isPublic(modifiers);
+				boolean isPrivate= Modifier.isPrivate(modifiers);
+				boolean isProtected= Modifier.isProtected(modifiers);
+				if (!isPublic) {
+					if (binding instanceof IVariableBinding varBinding) {
+						ITypeBinding declClass= varBinding.getDeclaringClass();
+						if (!varBinding.isField() || declClass == null || declClass.isLocal()) {
+							return true;
+						}
+					} else if (binding instanceof IMethodBinding methodBinding) {
+						ITypeBinding declClass= methodBinding.getDeclaringClass();
+						if (declClass == null || declClass.isLocal()) {
+							return true;
+						}
+					} else {
+						return true;
+					}
+				}
+				accessesPrivate= accessesPrivate || isPrivate;
+				accessesProtected= accessesProtected || isProtected;
+				accessesPackagePrivate= accessesPackagePrivate || (!isPublic && !isPrivate && !isProtected);
+			}
+			return true;
+		}
+	}
+
 	private ITypeRoot fTypeRoot;
 	private MethodDeclaration fDeclaration;
 	private Map<IVariableBinding, ParameterData> fParameters;
@@ -380,6 +415,10 @@ class SourceAnalyzer  {
 	private Map<ITypeBinding, NameData> fMethodTypeParameterMapping;
 
 	private boolean fInterruptedExecutionFlow;
+
+	private boolean fAccessesPrivate;
+	private boolean fAccessesProtected;
+	private boolean fAccessesPackagePrivate;
 
 	public SourceAnalyzer(ITypeRoot typeRoot, MethodDeclaration declaration) {
 		super();
@@ -420,6 +459,11 @@ class SourceAnalyzer  {
 			result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors, JavaStatusContext.create(fTypeRoot));
 			return result;
 		}
+		AccessAnalyzer accessAnalyzer= new AccessAnalyzer();
+		fDeclaration.accept(accessAnalyzer);
+		fAccessesPrivate= accessAnalyzer.accessesPrivate;
+		fAccessesProtected= accessAnalyzer.accessesProtected;
+		fAccessesPackagePrivate= accessAnalyzer.accessesPackagePrivate;
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
 		fDeclaration.accept(analyzer);
 		result.merge(analyzer.status);
@@ -534,6 +578,22 @@ class SourceAnalyzer  {
 	private ASTNode[] getStatements() {
 		List<Statement> statements= fDeclaration.getBody().statements();
 		return statements.toArray(new ASTNode[statements.size()]);
+	}
+
+	public boolean accessesPrivate() {
+		return fAccessesPrivate;
+	}
+
+	public boolean accessesProtected() {
+		return fAccessesProtected;
+	}
+
+	public boolean accessesPackagePrivate() {
+		return fAccessesPackagePrivate;
+	}
+
+	public boolean onlyAccessesPublic() {
+		return !fAccessesPrivate && !fAccessesProtected && !fAccessesPackagePrivate;
 	}
 
 }

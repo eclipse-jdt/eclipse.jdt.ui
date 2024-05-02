@@ -47,6 +47,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -265,6 +266,7 @@ public class CallInliner {
 			JavaManipulationPlugin.log(exception);
 		}
 		checkInvocationContext(result, severity);
+		checkAccessCompatibility(result, severity);
 
 		return result;
 	}
@@ -314,6 +316,17 @@ public class CallInliner {
 					RefactoringCoreMessages.CallInliner_super_into_this_expression,
 					JavaStatusContext.create(fCUnit, fInvocation)));
 			}
+		}
+	}
+
+	private void checkAccessCompatibility(RefactoringStatus result, int severity) {
+		try {
+			result.merge(fSourceProvider.checkAccessCompatible(fTargetNode));
+		} catch (JavaModelException e) {
+			result.addEntry(new RefactoringStatusEntry(
+					severity,
+					RefactoringCoreMessages.CallInliner_unexpected_model_exception,
+					JavaStatusContext.create(fCUnit, fInvocation)));
 		}
 	}
 
