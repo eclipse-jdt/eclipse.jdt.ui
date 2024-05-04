@@ -2690,4 +2690,14 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	public void testIssue1355() throws Exception {
 		invalidSelectionTest();
 	}
+
+	@Test
+	public void testIssue1356_1() throws Exception {
+		invalidSelectionTest();
+	}
+
+	@Test
+	public void testIssue1356_2() throws Exception {
+		invalidSelectionTest();
+	}
 }

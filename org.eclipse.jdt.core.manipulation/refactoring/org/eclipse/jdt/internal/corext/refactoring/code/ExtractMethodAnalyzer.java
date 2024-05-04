@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -89,6 +91,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -403,6 +406,12 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 			status.addError(RefactoringCoreMessages.FlowAnalyzer_execution_flow, JavaStatusContext.create(fCUnit, getSelection()));
 			fReturnKind= NO;
 		}
+		String checkForFinalFieldsProblem= checkForFinalFields();
+		if (checkForFinalFieldsProblem != null) {
+			status.addFatalError(checkForFinalFieldsProblem, JavaStatusContext.create(fCUnit, getSelection()));
+			fReturnKind= ERROR;
+			return status;
+		}
 		computeInput();
 		computeExceptions();
 		computeOutput(status);
@@ -412,6 +421,34 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		adjustArgumentsAndMethodLocals();
 		compressArrays();
 		return status;
+	}
+
+	private String checkForFinalFields() {
+		ASTNode[] selectedNodes= getSelectedNodes();
+		final String[] problems= new String[] { null };
+		for (ASTNode astNode : selectedNodes) {
+			try {
+				astNode.accept(new ASTVisitor() {
+					@Override
+					public boolean visit(Assignment node) {
+						IBinding binding= null;
+						if (node.getLeftHandSide() instanceof FieldAccess fieldAccess) {
+							binding= fieldAccess.resolveFieldBinding();
+						} else if (node.getLeftHandSide() instanceof SimpleName simpleName) {
+							binding= simpleName.resolveBinding();
+						}
+						if (binding instanceof IVariableBinding varBinding && varBinding.isField() && Modifier.isFinal(varBinding.getModifiers())) {
+							problems[0]= RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_final_field_assignment;
+							throw new AbortSearchException();
+						}
+						return false;
+					}
+				});
+			} catch (AbortSearchException e) {
+				// do nothing, just a way to exit early
+			}
+		}
+		return problems[0];
 	}
 
 	private String canHandleBranches() {
