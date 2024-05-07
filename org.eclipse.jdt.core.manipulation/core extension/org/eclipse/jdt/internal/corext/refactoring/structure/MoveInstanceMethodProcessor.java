@@ -1231,7 +1231,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(status);
 		if (fTargetType.isInterface()) {
 			if (Flags.isFinal(fMethod.getFlags())) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_final_to_interface, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(fTargetType)));
+				status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_final_to_interface, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(fTargetType)));
 			}
 		}
 
@@ -2341,7 +2341,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					modifierRewrite.setModifiers(Modifier.NONE, Modifier.DEFAULT, null);
 				} else if (!JdtFlags.isDefaultMethod(binding) && getTargetType().isInterface()) {
 					// Remove visibility modifiers and add 'default'
-					modifierRewrite.setModifiers(Modifier.DEFAULT, Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE, null);
+					modifierRewrite.setModifiers(Modifier.DEFAULT, Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.FINAL, null);
 				} else if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue())
 						&& MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
 					final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(fMethod, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(fMethod), MemberVisibilityAdjustor.getLabel(keyword) }), JavaStatusContext.create(fMethod), null, RefactoringStatusEntry.NO_CODE, null));
