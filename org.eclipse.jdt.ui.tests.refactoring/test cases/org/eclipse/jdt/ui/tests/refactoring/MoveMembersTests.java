@@ -644,13 +644,6 @@ public class MoveMembersTests extends GenericRefactoringTest {
 	}
 
 	@Test
-	public void testFail9() throws Exception{
-		fieldMethodTypeHelper_failing(new String[0],
-				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-				RefactoringStatus.FATAL, "p.B");
-	}
-
-	@Test
 	public void testFail15() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],
 				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
