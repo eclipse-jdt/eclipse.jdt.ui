@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SubstringCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnreachableBlockCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
@@ -75,7 +75,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new EmbeddedIfCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
 				new RedundantComparatorCleanUpCore(values),
-				new UnnecessaryArrayCreationCleanUp(values),
+				new UnnecessaryArrayCreationCleanUpCore(values),
 				new ArrayWithCurlyCleanUpCore(values),
 				new ReturnExpressionCleanUpCore(values),
 				new UselessReturnCleanUp(values),

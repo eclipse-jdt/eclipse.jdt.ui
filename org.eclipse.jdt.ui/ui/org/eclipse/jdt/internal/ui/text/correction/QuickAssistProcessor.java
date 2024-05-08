@@ -173,7 +173,7 @@ import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
-import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
+import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFixCore;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
@@ -210,7 +210,7 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
@@ -2943,14 +2943,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		IProposableFix fix= UnnecessaryArrayCreationFix.createUnnecessaryArrayCreationFix(context.getASTRoot(), methodInvocation);
+		IProposableFix fix= UnnecessaryArrayCreationFixCore.createUnnecessaryArrayCreationFix(context.getASTRoot(), methodInvocation);
 		if (fix == null)
 			return false;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new UnnecessaryArrayCreationCleanUp(options);
+		ICleanUp cleanUp= new UnnecessaryArrayCreationCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_UNNECESSARY_ARRAY_CREATION, image, context);
 		proposal.setCommandId(REMOVE_UNNECESSARY_ARRAY_CREATION_ID);
 

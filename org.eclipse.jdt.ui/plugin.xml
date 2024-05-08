@@ -7292,7 +7292,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation"
             runAfter="org.eclipse.jdt.ui.cleanup.redundant_comparator">
       </cleanUp>
