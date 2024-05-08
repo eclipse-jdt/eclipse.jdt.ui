@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 GK Software SE and others.
+ * Copyright (c) 2020, 2024 GK Software SE and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -201,7 +201,55 @@ public class JavadocHoverTests extends CoreTests {
 			int index= actualHtmlContent.indexOf("<pre><code>");
 			assertFalse(index == -1);
 			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
-			assertEquals("sequence doesn't match", actualSnippet, expectedCodeSequence);
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+		}
+	}
+
+	@Test
+	public void testCodeTagWithPre_2() throws Exception {
+		String source=
+				"package p;\n" +
+				"public class TestClass {\n" +
+			    "/**\n" +
+				" * <pre>{@see <a href=\"https://www.eclipse.org\">\n" +
+				" * www.eclipse.org\n" +
+				" * </a>}}</pre>\n" +
+				" * @see \"Hello\n" +
+				" * World\"}</pre>\n" +
+				" */\n" +
+				"int check (String value, String[] strings) {\n" +
+				"	for (String s : strings) {\n" +
+				"		if (s.equals(value)) {\n" +
+				"			return 0;\n" +
+				"		}\n" +
+				"		if (s.startsWith(value)) {\n" +
+				"			return 1;\n" +
+				"		}\n" +
+				"	}\n" +
+				"	return -1;\n" +
+				"}\n";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		IType type= cu.getType("TestClass");
+		// check javadoc on each member:
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			String expectedCodeSequence=
+					"<pre>{@see <a href=\"https://www.eclipse.org\">\n"
+					+ " www.eclipse.org\n"
+					+ " </a>}}</pre><dl><dt>Parameters:</dt><dd><b>value</b> </dd><dd><b>strings</b> </dd><dt>See Also:</dt><dd> \"Hello\n"
+					+ " World\"}</pre>";
+
+			// value should be expanded:
+			int index= actualHtmlContent.indexOf("<pre>{");
+			assertFalse(index == -1);
+			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2023 IBM Corporation and others.
+ * Copyright (c) 2008, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -124,6 +124,8 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 	protected HashMap<String, StringBuffer> fExceptionDescriptions;
 
 	protected int fPreCounter;
+
+	protected int fInPreCodeCounter= -1;
 
 	public CoreJavadocAccessImpl(IJavaElement element, Javadoc javadoc, String source, JavadocLookup lookup) {
 		Assert.isNotNull(element);
@@ -800,15 +802,23 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 			++fPreCounter;
 		} else if (tagElement == null && text.equals("</pre>")) { //$NON-NLS-1$
 			--fPreCounter;
+			if (fPreCounter == fInPreCodeCounter) {
+				fInPreCodeCounter= -1;
+			}
 		} else if (tagElement == null && fPreCounter > 0 && text.matches("}\\s*</pre>")) { //$NON-NLS-1$
 			// this is a temporary workaround for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/316
 			// as the parser for @code is treating the first } it finds as the end of the code
 			// sequence but this is not the case for a <pre>{@code sequence which goes over
 			// multiple lines and may contain }'s that are part of the code
 			--fPreCounter;
-			text= "</code></pre>"; //$NON-NLS-1$
-			int lastCodeEnd= fBuf.lastIndexOf("</code>"); //$NON-NLS-1$
-			fBuf.replace(lastCodeEnd, lastCodeEnd + 7, ""); //$NON-NLS-1$
+			if (fPreCounter == fInPreCodeCounter) {
+				text= "</code></pre>"; //$NON-NLS-1$
+				int lastCodeEnd= fBuf.lastIndexOf("</code>"); //$NON-NLS-1$
+				if (lastCodeEnd >= 0) {
+					fBuf.replace(lastCodeEnd, lastCodeEnd + 7, ""); //$NON-NLS-1$
+				}
+				fInPreCodeCounter= -1;
+			}
 		}
 		return text;
 	}
@@ -926,8 +936,12 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 
 		if (isLiteral || isCode || isSummary || isIndex)
 			fLiteralContent++;
-		if (isCode || (isLink && addCodeTagOnLink()))
+		if (isCode || (isLink && addCodeTagOnLink())) {
+			if (isCode && fPreCounter > 0 && fBuf.lastIndexOf("<pre>") == fBuf.length() - 5) { //$NON-NLS-1$
+				fInPreCodeCounter= fPreCounter - 1;
+			}
 			fBuf.append("<code>"); //$NON-NLS-1$
+		}
 		if (isReturn)
 			fBuf.append(JavaDocMessages.JavadocContentAccess2_returns_pre);
 
