@@ -1219,6 +1219,25 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	/**
+	 * Checks whether a final method is being moved into an interface
+	 *
+	 * @param status
+	 *			the status of the check
+	 * @throws JavaModelException
+	 *             if the declared methods of the target type could not be
+	 *             retrieved
+	 */
+	protected void checkFinalMethod(final RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(status);
+		if (fTargetType.isInterface()) {
+			if (Flags.isFinal(fMethod.getFlags())) {
+				status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_final_to_interface, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(fTargetType)));
+			}
+		}
+
+	}
+
+	/**
 	 * Checks whether a method with the proposed name already exists in the
 	 * target type.
 	 *
@@ -1317,6 +1336,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
 								checkConflictingTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingMethod(Progress.subMonitor(monitor, 1), status);
+								checkFinalMethod(status);
 
 								Checks.addModifiedFilesToChecker(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), context);
 
@@ -2321,7 +2341,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					modifierRewrite.setModifiers(Modifier.NONE, Modifier.DEFAULT, null);
 				} else if (!JdtFlags.isDefaultMethod(binding) && getTargetType().isInterface()) {
 					// Remove visibility modifiers and add 'default'
-					modifierRewrite.setModifiers(Modifier.DEFAULT, Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE, null);
+					modifierRewrite.setModifiers(Modifier.DEFAULT, Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.FINAL, null);
 				} else if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue())
 						&& MemberVisibilityAdjustor.needsVisibilityAdjustments(fMethod, keyword, adjustments)) {
 					final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(fMethod, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(fMethod), MemberVisibilityAdjustor.getLabel(keyword) }), JavaStatusContext.create(fMethod), null, RefactoringStatusEntry.NO_CODE, null));
