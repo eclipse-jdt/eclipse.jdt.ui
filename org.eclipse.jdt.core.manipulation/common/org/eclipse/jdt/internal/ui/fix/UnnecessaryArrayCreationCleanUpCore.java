@@ -24,9 +24,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
-import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
+import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFixCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
@@ -36,13 +35,13 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 /**
  * A fix that removes unnecessary array creation for a varargs parameter of a method or super method invocation.
  */
-public class UnnecessaryArrayCreationCleanUp extends AbstractMultiFix {
+public class UnnecessaryArrayCreationCleanUpCore extends AbstractMultiFix {
 
-	public UnnecessaryArrayCreationCleanUp() {
+	public UnnecessaryArrayCreationCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public UnnecessaryArrayCreationCleanUp(Map<String, String> options) {
+	public UnnecessaryArrayCreationCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -78,14 +77,14 @@ public class UnnecessaryArrayCreationCleanUp extends AbstractMultiFix {
 
 		final List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
 
-		UnnecessaryArrayCreationFix.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFix.UnnecessaryArrayCreationFinder(true, rewriteOperations);
+		UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder(true, rewriteOperations);
 		unit.accept(finder);
 
 		if (rewriteOperations.isEmpty()) {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.UnnecessaryArrayCreationCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.UnnecessaryArrayCreationCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]));
 	}
 
