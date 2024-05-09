@@ -1286,9 +1286,28 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		// Locals that are not passed as an arguments since the extracted method only
 		// writes to them
+		IRegion selectedNodeRange= fAnalyzer.getSelectedNodeRange();
+		int endOfSelectedNodes= selectedNodeRange.getOffset() + selectedNodeRange.getLength();
 		for (IVariableBinding methodLocal : fAnalyzer.getMethodLocals()) {
 			if (methodLocal != null) {
 				result.statements().add(createDeclaration(methodLocal, null));
+				// check if local variable that is used in selected nodes is also used outside of selected nodes, otherwise remove
+				SimpleName[] nodes= LinkedNodeFinder.findByBinding(fAnalyzer.getEnclosingBodyDeclaration(), methodLocal);
+				SimpleName firstNode= nodes[0];
+				VariableDeclarationStatement vdecl= ASTNodes.getFirstAncestorOrNull(firstNode, VariableDeclarationStatement.class);
+				if (vdecl != null) {
+					boolean needed= false;
+					for (int i= 1; i < nodes.length; ++i) {
+						SimpleName refNode= nodes[i];
+						if (refNode.getStartPosition() < selectedNodeRange.getOffset() || refNode.getStartPosition() > endOfSelectedNodes) {
+							needed= true;
+							break;
+						}
+					}
+					if (!needed) {
+						fRewriter.remove(vdecl, null);
+					}
+				}
 			}
 		}
 		for (ParameterInfo parameter : fParameterInfos) {
