@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.EnvironmentTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
+import org.eclipse.debug.ui.PrototypeTab;
 import org.eclipse.debug.ui.sourcelookup.SourceLookupTab;
 
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
@@ -45,7 +46,7 @@ public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] { new JUnitLaunchConfigurationTab(),
 				new JavaArgumentsTab(), new JavaJRETab(true),
 				isModularConfiguration ? new JavaDependenciesTab() : new JavaClasspathTab(), new SourceLookupTab(),
-				new EnvironmentTab(), new CommonTab() };
+				new EnvironmentTab(), new CommonTab(), new PrototypeTab() };
 		setTabs(tabs);
 	}
 

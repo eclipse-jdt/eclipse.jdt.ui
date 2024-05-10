@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -32,7 +34,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -65,10 +66,16 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ChangedValueChecker extends AbstractChecker {
 
@@ -147,13 +154,39 @@ public class ChangedValueChecker extends AbstractChecker {
 		}
 		return fConflict;
 	}
+	private class FunctionSearchRequestor extends SearchRequestor {
+
+		public List<SearchMatch> results= new ArrayList<>();
+
+		public List<SearchMatch> getResults() {
+			return results;
+		}
+
+		@Override
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+				results.add(match);
+			}
+		}
+
+	}
+
+	protected void search(SearchPattern searchPattern, IJavaSearchScope scope, SearchRequestor requestor) throws CoreException {
+		new SearchEngine().search(
+			searchPattern,
+			new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()},
+			scope,
+			requestor,
+			null);
+	}
 
 	private MethodDeclaration findFunctionDefinition(ITypeBinding iTypeBinding, IMethodBinding methodBinding) {
 		if (methodBinding == null || iTypeBinding == null) {
 			return null;
 		}
-		if (!(iTypeBinding.getJavaElement() instanceof IType))
+		if (!(iTypeBinding.getJavaElement() instanceof IType)) {
 			return null;
+		}
 		IType it= (IType) (iTypeBinding.getJavaElement());
 		try {
 			IJavaElement root= it.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
@@ -164,52 +197,63 @@ public class ChangedValueChecker extends AbstractChecker {
 					return null;
 				}
 			}
-			ITypeHierarchy ith= it.newTypeHierarchy(iTypeBinding.getJavaElement().getJavaProject(), null);
 			IMethod iMethod= (IMethod) methodBinding.getJavaElement();
-			if (iMethod == null || ith == null) {
+			if (iMethod == null) {
 				return null;
 			}
-
-			ArrayList<IType> iTypes= new ArrayList<>();
-			findTypes(it, ith, iTypes);
-			for (IType t : iTypes) {
-				IMethod tmp= JavaModelUtil.findMethod(iMethod.getElementName(),
-						iMethod.getParameterTypes(), false, t);
-				if (tmp != null) {
-					ICompilationUnit icu= tmp.getCompilationUnit();
-					if (icu == null || icu.getSource() == null) {
-						return null;
-					}
-					ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
-					parser.setKind(ASTParser.K_COMPILATION_UNIT);
-					parser.setSource(icu);
-					parser.setResolveBindings(true);
-					CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
-					final ASTNode perform= NodeFinder.perform(compilationUnit, tmp.getSourceRange());
-					if (perform instanceof MethodDeclaration && ((MethodDeclaration) perform).resolveBinding() != null) {
-						MethodDeclaration md= (MethodDeclaration) perform;
-						if (Modifier.isAbstract(md.resolveBinding().getModifiers()))
-							continue;
-						return md;
-					} else {
-						return null;
+			IType type= iMethod.getDeclaringType();
+			if (type == null) {
+				return null;
+			}
+			if (!type.isInterface()) {
+				ICompilationUnit icu= iMethod.getCompilationUnit();
+				if (icu == null || icu.getSource() == null) {
+					return null;
+				}
+				return getMethodDeclaration(iMethod, icu);
+			} else {
+				String typeName= type.getFullyQualifiedName();
+				SearchPattern pattern = SearchPattern.createPattern(typeName, IJavaSearchConstants.TYPE, IJavaSearchConstants.IMPLEMENTORS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+				FunctionSearchRequestor requestor= new FunctionSearchRequestor();
+				try {
+					search(pattern, SearchEngine.createJavaSearchScope(new IJavaElement[] {iMethod.getJavaProject()}), requestor);
+				} catch (CoreException e) {
+					return null;
+				}
+				List<SearchMatch> results= requestor.getResults();
+				for (SearchMatch result : results) {
+					Object obj= result.getElement();
+					if (obj instanceof IType resultType) {
+						ICompilationUnit icu= resultType.getCompilationUnit();
+						if (icu != null && icu.getSource() != null) {
+							MethodDeclaration md= getMethodDeclaration(iMethod, icu);
+							if (md != null) {
+								return md;
+							}
+						}
 					}
 				}
 			}
-			return null;
-		} catch (JavaModelException e) {
-		} catch (OperationCanceledException e) {
+		} catch (JavaModelException | OperationCanceledException e) {
+			// ignore
 		}
 		return null;
 	}
 
-	private static void findTypes(IType it, ITypeHierarchy ith, ArrayList<IType> iTypes) {
-		iTypes.add(it);
-
-		for (IType i : ith.getAllSubtypes(it)) {
-			iTypes.add(i);
+	private MethodDeclaration getMethodDeclaration(IMethod iMethod, ICompilationUnit icu) throws JavaModelException {
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(icu);
+		parser.setResolveBindings(true);
+		CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+		ASTNode perform= NodeFinder.perform(compilationUnit, iMethod.getSourceRange());
+		if (perform instanceof MethodDeclaration && ((MethodDeclaration) perform).resolveBinding() != null) {
+			MethodDeclaration md= (MethodDeclaration) perform;
+			if (!Modifier.isAbstract(md.resolveBinding().getModifiers())) {
+				return md;
+			}
 		}
-		return;
+		return null;
 	}
 
 	private ASTNode getOriginalExpression(ASTNode node) {
@@ -489,6 +533,7 @@ public class ChangedValueChecker extends AbstractChecker {
 					fEnclosingMethodSignature.equals(resolveMethodBinding.getMethodDeclaration().getKey())) {
 				return super.visit(methodInvocation);
 			}
+
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
 			if (md != null && md.getLength() < THRESHOLD) {
 				ReadVisitor rv= new ReadVisitor(false);

@@ -27,55 +27,7 @@
             <message_arguments>
                 <message_argument value="GuardedPattern"/>
                 <message_argument value="ASTFlattener"/>
-                <message_argument value="getExpression()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Java preview feature API" id="640712815">
-            <message_arguments>
-                <message_argument value="GuardedPattern"/>
-                <message_argument value="ASTFlattener"/>
                 <message_argument value="getPattern()"/>
-            </message_arguments>
-        </filter>
-        <filter id="640712815">
-            <message_arguments>
-                <message_argument value="RecordPattern"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="patterns()"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Java preview feature API" id="640712815">
-            <message_arguments>
-                <message_argument value="TypePattern"/>
-                <message_argument value="ASTFlattener"/>
-                <message_argument value="getPatternVariable()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/fix/OneIfRatherThanDuplicateBlocksThatFallThroughFixCore.java" type="org.eclipse.jdt.internal.corext.fix.OneIfRatherThanDuplicateBlocksThatFallThroughFixCore$OneIfRatherThanDuplicateBlocksThatFallThroughFinder$SuccessiveIfVisitor$PatternNameVisitor">
-        <filter comment="Allow TypePattern.patternVariables() call" id="640712815">
-            <message_arguments>
-                <message_argument value="TypePattern"/>
-                <message_argument value="PatternNameVisitor"/>
-                <message_argument value="patternVariables()"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="core extension/org/eclipse/jdt/internal/corext/fix/PatternMatchingForInstanceofFixCore.java" type="org.eclipse.jdt.internal.corext.fix.PatternMatchingForInstanceofFixCore$PatternMatchingForInstanceofFixOperation">
-        <filter comment="Need to set pattern of TypePatter" id="640712815">
-            <message_arguments>
-                <message_argument value="TypePattern"/>
-                <message_argument value="PatternMatchingForInstanceofFixOperation"/>
-                <message_argument value="setPatternVariable(SingleVariableDeclaration)"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="refactoring/org/eclipse/jdt/internal/corext/refactoring/surround/SurroundWithTryCatchAnalyzer.java" type="org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer">
-        <filter id="640712815">
-            <message_arguments>
-                <message_argument value="TypePattern"/>
-                <message_argument value="SurroundWithTryCatchAnalyzer"/>
-                <message_argument value="getPatternVariable()"/>
             </message_arguments>
         </filter>
     </resource>

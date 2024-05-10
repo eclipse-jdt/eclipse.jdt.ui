@@ -38,6 +38,8 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+
 public class AssistQuickFixTest15 extends QuickFixTest {
 
 	@Rule
@@ -998,5 +1000,558 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		assertProposalDoesNotExist(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 	}
-}
 
+	@Test
+	public void testConcatToMessageFormatTextBlock1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" +\n");
+		buf.append("                \" * simple {} \\n\" +\n");
+		buf.append("                \" * copyright\\n\" +\n");
+		buf.append("                statement +\n");
+		buf.append("                \" * notice {0}\\n\" +\n");
+		buf.append("                \"***********/\\n\"; // comment 2\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                MessageFormat.format(\"\"\"\n");
+		buf.append("		                /***********\n");
+		buf.append("		                 * simple '{}'\\s\n");
+		buf.append("		                 * copyright\n");
+		buf.append("		                {0}\\\n");
+		buf.append("		                 * notice '{'0'}'\n");
+		buf.append("		                ***********/\n");
+		buf.append("		                \"\"\", statement); // comment 2\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToMessageFormatTextBlock2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
+		buf.append("                statement +\n");
+		buf.append("                \" * copyright\\n\"; //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                MessageFormat.format(\"\"\"\n");
+		buf.append("\t\t                /***********\n");
+		buf.append("\t\t                 * simple  \\s\n");
+		buf.append("\t\t                {0}\\\n");
+		buf.append("\t\t                 * copyright\n");
+		buf.append("\t\t                \"\"\", statement); //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToMessageFormatTextBlock3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
+		buf.append("                statement;\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("\t\t        String copyright=\n");
+		buf.append("\t\t                MessageFormat.format(\"\"\"\n");
+		buf.append("\t\t                /***********\n");
+		buf.append("\t\t                 * simple  \\s\n");
+		buf.append("\t\t                 * copyright\n");
+		buf.append("\t\t                {0}\"\"\", statement); //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToMessageFormatTextBlock4() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
+		buf.append("                statement + \" * notice\\n\" + \"***********/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("\t\t        String copyright=\n");
+		buf.append("\t\t                MessageFormat.format(\"\"\"\n");
+		buf.append("\t\t                /***********\n");
+		buf.append("\t\t                 * simple  \\s\n");
+		buf.append("\t\t                 * copyright\n");
+		buf.append("\t\t                {0}\\\n");
+		buf.append("\t\t                 * notice\n");
+		buf.append("\t\t                ***********/\n");
+		buf.append("\t\t                \"\"\", statement); //comment 2 //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToMessageFormatTextBlock5() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo(String name, String id) {\n");
+		buf.append("        String title = \"Name: \" + name + \" ID: \" + id;\n");
+		buf.append("        System.out.println(title);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("title");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.text.MessageFormat;\n");
+		buf.append("\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo(String name, String id) {\n");
+		buf.append("        String title = MessageFormat.format(\"Name: {0} ID: {1}\", name, id);\n");
+		buf.append("        System.out.println(title);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToStringFormatTextBlock1() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" +\n");
+		buf.append("                \" * simple   \\n\" +\n");
+		buf.append("                \" * copyright %\\n\" +\n");
+		buf.append("                statement +\n");
+		buf.append("                \" * notice\\n\" +\n");
+		buf.append("                \"***********/\\n\"; // comment 2\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                String.format(\"\"\"\n");
+		buf.append("		                /***********\n");
+		buf.append("		                 * simple  \\s\n");
+		buf.append("		                 * copyright %%\n");
+		buf.append("		                %s\\\n");
+		buf.append("		                 * notice\n");
+		buf.append("		                ***********/\n");
+		buf.append("		                \"\"\", statement); // comment 2\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToStringFormatTextBlock2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
+		buf.append("                statement +\n");
+		buf.append("                \" * copyright\\n\"; //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                String.format(\"\"\"\n");
+		buf.append("\t\t                /***********\n");
+		buf.append("\t\t                 * simple  \\s\n");
+		buf.append("\t\t                %s\\\n");
+		buf.append("\t\t                 * copyright\n");
+		buf.append("\t\t                \"\"\", statement); //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToStringFormatTextBlock3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
+		buf.append("                statement;\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("\t\t        String copyright=\n");
+		buf.append("\t\t                String.format(\"\"\"\n");
+		buf.append("\t\t                /***********\n");
+		buf.append("\t\t                 * simple  \\s\n");
+		buf.append("\t\t                 * copyright\n");
+		buf.append("\t\t                %s\"\"\", statement); //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToStringFormatTextBlock4() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("        String copyright=\n");
+		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
+		buf.append("                statement + \" * notice\\n\" + \"***********/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("simple");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String statement= \" * statement\\n\";\n");
+		buf.append("        // comment 1\n");
+		buf.append("\t\t        String copyright=\n");
+		buf.append("\t\t                String.format(\"\"\"\n");
+		buf.append("\t\t                /***********\n");
+		buf.append("\t\t                 * simple  \\s\n");
+		buf.append("\t\t                 * copyright\n");
+		buf.append("\t\t                %s\\\n");
+		buf.append("\t\t                 * notice\n");
+		buf.append("\t\t                ***********/\n");
+		buf.append("\t\t                \"\"\", statement); //comment 2 //$NON-NLS-1$\n");
+		buf.append("        System.out.println(copyright);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToStringFormatTextBlock5() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		StringBuilder buf= new StringBuilder();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo(String name, String id) {\n");
+		buf.append("        String title = \"Name: \" + name + \" ID: \" + id;\n");
+		buf.append("        System.out.println(title);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("title");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo(String name, String id) {\n");
+		buf.append("        String title = String.format(\"Name: %s ID: %s\", name, id);\n");
+		buf.append("        System.out.println(title);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+}

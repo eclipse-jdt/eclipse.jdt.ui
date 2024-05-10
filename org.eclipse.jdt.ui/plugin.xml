@@ -7132,7 +7132,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.ElseIfCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.ElseIfCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.else_if"
             runAfter="org.eclipse.jdt.ui.cleanup.variables">
       </cleanUp>
@@ -7292,7 +7292,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.unnecessary_array_creation"
             runAfter="org.eclipse.jdt.ui.cleanup.redundant_comparator">
       </cleanUp>
@@ -7377,7 +7377,7 @@
             runAfter="org.eclipse.jdt.ui.boolean_value_rather_than_comparison">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.overridden_assignment"
             runAfter="org.eclipse.jdt.ui.cleanup.double_negation">
       </cleanUp>
@@ -7512,7 +7512,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.join">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.multi_catch"
             runAfter="org.eclipse.jdt.ui.cleanup.try_with_resource">
       </cleanUp>

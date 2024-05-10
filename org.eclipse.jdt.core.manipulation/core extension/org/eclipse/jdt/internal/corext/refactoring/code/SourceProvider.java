@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,12 +51,14 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
@@ -69,6 +71,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -78,6 +81,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -100,7 +104,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -294,6 +300,26 @@ public class SourceProvider {
 
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
+	}
+
+	public boolean isSynchronized() {
+		List<IExtendedModifier> modifierList= fDeclaration.modifiers();
+		for (IExtendedModifier modifier : modifierList) {
+			if (modifier instanceof Modifier m && m.isSynchronized()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isStatic() {
+		List<IExtendedModifier> modifierList= fDeclaration.modifiers();
+		for (IExtendedModifier modifier : modifierList) {
+			if (modifier instanceof Modifier m && m.isStatic()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getMethodName() {
@@ -779,5 +805,59 @@ public class SourceProvider {
 			return !(((WhileStatement)statement).getBody() instanceof Block);
 		}
 		return false;
+	}
+
+	public RefactoringStatus checkAccessCompatible(ASTNode targetNode) throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		if (fAnalyzer.onlyAccessesPublic()) {
+			return result;
+		}
+		IMethodBinding declBinding= fDeclaration.resolveBinding();
+		if (declBinding == null) {
+			result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors, JavaStatusContext.create(fTypeRoot));
+			return result;
+		}
+		ASTNode targetRoot= targetNode.getRoot();
+		if (targetRoot instanceof CompilationUnit cu && (fTypeRoot instanceof ICompilationUnit rootICU)) {
+			AbstractTypeDeclaration typeNode= ASTNodes.getTopLevelTypeDeclaration(targetNode);
+			AbstractTypeDeclaration declTypeNode= ASTNodes.getTopLevelTypeDeclaration(fDeclaration);
+			if (typeNode != null && declTypeNode != null) {
+				ITypeBinding typeNodeBinding= typeNode.resolveBinding();
+				ITypeBinding declTypeNodeBinding= declTypeNode.resolveBinding();
+				if (typeNodeBinding != null && declTypeNodeBinding != null) {
+					if (typeNodeBinding.isEqualTo(declTypeNodeBinding)) {
+						return result;
+					}
+				}
+			}
+			if (fAnalyzer.accessesPrivate()) {
+				result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_private, JavaStatusContext.create(fTypeRoot));
+				return result;
+			}
+			PackageDeclaration packageDecl= cu.getPackage();
+			IPackageDeclaration[] rootPackageDecls= rootICU.getPackageDeclarations();
+			if (packageDecl.getName().getFullyQualifiedName().equals(rootPackageDecls[0].getElementName())) {
+				return result;
+			}
+			if (fAnalyzer.accessesPackagePrivate()) {
+				result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_package_private, JavaStatusContext.create(fTypeRoot));
+				return result;
+			}
+			ITypeBinding typeBinding= declBinding.getDeclaringClass();
+			if (typeBinding == null) {
+				result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors, JavaStatusContext.create(fTypeRoot));
+				return result;
+			}
+			if (typeNode != null) {
+				ITypeBinding targetTypeBinding= typeNode.resolveBinding();
+				if (targetTypeBinding != null) {
+					if (ASTNodes.findImplementedType(targetTypeBinding, typeBinding.getQualifiedName()) == null
+							|| (targetNode instanceof MethodInvocation invocation && invocation.getExpression() != null && !(invocation.getExpression() instanceof ThisExpression))) {
+						result.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_protected, JavaStatusContext.create(fTypeRoot));
+					}
+				}
+			}
+		}
+		return result;
 	}
 }

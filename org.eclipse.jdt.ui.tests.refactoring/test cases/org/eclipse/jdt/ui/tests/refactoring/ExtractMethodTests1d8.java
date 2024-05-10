@@ -244,7 +244,7 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 	@Override
 	@Test
 	public void test311() throws Exception {
-		lambdaExpressionTest(0, Modifier.PRIVATE);
+		invalidSelectionTest();
 	}
 
 	@Test

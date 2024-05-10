@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation from jdt.ui
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -52,8 +53,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -70,16 +71,16 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>The <code>catch</code> blocks must be able to move.</li>
  * </ul>
  */
-public class MultiCatchCleanUp extends AbstractMultiFix {
+public class MultiCatchCleanUpCore extends AbstractMultiFix {
 	private enum MergeDirection {
 		NONE, UP, DOWN;
 	}
 
-	public MultiCatchCleanUp() {
+	public MultiCatchCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public MultiCatchCleanUp(final Map<String, String> options) {
+	public MultiCatchCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
 
@@ -420,7 +421,7 @@ public class MultiCatchCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.MultiCatchCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.MultiCatchCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 
@@ -444,7 +445,7 @@ public class MultiCatchCleanUp extends AbstractMultiFix {
 		}
 
 		@Override
-		public void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
+		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.MultiCatchCleanUp_description, cuRewrite);

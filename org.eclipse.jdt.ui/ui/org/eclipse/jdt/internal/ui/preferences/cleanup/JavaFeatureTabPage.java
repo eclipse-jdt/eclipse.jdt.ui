@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.HashCleanUp;
 import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
-import org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUp;
+import org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
@@ -52,7 +52,7 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new JoinCleanUp(values),
 				new TryWithResourceCleanUp(values),
 				new StringConcatToTextBlockCleanUpCore(values),
-				new MultiCatchCleanUp(values),
+				new MultiCatchCleanUpCore(values),
 				new TypeParametersCleanUp(values),
 				new HashCleanUp(values),
 				new ObjectsEqualsCleanUp(values),

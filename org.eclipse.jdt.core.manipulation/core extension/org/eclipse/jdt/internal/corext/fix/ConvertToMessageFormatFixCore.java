@@ -15,11 +15,14 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -34,6 +37,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -52,6 +56,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperationsFixCore {
+
+	/**
+	 * Should match the last NLS comment before end of the line
+	 */
+	static final Pattern comment= Pattern.compile("([ ]*\\/\\/\\$NON-NLS-[0-9]\\$) *$"); //$NON-NLS-1$
 
 	public ConvertToMessageFormatFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
 		super(name, compilationUnit, operation);
@@ -156,6 +165,30 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 		return null;
 	}
 
+	private static String indentOf(ICompilationUnit cu, Expression exp) {
+		CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
+		int startLine= cUnit.getLineNumber(exp.getStartPosition());
+		int startLinePos= cUnit.getPosition(startLine, 0);
+		int endOfLine= cUnit.getPosition(startLine + 1, 0);
+		String indent= ""; //$NON-NLS-1$
+		IBuffer buffer;
+		try {
+			buffer= cu.getBuffer();
+			String line= buffer.getText(startLinePos, endOfLine - startLinePos);
+			for (int i= 0; i < line.length(); ++i) {
+				char ch= line.charAt(i);
+				if (Character.isSpaceChar(ch)) {
+					indent+= ch;
+				} else {
+					break;
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}
+		return indent;
+	}
+
 	private static void collectInfixPlusOperands(Expression expression, List<Expression> collector) {
 		if (expression instanceof InfixExpression && ((InfixExpression) expression).getOperator() == InfixExpression.Operator.PLUS) {
 			InfixExpression infixExpression= (InfixExpression) expression;
@@ -182,8 +215,11 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
+			final List<String> fLiterals= new ArrayList<>();
+			String fIndent= ""; //$NON-NLS-1$
 			ICompilationUnit cu= cuRewrite.getCu();
 			boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
+			boolean is15OrHigher= JavaModelUtil.is15OrHigher(cu.getJavaProject());
 			AST fAst= cuRewrite.getAST();
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -201,8 +237,20 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			StringBuilder formatString= new StringBuilder();
 			int i= 0;
 			int tagsCount= 0;
+			boolean isFirstStringLiteral= true;
+			boolean isFirstArgument= true;
+			Expression firstStringLiteral= operands.get(0);
+			Expression lastStringLiteral= firstStringLiteral;
+			Expression firstArgumentExpression= operands.get(0);
+			Expression lastArgumentExpression= firstArgumentExpression;
 			for (Expression operand : operands) {
 				if (operand instanceof StringLiteral) {
+					if (isFirstStringLiteral) {
+						fIndent= indentOf(cu, operand);
+						isFirstStringLiteral= false;
+						firstStringLiteral= operand;
+					}
+					lastStringLiteral= operand;
 					NLSLine nlsLine= scanCurrentLine(cu, operand);
 					if (nlsLine != null) {
 						for (NLSElement element : nlsLine.getElements()) {
@@ -214,10 +262,20 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 						}
 					}
 					String value= ((StringLiteral) operand).getEscapedValue();
-					value= value.substring(1, value.length() - 1);
 					value= value.replace("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
+					value= value.replace("{", "'{'"); //$NON-NLS-1$ //$NON-NLS-2$
+					value= value.replace("}", "'}'"); //$NON-NLS-1$ //$NON-NLS-2$
+					value= value.replace("'{''}'", "'{}'"); //$NON-NLS-1$ //$NON-NLS-2$
+					fLiterals.add(value);
+					value= value.substring(1, value.length() - 1);
 					formatString.append(value);
 				} else {
+					if (isFirstArgument) {
+						firstArgumentExpression= operand;
+						isFirstArgument= false;
+					}
+					lastArgumentExpression= operand;
+					fLiterals.add("\"{" + Integer.toString(i) + "}\""); //$NON-NLS-1$ //$NON-NLS-2$
 					formatString.append("{").append(i).append("}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 					String argument;
@@ -251,7 +309,66 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 
 			StringBuilder buffer= new StringBuilder();
 			buffer.append("MessageFormat.format("); //$NON-NLS-1$
-			buffer.append("\"" + formatString.toString().replaceAll("\"", "\\\"") + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+			int minOffset= firstStringLiteral.getStartPosition() < firstArgumentExpression.getStartPosition() ? firstStringLiteral.getStartPosition() : firstArgumentExpression.getStartPosition();
+			int maxOffset= lastStringLiteral.getStartPosition() > lastArgumentExpression.getStartPosition() ?
+					lastStringLiteral.getStartPosition() + lastStringLiteral.getLength() : lastArgumentExpression.getStartPosition() + lastArgumentExpression.getLength();
+
+			boolean isSingleLine= root.getLineNumber(maxOffset) == root.getLineNumber(minOffset);
+
+			if (is15OrHigher && !isSingleLine) {
+				StringBuilder buf= new StringBuilder();
+
+				List<String> parts= new ArrayList<>();
+				fLiterals.stream().forEach((t) -> { parts.addAll(StringConcatToTextBlockFixCore.unescapeBlock(t.substring(1, t.length() - 1))); });
+
+
+				buf.append("\"\"\"\n"); //$NON-NLS-1$
+				boolean newLine= false;
+				boolean allWhiteSpaceStart= true;
+				boolean allEmpty= true;
+				for (String part : parts) {
+					if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
+						if (!newLine) {
+							// no line terminator in this part: merge the line by emitting a line continuation escape
+							buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
+						}
+					}
+					newLine= part.endsWith(System.lineSeparator());
+					allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
+					allEmpty= allEmpty && part.isEmpty();
+					buf.append(fIndent).append(part);
+				}
+
+				if (newLine || allEmpty) {
+					buf.append(fIndent);
+				} else if (allWhiteSpaceStart) {
+					buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
+					buf.append(fIndent);
+				} else {
+					// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+					int readIndex= buf.length() - 1;
+					int count= 0;
+					while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
+						--readIndex;
+						++count;
+					}
+					if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
+						--count;
+					}
+					for (int i1= count; i1 > 0; --i1) {
+						buf.deleteCharAt(buf.length() - 1);
+					}
+					for (int i1= count; i1 > 0; --i1) {
+						buf.append("\\\""); //$NON-NLS-1$
+					}
+				}
+				buf.append("\"\"\""); //$NON-NLS-1$
+				buffer.append(buf.toString());
+			} else {
+				buffer.append("\"" + formatString.toString().replaceAll("\"", "\\\"") + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+
 			if (is50OrHigher) {
 				for (String formatArgument : formatArguments) {
 					buffer.append(", " + formatArgument); //$NON-NLS-1$
@@ -269,11 +386,57 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			buffer.append(")"); //$NON-NLS-1$
 
 			if (tagsCount > 1) {
-				ASTNodes.replaceAndRemoveNLSByCount(rewrite, infixExpression, buffer.toString(), tagsCount - 1, null, cuRewrite);
+				if (is15OrHigher) {
+					Expression lastOperand= operands.get(operands.size() - 1);
+					NLSLine nlsLine= scanCurrentLine(cu, lastOperand);
+					tagsCount= 0;
+					if (nlsLine != null) {
+						for (NLSElement element : nlsLine.getElements()) {
+							if (element.hasTag()) {
+								++tagsCount;
+							}
+						}
+					}
+					if (!(lastOperand instanceof StringLiteral) || tagsCount > 1) {
+						// if last operand is not a StringLiteral, we have to replace the statement
+						// and add a non-NLS marker because we can't add one via expression replacement
+						ASTNode statement= ASTNodes.getFirstAncestorOrNull(infixExpression, Statement.class);
+						if (statement == null) {
+							return;
+						}
+						CompilationUnit cUnit= (CompilationUnit)infixExpression.getRoot();
+						int extendedStart= cUnit.getExtendedStartPosition(statement);
+						int extendedLength= cUnit.getExtendedLength(statement);
+						String completeStatement= cu.getBuffer().getText(extendedStart, extendedLength);
+						if (tagsCount > 1) {
+							// remove all non-NLS comments and then replace with just one
+							Matcher commentMatcher= comment.matcher(completeStatement);
+							while (tagsCount-- > 0) {
+								completeStatement= commentMatcher.replaceFirst(""); //$NON-NLS-1$
+								commentMatcher= comment.matcher(completeStatement);
+							}
+							extendedLength= completeStatement.length();
+						}
+						StringBuilder newBuffer= new StringBuilder();
+						newBuffer= newBuffer.append(completeStatement.substring(0, infixExpression.getStartPosition() - extendedStart));
+						newBuffer= newBuffer.append(buffer.toString());
+						int infixExpressionEnd= infixExpression.getStartPosition() + infixExpression.getLength();
+						newBuffer= newBuffer.append(cu.getBuffer().getText(infixExpressionEnd, extendedStart + extendedLength - infixExpressionEnd));
+						newBuffer= newBuffer.append(" //$NON-NLS-1$"); //$NON-NLS-1$
+						Statement newStatement= (Statement)rewrite.createStringPlaceholder(newBuffer.toString(), statement.getNodeType());
+						rewrite.replace(statement, newStatement, null);
+					} else {
+						MethodInvocation formatInvocation= (MethodInvocation)rewrite.createStringPlaceholder(buffer.toString(), ASTNode.METHOD_INVOCATION);
+						rewrite.replace(infixExpression, formatInvocation, null);
+					}
+				} else {
+					ASTNodes.replaceAndRemoveNLSByCount(rewrite, infixExpression, buffer.toString(), tagsCount - 1, null, cuRewrite);
+				}
 			} else {
 				MethodInvocation formatInvocation= (MethodInvocation)rewrite.createStringPlaceholder(buffer.toString(), ASTNode.METHOD_INVOCATION);
 				rewrite.replace(infixExpression, formatInvocation, null);
 			}
 		}
+
 	}
 }

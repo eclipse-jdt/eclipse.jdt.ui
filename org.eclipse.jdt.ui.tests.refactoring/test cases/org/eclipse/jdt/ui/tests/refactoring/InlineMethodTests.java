@@ -34,7 +34,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -43,11 +47,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+
 import org.eclipse.jdt.internal.core.manipulation.dom.OperatorPrecedence;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.junit.Rule;
-import org.junit.Test;
 
 public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	private static final boolean BUG_82166= true;
@@ -222,6 +225,17 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	@Test
 	public void test_314407() throws Exception {
 		performInvalidTest();
+	}
+
+	/* *********************** Warning Tests ****************************** */
+
+	private void performWarningTest() throws Exception {
+		performTestInlineCall(fgTestSetup.getWarningPackage(), getName(), TestMode.WARNING_FOR_SELECTION, "warning_out");
+	}
+
+	@Test
+	public void testSync1() throws Exception {
+		performWarningTest();
 	}
 
 	/* *********************** Simple Tests ******************************* */
@@ -425,6 +439,36 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void test_462038() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_1360_1() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_1360_2() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_1360_3() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_1358_1() throws Exception {
+		performInvalidTest();
+	}
+
+	@Test
+	public void test_issue_1358_2() throws Exception {
+		performBugTest();
+	}
+
+	@Test
+	public void test_issue_1358_3() throws Exception {
 		performBugTest();
 	}
 

@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
-public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperationsFix {
+public class UnnecessaryArrayCreationFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 	public final static class UnnecessaryArrayCreationFinder extends GenericVisitor {
 		private static final Set<String> fInvalidTypes= new HashSet<>(Arrays.asList("byte", "char", "short")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -142,7 +142,7 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 			return null;
 
 		List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
-		UnnecessaryArrayCreationFix.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFix.UnnecessaryArrayCreationFinder(removeUnnecessaryArrayCreation, operations);
+		UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder(removeUnnecessaryArrayCreation, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())
@@ -152,23 +152,23 @@ public class UnnecessaryArrayCreationFix extends CompilationUnitRewriteOperation
 		return new ConvertLoopFixCore(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops, null);
 	}
 
-	public static UnnecessaryArrayCreationFix createUnnecessaryArrayCreationFix(CompilationUnit compilationUnit, Expression methodInvocation) {
+	public static UnnecessaryArrayCreationFixCore createUnnecessaryArrayCreationFix(CompilationUnit compilationUnit, Expression methodInvocation) {
 		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
 			return null;
 
 		List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
-		UnnecessaryArrayCreationFix.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFix.UnnecessaryArrayCreationFinder(true, operations);
+		UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder(true, operations);
 		methodInvocation.accept(finder);
 
 		if (operations.isEmpty())
 			return null;
 
-		return new UnnecessaryArrayCreationFix(FixMessages.Java50Fix_RemoveUnnecessaryArrayCreation_description, compilationUnit, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] {operations.get(0)}, null);
+		return new UnnecessaryArrayCreationFixCore(FixMessages.Java50Fix_RemoveUnnecessaryArrayCreation_description, compilationUnit, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] {operations.get(0)}, null);
 	}
 
 	private final IStatus fStatus;
 
-	protected UnnecessaryArrayCreationFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations, IStatus status) {
+	protected UnnecessaryArrayCreationFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations, IStatus status) {
 		super(name, compilationUnit, fixRewriteOperations);
 		fStatus= status;
 	}
