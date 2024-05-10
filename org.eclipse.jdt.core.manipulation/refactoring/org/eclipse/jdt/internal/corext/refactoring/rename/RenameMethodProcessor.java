@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -232,6 +232,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel() } )
 					: RefactoringCoreMessages.RenameMethodRefactoring_same_name,
 					JavaStatusContext.create(fMethod));
+
+		if (Checks.findMatchingStaticMethodImport(fMethod, newName) != null) {
+			status.addFatalError(fIsComposite
+					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_overrides_static_name2, new String[] { BasicElementLabels.getJavaElementName(newName), getDeclaringTypeLabel() } )
+					: RefactoringCoreMessages.RenameMethodRefactoring_overrides_static_name,
+					JavaStatusContext.create(Checks.findMatchingStaticMethodImport(fMethod, newName)));
+		}
 		return status;
 	}
 	private String getDeclaringTypeLabel() {

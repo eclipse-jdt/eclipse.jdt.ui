@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,7 +36,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,13 +52,16 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -67,6 +72,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
@@ -907,5 +913,47 @@ public class Checks {
 		if (ASTNodes.isParent(anonymous, initializer))
 			return false;
 		return true;
+	}
+
+	private static  CompilationUnit convertICUtoCU(ICompilationUnit compilationUnit) {
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(compilationUnit);
+		parser.setResolveBindings(true);
+
+		return (CompilationUnit) parser.createAST(null);
+	}
+
+	public static IImportDeclaration findMatchingStaticMethodImport(IMethod method, String newName) {
+		if (method.getCompilationUnit() != null) {
+			try {
+				IImportDeclaration[] imports=method.getCompilationUnit().getImports();
+				CompilationUnit cu= null;
+				for (IImportDeclaration importDecl : imports) {
+					if (Flags.isStatic(importDecl.getFlags())) {
+						String importName= importDecl.getElementName();
+						String[] fragments= importName.split("\\."); //$NON-NLS-1$
+						if (fragments.length > 0 && newName.equals(fragments[fragments.length - 1])) {
+							cu= convertICUtoCU(method.getCompilationUnit());
+							if (cu != null) {
+								List<ImportDeclaration> importList= cu.imports();
+								for (ImportDeclaration importListDecl : importList) {
+									if (importListDecl.getName().getFullyQualifiedName().equals(importName)) {
+										IBinding binding= importListDecl.resolveBinding();
+										if (binding instanceof IMethodBinding) {
+											return importDecl;
+										}
+									}
+								}
+							}
+							return null;
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				// do nothing
+			}
+		}
+		return null;
 	}
 }

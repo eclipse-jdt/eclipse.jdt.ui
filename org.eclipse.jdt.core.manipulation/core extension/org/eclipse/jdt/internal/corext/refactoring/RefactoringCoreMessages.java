@@ -1809,6 +1809,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameMethodRefactoring_not_in_model;
 
+	public static String RenameMethodRefactoring_overrides_static_name;
+
+	public static String RenameMethodRefactoring_overrides_static_name2;
+
 	public static String RenameMethodRefactoring_same_name;
 
 	public static String RenameMethodRefactoring_same_name2;
