@@ -2,8 +2,6 @@ package locals_out;
 
 public class A_test501 {
 	public void foo() {
-		int x= 10;
-		
 		extracted();
 	}
 
