@@ -755,6 +755,12 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		failHelper1(new String[] { "p1.A", "p1.B"}, "p1.A", 8, 14, 8, 15, PARAMETER, "b", true, true);
 	}
 
+	// Issue 1404
+	@Test
+	public void testFail17() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 13, 16, 13, 24, FIELD, "a1", true, true);
+	}
+
 	// Cannot move static method
 	@Test
 	public void testFail2() throws Exception {
