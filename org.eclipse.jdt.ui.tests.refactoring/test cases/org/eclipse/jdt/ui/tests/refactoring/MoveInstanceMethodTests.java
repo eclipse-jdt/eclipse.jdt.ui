@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -648,6 +648,12 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 	@Test
 	public void test69() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B"}, "p1.A", 11, 17, 11, 23, FIELD, "b", true, true);
+	}
+
+	// Issue 1300
+	@Test
+	public void test70() throws Exception {
+		helper1(new String[] { "A" }, "A", 10, 17, 10, 18, FIELD, "b", true, true);
 	}
 
 	// Move mA1 to field fB, do not inline delegator
