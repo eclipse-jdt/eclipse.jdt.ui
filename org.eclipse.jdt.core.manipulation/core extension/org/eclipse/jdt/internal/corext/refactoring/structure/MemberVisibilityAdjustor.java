@@ -1272,7 +1272,15 @@ public final class MemberVisibilityAdjustor {
 		}
 		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
 		if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
-			if (referenced.getDeclaringType().getDeclaringType() == null)
+			IType referencedType= referenced.getDeclaringType();
+			while (referencedType.getDeclaringType() != null) {
+				referencedType= referencedType.getDeclaringType();
+			}
+			IType referencingType= referencing;
+			while (referencingType.getDeclaringType() != null) {
+				referencingType= referencingType.getDeclaringType();
+			}
+			if (!referencedType.getFullyQualifiedName().equals(referencingType.getFullyQualifiedName()))
 				keyword= null;
 			else
 				keyword= ModifierKeyword.PRIVATE_KEYWORD;
