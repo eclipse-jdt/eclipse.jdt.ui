@@ -67,10 +67,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
@@ -1528,56 +1526,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		} finally {
 			monitor.done();
-		}
-	}
-
-	protected void checkAccessCompatible(MethodDeclaration methodDeclaration, RefactoringStatus status) throws JavaModelException {
-		IMethodBinding declBinding= methodDeclaration.resolveBinding();
-		if (declBinding == null) {
-			return;
-		}
-		AccessAnalyzer accessAnalyzer= new AccessAnalyzer();
-		methodDeclaration.accept(accessAnalyzer);
-		if (accessAnalyzer.onlyAccessesPublic()) {
-			return;
-		}
-		IMethod method= (IMethod) declBinding.getJavaElement();
-		ITypeRoot typeRoot= method.getTypeRoot();
-		ICompilationUnit targetICU= getTargetType().getCompilationUnit();
-		if (targetICU != null && (typeRoot instanceof ICompilationUnit rootICU)) {
-			AbstractTypeDeclaration declTypeNode= ASTNodes.getTopLevelTypeDeclaration(methodDeclaration);
-			if (declTypeNode != null) {
-				ITypeBinding typeNodeBinding= fTarget.getType();
-				ITypeBinding declTypeNodeBinding= declTypeNode.resolveBinding();
-				if (typeNodeBinding != null && declTypeNodeBinding != null) {
-					if (typeNodeBinding.isEqualTo(declTypeNodeBinding)) {
-						return;
-					}
-				}
-			}
-			if (accessAnalyzer.accessesPrivate()) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_methoddeclaration_accesses_private, JavaStatusContext.create(typeRoot)));
-				return;
-			}
-			IPackageDeclaration[] targetPackageDecls= targetICU.getPackageDeclarations();
-			IPackageDeclaration[] rootPackageDecls= rootICU.getPackageDeclarations();
-			if (targetPackageDecls[0].getElementName().equals(rootPackageDecls[0].getElementName())) {
-				return;
-			}
-			if (accessAnalyzer.accessesPackagePrivate()) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_methoddeclaration_accesses_package_private, JavaStatusContext.create(typeRoot)));
-				return;
-			}
-			ITypeBinding typeBinding= declBinding.getDeclaringClass();
-			if (typeBinding == null) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_methoddeclaration_has_errors, JavaStatusContext.create(typeRoot)));
-				return;
-			}
-			if (fTarget.getType() != null) {
-				if (ASTNodes.findImplementedType(fTarget.getType(), typeBinding.getQualifiedName()) == null) {
-					status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_methoddeclaration_accesses_protected, JavaStatusContext.create(typeRoot)));
-				}
-			}
 		}
 	}
 
