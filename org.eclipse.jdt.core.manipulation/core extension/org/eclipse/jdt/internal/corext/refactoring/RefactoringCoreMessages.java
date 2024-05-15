@@ -1319,6 +1319,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_add_moved_method;
 
+	public static String MoveInstanceMethodProcessor_cannot_access_or_adjust;
+
 	public static String MoveInstanceMethodProcessor_cannot_be_moved;
 
 	public static String MoveInstanceMethodProcessor_checking;
@@ -1334,6 +1336,14 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInstanceMethodProcessor_inline_method_invocation;
 
 	public static String MoveInstanceMethodProcessor_inline_overridden;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_protected;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_has_errors;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_package_private;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_private;
 
 	public static String MoveInstanceMethodProcessor_method_already_exists;
 
