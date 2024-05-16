@@ -254,11 +254,13 @@ public class NLSScannerTester {
 	@Test
 	public void test19() throws Exception {
 		String text=
-				"@interface Annotation {\r\n" +
-				"	String a() default \"a\" + \"b\";\r\n" +
-				"	String b() default \"bee\";\r\n" +
-				"	String c() default true ? \"x\" : \"y\";\r\n" +
-				"}\r\n";
+				"""
+			@interface Annotation {\r
+				String a() default "a" + "b";\r
+				String b() default "bee";\r
+				String c() default true ? "x" : "y";\r
+			}\r
+			""";
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
 	}
@@ -267,16 +269,17 @@ public class NLSScannerTester {
 	@Test
 	public void test20() throws Exception {
 		String text=
-			"class C {\r\n" +
-			"    void m() {\r\n" +
-			"        switch (42) {\r\n" +
-			"            default: String s= \"x\";\r\n" +
-			"        }\r\n" +
-			"        switch (1) {\r\n" +
-			"            default /*standard*/: String s= \"x\";\r\n" +
-			"        }\r\n" +
-			"    }\r\n" +
-			"}";
+			"""
+			class C {\r
+			    void m() {\r
+			        switch (42) {\r
+			            default: String s= "x";\r
+			        }\r
+			        switch (1) {\r
+			            default /*standard*/: String s= "x";\r
+			        }\r
+			    }\r
+			}""";
 		NLSLine[] l= NLSScanner.scan(text);
 
 		assertEquals(2, l.length);
@@ -295,16 +298,17 @@ public class NLSScannerTester {
 	@Test
 	public void test21() throws Exception {
 		String text=
-			"class C {\r\n" +
-			"    void m() {\r\n" +
-			"        System.out.println(new Object() {\r\n" +
-			"            @Override\r\n" +
-			"            public String toString() {\r\n" +
-			"                return \"me\";\r\n" +
-			"            };\r\n" +
-			"        });\r\n" +
-			"    }\r\n" +
-			"}";
+			"""
+			class C {\r
+			    void m() {\r
+			        System.out.println(new Object() {\r
+			            @Override\r
+			            public String toString() {\r
+			                return "me";\r
+			            };\r
+			        });\r
+			    }\r
+			}""";
 		NLSLine[] l= NLSScanner.scan(text);
 
 		assertEquals(1, l.length);
@@ -319,16 +323,17 @@ public class NLSScannerTester {
 	@Test
 	public void test22() throws Exception {
 		String text=
-			"class C {\r\n" +
-			"    void m() {\r\n" +
-			"        Object var= ((((new Object() {\r\n" +
-			"            @Override\r\n" +
-			"            public String toString() {\r\n" +
-			"                return \"me\";\r\n" +
-			"            };\r\n" +
-			"        }))));\r\n" +
-			"    }\r\n" +
-			"}";
+			"""
+			class C {\r
+			    void m() {\r
+			        Object var= ((((new Object() {\r
+			            @Override\r
+			            public String toString() {\r
+			                return "me";\r
+			            };\r
+			        }))));\r
+			    }\r
+			}""";
 		NLSLine[] l= NLSScanner.scan(text);
 
 		assertEquals(1, l.length);
@@ -343,14 +348,15 @@ public class NLSScannerTester {
 	@Test
 	public void test23() throws Exception {
 		String text=
-			"class C {\r\n" +
-			"    Object field= (new Object() {\r\n" +
-			"        @java.lang.Override\r\n" +
-			"        public String toString() {\r\n" +
-			"            return \"me\";\r\n" +
-			"        };\r\n" +
-			"    });\r\n" +
-			"}";
+			"""
+			class C {\r
+			    Object field= (new Object() {\r
+			        @java.lang.Override\r
+			        public String toString() {\r
+			            return "me";\r
+			        };\r
+			    });\r
+			}""";
 		NLSLine[] l= NLSScanner.scan(text);
 
 		assertEquals(1, l.length);
@@ -365,9 +371,10 @@ public class NLSScannerTester {
 	@Test
 	public void test24() throws Exception {
 		String text=
-			"class C {\r\n" +
-			"    @java.lang.Deprecated int field2= (\"me\").length();\r\n" +
-			"}";
+			"""
+			class C {\r
+			    @java.lang.Deprecated int field2= ("me").length();\r
+			}""";
 		NLSLine[] l= NLSScanner.scan(text);
 
 		assertEquals(1, l.length);
@@ -382,9 +389,11 @@ public class NLSScannerTester {
 	@Test
 	public void test25() throws Exception {
 		String text=
-				"@SuppressWarnings(\"unchecked\") //$NON-NLS-1$\r\n" +
-				"public class B {}\r\n" +
-				"\r\n";
+				"""
+			@SuppressWarnings("unchecked") //$NON-NLS-1$\r
+			public class B {}\r
+			\r
+			""";
 		NLSLine[] l= NLSScanner.scan(text);
 		assertEquals(0, l.length);
 	}
@@ -393,17 +402,18 @@ public class NLSScannerTester {
 	@Test
 	public void test26() throws Exception {
 		String text=
-				"@interface Ann {\n" +
-				"	String[] strings() default {\"a\", \"2\"};\n" +
-				"	String string() default \"s\";\n" +
-				"	String string2() default ((true) ? \"t\" : \"f\");\n" +
-				"}\n" +
-				"\n" +
-				"public interface Intf {\n" +
-				"	default void foo() {\n" +
-				"		System.out.println(\"Hello\");\n" +
-				"	}\n" +
-				"}";
+				"""
+			@interface Ann {
+				String[] strings() default {"a", "2"};
+				String string() default "s";
+				String string2() default ((true) ? "t" : "f");
+			}
+			
+			public interface Intf {
+				default void foo() {
+					System.out.println("Hello");
+				}
+			}""";
 		NLSLine[] l= NLSScanner.scan(text);
 
 		assertEquals(1, l.length);
