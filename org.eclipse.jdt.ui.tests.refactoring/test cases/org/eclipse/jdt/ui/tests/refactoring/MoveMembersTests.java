@@ -691,9 +691,12 @@ public class MoveMembersTests extends GenericRefactoringTest {
 				RefactoringStatus.FATAL, "p.B");
 	}
 
+	// Issue 1299
 	@Test
 	public void testFail22() throws Exception{
-		//free slot
+		fieldMethodTypeHelper_failing(new String[0],
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.FATAL, "p.B");
 	}
 
 	@Test
