@@ -23,10 +23,11 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.debug.core.IStatusHandler;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 public class LaunchErrorStatusHandler implements IStatusHandler {
 
@@ -35,7 +36,7 @@ public class LaunchErrorStatusHandler implements IStatusHandler {
 		final AtomicBoolean success= new AtomicBoolean(false);
 		getDisplay().syncExec(
 				() -> {
-					Shell shell= JUnitPlugin.getActiveWorkbenchShell();
+					Shell shell= PlatformUI.getWorkbench().getModalDialogShellProvider().getShell();
 					if (shell == null)
 						shell= getDisplay().getActiveShell();
 					if (shell != null) {
