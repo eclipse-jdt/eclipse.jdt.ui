@@ -195,9 +195,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatComment() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	byte aByte;\r\n" + "	char aChar;\r\n"
-				+ "	int anInt;\r\n" + "	double aDouble;\r\n" + "	float aFloat;\r\n" + "	long aLong;\r\n" + "	int aFloatMethod() {\r\n" + "		return 3.3;\r\n" + "	}\r\n" + "	int aStringMethod() {\r\n"
-				+ "		return \"\";\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				int aFloatMethod() {\r
+					return 3.3;\r
+				}\r
+				int aStringMethod() {\r
+					return "";\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aFloatMethod", "aStringMethod" });
@@ -237,36 +254,56 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.skipNulls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return \"A [\" + (aStringMethod() != null ? \"aStringMethod()=\" + aStringMethod() + \", \" : \"\") + \"aFloatMethod()=\" + aFloatMethod() + \", \" + (anArrayMethod() != null ? \"anArrayMethod()=\" + anArrayMethod() + \", \" : \"\") + \"aBool=\" + aBool + \", \" + (aString != null ? \"aString=\" + aString + \", \" : \"\") + \"anInt=\" + anInt + \"]\";\r\n"
-				+ "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					return "A [" + (aStringMethod() != null ? "aStringMethod()=" + aStringMethod() + ", " : "") + "aFloatMethod()=" + aFloatMethod() + ", " + (anArrayMethod() != null ? "anArrayMethod()=" + anArrayMethod() + ", " : "") + "aBool=" + aBool + ", " + (aString != null ? "aString=" + aString + ", " : "") + "anInt=" + anInt + "]";\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -972,36 +1009,56 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatTemplate() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.stringFormatTemplate= "ABCD${object.className}(${object.getClassName})\nEFG\n{\n\t${member.name} == ${member.value}\n\t${otherMembers}\n}(${object.className}|${object.hashCode}|${object.superToString}|${object.identityHashCode})\nGoodbye!";
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return \"ABCDA(\" + getClass().getName() + \")\\nEFG\\n{\\n\\taStringMethod == \" + aStringMethod() + \"\\n\\taFloatMethod == \" + aFloatMethod() + \"\\n\\tanArrayMethod == \" + anArrayMethod() + \"\\n\\taBool == \" + aBool + \"\\n\\taString == \" + aString + \"\\n\\tanInt == \" + anInt + \"\\n}(A|\" + hashCode() + \"|\" + super.toString() + \"|\" + System.identityHashCode(this) + \")\\nGoodbye!\";\r\n"
-				+ "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					return "ABCDA(" + getClass().getName() + ")\\nEFG\\n{\\n\\taStringMethod == " + aStringMethod() + "\\n\\taFloatMethod == " + aFloatMethod() + "\\n\\tanArrayMethod == " + anArrayMethod() + "\\n\\taBool == " + aBool + "\\n\\taString == " + aString + "\\n\\tanInt == " + anInt + "\\n}(A|" + hashCode() + "|" + super.toString() + "|" + System.identityHashCode(this) + ")\\nGoodbye!";\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1069,9 +1126,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void builderNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
@@ -1079,15 +1153,56 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"A [\");\r\n" + "		if (aStringMethod() != null) {\r\n" + "			builder.append(\"aStringMethod()=\");\r\n" + "			builder.append(aStringMethod());\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"aFloatMethod()=\");\r\n" + "		builder.append(aFloatMethod());\r\n" + "		builder.append(\", \");\r\n"
-				+ "		if (anArrayMethod() != null) {\r\n" + "			builder.append(\"anArrayMethod()=\");\r\n" + "			builder.append(anArrayMethod());\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		builder.append(\"aBool=\");\r\n" + "		builder.append(aBool);\r\n" + "		builder.append(\", \");\r\n" + "		if (aString != null) {\r\n" + "			builder.append(\"aString=\");\r\n"
-				+ "			builder.append(aString);\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"anInt=\");\r\n" + "		builder.append(anInt);\r\n"
-				+ "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [");\r
+					if (aStringMethod() != null) {\r
+						builder.append("aStringMethod()=");\r
+						builder.append(aStringMethod());\r
+						builder.append(", ");\r
+					}\r
+					builder.append("aFloatMethod()=");\r
+					builder.append(aFloatMethod());\r
+					builder.append(", ");\r
+					if (anArrayMethod() != null) {\r
+						builder.append("anArrayMethod()=");\r
+						builder.append(anArrayMethod());\r
+						builder.append(", ");\r
+					}\r
+					builder.append("aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", ");\r
+					if (aString != null) {\r
+						builder.append("aString=");\r
+						builder.append(aString);\r
+						builder.append(", ");\r
+					}\r
+					builder.append("anInt=");\r
+					builder.append(anInt);\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1555,9 +1670,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedBuilderNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
@@ -1565,14 +1697,44 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 2;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"A [\");\r\n" + "		if (aStringMethod() != null) {\r\n" + "			builder.append(\"aStringMethod()=\").append(aStringMethod()).append(\", \");\r\n" + "		}\r\n"
-				+ "		builder.append(\"aFloatMethod()=\").append(aFloatMethod()).append(\", \");\r\n" + "		if (anArrayMethod() != null) {\r\n"
-				+ "			builder.append(\"anArrayMethod()=\").append(anArrayMethod()).append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"aBool=\").append(aBool).append(\", \");\r\n"
-				+ "		if (aString != null) {\r\n" + "			builder.append(\"aString=\").append(aString).append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"anInt=\").append(anInt).append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [");\r
+					if (aStringMethod() != null) {\r
+						builder.append("aStringMethod()=").append(aStringMethod()).append(", ");\r
+					}\r
+					builder.append("aFloatMethod()=").append(aFloatMethod()).append(", ");\r
+					if (anArrayMethod() != null) {\r
+						builder.append("anArrayMethod()=").append(anArrayMethod()).append(", ");\r
+					}\r
+					builder.append("aBool=").append(aBool).append(", ");\r
+					if (aString != null) {\r
+						builder.append("aString=").append(aString).append(", ");\r
+					}\r
+					builder.append("anInt=").append(anInt).append("]");\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1858,36 +2020,56 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void format() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 3;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return String.format(\"A [aStringMethod()=%s, aFloatMethod()=%s, anArrayMethod()=%s, aBool=%s, aString=%s, anInt=%s]\", aStringMethod(), aFloatMethod(), anArrayMethod(), aBool, aString, anInt);\r\n"
-				+ "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					return String.format("A [aStringMethod()=%s, aFloatMethod()=%s, anArrayMethod()=%s, aBool=%s, aString=%s, anInt=%s]", aStringMethod(), aFloatMethod(), anArrayMethod(), aBool, aString, anInt);\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2288,21 +2470,65 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void customBuilder() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
-				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		builder.append(\"aStringMethod()\", aStringMethod());\r\n"
-				+ "		builder.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		builder.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
-				+ "		builder.append(\"aString\", aString);\r\n" + "		builder.append(\"anInt\", anInt);\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					builder.append("aStringMethod()", aStringMethod());\r
+					builder.append("aFloatMethod()", aFloatMethod());\r
+					builder.append("anArrayMethod()", anArrayMethod());\r
+					builder.append("aBool", aBool);\r
+					builder.append("aString", aString);\r
+					builder.append("anInt", anInt);\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2315,9 +2541,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void customBuilderNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
@@ -2325,13 +2568,45 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
-				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		if (aStringMethod() != null) {\r\n" + "			builder.append(\"aStringMethod()\", aStringMethod());\r\n" + "		}\r\n"
-				+ "		builder.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		if (anArrayMethod() != null) {\r\n" + "			builder.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		}\r\n"
-				+ "		builder.append(\"aBool\", aBool);\r\n" + "		if (aString != null) {\r\n" + "			builder.append(\"aString\", aString);\r\n" + "		}\r\n" + "		builder.append(\"anInt\", anInt);\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					if (aStringMethod() != null) {\r
+						builder.append("aStringMethod()", aStringMethod());\r
+					}\r
+					builder.append("aFloatMethod()", aFloatMethod());\r
+					if (anArrayMethod() != null) {\r
+						builder.append("anArrayMethod()", anArrayMethod());\r
+					}\r
+					builder.append("aBool", aBool);\r
+					if (aString != null) {\r
+						builder.append("aString", aString);\r
+					}\r
+					builder.append("anInt", anInt);\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2590,9 +2865,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedCustomBuilder() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
@@ -2600,30 +2892,34 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import com.pack.ToStringBuilder;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n"
-				+ "		builder.append(\"aStringMethod()\", aStringMethod()).append(\"aFloatMethod()\", aFloatMethod()).append(\"anArrayMethod()\", anArrayMethod()).append(\"aBool\", aBool).append(\"aString\", aString).append(\"anInt\", anInt);\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					builder.append("aStringMethod()", aStringMethod()).append("aFloatMethod()", aFloatMethod()).append("anArrayMethod()", anArrayMethod()).append("aBool", aBool).append("aString", aString).append("anInt", anInt);\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2636,9 +2932,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedCustomBuilderNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
@@ -2647,13 +2960,44 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n" + "	String aString;\r\n" + "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n"
-				+ "	}\r\n" + "	int[] anArrayMethod() {\r\n" + "		return new int[0];\r\n" + "	}\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		if (aStringMethod() != null) {\r\n" + "			builder.append(\"aStringMethod()\", aStringMethod());\r\n" + "		}\r\n"
-				+ "		builder.append(\"aFloatMethod()\", aFloatMethod());\r\n" + "		if (anArrayMethod() != null) {\r\n" + "			builder.append(\"anArrayMethod()\", anArrayMethod());\r\n" + "		}\r\n"
-				+ "		if (aString != null) {\r\n" + "			builder.append(\"aString\", aString);\r\n" + "		}\r\n" + "		builder.append(\"aBool\", aBool).append(\"anInt\", anInt);\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					if (aStringMethod() != null) {\r
+						builder.append("aStringMethod()", aStringMethod());\r
+					}\r
+					builder.append("aFloatMethod()", aFloatMethod());\r
+					if (anArrayMethod() != null) {\r
+						builder.append("anArrayMethod()", anArrayMethod());\r
+					}\r
+					if (aString != null) {\r
+						builder.append("aString", aString);\r
+					}\r
+					builder.append("aBool", aBool).append("anInt", anInt);\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2666,9 +3010,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedCustomBuilderComments() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
@@ -2677,30 +3038,34 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import com.pack.ToStringBuilder;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n"
-				+ "		builder.append(\"aStringMethod()\", aStringMethod()).append(\"aFloatMethod()\", aFloatMethod()).append(\"anArrayMethod()\", anArrayMethod()).append(\"aString\", aString).append(\"aBool\", aBool).append(\"anInt\", anInt);\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}";
+		String expected= """
+			package p;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					builder.append("aStringMethod()", aStringMethod()).append("aFloatMethod()", aFloatMethod()).append("anArrayMethod()", anArrayMethod()).append("aString", aString).append("aBool", aBool).append("anInt", anInt);\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2713,9 +3078,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void alternativeCustomBuilder() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
@@ -2726,38 +3108,39 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.resultMethod= "getResult";
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import org.another.pack.AnotherToStringCreator;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n"
-				+ "		creator.addSth(aStringMethod(), \"aStringMethod()\");\r\n"
-				+ "		creator.addSth(aFloatMethod(), \"aFloatMethod()\");\r\n"
-				+ "		creator.addSth(anArrayMethod(), \"anArrayMethod()\");\r\n"
-				+ "		creator.addSth(aBool, \"aBool\");\r\n"
-				+ "		creator.addSth(aString, \"aString\");\r\n"
-				+ "		creator.addSth(\"anInt\", anInt);\r\n"
-				+ "		return creator.getResult();\r\n"
-				+ "	}\r\n"
-				+ "\r\n"
-				+ "}";
+		String expected= """
+			package p;\r
+			\r
+			import org.another.pack.AnotherToStringCreator;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					AnotherToStringCreator creator = new AnotherToStringCreator(this);\r
+					creator.addSth(aStringMethod(), "aStringMethod()");\r
+					creator.addSth(aFloatMethod(), "aFloatMethod()");\r
+					creator.addSth(anArrayMethod(), "anArrayMethod()");\r
+					creator.addSth(aBool, "aBool");\r
+					creator.addSth(aString, "aString");\r
+					creator.addSth("anInt", anInt);\r
+					return creator.getResult();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2844,9 +3227,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void alternativeCustomBuilderNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aString", "aBool", "anInt" });
@@ -2858,44 +3258,45 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.resultMethod= "getResult";
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import org.another.pack.AnotherToStringCreator;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	String aString;\r\n"
-				+ "	A anA;\r\n"
-				+ "	float aFloatMethod() {\r\n"
-				+ "		return 3.3f;\r\n"
-				+ "	}\r\n"
-				+ "	String aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n"
-				+ "		if (aStringMethod() != null) {\r\n"
-				+ "			creator.addSth(aStringMethod(), \"aStringMethod()\");\r\n"
-				+ "		}\r\n"
-				+ "		creator.addSth(aFloatMethod(), \"aFloatMethod()\");\r\n"
-				+ "		if (anArrayMethod() != null) {\r\n"
-				+ "			creator.addSth(anArrayMethod(), \"anArrayMethod()\");\r\n"
-				+ "		}\r\n"
-				+ "		if (aString != null) {\r\n"
-				+ "			creator.addSth(aString, \"aString\");\r\n"
-				+ "		}\r\n"
-				+ "		creator.addSth(aBool, \"aBool\");\r\n"
-				+ "		creator.addSth(\"anInt\", anInt);\r\n"
-				+ "		return creator.getResult();\r\n"
-				+ "	}\r\n"
-				+ "\r\n"
-				+ "}";
+		String expected= """
+			package p;\r
+			\r
+			import org.another.pack.AnotherToStringCreator;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					AnotherToStringCreator creator = new AnotherToStringCreator(this);\r
+					if (aStringMethod() != null) {\r
+						creator.addSth(aStringMethod(), "aStringMethod()");\r
+					}\r
+					creator.addSth(aFloatMethod(), "aFloatMethod()");\r
+					if (anArrayMethod() != null) {\r
+						creator.addSth(anArrayMethod(), "anArrayMethod()");\r
+					}\r
+					if (aString != null) {\r
+						creator.addSth(aString, "aString");\r
+					}\r
+					creator.addSth(aBool, "aBool");\r
+					creator.addSth("anInt", anInt);\r
+					return creator.getResult();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2908,9 +3309,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedAlternativeCustomBuilderCreator() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "aFloatMethod", "anArrayMethod", "aBool", "aString", "anInt" });
@@ -2922,34 +3340,35 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import org.another.pack.AnotherToStringCreator;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	int anInt;\r\n" +
-				"	String aString;\r\n" +
-				"	A anA;\r\n" +
-				"	float aFloatMethod() {\r\n" +
-				"		return 3.3f;\r\n" +
-				"	}\r\n" +
-				"	String aStringMethod() {\r\n" +
-				"		return \"\";\r\n" +
-				"	}\r\n" +
-				"	int[] anArrayMethod() {\r\n" +
-				"		return new int[0];\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public String toString() {\r\n" +
-				"		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n" +
-				"		creator.addSth(aStringMethod(), \"aStringMethod()\").addSth(aFloatMethod(), \"aFloatMethod()\").addSth(anArrayMethod(), \"anArrayMethod()\").addSth(aBool, \"aBool\");\r\n" +
-				"		creator.addSth(aString, \"aString\").addSth(\"anInt\", anInt);\r\n" +
-				"		return creator.getResult();\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}";
+		String expected= """
+			package p;\r
+			\r
+			import org.another.pack.AnotherToStringCreator;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					AnotherToStringCreator creator = new AnotherToStringCreator(this);\r
+					creator.addSth(aStringMethod(), "aStringMethod()").addSth(aFloatMethod(), "aFloatMethod()").addSth(anArrayMethod(), "anArrayMethod()").addSth(aBool, "aBool");\r
+					creator.addSth(aString, "aString").addSth("anInt", anInt);\r
+					return creator.getResult();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -3068,9 +3487,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedAlternativeCustomBuilderNulls() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aStringMethod", "anArrayMethod", "aString", "aFloatMethod", "aBool", "anInt" });
@@ -3083,43 +3519,44 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.chainCalls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import org.another.pack.AnotherToStringCreator;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	int anInt;\r\n" +
-				"	String aString;\r\n" +
-				"	A anA;\r\n" +
-				"	float aFloatMethod() {\r\n" +
-				"		return 3.3f;\r\n" +
-				"	}\r\n" +
-				"	String aStringMethod() {\r\n" +
-				"		return \"\";\r\n" +
-				"	}\r\n" +
-				"	int[] anArrayMethod() {\r\n" +
-				"		return new int[0];\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public String toString() {\r\n" +
-				"		AnotherToStringCreator creator = new AnotherToStringCreator(this);\r\n" +
-				"		if (aStringMethod() != null) {\r\n" +
-				"			creator.addSth(aStringMethod(), \"aStringMethod()\");\r\n" +
-				"		}\r\n" +
-				"		if (anArrayMethod() != null) {\r\n" +
-				"			creator.addSth(anArrayMethod(), \"anArrayMethod()\");\r\n" +
-				"		}\r\n" +
-				"		if (aString != null) {\r\n" +
-				"			creator.addSth(aString, \"aString\");\r\n" +
-				"		}\r\n" +
-				"		creator.addSth(aFloatMethod(), \"aFloatMethod()\").addSth(aBool, \"aBool\");\r\n" +
-				"		creator.addSth(\"anInt\", anInt);\r\n" +
-				"		return creator.getResult();\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}";
+		String expected= """
+			package p;\r
+			\r
+			import org.another.pack.AnotherToStringCreator;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					AnotherToStringCreator creator = new AnotherToStringCreator(this);\r
+					if (aStringMethod() != null) {\r
+						creator.addSth(aStringMethod(), "aStringMethod()");\r
+					}\r
+					if (anArrayMethod() != null) {\r
+						creator.addSth(anArrayMethod(), "anArrayMethod()");\r
+					}\r
+					if (aString != null) {\r
+						creator.addSth(aString, "aString");\r
+					}\r
+					creator.addSth(aFloatMethod(), "aFloatMethod()").addSth(aBool, "aBool");\r
+					creator.addSth("anInt", anInt);\r
+					return creator.getResult();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -3133,9 +3570,26 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedOneArgumentCustomBuilders() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "	\r\n" + "	boolean aBool;\r\n" + "	int anInt;\r\n" + "	String aString;\r\n"
-				+ "	A anA;\r\n" + "	float aFloatMethod() {\r\n" + "		return 3.3f;\r\n" + "	}\r\n" + "	String aStringMethod() {\r\n" + "		return \"\";\r\n" + "	}\r\n" + "	int[] anArrayMethod() {\r\n"
-				+ "		return new int[0];\r\n" + "	}\r\n" + "\r\n" + "}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+			\r
+			}""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IPackageFragment packageFragment= fRoot.createPackageFragment("com.simple.pack", true, null);
@@ -3151,44 +3605,45 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import com.simple.pack.ToStringBuilder;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	int anInt;\r\n" +
-				"	String aString;\r\n" +
-				"	A anA;\r\n" +
-				"	float aFloatMethod() {\r\n" +
-				"		return 3.3f;\r\n" +
-				"	}\r\n" +
-				"	String aStringMethod() {\r\n" +
-				"		return \"\";\r\n" +
-				"	}\r\n" +
-				"	int[] anArrayMethod() {\r\n" +
-				"		return new int[0];\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public String toString() {\r\n" +
-				"		ToStringBuilder builder = new ToStringBuilder(this);\r\n" +
-				"		if (aStringMethod() != null) {\r\n" +
-				"			builder.append(\"aStringMethod()\", aStringMethod());\r\n" +
-				"		}\r\n" +
-				"		if (anArrayMethod() != null) {\r\n" +
-				"			builder.append(anArrayMethod());\r\n" +
-				"		}\r\n" +
-				"		if (aString != null) {\r\n" +
-				"			builder.append(\"aString\", aString);\r\n" +
-				"		}\r\n" +
-				"		builder.append(aFloatMethod());\r\n" +
-				"		builder.append(aBool);\r\n" +
-				"		builder.append(anInt);\r\n" +
-				"		return builder.toString();\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}";
+		String expected= """
+			package p;\r
+			\r
+			import com.simple.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				int anInt;\r
+				String aString;\r
+				A anA;\r
+				float aFloatMethod() {\r
+					return 3.3f;\r
+				}\r
+				String aStringMethod() {\r
+					return "";\r
+				}\r
+				int[] anArrayMethod() {\r
+					return new int[0];\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					if (aStringMethod() != null) {\r
+						builder.append("aStringMethod()", aStringMethod());\r
+					}\r
+					if (anArrayMethod() != null) {\r
+						builder.append(anArrayMethod());\r
+					}\r
+					if (aString != null) {\r
+						builder.append("aString", aString);\r
+					}\r
+					builder.append(aFloatMethod());\r
+					builder.append(aBool);\r
+					builder.append(anInt);\r
+					return builder.toString();\r
+				}\r
+			\r
+			}""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}

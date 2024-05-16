@@ -62,23 +62,23 @@ public class BindingsHierarchyTest {
 
 	@Test
 	public void testWalkSuperclassInterface() throws JavaModelException {
-		String source= ""
-				+ "package test1\n"
-				+ "interface I1 {\n"
-				+ "\n"
-				+ "}\n"
-				+ "\n"
-				+ "interface I2 {\n"
-				+ "\n"
-				+ "}\n"
-				+ "\n"
-				+ "class Test1 implements I1 {\n"
-				+ "\n"
-				+ "}\n"
-				+ "\n"
-				+ "class Test2 extends Test1 implements I2 {\n"
-				+ "\n"
-				+ "}";
+		String source= """
+			package test1
+			interface I1 {
+			
+			}
+			
+			interface I2 {
+			
+			}
+			
+			class Test1 implements I1 {
+			
+			}
+			
+			class Test2 extends Test1 implements I2 {
+			
+			}""";
 
 		CompilationUnit ast= createAST(fPackage.createCompilationUnit("Test1.java", source, false, new NullProgressMonitor()));
 

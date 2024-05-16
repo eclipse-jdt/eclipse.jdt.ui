@@ -111,14 +111,15 @@ public class TemplateCompletionTests {
 	public void testRegressionBug574267() throws Exception {
 		String propDisplay= "sysout - print to standard out";
 		StringBuffer buf= new StringBuffer();
-		buf.append("class Sample {\n" +
-				"	void sample(String foo) {\n" +
-				"		if (foo != null) {\n" +
-				"			sys$ // content assist here\n" +
-				"			System.out.println();\n" +
-				"		}\n" +
-				"	}\n" +
-				"}");
+		buf.append("""
+			class Sample {
+				void sample(String foo) {
+					if (foo != null) {
+						sys$ // content assist here
+						System.out.println();
+					}
+				}
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "Sample.java");
@@ -129,17 +130,16 @@ public class TemplateCompletionTests {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "sysout", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("class Sample {\n" +
-				"	void sample(String foo) {\n" +
-				"		if (foo != null) {\n" +
-				"			System.out.println(); // content assist here\n" +
-				"			System.out.println();\n" +
-				"		}\n" +
-				"	}\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			class Sample {
+				void sample(String foo) {
+					if (foo != null) {
+						System.out.println(); // content assist here
+						System.out.println();
+					}
+				}
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	private ITextViewer initializeViewer(ICompilationUnit cu) throws Exception {

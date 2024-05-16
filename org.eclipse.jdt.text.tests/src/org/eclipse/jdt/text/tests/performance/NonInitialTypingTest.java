@@ -37,9 +37,10 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
-	private static final char[] METHOD= ("public int foobar(int iParam, Object oParam) {\r" +
-			"return 42;\r" +
-			"}\r").toCharArray();
+	private static final char[] METHOD= ("""
+		public int foobar(int iParam, Object oParam) {\r\
+		return 42;\r\
+		}\r""").toCharArray();
 
 	private static final int WARM_UP_RUNS= 3;
 

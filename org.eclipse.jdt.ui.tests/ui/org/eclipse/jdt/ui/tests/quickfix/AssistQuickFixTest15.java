@@ -68,14 +68,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -93,19 +94,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\"\"\n");
-        buf.append("		\tpublic void foo() {\n");
-        buf.append("		\t    System.out.println(\"abc\");\n");
-        buf.append("		\t}\n");
-        buf.append("		\t\"\"\"; //$NON-NLS-1$ // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = \"""
+						public void foo() {
+						    System.out.println("abc");
+						}
+						\"""; //$NON-NLS-1$ // comment 2
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -118,14 +119,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -143,19 +145,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\"\"\n");
-        buf.append("		\tpublic void foo() {\\s\n");
-        buf.append("		\t    System.out.println(\"abc\");\n");
-        buf.append("		\t}\n");
-        buf.append("		\t\"\"\"; // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = \"""
+						public void foo() {\\s
+						    System.out.println("abc");
+						}
+						\"""; // comment 2
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -168,14 +170,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -193,19 +196,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\"\"\n");
-        buf.append("		\tpublic void foo() {\\s\n");
-        buf.append("		\t    System.out.println(\\\"\"\"abc\\\"\"\");\n");
-        buf.append("		\t}\n");
-        buf.append("		\t\"\"\"; // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = \"""
+						public void foo() {\\s
+						    System.out.println(\\\"""abc\\\""");
+						}
+						\"""; // comment 2
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -218,14 +221,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -243,18 +247,18 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\"\"\n");
-        buf.append("		\tabcdef\\\n");
-        buf.append("		\tghijkl\\\"\"\"123\\\"\"\"\\\n");
-        buf.append("		\tmnop\"\"\";\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = \"""
+						abcdef\\
+						ghijkl\\\"""123\\\"""\\
+						mnop\""";
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -267,14 +271,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -298,26 +303,26 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String str = \"\"\"\n");
-		buf.append("		\tintro string\n");
-		buf.append("		\tpublic void foo() {\n");
-		buf.append("		\t    return null;\n");
-		buf.append("		\t}\n");
-		buf.append("		\t\n");
-		buf.append("		\t\"\"\";\n");
-		buf.append("        System.out.println(str);\n");
-		buf.append("        System.out.println(str + \"abc\");\n");
-		buf.append("        // comment 2\n");
-		buf.append("        StringBuffer buf = new StringBuffer(\"intro string 2\\n\");\n");
-		buf.append("        buf.append(\"some string\\n\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String str = \"""
+						intro string
+						public void foo() {
+						    return null;
+						}
+					\t
+						\""";
+			        System.out.println(str);
+			        System.out.println(str + "abc");
+			        // comment 2
+			        StringBuffer buf = new StringBuffer("intro string 2\\n");
+			        buf.append("some string\\n");
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -330,14 +335,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -358,21 +364,21 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = \"\"\"\n");
-		buf.append("		\tpublic void foo() {\n");
-		buf.append("		\t    return null;\n");
-		buf.append("		\t}\n");
-		buf.append("		\t\n");
-		buf.append("		\t\"\"\";\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String k = \"""
+						public void foo() {
+						    return null;
+						}
+					\t
+						\""";
+			       \s
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -385,14 +391,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -413,22 +420,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String str = \"\"\"\n");
-		buf.append("		\tpublic void foo() {\n");
-		buf.append("		\t    return null;\n");
-		buf.append("		\t}\n");
-		buf.append("		\t\n");
-		buf.append("		\t\"\"\"; //$NON-NLS-1$\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = str;\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String str = \"""
+						public void foo() {
+						    return null;
+						}
+					\t
+						\"""; //$NON-NLS-1$
+			        // comment 1
+			        String k = str;
+			       \s
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -441,14 +448,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -469,22 +477,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String str = \"\"\"\n");
-		buf.append("		\tpublic void foo() {\n");
-		buf.append("		\t    return null;\n");
-		buf.append("		\t}\n");
-		buf.append("		\t\n");
-		buf.append("		\t\"\"\"; //$NON-NLS-1$\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = str;\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String str = \"""
+						public void foo() {
+						    return null;
+						}
+					\t
+						\"""; //$NON-NLS-1$
+			        // comment 1
+			        String k = str;
+			       \s
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -497,14 +505,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -519,19 +528,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\"\"\n");
-		buf.append("		\tfoo\\s\n");
-		buf.append("		\tbar  \\\n");
-		buf.append("		\tbaz\\\n");
-		buf.append("		\tbiz\"\"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = \"""
+						foo\\s
+						bar  \\
+						baz\\
+						biz\""";
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -547,14 +556,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -569,19 +579,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\"\"\n");
-		buf.append("            foo\\s\n");
-		buf.append("            bar  \\\n");
-		buf.append("            baz\\\n");
-		buf.append("            biz\"\"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = \"""
+			            foo\\s
+			            bar  \\
+			            baz\\
+			            biz\""";
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -597,14 +607,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -623,20 +634,21 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x =\"\"\"\n");
-		buf.append("            \tif (true) {\n");
-		buf.append("            \t\tstuff();\n");
-		buf.append("            \t} else\n");
-		buf.append("            \t\tnoStuff\\\n");
-		buf.append("            \"\"\";\n");
-		buf.append("        System.out.println(x);\n");		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x =\"""
+			            	if (true) {
+			            		stuff();
+			            	} else
+			            		noStuff\\
+			            \""";
+			        System.out.println(x);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -649,14 +661,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -683,14 +696,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -718,14 +732,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -753,14 +768,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo(String a) {\n");
@@ -788,14 +804,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void noToString() {\n");
@@ -824,14 +841,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void extraAppend() {\n");
@@ -862,14 +880,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void combinedAppendWithNLS() {\n");
@@ -899,14 +918,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void inconsistentNLSMarkers() {\n");
@@ -936,14 +956,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void inconsistentNLS() {\n");
@@ -971,14 +992,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void inconsistentNLS() {\n");
@@ -1008,14 +1030,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1036,27 +1059,27 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                MessageFormat.format(\"\"\"\n");
-		buf.append("		                /***********\n");
-		buf.append("		                 * simple '{}'\\s\n");
-		buf.append("		                 * copyright\n");
-		buf.append("		                {0}\\\n");
-		buf.append("		                 * notice '{'0'}'\n");
-		buf.append("		                ***********/\n");
-		buf.append("		                \"\"\", statement); // comment 2\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			import java.text.MessageFormat;
+			
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                MessageFormat.format(\"""
+					                /***********
+					                 * simple '{}'\\s
+					                 * copyright
+					                {0}\\
+					                 * notice '{'0'}'
+					                ***********/
+					                \""", statement); // comment 2
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1069,14 +1092,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1096,26 +1120,26 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                MessageFormat.format(\"\"\"\n");
-		buf.append("\t\t                /***********\n");
-		buf.append("\t\t                 * simple  \\s\n");
-		buf.append("\t\t                {0}\\\n");
-		buf.append("\t\t                 * copyright\n");
-		buf.append("\t\t                \"\"\", statement); //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			import java.text.MessageFormat;
+			
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                MessageFormat.format(\"""
+					                /***********
+					                 * simple  \\s
+					                {0}\\
+					                 * copyright
+					                \""", statement); //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1128,14 +1152,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1155,25 +1180,25 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("\t\t        String copyright=\n");
-		buf.append("\t\t                MessageFormat.format(\"\"\"\n");
-		buf.append("\t\t                /***********\n");
-		buf.append("\t\t                 * simple  \\s\n");
-		buf.append("\t\t                 * copyright\n");
-		buf.append("\t\t                {0}\"\"\", statement); //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			import java.text.MessageFormat;
+			
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+					        String copyright=
+					                MessageFormat.format(\"""
+					                /***********
+					                 * simple  \\s
+					                 * copyright
+					                {0}\""", statement); //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1186,14 +1211,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1213,28 +1239,28 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("\t\t        String copyright=\n");
-		buf.append("\t\t                MessageFormat.format(\"\"\"\n");
-		buf.append("\t\t                /***********\n");
-		buf.append("\t\t                 * simple  \\s\n");
-		buf.append("\t\t                 * copyright\n");
-		buf.append("\t\t                {0}\\\n");
-		buf.append("\t\t                 * notice\n");
-		buf.append("\t\t                ***********/\n");
-		buf.append("\t\t                \"\"\", statement); //comment 2 //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			import java.text.MessageFormat;
+			
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+					        String copyright=
+					                MessageFormat.format(\"""
+					                /***********
+					                 * simple  \\s
+					                 * copyright
+					                {0}\\
+					                 * notice
+					                ***********/
+					                \""", statement); //comment 2 //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_message_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1247,14 +1273,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo(String name, String id) {\n");
@@ -1268,18 +1295,18 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import java.text.MessageFormat;\n");
-		buf.append("\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String name, String id) {\n");
-		buf.append("        String title = MessageFormat.format(\"Name: {0} ID: {1}\", name, id);\n");
-		buf.append("        System.out.println(title);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			
+			import java.text.MessageFormat;
+			
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = MessageFormat.format("Name: {0} ID: {1}", name, id);
+			        System.out.println(title);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1292,14 +1319,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1320,24 +1348,24 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                String.format(\"\"\"\n");
-		buf.append("		                /***********\n");
-		buf.append("		                 * simple  \\s\n");
-		buf.append("		                 * copyright %%\n");
-		buf.append("		                %s\\\n");
-		buf.append("		                 * notice\n");
-		buf.append("		                ***********/\n");
-		buf.append("		                \"\"\", statement); // comment 2\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                String.format(\"""
+					                /***********
+					                 * simple  \\s
+					                 * copyright %%
+					                %s\\
+					                 * notice
+					                ***********/
+					                \""", statement); // comment 2
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1350,14 +1378,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1377,23 +1406,23 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                String.format(\"\"\"\n");
-		buf.append("\t\t                /***********\n");
-		buf.append("\t\t                 * simple  \\s\n");
-		buf.append("\t\t                %s\\\n");
-		buf.append("\t\t                 * copyright\n");
-		buf.append("\t\t                \"\"\", statement); //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                String.format(\"""
+					                /***********
+					                 * simple  \\s
+					                %s\\
+					                 * copyright
+					                \""", statement); //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1406,14 +1435,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1433,22 +1463,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("\t\t        String copyright=\n");
-		buf.append("\t\t                String.format(\"\"\"\n");
-		buf.append("\t\t                /***********\n");
-		buf.append("\t\t                 * simple  \\s\n");
-		buf.append("\t\t                 * copyright\n");
-		buf.append("\t\t                %s\"\"\", statement); //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+					        String copyright=
+					                String.format(\"""
+					                /***********
+					                 * simple  \\s
+					                 * copyright
+					                %s\""", statement); //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1461,14 +1491,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo() {\n");
@@ -1488,25 +1519,25 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("\t\t        String copyright=\n");
-		buf.append("\t\t                String.format(\"\"\"\n");
-		buf.append("\t\t                /***********\n");
-		buf.append("\t\t                 * simple  \\s\n");
-		buf.append("\t\t                 * copyright\n");
-		buf.append("\t\t                %s\\\n");
-		buf.append("\t\t                 * notice\n");
-		buf.append("\t\t                ***********/\n");
-		buf.append("\t\t                \"\"\", statement); //comment 2 //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+					        String copyright=
+					                String.format(\"""
+					                /***********
+					                 * simple  \\s
+					                 * copyright
+					                %s\\
+					                 * notice
+					                ***********/
+					                \""", statement); //comment 2 //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });
@@ -1519,14 +1550,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package test;\n");
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo(String name, String id) {\n");
@@ -1540,15 +1572,15 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		assertNoErrors(ctx);
 		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String name, String id) {\n");
-		buf.append("        String title = String.format(\"Name: %s ID: %s\", name, id);\n");
-		buf.append("        System.out.println(title);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = String.format("Name: %s ID: %s", name, id);
+			        System.out.println(title);
+			    }
+			}
+			""";
 
 		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
 		assertExpectedExistInProposals(proposals, new String[] { expected });

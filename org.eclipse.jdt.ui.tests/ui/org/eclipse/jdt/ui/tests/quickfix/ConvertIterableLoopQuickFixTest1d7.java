@@ -92,20 +92,21 @@ public final class ConvertIterableLoopQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testBug563267() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String sample= "" //
-				+ "package test;\n" //
-				+ "import java.util.Iterator;\n" //
-				+ "import java.util.List;\n" //
-				+ "public class A {\n" //
-				+ "    public void foo(List<String> list) {\n" //
-				+ "        List<InputStream> toClose = new ArrayList<>();\n" //
-				+ "        for (Iterator<InputStream> it = toClose.iterator(); it.hasNext();) {\n" //
-				+ "            try (InputStream r = it.next()) {\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "        toClose.clear();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test;
+			import java.util.Iterator;
+			import java.util.List;
+			public class A {
+			    public void foo(List<String> list) {
+			        List<InputStream> toClose = new ArrayList<>();
+			        for (Iterator<InputStream> it = toClose.iterator(); it.hasNext();) {
+			            try (InputStream r = it.next()) {
+			            }
+			        }
+			        toClose.clear();
+			    }
+			}
+			""";
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", sample, false, null);
 
 		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(sample, unit);

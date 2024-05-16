@@ -96,32 +96,33 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersTask() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void a() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public void x() {
+			        System.out.println();
+			    }
+			
+			    public void a() {}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		addMarker(IMarker.TASK, cu1, 4).getId();
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void a() {}\n");
-		buf.append("\n");
-		buf.append("    public void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1 {
+			    public void a() {}
+			
+			    public void x() {
+			        System.out.println();
+			    }
+			}
+			""";
 
 		RefactoringStatus status= assertRefactoringResultAsExpected(new ICompilationUnit[] {
 			cu1
@@ -135,32 +136,33 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBookmarks() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void a() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public void x() {
+			        System.out.println();
+			    }
+			
+			    public void a() {}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		addMarker(IMarker.BOOKMARK, cu1, 4).getId();
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void a() {}\n");
-		buf.append("\n");
-		buf.append("    public void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1 {
+			    public void a() {}
+			
+			    public void x() {
+			        System.out.println();
+			    }
+			}
+			""";
 
 		RefactoringStatus status= assertRefactoringResultAsExpected(new ICompilationUnit[] {
 			cu1
@@ -174,32 +176,33 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersBreakpoints() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void a() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public void x() {
+			        System.out.println();
+			    }
+			
+			    public void a() {}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		addMarker(IBreakpoint.LINE_BREAKPOINT_MARKER, cu1, 4).getId();
 
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void a() {}\n");
-		buf.append("\n");
-		buf.append("    public void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1 {
+			    public void a() {}
+			
+			    public void x() {
+			        System.out.println();
+			    }
+			}
+			""";
 
 		RefactoringStatus status= assertRefactoringResultAsExpected(new ICompilationUnit[] {
 			cu1
@@ -213,16 +216,17 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersProblemMarker() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public void a() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    private void x() {
+			        System.out.println();
+			    }
+			
+			    public void a() {}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
@@ -234,16 +238,16 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public void a() {}\n");
-		buf.append("\n");
-		buf.append("    private void x() {\n");
-		buf.append("        System.out.println();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1 {
+			    public void a() {}
+			
+			    private void x() {
+			        System.out.println();
+			    }
+			}
+			""";
 
 		RefactoringStatus status= assertRefactoringResultAsExpected(new ICompilationUnit[] {
 			cu1

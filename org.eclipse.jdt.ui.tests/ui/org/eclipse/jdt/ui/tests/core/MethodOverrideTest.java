@@ -94,21 +94,22 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A<S> {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public void o0_foo(S t) {}\n");
-		buf.append("}\n");
-		buf.append("class B<T> extends A<T> {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public void o0_foo(T t) {}\n");
-		buf.append("}\n");
-		buf.append("class C extends B<String> {\n");
-		buf.append("    public C() {}\n");
-		buf.append("    @Override public void o0_foo(String t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class A<S> {
+			    public A() {}
+			    public void o0_foo(S t) {}
+			}
+			class B<T> extends A<T> {
+			    public B() {}
+			    @Override public void o0_foo(T t) {}
+			}
+			class C extends B<String> {
+			    public C() {}
+			    @Override public void o0_foo(String t) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 2, 2, 1); // C and B
 		doOverrideTests(cu, 2, 2, 0); // C and A
@@ -120,35 +121,36 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A<T> {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public void o1_foo1(T t) {}\n");
-		buf.append("    public void o1_foo2(int i, String s) {}\n");
-		buf.append("    public void o1_foo3(String s) {}\n");
-		buf.append("    public void o1_foo4(T... t) {}\n");
-		buf.append("    public void o1_foo5(A<T> s) {}\n");
-		buf.append("    public void o1_foo6(A<? super T> s) {}\n");
-		buf.append("    public void o1_foo7(T... t) {}\n");
-		buf.append("    public void o1_xoo1(T[] t) {}\n");
-		buf.append("    public void o1_xoo2(A<?> s) {}\n");
-		buf.append("    public void o1_xoo3(A<? extends T> s) {}\n");
-		buf.append("}\n");
-		buf.append("class B<S> extends A<S> {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public void o1_foo1(S t) {}\n");
-		buf.append("    @Override public void o1_foo2(int i, String s) {}\n");
-		buf.append("    @Override public void o1_foo3(String s) {}\n");
-		buf.append("    @Override public void o1_foo4(S... t) {}\n");
-		buf.append("    @Override public void o1_foo5(A<S> s) {}\n");
-		buf.append("    @Override public void o1_foo6(A<? super S> s) {}\n");
-		buf.append("    @Override public void o1_foo7(S[] t) {}\n");
-		buf.append("    @Override public void o1_xoo1(S[][] t) {}\n");
-		buf.append("    @Override public void o1_xoo2(A<Object> s) {}\n");
-		buf.append("    @Override public void o1_xoo3(A<? super S> s) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class A<T> {
+			    public A() {}
+			    public void o1_foo1(T t) {}
+			    public void o1_foo2(int i, String s) {}
+			    public void o1_foo3(String s) {}
+			    public void o1_foo4(T... t) {}
+			    public void o1_foo5(A<T> s) {}
+			    public void o1_foo6(A<? super T> s) {}
+			    public void o1_foo7(T... t) {}
+			    public void o1_xoo1(T[] t) {}
+			    public void o1_xoo2(A<?> s) {}
+			    public void o1_xoo3(A<? extends T> s) {}
+			}
+			class B<S> extends A<S> {
+			    public B() {}
+			    @Override public void o1_foo1(S t) {}
+			    @Override public void o1_foo2(int i, String s) {}
+			    @Override public void o1_foo3(String s) {}
+			    @Override public void o1_foo4(S... t) {}
+			    @Override public void o1_foo5(A<S> s) {}
+			    @Override public void o1_foo6(A<? super S> s) {}
+			    @Override public void o1_foo7(S[] t) {}
+			    @Override public void o1_xoo1(S[][] t) {}
+			    @Override public void o1_xoo2(A<Object> s) {}
+			    @Override public void o1_xoo3(A<? super S> s) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
@@ -158,21 +160,22 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class A<S, T> {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public void o2_foo1(Map<S, T> t) {}\n");
-		buf.append("    public void o2_xoo1(List<? extends T> t) {}\n");
-		buf.append("}\n");
-		buf.append("class B<V, W> extends A<W, V> {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public void o2_foo1(Map<W, V> t) {}\n");
-		buf.append("    @Override public void o2_xoo1(List<? extends W> t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.List;
+			import java.util.Map;
+			public class A<S, T> {
+			    public A() {}
+			    public void o2_foo1(Map<S, T> t) {}
+			    public void o2_xoo1(List<? extends T> t) {}
+			}
+			class B<V, W> extends A<W, V> {
+			    public B() {}
+			    @Override public void o2_foo1(Map<W, V> t) {}
+			    @Override public void o2_xoo1(List<? extends W> t) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
@@ -182,20 +185,21 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public void o3_foo1(List<Object> t) {}\n");
-		buf.append("    public void o3_xoo1(List t) {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public void o3_foo1(List t) {}\n");
-		buf.append("    @Override public void o3_xoo1(List<Object> t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.List;
+			public class A {
+			    public A() {}
+			    public void o3_foo1(List<Object> t) {}
+			    public void o3_xoo1(List t) {}
+			}
+			class B extends A {
+			    public B() {}
+			    @Override public void o3_foo1(List t) {}
+			    @Override public void o3_xoo1(List<Object> t) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
@@ -205,25 +209,25 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A<T> {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public void o4_foo1(T[] t) {}\n");
-		buf.append("    public void o4_foo2(T t) {}\n");
-		buf.append("    public void o4_foo3(T t) {}\n");
-		buf.append("    public void o4_xoo1(T t) {}\n");
-
-		buf.append("}\n");
-		buf.append("class B extends A<List<String>> {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public void o4_foo1(List<String>[] t) {}\n");
-		buf.append("    @Override public void o4_foo2(List<String> t) {}\n");
-		buf.append("    @Override public void o4_foo3(List t) {}\n");
-		buf.append("    @Override public void o4_xoo1(List<?> t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.List;
+			public class A<T> {
+			    public A() {}
+			    public void o4_foo1(T[] t) {}
+			    public void o4_foo2(T t) {}
+			    public void o4_foo3(T t) {}
+			    public void o4_xoo1(T t) {}
+			}
+			class B extends A<List<String>> {
+			    public B() {}
+			    @Override public void o4_foo1(List<String>[] t) {}
+			    @Override public void o4_foo2(List<String> t) {}
+			    @Override public void o4_foo3(List t) {}
+			    @Override public void o4_xoo1(List<?> t) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
@@ -234,37 +238,36 @@ public class MethodOverrideTest extends CoreTests {
 
 		// ATTENTION: Method names in this test must be in alphabetic order!
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A<S> {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public <T extends Enum<T>> T getEnum(String name, Class<T> clazz) { return null; }\n");
-		buf.append("    public <X> void tp1_foo1(S s, X x) {}\n");
-		buf.append("    public <X, Y> void tp1_foo2(S s, X x, Y y) {}\n");
-		buf.append("    public <X, Y> void tp1_foo3(X x, Y y) {}\n");
-		buf.append("    public <X extends Number> void tp1_foo4(X x) {}\n");
-		buf.append("    public <X extends Object> void tp1_foo5(X x) {}\n");
-		buf.append("    public <X, Y> void tp1_xoo1(S s, X x, Y y) {}\n");
-		buf.append("    public void tp1_xoo2() {}\n");
-		buf.append("    public <X, Y> void tp1_xoo3(X x, Y y) {}\n");
-//		buf.append("    public <T extends Number & Runnable> void tp1_xoo4() {}\n");
-		buf.append("    public <X extends Number> void tp1_xoo5(X x) {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A<String> {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public <E extends Enum<E>> E getEnum(String name, Class<E> clazz) { return null; }\n");
-		buf.append("    @Override public <X> void tp1_foo1(String s, X x) {}\n");
-		buf.append("    @Override public void tp1_foo2(String s, Object x, Object y) {}\n");
-		buf.append("    @Override public <V, W> void tp1_foo3(V x, W y) {}\n");
-		buf.append("    @Override public <X extends Number> void tp1_foo4(X x) {}\n");
-		buf.append("    @Override public <X> void tp1_foo5(X x) {}\n");
-		buf.append("    @Override public <X> void tp1_xoo1(String s, X x, Object y) {}\n");
-		buf.append("    @Override public <X> void tp1_xoo2() {}\n");
-		buf.append("    @Override public <W, V> void tp1_xoo3(V x, W y) {}\n");
-//		buf.append("    @Override public <T extends Number> void tp1_xoo4() {}\n");   // jdt.core bug, need to compare all bounds
-		buf.append("    @Override public <X> void tp1_xoo5(Number x) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class A<S> {
+			    public A() {}
+			    public <T extends Enum<T>> T getEnum(String name, Class<T> clazz) { return null; }
+			    public <X> void tp1_foo1(S s, X x) {}
+			    public <X, Y> void tp1_foo2(S s, X x, Y y) {}
+			    public <X, Y> void tp1_foo3(X x, Y y) {}
+			    public <X extends Number> void tp1_foo4(X x) {}
+			    public <X extends Object> void tp1_foo5(X x) {}
+			    public <X, Y> void tp1_xoo1(S s, X x, Y y) {}
+			    public void tp1_xoo2() {}
+			    public <X, Y> void tp1_xoo3(X x, Y y) {}
+			    public <X extends Number> void tp1_xoo5(X x) {}
+			}
+			class B extends A<String> {
+			    public B() {}
+			    @Override public <E extends Enum<E>> E getEnum(String name, Class<E> clazz) { return null; }
+			    @Override public <X> void tp1_foo1(String s, X x) {}
+			    @Override public void tp1_foo2(String s, Object x, Object y) {}
+			    @Override public <V, W> void tp1_foo3(V x, W y) {}
+			    @Override public <X extends Number> void tp1_foo4(X x) {}
+			    @Override public <X> void tp1_foo5(X x) {}
+			    @Override public <X> void tp1_xoo1(String s, X x, Object y) {}
+			    @Override public <X> void tp1_xoo2() {}
+			    @Override public <W, V> void tp1_xoo3(V x, W y) {}
+			    @Override public <X> void tp1_xoo5(Number x) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
@@ -274,21 +277,20 @@ public class MethodOverrideTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A<S> {\n");
-		buf.append("    public A() {}\n");
-		buf.append("    public void r1_foo1(S s) {}\n");
-		buf.append("    public void r1_foo2(A<S> s) {}\n");
-//		buf.append("    public void r1_xoo1(A<S> s) {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A {\n");
-		buf.append("    public B() {}\n");
-		buf.append("    @Override public void r1_foo1(Object s) {}\n");
-		buf.append("    @Override public void r1_foo2(A s) {}\n");
-//		buf.append("    @Override public void r1_xoo1(A<Object> s) {}\n");  // bug in our implementation: extended raw type has all types raw
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class A<S> {
+			    public A() {}
+			    public void r1_foo1(S s) {}
+			    public void r1_foo2(A<S> s) {}
+			}
+			class B extends A {
+			    public B() {}
+			    @Override public void r1_foo1(Object s) {}
+			    @Override public void r1_foo2(A s) {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}

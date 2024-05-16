@@ -98,27 +98,29 @@ public class TypeAnnotationQuickFixTest extends QuickFixTest {
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 
-		String prefix= "package test;\n" +
-				"\n" +
-				"import java.lang.annotation.ElementType;\n" +
-				"import java.lang.annotation.Target;\n" +
-				"\n" +
-				"import org.eclipse.jdt.annotation.Nullable;\n" +
-				"\n" +
-				"@Target(ElementType.TYPE_USE) @interface X {}\n" +
-				"@Target(ElementType.TYPE_USE) @interface Y {}\n" +
-				"@Target(ElementType.TYPE_USE) @interface N { int[] v1(); String v2(); }\n" +
-				"@Target(ElementType.TYPE_USE) @interface S { int[] value(); }\n" +
-				"@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE }) @interface Old {}\n" +
-				"\n" +
-				"class File {}\n" +
-				"\n" +
-				"class Outer {\n" +
-				"	static class StaticInner {}\n" +
-				"	class Inner {}\n" +
-				"}\n" +
-				"\n" +
-				"class Generic<T> {@Nullable Object f;}\n";
+		String prefix= """
+			package test;
+			
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			@Target(ElementType.TYPE_USE) @interface X {}
+			@Target(ElementType.TYPE_USE) @interface Y {}
+			@Target(ElementType.TYPE_USE) @interface N { int[] v1(); String v2(); }
+			@Target(ElementType.TYPE_USE) @interface S { int[] value(); }
+			@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE }) @interface Old {}
+			
+			class File {}
+			
+			class Outer {
+				static class StaticInner {}
+				class Inner {}
+			}
+			
+			class Generic<T> {@Nullable Object f;}
+			""";
 
 		String input= prefix +
 				"public class Test {\n" +

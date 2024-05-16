@@ -101,28 +101,28 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 	public void testMoveTypeAnnotation() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=468457
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface X {}\n");
-		buf.append("@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface Y {}\n");
-		buf.append("public class Test {\n");
-		buf.append("    void test(@X java.lang.@Y String param) {\n");
-		buf.append("        @X @Y java.lang.String f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String original= buf.toString();
+		String original= """
+			package test;
+			@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface X {}
+			@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface Y {}
+			public class Test {
+			    void test(@X java.lang.@Y String param) {
+			        @X @Y java.lang.String f;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", original, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface X {}\n");
-		buf.append("@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface Y {}\n");
-		buf.append("public class Test {\n");
-		buf.append("    void test(java.lang.@Y @X String param) {\n");
-		buf.append("        java.lang.@X @Y String f;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test;
+			@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface X {}
+			@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface Y {}
+			public class Test {
+			    void test(java.lang.@Y @X String param) {
+			        java.lang.@X @Y String f;
+			    }
+			}
+			""";
 
 		ICleanUp[] cleanUps= { new NullAnnotationsCleanUp(new HashMap<>(), IProblem.TypeAnnotationAtQualifiedName) };
 		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps, null);
@@ -133,48 +133,46 @@ public class NullAnnotationsCleanUpTest1d8 extends CleanUpTestCase {
 	@Test
 	public void testBug528222() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
-		buf.append("\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("abstract class Test {\n");
-		buf.append("    abstract void f(String x);\n");
-		buf.append("\n");
-		buf.append("    void g() {\n");
-		buf.append("        f(null);\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    Object h() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("");
-		String original= buf.toString();
+		String original= """
+			package test;
+			
+			import org.eclipse.jdt.annotation.NonNullByDefault;
+			
+			@NonNullByDefault
+			abstract class Test {
+			    abstract void f(String x);
+			
+			    void g() {
+			        f(null);
+			    }
+			
+			    Object h() {
+			        return null;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", original, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("abstract class Test {\n");
-		buf.append("    abstract void f(String x);\n");
-		buf.append("\n");
-		buf.append("    void g() {\n");
-		buf.append("        f(null);\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    @Nullable\n");
-		buf.append("    Object h() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("");
-		String expected1= buf.toString();
+		String expected1= """
+			package test;
+			
+			import org.eclipse.jdt.annotation.NonNullByDefault;
+			import org.eclipse.jdt.annotation.Nullable;
+			
+			@NonNullByDefault
+			abstract class Test {
+			    abstract void f(String x);
+			
+			    void g() {
+			        f(null);
+			    }
+			
+			    @Nullable
+			    Object h() {
+			        return null;
+			    }
+			}
+			""";
 
 		ICleanUp[] cleanUps= { new NullAnnotationsCleanUp(new HashMap<>(), IProblem.RequiredNonNullButProvidedNull) };
 		performRefactoring(new CleanUpRefactoring(), new ICompilationUnit[] { cu1 }, cleanUps, null);

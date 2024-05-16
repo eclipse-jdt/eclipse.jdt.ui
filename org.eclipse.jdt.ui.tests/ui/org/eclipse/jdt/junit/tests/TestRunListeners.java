@@ -83,9 +83,11 @@ public class TestRunListeners {
 		public void sessionFinished(ITestRunSession session) {
 			process(session);
 			if (fLog.getLog().length == 0) {
-				fLog.add("<empty>\n\n"
-						+ "To see why the test log finished early, try to reduce\n"
-						+ "the step number passed to new TreeTest(..., step).");
+				fLog.add("""
+					<empty>
+					
+					To see why the test log finished early, try to reduce
+					the step number passed to new TreeTest(..., step).""");
 			}
 			fLog.setDone();
 		}

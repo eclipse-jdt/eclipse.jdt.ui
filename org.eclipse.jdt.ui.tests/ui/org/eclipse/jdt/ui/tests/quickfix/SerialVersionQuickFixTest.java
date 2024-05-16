@@ -107,23 +107,24 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testLocalClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test5 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        class X implements Serializable, Cloneable, Runnable {\n");
-		buf.append("            private static final int x= 1;\n");
-		buf.append("            private Object y;\n");
-		buf.append("            public X() {\n");
-		buf.append("            }\n");
-		buf.append("            public void run() {}\n");
-		buf.append("            public synchronized strictfp void bar() {}\n");
-		buf.append("            public String bar(int x, int y) { return null; };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test5.java", buf.toString(), false, null);
+		String str= """
+			package test3;
+			import java.io.Serializable;
+			public class Test5 {
+			    public void test() {
+			        class X implements Serializable, Cloneable, Runnable {
+			            private static final int x= 1;
+			            private Object y;
+			            public X() {
+			            }
+			            public void run() {}
+			            public synchronized strictfp void bar() {}
+			            public String bar(int x, int y) { return null; };
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test5.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -131,45 +132,45 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test5 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        class X implements Serializable, Cloneable, Runnable {\n");
-		buf.append("            /* Test */\n");
-		buf.append("            private static final long serialVersionUID = 1L;\n");
-		buf.append("            private static final int x= 1;\n");
-		buf.append("            private Object y;\n");
-		buf.append("            public X() {\n");
-		buf.append("            }\n");
-		buf.append("            public void run() {}\n");
-		buf.append("            public synchronized strictfp void bar() {}\n");
-		buf.append("            public String bar(int x, int y) { return null; };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test3;
+			import java.io.Serializable;
+			public class Test5 {
+			    public void test() {
+			        class X implements Serializable, Cloneable, Runnable {
+			            /* Test */
+			            private static final long serialVersionUID = 1L;
+			            private static final int x= 1;
+			            private Object y;
+			            public X() {
+			            }
+			            public void run() {}
+			            public synchronized strictfp void bar() {}
+			            public String bar(int x, int y) { return null; };
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test5 {\n");
-		buf.append("    public void test() {\n");
-		buf.append("        class X implements Serializable, Cloneable, Runnable {\n");
-		buf.append("            /* Test */\n");
-		buf.append("            private static final long serialVersionUID = -4564939359985118485L;\n");
-		buf.append("            private static final int x= 1;\n");
-		buf.append("            private Object y;\n");
-		buf.append("            public X() {\n");
-		buf.append("            }\n");
-		buf.append("            public void run() {}\n");
-		buf.append("            public synchronized strictfp void bar() {}\n");
-		buf.append("            public String bar(int x, int y) { return null; };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test3;
+			import java.io.Serializable;
+			public class Test5 {
+			    public void test() {
+			        class X implements Serializable, Cloneable, Runnable {
+			            /* Test */
+			            private static final long serialVersionUID = -4564939359985118485L;
+			            private static final int x= 1;
+			            private Object y;
+			            public X() {
+			            }
+			            public void run() {}
+			            public synchronized strictfp void bar() {}
+			            public String bar(int x, int y) { return null; };
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -178,19 +179,20 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAnonymousClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test3 {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Serializable var3= new Serializable() {\n");
-		buf.append("            int var4; \n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test3.java", buf.toString(), false, null);
+		String str= """
+			package test3;
+			import java.io.Serializable;
+			public class Test3 {
+			    protected int var1;
+			    protected int var2;
+			    public void test() {
+			        Serializable var3= new Serializable() {
+			            int var4;\s
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test3.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -198,37 +200,37 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test3 {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Serializable var3= new Serializable() {\n");
-		buf.append("            /* Test */\n");
-		buf.append("            private static final long serialVersionUID = 1L;\n");
-		buf.append("            int var4; \n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test3;
+			import java.io.Serializable;
+			public class Test3 {
+			    protected int var1;
+			    protected int var2;
+			    public void test() {
+			        Serializable var3= new Serializable() {
+			            /* Test */
+			            private static final long serialVersionUID = 1L;
+			            int var4;\s
+			        };
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test3 {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Serializable var3= new Serializable() {\n");
-		buf.append("            /* Test */\n");
-		buf.append("            private static final long serialVersionUID = -868523843598659436L;\n");
-		buf.append("            int var4; \n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test3;
+			import java.io.Serializable;
+			public class Test3 {
+			    protected int var1;
+			    protected int var2;
+			    public void test() {
+			        Serializable var3= new Serializable() {
+			            /* Test */
+			            private static final long serialVersionUID = -868523843598659436L;
+			            int var4;\s
+			        };
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -236,19 +238,20 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInnerClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("\n");
-		buf.append("public class Test2 {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("    protected class Test1 implements Serializable {\n");
-		buf.append("        public long var3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			
+			import java.io.Serializable;
+			
+			public class Test2 {
+			    protected int var1;
+			    protected int var2;
+			    protected class Test1 implements Serializable {
+			        public long var3;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -256,37 +259,37 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("\n");
-		buf.append("public class Test2 {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("    protected class Test1 implements Serializable {\n");
-		buf.append("        /* Test */\n");
-		buf.append("        private static final long serialVersionUID = 1L;\n");
-		buf.append("        public long var3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test2;
+			
+			import java.io.Serializable;
+			
+			public class Test2 {
+			    protected int var1;
+			    protected int var2;
+			    protected class Test1 implements Serializable {
+			        /* Test */
+			        private static final long serialVersionUID = 1L;
+			        public long var3;
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("\n");
-		buf.append("public class Test2 {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("    protected class Test1 implements Serializable {\n");
-		buf.append("        /* Test */\n");
-		buf.append("        private static final long serialVersionUID = -4023230086280104302L;\n");
-		buf.append("        public long var3;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test2;
+			
+			import java.io.Serializable;
+			
+			public class Test2 {
+			    protected int var1;
+			    protected int var2;
+			    protected class Test1 implements Serializable {
+			        /* Test */
+			        private static final long serialVersionUID = -4023230086280104302L;
+			        public long var3;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -295,14 +298,15 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testOuterClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test1 implements Serializable {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.Serializable;
+			public class Test1 implements Serializable {
+			    protected int var1;
+			    protected int var2;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -310,27 +314,27 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test1 implements Serializable {\n");
-		buf.append("    /* Test */\n");
-		buf.append("    private static final long serialVersionUID = 1L;\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			import java.io.Serializable;
+			public class Test1 implements Serializable {
+			    /* Test */
+			    private static final long serialVersionUID = 1L;
+			    protected int var1;
+			    protected int var2;
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test1 implements Serializable {\n");
-		buf.append("    /* Test */\n");
-		buf.append("    private static final long serialVersionUID = -2242798150684569765L;\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    protected int var2;\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			import java.io.Serializable;
+			public class Test1 implements Serializable {
+			    /* Test */
+			    private static final long serialVersionUID = -2242798150684569765L;
+			    protected int var1;
+			    protected int var2;
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -338,25 +342,26 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 	@Test
 	public void testOuterClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.util.EventObject;\n");
-		buf.append("public class Test4 extends EventObject {\n");
-		buf.append("    private static final int x;\n");
-		buf.append("    private static Class[] a2;\n");
-		buf.append("    private volatile Class a1;\n");
-		buf.append("    static {\n");
-		buf.append("        x= 1;\n");
-		buf.append("    }\n");
-		buf.append("    {\n");
-		buf.append("        a1= null;\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("    public Test4(Object source) {\n");
-		buf.append("        super(source);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test4.java", buf.toString(), false, null);
+		String str= """
+			package test3;
+			import java.util.EventObject;
+			public class Test4 extends EventObject {
+			    private static final int x;
+			    private static Class[] a2;
+			    private volatile Class a1;
+			    static {
+			        x= 1;
+			    }
+			    {
+			        a1= null;
+			    }
+			   \s
+			    public Test4(Object source) {
+			        super(source);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test4.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -364,49 +369,49 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.util.EventObject;\n");
-		buf.append("public class Test4 extends EventObject {\n");
-		buf.append("    /* Test */\n");
-		buf.append("    private static final long serialVersionUID = 1L;\n");
-		buf.append("    private static final int x;\n");
-		buf.append("    private static Class[] a2;\n");
-		buf.append("    private volatile Class a1;\n");
-		buf.append("    static {\n");
-		buf.append("        x= 1;\n");
-		buf.append("    }\n");
-		buf.append("    {\n");
-		buf.append("        a1= null;\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("    public Test4(Object source) {\n");
-		buf.append("        super(source);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test3;
+			import java.util.EventObject;
+			public class Test4 extends EventObject {
+			    /* Test */
+			    private static final long serialVersionUID = 1L;
+			    private static final int x;
+			    private static Class[] a2;
+			    private volatile Class a1;
+			    static {
+			        x= 1;
+			    }
+			    {
+			        a1= null;
+			    }
+			   \s
+			    public Test4(Object source) {
+			        super(source);
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test3;\n");
-		buf.append("import java.util.EventObject;\n");
-		buf.append("public class Test4 extends EventObject {\n");
-		buf.append("    /* Test */\n");
-		buf.append("    private static final long serialVersionUID = -7476608308201363525L;\n");
-		buf.append("    private static final int x;\n");
-		buf.append("    private static Class[] a2;\n");
-		buf.append("    private volatile Class a1;\n");
-		buf.append("    static {\n");
-		buf.append("        x= 1;\n");
-		buf.append("    }\n");
-		buf.append("    {\n");
-		buf.append("        a1= null;\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("    public Test4(Object source) {\n");
-		buf.append("        super(source);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test3;
+			import java.util.EventObject;
+			public class Test4 extends EventObject {
+			    /* Test */
+			    private static final long serialVersionUID = -7476608308201363525L;
+			    private static final int x;
+			    private static Class[] a2;
+			    private volatile Class a1;
+			    static {
+			        x= 1;
+			    }
+			    {
+			        a1= null;
+			    }
+			   \s
+			    public Test4(Object source) {
+			        super(source);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -416,14 +421,15 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		// longer package
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a.b.c", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package a.b.c;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test1 implements Serializable {\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    class Test1Inner {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", buf.toString(), false, null);
+		String str= """
+			package a.b.c;
+			import java.io.Serializable;
+			public class Test1 implements Serializable {
+			    protected int var1;
+			    class Test1Inner {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -431,27 +437,27 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package a.b.c;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test1 implements Serializable {\n");
-		buf.append("    /* Test */\n");
-		buf.append("    private static final long serialVersionUID = 1L;\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    class Test1Inner {}\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package a.b.c;
+			import java.io.Serializable;
+			public class Test1 implements Serializable {
+			    /* Test */
+			    private static final long serialVersionUID = 1L;
+			    protected int var1;
+			    class Test1Inner {}
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package a.b.c;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class Test1 implements Serializable {\n");
-		buf.append("    /* Test */\n");
-		buf.append("    private static final long serialVersionUID = -3715240305486851194L;\n");
-		buf.append("    protected int var1;\n");
-		buf.append("    class Test1Inner {}\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package a.b.c;
+			import java.io.Serializable;
+			public class Test1 implements Serializable {
+			    /* Test */
+			    private static final long serialVersionUID = -3715240305486851194L;
+			    protected int var1;
+			    class Test1Inner {}
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

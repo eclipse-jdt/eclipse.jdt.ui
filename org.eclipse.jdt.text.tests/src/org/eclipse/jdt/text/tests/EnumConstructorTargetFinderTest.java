@@ -90,16 +90,15 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_1() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1,\n" +
-				"      A2;\n" +
-				"   }\n" +
-
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1,
+			      A2;
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 
@@ -112,28 +111,26 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_2() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1(B.B1),\n" +
-				"      A2(1, B.B2),\n" +
-				"      A3(B.B2, 2);\n" +
-
-				"      A(B b) {\n" +
-				"      }\n" +
-				"      A(B b, int i) {\n" +
-				"      }\n" +
-				"      A(int i, B b) {\n" +
-				"      }\n" +
-				"   }\n" +
-
-				"   public enum B {\n" +
-				"      B1,\n" +
-				"      B2;\n" +
-				"   }\n" +
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1(B.B1),
+			      A2(1, B.B2),
+			      A3(B.B2, 2);
+			      A(B b) {
+			      }
+			      A(B b, int i) {
+			      }
+			      A(int i, B b) {
+			      }
+			   }
+			   public enum B {
+			      B1,
+			      B2;
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 
@@ -156,23 +153,22 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_3() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1(1, 2),\n" +
-				"      A2(1, 2.0),\n" +
-				"      A3(2.0, 1);\n" +
-
-				"      A(int i1, int i2) {\n" +
-				"      }\n" +
-				"      A(double d, int i) {\n" +
-				"      }\n" +
-				"      A(int i, double d) {\n" +
-				"      }\n" +
-				"   }\n" +
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1(1, 2),
+			      A2(1, 2.0),
+			      A3(2.0, 1);
+			      A(int i1, int i2) {
+			      }
+			      A(double d, int i) {
+			      }
+			      A(int i, double d) {
+			      }
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 
@@ -195,37 +191,35 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_4() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1(B.B1),\n" +
-				"      A2(B.B2, 1),\n" +
-				"      A3(1, B.B2, 2),\n" +
-				"      A4(B.B1, 3),\n" +
-				"      A5(B.B1, Double.valueOf(5.0)),\n" +
-				"      A6(\"string\");\n" +
-
-				"      void foo(String s) {\n" +
-				"      }\n" +
-				"      A(B b) {\n" +
-				"      }\n" +
-				"      A(B b, int i) {\n" +
-				"      }\n" +
-				"      A(B b, Double d) {\n" +
-				"      }\n" +
-				"      A(int i1, B b, int i2) {\n" +
-				"      }\n" +
-				"      A(String s) {\n" +
-				"      }\n" +
-				"   }\n" +
-
-				"   public enum B {\n" +
-				"      B1,\n" +
-				"      B2;\n" +
-				"   }\n" +
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1(B.B1),
+			      A2(B.B2, 1),
+			      A3(1, B.B2, 2),
+			      A4(B.B1, 3),
+			      A5(B.B1, Double.valueOf(5.0)),
+			      A6("string");
+			      void foo(String s) {
+			      }
+			      A(B b) {
+			      }
+			      A(B b, int i) {
+			      }
+			      A(B b, Double d) {
+			      }
+			      A(int i1, B b, int i2) {
+			      }
+			      A(String s) {
+			      }
+			   }
+			   public enum B {
+			      B1,
+			      B2;
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 
@@ -263,20 +257,19 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_5() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1(\"\"),\n" +
-				"      A2(\"\",\"\");\n" +
-
-				"      A(String ... strings) {\n" +
-				"      }\n" +
-				"      A(String s) {\n" +
-				"      }\n" +
-				"   }\n" +
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1(""),
+			      A2("","");
+			      A(String ... strings) {
+			      }
+			      A(String s) {
+			      }
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 
@@ -294,20 +287,19 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_6() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1(\"\"),\n" +
-				"      A2(new Object());\n" +
-				"      A(String s) {\n" +
-				"      }\n" +
-				"      A(Object o) {\n" +
-				"      }\n" +
-				"   }\n" +
-
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1(""),
+			      A2(new Object());
+			      A(String s) {
+			      }
+			      A(Object o) {
+			      }
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 
@@ -325,29 +317,28 @@ public class EnumConstructorTargetFinderTest {
 
 	@Test
 	public void testEnumConstructorFinder_7() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"class E {\n" +
-
-				"   public enum A {\n" +
-				"      A1(1L),\n" +
-				"      A2(new Long(1)),\n" +
-				"      A3(new Long(1), 1L),\n" +
-				"      A4(Long.valueOf(1)),\n" +
-				"      A5(Long.parseLong(\"1\")),\n" +
-				"      A6(1L, 2.0),\n" +
-				"      A7(Long.valueOf(1), Double.valueOf(2.0));\n" +
-				"      A(long l) {\n" +
-				"      }\n" +
-				"      A(Long l) {\n" +
-				"      }\n" +
-				"      A(long l, double d) {\n" +
-				"      }\n" +
-				"      A(Long l, Double d) {\n" +
-				"      }\n" +
-				"   }\n" +
-
-				"}\n";
+		String s= """
+			package test1;
+			class E {
+			   public enum A {
+			      A1(1L),
+			      A2(new Long(1)),
+			      A3(new Long(1), 1L),
+			      A4(Long.valueOf(1)),
+			      A5(Long.parseLong("1")),
+			      A6(1L, 2.0),
+			      A7(Long.valueOf(1), Double.valueOf(2.0));
+			      A(long l) {
+			      }
+			      A(Long l) {
+			      }
+			      A(long l, double d) {
+			      }
+			      A(Long l, Double d) {
+			      }
+			   }
+			}
+			""";
 
 		CompilationUnit root= createCompilationUnit(s);
 

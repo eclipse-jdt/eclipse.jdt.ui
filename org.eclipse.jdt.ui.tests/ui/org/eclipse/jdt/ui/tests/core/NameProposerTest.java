@@ -51,22 +51,23 @@ public class NameProposerTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("  int fCount;\n");
-		buf.append("  static int fgSingleton;\n");
-		buf.append("  int foo;\n");
-		buf.append("\n");
-		buf.append("  boolean fBlue;\n");
-		buf.append("  boolean modified;\n");
-		buf.append("  boolean isTouched;\n");
-		buf.append("\n");
-		buf.append("  static final int K_CONST;\n");
-		buf.append("  static final boolean MY_CONST_ANT;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package pack1;
+			
+			public class C {
+			  int fCount;
+			  static int fgSingleton;
+			  int foo;
+			
+			  boolean fBlue;
+			  boolean modified;
+			  boolean isTouched;
+			
+			  static final int K_CONST;
+			  static final boolean MY_CONST_ANT;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 		IType type= cu.getType("C");
 
 		fJProject1.setOption(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");

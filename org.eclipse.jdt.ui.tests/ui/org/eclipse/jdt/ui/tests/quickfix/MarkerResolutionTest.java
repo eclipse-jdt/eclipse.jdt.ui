@@ -142,15 +142,16 @@ public class MarkerResolutionTest extends QuickFixTest {
 			return;
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Vector vec) {\n");
-		buf.append("        goo(true);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.Vector;
+			public class E {
+			    void foo(Vector vec) {
+			        goo(true);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		createMarker(cu, 0, 0, 7);
 
@@ -171,15 +172,16 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 			proposals[0].apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("PACKAGE test1;\n");
-			buf.append("import java.util.Vector;\n");
-			buf.append("public class E {\n");
-			buf.append("    void foo(Vector vec) {\n");
-			buf.append("        goo(true);\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
+			String str1= """
+				PACKAGE test1;
+				import java.util.Vector;
+				public class E {
+				    void foo(Vector vec) {
+				        goo(true);
+				    }
+				}
+				""";
+			assertEqualString(doc.get(), str1);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
@@ -191,15 +193,16 @@ public class MarkerResolutionTest extends QuickFixTest {
 			return;
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(Vector vec) {\n");
-		buf.append("        goo(true);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.Vector;
+			public class E {
+			    void foo(Vector vec) {
+			        goo(true);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		int markerPos= 8;
 		createMarker(cu, 0, markerPos, 5);
@@ -218,16 +221,17 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 			proposals[0].apply(doc);
 
-			buf= new StringBuilder();
-			buf.append("\n");
-			buf.append("package TEST1;\n");
-			buf.append("import java.util.Vector;\n");
-			buf.append("public class E {\n");
-			buf.append("    void foo(Vector vec) {\n");
-			buf.append("        goo(true);\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			assertEqualString(doc.get(), buf.toString());
+			String str1= """
+				
+				package TEST1;
+				import java.util.Vector;
+				public class E {
+				    void foo(Vector vec) {
+				        goo(true);
+				    }
+				}
+				""";
+			assertEqualString(doc.get(), str1);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}

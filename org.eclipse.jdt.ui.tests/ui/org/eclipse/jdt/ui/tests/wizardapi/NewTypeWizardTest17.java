@@ -120,30 +120,34 @@ public class NewTypeWizardTest17 {
 		fJProject1= projectSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape permits Square {
+			}
+			""";
 		fSealedSuperCls= fpack1.createCompilationUnit("Shape.java", test, false, null);
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Square extends Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Square extends Shape {
+			}
+			""";
 		fpack1.createCompilationUnit("Square.java", test, false, null);
 		fSealedClsBinding= getTypeBinding(fSealedSuperCls);
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public sealed interface IShape permits ISquare {
+			}
+			""";
 		fSealedSuperInterface= fpack1.createCompilationUnit("IShape.java", test, false, null);
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed interface ISquare extends IShape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed interface ISquare extends IShape {
+			}
+			""";
 		fpack1.createCompilationUnit("ISquare.java", test, false, null);
 		fSealedInterfaceBinding= getTypeBinding(fSealedSuperInterface);
 	}
@@ -153,30 +157,34 @@ public class NewTypeWizardTest17 {
 		fJProjectM1= projectMSetup.getProject();
 		fMSourceFolder= JavaProjectHelper.addSourceContainer(fJProjectM1, "src");
 		fMpack1= fMSourceFolder.createPackageFragment("test1", false, null);
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square {\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public sealed class Shape permits Square {
+			}
+			""";
 		fMSealedSuperCls= fMpack1.createCompilationUnit("Shape.java", test, false, null);
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed class Square extends Shape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed class Square extends Shape {
+			}
+			""";
 		fMpack1.createCompilationUnit("Square.java", test, false, null);
 		fMSealedClsBinding= getTypeBinding(fMSealedSuperCls);
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public sealed interface IShape permits ISquare {
+			}
+			""";
 		fMSealedSuperInterface= fMpack1.createCompilationUnit("IShape.java", test, false, null);
-		test= "" +
-				"package test;\n" +
-				"\n" +
-				"public non-sealed interface ISquare extends IShape {\n" +
-				"}\n";
+		test= """
+			package test;
+			
+			public non-sealed interface ISquare extends IShape {
+			}
+			""";
 		fMpack1.createCompilationUnit("ISquare.java", test, false, null);
 		fMSealedInterfaceBinding= getTypeBinding(fMSealedSuperInterface);
 	}
@@ -195,12 +203,13 @@ public class NewTypeWizardTest17 {
 	}
 
 	private void createModuleInfo() throws Exception {
-		String test= "" +
-				"\n" +
-				"\n" +
-				"module modTest1 {\n" +
-				"	exports test1;\n" +
-				"}\n";
+		String test= """
+			
+			
+			module modTest1 {
+				exports test1;
+			}
+			""";
 		IPackageFragment def= fMSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit(QuickFixTest14.MODULE_INFO_FILE, test, false, null);
 	}
@@ -210,12 +219,13 @@ public class NewTypeWizardTest17 {
 		fJProjectM2= projectMSetup2.getProject();
 		fMSourceFolder= JavaProjectHelper.addSourceContainer(fJProjectM2, "src");
 		fMpack1= fMSourceFolder.createPackageFragment("test3", false, null);
-		String test= "" +
-				"\n" +
-				"\n" +
-				"module modTest2 {\n" +
-				"	requires modTest2;\n" +
-				"}\n";
+		String test= """
+			
+			
+			module modTest2 {
+				requires modTest2;
+			}
+			""";
 		IPackageFragment def= fMSourceFolder.createPackageFragment("", false, null);
 		def.createCompilationUnit(QuickFixTest14.MODULE_INFO_FILE, test, false, null);
 		IPath path= fJProjectM1.getPath();
@@ -356,28 +366,30 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public non-sealed class E extends Shape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public non-sealed class E extends Shape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fSealedSuperCls.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			public sealed class Shape permits Square, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -418,28 +430,30 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public non-sealed class E implements IShape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public non-sealed class E implements IShape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fSealedSuperInterface.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			public sealed interface IShape permits ISquare, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -481,28 +495,30 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public final class E extends Shape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public final class E extends Shape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fSealedSuperCls.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed class Shape permits Square, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			public sealed class Shape permits Square, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -543,28 +559,30 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public final class E implements IShape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public final class E implements IShape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fSealedSuperInterface.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			public sealed interface IShape permits ISquare, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -604,28 +622,30 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public non-sealed interface IE extends IShape {\n" +
-				"    /* interface body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public non-sealed interface IE extends IShape {
+			    /* interface body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fSealedSuperInterface.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare, IE {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			public sealed interface IShape permits ISquare, IE {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -757,32 +777,34 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test2;\n" +
-				"\n" +
-				"import test1.Shape;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public non-sealed class E extends Shape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test2;
+			
+			import test1.Shape;
+			
+			/**
+			 * Type
+			 */
+			public non-sealed class E extends Shape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fMSealedSuperCls.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"import test2.E;\n" +
-				"\n" +
-				"public sealed class Shape permits Square, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			import test2.E;
+			
+			public sealed class Shape permits Square, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -826,32 +848,34 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test2;\n" +
-				"\n" +
-				"import test1.IShape;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public non-sealed class E implements IShape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test2;
+			
+			import test1.IShape;
+			
+			/**
+			 * Type
+			 */
+			public non-sealed class E implements IShape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fMSealedSuperInterface.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"import test2.E;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			import test2.E;
+			
+			public sealed interface IShape permits ISquare, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -896,32 +920,34 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test2;\n" +
-				"\n" +
-				"import test1.Shape;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public final class E extends Shape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test2;
+			
+			import test1.Shape;
+			
+			/**
+			 * Type
+			 */
+			public final class E extends Shape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fMSealedSuperCls.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"import test2.E;\n" +
-				"\n" +
-				"public sealed class Shape permits Square, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			import test2.E;
+			
+			public sealed class Shape permits Square, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -965,32 +991,34 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test2;\n" +
-				"\n" +
-				"import test1.IShape;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public final class E implements IShape {\n" +
-				"    /* class body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test2;
+			
+			import test1.IShape;
+			
+			/**
+			 * Type
+			 */
+			public final class E implements IShape {
+			    /* class body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fMSealedSuperInterface.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"import test2.E;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare, E {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			import test2.E;
+			
+			public sealed interface IShape permits ISquare, E {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -1033,32 +1061,34 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test2;\n" +
-				"\n" +
-				"import test1.IShape;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public non-sealed interface IE extends IShape {\n" +
-				"    /* interface body */\n" +
-				"}\n";
+		String expected= """
+			/**
+			 * File
+			 */
+			package test2;
+			
+			import test1.IShape;
+			
+			/**
+			 * Type
+			 */
+			public non-sealed interface IE extends IShape {
+			    /* interface body */
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 
 		actual= fMSealedSuperInterface.getSource();
 
-		expected= "" +
-				"package test;\n" +
-				"\n" +
-				"import test2.IE;\n" +
-				"\n" +
-				"public sealed interface IShape permits ISquare, IE {\n" +
-				"}\n";
+		expected= """
+			package test;
+			
+			import test2.IE;
+			
+			public sealed interface IShape permits ISquare, IE {
+			}
+			""";
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -1150,11 +1180,12 @@ public class NewTypeWizardTest17 {
 		fJProject1= projectSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String test= "" +
-				"package test;\n" +
-				"\n" +
-				"public record Rec1(int x){\n" +
-				"}\n";
+		String test= """
+			package test;
+			
+			public record Rec1(int x){
+			}
+			""";
 		ICompilationUnit superClsUnit= fpack1.createCompilationUnit("Rec1.java", test, false, null);
 		ITypeBinding superCls= getTypeBinding(superClsUnit);
 
@@ -1206,42 +1237,42 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public record Rec1() {\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Overridden\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public boolean equals(Object arg0) {\n" +
-				"        return false;\n" +
-				"    }\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Overridden\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public int hashCode() {\n" +
-				"        return 0;\n" +
-				"    }\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Overridden\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public String toString() {\n" +
-				"        return null;\n" +
-				"    }\n" +
-				"\n" +
-				"}" ;
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public record Rec1() {
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public boolean equals(Object arg0) {
+			        return false;
+			    }
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public int hashCode() {
+			        return 0;
+			    }
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public String toString() {
+			        return null;
+			    }
+			
+			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -1270,18 +1301,18 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public record Rec1() {\n" +
-				"\n" +
-				"}" ;
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public record Rec1() {
+			
+			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -1310,25 +1341,25 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public record Rec1() {\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Method\n" +
-				"     */\n" +
-				"    public static void main(String[] args) {\n" +
-				"\n" +
-				"    }\n" +
-				"\n" +
-				"}" ;
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public record Rec1() {
+			
+			    /**
+			     * Method
+			     */
+			    public static void main(String[] args) {
+			
+			    }
+			
+			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
@@ -1357,48 +1388,49 @@ public class NewTypeWizardTest17 {
 
 		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
 
-		String expected= "" +
-				"/**\n" +
-				" * File\n" +
-				" */\n" +
-				"package test1;\n" +
-				"\n" +
-				"/**\n" +
-				" * Type\n" +
-				" */\n" +
-				"public record Rec1() {\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Overridden\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public boolean equals(Object arg0) {\n" +
-				"        return false;\n" +
-				"    }\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Overridden\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public int hashCode() {\n" +
-				"        return 0;\n" +
-				"    }\n" +
-				"\n" +
-				"    /**\n" +
-				"     * Overridden\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public String toString() {\n" +
-				"        return null;\n" +
-				"    }\n\n" +
-				"    /**\n" +
-				"     * Method\n" +
-				"     */\n" +
-				"    public static void main(String[] args) {\n" +
-				"\n" +
-				"    }\n" +
-				"\n" +
-				"}" ;
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+			
+			/**
+			 * Type
+			 */
+			public record Rec1() {
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public boolean equals(Object arg0) {
+			        return false;
+			    }
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public int hashCode() {
+			        return 0;
+			    }
+			
+			    /**
+			     * Overridden
+			     */
+			    @Override
+			    public String toString() {
+			        return null;
+			    }
+			
+			    /**
+			     * Method
+			     */
+			    public static void main(String[] args) {
+			
+			    }
+			
+			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}

@@ -76,18 +76,20 @@ public class ValidateEditTests extends GenericRefactoringTest {
 	public void testPackageRename1() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("class A {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("A.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			class A {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("A.java", str, true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("class B {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= fragment.createCompilationUnit("B.java", buf.toString(), true, null);
+		String str1= """
+			package org.test;
+			class B {
+			}
+			""";
+		ICompilationUnit cu2= fragment.createCompilationUnit("B.java", str1, true, null);
 		setReadOnly(cu2);
 
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
@@ -110,27 +112,30 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("A.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class A {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("A.java", str, true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class B {\n");
-		buf.append("}\n");
-		fragment.createCompilationUnit("B.java", buf.toString(), true, null);
+		String str1= """
+			package org.test;
+			public class B {
+			}
+			""";
+		fragment.createCompilationUnit("B.java", str1, true, null);
 		// not read only
 
 		IPackageFragment fragment2= getRoot().createPackageFragment("org.other", true, null);
 
-		buf= new StringBuilder();
-		buf.append("package org.other;\n");
-		buf.append("public class C extends org.test.A {\n");
-		buf.append("}\n");
-		ICompilationUnit cu3= fragment2.createCompilationUnit("C.java", buf.toString(), true, null);
+		String str2= """
+			package org.other;
+			public class C extends org.test.A {
+			}
+			""";
+		ICompilationUnit cu3= fragment2.createCompilationUnit("C.java", str2, true, null);
 		setReadOnly(cu3);
 
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_PACKAGE);
@@ -153,11 +158,12 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
 		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
@@ -185,11 +191,12 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
 		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
@@ -219,18 +226,20 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class C extends MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", buf.toString(), true, null);
+		String str1= """
+			package org.test;
+			public class C extends MyClass {
+			}
+			""";
+		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", str1, true, null);
 		setReadOnly(cu2);
 
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_COMPILATION_UNIT);
@@ -252,18 +261,20 @@ public class ValidateEditTests extends GenericRefactoringTest {
 
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class C extends MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", buf.toString(), true, null);
+		String str1= """
+			package org.test;
+			public class C extends MyClass {
+			}
+			""";
+		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", str1, true, null);
 		setReadOnly(cu2);
 
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_TYPE);
@@ -287,11 +298,12 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
 		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
@@ -299,11 +311,12 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		file.create(getStream(content), true, null);
 		setReadOnly(file);
 
-		buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class C extends MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", buf.toString(), true, null);
+		String str1= """
+			package org.test;
+			public class C extends MyClass {
+			}
+			""";
+		ICompilationUnit cu2= fragment.createCompilationUnit("C.java", str1, true, null);
 		setReadOnly(cu2);
 
 		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(new IResource[] { file } , new IJavaElement[] { cu1 });
@@ -361,19 +374,21 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
 
-		buf= new StringBuilder();
-		buf.append("package org.test1;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= otherFragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str1= """
+			package org.test1;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu2= otherFragment.createCompilationUnit("MyClass.java", str1, true, null);
 		setReadOnly(cu2);
 
 
@@ -400,18 +415,20 @@ public class ValidateEditTests extends GenericRefactoringTest {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 		IPackageFragment otherFragment= getRoot().createPackageFragment("org.test1", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu1= fragment.createCompilationUnit("MyClass.java", str, true, null);
 		setReadOnly(cu1);
 
-		buf= new StringBuilder();
-		buf.append("package org.test1;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		ICompilationUnit cu2= otherFragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str1= """
+			package org.test1;
+			public class MyClass {
+			}
+			""";
+		ICompilationUnit cu2= otherFragment.createCompilationUnit("MyClass.java", str1, true, null);
 		setReadOnly(cu2);
 
 		ICopyPolicy policy= ReorgPolicyFactory.createCopyPolicy(new IResource[0], new IJavaElement[] { cu1 });

@@ -58,11 +58,11 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 	@Before
 	public void before() {
-		StringBuilder comment= new StringBuilder();
-		comment.append("/* (non-Javadoc)\n");
-		comment.append(" * ${see_to_target}\n");
-		comment.append(" */");
-		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, comment.toString(), null);
+		String str= """
+			/* (non-Javadoc)
+			 * ${see_to_target}
+			 */""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, str, null);
 	}
 
 	public void runOperation(IType type, IField[] fields, IMethod[] methods, IJavaElement insertBefore, boolean createComments) throws CoreException {
@@ -154,39 +154,40 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), new IField[] { b1, b2, c1, c2 }, new IMethod[] { foo_b, bar_b, foo_c, bar_c } );
 
-		String expected= "package p;\r\n" +
-		"\r\n" +
-		"public class A {\r\n" +
-		"\r\n" +
-		"	B b1;\r\n" +
-		"	B b2;\r\n" +
-		"	C c1;\r\n" +
-		"	C c2;\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.B#foo_b()\r\n" +
-		"	 */\r\n" +
-		"	public void foo_b() {\r\n" +
-		"		b1.foo_b();\r\n" +
-		"	}\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.B#bar_b()\r\n" +
-		"	 */\r\n" +
-		"	public void bar_b() {\r\n" +
-		"		b2.bar_b();\r\n" +
-		"	}\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.C#foo_c()\r\n" +
-		"	 */\r\n" +
-		"	public void foo_c() {\r\n" +
-		"		c1.foo_c();\r\n" +
-		"	}\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.C#bar_c()\r\n" +
-		"	 */\r\n" +
-		"	public void bar_c() {\r\n" +
-		"		c2.bar_c();\r\n" +
-		"	}\r\n" +
-		"}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				B b1;\r
+				B b2;\r
+				C c1;\r
+				C c2;\r
+				/* (non-Javadoc)\r
+				 * @see p.B#foo_b()\r
+				 */\r
+				public void foo_b() {\r
+					b1.foo_b();\r
+				}\r
+				/* (non-Javadoc)\r
+				 * @see p.B#bar_b()\r
+				 */\r
+				public void bar_b() {\r
+					b2.bar_b();\r
+				}\r
+				/* (non-Javadoc)\r
+				 * @see p.C#foo_c()\r
+				 */\r
+				public void foo_c() {\r
+					c1.foo_c();\r
+				}\r
+				/* (non-Javadoc)\r
+				 * @see p.C#bar_c()\r
+				 */\r
+				public void bar_c() {\r
+					c2.bar_c();\r
+				}\r
+			}""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -371,13 +372,14 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 				"}\r\n" +
 				"", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B<A> someField;\r\n" +
-				"\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				B<A> someField;\r
+			\r
+			}""", true, null);
 
 		IField field= a.getType("A").getField("someField");
 		IMethod method= b.getType("B").getMethod("get", new String[0]);
@@ -385,27 +387,28 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), new IField[] { field, field } , new IMethod[] { method, method2 });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B<A> someField;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.B#get()\r\n" +
-				"	 */\r\n" +
-				"	public A get() {\r\n" +
-				"		return someField.get();\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.B#set(java.lang.Object)\r\n" +
-				"	 */\r\n" +
-				"	public void set(A e) {\r\n" +
-				"		someField.set(e);\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				B<A> someField;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#get()\r
+				 */\r
+				public A get() {\r
+					return someField.get();\r
+				}\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#set(java.lang.Object)\r
+				 */\r
+				public void set(A e) {\r
+					someField.set(e);\r
+				}\r
+			\r
+			}""", a.getSource());
 	}
 
 	/**
@@ -486,21 +489,22 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), new IField[] { field } , new IMethod[] { sMethod });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"import p.B.SomeEnum;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B someField;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.B#getIt()\r\n" +
-				"	 */\r\n" +
-				"	public SomeEnum getIt() {\r\n" +
-				"		return someField.getIt();\r\n" +
-				"	}\r\n" +
-				"}", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			import p.B.SomeEnum;\r
+			\r
+			public class A {\r
+				\r
+				B someField;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#getIt()\r
+				 */\r
+				public SomeEnum getIt() {\r
+					return someField.getIt();\r
+				}\r
+			}""", a.getSource());
 
 	}
 
@@ -510,18 +514,19 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test07() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"\r\n" +
-				"	class C {\r\n" +
-				"		\r\n" +
-				"		A some;\r\n" +
-				"	}\r\n" +
-				"	\r\n" +
-				"	public void foo() {}\r\n" +
-				"\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				class C {\r
+					\r
+					A some;\r
+				}\r
+				\r
+				public void foo() {}\r
+			\r
+			}""", true, null);
 
 		IField fieldSome= a.getType("A").getType("C").getField("some");
 		IMethod method= a.getType("A").getMethod("foo", new String[0]);
@@ -558,15 +563,16 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test08() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public void foo() {\r\n" +
-				"		A a = new A() {\r\n" +
-				"			A someA;\r\n" +
-				"		};\r\n" +
-				"	}\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				public void foo() {\r
+					A a = new A() {\r
+						A someA;\r
+					};\r
+				}\r
+			}""", true, null);
 
 		IType anonType= (IType)a.getElementAt(70);
 		IField theField= anonType.getField("someA");
@@ -574,22 +580,23 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(anonType, new IField[] { theField }, new IMethod[] { theMethod });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public void foo() {\r\n" +
-				"		A a = new A() {\r\n" +
-				"			A someA;\r\n" +
-				"\r\n" +
-				"			/* (non-Javadoc)\r\n" +
-				"			 * @see p.A#foo()\r\n" +
-				"			 */\r\n" +
-				"			public void foo() {\r\n" +
-				"				someA.foo();\r\n" +
-				"			}\r\n" +
-				"		};\r\n" +
-				"	}\r\n" +
-				"}", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A {\r
+				public void foo() {\r
+					A a = new A() {\r
+						A someA;\r
+			\r
+						/* (non-Javadoc)\r
+						 * @see p.A#foo()\r
+						 */\r
+						public void foo() {\r
+							someA.foo();\r
+						}\r
+					};\r
+				}\r
+			}""", a.getSource());
 	}
 
 	/**
@@ -607,13 +614,14 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 				"}\r\n" +
 				"", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A<E extends B> {\r\n" +
-				"\r\n" +
-				"	E someField;\r\n" +
-				"	\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A<E extends B> {\r
+			\r
+				E someField;\r
+				\r
+			}""", true, null);
 
 		IType typeA= a.getType("A");
 		IField someField= typeA.getField("someField");
@@ -621,20 +629,21 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(typeA, new IField[] { someField }, new IMethod[] { theMethod });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A<E extends B> {\r\n" +
-				"\r\n" +
-				"	E someField;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.B#foo()\r\n" +
-				"	 */\r\n" +
-				"	public void foo() {\r\n" +
-				"		someField.foo();\r\n" +
-				"	}\r\n" +
-				"	\r\n" +
-				"}", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A<E extends B> {\r
+			\r
+				E someField;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#foo()\r
+				 */\r
+				public void foo() {\r
+					someField.foo();\r
+				}\r
+				\r
+			}""", a.getSource());
 	}
 
 	/**
@@ -743,22 +752,24 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test12() throws Exception {
 
-		/*ICompilationUnit i= */fPackageP.createCompilationUnit("I.java", "package p;\r\n" +
-				"\r\n" +
-				"public interface I {\r\n" +
-				"	public void foo();\r\n" +
-				"	public default void bar(String s) {\r\n" +
-				"		if(s == null) {\r\n" +
-				"			return;\r\n" +
-				"		};\r\n" +
-				"	}\r\n" +
-				"}", true, null);
+		/*ICompilationUnit i= */fPackageP.createCompilationUnit("I.java", """
+			package p;\r
+			\r
+			public interface I {\r
+				public void foo();\r
+				public default void bar(String s) {\r
+					if(s == null) {\r
+						return;\r
+					};\r
+				}\r
+			}""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	I i;\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				I i;\r
+			}""", true, null);
 
 		IType anonType= (IType) a.getElementAt(32);
 		IField theField= anonType.getField("i");
@@ -769,59 +780,58 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(anonType, new IField[] { theField, theField }, new IMethod[] { fooMethod, barMethod });
 
-		compareSource("package p;\n" +
-				"\n" +
-				"public class A {\n" +
-				"	I i;\n" +
-				"\n" +
-				"	/* (non-Javadoc)\n" +
-				"	 * @see p.I#foo()\n" +
-				"	 */\n" +
-				"	public void foo() {\n" +
-				"		i.foo();\n" +
-				"	}\n" +
-				"\n" +
-				"	/* (non-Javadoc)\n" +
-				"	 * @see p.I#bar(java.lang.String)\n" +
-				"	 */\n" +
-				"	public void bar(String s) {\n" +
-				"		i.bar(s);\n" +
-				"	}\n" +
-				"}", a.getSource());
+		compareSource("""
+			package p;
+			
+			public class A {
+				I i;
+			
+				/* (non-Javadoc)
+				 * @see p.I#foo()
+				 */
+				public void foo() {
+					i.foo();
+				}
+			
+				/* (non-Javadoc)
+				 * @see p.I#bar(java.lang.String)
+				 */
+				public void bar(String s) {
+					i.bar(s);
+				}
+			}""", a.getSource());
 	}
 
 	@Test
 	public void insertAt() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class A  {\n");
-		buf.append("	Runnable x;\n");
-		buf.append("	\n");
-		buf.append("	A() {\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	void foo() {\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	{\n"); // initializer
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	static {\n"); // static initializer
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	class Inner {\n"); // inner class
-		buf.append("	}\n");
-		buf.append("}");
-		String originalContent= buf.toString();
+		String originalContent= """
+			package p;
+			
+			public class A  {
+				Runnable x;
+			\t
+				A() {
+				}
+			\t
+				void foo() {
+				}
+			\t
+				{
+				}
+			\t
+				static {
+				}
+			\t
+				class Inner {
+				}
+			}""";
 
 		final int NUM_MEMBERS= 6;
 
-		buf= new StringBuilder();
-		buf.append("public void run() {\n");
-		buf.append("		x.run();\n");
-		buf.append("	}");
-		String expectedConstructor= buf.toString();
+		String expectedConstructor= """
+			public void run() {
+					x.run();
+				}""";
 
 
 		IType runnableType= fPackageP.getJavaProject().findType("java.lang.Runnable");

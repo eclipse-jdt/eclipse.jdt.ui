@@ -35,13 +35,14 @@ public abstract class AbstractRenameMethodPerfTest extends RepeatingRefactoringP
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment definition= fTestProject.getSourceFolder().createPackageFragment("def", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package def;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit result= definition.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package def;
+			public class A {
+			    public void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit result= definition.createCompilationUnit("A.java", str, false, null);
 
 		IPackageFragment references= fTestProject.getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {

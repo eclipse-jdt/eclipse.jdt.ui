@@ -84,22 +84,23 @@ public class AdvancedQuickAssistTest1d5 extends QuickFixTest {
 	@Test
 	public void testReplaceIfWithCondition1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object s) {\n");
-		buf.append("        Number number;\n");
-		buf.append("        if (s instanceof String) {\n");
-		buf.append("            number = Long.parseLong(\"1\");\n");
-		buf.append("        } else {\n");
-		buf.append("            number = Double.parseDouble(\"1\");\n");
-		buf.append("        }\n");
-		buf.append("        System.out.println(number);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(Object s) {
+			        Number number;
+			        if (s instanceof String) {
+			            number = Long.parseLong("1");
+			        } else {
+			            number = Double.parseDouble("1");
+			        }
+			        System.out.println(number);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -111,37 +112,37 @@ public class AdvancedQuickAssistTest1d5 extends QuickFixTest {
 	@Test
 	public void testReplaceIfWithCondition2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object s) {\n");
-		buf.append("        Number number;\n");
-		buf.append("        if (s instanceof String) {\n");
-		buf.append("            number = Long.parseLong(\"3\");\n");
-		buf.append("        } else {\n");
-		buf.append("            number = Long.parseLong(\"1\");\n");
-		buf.append("        }\n");
-		buf.append("        System.out.println(number);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(Object s) {
+			        Number number;
+			        if (s instanceof String) {
+			            number = Long.parseLong("3");
+			        } else {
+			            number = Long.parseLong("1");
+			        }
+			        System.out.println(number);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(Object s) {\n");
-		buf.append("        Number number;\n");
-		buf.append("        number = s instanceof String ? Long.parseLong(\"3\") : Long.parseLong(\"1\");\n");
-		buf.append("        System.out.println(number);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo(Object s) {
+			        Number number;
+			        number = s instanceof String ? Long.parseLong("3") : Long.parseLong("1");
+			        System.out.println(number);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 		assertCorrectLabels(proposals);

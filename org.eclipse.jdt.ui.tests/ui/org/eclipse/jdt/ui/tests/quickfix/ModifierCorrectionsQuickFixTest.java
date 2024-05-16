@@ -95,16 +95,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testStaticMethodRequestedInSameType1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void xoo() {
+			    }
+			    public static void foo() {
+			        xoo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -114,31 +115,33 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public static void xoo() {
+			    }
+			    public static void foo() {
+			        xoo();
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testStaticMethodRequestedInSameType2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        E.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void xoo() {
+			    }
+			    public static void foo() {
+			        E.xoo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -148,28 +151,28 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] previews= getAllPreviewContent(proposals);
 		String[] expected = new String[previews.length];
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        E.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0] = buf.toString();
+		expected[0] = """
+			package test1;
+			public class E {
+			    public static void xoo() {
+			    }
+			    public static void foo() {
+			        E.xoo();
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        E e = new E();\n");
-		buf.append("        e.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1] = buf.toString();
+		expected[1] = """
+			package test1;
+			public class E {
+			    public void xoo() {
+			    }
+			    public static void foo() {
+			        E e = new E();
+			        e.xoo();
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
@@ -178,16 +181,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testStaticMethodRequestedInSameGenericType() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E<T> {\n");
-		buf.append("    public <M> void xoo(M m) {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        xoo(Boolean.TRUE);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E<T> {
+			    public <M> void xoo(M m) {
+			    }
+			    public static void foo() {
+			        xoo(Boolean.TRUE);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -197,37 +201,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E<T> {\n");
-		buf.append("    public static <M> void xoo(M m) {\n");
-		buf.append("    }\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("        xoo(Boolean.TRUE);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E<T> {
+			    public static <M> void xoo(M m) {
+			    }
+			    public static void foo() {
+			        xoo(Boolean.TRUE);
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testStaticMethodRequestedInOtherType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class X {\n");
-		buf.append("    public void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class X {
+			    public void xoo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("X.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         X.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			         X.xoo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -237,23 +244,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] previews= getAllPreviewContent(proposals);
 		String[] expected = new String[previews.length];
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class X {\n");
-		buf.append("    public static void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0] = buf.toString();
+		expected[0] = """
+			package test1;
+			public class X {
+			    public static void xoo() {
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         X x = new X();\n");
-		buf.append("        x.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1] = buf.toString();
+		expected[1] = """
+			package test1;
+			public class E {
+			    public void foo() {
+			         X x = new X();
+			        x.xoo();
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(previews, expected);
 	}
@@ -261,22 +268,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvisibleMethodRequestedInSuperType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private void xoo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    public void foo() {
+			         xoo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -286,34 +295,37 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected void xoo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleSuperMethodRequestedInSuperType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private void xoo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         super.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    public void foo() {
+			         super.xoo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -323,34 +335,37 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected void xoo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleSuperMethodRequestedInGenericSuperType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("    private void xoo(T... t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C<T> {
+			    private void xoo(T... t) {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C<Boolean> {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         super.xoo(Boolean.TRUE);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C<Boolean> {
+			    public void foo() {
+			         super.xoo(Boolean.TRUE);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -360,37 +375,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("    protected void xoo(T... t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C<T> {
+			    protected void xoo(T... t) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleMethodRequestedInOtherPackage() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class C {\n");
-		buf.append("    private void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			import java.util.List;
+			public class C {
+			    private void xoo() {
+			    }
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(C c) {\n");
-		buf.append("         c.xoo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.C;
+			public class E {
+			    public void foo(C c) {
+			         c.xoo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -400,35 +418,38 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class C {\n");
-		buf.append("    public void xoo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			import java.util.List;
+			public class C {
+			    public void xoo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleConstructorRequestedInOtherType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private C() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private C() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         C c= new C();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			         C c= new C();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -438,33 +459,36 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    C() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    C() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleDefaultConstructorRequestedInOtherType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected class Inner{\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    protected class Inner{
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class E extends test1.C {\n");
-		buf.append("    Object o= new Inner();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test2;
+			public class E extends test1.C {
+			    Object o= new Inner();
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -474,37 +498,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected class Inner{\n");
-		buf.append("\n");
-		buf.append("        public Inner() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected class Inner{
+			
+			        public Inner() {
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleConstructorRequestedInSuperType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private C() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private C() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public E() {\n");
-		buf.append("         super();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    public E() {
+			         super();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -514,33 +541,36 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected C() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected C() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleFieldRequestedInSamePackage1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private int fXoo;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private int fXoo;
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(C c) {\n");
-		buf.append("         c.fXoo= 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo(C c) {
+			         c.fXoo= 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -550,34 +580,36 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    int fXoo;\n");
-		buf.append("}\n");
-
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    int fXoo;
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 
 	@Test
 	public void testInvisibleFieldRequestedInSamePackage2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private int fXoo;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private int fXoo;
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         fXoo= 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    public void foo() {
+			         fXoo= 1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -587,61 +619,61 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected int fXoo;\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class C {
+			    protected int fXoo;
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    private int fXoo;\n");
-		buf.append("\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         fXoo= 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E extends C {
+			    private int fXoo;
+			
+			    public void foo() {
+			         fXoo= 1;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview3= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo(int fXoo) {\n");
-		buf.append("         fXoo= 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			public class E extends C {
+			    public void foo(int fXoo) {
+			         fXoo= 1;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(4);
 		String preview4= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         int fXoo = 1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
+		String expected4= """
+			package test1;
+			public class E extends C {
+			    public void foo() {
+			         int fXoo = 1;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(5);
 		String preview5= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
+		String expected5= """
+			package test1;
+			public class E extends C {
+			    public void foo() {
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 
@@ -651,17 +683,18 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testNonStaticMethodRequestedInConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int xoo() { return 1; };\n");
-		buf.append("    public E(int val) {\n");
-		buf.append("    }\n");
-		buf.append("    public E() {\n");
-		buf.append("         this(xoo());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    private int xoo() { return 1; };
+			    public E(int val) {
+			    }
+			    public E() {
+			         this(xoo());
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -671,33 +704,35 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private static int xoo() { return 1; };\n");
-		buf.append("    public E(int val) {\n");
-		buf.append("    }\n");
-		buf.append("    public E() {\n");
-		buf.append("         this(xoo());\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    private static int xoo() { return 1; };
+			    public E(int val) {
+			    }
+			    public E() {
+			         this(xoo());
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testNonStaticFieldRequestedInConstructor() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int fXoo= 1;\n");
-		buf.append("    public E(int val) {\n");
-		buf.append("    }\n");
-		buf.append("    public E() {\n");
-		buf.append("         this(fXoo);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    private int fXoo= 1;
+			    public E(int val) {
+			    }
+			    public E() {
+			         this(fXoo);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -707,37 +742,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private static int fXoo= 1;\n");
-		buf.append("    public E(int val) {\n");
-		buf.append("    }\n");
-		buf.append("    public E() {\n");
-		buf.append("         this(fXoo);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    private static int fXoo= 1;
+			    public E(int val) {
+			    }
+			    public E() {
+			         this(fXoo);
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvisibleTypeRequestedInDifferentPackage() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("class C {\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			class C {
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         test2.C c= null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			         test2.C c= null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -747,31 +785,34 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			public class C {
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testInvisibleTypeRequestedInGenericType() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("class C<T> {\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			class C<T> {
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         test2.C<String> c= null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			         test2.C<String> c= null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -781,33 +822,36 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			public class C<T> {
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 
 	@Test
 	public void testInvisibleTypeRequestedFromSuperClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    private class CInner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    private class CInner {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         CInner c= null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    public void foo() {
+			         CInner c= null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -817,34 +861,37 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    class CInner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    class CInner {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 
 	@Test
 	public void testInvisibleImport() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("class C {\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			class C {
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         test2.C c= null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			         test2.C c= null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -854,23 +901,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			public class C {
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testAbstractMethodWithBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public abstract void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public abstract class E {
+			    public abstract void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -880,23 +929,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public abstract class E {
+			    public void foo() {
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public abstract void foo();\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public abstract class E {
+			    public abstract void foo();
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
@@ -905,12 +954,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAbstractMethodWithBody2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("abstract class C {\n");
-		buf.append("    public abstract strictfp void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			abstract class C {
+			    public abstract strictfp void foo() {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 2);
@@ -920,22 +970,22 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("abstract class C {\n");
-		buf.append("    public strictfp void foo() {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			abstract class C {
+			    public strictfp void foo() {}
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("abstract class C {\n");
-		buf.append("    public abstract void foo();\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			abstract class C {
+			    public abstract void foo();
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
@@ -944,16 +994,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAbstractMethodWithBody3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("    A {\n");
-		buf.append("        public void foo() {}\n");
-		buf.append("    };\n");
-		buf.append("    public abstract void foo() {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			enum E {
+			    A {
+			        public void foo() {}
+			    };
+			    public abstract void foo() {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -962,16 +1013,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("    A {\n");
-		buf.append("        public void foo() {}\n");
-		buf.append("    };\n");
-		buf.append("    public abstract void foo();\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			enum E {
+			    A {
+			        public void foo() {}
+			    };
+			    public abstract void foo();
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -979,12 +1030,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAbstractMethodInNonAbstractClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public abstract int foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public abstract int foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -998,12 +1050,12 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public abstract int foo();\n");
-		buf.append("}\n");
-		String expectedMakeClassAbstract= buf.toString();
+		String expectedMakeClassAbstract= """
+			package test1;
+			public abstract class E {
+			    public abstract int foo();
+			}
+			""";
 
 		assertEquals(preview1, expectedMakeClassAbstract);
 
@@ -1016,14 +1068,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		proposal= (CUCorrectionProposal) proposals.get(0);
 		preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public int foo() {
+			        return 0;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
@@ -1034,13 +1086,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testNativeMethodWithBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public native void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public native void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1050,23 +1103,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public native void foo();\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public native void foo();
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -1075,19 +1128,20 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testOuterLocalMustBeFinal() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 9;\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                int x= i;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        int i= 9;
+			        Runnable run= new Runnable() {
+			            public void run() {
+			                int x= i;
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1097,39 +1151,41 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        final int i= 9;\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                int x= i;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        final int i= 9;
+			        Runnable run= new Runnable() {
+			            public void run() {
+			                int x= i;
+			            }
+			        };
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testOuterLocalMustBeFinal2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        List<String> i= null, j= null;\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                Object x= i;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.List;
+			public class E {
+			    public void foo() {
+			        List<String> i= null, j= null;
+			        Runnable run= new Runnable() {
+			            public void run() {
+			                Object x= i;
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1139,39 +1195,41 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        final List<String> i= null;\n");
-		buf.append("        List<String> j= null;\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                Object x= i;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import java.util.List;
+			public class E {
+			    public void foo() {
+			        final List<String> i= null;
+			        List<String> j= null;
+			        Runnable run= new Runnable() {
+			            public void run() {
+			                Object x= i;
+			            }
+			        };
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 
 	@Test
 	public void testOuterParameterMustBeFinal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                int x= i;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(int i) {
+			        Runnable run= new Runnable() {
+			            public void run() {
+			                int x= i;
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1181,37 +1239,39 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(final int i) {\n");
-		buf.append("        Runnable run= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                int x= i;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo(final int i) {
+			        Runnable run= new Runnable() {
+			            public void run() {
+			                int x= i;
+			            }
+			        };
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testOuterForParamMustBeFinal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (int i= 1; true;) {\n");
-		buf.append("            Runnable run= new Runnable() {\n");
-		buf.append("                public void run() {\n");
-		buf.append("                    int x= i;\n");
-		buf.append("                }\n");
-		buf.append("            };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        for (int i= 1; true;) {
+			            Runnable run= new Runnable() {
+			                public void run() {
+			                    int x= i;
+			                }
+			            };
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1221,32 +1281,34 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        for (final int i= 1; true;) {\n");
-		buf.append("            Runnable run= new Runnable() {\n");
-		buf.append("                public void run() {\n");
-		buf.append("                    int x= i;\n");
-		buf.append("                }\n");
-		buf.append("            };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        for (final int i= 1; true;) {
+			            Runnable run= new Runnable() {
+			                public void run() {
+			                    int x= i;
+			                }
+			            };
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 
 	@Test
 	public void testMethodRequiresBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1256,23 +1318,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo() {
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public abstract void foo();\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public abstract class E {
+			    public abstract void foo();
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
@@ -1281,12 +1343,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMethodRequiresBody2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public int foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1296,24 +1359,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public int foo() {\n");
-		buf.append("        return 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public int foo() {
+			        return 0;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E {\n");
-		buf.append("    public abstract int foo();\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public abstract class E {
+			    public abstract int foo();
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -1321,14 +1384,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMethodRequiresBody3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static class E1 {\n");
-		buf.append("        public int foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public static class E1 {
+			        public int foo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1338,28 +1402,28 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static class E1 {\n");
-		buf.append("        public int foo() {\n");
-		buf.append("            return 0;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public static class E1 {
+			        public int foo() {
+			            return 0;
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static abstract class E1 {\n");
-		buf.append("        public abstract int foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public static abstract class E1 {
+			        public abstract int foo();
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -1371,20 +1435,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                foo();\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    private void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			                foo();
+			            }
+			        };
+			    }
+			    private void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1394,20 +1459,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("                foo();\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			                foo();
+			            }
+			        };
+			    }
+			    void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -1417,20 +1483,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               E e= new E();\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    private E() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               E e= new E();
+			            }
+			        };
+			    }
+			    private E() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1440,20 +1507,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               E e= new E();\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    E() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               E e= new E();
+			            }
+			        };
+			    }
+			    E() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -1463,20 +1531,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               int x= fCount;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    private int fCount; {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               int x= fCount;
+			            }
+			        };
+			    }
+			    private int fCount; {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1486,20 +1555,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               int x= fCount;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    int fCount; {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               int x= fCount;
+			            }
+			        };
+			    }
+			    int fCount; {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -1509,20 +1579,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E<T> {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               T x= fCount;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    private T fCount; {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E<T> {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               T x= fCount;
+			            }
+			        };
+			    }
+			    private T fCount; {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1532,20 +1603,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E<T> {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               T x= fCount;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    T fCount; {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E<T> {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               T x= fCount;
+			            }
+			        };
+			    }
+			    T fCount; {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -1555,20 +1627,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               fCount= 2;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    private int fCount; {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               fCount= 2;
+			            }
+			        };
+			    }
+			    private int fCount; {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1578,34 +1651,36 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void x() {\n");
-		buf.append("        Runnable r= new Runnable() {\n");
-		buf.append("            public void run() {\n");
-		buf.append("               fCount= 2;\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("    int fCount; {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public void x() {
+			        Runnable r= new Runnable() {
+			            public void run() {
+			               fCount= 2;
+			            }
+			        };
+			    }
+			    int fCount; {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testSetFinalVariable1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private final int x= 9;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        x= 8;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    private final int x= 9;
+			    public void foo() {
+			        x= 8;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1615,30 +1690,32 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int x= 9;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        x= 8;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    private int x= 9;
+			    public void foo() {
+			        x= 8;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testSetFinalVariable2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private final int x;\n");
-		buf.append("    public E() {\n");
-		buf.append("        x= 8;\n");
-		buf.append("        x= 9;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    private final int x;
+			    public E() {
+			        x= 8;
+			        x= 9;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1648,30 +1725,32 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private int x;\n");
-		buf.append("    public E() {\n");
-		buf.append("        x= 8;\n");
-		buf.append("        x= 9;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    private int x;
+			    public E() {
+			        x= 8;
+			        x= 9;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testSetFinalVariable3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public E() {\n");
-		buf.append("        final int x= 8;\n");
-		buf.append("        x= 9;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public E() {
+			        final int x= 8;
+			        x= 9;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1681,31 +1760,33 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public E() {\n");
-		buf.append("        int x= 8;\n");
-		buf.append("        x= 9;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    public E() {
+			        int x= 8;
+			        x= 9;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testSetFinalVariable4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    final List<String> a= null, x= a, y= a;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        x= new ArrayList<String>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class E {
+			    final List<String> a= null, x= a, y= a;
+			    public void foo() {
+			        x= new ArrayList<String>();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1715,40 +1796,43 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    final List<String> a= null;\n");
-		buf.append("    List<String> x= a;\n");
-		buf.append("    final List<String> y= a;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        x= new ArrayList<String>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class E {
+			    final List<String> a= null;
+			    List<String> x= a;
+			    final List<String> y= a;
+			    public void foo() {
+			        x= new ArrayList<String>();
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testSetFinalVariableInGeneric() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("        T x;\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			public class C<T> {
+			        T x;
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(test2.C<String> c) {\n");
-		buf.append("         c.x= null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    public void foo(test2.C<String> c) {
+			         c.x= null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1758,12 +1842,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("        public T x;\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			public class C<T> {
+			        public T x;
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 
@@ -1771,21 +1856,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testOverrideFinalMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected final void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class C {
+			    protected final void foo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1795,13 +1882,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 
@@ -1809,23 +1897,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testOverridesNonVisibleMethod() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			public class C {
+			    void foo() {
+			    }
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.C;
+			public class E extends C {
+			    public void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1835,36 +1925,39 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			public class C {
+			    public void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testOverridesStaticMethod() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			public class C {
+			    public static void foo() {
+			    }
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.C;
+			public class E extends C {
+			    public void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1874,36 +1967,39 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test2;
+			public class C {
+			    public void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testStaticOverridesMethod() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			public class C {
+			    public void foo() {
+			    }
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public static void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.C;
+			public class E extends C {
+			    public static void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1913,37 +2009,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import test2.C;
+			public class E extends C {
+			    public void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testOverridesMoreVisibleMethod() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			public class C {
+			    public void foo() {
+			    }
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.C;
+			public class E extends C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1953,25 +2052,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			public class C {
+			    protected void foo() {
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import test2.C;
+			public class E extends C {
+			    public void foo() {
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
@@ -1981,23 +2080,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testOverridesMoreVisibleMethodInGeneric() throws Exception {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("    public <M> T foo(M m) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack2.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test2;
+			public class C<T> {
+			    public <M> T foo(M m) {
+			    }
+			}
+			""";
+		pack2.createCompilationUnit("C.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C<String> {\n");
-		buf.append("    protected <M> String foo(M m) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.C;
+			public class E extends C<String> {
+			    protected <M> String foo(M m) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2007,25 +2108,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class C<T> {\n");
-		buf.append("    protected <M> T foo(M m) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			public class C<T> {
+			    protected <M> T foo(M m) {
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.C;\n");
-		buf.append("public class E extends C<String> {\n");
-		buf.append("    public <M> String foo(M m) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import test2.C;
+			public class E extends C<String> {
+			    public <M> String foo(M m) {
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
@@ -2036,12 +2137,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testInvalidInterfaceModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public static interface E  {\n");
-		buf.append("    public void foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public static interface E  {
+			    public void foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2051,25 +2153,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    public void foo();\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public interface E  {
+			    public void foo();
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidMemberInterfaceModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    private interface Inner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public interface E  {
+			    private interface Inner {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2079,25 +2183,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    interface Inner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public interface E  {
+			    interface Inner {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidInterfaceFieldModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    public native int i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public interface E  {
+			    public native int i;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2107,24 +2213,26 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    public int i;\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public interface E  {
+			    public int i;
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidInterfaceMethodModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    private strictfp void foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public interface E  {
+			    private strictfp void foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2134,25 +2242,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    void foo();\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public interface E  {
+			    void foo();
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidClassModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public volatile class E  {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public volatile class E  {
+			    public void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2162,13 +2272,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    public void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 
@@ -2176,13 +2287,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testInvalidMemberClassModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    private class Inner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public interface E  {
+			    private class Inner {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2192,28 +2304,30 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface E  {\n");
-		buf.append("    class Inner {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public interface E  {
+			    class Inner {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidLocalClassModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private void foo() {\n");
-		buf.append("        static class Local {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    private void foo() {
+			        static class Local {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2223,27 +2337,29 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private void foo() {\n");
-		buf.append("        class Local {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    private void foo() {
+			        class Local {
+			        }
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidClassFieldModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    strictfp public native int i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    strictfp public native int i;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2253,24 +2369,26 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    public int i;\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    public int i;
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidClassMethodModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E  {\n");
-		buf.append("    volatile abstract void foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public abstract class E  {
+			    volatile abstract void foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2280,25 +2398,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public abstract class E  {\n");
-		buf.append("    abstract void foo();\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public abstract class E  {
+			    abstract void foo();
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidConstructorModifiers() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class Bug {\n");
-		buf.append("    public static Bug() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Bug.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			
+			public class Bug {
+			    public static Bug() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Bug.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2307,14 +2427,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class Bug {\n");
-		buf.append("    public Bug() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			
+			public class Bug {
+			    public Bug() {
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 		}
@@ -2324,13 +2444,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testInvalidParamModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private void foo(private int x) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    private void foo(private int x) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2340,27 +2461,29 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private void foo(int x) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    private void foo(int x) {
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidVariableModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private void foo() {\n");
-		buf.append("        native int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    private void foo() {
+			        native int x;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2370,30 +2493,32 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private void foo() {\n");
-		buf.append("        int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    private void foo() {
+			        int x;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidMultiVariableModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    public E() {\n");
-		buf.append("        @Deprecated final @SuppressWarnings(\"all\") int a, b, c;\n");
-		buf.append("        a = 0; b = 0; c = 12;\n");
-		buf.append("        b = 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    public E() {
+			        @Deprecated final @SuppressWarnings("all") int a, b, c;
+			        a = 0; b = 0; c = 12;
+			        b = 5;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2403,34 +2528,36 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    public E() {\n");
-		buf.append("        @Deprecated final @SuppressWarnings(\"all\") int a;\n");
-		buf.append("        @Deprecated @SuppressWarnings(\"all\") int b;\n");
-		buf.append("        @Deprecated final @SuppressWarnings(\"all\") int c;\n");
-		buf.append("        a = 0; b = 0; c = 12;\n");
-		buf.append("        b = 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    public E() {
+			        @Deprecated final @SuppressWarnings("all") int a;
+			        @Deprecated @SuppressWarnings("all") int b;
+			        @Deprecated final @SuppressWarnings("all") int c;
+			        a = 0; b = 0; c = 12;
+			        b = 5;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidMultiFieldModifiers() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private final int a, b;\n");
-		buf.append("    public E() {\n");
-		buf.append("        a = 0; b = 0;\n");
-		buf.append("        a = 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    private final int a, b;
+			    public E() {
+			        a = 0; b = 0;
+			        a = 5;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2440,33 +2567,35 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private int a;\n");
-		buf.append("    private final int b;\n");
-		buf.append("    public E() {\n");
-		buf.append("        a = 0; b = 0;\n");
-		buf.append("        a = 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    private int a;
+			    private final int b;
+			    public E() {
+			        a = 0; b = 0;
+			        a = 5;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testInvalidMultiFieldModifiers2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private final int b, a;\n");
-		buf.append("    public E() {\n");
-		buf.append("        a = 0; b = 0;\n");
-		buf.append("        a = 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E  {
+			    private final int b, a;
+			    public E() {
+			        a = 0; b = 0;
+			        a = 5;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2476,38 +2605,41 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E  {\n");
-		buf.append("    private final int b;\n");
-		buf.append("    private int a;\n");
-		buf.append("    public E() {\n");
-		buf.append("        a = 0; b = 0;\n");
-		buf.append("        a = 5;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E  {
+			    private final int b;
+			    private int a;
+			    public E() {
+			        a = 0; b = 0;
+			        a = 5;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testExtendsFinalClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public final class C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E extends C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E extends C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2517,35 +2649,38 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
 	public void testExtendsFinalClass2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public final class C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("C.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("        C c= new C() { };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E {
+			    protected void foo() {
+			        C c= new C() { };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2555,13 +2690,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class C {\n");
-		buf.append("    protected void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			public class C {
+			    protected void foo() {
+			    }
+			}
+			""";
+		assertEqualString(preview, str2);
 	}
 
 	@Test
@@ -2573,14 +2709,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    public String toString() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public final class C {
+			    public String toString() {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2590,15 +2727,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    @Override\n");
-		buf.append("    public String toString() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public final class C {
+			    @Override
+			    public String toString() {
+			        return null;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -2609,14 +2747,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * @deprecated\n");
-		buf.append(" */\n");
-		buf.append("public final class C {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			/**
+			 * @deprecated
+			 */
+			public final class C {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2626,15 +2765,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("/**\n");
-		buf.append(" * @deprecated\n");
-		buf.append(" */\n");
-		buf.append("@Deprecated\n");
-		buf.append("public final class C {\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			/**
+			 * @deprecated
+			 */
+			@Deprecated
+			public final class C {
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -2645,18 +2785,19 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Override\n");
-		buf.append("    public String toString() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public final class C {
+			    /**
+			     * @deprecated
+			     */
+			    @Override
+			    public String toString() {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2666,19 +2807,20 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    @Override\n");
-		buf.append("    public String toString() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public final class C {
+			    /**
+			     * @deprecated
+			     */
+			    @Deprecated
+			    @Override
+			    public String toString() {
+			        return null;
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -2690,15 +2832,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    public String name;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public final class C {
+			    /**
+			     * @deprecated
+			     */
+			    public String name;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -2708,16 +2851,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public final class C {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public String name;\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public final class C {
+			    /**
+			     * @deprecated
+			     */
+			    @Deprecated
+			    public String name;
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -2728,14 +2872,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    static {\n");
-		buf.append("        @SuppressWarnings(\"unused\") String str= \"foo\";");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    static {
+			        @SuppressWarnings("unused") String str= "foo";\
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
@@ -2743,24 +2888,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    static {\n");
-		buf.append("        @SuppressWarnings({\"unused\", \"nls\"}) String str= \"foo\";");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			public class E {
+			    static {
+			        @SuppressWarnings({"unused", "nls"}) String str= "foo";\
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("@SuppressWarnings(\"nls\")\n");
-		buf.append("public class E {\n");
-		buf.append("    static {\n");
-		buf.append("        @SuppressWarnings(\"unused\") String str= \"foo\";");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			@SuppressWarnings("nls")
+			public class E {
+			    static {
+			        @SuppressWarnings("unused") String str= "foo";\
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -2772,14 +2917,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    private class Q {\n");
-		buf.append("        String s = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			public class E {
+			    private class Q {
+			        String s = "";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
@@ -2787,15 +2933,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    private class Q {\n");
-		buf.append("        @SuppressWarnings(\"nls\")\n");
-		buf.append("        String s = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		String str1= """
+			package test1;\s
+			public class E {
+			    private class Q {
+			        @SuppressWarnings("nls")
+			        String s = "";
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str1});
 	}
 
 	@Test
@@ -2806,12 +2953,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    String s = \"\";\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			public class E {
+			    String s = "";
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
@@ -2819,13 +2967,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"nls\")\n");
-		buf.append("    String s = \"\";\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] {buf.toString()});
+		String str1= """
+			package test1;\s
+			public class E {
+			    @SuppressWarnings("nls")
+			    String s = "";
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] {str1});
 	}
 
 	@Test
@@ -2836,14 +2985,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\") String s = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			public class E {
+			    public void foo() {
+			        @SuppressWarnings("unused") String s = "";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
@@ -2851,24 +3001,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings({\"unused\", \"nls\"}) String s = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			public class E {
+			    public void foo() {
+			        @SuppressWarnings({"unused", "nls"}) String s = "";
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"nls\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\") String s = \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;\s
+			public class E {
+			    @SuppressWarnings("nls")
+			    public void foo() {
+			        @SuppressWarnings("unused") String s = "";
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -2881,16 +3031,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(ArrayList<String> c) {\n");
-		buf.append("        new ArrayList(c);\n"); // two warnings on this -> only one proposal!
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			public class A {
+			    public void foo(ArrayList<String> c) {
+			        new ArrayList(c);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -2899,17 +3050,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
-		buf.append("    public void foo(ArrayList<String> c) {\n");
-		buf.append("        new ArrayList(c);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			public class A {
+			    @SuppressWarnings("unchecked")
+			    public void foo(ArrayList<String> c) {
+			        new ArrayList(c);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -2922,17 +3073,18 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         @SuppressWarnings(\"unused\")\n");
-		buf.append("         ArrayList localVar= new ArrayList();");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			public class A {
+			    public void foo() {
+			         @SuppressWarnings("unused")
+			         ArrayList localVar= new ArrayList();\
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -2940,30 +3092,30 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 5);
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         @SuppressWarnings({\"unused\", \"rawtypes\"})\n");
-		buf.append("         ArrayList localVar= new ArrayList();");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			public class A {
+			    public void foo() {
+			         @SuppressWarnings({"unused", "rawtypes"})
+			         ArrayList localVar= new ArrayList();\
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("         @SuppressWarnings(\"unused\")\n");
-		buf.append("         ArrayList localVar= new ArrayList();");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			public class A {
+			    @SuppressWarnings("rawtypes")
+			    public void foo() {
+			         @SuppressWarnings("unused")
+			         ArrayList localVar= new ArrayList();\
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -2975,14 +3127,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    List<String> myList = new ArrayList();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    List<String> myList = new ArrayList();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -2991,15 +3144,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
-		buf.append("    List<String> myList = new ArrayList();\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    @SuppressWarnings("unchecked")
+			    List<String> myList = new ArrayList();
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3012,16 +3165,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("class A {\n");
-		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
-		buf.append("    ArrayList array;\n");
-		buf.append("    boolean a= array.add(1), b= array.add(1);\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			class A {
+			    @SuppressWarnings("rawtypes")
+			    ArrayList array;
+			    boolean a= array.add(1), b= array.add(1);
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -3030,17 +3184,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("\n");
-		buf.append("class A {\n");
-		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
-		buf.append("    ArrayList array;\n");
-		buf.append("    @SuppressWarnings(\"unchecked\")\n");
-		buf.append("    boolean a= array.add(1), b= array.add(1);\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.ArrayList;
+			
+			class A {
+			    @SuppressWarnings("rawtypes")
+			    ArrayList array;
+			    @SuppressWarnings("unchecked")
+			    boolean a= array.add(1), b= array.add(1);
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 
@@ -3053,16 +3207,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public int foo(int param1, List param2) {\n");
-		buf.append("         return param1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    public int foo(int param1, List param2) {
+			         return param1;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -3070,28 +3225,28 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 5);
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public int foo(int param1, @SuppressWarnings(\"rawtypes\") List param2) {\n");
-		buf.append("         return param1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    public int foo(int param1, @SuppressWarnings("rawtypes") List param2) {
+			         return param1;
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
-		buf.append("    public int foo(int param1, List param2) {\n");
-		buf.append("         return param1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    @SuppressWarnings("rawtypes")
+			    public int foo(int param1, List param2) {
+			         return param1;
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, expected);
 
 	}
@@ -3105,24 +3260,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        final Object object = new Object() {\n");
-		buf.append("            {\n");
-		buf.append("                for (List l = new ArrayList(), x = new Vector();;) {\n");
-		buf.append("                    if (l == x)\n");
-		buf.append("                        break;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    };\n");
-		buf.append("};\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    public void foo() {
+			        @SuppressWarnings("unused")
+			        final Object object = new Object() {
+			            {
+			                for (List l = new ArrayList(), x = new Vector();;) {
+			                    if (l == x)
+			                        break;
+			                }
+			            }
+			        };
+			    };
+			};
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
@@ -3131,64 +3287,64 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 6);
 		String[] expected= new String[3];
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        final Object object = new Object() {\n");
-		buf.append("            {\n");
-		buf.append("                for (@SuppressWarnings(\"rawtypes\")\n");
-		buf.append("                List l = new ArrayList(), x = new Vector();;) {\n");
-		buf.append("                    if (l == x)\n");
-		buf.append("                        break;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    };\n");
-		buf.append("};\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    public void foo() {
+			        @SuppressWarnings("unused")
+			        final Object object = new Object() {
+			            {
+			                for (@SuppressWarnings("rawtypes")
+			                List l = new ArrayList(), x = new Vector();;) {
+			                    if (l == x)
+			                        break;
+			                }
+			            }
+			        };
+			    };
+			};
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings({\"unused\", \"rawtypes\"})\n");
-		buf.append("        final Object object = new Object() {\n");
-		buf.append("            {\n");
-		buf.append("                for (List l = new ArrayList(), x = new Vector();;) {\n");
-		buf.append("                    if (l == x)\n");
-		buf.append("                        break;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    };\n");
-		buf.append("};\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    public void foo() {
+			        @SuppressWarnings({"unused", "rawtypes"})
+			        final Object object = new Object() {
+			            {
+			                for (List l = new ArrayList(), x = new Vector();;) {
+			                    if (l == x)
+			                        break;
+			                }
+			            }
+			        };
+			    };
+			};
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"rawtypes\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        @SuppressWarnings(\"unused\")\n");
-		buf.append("        final Object object = new Object() {\n");
-		buf.append("            {\n");
-		buf.append("                for (List l = new ArrayList(), x = new Vector();;) {\n");
-		buf.append("                    if (l == x)\n");
-		buf.append("                        break;\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    };\n");
-		buf.append("};\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    @SuppressWarnings("rawtypes")
+			    public void foo() {
+			        @SuppressWarnings("unused")
+			        final Object object = new Object() {
+			            {
+			                for (List l = new ArrayList(), x = new Vector();;) {
+			                    if (l == x)
+			                        break;
+			                }
+			            }
+			        };
+			    };
+			};
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3200,23 +3356,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    final Runnable r= new Runnable() {\n");
-		buf.append("        public void run() {\n");
-		buf.append("            boolean b;\n");
-		buf.append("            for (b = new ArrayList().add(1);;) {\n");
-		buf.append("                if (b)\n");
-		buf.append("                    return;\n");
-		buf.append("                        break;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    final Runnable r= new Runnable() {
+			        public void run() {
+			            boolean b;
+			            for (b = new ArrayList().add(1);;) {
+			                if (b)
+			                    return;
+			                        break;
+			            }
+			        }
+			    };
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -3224,39 +3381,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1; \n");
-		buf.append("import java.util.*;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    final Runnable r= new Runnable() {\n");
-		buf.append("        @SuppressWarnings(\"unchecked\")\n");
-		buf.append("        public void run() {\n");
-		buf.append("            boolean b;\n");
-		buf.append("            for (b = new ArrayList().add(1);;) {\n");
-		buf.append("                if (b)\n");
-		buf.append("                    return;\n");
-		buf.append("                        break;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;\s
+			import java.util.*;
+			
+			public class A {
+			    final Runnable r= new Runnable() {
+			        @SuppressWarnings("unchecked")
+			        public void run() {
+			            boolean b;
+			            for (b = new ArrayList().add(1);;) {
+			                if (b)
+			                    return;
+			                        break;
+			            }
+			        }
+			    };
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
 	@Test
 	public void testMisspelledSuppressToken() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package a;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"unusd\")\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package a;
+			
+			public class A {
+			    @SuppressWarnings("unusd")
+			    public static void main(String[] args) {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3265,24 +3423,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package a;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package a;
+			
+			public class A {
+			    @SuppressWarnings("unused")
+			    public static void main(String[] args) {
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package a;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package a;
+			
+			public class A {
+			    public static void main(String[] args) {
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3291,38 +3449,41 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testSuppressBug169446() throws Exception {
 
 		IPackageFragment other= fSourceFolder.createPackageFragment("other", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package other; \n");
-		buf.append("\n");
-		buf.append("public @interface SuppressWarnings {\n");
-		buf.append("    String value();\n");
-		buf.append("}\n");
-		other.createCompilationUnit("SuppressWarnings.java", buf.toString(), false, null);
+		String str= """
+			package other;\s
+			
+			public @interface SuppressWarnings {
+			    String value();
+			}
+			""";
+		other.createCompilationUnit("SuppressWarnings.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a.b", false, null);
 
-		buf= new StringBuilder();
-		buf.append("package a.b;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated()\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package a.b;
+			
+			public class E {
+			    @Deprecated()
+			    public void foo() {
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package a.b;\n");
-		buf.append("\n");
-		buf.append("import other.SuppressWarnings;\n");
-		buf.append("\n");
-		buf.append("public class Test {\n");
-		buf.append("    @SuppressWarnings(\"BC\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        new E().foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str2= """
+			package a.b;
+			
+			import other.SuppressWarnings;
+			
+			public class Test {
+			    @SuppressWarnings("BC")
+			    public void foo() {
+			        new E().foo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", str2, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3331,19 +3492,19 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package a.b;\n");
-		buf.append("\n");
-		buf.append("import other.SuppressWarnings;\n");
-		buf.append("\n");
-		buf.append("public class Test {\n");
-		buf.append("    @java.lang.SuppressWarnings(\"deprecation\")\n");
-		buf.append("    @SuppressWarnings(\"BC\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        new E().foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package a.b;
+			
+			import other.SuppressWarnings;
+			
+			public class Test {
+			    @java.lang.SuppressWarnings("deprecation")
+			    @SuppressWarnings("BC")
+			    public void foo() {
+			        new E().foo();
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3351,14 +3512,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testSuppressWarningInImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			import java.util.Vector;
+			
+			public class A {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3367,15 +3529,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String[] expected= new String[1];
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("\n");
-		buf.append("@SuppressWarnings(\"unused\")\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			import java.util.Vector;
+			
+			@SuppressWarnings("unused")
+			public class A {
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3388,14 +3550,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("@SuppressWarnings(value=\"unused\")\n");
-		buf.append("public class E {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			@SuppressWarnings(value="unused")
+			public class E {
+			
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3404,13 +3567,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			public class E {
+			
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3422,14 +3585,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.WARNING);
 		JavaCore.setOptions(hashtable);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("@SuppressWarnings(\"unused\")\n");
-		buf.append("public class E {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			@SuppressWarnings("unused")
+			public class E {
+			
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3438,13 +3602,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			public class E {
+			
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3456,14 +3620,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.WARNING);
 		JavaCore.setOptions(hashtable);
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("@SuppressWarnings({ \"unused\", \"X\" })\n");
-		buf.append("public class E {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			@SuppressWarnings({ "unused", "X" })
+			public class E {
+			
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3472,14 +3637,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("@SuppressWarnings({ \"X\" })\n");
-		buf.append("public class E {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			
+			@SuppressWarnings({ "X" })
+			public class E {
+			
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3488,21 +3653,22 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMakeFinalBug129165() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"serial\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 1, j= i + 1, h= j + 1;\n");
-		buf.append("        Serializable ser= new Serializable() {\n");
-		buf.append("            public void bar() {\n");
-		buf.append("                System.out.println(j);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.Serializable;
+			public class E {
+			    @SuppressWarnings("serial")
+			    public void foo() {
+			        int i= 1, j= i + 1, h= j + 1;
+			        Serializable ser= new Serializable() {
+			            public void bar() {
+			                System.out.println(j);
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3512,37 +3678,39 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"serial\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int i= 1;\n");
-		buf.append("        final int j= i + 1;\n");
-		buf.append("        int h= j + 1;\n");
-		buf.append("        Serializable ser= new Serializable() {\n");
-		buf.append("            public void bar() {\n");
-		buf.append("                System.out.println(j);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			import java.io.Serializable;
+			public class E {
+			    @SuppressWarnings("serial")
+			    public void foo() {
+			        int i= 1;
+			        final int j= i + 1;
+			        int h= j + 1;
+			        Serializable ser= new Serializable() {
+			            public void bar() {
+			                System.out.println(j);
+			            }
+			        };
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
 	public void testStaticFieldInInnerClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        static int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        static int x;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3551,25 +3719,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        int x;
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    static class F {\n");
-		buf.append("        static int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			
+			public class E {
+			    static class F {
+			        static int x;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3577,16 +3745,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testStaticMethodInInnerClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        static int foo() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        static int foo() {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3595,27 +3764,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        int foo() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        int foo() {
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    static class F {\n");
-		buf.append("        static int foo() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			
+			public class E {
+			    static class F {
+			        static int foo() {
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3623,15 +3792,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testFinalVolatileField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        volatile final int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        volatile final int x;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3640,25 +3810,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        final int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        final int x;
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    class F {\n");
-		buf.append("        volatile int x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			
+			public class E {
+			    class F {
+			        volatile int x;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3668,25 +3838,27 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testOverrideAnnotationButNotOverriding() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public class OtherMachine {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("OtherMachine.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			
+			public class OtherMachine {
+			}
+			""";
+		pack1.createCompilationUnit("OtherMachine.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("\n");
-		buf.append("public class Machine extends OtherMachine {\n");
-		buf.append("    @Override\n");
-		buf.append("    public boolean isAlive(OtherMachine m) throws IOException {\n");
-		buf.append("        return true;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Machine.java", buf.toString(), false, null);
+		String str1= """
+			package pack;
+			
+			import java.io.IOException;
+			
+			public class Machine extends OtherMachine {
+			    @Override
+			    public boolean isAlive(OtherMachine m) throws IOException {
+			        return true;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Machine.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3695,30 +3867,30 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("\n");
-		buf.append("public class Machine extends OtherMachine {\n");
-		buf.append("    public boolean isAlive(OtherMachine m) throws IOException {\n");
-		buf.append("        return true;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			
+			import java.io.IOException;
+			
+			public class Machine extends OtherMachine {
+			    public boolean isAlive(OtherMachine m) throws IOException {
+			        return true;
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("\n");
-		buf.append("public class OtherMachine {\n");
-		buf.append("\n");
-		buf.append("    public boolean isAlive(OtherMachine m) throws IOException {\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			
+			import java.io.IOException;
+			
+			public class OtherMachine {
+			
+			    public boolean isAlive(OtherMachine m) throws IOException {
+			        return false;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3727,21 +3899,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testCreateMethodWhenOverrideAnnotation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public abstract class OtherMachine {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("OtherMachine.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			
+			public abstract class OtherMachine {
+			}
+			""";
+		pack1.createCompilationUnit("OtherMachine.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public abstract class Machine extends OtherMachine {\n");
-		buf.append("    @Override\n");
-		buf.append("    public abstract void m1();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Machine.java", buf.toString(), false, null);
+		String str1= """
+			package pack;
+			
+			public abstract class Machine extends OtherMachine {
+			    @Override
+			    public abstract void m1();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Machine.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3750,22 +3924,22 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public abstract class OtherMachine {\n");
-		buf.append("\n");
-		buf.append("    public abstract void m1();\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			
+			public abstract class OtherMachine {
+			
+			    public abstract void m1();
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public abstract class Machine extends OtherMachine {\n");
-		buf.append("    public abstract void m1();\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			
+			public abstract class Machine extends OtherMachine {
+			    public abstract void m1();
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3777,20 +3951,21 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    public void foo() {
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3799,37 +3974,37 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			public class E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    @SuppressWarnings(\"deprecation\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			public class E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    @SuppressWarnings("deprecation")
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3841,22 +4016,23 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    public void foo() {
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3865,42 +4041,42 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			public class E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     * @deprecated
+			     */
+			    @Deprecated
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    @SuppressWarnings(\"deprecation\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			public class E {
+			    @Deprecated
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    @SuppressWarnings("deprecation")
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3908,14 +4084,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testAbstractMethodInEnumWithoutEnumConstants() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("    ;\n");
-		buf.append("    public abstract boolean foo();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			enum E {
+			    ;
+			    public abstract boolean foo();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3924,16 +4101,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("    ;\n");
-		buf.append("    public boolean foo() {\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			enum E {
+			    ;
+			    public boolean foo() {
+			        return false;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3941,12 +4118,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidEnumModifier() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("private final strictfp enum E {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			private final strictfp enum E {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3955,12 +4133,12 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("strictfp enum E {\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			strictfp enum E {
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3968,12 +4146,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidEnumModifier2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("public abstract enum E {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			public abstract enum E {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -3982,12 +4161,12 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("public enum E {\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			public enum E {
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -3995,13 +4174,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidEnumConstantModifier() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("	private final WHITE;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			enum E {
+				private final WHITE;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -4010,13 +4190,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("	WHITE;\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			enum E {
+				WHITE;
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4024,16 +4204,17 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidEnumConstructorModifier() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("	WHITE(1);\n");
-		buf.append("\n");
-		buf.append("	public final E(int foo) {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			enum E {
+				WHITE(1);
+			
+				public final E(int foo) {
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -4042,16 +4223,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("enum E {\n");
-		buf.append("	WHITE(1);\n");
-		buf.append("\n");
-		buf.append("	E(int foo) {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			enum E {
+				WHITE(1);
+			
+				E(int foo) {
+				}
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4059,14 +4240,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testInvalidMemberEnumModifier() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("class E {\n");
-		buf.append("	final enum A {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			class E {
+				final enum A {
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -4075,14 +4257,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("class E {\n");
-		buf.append("	enum A {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			class E {
+				enum A {
+				}
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4090,23 +4272,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	@Test
 	public void testMissingSynchronizedOnInheritedMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("	protected synchronized void foo() {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package r;
+			
+			public class A {
+				protected synchronized void foo() {
+				}
+			}
+			""";
+		pack1.createCompilationUnit("A.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("class B extends A {\n");
-		buf.append("	protected void foo() {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		String str1= """
+			package r;
+			
+			class B extends A {
+				protected void foo() {
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -4115,14 +4299,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package r;\n");
-		buf.append("\n");
-		buf.append("class B extends A {\n");
-		buf.append("	protected synchronized void foo() {\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package r;
+			
+			class B extends A {
+				protected synchronized void foo() {
+				}
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4135,14 +4319,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private void foo() {\n");
-		buf.append("        System.out.println(\"doesn't need class\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    private void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -4152,14 +4337,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    private static void foo() {\n");
-		buf.append("        System.out.println(\"doesn't need class\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str1= """
+			package test1;
+			public class E {
+			    private static void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
+		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -4170,14 +4356,15 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		JavaCore.setOptions(hashtable);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        System.out.println(\"doesn't need class\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -4185,24 +4372,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    static void foo() {\n");
-		buf.append("        System.out.println(\"doesn't need class\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			public class E {
+			    static void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    @SuppressWarnings(\"static-method\")\n");
-		buf.append("    void foo() {\n");
-		buf.append("        System.out.println(\"doesn't need class\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			public class E {
+			    @SuppressWarnings("static-method")
+			    void foo() {
+			        System.out.println("doesn't need class");
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4219,22 +4406,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testOverridingMethodIsPrivate() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
+		String str= """
+			package test1;
+			public abstract class A1 {
+			  protected abstract void m1();
+			}
+			""";
 
-		buf.append("package test1;\n");
-		buf.append("public abstract class A1 {\n");
-		buf.append("  protected abstract void m1();\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("A1.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("A1.java", str, false, null);
 
-		buf= new StringBuilder();
+		String str1= """
+			package test1;
+			public class B1 extends A1 {
+			  private void m1() {
+			  }
+			}
+			""";
 
-		buf.append("package test1;\n");
-		buf.append("public class B1 extends A1 {\n");
-		buf.append("  private void m1() {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("B1.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -4243,13 +4432,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class B1 extends A1 {\n");
-		buf.append("  protected void m1() {\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			public class B1 extends A1 {
+			  protected void m1() {
+			  }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4268,23 +4457,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
+		String str= """
+			package test1;
+			public abstract class Abs {
+			  abstract String getName();
+			}
+			""";
 
-		buf.append("package test1;\n");
-		buf.append("public abstract class Abs {\n");
-		buf.append("  abstract String getName();\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("Abs.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("Abs.java", str, false, null);
 
-		buf= new StringBuilder();
+		String str1= """
+			package test2;
+			public class AbsImpl extends test1.Abs {
+			  String getName() {
+			    return "name";
+			  }
+			}
+			""";
 
-		buf.append("package test2;\n");
-		buf.append("public class AbsImpl extends test1.Abs {\n");
-		buf.append("  String getName() {\n");
-		buf.append("    return \"name\";\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
@@ -4305,22 +4496,24 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public interface Interface1 {\n" //
-				+ "  String getName();\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public interface Interface1 {
+			  String getName();
+			}
+			""";
 		pack1.createCompilationUnit("Interface1.java", sample, false, null);
 
-		sample= "" //
-				+ "package test2;\n" //
-				+ "\n" //
-				+ "public class AbsImpl implements test1.Interface1 {\n" //
-				+ "  String getName() {\n" //
-				+ "    return \"name\";\n" //
-				+ "  }\n" //
-				+ "}\n";
+		sample= """
+			package test2;
+			
+			public class AbsImpl implements test1.Interface1 {
+			  String getName() {
+			    return "name";
+			  }
+			}
+			""";
 		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", sample, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -4341,30 +4534,33 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testDoNotProposeVisibilityFromDifferentInterfaceMethods() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 
-		String sample= "" //
-				+ "package test;\n" //
-				+ "\n" //
-				+ "public interface Interface1 {\n" //
-				+ "  String getName();\n" //
-				+ "}\n";
+		String sample= """
+			package test;
+			
+			public interface Interface1 {
+			  String getName();
+			}
+			""";
 		pack.createCompilationUnit("Interface1.java", sample, false, null);
 
-		sample= "" //
-				+ "package test;\n" //
-				+ "\n" //
-				+ "protected interface Interface2 {\n" //
-				+ "  protected String getName();\n" //
-				+ "}\n";
+		sample= """
+			package test;
+			
+			protected interface Interface2 {
+			  protected String getName();
+			}
+			""";
 		pack.createCompilationUnit("Interface2.java", sample, false, null);
 
-		sample= "" //
-				+ "package test;\n" //
-				+ "\n" //
-				+ "public class AbsImpl implements Interface1, Interface2 {\n" //
-				+ "  String getName() {\n" //
-				+ "    return \"name\";\n" //
-				+ "  }\n" //
-				+ "}\n";
+		sample= """
+			package test;
+			
+			public class AbsImpl implements Interface1, Interface2 {
+			  String getName() {
+			    return "name";
+			  }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("AbsImpl.java", sample, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -4387,30 +4583,33 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
 
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public interface Interface1 {\n" //
-				+ "  String getName();\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public interface Interface1 {
+			  String getName();
+			}
+			""";
 		pack1.createCompilationUnit("Interface1.java", sample, false, null);
 
-		sample= "" //
-				+ "package test2;\n" //
-				+ "\n" //
-				+ "public interface Interface2 {\n" //
-				+ "  String getName();\n" //
-				+ "}\n";
+		sample= """
+			package test2;
+			
+			public interface Interface2 {
+			  String getName();
+			}
+			""";
 		pack2.createCompilationUnit("Interface2.java", sample, false, null);
 
-		sample= "" //
-				+ "package test3;\n" //
-				+ "\n" //
-				+ "public class AbsImpl implements test1.Interface1, test2.Interface2 {\n" //
-				+ "  String getName() {\n" //
-				+ "    return \"name\";\n" //
-				+ "  }\n" //
-				+ "}\n";
+		sample= """
+			package test3;
+			
+			public class AbsImpl implements test1.Interface1, test2.Interface2 {
+			  String getName() {
+			    return "name";
+			  }
+			}
+			""";
 		ICompilationUnit cu= pack3.createCompilationUnit("AbsImpl.java", sample, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -4433,29 +4632,32 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
 
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public interface Interface1 {\n" //
-				+ "  String getName();\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public interface Interface1 {
+			  String getName();
+			}
+			""";
 		pack1.createCompilationUnit("Interface1.java", sample, false, null);
 
-		sample= "" //
-				+ "package test2;\n" //
-				+ "\n" //
-				+ "public interface Interface2 extends test1.Interface1 {\n" //
-				+ "}\n";
+		sample= """
+			package test2;
+			
+			public interface Interface2 extends test1.Interface1 {
+			}
+			""";
 		pack2.createCompilationUnit("Interface2.java", sample, false, null);
 
-		sample= "" //
-				+ "package test3;\n" //
-				+ "\n" //
-				+ "public class AbsImpl implements test2.Interface2 {\n" //
-				+ "  String getName() {\n" //
-				+ "    return \"name\";\n" //
-				+ "  }\n" //
-				+ "}\n";
+		sample= """
+			package test3;
+			
+			public class AbsImpl implements test2.Interface2 {
+			  String getName() {
+			    return "name";
+			  }
+			}
+			""";
 		ICompilationUnit cu= pack3.createCompilationUnit("AbsImpl.java", sample, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -4478,23 +4680,25 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 
-		StringBuilder buf= new StringBuilder();
+		String str= """
+			package test1;
+			public abstract class Abs {
+			  protected abstract String getName();
+			}
+			""";
 
-		buf.append("package test1;\n");
-		buf.append("public abstract class Abs {\n");
-		buf.append("  protected abstract String getName();\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("Abs.java", buf.toString(), false, null);
+		pack1.createCompilationUnit("Abs.java", str, false, null);
 
-		buf= new StringBuilder();
+		String str1= """
+			package test2;
+			public class AbsImpl extends test1.Abs {
+			  String getName() {
+			    return "name";
+			  }
+			}
+			""";
 
-		buf.append("package test2;\n");
-		buf.append("public class AbsImpl extends test1.Abs {\n");
-		buf.append("  String getName() {\n");
-		buf.append("    return \"name\";\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack2.createCompilationUnit("AbsImpl.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -4503,14 +4707,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class AbsImpl extends test1.Abs {\n");
-		buf.append("  protected String getName() {\n");
-		buf.append("    return \"name\";\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test2;
+			public class AbsImpl extends test1.Abs {
+			  protected String getName() {
+			    return "name";
+			  }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4526,18 +4730,19 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testImplementExtendSameMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("  void xxx();\n");
-		buf.append("}\n");
-		buf.append("class A {\n");
-		buf.append("  void xxx() {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A implements I {\n");
-		buf.append("  void xxx() {}//error\n");
-		buf.append("}\n");
-		ICompilationUnit cu=  pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			interface I {
+			  void xxx();
+			}
+			class A {
+			  void xxx() {}
+			}
+			class B extends A implements I {
+			  void xxx() {}//error
+			}
+			""";
+		ICompilationUnit cu=  pack1.createCompilationUnit("I.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -4546,18 +4751,18 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface I {\n");
-		buf.append("  void xxx();\n");
-		buf.append("}\n");
-		buf.append("class A {\n");
-		buf.append("  void xxx() {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A implements I {\n");
-		buf.append("  public void xxx() {}//error\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			interface I {
+			  void xxx();
+			}
+			class A {
+			  void xxx() {}
+			}
+			class B extends A implements I {
+			  public void xxx() {}//error
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

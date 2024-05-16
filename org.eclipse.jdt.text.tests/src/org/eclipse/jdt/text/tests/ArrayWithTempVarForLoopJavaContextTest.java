@@ -40,80 +40,96 @@ public class ArrayWithTempVarForLoopJavaContextTest extends AbstractForLoopJavaC
 	public void simpleArray() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Number[] numbers)");
 		assertEquals(
-				"	for (int i = 0; i < numbers.length; i++) {\n" +
-						"		Number number = numbers[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < numbers.length; i++) {
+							Number number = numbers[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void innerClassArray() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner[] inners)");
 		assertEquals(
-				"	for (int i = 0; i < inners.length; i++) {\n" +
-						"		Inner inner = inners[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < inners.length; i++) {
+							Inner inner = inners[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void innerClassParameterized() throws Exception {
 		String template= evaluateTemplateInMethod("void method(Inner2<Number>[] inners)");
 		assertEquals(
-				"	for (int i = 0; i < inners.length; i++) {\n" +
-						"		Inner2<Number> inner2 = inners[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < inners.length; i++) {
+							Inner2<Number> inner2 = inners[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void generic() throws Exception {
 		String template= evaluateTemplateInMethod("void <T> method(T[] generics)");
 		assertEquals(
-				"	for (int i = 0; i < generics.length; i++) {\n" +
-						"		T t = generics[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < generics.length; i++) {
+							T t = generics[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void uppderboundGeneric() throws Exception {
 		String template= evaluateTemplateInMethod("void <T extends Number> method(T[] numbers)");
 		assertEquals(
-				"	for (int i = 0; i < numbers.length; i++) {\n" +
-						"		T t = numbers[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < numbers.length; i++) {
+							T t = numbers[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void lowerboundGeneric() throws Exception {
 		String template= evaluateTemplateInMethod("void <T super Number> method(T[] objects)");
 		assertEquals(
-				"	for (int i = 0; i < objects.length; i++) {\n" +
-						"		T t = objects[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < objects.length; i++) {
+							T t = objects[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void proposalsWithField() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method()", "Number[] numbers");
 		assertEquals(
-				"	for (int i = 0; i < numbers.length; i++) {\n" +
-						"		Number number = numbers[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < numbers.length; i++) {
+							Number number = numbers[i];
+						\t
+						}\
+					""", template);
 	}
 
 	@Test
 	public void proposalsWithFieldAndParam() throws Exception {
 		String template= evaluateTemplateInMethodWithField("void method(String[] strings)", "Number[] numbers");
 		assertEquals(
-				"	for (int i = 0; i < strings.length; i++) {\n" +
-						"		String string = strings[i];\n" +
-						"		\n" +
-						"	}", template);
+				"""
+						for (int i = 0; i < strings.length; i++) {
+							String string = strings[i];
+						\t
+						}\
+					""", template);
 	}
 
 }

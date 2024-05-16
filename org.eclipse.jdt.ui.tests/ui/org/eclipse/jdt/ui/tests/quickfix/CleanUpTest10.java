@@ -45,26 +45,28 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceOnPrimitive() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        int number = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        int number = 0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var number = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var number = 0;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -72,26 +74,28 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceOnLongWidening() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        long number = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        long number = 0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var number = 0L;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var number = 0L;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -99,26 +103,28 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceOnFloatWidening() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        float number = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        float number = 0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var number = 0F;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var number = 0F;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -126,26 +132,28 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceOnDoubleWidening() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        double number = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        double number = 0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var number = 0D;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var number = 0D;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -153,26 +161,28 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceOnHexaPrimitive() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        long number = 0x0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        long number = 0x0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var number = 0x0L;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var number = 0x0L;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -180,30 +190,32 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceOnParameterizedType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        ArrayList<String> parameterizedType = new ArrayList<String>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			public class E {
+			    public void foo() {
+			        ArrayList<String> parameterizedType = new ArrayList<String>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var parameterizedType = new ArrayList<String>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			public class E {
+			    public void foo() {
+			        var parameterizedType = new ArrayList<String>();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -211,30 +223,32 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceParameterizedTypeWithDiamond() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        HashMap<Integer, String> parameterizedTypeWithDiamond = new HashMap<>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo() {
+			        HashMap<Integer, String> parameterizedTypeWithDiamond = new HashMap<>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var parameterizedTypeWithDiamond = new HashMap<Integer, String>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo() {
+			        var parameterizedTypeWithDiamond = new HashMap<Integer, String>();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -242,38 +256,41 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceRemoveUnusedImport() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/573
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Date;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Date x = E2.value;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Date;
+			
+			public class E {
+			    public void foo() {
+			        Date x = E2.value;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
-		String sample2= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Date;\n" //
-				+ "\n" //
-				+ "public class E2 {\n" //
-				+ "    public static Date value = null;\n" //
-				+ "}\n";
+		String sample2= """
+			package test1;
+			
+			import java.util.Date;
+			
+			public class E2 {
+			    public static Date value = null;
+			}
+			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample2, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var x = E2.value;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var x = E2.value;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected, sample2 }, null);
 	}
@@ -281,15 +298,16 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnUninitializedVariable() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo(int doNotRefactorParameter) {\n" //
-				+ "        int doNotRefactorUninitializedVariable;\n" //
-				+ "        doNotRefactorUninitializedVariable = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public void foo(int doNotRefactorParameter) {
+			        int doNotRefactorUninitializedVariable;
+			        doNotRefactorUninitializedVariable = 0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -300,17 +318,18 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnLambdaType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private interface I1 {\n" //
-				+ "        public void run(String s, int i, Boolean b);\n" //
-				+ "    }\n" //
-				+ "    public void foo(int doNotRefactorParameter) {\n" //
-				+ "        I1 i1 = (String s, int i, Boolean b) -> { System.out.println(\"hello\"); };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    private interface I1 {
+			        public void run(String s, int i, Boolean b);
+			    }
+			    public void foo(int doNotRefactorParameter) {
+			        I1 i1 = (String s, int i, Boolean b) -> { System.out.println("hello"); };
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -321,16 +340,17 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnNarrowingType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private int doNotRefactorField = 0;\n" //
-				+ "\n" //
-				+ "    public void foo(int doNotRefactorParameter) {\n" //
-				+ "        short doNotRefactorNarrowingType = 0;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    private int doNotRefactorField = 0;
+			
+			    public void foo(int doNotRefactorParameter) {
+			        short doNotRefactorNarrowingType = 0;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -341,17 +361,18 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnDifferentTypes() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "import java.util.Map;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Map<Integer, String> doNotRefactorDifferentTypes = new HashMap<Integer, String>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.HashMap;
+			import java.util.Map;
+			
+			public class E1 {
+			    public void foo() {
+			        Map<Integer, String> doNotRefactorDifferentTypes = new HashMap<Integer, String>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -362,14 +383,15 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        int doNotRefactorArray[] = new int[]{0};\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public void foo() {
+			        int doNotRefactorArray[] = new int[]{0};
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -380,16 +402,17 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnDifferentTypeArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        ArrayList<? extends Integer> doNotRefactorDifferentTypeArguments = new ArrayList<Integer>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			public class E1 {
+			    public void foo() {
+			        ArrayList<? extends Integer> doNotRefactorDifferentTypeArguments = new ArrayList<Integer>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -400,14 +423,15 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnMultiDeclarations() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        double doNot = 0, refactor = .0, multiDeclarations = 1D;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public void foo() {
+			        double doNot = 0, refactor = .0, multiDeclarations = 1D;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -418,20 +442,21 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnGenericMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        ArrayList<Integer> doNotRefactorGenericMethod = newInstance();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public <D> ArrayList<D> newInstance() {\n" //
-				+ "        return new ArrayList<D>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			public class E1 {
+			    public void foo() {
+			        ArrayList<Integer> doNotRefactorGenericMethod = newInstance();
+			    }
+			
+			    public <D> ArrayList<D> newInstance() {
+			        return new ArrayList<D>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -442,38 +467,40 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseVarOnParameterizedMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        ArrayList<Integer> list = newParameterizedInstance();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public ArrayList<Integer> newParameterizedInstance() {\n" //
-				+ "        return new ArrayList<Integer>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			public class E1 {
+			    public void foo() {
+			        ArrayList<Integer> list = newParameterizedInstance();
+			    }
+			
+			    public ArrayList<Integer> newParameterizedInstance() {
+			        return new ArrayList<Integer>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var list = newParameterizedInstance();\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public ArrayList<Integer> newParameterizedInstance() {\n" //
-				+ "        return new ArrayList<Integer>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.ArrayList;
+			
+			public class E1 {
+			    public void foo() {
+			        var list = newParameterizedInstance();
+			    }
+			
+			    public ArrayList<Integer> newParameterizedInstance() {
+			        return new ArrayList<Integer>();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -481,17 +508,18 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnInferedMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Collections;\n" //
-				+ "import java.util.List;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        List<Integer> doNotRefactorInferedMethod = Collections.emptyList();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Collections;
+			import java.util.List;
+			
+			public class E1 {
+			    public void foo() {
+			        List<Integer> doNotRefactorInferedMethod = Collections.emptyList();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -502,30 +530,32 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceParameterizedTypeFromCastExpression() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(Object o) {\n" //
-				+ "        HashMap<Integer, String> parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo(Object o) {
+			        HashMap<Integer, String> parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(Object o) {\n" //
-				+ "        var parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo(Object o) {
+			        var parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -533,31 +563,33 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceParameterizedTypeFromMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Collection;\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(HashMap<Integer, String> m) {\n" //
-				+ "        Collection<String> parameterizedTypeFromMethod = m.values();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Collection;
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo(HashMap<Integer, String> m) {
+			        Collection<String> parameterizedTypeFromMethod = m.values();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(HashMap<Integer, String> m) {\n" //
-				+ "        var parameterizedTypeFromMethod = m.values();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo(HashMap<Integer, String> m) {
+			        var parameterizedTypeFromMethod = m.values();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -565,31 +597,33 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceParameterizedTypeFromSuperMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Collection;\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E extends HashMap<Integer, String> {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Collection<String> parameterizedTypeFromMethod = super.values();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Collection;
+			import java.util.HashMap;
+			
+			public class E extends HashMap<Integer, String> {
+			    public void foo() {
+			        Collection<String> parameterizedTypeFromMethod = super.values();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E extends HashMap<Integer, String> {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var parameterizedTypeFromMethod = super.values();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E extends HashMap<Integer, String> {
+			    public void foo() {
+			        var parameterizedTypeFromMethod = super.values();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -597,30 +631,32 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceParameterizedTypeFromVariable() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(HashMap<Integer, String> m) {\n" //
-				+ "        HashMap<Integer, String> parameterizedTypeFromVariable = m;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo(HashMap<Integer, String> m) {
+			        HashMap<Integer, String> parameterizedTypeFromVariable = m;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(HashMap<Integer, String> m) {\n" //
-				+ "        var parameterizedTypeFromVariable = m;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.HashMap;
+			
+			public class E {
+			    public void foo(HashMap<Integer, String> m) {
+			        var parameterizedTypeFromVariable = m;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -628,30 +664,32 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceIntoStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(String[] array) {\n" //
-				+ "        for (int i= 0; i < array.length; i++) {\n" //
-				+ "            String arrayElement= array[i];\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo(String[] array) {
+			        for (int i= 0; i < array.length; i++) {
+			            String arrayElement= array[i];
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(String[] array) {\n" //
-				+ "        for (var i= 0; i < array.length; i++) {\n" //
-				+ "            var arrayElement= array[i];\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo(String[] array) {
+			        for (var i= 0; i < array.length; i++) {
+			            var arrayElement= array[i];
+			        }
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -659,16 +697,17 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnFromLambdaExpression() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Function<Integer, String> doNotUseVarOnFromLambdaExpression = i -> String.valueOf(i);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    public void foo() {
+			        Function<Integer, String> doNotUseVarOnFromLambdaExpression = i -> String.valueOf(i);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -679,17 +718,18 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseVarOnFromLambdaMethodReference() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    Function<String, Integer> field = String::length;\n" //
-				+ "    public void foo() {\n" //
-				+ "        Function<String, Integer> doNotUseVarOnFromLambdaMethodReference = String::length;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    Function<String, Integer> field = String::length;
+			    public void foo() {
+			        Function<String, Integer> doNotUseVarOnFromLambdaMethodReference = String::length;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -700,30 +740,32 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeForArrays() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(String[] array) {\n" //
-				+ "        String[] a = array;\n" //
-				+ "        String[] b = new String[] {\"a\", \"b\", \"c\"};\n" //
-				+ "        String[][] c = new String[][] { {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo(String[] array) {
+			        String[] a = array;
+			        String[] b = new String[] {"a", "b", "c"};
+			        String[][] c = new String[][] { {"a", "b", "c"}, {"d", "e", "f"} };
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(String[] array) {\n" //
-				+ "        var a = array;\n" //
-				+ "        var b = new String[] {\"a\", \"b\", \"c\"};\n" //
-				+ "        var c = new String[][] { {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E {
+			    public void foo(String[] array) {
+			        var a = array;
+			        var b = new String[] {"a", "b", "c"};
+			        var c = new String[][] { {"a", "b", "c"}, {"d", "e", "f"} };
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -731,15 +773,16 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseLocalVariableTypeForArrayInitialization() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        String[] a = {\"a\", \"b\", \"c\"};\n" //
-				+ "        String[][] b = { {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        String[] a = {"a", "b", "c"};
+			        String[][] b = { {"a", "b", "c"}, {"d", "e", "f"} };
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -750,15 +793,16 @@ public class CleanUpTest10 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseCurlyBracesOnlyArrayInitializationForVar() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        var a = new String[0];\n" //
-				+ "        var b = new String[][]{ {\"a\", \"b\", \"c\"}, {\"d\", \"e\", \"f\"} };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        var a = new String[0];
+			        var b = new String[][]{ {"a", "b", "c"}, {"d", "e", "f"} };
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		/*

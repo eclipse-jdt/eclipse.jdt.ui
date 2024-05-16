@@ -172,20 +172,24 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int[] ints, List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int[] ints, List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ([ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-				" ([IL1java/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ([ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			 ([IL1java/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -223,10 +227,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-					" ([IL1java/util/List<L0java/lang/String;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				 ([IL1java/util/List<L0java/lang/String;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -243,11 +249,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int[] ints, List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int[] ints, List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
@@ -277,20 +285,24 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(Object[] objects, List<? extends Number> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(Object[] objects, List<? extends Number> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ([Ljava/lang/Object;Ljava/util/List<+Ljava/lang/Number;>;)Ljava/lang/String;\n" +
-				" ([Ljava/lang/Object;L1java/util/List<+1Ljava/lang/Number;>;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ([Ljava/lang/Object;Ljava/util/List<+Ljava/lang/Number;>;)Ljava/lang/String;
+			 ([Ljava/lang/Object;L1java/util/List<+1Ljava/lang/Number;>;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -328,10 +340,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([Ljava/lang/Object;Ljava/util/List<+Ljava/lang/Number;>;)Ljava/lang/String;\n" +
-					" ([Ljava/lang/Object;L1java/util/List<+1L0java/lang/Number;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([Ljava/lang/Object;Ljava/util/List<+Ljava/lang/Number;>;)Ljava/lang/String;
+				 ([Ljava/lang/Object;L1java/util/List<+1L0java/lang/Number;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -352,11 +366,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int[][] ints, List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int[][] ints, List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
@@ -401,10 +417,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-					" ([[0ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				 ([[0ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -425,20 +443,24 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int[][] ints, List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int[][] ints, List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-				" ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			 ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -476,10 +498,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-					" ([1[0ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				 ([1[0ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -500,20 +524,24 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int ints[][], List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int ints[][], List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-				" ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			 ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -551,10 +579,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-					" ([1[0ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				 ([1[0ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -575,20 +605,24 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(int ints[][][], List<String> list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(int ints[][][], List<String> list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ([[[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-				" ([[1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ([[[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			 ([[1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -626,10 +660,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ([[[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n" +
-					" ([0[1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ([[[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				 ([0[1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -649,19 +685,23 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String[] test();\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String[] test();
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ()[Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ()[Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -699,10 +739,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ()[Ljava/lang/String;\n" +
-					" ()[0Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ()[Ljava/lang/String;
+				 ()[0Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -722,19 +764,23 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test()[];\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test()[];
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" ()[Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 ()[Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -772,10 +818,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" ()[Ljava/lang/String;\n" +
-					" ()[0Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 ()[Ljava/lang/String;
+				 ()[0Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -795,19 +843,23 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(List<String> list, int ... ints);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(List<String> list, int ... ints);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -845,10 +897,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[0I)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
+				 (Ljava/util/List<Ljava/lang/String;>;[0I)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -869,20 +923,24 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(List<String> list, int[] ... ints);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(List<String> list, int[] ... ints);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" (Ljava/util/List<Ljava/lang/String;>;[[I)Ljava/lang/String;\n" +
-				" (Ljava/util/List<Ljava/lang/String;>;[[1I)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 (Ljava/util/List<Ljava/lang/String;>;[[I)Ljava/lang/String;
+			 (Ljava/util/List<Ljava/lang/String;>;[[1I)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -920,10 +978,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[[I)Ljava/lang/String;\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[0[1I)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 (Ljava/util/List<Ljava/lang/String;>;[[I)Ljava/lang/String;
+				 (Ljava/util/List<Ljava/lang/String;>;[0[1I)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -943,19 +1003,23 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public String test(List<String> list, String ... strings);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public String test(List<String> list, String ... strings);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
-				"class pack/age/X\n" +
-				"test\n" +
-				" (Ljava/util/List<Ljava/lang/String;>;[Ljava/lang/String;)Ljava/lang/String;\n";
+				"""
+			class pack/age/X
+			test
+			 (Ljava/util/List<Ljava/lang/String;>;[Ljava/lang/String;)Ljava/lang/String;
+			""";
 		ensureExists(annotationFile.getParent());
 		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
 
@@ -993,10 +1057,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[Ljava/lang/String;)Ljava/lang/String;\n" +
-					" (Ljava/util/List<Ljava/lang/String;>;[L0java/lang/String;)Ljava/lang/String;\n";
+					"""
+				class pack/age/X
+				test
+				 (Ljava/util/List<Ljava/lang/String;>;[Ljava/lang/String;)Ljava/lang/String;
+				 (Ljava/util/List<Ljava/lang/String;>;[L0java/lang/String;)Ljava/lang/String;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -1015,11 +1081,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X {\n" +
-					"    public <X, T extends List<X>> X test(T list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X {
+						    public <X, T extends List<X>> X test(T list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
@@ -1057,10 +1125,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>(TT;)TX;\n" +
-					" <X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>(TT;)TX;\n";
+					"""
+				class pack/age/X
+				test
+				 <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>(TT;)TX;
+				 <X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>(TT;)TX;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 
 			// add second annotation:
@@ -1094,10 +1164,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			expectedContent=
-					"class pack/age/X\n" +
-					"test\n" +
-					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>(TT;)TX;\n" +
-					" <0X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>(TT;)TX;\n";
+					"""
+						class pack/age/X
+						test
+						 <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>(TT;)TX;
+						 <0X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>(TT;)TX;
+						""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -1116,11 +1188,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String X_PATH= "pack/age/X";
 		String[] pathAndContents= new String[] {
 					X_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public interface X <X, T extends List<X>> {\n" +
-					"    public X test(T list);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public interface X <X, T extends List<X>> {
+						    public X test(T list);
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
@@ -1158,9 +1232,11 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/X\n" +
-					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>\n" +
-					" <X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>\n";
+					"""
+				class pack/age/X
+				 <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>
+				 <X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 
 			// add second annotation:
@@ -1194,9 +1270,11 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			expectedContent=
-					"class pack/age/X\n" +
-					" <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>\n" +
-					" <0X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>\n";
+					"""
+						class pack/age/X
+						 <X:Ljava/lang/Object;T::Ljava/util/List<TX;>;>
+						 <0X:Ljava/lang/Object;0T::Ljava/util/List<TX;>;>
+						""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -1214,11 +1292,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String NODE_PATH= "pack/age/Node";
 		String[] pathAndContents= new String[] {
 					NODE_PATH+".java",
-					"package pack.age;\n" +
-					"import java.util.List;\n" +
-					"public class Node {\n" +
-					"    List<Object[]> value;\n" +
-					"}\n"
+					"""
+						package pack.age;
+						import java.util.List;
+						public class Node {
+						    List<Object[]> value;
+						}
+						"""
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
@@ -1255,10 +1335,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/Node\n" +
-					"value\n" +
-					" Ljava/util/List<[Ljava/lang/Object;>;\n" +
-					" Ljava/util/List<[0Ljava/lang/Object;>;\n";
+					"""
+				class pack/age/Node
+				value
+				 Ljava/util/List<[Ljava/lang/Object;>;
+				 Ljava/util/List<[0Ljava/lang/Object;>;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -1278,10 +1360,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		String MY_MAP_PATH= "pack/age/MyMap";
 		String[] pathAndContents= new String[] {
 					MY_MAP_PATH+".java",
-					"package pack.age;\n" +
-					"public interface MyMap<K,V> {\n" +
-					"    public V get(K key);\n" +
-					"}\n"
+					"""
+						package pack.age;
+						public interface MyMap<K,V> {
+						    public V get(K key);
+						}
+						"""
 				};
 		JarUtil.createSourceDir(pathAndContents, fJProject1.getProject().getLocation()+"/src");
 		fJProject1.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -1337,10 +1421,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			assertTrue("Annotation file should have been created", annotationFile.exists());
 
 			String expectedContent=
-					"class pack/age/MyMap\n" +
-					"get\n" +
-					" (TK;)TV;\n" +
-					" (TK;)T0V;\n";
+					"""
+				class pack/age/MyMap
+				get
+				 (TK;)TV;
+				 (TK;)T0V;
+				""";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);
@@ -1366,10 +1452,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			String MY_MAP_PATH= "pack/age/MyMap";
 			String[] pathAndContents= new String[] {
 						MY_MAP_PATH+".java",
-						"package pack.age;\n" +
-						"public interface MyMap<K,V> {\n" +
-						"    public V get(K key);\n" +
-						"}\n"
+						"""
+							package pack.age;
+							public interface MyMap<K,V> {
+							    public V get(K key);
+							}
+							"""
 					};
 			createLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, JavaCore.VERSION_1_8, null);
 
@@ -1419,10 +1507,12 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 				assertTrue("Annotation file should have been created", annotationFile.exists());
 
 				String expectedContent=
-						"class pack/age/MyMap\n" +
-						"get\n" +
-						" (TK;)TV;\n" +
-						" (TK;)T0V;\n";
+						"""
+					class pack/age/MyMap
+					get
+					 (TK;)TV;
+					 (TK;)T0V;
+					""";
 				checkContentOfFile("annotation file content", annotationFile, expectedContent);
 			} finally {
 				JavaPlugin.getActivePage().closeAllEditors(false);

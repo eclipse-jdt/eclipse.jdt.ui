@@ -85,12 +85,13 @@ public class PostFixCompletionTest {
 	@Test
 	public void testStringVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class StringVar {\n" +
-				"  public void test () {\n" +
-				"    \"Some String Value\".var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class StringVar {
+			  public void test () {
+			    "Some String Value".var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "StringVar.java");
@@ -101,28 +102,28 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class StringVar {\n" +
-				"  public void test () {\n" +
-				"    String string = \"Some String Value\";\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class StringVar {
+			  public void test () {
+			    String string = "Some String Value";
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testStringVar2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"\n" +
-				"public class StringVar2 {\n" +
-				"  public void test () {\n" +
-				"    \"foo\".$\n" +
-				"    if (true);\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			
+			public class StringVar2 {
+			  public void test () {
+			    "foo".$
+			    if (true);
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "StringVar2.java");
@@ -133,28 +134,28 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"\n" +
-				"public class StringVar2 {\n" +
-				"  public void test () {\n" +
-				"    String string = \"foo\";\n" +
-				"    if (true);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			
+			public class StringVar2 {
+			  public void test () {
+			    String string = "foo";
+			    if (true);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testIntegerVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class IntegerVar {\n" +
-				"  public void test () {\n" +
-				"    new Integer(0).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class IntegerVar {
+			  public void test () {
+			    new Integer(0).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "IntegerVar.java");
@@ -165,26 +166,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class IntegerVar {\n" +
-				"  public void test () {\n" +
-				"    Integer integer = new Integer(0);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class IntegerVar {
+			  public void test () {
+			    Integer integer = new Integer(0);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testBooleanVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class BooleanVar {\n" +
-				"  public void test () {\n" +
-				"    false.var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class BooleanVar {
+			  public void test () {
+			    false.var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "BooleanVar.java");
@@ -195,26 +196,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class BooleanVar {\n" +
-				"  public void test () {\n" +
-				"    boolean b = false;\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class BooleanVar {
+			  public void test () {
+			    boolean b = false;
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testIntVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class IntVar {\n" +
-				"  public void test () {\n" +
-				"    (2 + 2).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class IntVar {
+			  public void test () {
+			    (2 + 2).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "IntVar.java");
@@ -225,26 +226,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class IntVar {\n" +
-				"  public void test () {\n" +
-				"    int name = (2 + 2);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class IntVar {
+			  public void test () {
+			    int name = (2 + 2);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testStringConcatVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class StringConcatVar {\n" +
-				"  public void test () {\n" +
-				"    (\"two\" + 2).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class StringConcatVar {
+			  public void test () {
+			    ("two" + 2).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "StringConcatVar.java");
@@ -255,26 +256,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class StringConcatVar {\n" +
-				"  public void test () {\n" +
-				"    String string = (\"two\" + 2);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class StringConcatVar {
+			  public void test () {
+			    String string = ("two" + 2);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testStringConcatVar2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class testStringConcatVar2 {\n" +
-				"  public void test () {\n" +
-				"    ((((\"two\" + 2)))).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class testStringConcatVar2 {
+			  public void test () {
+			    (((("two" + 2)))).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "testStringConcatVar2.java");
@@ -285,26 +286,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class testStringConcatVar2 {\n" +
-				"  public void test () {\n" +
-				"    String string = ((((\"two\" + 2))));\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class testStringConcatVar2 {
+			  public void test () {
+			    String string = (((("two" + 2))));
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testArrayVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class ArrayVar {\n" +
-				"  public void test () {\n" +
-				"    new byte[] { 0, 1, 3 }.var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class ArrayVar {
+			  public void test () {
+			    new byte[] { 0, 1, 3 }.var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ArrayVar.java");
@@ -315,27 +316,27 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class ArrayVar {\n" +
-				"  public void test () {\n" +
-				"    byte[] name = new byte[] { 0, 1, 3 };\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class ArrayVar {
+			  public void test () {
+			    byte[] name = new byte[] { 0, 1, 3 };
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testArrayAccessVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class ArrayAccessVar {\n" +
-				"  public void test () {\n" +
-				"    String [] args = new String [] { \"one\", \"two\" };\n" +
-				"    args[0].var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class ArrayAccessVar {
+			  public void test () {
+			    String [] args = new String [] { "one", "two" };
+			    args[0].var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ArrayAccessVar.java");
@@ -346,29 +347,29 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class ArrayAccessVar {\n" +
-				"  public void test () {\n" +
-				"    String [] args = new String [] { \"one\", \"two\" };\n" +
-				"    String string = args[0];\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class ArrayAccessVar {
+			  public void test () {
+			    String [] args = new String [] { "one", "two" };
+			    String string = args[0];
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testBoundedExtendsTypeParameterVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class BoundedExtendsTypeParameterVar {\n" +
-				"  public void test () {\n" +
-				"    List<? extends Number> x = null;\n" +
-				"    x.get(0).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.util.List;
+			public class BoundedExtendsTypeParameterVar {
+			  public void test () {
+			    List<? extends Number> x = null;
+			    x.get(0).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "BoundedExtendsTypeParameterVar.java");
@@ -379,30 +380,30 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class BoundedExtendsTypeParameterVar {\n" +
-				"  public void test () {\n" +
-				"    List<? extends Number> x = null;\n" +
-				"    Number number = x.get(0);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			import java.util.List;
+			public class BoundedExtendsTypeParameterVar {
+			  public void test () {
+			    List<? extends Number> x = null;
+			    Number number = x.get(0);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testBoundedSuperTypeParameterVar() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class testBoundedSuperTypeParameterVar {\n" +
-				"  public void test () {\n" +
-				"    List<? super Number> x = null;\n" +
-				"    x.get(0).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.util.List;
+			public class testBoundedSuperTypeParameterVar {
+			  public void test () {
+			    List<? super Number> x = null;
+			    x.get(0).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "testBoundedSuperTypeParameterVar.java");
@@ -413,31 +414,31 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class testBoundedSuperTypeParameterVar {\n" +
-				"  public void test () {\n" +
-				"    List<? super Number> x = null;\n" +
-				"    Object number = x.get(0);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			import java.util.List;
+			public class testBoundedSuperTypeParameterVar {
+			  public void test () {
+			    List<? super Number> x = null;
+			    Object number = x.get(0);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testVarForMethodInvocation() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.util.Arrays;\n" +
-				"import java.util.List;\n" +
-				"public class VarForMethodInvocation {\n" +
-				"  public void test () {\n" +
-				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" +
-				"    res.get(0).isEmpty().var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.util.Arrays;
+			import java.util.List;
+			public class VarForMethodInvocation {
+			  public void test () {
+			    List<String> res = Arrays.asList("a", "b");
+			    res.get(0).isEmpty().var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForMethodInvocation.java");
@@ -448,30 +449,30 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"import java.util.Arrays;\n" +
-				"import java.util.List;\n" +
-				"public class VarForMethodInvocation {\n" +
-				"  public void test () {\n" +
-				"    List<String> res = Arrays.asList(\"a\", \"b\");\n" +
-				"    boolean empty = res.get(0).isEmpty();\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			import java.util.Arrays;
+			import java.util.List;
+			public class VarForMethodInvocation {
+			  public void test () {
+			    List<String> res = Arrays.asList("a", "b");
+			    boolean empty = res.get(0).isEmpty();
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testVarForMethodInvocation2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class VarForMethodInvocation2 {\n" +
-				"  public void test () {\n" +
-				"    String s = \"5\";\n" +
-				"    Integer.valueOf(s).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class VarForMethodInvocation2 {
+			  public void test () {
+			    String s = "5";
+			    Integer.valueOf(s).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForMethodInvocation2.java");
@@ -482,32 +483,32 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class VarForMethodInvocation2 {\n" +
-				"  public void test () {\n" +
-				"    String s = \"5\";\n" +
-				"    Integer valueOf = Integer.valueOf(s);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class VarForMethodInvocation2 {
+			  public void test () {
+			    String s = "5";
+			    Integer valueOf = Integer.valueOf(s);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testVarForMethodInvocation3() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class VarForMethodInvocation3 {\n" +
-				"  public <T> T getAdapter(Class<T> required) {\n" +
-				"    return null;\n" +
-				"  } \n" +
-				"  public class Child extends VarForMethodInvocation3 {\n" +
-				"    public void test() {\n" +
-				"      super.getAdapter(VarForMethodInvocation3.class).var$\n" +
-				"    }\n" +
-				"  } \n" +
-				"}");
+		buf.append("""
+			package test;
+			public class VarForMethodInvocation3 {
+			  public <T> T getAdapter(Class<T> required) {
+			    return null;
+			  }\s
+			  public class Child extends VarForMethodInvocation3 {
+			    public void test() {
+			      super.getAdapter(VarForMethodInvocation3.class).var$
+			    }
+			  }\s
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForMethodInvocation3.java");
@@ -518,32 +519,32 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class VarForMethodInvocation3 {\n" +
-				"  public <T> T getAdapter(Class<T> required) {\n" +
-				"    return null;\n" +
-				"  } \n" +
-				"  public class Child extends VarForMethodInvocation3 {\n" +
-				"    public void test() {\n" +
-				"      VarForMethodInvocation3 adapter = super.getAdapter(VarForMethodInvocation3.class);\n" +
-				"    }\n" +
-				"  } \n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class VarForMethodInvocation3 {
+			  public <T> T getAdapter(Class<T> required) {
+			    return null;
+			  }\s
+			  public class Child extends VarForMethodInvocation3 {
+			    public void test() {
+			      VarForMethodInvocation3 adapter = super.getAdapter(VarForMethodInvocation3.class);
+			    }
+			  }\s
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testVarForClassCreation() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class VarForClassCreation {\n" +
-				"  public static final int STYLE = 7;\n" +
-				"  public void test () {\n" +
-				"    new Integer(VarForClassCreation.STYLE).var$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class VarForClassCreation {
+			  public static final int STYLE = 7;
+			  public void test () {
+			    new Integer(VarForClassCreation.STYLE).var$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForClassCreation.java");
@@ -554,29 +555,29 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class VarForClassCreation {\n" +
-				"  public static final int STYLE = 7;\n" +
-				"  public void test () {\n" +
-				"    Integer integer = new Integer(VarForClassCreation.STYLE);\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class VarForClassCreation {
+			  public static final int STYLE = 7;
+			  public void test () {
+			    Integer integer = new Integer(VarForClassCreation.STYLE);
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testBegForVoidMethodInvocation() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class BegForVoidMethodInvocation {\n" +
-				"  public void test() {\n" +
-				"    getFoo(String.class).beg$\n" +
-				"  } \n" +
-				"  public <T> void getFoo (Class <T> foo) {\n" +
-				"  } \n" +
-				"}");
+		buf.append("""
+			package test;
+			public class BegForVoidMethodInvocation {
+			  public void test() {
+			    getFoo(String.class).beg$
+			  }\s
+			  public <T> void getFoo (Class <T> foo) {
+			  }\s
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "BegForVoidMethodInvocation.java");
@@ -594,19 +595,20 @@ public class PostFixCompletionTest {
 	@Test
 	public void testVarForAnonymousClass() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.io.File;\n" +
-				"import java.io.FileFilter;\n" +
-				"public class Test {\n" +
-				"  public void test() {\n" +
-				"    new File(\"\").listFiles(new FileFilter() {\n" +
-				"      @Override\n" +
-				"      public boolean accept(File pathname) {\n" +
-				"        return false;\n" +
-				"      }\n" +
-				"    }).var$\n" +
-				"  } \n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.io.File;
+			import java.io.FileFilter;
+			public class Test {
+			  public void test() {
+			    new File("").listFiles(new FileFilter() {
+			      @Override
+			      public boolean accept(File pathname) {
+			        return false;
+			      }
+			    }).var$
+			  }\s
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "VarForAnonymousClass.java");
@@ -617,41 +619,41 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"import java.io.File;\n" +
-				"import java.io.FileFilter;\n" +
-				"public class Test {\n" +
-				"  public void test() {\n" +
-				"    File[] listFiles = new File(\"\").listFiles(new FileFilter() {\n" +
-				"      @Override\n" +
-				"      public boolean accept(File pathname) {\n" +
-				"        return false;\n" +
-				"      }\n" +
-				"    });\n" +
-				"  } \n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			import java.io.File;
+			import java.io.FileFilter;
+			public class Test {
+			  public void test() {
+			    File[] listFiles = new File("").listFiles(new FileFilter() {
+			      @Override
+			      public boolean accept(File pathname) {
+			        return false;
+			      }
+			    });
+			  }\s
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testNestedQualifiedNames() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class NestedQualifiedNames {\n" +
-				"public Foo foo; \n" +
-				"public void foo () {\n" +
-				"  Foo foo = new Foo ();\n" +
-				"  foo.bar.res.$\n" +
-				"}\n" +
-				"public class Foo {\n" +
-				"  public Bar bar;\n" +
-				"}\n" +
-				"public class Bar {\n" +
-				"  public String res;\n" +
-				"}\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class NestedQualifiedNames {
+			public Foo foo;\s
+			public void foo () {
+			  Foo foo = new Foo ();
+			  foo.bar.res.$
+			}
+			public class Foo {
+			  public Bar bar;
+			}
+			public class Bar {
+			  public String res;
+			}
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "NestedQualifiedNames.java");
@@ -662,37 +664,37 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class NestedQualifiedNames {\n" +
-				"public Foo foo; \n" +
-				"public void foo () {\n" +
-				"  Foo foo = new Foo ();\n" +
-				"  String res = foo.bar.res;\n" +
-				"}\n" +
-				"public class Foo {\n" +
-				"  public Bar bar;\n" +
-				"}\n" +
-				"public class Bar {\n" +
-				"  public String res;\n" +
-				"}\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class NestedQualifiedNames {
+			public Foo foo;\s
+			public void foo () {
+			  Foo foo = new Foo ();
+			  String res = foo.bar.res;
+			}
+			public class Foo {
+			  public Bar bar;
+			}
+			public class Bar {
+			  public String res;
+			}
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testFieldAccess() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class FieldAccess {\n" +
-				"  public class Foo {\n" +
-				"    public String res;\n" +
-				"    public void foo () {\n" +
-				"      this.res.$\n" +
-				"    }\n" +
-				"  }" +
-				"}");
+		buf.append("""
+			package test;
+			public class FieldAccess {
+			  public class Foo {
+			    public String res;
+			    public void foo () {
+			      this.res.$
+			    }
+			  }\
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "FieldAccess.java");
@@ -703,31 +705,31 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "var", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class FieldAccess {\n" +
-				"  public class Foo {\n" +
-				"    public String res;\n" +
-				"    public void foo () {\n" +
-				"      String res = this.res;\n" +
-				"    }\n" +
-				"  }" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class FieldAccess {
+			  public class Foo {
+			    public String res;
+			    public void foo () {
+			      String res = this.res;
+			    }
+			  }\
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testForStatement() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class ForStatement {\n" +
-				"  public void test () {\n" +
-				"    List<String> a;\n" +
-				"    a.$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.util.List;
+			public class ForStatement {
+			  public void test () {
+			    List<String> a;
+			    a.$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ForStatement.java");
@@ -738,32 +740,32 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "for", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class ForStatement {\n" +
-				"  public void test () {\n" +
-				"    List<String> a;\n" +
-				"    for (String a2 : a) {\n" +
-				"      \n" +
-				"    }\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			import java.util.List;
+			public class ForStatement {
+			  public void test () {
+			    List<String> a;
+			    for (String a2 : a) {
+			     \s
+			    }
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testForStatement2() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class ForStatement2 {\n" +
-				"  public int test (String [] inp) {\n" +
-				"    inp.fo$\n" +
-				"    return 0;\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			import java.util.List;
+			public class ForStatement2 {
+			  public int test (String [] inp) {
+			    inp.fo$
+			    return 0;
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ForStatement2.java");
@@ -774,30 +776,30 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "for", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"import java.util.List;\n" +
-				"public class ForStatement2 {\n" +
-				"  public int test (String [] inp) {\n" +
-				"    for (String inp2 : inp) {\n" +
-				"      \n" +
-				"    }\n" +
-				"    return 0;\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			import java.util.List;
+			public class ForStatement2 {
+			  public int test (String [] inp) {
+			    for (String inp2 : inp) {
+			     \s
+			    }
+			    return 0;
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testShorthandIfStatement() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class ShorthandIfStatement {\n" +
-				"  public void test () {\n" +
-				"    true.$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class ShorthandIfStatement {
+			  public void test () {
+			    true.$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ShorthandIfStatement.java");
@@ -808,26 +810,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "sif", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class ShorthandIfStatement {\n" +
-				"  public void test () {\n" +
-				"    ((true) ?  : )\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class ShorthandIfStatement {
+			  public void test () {
+			    ((true) ?  : )
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testConcatenatedShorthandIfStatement() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class ConcatenatedShorthandIfStatement {\n" +
-				"  public void test () {\n" +
-				"    System.out.println(\"two + \" + true.$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class ConcatenatedShorthandIfStatement {
+			  public void test () {
+			    System.out.println("two + " + true.$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ConcatenatedShorthandIfStatement.java");
@@ -838,26 +840,26 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "sif", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class ConcatenatedShorthandIfStatement {\n" +
-				"  public void test () {\n" +
-				"    System.out.println(\"two + \" + ((true) ?  : )\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class ConcatenatedShorthandIfStatement {
+			  public void test () {
+			    System.out.println("two + " + ((true) ?  : )
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 	@Test
 	public void testNoThrownExceptions() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"x.$\n" +
-				"public class NoThrownExceptions {\n" +
-				"  public void test () {\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			x.$
+			public class NoThrownExceptions {
+			  public void test () {
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "NoThrownExceptions.java");
@@ -867,12 +869,13 @@ public class PostFixCompletionTest {
 	@Test
 	public void testStreamOf() throws Exception {
 		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n" +
-				"public class StreamOf {\n" +
-				"  public void test (String[] args) {\n" +
-				"    args.stream$\n" +
-				"  }\n" +
-				"}");
+		buf.append("""
+			package test;
+			public class StreamOf {
+			  public void test (String[] args) {
+			    args.stream$
+			  }
+			}""");
 
 		int completionIndex= getCompletionIndex(buf);
 		ICompilationUnit cu= getCompilationUnit(pkg, buf, "StreamOf.java");
@@ -883,15 +886,14 @@ public class PostFixCompletionTest {
 		ITextViewer viewer= initializeViewer(cu);
 		applyProposal(viewer, proposals, "stream", completionIndex);
 
-		StringBuffer expected= new StringBuffer();
-		expected.append("package test;\n" +
-				"public class StreamOf {\n" +
-				"  public void test (String[] args) {\n" +
-				"    Stream.of(args)\n" +
-				"  }\n" +
-				"}");
-
-		assertEquals(expected.toString(), viewer.getDocument().get());
+		String str= """
+			package test;
+			public class StreamOf {
+			  public void test (String[] args) {
+			    Stream.of(args)
+			  }
+			}""";
+		assertEquals(str, viewer.getDocument().get());
 	}
 
 

@@ -111,58 +111,57 @@ public class CodeFormatterTest extends CoreTests {
 	@Test
 	public void testFormatSelection() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append("*\n");
-		buf.append(" * HEADER\n");
-		buf.append(" */\n");
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public final class C {\n");
-		buf.append("    /** \n");
-		buf.append("* Bla\n");
-		buf.append("     */\n");
-		buf.append("    public C() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String original= buf.toString();
+		String original= """
+			/**
+			*
+			 * HEADER
+			 */
+			package pack;
+			
+			public final class C {
+			    /**\s
+			* Bla
+			     */
+			    public C() {
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
 
-		buf= new StringBuilder();
-		buf.append("    /** \n");
-		buf.append("* Bla\n");
-		buf.append("     */\n");
-		String selection= buf.toString();
+		String selection= """
+			    /**\s
+			* Bla
+			     */
+			""";
 
 		String formatted= format(cu, original.indexOf(selection), selection.length());
 
-		buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append("*\n");
-		buf.append(" * HEADER\n");
-		buf.append(" */\n");
-		buf.append("package pack;\n");
-		buf.append("\n");
-		buf.append("public final class C {\n");
-		buf.append("    /**\n");
-		buf.append("     * Bla\n");
-		buf.append("     */\n");
-		buf.append("    public C() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			/**
+			*
+			 * HEADER
+			 */
+			package pack;
+			
+			public final class C {
+			    /**
+			     * Bla
+			     */
+			    public C() {
+			    }
+			}
+			""";
 		assertEqualString(formatted, expected);
 	}
 
 	@Test
 	public void testFormatFieldDeclWithExtraWhitespace() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("    class A {\n");
-		buf.append("        int i;\n");
-		buf.append("}\n");
-
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			    class A {
+			        int i;
+			}
+			""";
 		String formatString1= "    class A {";
 		String formatString2= "        int i;";
 
@@ -177,13 +176,12 @@ public class CodeFormatterTest extends CoreTests {
 		edit.apply(doc);
 		String formatted= doc.get();
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class A {\n");
-		buf.append("    int i;\n");
-		buf.append("}\n");
-
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			class A {
+			    int i;
+			}
+			""";
 		assertEqualString(formatted, expected);
 	}
 
@@ -195,20 +193,22 @@ public class CodeFormatterTest extends CoreTests {
 	public void testFormatElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original=
-				  "/**\n"
-				+ " *\n"
-				+ " * HEADER\n"
-				+ " */\n"
-				+ "package pack;\n"
-				+ "\n"
-				+ "public final class C {\n"
-				+ "    /** \n"
-				+ "* javadoc\n"
-				+ "     */\n"
-				+ "    public void method() {\n"
-				+ "int local;\n"
-				+ "    }\n"
-				+ "}\n";
+				  """
+			/**
+			 *
+			 * HEADER
+			 */
+			package pack;
+			
+			public final class C {
+			    /**\s
+			* javadoc
+			     */
+			    public void method() {
+			int local;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
 		String formatted= formatElement(cu, original.indexOf("method"), 0);
 
@@ -237,20 +237,22 @@ public class CodeFormatterTest extends CoreTests {
 	public void testFormatElementInJavadoc() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original=
-				  "/**\n"
-				+ " *\n"
-				+ " * HEADER\n"
-				+ " */\n"
-				+ "package pack;\n"
-				+ "\n"
-				+ "public final class C {\n"
-				+ "    /** \n"
-				+ "* javadoc\n"
-				+ "     */\n"
-				+ "    public void method() {\n"
-				+ "int local;\n"
-				+ "    }\n"
-				+ "}\n";
+				  """
+			/**
+			 *
+			 * HEADER
+			 */
+			package pack;
+			
+			public final class C {
+			    /**\s
+			* javadoc
+			     */
+			    public void method() {
+			int local;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
 		String formatted= formatElement(cu, original.indexOf("javadoc"), 0);
 
@@ -279,22 +281,24 @@ public class CodeFormatterTest extends CoreTests {
 	public void testFormatElementInComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String original=
-			"/**\n"
-			+ " *\n"
-			+ " * HEADER\n"
-			+ " */\n"
-			+ "package pack;\n"
-			+ "\n"
-			+ "public final class C {\n"
-			+ "    /** \n"
-			+ "* javadoc\n"
-			+ "     */\n"
-			+ "    public void method() {\n"
-			+ "/* a\n"
-			+ "comment */\n"
-			+ "int local;\n"
-			+ "    }\n"
-			+ "}\n";
+			"""
+			/**
+			 *
+			 * HEADER
+			 */
+			package pack;
+			
+			public final class C {
+			    /**\s
+			* javadoc
+			     */
+			    public void method() {
+			/* a
+			comment */
+			int local;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", original, false, null);
 		String formatted= formatElement(cu, original.indexOf("comment"), 0);
 

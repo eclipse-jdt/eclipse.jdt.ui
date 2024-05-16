@@ -41,47 +41,51 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 
 	@Test
 	public void testInheritedMethod() throws Exception {
-		assertTypeBodyProposal("toS|", "toString(", "/* (non-Javadoc)\n" +
-				"     * @see java.lang.Object#toString()\n" +
-				"     */\n" +
-				"    @Override\n" +
-				"    public String toString() {\n" +
-				"        //TODO\n" +
-				"        return super.toString();\n" +
-				"    }|");
+		assertTypeBodyProposal("toS|", "toString(", """
+			/* (non-Javadoc)
+			     * @see java.lang.Object#toString()
+			     */
+			    @Override
+			    public String toString() {
+			        //TODO
+			        return super.toString();
+			    }|""");
 	}
 
 	@Test
 	public void testMethodCreation() throws Exception {
-		assertTypeBodyProposal("foobar|", "foobar(", "/**\n" +
-				"     * Method.\n" +
-				"     */\n" +
-				"    private void foobar() {\n" +
-				"        //TODO\n" +
-				"\n" +
-				"    }|");
+		assertTypeBodyProposal("foobar|", "foobar(", """
+			/**
+			     * Method.
+			     */
+			    private void foobar() {
+			        //TODO
+			
+			    }|""");
 	}
 
 	@Test
 	public void testGetterCreation() throws Exception {
 		addMembers("String test;");
-		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
-				"     * @return the test\n" +
-				"     */\n" +
-				"    public String getTest() {\n" +
-				"        return test;\n" +
-				"    }|");
+		assertTypeBodyProposal("get|", "getTest(", """
+			/**
+			     * @return the test
+			     */
+			    public String getTest() {
+			        return test;
+			    }|""");
 	}
 
 	@Test
 	public void testConstGetterCreation() throws Exception {
 		addMembers("static final String TEST;");
-		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
-				"     * @return the test\n" +
-				"     */\n" +
-				"    public static String getTest() {\n" +
-				"        return TEST;\n" +
-				"    }|");
+		assertTypeBodyProposal("get|", "getTest(", """
+			/**
+			     * @return the test
+			     */
+			    public static String getTest() {
+			        return TEST;
+			    }|""");
 	}
 
 
@@ -89,23 +93,25 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 	public void testDuplicateGetterCreation() throws Exception {
 		addMembers("static final String TEST;");
 		addMembers("String test;");
-		assertTypeBodyProposal("get|", "getTest(", "/**\n" +
-				"     * @return the test\n" +
-				"     */\n" +
-				"    public String getTest() {\n" +
-				"        return test;\n" +
-				"    }|");
+		assertTypeBodyProposal("get|", "getTest(", """
+			/**
+			     * @return the test
+			     */
+			    public String getTest() {
+			        return test;
+			    }|""");
 	}
 
 	@Test
 	public void testSetterCreation() throws Exception {
 		addMembers("String test;");
-		assertTypeBodyProposal("set|", "setTest(", "/**\n" +
-				"     * @param test the test to set\n" +
-				"     */\n" +
-				"    public void setTest(String test) {\n" +
-				"        this.test = test;\n" +
-				"    }|");
+		assertTypeBodyProposal("set|", "setTest(", """
+			/**
+			     * @param test the test to set
+			     */
+			    public void setTest(String test) {
+			        this.test = test;
+			    }|""");
 	}
 
 	@Test

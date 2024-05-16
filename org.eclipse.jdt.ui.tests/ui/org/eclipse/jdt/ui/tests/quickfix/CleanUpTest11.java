@@ -54,30 +54,32 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceInLambda1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Predicate<String> cc = (String s) -> { return s.length() > 0; };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Predicate
+			
+			public class E {
+			    public void foo() {
+			        Predicate<String> cc = (String s) -> { return s.length() > 0; };
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Predicate<String> cc = (var s) -> { return s.length() > 0; };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.function.Predicate
+			
+			public class E {
+			    public void foo() {
+			        Predicate<String> cc = (var s) -> { return s.length() > 0; };
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -85,32 +87,34 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	@Test
 	public void testUseLocalVariableTypeInferenceInLambda2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private interface I1 {\n" //
-				+ "        public void run(String s, int i, Boolean b);\n" //
-				+ "    }\n" //
-				+ "    public void foo(int doNotRefactorParameter) {\n" //
-				+ "        I1 i1 = (String s, int i, Boolean b) -> { System.out.println(\"hello\"); };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    private interface I1 {
+			        public void run(String s, int i, Boolean b);
+			    }
+			    public void foo(int doNotRefactorParameter) {
+			        I1 i1 = (String s, int i, Boolean b) -> { System.out.println("hello"); };
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private interface I1 {\n" //
-				+ "        public void run(String s, int i, Boolean b);\n" //
-				+ "    }\n" //
-				+ "    public void foo(int doNotRefactorParameter) {\n" //
-				+ "        I1 i1 = (var s, var i, var b) -> { System.out.println(\"hello\"); };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			public class E1 {
+			    private interface I1 {
+			        public void run(String s, int i, Boolean b);
+			    }
+			    public void foo(int doNotRefactorParameter) {
+			        I1 i1 = (var s, var i, var b) -> { System.out.println("hello"); };
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -119,38 +123,40 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testUseLocalVariableTypeInferenceInParamCallWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        debug((String a) -> a.length());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private void debug(Function<String, Object> function) {\n" //
-				+ "        System.out.println(function);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    public void foo() {
+			        debug((String a) -> a.length());
+			    }
+			
+			    private void debug(Function<String, Object> function) {
+			        System.out.println(function);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        debug((var a) -> a.length());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private void debug(Function<String, Object> function) {\n" //
-				+ "        System.out.println(function);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    public void foo() {
+			        debug((var a) -> a.length());
+			    }
+			
+			    private void debug(Function<String, Object> function) {
+			        System.out.println(function);
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -159,20 +165,21 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testDoNotUseLocalVariableTypeInferenceInWildCardParamCallWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        debug((String a) -> a.length());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private void debug(Function<?, ?> function) {\n" //
-				+ "        System.out.println(function);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    public void foo() {
+			        debug((String a) -> a.length());
+			    }
+			
+			    private void debug(Function<?, ?> function) {
+			        System.out.println(function);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -184,20 +191,21 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testDoNotUseLocalVariableTypeInferenceInWildCardConstructorWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public static void main(String[] args) {\n" //
-				+ "        new E1((String a) -> a.length());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public E1(Function<?, ?> function) {\n" //
-				+ "        System.out.println(function);\n" //
-    			+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    public static void main(String[] args) {
+			        new E1((String a) -> a.length());
+			    }
+			
+			    public E1(Function<?, ?> function) {
+			        System.out.println(function);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -209,38 +217,40 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testDoNotUseLocalVariableTypeInferenceInWildCardSuperCallsWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public E1(Function<?, ?> function) {\n" //
-				+ "        System.out.println(function);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void method(Function<?, ?> function) {\n" //
-				+ "        System.out.println(function);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E1 {
+			    public E1(Function<?, ?> function) {
+			        System.out.println(function);
+			    }
+			
+			    public void method(Function<?, ?> function) {
+			        System.out.println(function);
+			    }
+			
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
-		String sample2= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Function;\n" //
-				+ "\n" //
-				+ "public class E2 extends E1 {\n" //
-				+ "    public E2(Function<?, ?> function) {\n" //
-				+ "        super((String a) -> a.length());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void method(Function<?, ?> function) {\n" //
-				+ "        super.method((String a) -> a.length());\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "}\n";
+		String sample2= """
+			package test1;
+			
+			import java.util.function.Function;
+			
+			public class E2 extends E1 {
+			    public E2(Function<?, ?> function) {
+			        super((String a) -> a.length());
+			    }
+			
+			    public void method(Function<?, ?> function) {
+			        super.method((String a) -> a.length());
+			    }
+			
+			}
+			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample2, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -252,30 +262,32 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testUseLocalVariableTypeInferenceInParamTypeDeclarationWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Predicate<String> cc = (String s) -> (s.length() > 0);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Predicate;
+			
+			public class E1 {
+			    public void foo() {
+			        Predicate<String> cc = (String s) -> (s.length() > 0);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Predicate<String> cc = (var s) -> (s.length() > 0);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.function.Predicate;
+			
+			public class E1 {
+			    public void foo() {
+			        Predicate<String> cc = (var s) -> (s.length() > 0);
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -284,16 +296,17 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testDoNotUseLocalVariableTypeInferenceInWildCardParamDeclarationWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo() {\n" //
-				+ "        Predicate<?> cc = (String s) -> (s.length() > 0);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Predicate;
+			
+			public class E1 {
+			    public void foo() {
+			        Predicate<?> cc = (String s) -> (s.length() > 0);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -305,26 +318,28 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testUseLocalVariableTypeInferenceInParamFieldDeclarationWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public Predicate<String> cc = (String s) -> (s.length() > 0);\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Predicate;
+			
+			public class E1 {
+			    public Predicate<String> cc = (String s) -> (s.length() > 0);
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public Predicate<String> cc = (var s) -> (s.length() > 0);\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.function.Predicate;
+			
+			public class E1 {
+			    public Predicate<String> cc = (var s) -> (s.length() > 0);
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
@@ -333,14 +348,15 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testDoNotUseLocalVariableTypeInferenceInWildCardParamFieldDeclarationWithLambda() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.function.Predicate;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public Predicate<?> cc = (String s) -> (s.length() > 0);\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.function.Predicate;
+			
+			public class E1 {
+			    public Predicate<?> cc = (String s) -> (s.length() > 0);
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_VAR);
@@ -353,167 +369,169 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	public void testUseStringIsBlank() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.List;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private static final int ZERO = 0;\n" //
-				+ "    private static final int THREE = 3;\n" //
-				+ "    private static final String EMPTY_STRING = \"\";\n" //
-				+ "\n" //
-				+ "    void isBlank(String text) {\n" //
-				+ "        if (text.strip().isEmpty()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.stripLeading().isEmpty()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.stripTrailing().isEmpty()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.strip().length() == 0) {\n" //
-				+ "            System.err.println(\"The text must not be blank\");\n" //
-				+ "        } else if (text.strip().length() <= 0) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.strip().length() < 1) {\n" //
-				+ "            System.err.println(\"This text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (0 == text.strip().length()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        } else if (0 >= text.strip().length()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (1 > text.strip().length()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.strip().length() == ZERO) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.strip().equals(\"\")) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (\"\".equals(text.stripLeading())) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (EMPTY_STRING.equals(text.stripTrailing())) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void isNotBlank(String text, StringBuilder builder) {\n" //
-				+ "        if (!text.strip().isEmpty()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (text.strip().length() != 0) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        } else if (text.strip().length() > 0) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (text.strip().length() >= 1) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (0 != text.strip().length()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        } else if (0 < text.strip().length()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (1 <= text.strip().length()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (4 - THREE <= builder.toString().strip().length()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void printList(List<String> list) {\n" //
-				+ "        list.stream().filter(s -> !s.strip().isEmpty()).map(String::strip);\n" //
-				+ "        list.stream().filter(s -> s.strip().length() != 0).map(String::strip);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			import java.util.List;
+			
+			public class E {
+			    private static final int ZERO = 0;
+			    private static final int THREE = 3;
+			    private static final String EMPTY_STRING = "";
+			
+			    void isBlank(String text) {
+			        if (text.strip().isEmpty()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.stripLeading().isEmpty()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.stripTrailing().isEmpty()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.strip().length() == 0) {
+			            System.err.println("The text must not be blank");
+			        } else if (text.strip().length() <= 0) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.strip().length() < 1) {
+			            System.err.println("This text must not be blank");
+			        }
+			        if (0 == text.strip().length()) {
+			            System.err.println("Text must not be blank");
+			        } else if (0 >= text.strip().length()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (1 > text.strip().length()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.strip().length() == ZERO) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.strip().equals("")) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if ("".equals(text.stripLeading())) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (EMPTY_STRING.equals(text.stripTrailing())) {
+			            System.err.println("Text must not be blank");
+			        }
+			    }
+			
+			    void isNotBlank(String text, StringBuilder builder) {
+			        if (!text.strip().isEmpty()) {
+			            System.out.println(text)
+			        }
+			        if (text.strip().length() != 0) {
+			            System.out.println(text)
+			        } else if (text.strip().length() > 0) {
+			            System.out.println(text)
+			        }
+			        if (text.strip().length() >= 1) {
+			            System.out.println(text)
+			        }
+			        if (0 != text.strip().length()) {
+			            System.out.println(text)
+			        } else if (0 < text.strip().length()) {
+			            System.out.println(text)
+			        }
+			        if (1 <= text.strip().length()) {
+			            System.out.println(text)
+			        }
+			        if (4 - THREE <= builder.toString().strip().length()) {
+			            System.out.println(text)
+			        }
+			    }
+			
+			    void printList(List<String> list) {
+			        list.stream().filter(s -> !s.strip().isEmpty()).map(String::strip);
+			        list.stream().filter(s -> s.strip().length() != 0).map(String::strip);
+			    }
+			}
+			""";
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.List;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private static final int ZERO = 0;\n" //
-				+ "    private static final int THREE = 3;\n" //
-				+ "    private static final String EMPTY_STRING = \"\";\n" //
-				+ "\n" //
-				+ "    void isBlank(String text) {\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"The text must not be blank\");\n" //
-				+ "        } else if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"This text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        } else if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "        if (text.isBlank()) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void isNotBlank(String text, StringBuilder builder) {\n" //
-				+ "        if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        } else if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        } else if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (!text.isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "        if (!builder.toString().isBlank()) {\n" //
-				+ "            System.out.println(text)\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void printList(List<String> list) {\n" //
-				+ "        list.stream().filter(s -> !s.isBlank()).map(String::strip);\n" //
-				+ "        list.stream().filter(s -> !s.isBlank()).map(String::strip);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.util.List;
+			
+			public class E {
+			    private static final int ZERO = 0;
+			    private static final int THREE = 3;
+			    private static final String EMPTY_STRING = "";
+			
+			    void isBlank(String text) {
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("The text must not be blank");
+			        } else if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("This text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        } else if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			        if (text.isBlank()) {
+			            System.err.println("Text must not be blank");
+			        }
+			    }
+			
+			    void isNotBlank(String text, StringBuilder builder) {
+			        if (!text.isBlank()) {
+			            System.out.println(text)
+			        }
+			        if (!text.isBlank()) {
+			            System.out.println(text)
+			        } else if (!text.isBlank()) {
+			            System.out.println(text)
+			        }
+			        if (!text.isBlank()) {
+			            System.out.println(text)
+			        }
+			        if (!text.isBlank()) {
+			            System.out.println(text)
+			        } else if (!text.isBlank()) {
+			            System.out.println(text)
+			        }
+			        if (!text.isBlank()) {
+			            System.out.println(text)
+			        }
+			        if (!builder.toString().isBlank()) {
+			            System.out.println(text)
+			        }
+			    }
+			
+			    void printList(List<String> list) {
+			        list.stream().filter(s -> !s.isBlank()).map(String::strip);
+			        list.stream().filter(s -> !s.isBlank()).map(String::strip);
+			    }
+			}
+			""";
 
 		// When
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
@@ -527,45 +545,46 @@ public class CleanUpTest11 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseStringIsBlank() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class NotAString {\n" //
-				+ "    int mostlyZero= 0;\n" //
-				+ "    private static int NON_FINAL_ZERO = 0;\n" //
-				+ "\n" //
-				+ "    public String strip() {\n" //
-				+ "        return \"\";\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void doNotUseStringIsBlank(NotAString noString, String text) {\n" //
-				+ "        if (noString.strip().length() == 0) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        if (text.strip().length() == mostlyZero) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        } else if (text.strip().length() <= NON_FINAL_ZERO) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void doNotUseStringIsBlankWithUnknownString(String text, String emptyString) {\n" //
-				+ "        if (text.strip().equals(emptyString)) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        if (emptyString.equals(text.strip())) {\n" //
-				+ "            System.err.println(\"Text must not be blank\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    void bug_573831(String text) {\n" //
-				+ "        if (equals(text.strip())) {\n" //
-				+ "            System.err.println(\"Applying the cleanup should not cause NPE\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class NotAString {
+			    int mostlyZero= 0;
+			    private static int NON_FINAL_ZERO = 0;
+			
+			    public String strip() {
+			        return "";
+			    }
+			
+			    void doNotUseStringIsBlank(NotAString noString, String text) {
+			        if (noString.strip().length() == 0) {
+			            System.err.println("Text must not be blank");
+			        }
+			
+			        if (text.strip().length() == mostlyZero) {
+			            System.err.println("Text must not be blank");
+			        } else if (text.strip().length() <= NON_FINAL_ZERO) {
+			            System.err.println("Text must not be blank");
+			        }
+			    }
+			
+			    void doNotUseStringIsBlankWithUnknownString(String text, String emptyString) {
+			        if (text.strip().equals(emptyString)) {
+			            System.err.println("Text must not be blank");
+			        }
+			
+			        if (emptyString.equals(text.strip())) {
+			            System.err.println("Text must not be blank");
+			        }
+			    }
+			
+			    void bug_573831(String text) {
+			        if (equals(text.strip())) {
+			            System.err.println("Applying the cleanup should not cause NPE");
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("NotAString.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_STRING_IS_BLANK);

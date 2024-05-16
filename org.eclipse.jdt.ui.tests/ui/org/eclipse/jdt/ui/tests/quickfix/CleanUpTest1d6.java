@@ -117,48 +117,50 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 	@Test
 	public void testAddOverride1d6() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "interface I {\n" //
-				+ "    void m();\n" //
-				+ "    boolean equals(Object obj);\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "interface J extends I {\n" //
-				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "class X implements J {\n" //
-				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-				+ "    public int hashCode() { return 0; }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			interface I {
+			    void m();
+			    boolean equals(Object obj);
+			}
+			
+			interface J extends I {
+			    void m(); // @Override error in 1.5, not in 1.6
+			}
+			
+			class X implements J {
+			    public void m() {} // @Override error in 1.5, not in 1.6
+			    public int hashCode() { return 0; }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("I.java", given, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "interface I {\n" //
-				+ "    void m();\n" //
-				+ "    @Override\n" //
-				+ "    boolean equals(Object obj);\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "interface J extends I {\n" //
-				+ "    @Override\n" //
-				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "class X implements J {\n" //
-				+ "    @Override\n" //
-				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-				+ "    @Override\n" //
-				+ "    public int hashCode() { return 0; }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			interface I {
+			    void m();
+			    @Override
+			    boolean equals(Object obj);
+			}
+			
+			interface J extends I {
+			    @Override
+			    void m(); // @Override error in 1.5, not in 1.6
+			}
+			
+			class X implements J {
+			    @Override
+			    public void m() {} // @Override error in 1.5, not in 1.6
+			    @Override
+			    public int hashCode() { return 0; }
+			}
+			""";
 
 		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
@@ -167,44 +169,46 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 	@Test
 	public void testAddOverride1d6NoInterfaceMethods() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "interface I {\n" //
-				+ "    void m();\n" //
-				+ "    boolean equals(Object obj);\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "interface J extends I {\n" //
-				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "class X implements J {\n" //
-				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-				+ "    public int hashCode() { return 0; }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			interface I {
+			    void m();
+			    boolean equals(Object obj);
+			}
+			
+			interface J extends I {
+			    void m(); // @Override error in 1.5, not in 1.6
+			}
+			
+			class X implements J {
+			    public void m() {} // @Override error in 1.5, not in 1.6
+			    public int hashCode() { return 0; }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("I.java", given, false, null);
 
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
 		enable(CleanUpConstants.ADD_MISSING_ANNOTATIONS_OVERRIDE);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "interface I {\n" //
-				+ "    void m();\n" //
-				+ "    boolean equals(Object obj);\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "interface J extends I {\n" //
-				+ "    void m(); // @Override error in 1.5, not in 1.6\n" //
-				+ "}\n" //
-				+ "\n" //
-				+ "class X implements J {\n" //
-				+ "    public void m() {} // @Override error in 1.5, not in 1.6\n" //
-				+ "    @Override\n" //
-				+ "    public int hashCode() { return 0; }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			interface I {
+			    void m();
+			    boolean equals(Object obj);
+			}
+			
+			interface J extends I {
+			    void m(); // @Override error in 1.5, not in 1.6
+			}
+			
+			class X implements J {
+			    public void m() {} // @Override error in 1.5, not in 1.6
+			    @Override
+			    public int hashCode() { return 0; }
+			}
+			""";
 
 		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu}, new String[] {expected}, null);
@@ -214,44 +218,46 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 	public void testConstantsForSystemProperty() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public void simpleCase() {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        String fs = System.getProperty(\"file.separator\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+fs);//$NON-NLS-1$\n" //
-				+ "        String ps = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+ps);//$NON-NLS-1$\n" //
-				+ "        String cdn = System.getProperty(\"file.encoding\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+cdn);//$NON-NLS-1$\n" //
-				+ "        String lsp = System.getProperty(\"line.separator\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+lsp);//$NON-NLS-1$\n" //
-				+ "        Boolean value = Boolean.parseBoolean(System.getProperty(\"arbitrarykey\")); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+value);//$NON-NLS-1$\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			public class E {
+			    public void simpleCase() {
+			        // Keep this comment
+			        String fs = System.getProperty("file.separator"); //$NON-NLS-1$
+			        System.out.println("out:"+fs);//$NON-NLS-1$
+			        String ps = System.getProperty("path.separator"); //$NON-NLS-1$
+			        System.out.println("out:"+ps);//$NON-NLS-1$
+			        String cdn = System.getProperty("file.encoding"); //$NON-NLS-1$
+			        System.out.println("out:"+cdn);//$NON-NLS-1$
+			        String lsp = System.getProperty("line.separator"); //$NON-NLS-1$
+			        System.out.println("out:"+lsp);//$NON-NLS-1$
+			        Boolean value = Boolean.parseBoolean(System.getProperty("arbitrarykey")); //$NON-NLS-1$
+			        System.out.println("out:"+value);//$NON-NLS-1$
+			    }
+			}
+			""";
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void simpleCase() {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        String fs = File.separator;\n" //
-				+ "        System.out.println(\"out:\"+fs);//$NON-NLS-1$\n" //
-				+ "        String ps = File.pathSeparator;\n" //
-				+ "        System.out.println(\"out:\"+ps);//$NON-NLS-1$\n" //
-				+ "        String cdn = System.getProperty(\"file.encoding\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+cdn);//$NON-NLS-1$\n" //
-				+ "        String lsp = System.getProperty(\"line.separator\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+lsp);//$NON-NLS-1$\n" //
-				+ "        Boolean value = Boolean.getBoolean(\"arbitrarykey\"); //$NON-NLS-1$\n" //
-				+ "        System.out.println(\"out:\"+value);//$NON-NLS-1$\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void simpleCase() {
+			        // Keep this comment
+			        String fs = File.separator;
+			        System.out.println("out:"+fs);//$NON-NLS-1$
+			        String ps = File.pathSeparator;
+			        System.out.println("out:"+ps);//$NON-NLS-1$
+			        String cdn = System.getProperty("file.encoding"); //$NON-NLS-1$
+			        System.out.println("out:"+cdn);//$NON-NLS-1$
+			        String lsp = System.getProperty("line.separator"); //$NON-NLS-1$
+			        System.out.println("out:"+lsp);//$NON-NLS-1$
+			        Boolean value = Boolean.getBoolean("arbitrarykey"); //$NON-NLS-1$
+			        System.out.println("out:"+value);//$NON-NLS-1$
+			    }
+			}
+			""";
 
 		// When
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);

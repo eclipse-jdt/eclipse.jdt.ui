@@ -57,24 +57,26 @@ public class BindingsNameTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("public class X {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("X.java", buf.toString(), false, null);
+		String str= """
+			public class X {
+			}
+			""";
+		pack0.createCompilationUnit("X.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
-		buf= new StringBuilder();
-		buf.append("package test1.ae;\n");
-		buf.append("import X;\n");
-		buf.append("public class E {\n");
-		buf.append("    public class Inner {\n");
-		buf.append("        public class InnerInner {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void goo(int i, int[] j, Object o, Object[] p, Inner.InnerInner x, Inner.InnerInner[][] y, X a, X[][][] b) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		fCompilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1.ae;
+			import X;
+			public class E {
+			    public class Inner {
+			        public class InnerInner {
+			        }
+			    }
+			    public void goo(int i, int[] j, Object o, Object[] p, Inner.InnerInner x, Inner.InnerInner[][] y, X a, X[][][] b) {
+			    }
+			}
+			""";
+		fCompilationUnit= pack1.createCompilationUnit("E.java", str1, false, null);
 	}
 
 	@After

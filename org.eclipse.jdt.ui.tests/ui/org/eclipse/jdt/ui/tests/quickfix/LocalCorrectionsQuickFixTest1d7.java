@@ -90,103 +90,104 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionUnionType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InterruptedIOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int a) {\n");
-		buf.append("        try {\n");
-		buf.append("            if (a < 10)\n");
-		buf.append("                throw new FileNotFoundException();\n");
-		buf.append("            else if (a < 20)\n");
-		buf.append("                throw new InterruptedIOException();\n");
-		buf.append("            else\n");
-		buf.append("                throw new ParseException(\"bar\", 0);\n");
-		buf.append("        } catch (FileNotFoundException | InterruptedIOException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.InterruptedIOException;
+			import java.text.ParseException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new ParseException("bar", 0);
+			        } catch (FileNotFoundException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InterruptedIOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int a) throws ParseException {\n");
-		buf.append("        try {\n");
-		buf.append("            if (a < 10)\n");
-		buf.append("                throw new FileNotFoundException();\n");
-		buf.append("            else if (a < 20)\n");
-		buf.append("                throw new InterruptedIOException();\n");
-		buf.append("            else\n");
-		buf.append("                throw new ParseException(\"bar\", 0);\n");
-		buf.append("        } catch (FileNotFoundException | InterruptedIOException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.InterruptedIOException;
+			import java.text.ParseException;
+			
+			public class E {
+			    void foo(int a) throws ParseException {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new ParseException("bar", 0);
+			        } catch (FileNotFoundException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InterruptedIOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int a) {\n");
-		buf.append("        try {\n");
-		buf.append("            if (a < 10)\n");
-		buf.append("                throw new FileNotFoundException();\n");
-		buf.append("            else if (a < 20)\n");
-		buf.append("                throw new InterruptedIOException();\n");
-		buf.append("            else\n");
-		buf.append("                throw new ParseException(\"bar\", 0);\n");
-		buf.append("        } catch (FileNotFoundException | InterruptedIOException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } catch (ParseException e) {\n");
-		buf.append("        } \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.InterruptedIOException;
+			import java.text.ParseException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new ParseException("bar", 0);
+			        } catch (FileNotFoundException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        } catch (ParseException e) {
+			        }\s
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InterruptedIOException;\n");
-		buf.append("import java.text.ParseException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(int a) {\n");
-		buf.append("        try {\n");
-		buf.append("            if (a < 10)\n");
-		buf.append("                throw new FileNotFoundException();\n");
-		buf.append("            else if (a < 20)\n");
-		buf.append("                throw new InterruptedIOException();\n");
-		buf.append("            else\n");
-		buf.append("                throw new ParseException(\"bar\", 0);\n");
-		buf.append("        } catch (FileNotFoundException | InterruptedIOException | ParseException ex) {\n");
-		buf.append("            ex.printStackTrace();\n");
-		buf.append("        } \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.InterruptedIOException;
+			import java.text.ParseException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new ParseException("bar", 0);
+			        } catch (FileNotFoundException | InterruptedIOException | ParseException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
 	}
@@ -194,24 +195,25 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUncaughtSuperException() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (FileNotFoundException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else
+			                throw new IOException();
+			        } catch (FileNotFoundException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -219,65 +221,68 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) throws IOException {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (FileNotFoundException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			
+			public class E {
+			    void foo(int a) throws IOException {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else
+			                throw new IOException();
+			        } catch (FileNotFoundException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 		String expected1= sample;
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (FileNotFoundException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } catch (IOException e) {\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else
+			                throw new IOException();
+			        } catch (FileNotFoundException ex) {
+			            ex.printStackTrace();
+			        } catch (IOException e) {
+			        }\s
+			    }
+			}
+			""";
 		String expected2= sample;
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (IOException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else
+			                throw new IOException();
+			        } catch (IOException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 		String expected3= sample;
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
@@ -286,27 +291,28 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	@Test
 	public void testUncaughtSuperExceptionUnionType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "import java.io.InterruptedIOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else if (a < 20)\n" //
-				+ "                throw new InterruptedIOException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (FileNotFoundException | InterruptedIOException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			import java.io.InterruptedIOException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new IOException();
+			        } catch (FileNotFoundException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -314,74 +320,77 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "import java.io.InterruptedIOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) throws IOException {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else if (a < 20)\n" //
-				+ "                throw new InterruptedIOException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (FileNotFoundException | InterruptedIOException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			import java.io.InterruptedIOException;
+			
+			public class E {
+			    void foo(int a) throws IOException {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new IOException();
+			        } catch (FileNotFoundException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 		String expected1= sample;
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "import java.io.InterruptedIOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else if (a < 20)\n" //
-				+ "                throw new InterruptedIOException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (FileNotFoundException | InterruptedIOException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } catch (IOException e) {\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			import java.io.InterruptedIOException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new IOException();
+			        } catch (FileNotFoundException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        } catch (IOException e) {
+			        }\s
+			    }
+			}
+			""";
 		String expected2= sample;
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileNotFoundException;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "import java.io.InterruptedIOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    void foo(int a) {\n" //
-				+ "        try {\n" //
-				+ "            if (a < 10)\n" //
-				+ "                throw new FileNotFoundException();\n" //
-				+ "            else if (a < 20)\n" //
-				+ "                throw new InterruptedIOException();\n" //
-				+ "            else\n" //
-				+ "                throw new IOException();\n" //
-				+ "        } catch (IOException | InterruptedIOException ex) {\n" //
-				+ "            ex.printStackTrace();\n" //
-				+ "        } \n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			import java.io.InterruptedIOException;
+			
+			public class E {
+			    void foo(int a) {
+			        try {
+			            if (a < 10)
+			                throw new FileNotFoundException();
+			            else if (a < 20)
+			                throw new InterruptedIOException();
+			            else
+			                throw new IOException();
+			        } catch (IOException | InterruptedIOException ex) {
+			            ex.printStackTrace();
+			        }\s
+			    }
+			}
+			""";
 		String expected3= sample;
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3 });
@@ -391,27 +400,27 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUncaughtExceptionTryWithResources1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 0); //quick fix on 1st problem
@@ -422,56 +431,56 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws FileNotFoundException, IOException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws FileNotFoundException, IOException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        } catch (FileNotFoundException e) {\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        } catch (FileNotFoundException e) {
+			        } catch (IOException e) {
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -480,27 +489,27 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUncaughtExceptionTryWithResources2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 1); //quick fix on 2nd problem
@@ -511,56 +520,56 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws FileNotFoundException, IOException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws FileNotFoundException, IOException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        } catch (FileNotFoundException e) {\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        } catch (FileNotFoundException e) {
+			        } catch (IOException e) {
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -569,27 +578,27 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUncaughtExceptionTryWithResources3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 2); //quick fix on 3rd problem
@@ -600,132 +609,132 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws IllegalArgumentException, MyException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws IllegalArgumentException, MyException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        } catch (IllegalArgumentException e) {\n");
-		buf.append("        } catch (MyException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        } catch (IllegalArgumentException e) {
+			        } catch (MyException e) {
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        } catch (IllegalArgumentException | MyException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar(1);
+			        } catch (IllegalArgumentException | MyException e) {
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(3);
 		String preview4= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            try {\n");
-		buf.append("                bar(1);\n");
-		buf.append("            } catch (IllegalArgumentException e) {\n");
-		buf.append("            } catch (MyException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
+		String expected4= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            try {
+			                bar(1);
+			            } catch (IllegalArgumentException e) {
+			            } catch (MyException e) {
+			            }
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(4);
 		String preview5= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            try {\n");
-		buf.append("                bar(1);\n");
-		buf.append("            } catch (IllegalArgumentException | MyException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
+		String expected5= """
+			package test1;
+			import java.io.FileInputStream;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar(int n) throws IllegalArgumentException, MyException {
+			        if (n == 1)
+			            throw new IllegalArgumentException();
+			        else
+			            throw new MyException();
+			    }
+			    void foo(String name, boolean b) {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            try {
+			                bar(1);
+			            } catch (IllegalArgumentException | MyException e) {
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 	}
@@ -734,25 +743,25 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUncaughtExceptionTryWithResources4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=351464
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar() throws MyException {\n");
-		buf.append("        throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws IOException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar() throws MyException {
+			        throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws IOException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -763,72 +772,72 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar() throws MyException {\n");
-		buf.append("        throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws IOException, MyException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar() throws MyException {
+			        throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws IOException, MyException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar();
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar() throws MyException {\n");
-		buf.append("        throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws IOException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar();\n");
-		buf.append("        } catch (MyException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar() throws MyException {
+			        throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws IOException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            bar();
+			        } catch (MyException e) {
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar() throws MyException {\n");
-		buf.append("        throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) throws IOException {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            try {\n");
-		buf.append("                bar();\n");
-		buf.append("            } catch (MyException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void bar() throws MyException {
+			        throw new MyException();
+			    }
+			    void foo(String name, boolean b) throws IOException {
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			            try {
+			                bar();
+			            } catch (MyException e) {
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
@@ -837,18 +846,18 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUncaughtExceptionTryWithResources5() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=139231
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        String e;\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileInputStream;
+			public class E {
+			    void foo(String name, boolean b) {
+			        String e;
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0); //quick fix on 1st problem
@@ -859,38 +868,38 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(String name, boolean b) throws FileNotFoundException, IOException {\n");
-		buf.append("        String e;\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    void foo(String name, boolean b) throws FileNotFoundException, IOException {
+			        String e;
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        String e;\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("        } catch (FileNotFoundException e1) {\n");
-		buf.append("        } catch (IOException e1) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    void foo(String name, boolean b) {
+			        String e;
+			        try (FileInputStream fis = new FileInputStream(name)) {
+			        } catch (FileNotFoundException e1) {
+			        } catch (IOException e1) {
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -899,28 +908,28 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUncaughtExceptionTryWithResources6() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=478714
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.ByteArrayInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.InputStream;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
-		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class ByteStreams {\n");
-		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			
+			public class E {
+			    public static void main(String[] args) {
+			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
+			            String bla = new String(ByteStreams.toByteArray(foo), "UTF-8");
+			        }
+			    }
+			}
+			
+			class ByteStreams {
+			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, 2);
@@ -930,142 +939,142 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.ByteArrayInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.InputStream;\n");
-		buf.append("import java.io.UnsupportedEncodingException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void main(String[] args) throws UnsupportedEncodingException, ArithmeticException, IOException {\n");
-		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
-		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class ByteStreams {\n");
-		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.io.UnsupportedEncodingException;
+			
+			public class E {
+			    public static void main(String[] args) throws UnsupportedEncodingException, ArithmeticException, IOException {
+			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
+			            String bla = new String(ByteStreams.toByteArray(foo), "UTF-8");
+			        }
+			    }
+			}
+			
+			class ByteStreams {
+			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
+			        return null;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.ByteArrayInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.InputStream;\n");
-		buf.append("import java.io.UnsupportedEncodingException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
-		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
-		buf.append("        } catch (UnsupportedEncodingException e) {\n");
-		buf.append("        } catch (ArithmeticException e) {\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class ByteStreams {\n");
-		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.io.UnsupportedEncodingException;
+			
+			public class E {
+			    public static void main(String[] args) {
+			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
+			            String bla = new String(ByteStreams.toByteArray(foo), "UTF-8");
+			        } catch (UnsupportedEncodingException e) {
+			        } catch (ArithmeticException e) {
+			        } catch (IOException e) {
+			        }
+			    }
+			}
+			
+			class ByteStreams {
+			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
+			        return null;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.ByteArrayInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.InputStream;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
-		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
-		buf.append("        } catch (ArithmeticException | IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class ByteStreams {\n");
-		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
+		String expected3= """
+			package test1;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			
+			public class E {
+			    public static void main(String[] args) {
+			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
+			            String bla = new String(ByteStreams.toByteArray(foo), "UTF-8");
+			        } catch (ArithmeticException | IOException e) {
+			        }
+			    }
+			}
+			
+			class ByteStreams {
+			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
+			        return null;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(3);
 		String preview4= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.ByteArrayInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.InputStream;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
-		buf.append("            try {\n");
-		buf.append("                String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
-		buf.append("            } catch (ArithmeticException | IOException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class ByteStreams {\n");
-		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected4= buf.toString();
+		String expected4= """
+			package test1;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			
+			public class E {
+			    public static void main(String[] args) {
+			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
+			            try {
+			                String bla = new String(ByteStreams.toByteArray(foo), "UTF-8");
+			            } catch (ArithmeticException | IOException e) {
+			            }
+			        }
+			    }
+			}
+			
+			class ByteStreams {
+			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
+			        return null;
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal) proposals.get(4);
 		String preview5= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.io.ByteArrayInputStream;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.io.InputStream;\n");
-		buf.append("import java.io.UnsupportedEncodingException;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
-		buf.append("            try {\n");
-		buf.append("                String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
-		buf.append("            } catch (UnsupportedEncodingException e) {\n");
-		buf.append("            } catch (ArithmeticException e) {\n");
-		buf.append("            } catch (IOException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class ByteStreams {\n");
-		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected5= buf.toString();
+		String expected5= """
+			package test1;
+			
+			import java.io.ByteArrayInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.io.UnsupportedEncodingException;
+			
+			public class E {
+			    public static void main(String[] args) {
+			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
+			            try {
+			                String bla = new String(ByteStreams.toByteArray(foo), "UTF-8");
+			            } catch (UnsupportedEncodingException e) {
+			            } catch (ArithmeticException e) {
+			            } catch (IOException e) {
+			            }
+			        }
+			    }
+			}
+			
+			class ByteStreams {
+			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
+			        return null;
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 	}
@@ -1074,19 +1083,20 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUnneededCaughtException1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (FileNotFoundException | IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    public void foo() {
+			        try {
+			            throw new FileNotFoundException();
+			        } catch (FileNotFoundException | IOException e) {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1097,36 +1107,36 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    public void foo() {
+			        try {
+			            throw new FileNotFoundException();
+			        } catch (IOException e) {
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws FileNotFoundException {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    public void foo() throws FileNotFoundException {
+			        try {
+			            throw new FileNotFoundException();
+			        } catch (IOException e) {
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -1135,19 +1145,20 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUnneededCaughtException2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (java.io.FileNotFoundException | java.io.IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    public void foo() {
+			        try {
+			            throw new FileNotFoundException();
+			        } catch (java.io.FileNotFoundException | java.io.IOException e) {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1158,36 +1169,36 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (java.io.IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    public void foo() {
+			        try {
+			            throw new FileNotFoundException();
+			        } catch (java.io.IOException e) {
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() throws java.io.FileNotFoundException {\n");
-		buf.append("        try {\n");
-		buf.append("            throw new FileNotFoundException();\n");
-		buf.append("        } catch (java.io.IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.io.IOException;
+			public class E {
+			    public void foo() throws java.io.FileNotFoundException {
+			        try {
+			            throw new FileNotFoundException();
+			        } catch (java.io.IOException e) {
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -1196,24 +1207,25 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testUnneededCatchBlockTryWithResources() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (FileReader reader1 = new FileReader(\"file\")) {\n");
-		buf.append("            int ch;\n");
-		buf.append("            while ((ch = reader1.read()) != -1) {\n");
-		buf.append("                System.out.println(ch);\n");
-		buf.append("            }\n");
-		buf.append("        } catch (MyException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileReader;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void foo() throws Exception {
+			        try (FileReader reader1 = new FileReader("file")) {
+			            int ch;
+			            while ((ch = reader1.read()) != -1) {
+			                System.out.println(ch);
+			            }
+			        } catch (MyException e) {
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1224,44 +1236,44 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (FileReader reader1 = new FileReader(\"file\")) {\n");
-		buf.append("            int ch;\n");
-		buf.append("            while ((ch = reader1.read()) != -1) {\n");
-		buf.append("                System.out.println(ch);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileReader;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void foo() throws Exception {
+			        try (FileReader reader1 = new FileReader("file")) {
+			            int ch;
+			            while ((ch = reader1.read()) != -1) {
+			                System.out.println(ch);
+			            }
+			        }
+			    }
+			}
+			""";
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 		String preview2= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileReader;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() throws Exception {\n");
-		buf.append("        try (FileReader reader1 = new FileReader(\"file\")) {\n");
-		buf.append("            int ch;\n");
-		buf.append("            while ((ch = reader1.read()) != -1) {\n");
-		buf.append("                System.out.println(ch);\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			import java.io.FileReader;
+			class MyException extends Exception {
+			    static final long serialVersionUID = 1L;
+			}
+			public class E {
+			    void foo() throws Exception {
+			        try (FileReader reader1 = new FileReader("file")) {
+			            int ch;
+			            while ((ch = reader1.read()) != -1) {
+			                System.out.println(ch);
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
@@ -1270,33 +1282,33 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testRemoveRedundantTypeArguments1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        List<String> a = new ArrayList<java.lang.String>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class E {
+			    void foo() {
+			        List<String> a = new ArrayList<java.lang.String>();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        List<String> a = new ArrayList<>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class E {
+			    void foo() {
+			        List<String> a = new ArrayList<>();
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
@@ -1304,33 +1316,33 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testRemoveRedundantTypeArguments2() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Map<String,String> a = new HashMap<String,String>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.HashMap;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        Map<String,String> a = new HashMap<String,String>();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Map<String,String> a = new HashMap<>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.HashMap;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        Map<String,String> a = new HashMap<>();
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
@@ -1338,35 +1350,35 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testRemoveRedundantTypeArguments3() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        List<Map<String, String>> a = new ArrayList<Map<String, String>>();;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        List<Map<String, String>> a = new ArrayList<Map<String, String>>();;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        List<Map<String, String>> a = new ArrayList<>();;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        List<Map<String, String>> a = new ArrayList<>();;
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
@@ -1374,33 +1386,33 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	public void testRemoveRedundantTypeArguments4() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Map<Map<String, String>, Map<String, String>> a = new HashMap<Map<String, String>, Map<String, String>>();;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.HashMap;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        Map<Map<String, String>, Map<String, String>> a = new HashMap<Map<String, String>, Map<String, String>>();;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Map<Map<String, String>, Map<String, String>> a = new HashMap<>();;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.HashMap;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        Map<Map<String, String>, Map<String, String>> a = new HashMap<>();;
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 

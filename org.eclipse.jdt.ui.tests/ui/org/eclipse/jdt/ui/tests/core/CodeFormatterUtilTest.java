@@ -128,66 +128,66 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCU() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    Runnable run= new Runnable() {};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			public class A {
+			    public void foo() {
+			    Runnable run= new Runnable() {};
+			    }
+			}
+			""";
 
 
 		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 0, "\n", fJProject1);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable run = new Runnable() {\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+			        Runnable run = new Runnable() {
+			        };
+			    }
+			}
+			""";
 		assertEqualString(formatted, expected);
 	}
 
 	@Test
 	public void testCUIndented() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    Runnable run= new Runnable() {};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			public class A {
+			    public void foo() {
+			    Runnable run= new Runnable() {};
+			    }
+			}
+			""";
 
 
 		String formatted= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, contents, 1, "\n", fJProject1);
 
-		buf= new StringBuilder();
-		buf.append("    package test1;\n");
-		buf.append("    public class A {\n");
-		buf.append("        public void foo() {\n");
-		buf.append("            Runnable run = new Runnable() {\n");
-		buf.append("            };\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		String expected= buf.toString();
+		String expected= """
+			    package test1;
+			    public class A {
+			        public void foo() {
+			            Runnable run = new Runnable() {
+			            };
+			        }
+			    }
+			""";
 		assertEqualString(formatted, expected);
 	}
 
 	@Test
 	public void testCUNewAPI() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    Runnable run= new Runnable() {};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			public class A {
+			    public void foo() {
+			    Runnable run= new Runnable() {};
+			    }
+			}
+			""";
 
 		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, contents, 0, "\n", null);
 		Document doc= new Document(contents);
@@ -195,31 +195,31 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String formatted= doc.get();
 
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable run = new Runnable() {\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+			        Runnable run = new Runnable() {
+			        };
+			    }
+			}
+			""";
 		assertEqualString(formatted, expected);
 	}
 
 	@Test
 	public void testCUNewAPI2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("/**\n");
-		buf.append(" * comment\n");
-		buf.append(" */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    Runnable run= new Runnable() {};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			public class A {
+			/**
+			 * comment
+			 */
+			    public void foo() {
+			    Runnable run= new Runnable() {};
+			    }
+			}
+			""";
 
 		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, contents, 0, "\n", null);
 		Document doc= new Document(contents);
@@ -227,31 +227,31 @@ public class CodeFormatterUtilTest extends CoreTests {
 		String formatted= doc.get();
 
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    /**\n");
-		buf.append("     * comment\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable run = new Runnable() {\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    /**
+			     * comment
+			     */
+			    public void foo() {
+			        Runnable run = new Runnable() {
+			        };
+			    }
+			}
+			""";
 		assertEqualString(formatted, expected);
 	}
 
 	@Test
 	public void testCUWithPos() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    Runnable run= new Runnable() {};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			public class A {
+			    public void foo() {
+			    Runnable run= new Runnable() {};
+			    }
+			}
+			""";
 
 		String word1= "new";
 		int start1= contents.indexOf(word1);
@@ -262,15 +262,15 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1});
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable run = new Runnable() {\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+			        Runnable run = new Runnable() {
+			        };
+			    }
+			}
+			""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -279,9 +279,9 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testPackage() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("  package   com . test1;");
-		String contents= buf.toString();
+		String contents= """
+			  package   com . test1;\
+			""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		PackageDeclaration decl= ast.newPackageDeclaration();
@@ -291,16 +291,15 @@ public class CodeFormatterUtilTest extends CoreTests {
 		Document document= new Document(contents);
 		edit.apply(document);
 
-		buf= new StringBuilder();
-		buf.append("package com.test1;");
-		assertEqualString(document.get(), buf.toString());
+		String str= """
+			package com.test1;""";
+		assertEqualString(document.get(), str);
 	}
 
 	@Test
 	public void testPackageWithPos() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package   com . test1;");
-		String contents= buf.toString();
+		String contents= """
+			package   com . test1;""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		PackageDeclaration node= ast.newPackageDeclaration();
@@ -318,9 +317,8 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuilder();
-		buf.append("package com.test1;");
-		String expected= buf.toString();
+		String expected= """
+			package com.test1;""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -333,9 +331,9 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testVarDeclStatemenetWithPos() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("x[ ]=\nnew  int[ offset]");
-		String contents= buf.toString();
+		String contents= """
+			x[ ]=
+			new  int[ offset]""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		VariableDeclarationFragment node= ast.newVariableDeclarationFragment();
@@ -353,9 +351,8 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuilder();
-		buf.append("x[] = new int[offset]");
-		String expected= buf.toString();
+		String expected= """
+			x[] = new int[offset]""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -368,11 +365,11 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testJavadoc() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("/** bar\n");
-		buf.append(" * foo\n");
-		buf.append(" */\n");
-		String contents= buf.toString();
+		String contents= """
+			/** bar
+			 * foo
+			 */
+			""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		Javadoc node= ast.newJavadoc();
@@ -390,11 +387,11 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuilder();
-		buf.append("/** bar\n");
-		buf.append(" * foo\n");
-		buf.append(" */\n");
-		String expected= buf.toString();
+		String expected= """
+			/** bar
+			 * foo
+			 */
+			""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -407,11 +404,10 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testJavadoc2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("/** bar\n");
-		buf.append(" * foo\n");
-		buf.append(" */");
-		String contents= buf.toString();
+		String contents= """
+			/** bar
+			 * foo
+			 */""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		Javadoc node= ast.newJavadoc();
@@ -429,11 +425,11 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuilder();
-		buf.append("    /** bar\n");
-		buf.append("     * foo\n");
-		buf.append("     */");
-		String expected= buf.toString();
+		String expected= """
+			    /** bar
+			     * foo
+			     */\
+			""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -446,11 +442,10 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testJavadoc3() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("/** bar\n");
-		buf.append(" * foo\n");
-		buf.append(" */");
-		String contents= buf.toString();
+		String contents= """
+			/** bar
+			 * foo
+			 */""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		Javadoc node= ast.newJavadoc();
@@ -469,11 +464,10 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuilder();
-		buf.append("/** bar\r\n");
-		buf.append(" * foo\r\n");
-		buf.append(" */");
-		String expected= buf.toString();
+		String expected= """
+			/** bar\r
+			 * foo\r
+			 */""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -486,11 +480,10 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCatchClause() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("catch\n");
-		buf.append("(Exception e) {\n");
-		buf.append("}");
-		String contents= buf.toString();
+		String contents= """
+			catch
+			(Exception e) {
+			}""";
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		CatchClause node= ast.newCatchClause();
@@ -508,10 +501,9 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2});
 
-		buf= new StringBuilder();
-		buf.append(" catch (Exception e) {\n");
-		buf.append("}");
-		String expected= buf.toString();
+		String expected= """
+			 catch (Exception e) {
+			}""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.offset + pos1.length);
@@ -524,9 +516,8 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 	@Test
 	public void testCatchStringLiteral() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("\"Hello\" ");
-		String contents= buf.toString();
+		String contents= """
+			"Hello" """;
 
 		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL, false);
 		StringLiteral node= ast.newStringLiteral();
@@ -536,27 +527,26 @@ public class CodeFormatterUtilTest extends CoreTests {
 		Document document= new Document(contents);
 		edit.apply(document);
 
-		buf= new StringBuilder();
-		buf.append("\"Hello\"");
-		String expected= buf.toString();
+		String expected= """
+			"Hello\"""";
 		assertEqualString(document.get(), expected);
 
 	}
 
 	@Test
 	public void testFormatSubstring() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    Runnable runnable= new Runnable() {};\n");
-		buf.append("    runnable.toString();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String contents= buf.toString();
+		String contents= """
+			package test1;
+			
+			import java.util.Vector;
+			
+			public class A {
+			    public void foo() {
+			    Runnable runnable= new Runnable() {};
+			    runnable.toString();
+			    }
+			}
+			""";
 
 		String formatString= "Runnable runnable= new Runnable() {};";
 		int formatStart= contents.indexOf(formatString);
@@ -579,19 +569,19 @@ public class CodeFormatterUtilTest extends CoreTests {
 		assertNotNull(edit);
 		String formatted= evaluateFormatterEdit(contents, edit, new Position[] { pos1, pos2, pos3});
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Runnable runnable = new Runnable() {\n");
-		buf.append("        };\n");
-		buf.append("    runnable.toString();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			
+			import java.util.Vector;
+			
+			public class A {
+			    public void foo() {
+			        Runnable runnable = new Runnable() {
+			        };
+			    runnable.toString();
+			    }
+			}
+			""";
 		assertEqualString(formatted, expected);
 
 		String curr1= formatted.substring(pos1.offset, pos1.getOffset() + pos1.getLength());

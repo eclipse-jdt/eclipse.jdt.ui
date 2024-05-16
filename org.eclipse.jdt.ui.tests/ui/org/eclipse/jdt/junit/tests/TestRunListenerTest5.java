@@ -65,11 +65,12 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 	@Test
 	public void testOK() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.jupiter.api.Test;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			public class ATestCase {
+			    @Test public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -84,12 +85,13 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 	@Test
 	public void testFail() throws Exception {
 		String source=
-			"package pack;\n" +
-			"import org.junit.jupiter.api.Test;\n"+
-			"import static org.junit.jupiter.api.Assertions.*;\n"+
-			"public class ATestCase {\n" +
-			"    @Test public void testFail() { fail(\"reason\"); }\n" +
-			"}";
+			"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			import static org.junit.jupiter.api.Assertions.*;
+			public class ATestCase {
+			    @Test public void testFail() { fail("reason"); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -105,11 +107,12 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSessionStarted() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.jupiter.api.Test;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			public class ATestCase {
+			    @Test public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -124,12 +127,13 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSessionEnded() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.jupiter.api.Test;\n"+
-				"import static org.junit.jupiter.api.Assertions.*;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testFail() { fail(\"reason\"); }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			import static org.junit.jupiter.api.Assertions.*;
+			public class ATestCase {
+			    @Test public void testFail() { fail("reason"); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -151,11 +155,12 @@ public class TestRunListenerTest5 extends AbstractTestRunListenerTest {
 		JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitPlatformEngineLibraryEntry());
 		JavaProjectHelper.addToClasspath(fProject, BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
 		String source=
-				"package pack;\n" +
-				"import org.junit.jupiter.api.Test;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.jupiter.api.Test;
+			public class ATestCase {
+			    @Test public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
