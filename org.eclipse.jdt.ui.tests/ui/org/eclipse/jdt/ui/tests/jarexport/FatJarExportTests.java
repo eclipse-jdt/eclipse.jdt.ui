@@ -134,17 +134,18 @@ public class FatJarExportTests {
 
 		fMainRoot= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
 		IPackageFragment fragment= fMainRoot.createPackageFragment("org.eclipse.jdt.ui.test", true, null); //$NON-NLS-1$
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.eclipse.jdt.ui.test;\n"); //$NON-NLS-1$
-		buf.append("import mylib.Foo;\n"); //$NON-NLS-1$
-		buf.append("public class Main {\n"); //$NON-NLS-1$
-		buf.append("    public static void main(String[] args) {\n"); //$NON-NLS-1$
-		buf.append("        new Foo();\n"); //$NON-NLS-1$
-		buf.append("        new Foo.FooInner();\n"); //$NON-NLS-1$
-		buf.append("        new Foo.FooInner.FooInnerInner();\n"); //$NON-NLS-1$
-		buf.append("    }\n"); //$NON-NLS-1$
-		buf.append("}\n"); //$NON-NLS-1$
-		fragment.createCompilationUnit("Main.java", buf.toString(), true, null); //$NON-NLS-1$
+		String str = """
+			package org.eclipse.jdt.ui.test;
+			import mylib.Foo;
+			public class Main {
+			    public static void main(String[] args) {
+			        new Foo();
+			        new Foo.FooInner();
+			        new Foo.FooInner.FooInnerInner();
+			    }
+			}
+			"""; //$NON-NLS-1$
+		fragment.createCompilationUnit("Main.java", str, true, null); //$NON-NLS-1$
 	}
 
 	@After
@@ -153,18 +154,19 @@ public class FatJarExportTests {
 	}
 
 	private static String getFooContent() {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package mylib;\n"); //$NON-NLS-1$
-		buf.append("public class Foo {\n"); //$NON-NLS-1$
-		buf.append("    public Foo() {\n"); //$NON-NLS-1$
-		buf.append("        System.out.println(\"created \" + Foo.class.getName());\n"); //$NON-NLS-1$
-		buf.append("    }\n"); //$NON-NLS-1$
-		buf.append("    public static class FooInner {\n"); //$NON-NLS-1$
-		buf.append("        public static class FooInnerInner {\n"); //$NON-NLS-1$
-		buf.append("        }\n"); //$NON-NLS-1$
-		buf.append("    }\n"); //$NON-NLS-1$
-		buf.append("}\n"); //$NON-NLS-1$
-		return buf.toString();
+		String str = """
+			package mylib;
+			public class Foo {
+			    public Foo() {
+			        System.out.println("created " + Foo.class.getName());
+			    }
+			    public static class FooInner {
+			        public static class FooInnerInner {
+			        }
+			    }
+			}
+			"""; //$NON-NLS-1$
+		return str;
 	}
 
 	private static JarPackageData createAndRunFatJar(IJavaProject project, String testName, boolean compressJar, LibraryHandler libraryHandler) throws Exception, CoreException {

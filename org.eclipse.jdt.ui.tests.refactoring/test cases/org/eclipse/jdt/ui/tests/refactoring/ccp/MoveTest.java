@@ -1003,33 +1003,36 @@ public class MoveTest extends GenericRefactoringTest {
 	public void testDestination_yes_cuToOtherPackageBug549674() throws Exception {
 		ParticipantTesting.reset();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import q.Class1;\n");
-		buf.append("import q.Class3;\n");
-		buf.append("import q.Class3.InnerClass3;\n");
-		buf.append("\n");
-		buf.append("public class Class2 {\n");
-		buf.append("    Class1 c;\n");
-		buf.append("    Class3 c3;\n");
-		buf.append("    InnerClass3 ic3;\n");
-		buf.append("}\n");
-		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
+		String str= """
+			package p;
+			
+			import q.Class1;
+			import q.Class3;
+			import q.Class3.InnerClass3;
+			
+			public class Class2 {
+			    Class1 c;
+			    Class3 c3;
+			    InnerClass3 ic3;
+			}
+			""";
+		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", str, false, new NullProgressMonitor());
 
-		buf= new StringBuilder();
-		buf.append("package q;\n");
-		buf.append("public class Class1 {\n");
-		buf.append("}\n");
-		getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
+		String str1= """
+			package q;
+			public class Class1 {
+			}
+			""";
+		getPackageQ().createCompilationUnit("Class1.java", str1, false, new NullProgressMonitor());
 
-		buf= new StringBuilder();
-		buf.append("package q;\n");
-		buf.append("public class Class3 {\n");
-		buf.append("    public interface InnerClass3 {\n");
-		buf.append("    }\n");
-		buf.append("{\n");
-		getPackageQ().createCompilationUnit("Class3.java", buf.toString(), false, new NullProgressMonitor());
+		String str2= """
+			package q;
+			public class Class3 {
+			    public interface InnerClass3 {
+			    }
+			{
+			""";
+		getPackageQ().createCompilationUnit("Class3.java", str2, false, new NullProgressMonitor());
 
 		String[] handles= ParticipantTesting.createHandles(new Object[] { toMove, toMove.getTypes()[0], toMove.getResource() });
 		JavaMoveProcessor processor= verifyEnabled(new IResource[] {}, new IJavaElement[] { toMove }, createReorgQueries());
@@ -1043,17 +1046,18 @@ public class MoveTest extends GenericRefactoringTest {
 		ICompilationUnit newCu= getPackageQ().getCompilationUnit(toMove.getElementName());
 		assertTrue("new file does not exist after moving", newCu.exists());
 
-		buf= new StringBuilder();
-		buf.append("package q;\n");
-		buf.append("\n");
-		buf.append("import q.Class3.InnerClass3;\n");
-		buf.append("\n");
-		buf.append("public class Class2 {\n");
-		buf.append("    Class1 c;\n");
-		buf.append("    Class3 c3;\n");
-		buf.append("    InnerClass3 ic3;\n");
-		buf.append("}\n");
-		assertEqualLines(buf.toString(), newCu.getSource());
+		String str3= """
+			package q;
+			
+			import q.Class3.InnerClass3;
+			
+			public class Class2 {
+			    Class1 c;
+			    Class3 c3;
+			    InnerClass3 ic3;
+			}
+			""";
+		assertEqualLines(str3, newCu.getSource());
 
 		ParticipantTesting.testMove(handles,
 				new MoveArguments[] {
@@ -1067,31 +1071,34 @@ public class MoveTest extends GenericRefactoringTest {
 	public void testDestination_yes_cuToOtherPackageBug21008() throws Exception {
 		ParticipantTesting.reset();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import q.*;\n");
-		buf.append("\n");
-		buf.append("public class Class2 {\n");
-		buf.append("    Class1 c;\n");
-		buf.append("    Class3 c3;\n");
-		buf.append("    InnerClass3 ic3;\n");
-		buf.append("}\n");
-		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
+		String str= """
+			package p;
+			
+			import q.*;
+			
+			public class Class2 {
+			    Class1 c;
+			    Class3 c3;
+			    InnerClass3 ic3;
+			}
+			""";
+		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", str, false, new NullProgressMonitor());
 
-		buf= new StringBuilder();
-		buf.append("package q;\n");
-		buf.append("public class Class1 {\n");
-		buf.append("}\n");
-		getPackageQ().createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
+		String str1= """
+			package q;
+			public class Class1 {
+			}
+			""";
+		getPackageQ().createCompilationUnit("Class1.java", str1, false, new NullProgressMonitor());
 
-		buf= new StringBuilder();
-		buf.append("package q;\n");
-		buf.append("public class Class3 {\n");
-		buf.append("    public interface InnerClass3 {\n");
-		buf.append("    }\n");
-		buf.append("{\n");
-		getPackageQ().createCompilationUnit("Class3.java", buf.toString(), false, new NullProgressMonitor());
+		String str2= """
+			package q;
+			public class Class3 {
+			    public interface InnerClass3 {
+			    }
+			{
+			""";
+		getPackageQ().createCompilationUnit("Class3.java", str2, false, new NullProgressMonitor());
 
 		String[] handles= ParticipantTesting.createHandles(new Object[] { toMove, toMove.getTypes()[0], toMove.getResource() });
 		JavaMoveProcessor processor= verifyEnabled(new IResource[] {}, new IJavaElement[] { toMove }, createReorgQueries());
@@ -1105,15 +1112,16 @@ public class MoveTest extends GenericRefactoringTest {
 		ICompilationUnit newCu= getPackageQ().getCompilationUnit(toMove.getElementName());
 		assertTrue("new file does not exist after moving", newCu.exists());
 
-		buf= new StringBuilder();
-		buf.append("package q;\n");
-		buf.append("\n");
-		buf.append("public class Class2 {\n");
-		buf.append("    Class1 c;\n");
-		buf.append("    Class3 c3;\n");
-		buf.append("    InnerClass3 ic3;\n");
-		buf.append("}\n");
-		assertEqualLines(buf.toString(), newCu.getSource());
+		String str3= """
+			package q;
+			
+			public class Class2 {
+			    Class1 c;
+			    Class3 c3;
+			    InnerClass3 ic3;
+			}
+			""";
+		assertEqualLines(str3, newCu.getSource());
 
 		ParticipantTesting.testMove(handles,
 				new MoveArguments[] {
@@ -1166,20 +1174,22 @@ public class MoveTest extends GenericRefactoringTest {
 	public void testDestination_yes_cuToOtherPackageWithMultiRootBug109145() throws Exception {
 		ParticipantTesting.reset();
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("public class Class2 {\n");
-		buf.append("    Class1 c;\n");
-		buf.append("}\n");
-		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", buf.toString(), false, new NullProgressMonitor());
+		String str= """
+			package p;
+			public class Class2 {
+			    Class1 c;
+			}
+			""";
+		ICompilationUnit toMove= getPackageP().createCompilationUnit("Class2.java", str, false, new NullProgressMonitor());
 
 		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(rts.getProject(), "testSrc");
 		IPackageFragment testP= testSrc.createPackageFragment("p", true, new NullProgressMonitor());
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("public class Class1 {\n");
-		buf.append("}\n");
-		ICompilationUnit reference= testP.createCompilationUnit("Class1.java", buf.toString(), false, new NullProgressMonitor());
+		String str1= """
+			package p;
+			public class Class1 {
+			}
+			""";
+		ICompilationUnit reference= testP.createCompilationUnit("Class1.java", str1, false, new NullProgressMonitor());
 		IPackageFragment destination= testSrc.createPackageFragment("p2", true, new NullProgressMonitor());
 
 		String[] handles= ParticipantTesting.createHandles(new Object[] { toMove, toMove.getTypes()[0], toMove.getResource() });
@@ -1194,21 +1204,23 @@ public class MoveTest extends GenericRefactoringTest {
 		ICompilationUnit newCu= destination.getCompilationUnit(toMove.getElementName());
 		assertTrue("new file does not exist after moving", newCu.exists());
 
-		buf= new StringBuilder();
-		buf.append("package p2;\n");
-		buf.append("\n");
-		buf.append("import p.Class1;\n");
-		buf.append("\n");
-		buf.append("public class Class2 {\n");
-		buf.append("    Class1 c;\n");
-		buf.append("}\n");
-		assertEqualLines(buf.toString(), newCu.getSource());
+		String str2= """
+			package p2;
+			
+			import p.Class1;
+			
+			public class Class2 {
+			    Class1 c;
+			}
+			""";
+		assertEqualLines(str2, newCu.getSource());
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("public class Class1 {\n");
-		buf.append("}\n");
-		assertEqualLines(buf.toString(), reference.getSource());
+		String str3= """
+			package p;
+			public class Class1 {
+			}
+			""";
+		assertEqualLines(str3, reference.getSource());
 
 		ParticipantTesting.testMove(handles, new MoveArguments[] { new MoveArguments(destination, processor.getUpdateReferences()),
 				new MoveArguments(destination, processor.getUpdateReferences()), new MoveArguments(destination.getResource(), processor.getUpdateReferences()) });

@@ -120,15 +120,16 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int I;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        (new E1()).I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public static int I;
+			    public void foo() {
+			        (new E1()).I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -136,15 +137,15 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int I;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1 {
+			    public static int I;
+			    public void foo() {
+			        E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -152,15 +153,16 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        (new E1<String>()).I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T> {
+			    public static int I;
+			    public void foo() {
+			        (new E1<String>()).I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -168,15 +170,15 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1<T> {
+			    public static int I;
+			    public void foo() {
+			        E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -184,15 +186,16 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T extends String> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        (new E1<String>()).I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T extends String> {
+			    public static int I;
+			    public void foo() {
+			        (new E1<String>()).I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -200,15 +203,15 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T extends String> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E1<T extends String> {
+			    public static int I;
+			    public void foo() {
+			        E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -216,28 +219,30 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static class E1 {\n");
-		buf.append("        public static int N;\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        e1.I= 10;\n");
-		buf.append("        \n");
-		buf.append("        E1 e12= new E1();\n");
-		buf.append("        e12.N= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 {
+			    private static class E1 {
+			        public static int N;
+			    }
+			    public void bar() {
+			        test1.E1 e1= new test1.E1();
+			        e1.I= 10;
+			       \s
+			        E1 e12= new E1();
+			        e12.N= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -245,21 +250,21 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static class E1 {\n");
-		buf.append("        public static int N;\n");
-		buf.append("    }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        test1.E1.I= 10;\n");
-		buf.append("        \n");
-		buf.append("        E1 e12= new E1();\n");
-		buf.append("        E1.N= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E2 {
+			    private static class E1 {
+			        public static int N;
+			    }
+			    public void bar() {
+			        test1.E1 e1= new test1.E1();
+			        test1.E1.I= 10;
+			       \s
+			        E1 e12= new E1();
+			        E1.N= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -267,29 +272,32 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1 {}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 extends E1 {}
+			""";
+		pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3  {\n");
-		buf.append("    private E2 e2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        e2.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		String str2= """
+			package test2;
+			import test1.E2;
+			public class E3  {
+			    private E2 e2;
+			    public void foo() {
+			        e2.I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", str2, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -297,17 +305,17 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3  {\n");
-		buf.append("    private E2 e2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			import test1.E1;
+			import test1.E2;
+			public class E3  {
+			    private E2 e2;
+			    public void foo() {
+			        E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -315,29 +323,32 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T> {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2<T, G> extends E1<T> {}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2<T, G> extends E1<T> {}
+			""";
+		pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        e2.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		String str2= """
+			package test2;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    public void foo() {
+			        e2.I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", str2, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -345,17 +356,17 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			import test1.E1;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    public void foo() {
+			        E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -363,30 +374,33 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T> {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2<T, G> extends E1<T> {}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2<T, G> extends E1<T> {}
+			""";
+		pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    private static class E1<T, G> {}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        e2.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		String str2= """
+			package test2;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    private static class E1<T, G> {}
+			    public void foo() {
+			        e2.I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", str2, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -394,17 +408,17 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    private static class E1<T, G> {}\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    private static class E1<T, G> {}
+			    public void foo() {
+			        test1.E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -412,33 +426,36 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T> {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2<T, G> extends E1<T> {}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2<T, G> extends E1<T> {}
+			""";
+		pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    private class E1<T, G> {\n");
-		buf.append("        private class C {\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                e2.I= 10;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		String str2= """
+			package test2;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    private class E1<T, G> {
+			        private class C {
+			            public void foo() {
+			                e2.I= 10;
+			            }
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", str2, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -446,20 +463,20 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    private class E1<T, G> {\n");
-		buf.append("        private class C {\n");
-		buf.append("            public void foo() {\n");
-		buf.append("                test1.E1.I= 10;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    private class E1<T, G> {
+			        private class C {
+			            public void foo() {
+			                test1.E1.I= 10;
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -467,33 +484,36 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T> {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2<T, G> extends E1<T> {}\n");
-		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2<T, G> extends E1<T> {}
+			""";
+		pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    private class C {\n");
-		buf.append("        private class E1<T, G> {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        e2.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		String str2= """
+			package test2;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    private class C {
+			        private class E1<T, G> {
+			        }
+			    }
+			    public void foo() {
+			        e2.I= 10;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E3.java", str2, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -501,21 +521,21 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("import test1.E1;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3<G>  {\n");
-		buf.append("    private E2<String, G> e2;\n");
-		buf.append("    private class C {\n");
-		buf.append("        private class E1<T, G> {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        E1.I= 10;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test2;
+			import test1.E1;
+			import test1.E2;
+			public class E3<G>  {
+			    private E2<String, G> e2;
+			    private class C {
+			        private class E1<T, G> {
+			        }
+			    }
+			    public void foo() {
+			        E1.I= 10;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -523,23 +543,25 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    public static void foo() {};\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1 {
+			    public static void foo() {};
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static String E1= \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        e1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 {
+			    private static String E1= "";
+			    public void foo() {
+			        test1.E1 e1= new test1.E1();
+			        e1.foo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -547,16 +569,16 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static String E1= \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1 e1= new test1.E1();\n");
-		buf.append("        test1.E1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E2 {
+			    private static String E1= "";
+			    public void foo() {
+			        test1.E1 e1= new test1.E1();
+			        test1.E1.foo();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -564,23 +586,25 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<T> {\n");
-		buf.append("    public static void foo() {};\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<T> {
+			    public static void foo() {};
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static String E1= \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1<String> e1= new test1.E1<String>();\n");
-		buf.append("        e1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class E2 {
+			    private static String E1= "";
+			    public void foo() {
+			        test1.E1<String> e1= new test1.E1<String>();
+			        e1.foo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -588,16 +612,16 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static String E1= \"\";\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1<String> e1= new test1.E1<String>();\n");
-		buf.append("        test1.E1.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E2 {
+			    private static String E1= "";
+			    public void foo() {
+			        test1.E1<String> e1= new test1.E1<String>();
+			        test1.E1.foo();
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
@@ -605,30 +629,33 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	@Test
 	public void testNonStaticAccessTest12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1<G> {\n");
-		buf.append("    public static int I;\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E1<G> {
+			    public static int I;
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.E1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1<E1<test1.E1<E2>>> e1= new test1.E1<E1<test1.E1<E2>>>();\n");
-		buf.append("        e1.I= 10;\n");
-		buf.append("        E1<E1<E2>> f=null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import test2.E1;
+			public class E2 {
+			    public void foo() {
+			        test1.E1<E1<test1.E1<E2>>> e1= new test1.E1<E1<test1.E1<E2>>>();
+			        e1.I= 10;
+			        E1<E1<E2>> f=null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str1, false, null);
 
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-		buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("public class E1<G>  {}\n");
-		pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str2= """
+			package test2;
+			public class E1<G>  {}
+			""";
+		pack2.createCompilationUnit("E1.java", str2, false, null);
 
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
@@ -636,17 +663,17 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		ICleanUp cleanUp= createCleanUp();
 		refactoring.addCleanUp(cleanUp);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import test2.E1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        test1.E1<E1<test1.E1<E2>>> e1= new test1.E1<E1<test1.E1<E2>>>();\n");
-		buf.append("        test1.E1.I= 10;\n");
-		buf.append("        E1<E1<E2>> f=null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import test2.E1;
+			public class E2 {
+			    public void foo() {
+			        test1.E1<E1<test1.E1<E2>>> e1= new test1.E1<E1<test1.E1<E2>>>();
+			        test1.E1.I= 10;
+			        E1<E1<E2>> f=null;
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}

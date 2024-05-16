@@ -145,10 +145,12 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents=
-			"package test1\n" +
-			"public record X1(int abcd) {\n" +
-			"      abc \n" +
-			"}\n";
+			"""
+			package test1
+			public record X1(int abcd) {
+			      abc\s
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("X1.java", contents, false, null);
 
 
@@ -168,15 +170,17 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 		}
 
 		String expectedContents=
-				"package test1\n" +
-				"public record X1(int abcd) {\n" +
-			    "      /**\n" +
-			    "     * Method.\n" +
-			    "     */\n" +
-				"    public int abcd() {\n" +
-				"        return abcd;\n" +
-				"    } \n" +
-				"}\n";
+				"""
+			package test1
+			public record X1(int abcd) {
+			      /**
+			     * Method.
+			     */
+			    public int abcd() {
+			        return abcd;
+			    }\s
+			}
+			""";
 		assertEquals(expectedContents, doc.get());
 	}
 

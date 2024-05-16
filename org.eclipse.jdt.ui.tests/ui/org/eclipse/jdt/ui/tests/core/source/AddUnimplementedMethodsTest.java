@@ -210,30 +210,33 @@ public class AddUnimplementedMethodsTest {
 
 	@Test
 	public void bug119171() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package ibm.util;\n");
-		buf.append("import java.util.Properties;\n");
-		buf.append("public interface F {\n");
-		buf.append("    public void b(Properties p);\n");
-		buf.append("}\n");
-		fPackage.createCompilationUnit("F.java", buf.toString(), false, null);
+		String str= """
+			package ibm.util;
+			import java.util.Properties;
+			public interface F {
+			    public void b(Properties p);
+			}
+			""";
+		fPackage.createCompilationUnit("F.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package ibm.util;\n");
-		buf.append("public class Properties {\n");
-		buf.append("    public int get() {return 0;}\n");
-		buf.append("}\n");
-		fPackage.createCompilationUnit("Properties.java", buf.toString(), false, null);
+		String str1= """
+			package ibm.util;
+			public class Properties {
+			    public int get() {return 0;}
+			}
+			""";
+		fPackage.createCompilationUnit("Properties.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("public class Test5 implements F {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Properties p= new Properties();\n");
-		buf.append("        p.get();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
+		String str2= """
+			public class Test5 implements F {
+			    public void foo() {
+			        Properties p= new Properties();
+			        p.get();
+			    }
+			}
+			""";
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test5.java");
-		IType testClass= cu.createType(buf.toString(), null, true, null);
+		IType testClass= cu.createType(str2, null, true, null);
 
 		testHelper(testClass);
 
@@ -246,30 +249,33 @@ public class AddUnimplementedMethodsTest {
 
 	@Test
 	public void bug297183() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package ibm.util;\n");
-		buf.append("interface Shape {\r\n");
-		buf.append("  int getX();\r\n");
-		buf.append("  int getY();\r\n");
-		buf.append("  int getEdges();\r\n");
-		buf.append("  int getArea();\r\n");
-		buf.append("}\r\n");
-		fPackage.createCompilationUnit("Shape.java", buf.toString(), false, null);
+		String str= """
+			package ibm.util;
+			interface Shape {\r
+			  int getX();\r
+			  int getY();\r
+			  int getEdges();\r
+			  int getArea();\r
+			}\r
+			""";
+		fPackage.createCompilationUnit("Shape.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package ibm.util;\n");
-		buf.append("interface Circle extends Shape {\r\n");
-		buf.append("  int getR();\r\n");
-		buf.append("}\r\n");
-		buf.append("\r\n");
-		fPackage.createCompilationUnit("Circle.java", buf.toString(), false, null);
+		String str1= """
+			package ibm.util;
+			interface Circle extends Shape {\r
+			  int getR();\r
+			}\r
+			\r
+			""";
+		fPackage.createCompilationUnit("Circle.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package ibm.util;\n");
-		buf.append("public class DefaultCircle implements Circle {\n");
-		buf.append("}\n");
+		String str2= """
+			package ibm.util;
+			public class DefaultCircle implements Circle {
+			}
+			""";
 		ICompilationUnit cu= fPackage.getCompilationUnit("DefaultCircle.java");
-		IType testClass= cu.createType(buf.toString(), null, true, null);
+		IType testClass= cu.createType(str2, null, true, null);
 
 		testHelper(testClass, -1, false);
 
@@ -288,46 +294,44 @@ public class AddUnimplementedMethodsTest {
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fPackage= root.createPackageFragment("p", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public abstract class B  {\n");
-		buf.append("	public abstract void foo() {\n");
-		buf.append("	}\n");
-		buf.append("}");
-		fPackage.createCompilationUnit("B.java", buf.toString(), true, null);
+		String str= """
+			package p;
+			
+			public abstract class B  {
+				public abstract void foo() {
+				}
+			}""";
+		fPackage.createCompilationUnit("B.java", str, true, null);
 
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class A extends B {\n");
-		buf.append("    int x;\n");
-		buf.append("\n");
-		buf.append("    A() {\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    void bar() {\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    {\n"); // initializer
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    static {\n"); // static initializer
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    class Inner {\n"); // inner class
-		buf.append("    }\n");
-		buf.append("}");
-		String originalContent= buf.toString();
+		String originalContent= """
+			package p;
+			
+			public class A extends B {
+			    int x;
+			
+			    A() {
+			    }
+			
+			    void bar() {
+			    }
+			
+			    {
+			    }
+			
+			    static {
+			    }
+			
+			    class Inner {
+			    }
+			}""";
 
 		final int NUM_MEMBERS= 6;
 
-		buf= new StringBuilder();
-		buf.append("public void foo() {\n");
-		buf.append("        // TODO\n");
-		buf.append("    }");
-		String expectedConstructor= buf.toString();
+		String expectedConstructor= """
+			public void foo() {
+			        // TODO
+			    }""";
 
 		// try to insert the new constructor after every member and at the end
 		for (int i= 0; i < NUM_MEMBERS + 1; i++) {
@@ -358,20 +362,20 @@ public class AddUnimplementedMethodsTest {
 
 	@Test
 	public void bug480682() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("public class Test480682 extends Base {\n");
-		buf.append("}\n");
-		buf.append("abstract class Base implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    public final void method1() {}\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("    void method1();\n");
-		buf.append("    void method2();\n");
-		buf.append("}\n");
-
-		ICompilationUnit cu= fPackage.createCompilationUnit("Test480682.java", buf.toString(), true, null);
-		IType testClass= cu.createType(buf.toString(), null, true, null);
+		String str= """
+			public class Test480682 extends Base {
+			}
+			abstract class Base implements I {
+			    @Override
+			    public final void method1() {}
+			}
+			interface I {
+			    void method1();
+			    void method2();
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("Test480682.java", str, true, null);
+		IType testClass= cu.createType(str, null, true, null);
 
 		testHelper(testClass, -1, false);
 
@@ -410,12 +414,14 @@ public class AddUnimplementedMethodsTest {
 	public void doTestOldAstLevel(int astLevel) throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType(
-				  "public class Test1 extends A implements B {\n"
-				+ "    @Deprecated\n"
-				+ "    java.util.List<String>[][] getArray() throws RuntimeException {\n"
-				+ "        return (ArrayList<String>[][]) new ArrayList<?>[1][2];\n"
-				+ "    }\n"
-				+ "}\n", null, true, null);
+				  """
+					public class Test1 extends A implements B {
+					    @Deprecated
+					    java.util.List<String>[][] getArray() throws RuntimeException {
+					        return (ArrayList<String>[][]) new ArrayList<?>[1][2];
+					    }
+					}
+					""", null, true, null);
 		cu.createImport("java.util.ArrayList", null, null);
 
 		RefactoringASTParser parser= new RefactoringASTParser(astLevel);

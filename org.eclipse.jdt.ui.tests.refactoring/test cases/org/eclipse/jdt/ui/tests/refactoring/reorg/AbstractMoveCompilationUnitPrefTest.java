@@ -46,11 +46,12 @@ public abstract class AbstractMoveCompilationUnitPrefTest extends RepeatingRefac
 
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
 		IPackageFragment source= fTestProject.getSourceFolder().createPackageFragment("source", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package source;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		ICompilationUnit result= source.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package source;
+			public class A {
+			}
+			""";
+		ICompilationUnit result= source.createCompilationUnit("A.java", str, false, null);
 
 		IPackageFragment references= fTestProject.getSourceFolder().createPackageFragment("ref", false, null);
 		for(int i= 0; i < numberOfCus; i++) {

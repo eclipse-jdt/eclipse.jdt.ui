@@ -91,42 +91,43 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionTypeUseAnnotation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int a) {\n");
-		buf.append("        throw new @Marker FileNotFoundException();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("@interface Marker { }\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			public class E {
+			    void test(int a) {
+			        throw new @Marker FileNotFoundException();
+			    }
+			}
+			
+			@Target(ElementType.TYPE_USE)
+			@interface Marker { }
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    void test(int a) throws @Marker FileNotFoundException {\n");
-		buf.append("        throw new @Marker FileNotFoundException();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("@interface Marker { }\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.FileNotFoundException;
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			public class E {
+			    void test(int a) throws @Marker FileNotFoundException {
+			        throw new @Marker FileNotFoundException();
+			    }
+			}
+			
+			@Target(ElementType.TYPE_USE)
+			@interface Marker { }
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -134,37 +135,38 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class C1 {\n");
-		buf.append("    Runnable r = () -> info(\"Processing rule #{} {}\", \"\");\n");
-		buf.append("\n");
-		buf.append("    private void info(String string, Object object) throws GridException1 {}\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class GridException1 extends Exception {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class C1 {
+			    Runnable r = () -> info("Processing rule #{} {}", "");
+			
+			    private void info(String string, Object object) throws GridException1 {}
+			}
+			@SuppressWarnings("serial")
+			class GridException1 extends Exception {}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class C1 {\n");
-		buf.append("    Runnable r = () -> {\n");
-		buf.append("        try {\n");
-		buf.append("            info(\"Processing rule #{} {}\", \"\");\n");
-		buf.append("        } catch (GridException1 e) {\n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("\n");
-		buf.append("    private void info(String string, Object object) throws GridException1 {}\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class GridException1 extends Exception {}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test;
+			public class C1 {
+			    Runnable r = () -> {
+			        try {
+			            info("Processing rule #{} {}", "");
+			        } catch (GridException1 e) {
+			        }
+			    };
+			
+			    private void info(String string, Object object) throws GridException1 {}
+			}
+			@SuppressWarnings("serial")
+			class GridException1 extends Exception {}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
@@ -172,18 +174,19 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class C2 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Runnable r = () -> info(\"Processing rule #{} {}\", \"\");\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private void info(String string, Object object) throws GridException2 {}\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class GridException2 extends Exception {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			public class C2 {
+			    void test() {
+			        Runnable r = () -> info("Processing rule #{} {}", "");
+			    }
+			
+			    private void info(String string, Object object) throws GridException2 {}
+			}
+			@SuppressWarnings("serial")
+			class GridException2 extends Exception {}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -192,23 +195,23 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class C2 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Runnable r = () -> {\n");
-		buf.append("            try {\n");
-		buf.append("                info(\"Processing rule #{} {}\", \"\");\n");
-		buf.append("            } catch (GridException2 e) {\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private void info(String string, Object object) throws GridException2 {}\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class GridException2 extends Exception {}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			public class C2 {
+			    void test() {
+			        Runnable r = () -> {
+			            try {
+			                info("Processing rule #{} {}", "");
+			            } catch (GridException2 e) {
+			            }
+			        };
+			    }
+			
+			    private void info(String string, Object object) throws GridException2 {}
+			}
+			@SuppressWarnings("serial")
+			class GridException2 extends Exception {}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 
@@ -218,23 +221,24 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class C3 {\n");
-		buf.append("    void test(ArrayList<Integer> ruleIds) {\n");
-		buf.append("        Runnable r = () -> {\n");
-		buf.append("            for (int ruleId : ruleIds) {\n");
-		buf.append("                info(\"Processing rule #{} {}\", ruleId);\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private void info(String string, Object object) throws GridException3 {}\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class GridException3 extends Exception {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C3.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.util.ArrayList;
+			public class C3 {
+			    void test(ArrayList<Integer> ruleIds) {
+			        Runnable r = () -> {
+			            for (int ruleId : ruleIds) {
+			                info("Processing rule #{} {}", ruleId);
+			            }
+			        };
+			    }
+			
+			    private void info(String string, Object object) throws GridException3 {}
+			}
+			@SuppressWarnings("serial")
+			class GridException3 extends Exception {}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C3.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -243,26 +247,26 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class C3 {\n");
-		buf.append("    void test(ArrayList<Integer> ruleIds) {\n");
-		buf.append("        Runnable r = () -> {\n");
-		buf.append("            for (int ruleId : ruleIds) {\n");
-		buf.append("                try {\n");
-		buf.append("                    info(\"Processing rule #{} {}\", ruleId);\n");
-		buf.append("                } catch (GridException3 e) {\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    private void info(String string, Object object) throws GridException3 {}\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class GridException3 extends Exception {}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.util.ArrayList;
+			public class C3 {
+			    void test(ArrayList<Integer> ruleIds) {
+			        Runnable r = () -> {
+			            for (int ruleId : ruleIds) {
+			                try {
+			                    info("Processing rule #{} {}", ruleId);
+			                } catch (GridException3 e) {
+			                }
+			            }
+			        };
+			    }
+			
+			    private void info(String string, Object object) throws GridException3 {}
+			}
+			@SuppressWarnings("serial")
+			class GridException3 extends Exception {}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -270,28 +274,29 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("public class C4 {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            Files.walk(new File(\".\").toPath()).filter(p -> p.toString().endsWith(\".java\"))\n");
-		buf.append("                    .forEach(p -> Files.lines(p).forEach(System.out::println));\n");
-		buf.append("        } catch (IOException e) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Files {\n");
-		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C4.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.File;
+			import java.io.IOException;
+			import java.util.stream.Stream;
+			public class C4 {
+			    void foo() {
+			        try {
+			            Files.walk(new File(".").toPath()).filter(p -> p.toString().endsWith(".java"))
+			                    .forEach(p -> Files.lines(p).forEach(System.out::println));
+			        } catch (IOException e) {}
+			    }
+			}
+			class Files {
+			    public static Stream<Object> walk(Object start) throws IOException {
+			        return null;
+			    }
+			    public static Stream<String> lines(Object path) throws IOException {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C4.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -300,33 +305,33 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("public class C4 {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        try {\n");
-		buf.append("            Files.walk(new File(\".\").toPath()).filter(p -> p.toString().endsWith(\".java\"))\n");
-		buf.append("                    .forEach(p -> {\n");
-		buf.append("                        try {\n");
-		buf.append("                            Files.lines(p).forEach(System.out::println);\n");
-		buf.append("                        } catch (IOException e) {\n");
-		buf.append("                        }\n");
-		buf.append("                    });\n");
-		buf.append("        } catch (IOException e) {}\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Files {\n");
-		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.File;
+			import java.io.IOException;
+			import java.util.stream.Stream;
+			public class C4 {
+			    void foo() {
+			        try {
+			            Files.walk(new File(".").toPath()).filter(p -> p.toString().endsWith(".java"))
+			                    .forEach(p -> {
+			                        try {
+			                            Files.lines(p).forEach(System.out::println);
+			                        } catch (IOException e) {
+			                        }
+			                    });
+			        } catch (IOException e) {}
+			    }
+			}
+			class Files {
+			    public static Stream<Object> walk(Object start) throws IOException {
+			        return null;
+			    }
+			    public static Stream<String> lines(Object path) throws IOException {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -334,33 +339,34 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("\n");
-		buf.append("public class C5 {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Consumer<Object> s = (a) -> Files.walk(new File(\".\").toPath())\n");
-		buf.append("                .filter(p -> p.toString().endsWith(\".java\"))\n");
-		buf.append("                .forEach(p -> {\n");
-		buf.append("                    try {\n");
-		buf.append("                        Files.lines(p).forEach(System.out::println);\n");
-		buf.append("                    } catch (IOException e) {}\n");
-		buf.append("                });\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Files {\n");
-		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C5.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.File;
+			import java.io.IOException;
+			import java.util.function.Consumer;
+			import java.util.stream.Stream;
+			
+			public class C5 {
+			    void foo() {
+			        Consumer<Object> s = (a) -> Files.walk(new File(".").toPath())
+			                .filter(p -> p.toString().endsWith(".java"))
+			                .forEach(p -> {
+			                    try {
+			                        Files.lines(p).forEach(System.out::println);
+			                    } catch (IOException e) {}
+			                });
+			    }
+			}
+			class Files {
+			    public static Stream<Object> walk(Object start) throws IOException {
+			        return null;
+			    }
+			    public static Stream<String> lines(Object path) throws IOException {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C5.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -369,38 +375,38 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("\n");
-		buf.append("public class C5 {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Consumer<Object> s = (a) -> {\n");
-		buf.append("            try {\n");
-		buf.append("                Files.walk(new File(\".\").toPath())\n");
-		buf.append("                        .filter(p -> p.toString().endsWith(\".java\"))\n");
-		buf.append("                        .forEach(p -> {\n");
-		buf.append("                            try {\n");
-		buf.append("                                Files.lines(p).forEach(System.out::println);\n");
-		buf.append("                            } catch (IOException e) {}\n");
-		buf.append("                        });\n");
-		buf.append("            } catch (IOException e) {\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Files {\n");
-		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.File;
+			import java.io.IOException;
+			import java.util.function.Consumer;
+			import java.util.stream.Stream;
+			
+			public class C5 {
+			    void foo() {
+			        Consumer<Object> s = (a) -> {
+			            try {
+			                Files.walk(new File(".").toPath())
+			                        .filter(p -> p.toString().endsWith(".java"))
+			                        .forEach(p -> {
+			                            try {
+			                                Files.lines(p).forEach(System.out::println);
+			                            } catch (IOException e) {}
+			                        });
+			            } catch (IOException e) {
+			            }
+			        };
+			    }
+			}
+			class Files {
+			    public static Stream<Object> walk(Object start) throws IOException {
+			        return null;
+			    }
+			    public static Stream<String> lines(Object path) throws IOException {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -408,33 +414,34 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("\n");
-		buf.append("public class C5 {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Consumer<Object> s = (a) -> {\n");
-		buf.append("            try {\n");
-		buf.append("                Files.walk(new File(\".\").toPath())\n");
-		buf.append("                        .filter(p -> p.toString().endsWith(\".java\"))\n");
-		buf.append("                        .forEach(p -> Files.lines(p).forEach(System.out::println));\n");
-		buf.append("            } catch (IOException e) {}\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Files {\n");
-		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C5.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.File;
+			import java.io.IOException;
+			import java.util.function.Consumer;
+			import java.util.stream.Stream;
+			
+			public class C5 {
+			    void foo() {
+			        Consumer<Object> s = (a) -> {
+			            try {
+			                Files.walk(new File(".").toPath())
+			                        .filter(p -> p.toString().endsWith(".java"))
+			                        .forEach(p -> Files.lines(p).forEach(System.out::println));
+			            } catch (IOException e) {}
+			        };
+			    }
+			}
+			class Files {
+			    public static Stream<Object> walk(Object start) throws IOException {
+			        return null;
+			    }
+			    public static Stream<String> lines(Object path) throws IOException {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C5.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -443,38 +450,38 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.File;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("import java.util.stream.Stream;\n");
-		buf.append("\n");
-		buf.append("public class C5 {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Consumer<Object> s = (a) -> {\n");
-		buf.append("            try {\n");
-		buf.append("                Files.walk(new File(\".\").toPath())\n");
-		buf.append("                        .filter(p -> p.toString().endsWith(\".java\"))\n");
-		buf.append("                        .forEach(p -> {\n");
-		buf.append("                            try {\n");
-		buf.append("                                Files.lines(p).forEach(System.out::println);\n");
-		buf.append("                            } catch (IOException e) {\n");
-		buf.append("                            }\n");
-		buf.append("                        });\n");
-		buf.append("            } catch (IOException e) {}\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Files {\n");
-		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.File;
+			import java.io.IOException;
+			import java.util.function.Consumer;
+			import java.util.stream.Stream;
+			
+			public class C5 {
+			    void foo() {
+			        Consumer<Object> s = (a) -> {
+			            try {
+			                Files.walk(new File(".").toPath())
+			                        .filter(p -> p.toString().endsWith(".java"))
+			                        .forEach(p -> {
+			                            try {
+			                                Files.lines(p).forEach(System.out::println);
+			                            } catch (IOException e) {
+			                            }
+			                        });
+			            } catch (IOException e) {}
+			        };
+			    }
+			}
+			class Files {
+			    public static Stream<Object> walk(Object start) throws IOException {
+			        return null;
+			    }
+			    public static Stream<String> lines(Object path) throws IOException {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -482,26 +489,27 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInLambda7() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InvalidClassException;\n");
-		buf.append("interface C7 {\n");
-		buf.append("    int foo(int i);\n");
-		buf.append("    default C7 method1() {\n");
-		buf.append("        return x -> {\n");
-		buf.append("            try {\n");
-		buf.append("                if (x == -1)\n");
-		buf.append("                    throw new InvalidClassException(\"ex\");\n");
-		buf.append("                if (x == 0)\n");
-		buf.append("                    throw new FileNotFoundException();\n");
-		buf.append("            } catch (InvalidClassException e) {\n");
-		buf.append("            }\n");
-		buf.append("            return x;\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C7.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.io.InvalidClassException;
+			interface C7 {
+			    int foo(int i);
+			    default C7 method1() {
+			        return x -> {
+			            try {
+			                if (x == -1)
+			                    throw new InvalidClassException("ex");
+			                if (x == 0)
+			                    throw new FileNotFoundException();
+			            } catch (InvalidClassException e) {
+			            }
+			            return x;
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C7.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -510,48 +518,48 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InvalidClassException;\n");
-		buf.append("interface C7 {\n");
-		buf.append("    int foo(int i);\n");
-		buf.append("    default C7 method1() {\n");
-		buf.append("        return x -> {\n");
-		buf.append("            try {\n");
-		buf.append("                if (x == -1)\n");
-		buf.append("                    throw new InvalidClassException(\"ex\");\n");
-		buf.append("                if (x == 0)\n");
-		buf.append("                    throw new FileNotFoundException();\n");
-		buf.append("            } catch (InvalidClassException e) {\n");
-		buf.append("            } catch (FileNotFoundException e) {\n");
-		buf.append("            }\n");
-		buf.append("            return x;\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.io.InvalidClassException;
+			interface C7 {
+			    int foo(int i);
+			    default C7 method1() {
+			        return x -> {
+			            try {
+			                if (x == -1)
+			                    throw new InvalidClassException("ex");
+			                if (x == 0)
+			                    throw new FileNotFoundException();
+			            } catch (InvalidClassException e) {
+			            } catch (FileNotFoundException e) {
+			            }
+			            return x;
+			        };
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.InvalidClassException;\n");
-		buf.append("interface C7 {\n");
-		buf.append("    int foo(int i);\n");
-		buf.append("    default C7 method1() {\n");
-		buf.append("        return x -> {\n");
-		buf.append("            try {\n");
-		buf.append("                if (x == -1)\n");
-		buf.append("                    throw new InvalidClassException(\"ex\");\n");
-		buf.append("                if (x == 0)\n");
-		buf.append("                    throw new FileNotFoundException();\n");
-		buf.append("            } catch (InvalidClassException | FileNotFoundException e) {\n");
-		buf.append("            }\n");
-		buf.append("            return x;\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.io.InvalidClassException;
+			interface C7 {
+			    int foo(int i);
+			    default C7 method1() {
+			        return x -> {
+			            try {
+			                if (x == -1)
+			                    throw new InvalidClassException("ex");
+			                if (x == 0)
+			                    throw new FileNotFoundException();
+			            } catch (InvalidClassException | FileNotFoundException e) {
+			            }
+			            return x;
+			        };
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -559,19 +567,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference1() throws Exception { // ExpressionMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
-		buf.append("    Consumer<? super String> mapper = TRANSFORMER::transform;\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class Transformer {\n");
-		buf.append("    void transform(String number) throws FileNotFoundException {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.util.function.Consumer;
+			public class E1 {
+			    private static Transformer TRANSFORMER = new Transformer();
+			    Consumer<? super String> mapper = TRANSFORMER::transform;
+			}
+			
+			class Transformer {
+			    void transform(String number) throws FileNotFoundException {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -580,24 +589,24 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
-		buf.append("    Consumer<? super String> mapper = arg0 -> {\n");
-		buf.append("        try {\n");
-		buf.append("            TRANSFORMER.transform(arg0);\n");
-		buf.append("        } catch (FileNotFoundException e) {\n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class Transformer {\n");
-		buf.append("    void transform(String number) throws FileNotFoundException {}\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.util.function.Consumer;
+			public class E1 {
+			    private static Transformer TRANSFORMER = new Transformer();
+			    Consumer<? super String> mapper = arg0 -> {
+			        try {
+			            TRANSFORMER.transform(arg0);
+			        } catch (FileNotFoundException e) {
+			        }
+			    };
+			}
+			
+			class Transformer {
+			    void transform(String number) throws FileNotFoundException {}
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -605,22 +614,23 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.util.Optional;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Optional.ofNullable(\"10\").map(TRANSFORMER::transform).ifPresent(System.out::print);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Transformer {\n");
-		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.util.Optional;
+			public class E2 {
+			    private static Transformer TRANSFORMER = new Transformer();
+			    public void test() {
+			        Optional.ofNullable("10").map(TRANSFORMER::transform).ifPresent(System.out::print);
+			    }
+			}
+			class Transformer {
+			    Long transform(String number) throws FileNotFoundException {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -629,27 +639,27 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.util.Optional;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Optional.ofNullable(\"10\").map(arg0 -> {\n");
-		buf.append("            try {\n");
-		buf.append("                return TRANSFORMER.transform(arg0);\n");
-		buf.append("            } catch (FileNotFoundException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }).ifPresent(System.out::print);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Transformer {\n");
-		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.util.Optional;
+			public class E2 {
+			    private static Transformer TRANSFORMER = new Transformer();
+			    public void test() {
+			        Optional.ofNullable("10").map(arg0 -> {
+			            try {
+			                return TRANSFORMER.transform(arg0);
+			            } catch (FileNotFoundException e) {
+			            }
+			        }).ifPresent(System.out::print);
+			    }
+			}
+			class Transformer {
+			    Long transform(String number) throws FileNotFoundException {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -657,24 +667,25 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.util.Optional;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Consumer<Object> s = (a) -> Optional.ofNullable(\"10\").map(TRANSFORMER::transform).ifPresent(System.out::print);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Transformer {\n");
-		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E3.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.util.Optional;
+			import java.util.function.Consumer;
+			
+			public class E3 {
+			    private static Transformer TRANSFORMER = new Transformer();
+			    public void test() {
+			        Consumer<Object> s = (a) -> Optional.ofNullable("10").map(TRANSFORMER::transform).ifPresent(System.out::print);
+			    }
+			}
+			class Transformer {
+			    Long transform(String number) throws FileNotFoundException {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E3.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -683,29 +694,29 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.util.Optional;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("\n");
-		buf.append("public class E3 {\n");
-		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
-		buf.append("    public void test() {\n");
-		buf.append("        Consumer<Object> s = (a) -> Optional.ofNullable(\"10\").map(arg0 -> {\n");
-		buf.append("            try {\n");
-		buf.append("                return TRANSFORMER.transform(arg0);\n");
-		buf.append("            } catch (FileNotFoundException e) {\n");
-		buf.append("            }\n");
-		buf.append("        }).ifPresent(System.out::print);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Transformer {\n");
-		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.FileNotFoundException;
+			import java.util.Optional;
+			import java.util.function.Consumer;
+			
+			public class E3 {
+			    private static Transformer TRANSFORMER = new Transformer();
+			    public void test() {
+			        Consumer<Object> s = (a) -> Optional.ofNullable("10").map(arg0 -> {
+			            try {
+			                return TRANSFORMER.transform(arg0);
+			            } catch (FileNotFoundException e) {
+			            }
+			        }).ifPresent(System.out::print);
+			    }
+			}
+			class Transformer {
+			    Long transform(String number) throws FileNotFoundException {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -713,19 +724,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference4() throws Exception { // Generic lambda not allowed
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E4 {\n");
-		buf.append("    {\n");
-		buf.append("        FI fi = this::test;\n");
-		buf.append("    }\n");
-		buf.append("    private void test() throws IOException {}\n");
-		buf.append("    interface FI {\n");
-		buf.append("        <T> void foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E4.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.IOException;
+			public class E4 {
+			    {
+			        FI fi = this::test;
+			    }
+			    private void test() throws IOException {}
+			    interface FI {
+			        <T> void foo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E4.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -738,22 +750,23 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference5() throws Exception { // CreationReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.HashSet;\n");
-		buf.append("import java.util.function.Supplier;\n");
-		buf.append("public class E5 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Supplier<HashSet<String>> c = MyHashSet::new;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class MyHashSet extends HashSet<String> {\n");
-		buf.append("    public MyHashSet() throws IOException {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E5.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.IOException;
+			import java.util.HashSet;
+			import java.util.function.Supplier;
+			public class E5 {
+			    void test() {
+			        Supplier<HashSet<String>> c = MyHashSet::new;
+			    }
+			}
+			@SuppressWarnings("serial")
+			class MyHashSet extends HashSet<String> {
+			    public MyHashSet() throws IOException {
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E5.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -762,27 +775,27 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.HashSet;\n");
-		buf.append("import java.util.function.Supplier;\n");
-		buf.append("public class E5 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Supplier<HashSet<String>> c = () -> {\n");
-		buf.append("            try {\n");
-		buf.append("                return new MyHashSet();\n");
-		buf.append("            } catch (IOException e) {\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("@SuppressWarnings(\"serial\")\n");
-		buf.append("class MyHashSet extends HashSet<String> {\n");
-		buf.append("    public MyHashSet() throws IOException {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.IOException;
+			import java.util.HashSet;
+			import java.util.function.Supplier;
+			public class E5 {
+			    void test() {
+			        Supplier<HashSet<String>> c = () -> {
+			            try {
+			                return new MyHashSet();
+			            } catch (IOException e) {
+			            }
+			        };
+			    }
+			}
+			@SuppressWarnings("serial")
+			class MyHashSet extends HashSet<String> {
+			    public MyHashSet() throws IOException {
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -790,21 +803,22 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference6() throws Exception { // TypeMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Function;\n");
-		buf.append("public class E6 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Function<Clazz<Integer>, String> c = Clazz<Integer>::searchForRefs1;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Clazz<E> {\n");
-		buf.append("    <F> String searchForRefs1() throws IOException {\n");
-		buf.append("        return \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.IOException;
+			import java.util.function.Function;
+			public class E6 {
+			    void test() {
+			        Function<Clazz<Integer>, String> c = Clazz<Integer>::searchForRefs1;
+			    }
+			}
+			class Clazz<E> {
+			    <F> String searchForRefs1() throws IOException {
+			        return "";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -813,26 +827,26 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Function;\n");
-		buf.append("public class E6 {\n");
-		buf.append("    void test() {\n");
-		buf.append("        Function<Clazz<Integer>, String> c = arg0 -> {\n");
-		buf.append("            try {\n");
-		buf.append("                return arg0.searchForRefs1();\n");
-		buf.append("            } catch (IOException e) {\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Clazz<E> {\n");
-		buf.append("    <F> String searchForRefs1() throws IOException {\n");
-		buf.append("        return \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.IOException;
+			import java.util.function.Function;
+			public class E6 {
+			    void test() {
+			        Function<Clazz<Integer>, String> c = arg0 -> {
+			            try {
+			                return arg0.searchForRefs1();
+			            } catch (IOException e) {
+			            }
+			        };
+			    }
+			}
+			class Clazz<E> {
+			    <F> String searchForRefs1() throws IOException {
+			        return "";
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -840,19 +854,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testUncaughtExceptionInMethodReference7() throws Exception { // SuperMethodReference
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Supplier;\n");
-		buf.append("public class E7 extends Clazz<Object> {\n");
-		buf.append("    Supplier<String> c = super::searchForRefs1;\n");
-		buf.append("}\n");
-		buf.append("class Clazz<E> {\n");
-		buf.append("    <F> String searchForRefs1() throws IOException {\n");
-		buf.append("        return \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E7.java", buf.toString(), false, null);
+		String str= """
+			package test;
+			import java.io.IOException;
+			import java.util.function.Supplier;
+			public class E7 extends Clazz<Object> {
+			    Supplier<String> c = super::searchForRefs1;
+			}
+			class Clazz<E> {
+			    <F> String searchForRefs1() throws IOException {
+			        return "";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E7.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -861,24 +876,24 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 1);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.function.Supplier;\n");
-		buf.append("public class E7 extends Clazz<Object> {\n");
-		buf.append("    Supplier<String> c = () -> {\n");
-		buf.append("        try {\n");
-		buf.append("            return super.searchForRefs1();\n");
-		buf.append("        } catch (IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		buf.append("class Clazz<E> {\n");
-		buf.append("    <F> String searchForRefs1() throws IOException {\n");
-		buf.append("        return \"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test;
+			import java.io.IOException;
+			import java.util.function.Supplier;
+			public class E7 extends Clazz<Object> {
+			    Supplier<String> c = () -> {
+			        try {
+			            return super.searchForRefs1();
+			        } catch (IOException e) {
+			        }
+			    };
+			}
+			class Clazz<E> {
+			    <F> String searchForRefs1() throws IOException {
+			        return "";
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -887,19 +902,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public class E1 implements FI1, FI2 {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public class E1 implements FI1, FI2 {
+			
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -908,43 +924,43 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public class E1 implements FI1, FI2 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(int j, String s) {\n");
-		buf.append("        FI2.super.foo(j, s);\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public class E1 implements FI1, FI2 {
+			
+			    @Override
+			    public void foo(int j, String s) {
+			        FI2.super.foo(j, s);
+			    }
+			
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public class E1 implements FI1, FI2 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(int i, String s) {\n");
-		buf.append("        FI1.super.foo(i, s);\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public class E1 implements FI1, FI2 {
+			
+			    @Override
+			    public void foo(int i, String s) {
+			        FI1.super.foo(i, s);
+			    }
+			
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -952,19 +968,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public interface E1 extends FI1, FI2 {\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public interface E1 extends FI1, FI2 {
+			   \s
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -973,43 +990,43 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public interface E1 extends FI1, FI2 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void foo(int j, String s) {\n");
-		buf.append("        FI2.super.foo(j, s);\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public interface E1 extends FI1, FI2 {
+			
+			    @Override
+			    default void foo(int j, String s) {
+			        FI2.super.foo(j, s);
+			    }
+			   \s
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public interface E1 extends FI1, FI2 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void foo(int i, String s) {\n");
-		buf.append("        FI1.super.foo(i, s);\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public interface E1 extends FI1, FI2 {
+			
+			    @Override
+			    default void foo(int i, String s) {
+			        FI1.super.foo(i, s);
+			    }
+			   \s
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -1017,19 +1034,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public enum E1 implements FI1, FI2 {\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public enum E1 implements FI1, FI2 {
+			   \s
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1038,45 +1056,45 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public enum E1 implements FI1, FI2 {\n");
-		buf.append("    ;\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(int j, String s) {\n");
-		buf.append("        FI2.super.foo(j, s);\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public enum E1 implements FI1, FI2 {
+			    ;
+			
+			    @Override
+			    public void foo(int j, String s) {
+			        FI2.super.foo(j, s);
+			    }
+			   \s
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface FI1 {\n");
-		buf.append("    default void foo(int i, String s) {}\n");
-		buf.append("}\n");
-		buf.append("interface FI2 {\n");
-		buf.append("    default void foo(int j, String s) {}\n");
-		buf.append("}\n");
-		buf.append("public enum E1 implements FI1, FI2 {\n");
-		buf.append("    ;\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(int i, String s) {\n");
-		buf.append("        FI1.super.foo(i, s);\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			
+			interface FI1 {
+			    default void foo(int i, String s) {}
+			}
+			interface FI2 {
+			    default void foo(int j, String s) {}
+			}
+			public enum E1 implements FI1, FI2 {
+			    ;
+			
+			    @Override
+			    public void foo(int i, String s) {
+			        FI1.super.foo(i, s);
+			    }
+			   \s
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -1084,19 +1102,20 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void m1() { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    void m1();\n");
-		buf.append("}\n");
-		buf.append("interface I22 extends I2<String> { }\n");
-		buf.append("interface Both extends I1, I22 {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			interface I1 {
+			    default void m1() { }
+			}
+			interface I2<T2> {
+			    void m1();
+			}
+			interface I22 extends I2<String> { }
+			interface Both extends I1, I22 {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1105,42 +1124,42 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void m1() { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    void m1();\n");
-		buf.append("}\n");
-		buf.append("interface I22 extends I2<String> { }\n");
-		buf.append("interface Both extends I1, I22 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void m1() {\n");
-		buf.append("        I1.super.m1();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			interface I1 {
+			    default void m1() { }
+			}
+			interface I2<T2> {
+			    void m1();
+			}
+			interface I22 extends I2<String> { }
+			interface Both extends I1, I22 {
+			
+			    @Override
+			    default void m1() {
+			        I1.super.m1();
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void m1() { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    void m1();\n");
-		buf.append("}\n");
-		buf.append("interface I22 extends I2<String> { }\n");
-		buf.append("interface Both extends I1, I22 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void m1() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			
+			interface I1 {
+			    default void m1() { }
+			}
+			interface I2<T2> {
+			    void m1();
+			}
+			interface I22 extends I2<String> { }
+			interface Both extends I1, I22 {
+			
+			    @Override
+			    default void m1() {
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -1148,21 +1167,22 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testOverrideDefaultMethod_multiLevel() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("interface I1<T1> {\n");
-		buf.append("    default void def(T1 t1) { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    default void def(T2 t2) { }\n");
-		buf.append("}\n");
-		buf.append("interface I22<T22> extends I2<T22> { }\n");
-		buf.append("interface Both extends I1<List<String>>, I22<List<String>> {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			import java.util.List;
+			
+			interface I1<T1> {
+			    default void def(T1 t1) { }
+			}
+			interface I2<T2> {
+			    default void def(T2 t2) { }
+			}
+			interface I22<T22> extends I2<T22> { }
+			interface Both extends I1<List<String>>, I22<List<String>> {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1171,47 +1191,47 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("interface I1<T1> {\n");
-		buf.append("    default void def(T1 t1) { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    default void def(T2 t2) { }\n");
-		buf.append("}\n");
-		buf.append("interface I22<T22> extends I2<T22> { }\n");
-		buf.append("interface Both extends I1<List<String>>, I22<List<String>> {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void def(List<String> t2) {\n");
-		buf.append("        I22.super.def(t2);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			import java.util.List;
+			
+			interface I1<T1> {
+			    default void def(T1 t1) { }
+			}
+			interface I2<T2> {
+			    default void def(T2 t2) { }
+			}
+			interface I22<T22> extends I2<T22> { }
+			interface Both extends I1<List<String>>, I22<List<String>> {
+			
+			    @Override
+			    default void def(List<String> t2) {
+			        I22.super.def(t2);
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("interface I1<T1> {\n");
-		buf.append("    default void def(T1 t1) { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    default void def(T2 t2) { }\n");
-		buf.append("}\n");
-		buf.append("interface I22<T22> extends I2<T22> { }\n");
-		buf.append("interface Both extends I1<List<String>>, I22<List<String>> {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void def(List<String> t1) {\n");
-		buf.append("        I1.super.def(t1);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			
+			import java.util.List;
+			
+			interface I1<T1> {
+			    default void def(T1 t1) { }
+			}
+			interface I2<T2> {
+			    default void def(T2 t2) { }
+			}
+			interface I22<T22> extends I2<T22> { }
+			interface Both extends I1<List<String>>, I22<List<String>> {
+			
+			    @Override
+			    default void def(List<String> t1) {
+			        I1.super.def(t1);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -1219,217 +1239,230 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	@Test
 	public void testCreateMethodInSuperTypeQuickFix1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    void foo(int... i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class E implements I {
+			    @Override
+			    void foo(int... i) {
+			    }
+			}
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    void foo(int... i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("\n");
-		buf.append("    void foo(int... i);\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			class E implements I {
+			    @Override
+			    void foo(int... i) {
+			    }
+			}
+			interface I {
+			
+			    void foo(int... i);
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { str1 });
 	}
 
 	@Test
 	public void testCreateMethodInSuperTypeQuickFix2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    void foo(int[]... i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class E implements I {
+			    @Override
+			    void foo(int[]... i) {
+			    }
+			}
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    void foo(int[]... i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("\n");
-		buf.append("    void foo(int[]... i);\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			class E implements I {
+			    @Override
+			    void foo(int[]... i) {
+			    }
+			}
+			interface I {
+			
+			    void foo(int[]... i);
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { str1 });
 	}
 
 	@Test
 	public void testCreateMethodInSuperTypeQuickFix3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    void foo(double d, int[]... i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class E implements I {
+			    @Override
+			    void foo(double d, int[]... i) {
+			    }
+			}
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    void foo(double d, int[]... i) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("\n");
-		buf.append("    void foo(double d, int[]... i);\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			class E implements I {
+			    @Override
+			    void foo(double d, int[]... i) {
+			    }
+			}
+			interface I {
+			
+			    void foo(double d, int[]... i);
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { str1 });
 	}
 
 	@Test
 	public void testCreateMethodInSuperTypeQuickFix4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    <T> void foo(T t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class E implements I {
+			    @Override
+			    <T> void foo(T t) {
+			    }
+			}
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    <T> void foo(T t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("\n");
-		buf.append("    <T> void foo(T t);\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			class E implements I {
+			    @Override
+			    <T> void foo(T t) {
+			    }
+			}
+			interface I {
+			
+			    <T> void foo(T t);
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { str1 });
 	}
 
 	@Test
 	public void testCreateMethodInSuperTypeQuickFix5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    <T> void foo(T... t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class E implements I {
+			    @Override
+			    <T> void foo(T... t) {
+			    }
+			}
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    <T> void foo(T... t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("\n");
-		buf.append("    <T> void foo(T... t);\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			class E implements I {
+			    @Override
+			    <T> void foo(T... t) {
+			    }
+			}
+			interface I {
+			
+			    <T> void foo(T... t);
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { str1 });
 	}
 
 	@Test
 	public void testCreateMethodInSuperTypeQuickFix6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    <T> void foo(T[]... t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class E implements I {
+			    @Override
+			    <T> void foo(T[]... t) {
+			    }
+			}
+			interface I {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class E implements I {\n");
-		buf.append("    @Override\n");
-		buf.append("    <T> void foo(T[]... t) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("interface I {\n");
-		buf.append("\n");
-		buf.append("    <T> void foo(T[]... t);\n");
-		buf.append("}\n");
-		assertExpectedExistInProposals(proposals, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			class E implements I {
+			    @Override
+			    <T> void foo(T[]... t) {
+			    }
+			}
+			interface I {
+			
+			    <T> void foo(T[]... t);
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { str1 });
 	}
 
 	@Test
 	public void testOverrideDefaultMethod_noParam() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void def() { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    default void def() { }\n");
-		buf.append("}\n");
-		buf.append("interface I22 extends I2<String> { }\n");
-		buf.append("interface Both extends I1, I22 {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			interface I1 {
+			    default void def() { }
+			}
+			interface I2<T2> {
+			    default void def() { }
+			}
+			interface I22 extends I2<String> { }
+			interface Both extends I1, I22 {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1438,43 +1471,43 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void def() { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    default void def() { }\n");
-		buf.append("}\n");
-		buf.append("interface I22 extends I2<String> { }\n");
-		buf.append("interface Both extends I1, I22 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void def() {\n");
-		buf.append("        I22.super.def();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			interface I1 {
+			    default void def() { }
+			}
+			interface I2<T2> {
+			    default void def() { }
+			}
+			interface I22 extends I2<String> { }
+			interface Both extends I1, I22 {
+			
+			    @Override
+			    default void def() {
+			        I22.super.def();
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("interface I1 {\n");
-		buf.append("    default void def() { }\n");
-		buf.append("}\n");
-		buf.append("interface I2<T2> {\n");
-		buf.append("    default void def() { }\n");
-		buf.append("}\n");
-		buf.append("interface I22 extends I2<String> { }\n");
-		buf.append("interface Both extends I1, I22 {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    default void def() {\n");
-		buf.append("        I1.super.def();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package test1;
+			
+			interface I1 {
+			    default void def() { }
+			}
+			interface I2<T2> {
+			    default void def() { }
+			}
+			interface I22 extends I2<String> { }
+			interface Both extends I1, I22 {
+			
+			    @Override
+			    default void def() {
+			        I1.super.def();
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -1482,45 +1515,45 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 	public void testCorrectVariableType() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("public class Test {\n");
-		buf.append("\n");
-		buf.append("    public void method() {\n");
-		buf.append("        List<String> strings1 = strings().toArray(new String[0]);\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public List<String> strings() {\n");
-		buf.append("        return Collections.emptyList();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.Collections;
+			import java.util.List;
+			
+			public class Test {
+			
+			    public void method() {
+			        List<String> strings1 = strings().toArray(new String[0]);
+			    }
+			
+			    public List<String> strings() {
+			        return Collections.emptyList();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("public class Test {\n");
-		buf.append("\n");
-		buf.append("    public void method() {\n");
-		buf.append("        String[] strings1 = strings().toArray(new String[0]);\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    public List<String> strings() {\n");
-		buf.append("        return Collections.emptyList();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.Collections;
+			import java.util.List;
+			
+			public class Test {
+			
+			    public void method() {
+			        String[] strings1 = strings().toArray(new String[0]);
+			    }
+			
+			    public List<String> strings() {
+			        return Collections.emptyList();
+			    }
+			}
+			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 	@Test
@@ -1531,17 +1564,18 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			JavaCore.setOptions(options);
 			NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package pack;\n");
-			buf.append("import java.util.*;\n");
-			buf.append("import annots.*;\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class E {\n");
-			buf.append("    private void foo() {\n");
-			buf.append("        ArrayList x=new ArrayList<String>();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			String str= """
+				package pack;
+				import java.util.*;
+				import annots.*;
+				@NonNullByDefault
+				public class E {
+				    private void foo() {
+				        ArrayList x=new ArrayList<String>();
+				    }
+				}
+				""";
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -1549,18 +1583,18 @@ public class LocalCorrectionsQuickFixTest1d8 extends QuickFixTest {
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 6);
 
-			buf= new StringBuilder();
-			buf.append("package pack;\n");
-			buf.append("import java.util.*;\n");
-			buf.append("import annots.*;\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class E {\n");
-			buf.append("    private void foo() {\n");
-			buf.append("        ArrayList<String> x=new ArrayList<String>();\n");
-			buf.append("    }\n");
-			buf.append("}\n");
-
-			assertProposalPreviewEquals(buf.toString(), "Change type to 'ArrayList<String>'", proposals);
+			String str1= """
+				package pack;
+				import java.util.*;
+				import annots.*;
+				@NonNullByDefault
+				public class E {
+				    private void foo() {
+				        ArrayList<String> x=new ArrayList<String>();
+				    }
+				}
+				""";
+			assertProposalPreviewEquals(str1, "Change type to 'ArrayList<String>'", proposals);
 		} finally {
 			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
 		}

@@ -100,16 +100,16 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		List<String> list = Arrays.asList(\"a\", \"b\", \"c\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    public void foo() {
+					List<String> list = Arrays.asList("a", "b", "c");
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -135,16 +135,16 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		List<String> list = Arrays.asList(\"a\", \"b\", \"c\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    public void foo() {
+					List<String> list = Arrays.asList("a", "b", "c");
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -170,16 +170,16 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("		List<String> list = Arrays.asList(\"a\", \"b\", \"c\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    public void foo() {
+					List<String> list = Arrays.asList("a", "b", "c");
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -315,23 +315,23 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    private class A1 {\n");
-		buf.append("        public String foo(int x, String ... b) {\n");
-		buf.append("            return b[0];\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private class A2 extends A1 {\n");
-		buf.append("        public String foo(int x) {\n");
-		buf.append("            return super.foo(x, \"a\", \"b\", \"c\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    private class A1 {
+			        public String foo(int x, String ... b) {
+			            return b[0];
+			        }
+			    }
+			    private class A2 extends A1 {
+			        public String foo(int x) {
+			            return super.foo(x, "a", "b", "c");
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -364,23 +364,23 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    private class A1 {\n");
-		buf.append("        public String foo(int x, String ... b) {\n");
-		buf.append("            return b[0];\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private class A2 extends A1 {\n");
-		buf.append("        public String foo(int x) {\n");
-		buf.append("            return super.foo(x, \"a\", \"b\", \"c\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    private class A1 {
+			        public String foo(int x, String ... b) {
+			            return b[0];
+			        }
+			    }
+			    private class A2 extends A1 {
+			        public String foo(int x) {
+			            return super.foo(x, "a", "b", "c");
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -413,23 +413,23 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    private class A1 {\n");
-		buf.append("        public String foo(int x, String ... b) {\n");
-		buf.append("            return b[0];\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private class A2 extends A1 {\n");
-		buf.append("        public String foo(int x) {\n");
-		buf.append("            return super.foo(x, \"a\", \"b\", \"c\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    private class A1 {
+			        public String foo(int x, String ... b) {
+			            return b[0];
+			        }
+			    }
+			    private class A2 extends A1 {
+			        public String foo(int x) {
+			            return super.foo(x, "a", "b", "c");
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 
@@ -462,23 +462,23 @@ public class UnnecessaryArrayCreationQuickFixTest extends QuickFixTest {
 
 		String preview1= getPreviewContent(fRemoveArrayCreationProposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class A {\n");
-		buf.append("    private class A1 {\n");
-		buf.append("        public String foo(int x, String ... b) {\n");
-		buf.append("            return b[0];\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    private class A2 extends A1 {\n");
-		buf.append("        public String foo(int x) {\n");
-		buf.append("            return super.foo(x, \"a\", \"b\", \"c\");\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			import java.util.Arrays;
+			import java.util.List;
+			public class A {
+			    private class A1 {
+			        public String foo(int x, String ... b) {
+			            return b[0];
+			        }
+			    }
+			    private class A2 extends A1 {
+			        public String foo(int x) {
+			            return super.foo(x, "a", "b", "c");
+			        }
+			    }
+			}
+			""";
 		assertEqualString(preview1, expected);
 	}
 

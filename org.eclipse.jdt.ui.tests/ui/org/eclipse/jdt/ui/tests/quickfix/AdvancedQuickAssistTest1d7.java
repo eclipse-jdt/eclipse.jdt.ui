@@ -92,26 +92,27 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertSwitchToIf() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        switch (s) {\n");
-		buf.append("        case \"abc\":\n");
-		buf.append("            System.out.println();\n");
-		buf.append("            break;\n");
-		buf.append("        case \"xyz\":\n");
-		buf.append("            System.out.println();\n");
-		buf.append("            break;\n");
-		buf.append("        default:\n");
-		buf.append("            System.out.println();\n");
-		buf.append("            break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        switch (s) {
+			        case "abc":
+			            System.out.println();
+			            break;
+			        case "xyz":
+			            System.out.println();
+			            break;
+			        default:
+			            System.out.println();
+			            break;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("switch");
+		int offset= str.indexOf("switch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -119,35 +120,35 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (\"abc\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (\"xyz\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if ("abc".equals(s)) {
+			            System.out.println();
+			        } else if ("xyz".equals(s)) {
+			            System.out.println();
+			        } else {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (s.equals(\"abc\")) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (s.equals(\"xyz\")) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if (s.equals("abc")) {
+			            System.out.println();
+			        } else if (s.equals("xyz")) {
+			            System.out.println();
+			        } else {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
@@ -155,22 +156,23 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (s.equals(\"abc\")) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (s.equals(\"xyz\")) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if (s.equals("abc")) {
+			            System.out.println();
+			        } else if (s.equals("xyz")) {
+			            System.out.println();
+			        } else {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -178,25 +180,24 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        switch (s) {\n");
-		buf.append("            case \"abc\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            case \"xyz\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            default :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        switch (s) {
+			            case "abc" :
+			                System.out.println();
+			                break;
+			            case "xyz" :
+			                System.out.println();
+			                break;
+			            default :
+			                System.out.println();
+			                break;
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -204,22 +205,23 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (\"abc\" == s) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (\"xyz\" == s) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if ("abc" == s) {
+			            System.out.println();
+			        } else if ("xyz" == s) {
+			            System.out.println();
+			        } else {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -233,22 +235,23 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (\"abc\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (\"xyz\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if ("abc".equals(s)) {
+			            System.out.println();
+			        } else if ("xyz".equals(s)) {
+			            System.out.println();
+			        } else {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -256,47 +259,47 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        switch (s) {\n");
-		buf.append("            case \"abc\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            case \"xyz\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            default :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        switch (s) {
+			            case "abc" :
+			                System.out.println();
+			                break;
+			            case "xyz" :
+			                System.out.println();
+			                break;
+			            default :
+			                System.out.println();
+			                break;
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (s == null) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            switch (s) {\n");
-		buf.append("                case \"abc\" :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("                case \"xyz\" :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("                default :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if (s == null) {
+			            System.out.println();
+			        } else {
+			            switch (s) {
+			                case "abc" :
+			                    System.out.println();
+			                    break;
+			                case "xyz" :
+			                    System.out.println();
+			                    break;
+			                default :
+			                    System.out.println();
+			                    break;
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
@@ -304,22 +307,23 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (s.equals(\"abc\")) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (\"xyz\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if (s.equals("abc")) {
+			            System.out.println();
+			        } else if ("xyz".equals(s)) {
+			            System.out.println();
+			        } else {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -327,47 +331,47 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        switch (s) {\n");
-		buf.append("            case \"abc\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            case \"xyz\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            default :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        switch (s) {
+			            case "abc" :
+			                System.out.println();
+			                break;
+			            case "xyz" :
+			                System.out.println();
+			                break;
+			            default :
+			                System.out.println();
+			                break;
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (s == null) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else {\n");
-		buf.append("            switch (s) {\n");
-		buf.append("                case \"abc\" :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("                case \"xyz\" :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("                default :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if (s == null) {
+			            System.out.println();
+			        } else {
+			            switch (s) {
+			                case "abc" :
+			                    System.out.println();
+			                    break;
+			                case "xyz" :
+			                    System.out.println();
+			                    break;
+			                default :
+			                    System.out.println();
+			                    break;
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
@@ -375,20 +379,21 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch5() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (\"abc\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        } else if (\"xyz\".equals(s)) {\n");
-		buf.append("            System.out.println();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if ("abc".equals(s)) {
+			            System.out.println();
+			        } else if ("xyz".equals(s)) {
+			            System.out.println();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -396,40 +401,40 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        switch (s) {\n");
-		buf.append("            case \"abc\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("            case \"xyz\" :\n");
-		buf.append("                System.out.println();\n");
-		buf.append("                break;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        switch (s) {
+			            case "abc" :
+			                System.out.println();
+			                break;
+			            case "xyz" :
+			                System.out.println();
+			                break;
+			        }
+			    }
+			}
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        if (s == null) {\n");
-		buf.append("        } else {\n");
-		buf.append("            switch (s) {\n");
-		buf.append("                case \"abc\" :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("                case \"xyz\" :\n");
-		buf.append("                    System.out.println();\n");
-		buf.append("                    break;\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
+		String expected2= """
+			package test1;
+			public class E {
+			    public void foo(String s) {
+			        if (s == null) {
+			        } else {
+			            switch (s) {
+			                case "abc" :
+			                    System.out.println();
+			                    break;
+			                case "xyz" :
+			                    System.out.println();
+			                    break;
+			            }
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
@@ -438,36 +443,37 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	public void testReplaceReturnConditionWithIf4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=112443
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    List<String> foo(int a) {\n");
-		buf.append("        return a > 0 ? new ArrayList<>() : new ArrayList<>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.Collections;
+			import java.util.List;
+			public class E {
+			    List<String> foo(int a) {
+			        return a > 0 ? new ArrayList<>() : new ArrayList<>();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("?");
+		int offset= str.indexOf("?");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    List<String> foo(int a) {\n");
-		buf.append("        if (a > 0)\n");
-		buf.append("            return new ArrayList<>();\n");
-		buf.append("        else\n");
-		buf.append("            return new ArrayList<>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.Collections;
+			import java.util.List;
+			public class E {
+			    List<String> foo(int a) {
+			        if (a > 0)
+			            return new ArrayList<>();
+			        else
+			            return new ArrayList<>();
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
@@ -475,39 +481,39 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceReturnIfWithCondition3() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    public List<String> foo(int a) {\n");
-		buf.append("        if (a > 0) {\n");
-		buf.append("            return new ArrayList<>();\n");
-		buf.append("        } else {\n");
-		buf.append("            return new ArrayList<>();\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class E {
+			    public List<String> foo(int a) {
+			        if (a > 0) {
+			            return new ArrayList<>();
+			        } else {
+			            return new ArrayList<>();
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    public List<String> foo(int a) {\n");
-		buf.append("        return a > 0 ? new ArrayList<String>() : new ArrayList<String>();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.List;
+			public class E {
+			    public List<String> foo(int a) {
+			        return a > 0 ? new ArrayList<String>() : new ArrayList<String>();
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
@@ -515,40 +521,40 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testReplaceReturnIfWithCondition4() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    public Map<String, java.io.IOException> foo(int a) {\n");
-		buf.append("        if (a > 0) {\n");
-		buf.append("            return Collections.emptyMap();\n");
-		buf.append("        } else {\n");
-		buf.append("            return Collections.singletonMap(\"none\", null);\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.util.Collections;
+			import java.util.Map;
+			public class E {
+			    public Map<String, java.io.IOException> foo(int a) {
+			        if (a > 0) {
+			            return Collections.emptyMap();
+			        } else {
+			            return Collections.singletonMap("none", null);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("import java.util.Collections;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class E {\n");
-		buf.append("    public Map<String, java.io.IOException> foo(int a) {\n");
-		buf.append("        return a > 0 ? Collections.<String, IOException>emptyMap() : Collections.<String, IOException>singletonMap(\"none\", null);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			import java.io.IOException;
+			import java.util.Collections;
+			import java.util.Map;
+			public class E {
+			    public Map<String, java.io.IOException> foo(int a) {
+			        return a > 0 ? Collections.<String, IOException>emptyMap() : Collections.<String, IOException>singletonMap("none", null);
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
@@ -556,20 +562,21 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 	@Test
 	public void testConvertIfToSwitch() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static boolean isOdd(String number) {\n");
-		buf.append("        if (number.equals(\"one\") || number.equals(\"three\") || number.equals(\"five\") || number.equals(\"nine\")) {\n");
-		buf.append("            return true;\n");
-		buf.append("        } else {\n");
-		buf.append("            return false;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public static boolean isOdd(String number) {
+			        if (number.equals("one") || number.equals("three") || number.equals("five") || number.equals("nine")) {
+			            return true;
+			        } else {
+			            return false;
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-		int offset= buf.toString().indexOf("if");
+		int offset= str.indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
@@ -577,23 +584,22 @@ public class AdvancedQuickAssistTest1d7 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public static boolean isOdd(String number) {\n");
-		buf.append("        switch (number) {\n");
-		buf.append("            case \"one\" :\n");
-		buf.append("            case \"three\" :\n");
-		buf.append("            case \"five\" :\n");
-		buf.append("            case \"nine\" :\n");
-		buf.append("                return true;\n");
-		buf.append("            default :\n");
-		buf.append("                return false;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-
-		String expected1= buf.toString();
+		String expected1= """
+			package test1;
+			public class E {
+			    public static boolean isOdd(String number) {
+			        switch (number) {
+			            case "one" :
+			            case "three" :
+			            case "five" :
+			            case "nine" :
+			                return true;
+			            default :
+			                return false;
+			        }
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}

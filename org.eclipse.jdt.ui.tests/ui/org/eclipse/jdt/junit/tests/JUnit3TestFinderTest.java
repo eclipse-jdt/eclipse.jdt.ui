@@ -62,108 +62,115 @@ public class JUnit3TestFinderTest {
 	@Test
 	public void testTestCase() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("public class MyTest extends TestCase {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		IType validTest1= p.createCompilationUnit("MyTest.java", buf.toString(), false, null).findPrimaryType();
+		String str= """
+			package p;
+			import junit.framework.TestCase;
+			
+			public class MyTest extends TestCase {
+			        public void testFoo() {
+			        }
+			}
+			""";
+		IType validTest1= p.createCompilationUnit("MyTest.java", str, false, null).findPrimaryType();
 
 		assertTestFound(validTest1, new String[] { "p.MyTest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyTest" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("public class MySuperTest extends MyTest {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		IType validTest2= p.createCompilationUnit("MySuperTest.java", buf.toString(), false, null).findPrimaryType();
+		String str1= """
+			package p;
+			import junit.framework.TestCase;
+			
+			public class MySuperTest extends MyTest {
+			        public void testFoo() {
+			        }
+			}
+			""";
+		IType validTest2= p.createCompilationUnit("MySuperTest.java", str1, false, null).findPrimaryType();
 
 		assertTestFound(validTest2, new String[] { "p.MySuperTest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperTest" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("class InvisibleTest extends TestCase {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		IType validTest3= p.createCompilationUnit("InvisibleTest.java", buf.toString(), false, null).findPrimaryType();
+		String str2= """
+			package p;
+			import junit.framework.TestCase;
+			
+			class InvisibleTest extends TestCase {
+			        public void testFoo() {
+			        }
+			}
+			""";
+		IType validTest3= p.createCompilationUnit("InvisibleTest.java", str2, false, null).findPrimaryType();
 
 		// accept invisible top level types
 		assertTestFound(validTest3, new String[] { "p.InvisibleTest" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleTest" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("public class Outer {\n");
-		buf.append("    public static class InnerTest extends TestCase {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest4= p.createCompilationUnit("Outer.java", buf.toString(), false, null).getType("Outer").getType("InnerTest");
+		String str3= """
+			package p;
+			import junit.framework.TestCase;
+			
+			public class Outer {
+			    public static class InnerTest extends TestCase {
+			        public void testFoo() {
+			        }
+			    }
+			}
+			""";
+		IType validTest4= p.createCompilationUnit("Outer.java", str3, false, null).getType("Outer").getType("InnerTest");
 
 		assertTestFound(validTest4, new String[] { "p.Outer.InnerTest" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.Outer.InnerTest" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("public class Outer2 {\n");
-		buf.append("    public class NonStaticInnerTest extends TestCase {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    static class NonVisibleInnerTest extends TestCase {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("            class LocalTest extends TestCase {\n");
-		buf.append("                public void testFoo() {\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType[] invalidTests= p.createCompilationUnit("Outer2.java", buf.toString(), false, null).getAllTypes();
+		String str4= """
+			package p;
+			import junit.framework.TestCase;
+			
+			public class Outer2 {
+			    public class NonStaticInnerTest extends TestCase {
+			        public void testFoo() {
+			        }
+			    }
+			    static class NonVisibleInnerTest extends TestCase {
+			        public void testFoo() {
+			            class LocalTest extends TestCase {
+			                public void testFoo() {
+			                }
+			            }
+			        }
+			    }
+			}
+			""";
+		IType[] invalidTests= p.createCompilationUnit("Outer2.java", str4, false, null).getAllTypes();
 		for (IType invalidTest : invalidTests) {
 			assertTestFound(invalidTest, new String[] {});
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("public abstract class AbstractTest extends TestCase {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		IType invalidTest1= p.createCompilationUnit("AbstractTest.java", buf.toString(), false, null).findPrimaryType();
+		String str5= """
+			package p;
+			import junit.framework.TestCase;
+			
+			public abstract class AbstractTest extends TestCase {
+			        public void testFoo() {
+			        }
+			}
+			""";
+		IType invalidTest1= p.createCompilationUnit("AbstractTest.java", str5, false, null).findPrimaryType();
 
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("\n");
-		buf.append("public class NoTest extends Vector {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		IType invalidTest3= p.createCompilationUnit("NoTest.java", buf.toString(), false, null).findPrimaryType();
+		String str6= """
+			package p;
+			import java.util.Vector;
+			
+			public class NoTest extends Vector {
+			        public void testFoo() {
+			        }
+			}
+			""";
+		IType invalidTest3= p.createCompilationUnit("NoTest.java", str6, false, null).findPrimaryType();
 
 		assertTestFound(invalidTest3, new String[] {});
 		assertTestFound(invalidTest3.getCompilationUnit(), new String[] {});
@@ -178,127 +185,135 @@ public class JUnit3TestFinderTest {
 	@Test
 	public void testSuite() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public class SuiteClass {\n");
-		buf.append("    public static Test suite() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest1= p.createCompilationUnit("SuiteClass.java", buf.toString(), false, null).getType("SuiteClass");
+		String str= """
+			package p;
+			import junit.framework.Test;
+			
+			public class SuiteClass {
+			    public static Test suite() {
+			        return null;
+			    }
+			}
+			""";
+		IType validTest1= p.createCompilationUnit("SuiteClass.java", str, false, null).getType("SuiteClass");
 
 		assertTestFound(validTest1, new String[] { "p.SuiteClass" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.SuiteClass" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public abstract class AbstractSuiteClass {\n");
-		buf.append("    public static Test suite() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest2= p.createCompilationUnit("AbstractSuiteClass.java", buf.toString(), false, null).getType("AbstractSuiteClass");
+		String str1= """
+			package p;
+			import junit.framework.Test;
+			
+			public abstract class AbstractSuiteClass {
+			    public static Test suite() {
+			        return null;
+			    }
+			}
+			""";
+		IType validTest2= p.createCompilationUnit("AbstractSuiteClass.java", str1, false, null).getType("AbstractSuiteClass");
 
 		assertTestFound(validTest2, new String[] { "p.AbstractSuiteClass" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.AbstractSuiteClass" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("class InvisibleSuiteClass {\n");
-		buf.append("    public static Test suite() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest3= p.createCompilationUnit("InvisibleSuiteClass.java", buf.toString(), false, null).getType("InvisibleSuiteClass");
+		String str2= """
+			package p;
+			import junit.framework.Test;
+			
+			class InvisibleSuiteClass {
+			    public static Test suite() {
+			        return null;
+			    }
+			}
+			""";
+		IType validTest3= p.createCompilationUnit("InvisibleSuiteClass.java", str2, false, null).getType("InvisibleSuiteClass");
 
 		assertTestFound(validTest3, new String[] { "p.InvisibleSuiteClass" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.InvisibleSuiteClass" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public class SuiteOuter {\n");
-		buf.append("    public static class InnerSuite {\n");
-		buf.append("        public static Test suite() {\n");
-		buf.append("            return null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest4= p.createCompilationUnit("SuiteOuter.java", buf.toString(), false, null).getType("SuiteOuter").getType("InnerSuite");
+		String str3= """
+			package p;
+			import junit.framework.Test;
+			
+			public class SuiteOuter {
+			    public static class InnerSuite {
+			        public static Test suite() {
+			            return null;
+			        }
+			    }
+			}
+			""";
+		IType validTest4= p.createCompilationUnit("SuiteOuter.java", str3, false, null).getType("SuiteOuter").getType("InnerSuite");
 
 		assertTestFound(validTest4, new String[] { "p.SuiteOuter.InnerSuite" });
 		assertTestFound(validTest4.getCompilationUnit(), new String[] { "p.SuiteOuter.InnerSuite" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestCase;\n");
-		buf.append("\n");
-		buf.append("public class Outer2 {\n");
-		buf.append("    public class NonStaticInnerSuiteTest extends TestCase {\n");
-		buf.append("        public static Test suite() {\n");
-		buf.append("            return null;\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    static class NonVisibleInnerTest extends TestCase {\n");
-		buf.append("        public static Test suite() {\n");
-		buf.append("            class LocalTest extends TestCase {\n");
-		buf.append("                public static Test suite() {\n");
-		buf.append("                }\n");
-		buf.append("            }\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType[] invalidTests= p.createCompilationUnit("Outer2.java", buf.toString(), false, null).getAllTypes();
+		String str4= """
+			package p;
+			import junit.framework.TestCase;
+			
+			public class Outer2 {
+			    public class NonStaticInnerSuiteTest extends TestCase {
+			        public static Test suite() {
+			            return null;
+			        }
+			    }
+			    static class NonVisibleInnerTest extends TestCase {
+			        public static Test suite() {
+			            class LocalTest extends TestCase {
+			                public static Test suite() {
+			                }
+			            }
+			        }
+			    }
+			}
+			""";
+		IType[] invalidTests= p.createCompilationUnit("Outer2.java", str4, false, null).getAllTypes();
 		for (IType invalidTest : invalidTests) {
 			assertTestFound(invalidTest, new String[] {});
 		}
 		assertTestFound(invalidTests[0].getCompilationUnit(), new String[] {});
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public class NonStaticSuite {\n");
-		buf.append("    public Test suite() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType invalidTest1= p.createCompilationUnit("NonStaticSuite.java", buf.toString(), false, null).getType("NonStaticSuite");
+		String str5= """
+			package p;
+			import junit.framework.Test;
+			
+			public class NonStaticSuite {
+			    public Test suite() {
+			        return null;
+			    }
+			}
+			""";
+		IType invalidTest1= p.createCompilationUnit("NonStaticSuite.java", str5, false, null).getType("NonStaticSuite");
 
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public class NonVisibleSuite {\n");
-		buf.append("    private static Test suite() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType invalidTest2= p.createCompilationUnit("NonVisibleSuite.java", buf.toString(), false, null).getType("NonVisibleSuite");
+		String str6= """
+			package p;
+			import junit.framework.Test;
+			
+			public class NonVisibleSuite {
+			    private static Test suite() {
+			        return null;
+			    }
+			}
+			""";
+		IType invalidTest2= p.createCompilationUnit("NonVisibleSuite.java", str6, false, null).getType("NonVisibleSuite");
 
 		assertTestFound(invalidTest2, new String[] {});
 		assertTestFound(invalidTest2.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public class ParameterSuite {\n");
-		buf.append("    public static Test suite(int i) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType invalidTest3= p.createCompilationUnit("ParameterSuite.java", buf.toString(), false, null).getType("ParameterSuite");
+		String str7= """
+			package p;
+			import junit.framework.Test;
+			
+			public class ParameterSuite {
+			    public static Test suite(int i) {
+			        return null;
+			    }
+			}
+			""";
+		IType invalidTest3= p.createCompilationUnit("ParameterSuite.java", str7, false, null).getType("ParameterSuite");
 
 		assertTestFound(invalidTest3, new String[] {});
 		assertTestFound(invalidTest3.getCompilationUnit(), new String[] {});
@@ -313,58 +328,62 @@ public class JUnit3TestFinderTest {
 	@Test
 	public void testTestInterface() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("import junit.framework.TestResult;\n");
-		buf.append("\n");
-		buf.append("public class MyITest implements Test {\n");
-		buf.append("    public int countTestCases() {\n");
-		buf.append("        return 1;\n");
-		buf.append("    }\n");
-		buf.append("    public void run(TestResult result) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest1= p.createCompilationUnit("MyITest.java", buf.toString(), false, null).findPrimaryType();
+		String str= """
+			package p;
+			import junit.framework.Test;
+			import junit.framework.TestResult;
+			
+			public class MyITest implements Test {
+			    public int countTestCases() {
+			        return 1;
+			    }
+			    public void run(TestResult result) {
+			    }
+			}
+			""";
+		IType validTest1= p.createCompilationUnit("MyITest.java", str, false, null).findPrimaryType();
 
 		assertTestFound(validTest1, new String[] { "p.MyITest" });
 		assertTestFound(validTest1.getCompilationUnit(), new String[] { "p.MyITest" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class MySuperITest extends MyITest {\n");
-		buf.append("        public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		IType validTest2= p.createCompilationUnit("MySuperITest.java", buf.toString(), false, null).findPrimaryType();
+		String str1= """
+			package p;
+			
+			public class MySuperITest extends MyITest {
+			        public void testFoo() {
+			        }
+			}
+			""";
+		IType validTest2= p.createCompilationUnit("MySuperITest.java", str1, false, null).findPrimaryType();
 
 		assertTestFound(validTest2, new String[] { "p.MySuperITest" });
 		assertTestFound(validTest2.getCompilationUnit(), new String[] { "p.MySuperITest" });
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.Test;\n");
-		buf.append("\n");
-		buf.append("public interface MyITestSuperInterface extends Test {\n");
-		buf.append("}\n");
-		IType invalidTest1= p.createCompilationUnit("MyITestSuperInterface.java", buf.toString(), false, null).findPrimaryType();
+		String str2= """
+			package p;
+			import junit.framework.Test;
+			
+			public interface MyITestSuperInterface extends Test {
+			}
+			""";
+		IType invalidTest1= p.createCompilationUnit("MyITestSuperInterface.java", str2, false, null).findPrimaryType();
 
 		assertTestFound(invalidTest1, new String[] {});
 		assertTestFound(invalidTest1.getCompilationUnit(), new String[] {});
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import junit.framework.TestResult;\n");
-		buf.append("\n");
-		buf.append("public class MyITestSuperInterfaceImpl implements MyITestSuperInterface {\n");
-		buf.append("    public int countTestCases() {\n");
-		buf.append("        return 1;\n");
-		buf.append("    }\n");
-		buf.append("    public void run(TestResult result) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		IType validTest3= p.createCompilationUnit("MyITestSuperInterfaceImpl.java", buf.toString(), false, null).findPrimaryType();
+		String str3= """
+			package p;
+			import junit.framework.TestResult;
+			
+			public class MyITestSuperInterfaceImpl implements MyITestSuperInterface {
+			    public int countTestCases() {
+			        return 1;
+			    }
+			    public void run(TestResult result) {
+			    }
+			}
+			""";
+		IType validTest3= p.createCompilationUnit("MyITestSuperInterfaceImpl.java", str3, false, null).findPrimaryType();
 
 		assertTestFound(validTest3, new String[] { "p.MyITestSuperInterfaceImpl" });
 		assertTestFound(validTest3.getCompilationUnit(), new String[] { "p.MyITestSuperInterfaceImpl" });

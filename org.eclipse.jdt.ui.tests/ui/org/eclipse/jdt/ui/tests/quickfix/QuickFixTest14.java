@@ -52,20 +52,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public static void foo(Day day) {\n"
-					+ "        switch (day) {\n"
-					+ "        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n"
-					+ "        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "}\n"
-					+ "\n"
-					+ "enum Day {\n"
-					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			        case SATURDAY, SUNDAY -> System.out.println("Weekend");
+			        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println("Weekday");
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -76,21 +77,22 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public static void foo(Day day) {\n"
-						+ "        switch (day) {\n"
-						+ "        case SATURDAY, SUNDAY -> System.out.println(\"Weekend\");\n"
-						+ "        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println(\"Weekday\");\n"
-						+ "			default -> throw new IllegalArgumentException(\"Unexpected value: \" + day);\n"
-						+ "        }\n"
-						+ "    }\n"
-						+ "}\n"
-						+ "\n"
-						+ "enum Day {\n"
-						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			        case SATURDAY, SUNDAY -> System.out.println("Weekend");
+			        case MONDAY, TUESDAY, WEDNESDAY -> System.out.println("Weekday");
+						default -> throw new IllegalArgumentException("Unexpected value: " + day);
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -106,20 +108,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public static void foo(Day day) {\n"
-					+ "        switch (day) {\n"
-					+ "        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n"
-					+ "        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "}\n"
-					+ "\n"
-					+ "enum Day {\n"
-					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			        case SATURDAY, SUNDAY: System.out.println("Weekend");
+			        case MONDAY, TUESDAY, WEDNESDAY: System.out.println("Weekday");
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -130,22 +133,23 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public static void foo(Day day) {\n"
-						+ "        switch (day) {\n"
-						+ "        case SATURDAY, SUNDAY: System.out.println(\"Weekend\");\n"
-						+ "        case MONDAY, TUESDAY, WEDNESDAY: System.out.println(\"Weekday\");\n"
-						+ "			default :\n"
-						+ "				break;\n"
-						+ "        }\n"
-						+ "    }\n"
-						+ "}\n"
-						+ "\n"
-						+ "enum Day {\n"
-						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			        case SATURDAY, SUNDAY: System.out.println("Weekend");
+			        case MONDAY, TUESDAY, WEDNESDAY: System.out.println("Weekday");
+						default :
+							break;
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -161,18 +165,19 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public static void foo(Day day) {\n"
-					+ "        switch (day) {\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "}\n"
-					+ "\n"
-					+ "enum Day {\n"
-					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -183,20 +188,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public static void foo(Day day) {\n"
-						+ "        switch (day) {\n"
-						+ "			default :\n"
-						+ "				break;\n"
-						+ "        }\n"
-						+ "    }\n"
-						+ "}\n"
-						+ "\n"
-						+ "enum Day {\n"
-						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void foo(Day day) {
+			        switch (day) {
+						default :
+							break;
+			        }
+			    }
+			}
+			
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -212,20 +218,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public void bar1(Day day) {\n"
-					+ "        switch (day) {\n"
-					+ "            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);\n"
-					+ "            case TUESDAY                -> System.out.println(7);\n"
-					+ "            case THURSDAY, SATURDAY     -> System.out.println(8);\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "}\n"
-					+ "enum Day {\n"
-					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public void bar1(Day day) {
+			        switch (day) {
+			            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);
+			            case TUESDAY                -> System.out.println(7);
+			            case THURSDAY, SATURDAY     -> System.out.println(8);
+			        }
+			    }
+			}
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -236,23 +243,24 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public void bar1(Day day) {\n"
-						+ "        switch (day) {\n"
-						+ "            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);\n"
-						+ "            case TUESDAY                -> System.out.println(7);\n"
-						+ "            case THURSDAY, SATURDAY     -> System.out.println(8);\n"
-						+ "			case SUNDAY -> throw new UnsupportedOperationException(\"Unimplemented case: \" + day);\n"
-						+ "			case WEDNESDAY -> throw new UnsupportedOperationException(\"Unimplemented case: \" + day);\n"
-						+ "			default -> throw new IllegalArgumentException(\"Unexpected value: \" + day);\n"
-						+ "        }\n"
-						+ "    }\n"
-						+ "}\n"
-						+ "enum Day {\n"
-						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public void bar1(Day day) {
+			        switch (day) {
+			            case MONDAY, FRIDAY -> System.out.println(Day.SUNDAY);
+			            case TUESDAY                -> System.out.println(7);
+			            case THURSDAY, SATURDAY     -> System.out.println(8);
+						case SUNDAY -> throw new UnsupportedOperationException("Unimplemented case: " + day);
+						case WEDNESDAY -> throw new UnsupportedOperationException("Unimplemented case: " + day);
+						default -> throw new IllegalArgumentException("Unexpected value: " + day);
+			        }
+			    }
+			}
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -268,20 +276,21 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public static void bar3(int input) {\n"
-					+ "        int num = switch (input) {\n"
-					+ "        case 60, 600 -> 6;\n"
-					+ "        case 70 -> 7;\n"
-					+ "        case 80 -> 8;\n"
-					+ "        case 90, 900 -> {\n"
-					+ "            yield 9;\n"
-					+ "        }\n"
-					+ "        };\n"
-					+ "    }\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public static void bar3(int input) {
+			        int num = switch (input) {
+			        case 60, 600 -> 6;
+			        case 70 -> 7;
+			        case 80 -> 8;
+			        case 90, 900 -> {
+			            yield 9;
+			        }
+			        };
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -292,21 +301,22 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public static void bar3(int input) {\n"
-						+ "        int num = switch (input) {\n"
-						+ "        case 60, 600 -> 6;\n"
-						+ "        case 70 -> 7;\n"
-						+ "        case 80 -> 8;\n"
-						+ "        case 90, 900 -> {\n"
-						+ "            yield 9;\n"
-						+ "        }\n"
-						+ "			default -> throw new IllegalArgumentException(\"Unexpected value: \" + input);\n"
-						+ "        };\n"
-						+ "    }\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void bar3(int input) {
+			        int num = switch (input) {
+			        case 60, 600 -> 6;
+			        case 70 -> 7;
+			        case 80 -> 8;
+			        case 90, 900 -> {
+			            yield 9;
+			        }
+						default -> throw new IllegalArgumentException("Unexpected value: " + input);
+			        };
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -322,22 +332,23 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public static void bar4(int input) {\n"
-					+ "        int num = switch (input) {\n"
-					+ "        case 60, 600:\n"
-					+ "            yield 6;\n"
-					+ "        case 70:\n"
-					+ "            yield 7;\n"
-					+ "        case 80:\n"
-					+ "            yield 8;\n"
-					+ "        case 90, 900:\n"
-					+ "            yield 9;\n"
-					+ "        };\n"
-					+ "    }\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public static void bar4(int input) {
+			        int num = switch (input) {
+			        case 60, 600:
+			            yield 6;
+			        case 70:
+			            yield 7;
+			        case 80:
+			            yield 8;
+			        case 90, 900:
+			            yield 9;
+			        };
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -348,25 +359,26 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public static void bar4(int input) {\n"
-						+ "        int num = switch (input) {\n"
-						+ "        case 60, 600:\n"
-						+ "            yield 6;\n"
-						+ "        case 70:\n"
-						+ "            yield 7;\n"
-						+ "        case 80:\n"
-						+ "            yield 8;\n"
-						+ "        case 90, 900:\n"
-						+ "            yield 9;\n"
-						+ "			default :\n"
-						+ "				throw new IllegalArgumentException(\n"
-						+ "						\"Unexpected value: \" + input);\n"
-						+ "        };\n"
-						+ "    }\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void bar4(int input) {
+			        int num = switch (input) {
+			        case 60, 600:
+			            yield 6;
+			        case 70:
+			            yield 7;
+			        case 80:
+			            yield 8;
+			        case 90, 900:
+			            yield 9;
+						default :
+							throw new IllegalArgumentException(
+									"Unexpected value: " + input);
+			        };
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -382,14 +394,15 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public static void bar4(int input) {\n"
-					+ "        int num = switch (input) {\n"
-					+ "        };\n"
-					+ "    }\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public static void bar4(int input) {
+			        int num = switch (input) {
+			        };
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -400,17 +413,18 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public static void bar4(int input) {\n"
-						+ "        int num = switch (input) {\n"
-						+ "			default :\n"
-						+ "				throw new IllegalArgumentException(\n"
-						+ "						\"Unexpected value: \" + input);\n"
-						+ "        };\n"
-						+ "    }\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public static void bar4(int input) {
+			        int num = switch (input) {
+						default :
+							throw new IllegalArgumentException(
+									"Unexpected value: " + input);
+			        };
+			    }
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -426,23 +440,24 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "    public void bar1(Day day) {\n"
-					+ "        int len = switch (day) {\n"
-					+ "        case MONDAY, FRIDAY:\n"
-					+ "            yield 6;\n"
-					+ "        case TUESDAY:\n"
-					+ "            yield 7;\n"
-					+ "        case THURSDAY, SATURDAY:\n"
-					+ "            yield 8;\n"
-					+ "        };\n"
-					+ "    }\n"
-					+ "}\n"
-					+ "enum Day {\n"
-					+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-					+ "}\n";
+		String test= """
+			package test;
+			public class Cls {
+			    public void bar1(Day day) {
+			        int len = switch (day) {
+			        case MONDAY, FRIDAY:
+			            yield 6;
+			        case TUESDAY:
+			            yield 7;
+			        case THURSDAY, SATURDAY:
+			            yield 8;
+			        };
+			    }
+			}
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -453,32 +468,33 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "    public void bar1(Day day) {\n"
-						+ "        int len = switch (day) {\n"
-						+ "        case MONDAY, FRIDAY:\n"
-						+ "            yield 6;\n"
-						+ "        case TUESDAY:\n"
-						+ "            yield 7;\n"
-						+ "        case THURSDAY, SATURDAY:\n"
-						+ "            yield 8;\n"
-						+ "			case SUNDAY :\n"
-						+ "				throw new UnsupportedOperationException(\n"
-						+ "						\"Unimplemented case: \" + day);\n"
-						+ "			case WEDNESDAY :\n"
-						+ "				throw new UnsupportedOperationException(\n"
-						+ "						\"Unimplemented case: \" + day);\n"
-						+ "			default :\n"
-						+ "				throw new IllegalArgumentException(\n"
-						+ "						\"Unexpected value: \" + day);\n"
-						+ "        };\n"
-						+ "    }\n"
-						+ "}\n"
-						+ "enum Day {\n"
-						+ "    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n"
-						+ "}\n";
+		String expected= """
+			package test;
+			public class Cls {
+			    public void bar1(Day day) {
+			        int len = switch (day) {
+			        case MONDAY, FRIDAY:
+			            yield 6;
+			        case TUESDAY:
+			            yield 7;
+			        case THURSDAY, SATURDAY:
+			            yield 8;
+						case SUNDAY :
+							throw new UnsupportedOperationException(
+									"Unimplemented case: " + day);
+						case WEDNESDAY :
+							throw new UnsupportedOperationException(
+									"Unimplemented case: " + day);
+						default :
+							throw new IllegalArgumentException(
+									"Unexpected value: " + day);
+			        };
+			    }
+			}
+			enum Day {
+			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			}
+			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -494,23 +510,24 @@ public class QuickFixTest14 extends QuickFixTest {
 		def.createCompilationUnit(MODULE_INFO_FILE, MODULE_INFO_FILE_CONTENT, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= ""
-					+ "package test;\n"
-					+ "public class Cls {\n"
-					+ "	public static int process(int i) {\n"
-					+ "		var t = switch (i) {\n"
-					+ "			case 0 -> {\n"
-					+ "				return 99;\n"
-					+ "			}\n"
-					+ "			default ->100;\n"
-					+ "		};\n"
-					+ "		return t;\n"
-					+ "	}\n\n"
-					+ "	public static void main(String[] args) {\n"
-					+ "		System.out.println(process(1));\n"
-					+ "		System.out.println(process(0));\n"
-					+ "	}\n"
-					+ "}";
+		String test= """
+			package test;
+			public class Cls {
+				public static int process(int i) {
+					var t = switch (i) {
+						case 0 -> {
+							return 99;
+						}
+						default ->100;
+					};
+					return t;
+				}
+			
+				public static void main(String[] args) {
+					System.out.println(process(1));
+					System.out.println(process(0));
+				}
+			}""";
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
@@ -521,23 +538,24 @@ public class QuickFixTest14 extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
-		String expected= ""
-						+ "package test;\n"
-						+ "public class Cls {\n"
-						+ "	public static int process(int i) {\n"
-						+ "		var t = switch (i) {\n"
-						+ "			case 0 -> {\n"
-						+ "				yield 99;\n"
-						+ "			}\n"
-						+ "			default ->100;\n"
-						+ "		};\n"
-						+ "		return t;\n"
-						+ "	}\n\n"
-						+ "	public static void main(String[] args) {\n"
-						+ "		System.out.println(process(1));\n"
-						+ "		System.out.println(process(0));\n"
-						+ "	}\n"
-						+ "}";
+		String expected= """
+			package test;
+			public class Cls {
+				public static int process(int i) {
+					var t = switch (i) {
+						case 0 -> {
+							yield 99;
+						}
+						default ->100;
+					};
+					return t;
+				}
+			
+				public static void main(String[] args) {
+					System.out.println(process(1));
+					System.out.println(process(0));
+				}
+			}""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
@@ -549,33 +567,34 @@ public class QuickFixTest14 extends QuickFixTest {
 		JavaProjectHelper.set14CompilerOptions(fJProject1, false);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("module test {\n");
-		buf.append("}\n");
+		String str= """
+			module test {
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		String test= "" +
-					"package test;\n" +
-					"public class Cls {\n" +
-					"\n" +
-					"	public static int process(int i) {\n" +
-					"		var t = switch (i) {\n" +
-					"	        case 0:\n" +
-					"	             return 1; // Error - Quick Fix works only if the return statement is surrounded in curly braces\n" +
-					"	        default:\n" +
-					"                     yield 100;\n" +
-					"		};\n" +
-					"       System.out.println(t);\n" +
-					"		return t;\n" +
-					"	}\n" +
-					"	public static void main(String[] args) {\n" +
-					"		process(1);\n" +
-					"		process(0);\n" +
-					"		process(2);\n" +
-					"	}\n" +
-					"}";
+		String test= """
+			package test;
+			public class Cls {
+			
+				public static int process(int i) {
+					var t = switch (i) {
+				        case 0:
+				             return 1; // Error - Quick Fix works only if the return statement is surrounded in curly braces
+				        default:
+			                     yield 100;
+					};
+			       System.out.println(t);
+					return t;
+				}
+				public static void main(String[] args) {
+					process(1);
+					process(0);
+					process(2);
+				}
+			}""";
 
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", test, false, null);
 
@@ -586,26 +605,26 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
-		String expected= "" +
-				"package test;\n" +
-				"public class Cls {\n" +
-				"\n" +
-				"	public static int process(int i) {\n" +
-				"		var t = switch (i) {\n" +
-				"	        case 0:\n" +
-				"	             yield 1;\n" +
-				"	        default:\n" +
-				"                     yield 100;\n" +
-				"		};\n" +
-				"       System.out.println(t);\n" +
-				"		return t;\n" +
-				"	}\n" +
-				"	public static void main(String[] args) {\n" +
-				"		process(1);\n" +
-				"		process(0);\n" +
-				"		process(2);\n" +
-				"	}\n" +
-				"}";
+		String expected= """
+			package test;
+			public class Cls {
+			
+				public static int process(int i) {
+					var t = switch (i) {
+				        case 0:
+				             yield 1;
+				        default:
+			                     yield 100;
+					};
+			       System.out.println(t);
+					return t;
+				}
+				public static void main(String[] args) {
+					process(1);
+					process(0);
+					process(2);
+				}
+			}""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}

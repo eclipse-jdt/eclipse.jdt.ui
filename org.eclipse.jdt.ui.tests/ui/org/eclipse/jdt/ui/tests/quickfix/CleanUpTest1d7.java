@@ -53,36 +53,38 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testRemoveRedundantTypeArguments1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "import java.util.List;\n" //
-				+ "import java.util.Map;\n" //
-				+ "public class E {\n" //
-				+ "    void foo() {\n" //
-				+ "        new ArrayList<String>().add(\"a\")\n" //
-				+ "        List<String> a = new ArrayList<String>();\n" //
-				+ "        Map<Integer, String> m = new HashMap<Integer, String>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.HashMap;
+			import java.util.List;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        new ArrayList<String>().add("a")
+			        List<String> a = new ArrayList<String>();
+			        Map<Integer, String> m = new HashMap<Integer, String>();
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "import java.util.ArrayList;\n" //
-				+ "import java.util.HashMap;\n" //
-				+ "import java.util.List;\n" //
-				+ "import java.util.Map;\n" //
-				+ "public class E {\n" //
-				+ "    void foo() {\n" //
-				+ "        new ArrayList<String>().add(\"a\")\n" //
-				+ "        List<String> a = new ArrayList<>();\n" //
-				+ "        Map<Integer, String> m = new HashMap<>();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.HashMap;
+			import java.util.List;
+			import java.util.Map;
+			public class E {
+			    void foo() {
+			        new ArrayList<String>().add("a")
+			        List<String> a = new ArrayList<>();
+			        Map<Integer, String> m = new HashMap<>();
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -91,167 +93,169 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testHash() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String input= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Arrays;\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public class RefactoredClass {\n" //
-				+ "        private Map<Integer, String> innerTextById;\n" //
-				+ "        private Observable innerObservable;\n" //
-				+ "        private String innerText;\n" //
-				+ "        private String[] innerTexts;\n" //
-				+ "        private int[] innerIntegers;\n" //
-				+ "        private char innerChar;\n" //
-				+ "        private byte innerByte;\n" //
-				+ "        private boolean innerBoolean;\n" //
-				+ "        private int innerInt;\n" //
-				+ "        private long innerLong;\n" //
-				+ "        private double innerDouble;\n" //
-				+ "        private short innerShort;\n" //
-				+ "        private float innerFloat;\n" //
-				+ "        private double innerOtherDouble;\n" //
-				+ "        private Boolean innerBooleanWrapper;\n" //
-				+ "\n" //
-				+ "        @Override\n" //
-				+ "        public int hashCode() {\n" //
-				+ "            // Keep this comment\n" //
-				+ "            final int prime = 31;\n" //
-				+ "            int result = 1;\n" //
-				+ "            result = prime * result + getEnclosingInstance().hashCode();\n" //
-				+ "            result = prime * result + (RefactoredClass.this.innerBoolean ? 1231 : 1237);\n" //
-				+ "            result = prime * result + this.innerByte;\n" //
-				+ "            result = prime * result + innerChar;\n" //
-				+ "            long temp = Double.doubleToLongBits(innerDouble);\n" //
-				+ "            result = prime * result + (int) ((temp >>> 32) ^ temp);\n" //
-				+ "            result = prime * result + Float.floatToIntBits(innerFloat);\n" //
-				+ "            result = result * prime + innerInt;\n" //
-				+ "            result = prime * result + Arrays.hashCode(innerIntegers);\n" //
-				+ "            result = prime * result + (int) (innerLong ^ (this.innerLong >>> 32));\n" //
-				+ "            result = prime * result + ((innerObservable == null) ? 0 : innerObservable.hashCode());\n" //
-				+ "            temp = Double.doubleToLongBits(innerOtherDouble);\n" //
-				+ "            result = prime * result + (int) (temp ^ (temp >>> 32));\n" //
-				+ "            result = prime * result + innerShort;\n" //
-				+ "            result = prime * result + ((innerText == null) ? 0 : innerText.hashCode());\n" //
-				+ "            result = prime * result + ((innerTextById != null) ? this.innerTextById.hashCode() : 0);\n" //
-				+ "            result = prime * result + ((this.innerBooleanWrapper != null) ? innerBooleanWrapper.hashCode() : 0);\n" //
-				+ "            return prime * result + Arrays.hashCode(innerTexts);\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private E getEnclosingInstance() {\n" //
-				+ "            return E.this;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "    private String[] texts;\n" //
-				+ "    private int[] integers;\n" //
-				+ "    private char aChar;\n" //
-				+ "    private byte aByte;\n" //
-				+ "    private boolean aBoolean;\n" //
-				+ "    private int anInt;\n" //
-				+ "    private long aLong;\n" //
-				+ "    private double aDouble;\n" //
-				+ "    private short aShort;\n" //
-				+ "    private float aFloat;\n" //
-				+ "    private double anotherDouble;\n" //
-				+ "\n" //
-				+ "    @Override\n" //
-				+ "    public int hashCode() {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final int prime = 31;\n" //
-				+ "        int result = 1;\n" //
-				+ "        result = prime * result + (E.this.aBoolean ? 1231 : 1237);\n" //
-				+ "        result = prime * result + aByte;\n" //
-				+ "        result = prime * result + aChar;\n" //
-				+ "        result = prime * result + Float.floatToIntBits(aFloat);\n" //
-				+ "        result = prime * result + (int) (aLong ^ (aLong >>> 32));\n" //
-				+ "        long temp;\n" //
-				+ "        temp = Double.doubleToLongBits(aDouble);\n" //
-				+ "        result = prime * result + (int) (temp ^ (temp >>> 32));\n" //
-				+ "        result = prime * result + aShort;\n" //
-				+ "        result = prime * result + ((null == aText) ? 0 : aText.hashCode());\n" //
-				+ "        result = prime * result + anInt;\n" //
-				+ "        result = prime * result + ((anObservable == null) ? 0 : anObservable.hashCode());\n" //
-				+ "        result = prime * result + Arrays.hashCode(integers);\n" //
-				+ "        result = prime * result + ((textById == null) ? 0 : textById.hashCode());\n" //
-				+ "        result = prime * result + Arrays.hashCode(texts);\n" //
-				+ "        temp = Double.doubleToLongBits(anotherDouble);\n" //
-				+ "        result = prime * result + (int) (temp ^ (temp >>> 32));\n" //
-				+ "        return result;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String input= """
+			package test1;
+			
+			import java.util.Arrays;
+			import java.util.Map;
+			import java.util.Observable;
+			
+			public class E {
+			    public class RefactoredClass {
+			        private Map<Integer, String> innerTextById;
+			        private Observable innerObservable;
+			        private String innerText;
+			        private String[] innerTexts;
+			        private int[] innerIntegers;
+			        private char innerChar;
+			        private byte innerByte;
+			        private boolean innerBoolean;
+			        private int innerInt;
+			        private long innerLong;
+			        private double innerDouble;
+			        private short innerShort;
+			        private float innerFloat;
+			        private double innerOtherDouble;
+			        private Boolean innerBooleanWrapper;
+			
+			        @Override
+			        public int hashCode() {
+			            // Keep this comment
+			            final int prime = 31;
+			            int result = 1;
+			            result = prime * result + getEnclosingInstance().hashCode();
+			            result = prime * result + (RefactoredClass.this.innerBoolean ? 1231 : 1237);
+			            result = prime * result + this.innerByte;
+			            result = prime * result + innerChar;
+			            long temp = Double.doubleToLongBits(innerDouble);
+			            result = prime * result + (int) ((temp >>> 32) ^ temp);
+			            result = prime * result + Float.floatToIntBits(innerFloat);
+			            result = result * prime + innerInt;
+			            result = prime * result + Arrays.hashCode(innerIntegers);
+			            result = prime * result + (int) (innerLong ^ (this.innerLong >>> 32));
+			            result = prime * result + ((innerObservable == null) ? 0 : innerObservable.hashCode());
+			            temp = Double.doubleToLongBits(innerOtherDouble);
+			            result = prime * result + (int) (temp ^ (temp >>> 32));
+			            result = prime * result + innerShort;
+			            result = prime * result + ((innerText == null) ? 0 : innerText.hashCode());
+			            result = prime * result + ((innerTextById != null) ? this.innerTextById.hashCode() : 0);
+			            result = prime * result + ((this.innerBooleanWrapper != null) ? innerBooleanWrapper.hashCode() : 0);
+			            return prime * result + Arrays.hashCode(innerTexts);
+			        }
+			
+			        private E getEnclosingInstance() {
+			            return E.this;
+			        }
+			    }
+			
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			    private String[] texts;
+			    private int[] integers;
+			    private char aChar;
+			    private byte aByte;
+			    private boolean aBoolean;
+			    private int anInt;
+			    private long aLong;
+			    private double aDouble;
+			    private short aShort;
+			    private float aFloat;
+			    private double anotherDouble;
+			
+			    @Override
+			    public int hashCode() {
+			        // Keep this comment
+			        final int prime = 31;
+			        int result = 1;
+			        result = prime * result + (E.this.aBoolean ? 1231 : 1237);
+			        result = prime * result + aByte;
+			        result = prime * result + aChar;
+			        result = prime * result + Float.floatToIntBits(aFloat);
+			        result = prime * result + (int) (aLong ^ (aLong >>> 32));
+			        long temp;
+			        temp = Double.doubleToLongBits(aDouble);
+			        result = prime * result + (int) (temp ^ (temp >>> 32));
+			        result = prime * result + aShort;
+			        result = prime * result + ((null == aText) ? 0 : aText.hashCode());
+			        result = prime * result + anInt;
+			        result = prime * result + ((anObservable == null) ? 0 : anObservable.hashCode());
+			        result = prime * result + Arrays.hashCode(integers);
+			        result = prime * result + ((textById == null) ? 0 : textById.hashCode());
+			        result = prime * result + Arrays.hashCode(texts);
+			        temp = Double.doubleToLongBits(anotherDouble);
+			        result = prime * result + (int) (temp ^ (temp >>> 32));
+			        return result;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", input, false, null);
 
 		enable(CleanUpConstants.MODERNIZE_HASH);
 
-		String output= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Arrays;\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Objects;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public class RefactoredClass {\n" //
-				+ "        private Map<Integer, String> innerTextById;\n" //
-				+ "        private Observable innerObservable;\n" //
-				+ "        private String innerText;\n" //
-				+ "        private String[] innerTexts;\n" //
-				+ "        private int[] innerIntegers;\n" //
-				+ "        private char innerChar;\n" //
-				+ "        private byte innerByte;\n" //
-				+ "        private boolean innerBoolean;\n" //
-				+ "        private int innerInt;\n" //
-				+ "        private long innerLong;\n" //
-				+ "        private double innerDouble;\n" //
-				+ "        private short innerShort;\n" //
-				+ "        private float innerFloat;\n" //
-				+ "        private double innerOtherDouble;\n" //
-				+ "        private Boolean innerBooleanWrapper;\n" //
-				+ "\n" //
-				+ "        @Override\n" //
-				+ "        public int hashCode() {\n" //
-				+ "            // Keep this comment\n" //
-				+ "            return Objects.hash(getEnclosingInstance().hashCode(), innerBoolean, innerByte, innerChar, innerDouble,\n" //
-				+ "                    innerFloat, innerInt, Arrays.hashCode(innerIntegers), innerLong, innerObservable, innerOtherDouble,\n" //
-				+ "                    innerShort, innerText, innerTextById, innerBooleanWrapper, Arrays.hashCode(innerTexts));\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private E getEnclosingInstance() {\n" //
-				+ "            return E.this;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "    private String[] texts;\n" //
-				+ "    private int[] integers;\n" //
-				+ "    private char aChar;\n" //
-				+ "    private byte aByte;\n" //
-				+ "    private boolean aBoolean;\n" //
-				+ "    private int anInt;\n" //
-				+ "    private long aLong;\n" //
-				+ "    private double aDouble;\n" //
-				+ "    private short aShort;\n" //
-				+ "    private float aFloat;\n" //
-				+ "    private double anotherDouble;\n" //
-				+ "\n" //
-				+ "    @Override\n" //
-				+ "    public int hashCode() {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        return Objects.hash(aBoolean, aByte, aChar, aFloat, aLong,\n" //
-				+ "                aDouble, aShort, aText, anInt, anObservable, Arrays.hashCode(integers), textById,\n" //
-				+ "                Arrays.hashCode(texts), anotherDouble);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String output= """
+			package test1;
+			
+			import java.util.Arrays;
+			import java.util.Map;
+			import java.util.Objects;
+			import java.util.Observable;
+			
+			public class E {
+			    public class RefactoredClass {
+			        private Map<Integer, String> innerTextById;
+			        private Observable innerObservable;
+			        private String innerText;
+			        private String[] innerTexts;
+			        private int[] innerIntegers;
+			        private char innerChar;
+			        private byte innerByte;
+			        private boolean innerBoolean;
+			        private int innerInt;
+			        private long innerLong;
+			        private double innerDouble;
+			        private short innerShort;
+			        private float innerFloat;
+			        private double innerOtherDouble;
+			        private Boolean innerBooleanWrapper;
+			
+			        @Override
+			        public int hashCode() {
+			            // Keep this comment
+			            return Objects.hash(getEnclosingInstance().hashCode(), innerBoolean, innerByte, innerChar, innerDouble,
+			                    innerFloat, innerInt, Arrays.hashCode(innerIntegers), innerLong, innerObservable, innerOtherDouble,
+			                    innerShort, innerText, innerTextById, innerBooleanWrapper, Arrays.hashCode(innerTexts));
+			        }
+			
+			        private E getEnclosingInstance() {
+			            return E.this;
+			        }
+			    }
+			
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			    private String[] texts;
+			    private int[] integers;
+			    private char aChar;
+			    private byte aByte;
+			    private boolean aBoolean;
+			    private int anInt;
+			    private long aLong;
+			    private double aDouble;
+			    private short aShort;
+			    private float aFloat;
+			    private double anotherDouble;
+			
+			    @Override
+			    public int hashCode() {
+			        // Keep this comment
+			        return Objects.hash(aBoolean, aByte, aChar, aFloat, aLong,
+			                aDouble, aShort, aText, anInt, anObservable, Arrays.hashCode(integers), textById,
+			                Arrays.hashCode(texts), anotherDouble);
+			    }
+			}
+			""";
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output },
 				new HashSet<>(Arrays.asList(MultiFixMessages.HashCleanup_description)));
 	}
@@ -259,49 +263,50 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testKeepHash() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public class DoNotRefactorNewClass {\n" //
-				+ "        private boolean innerBoolean;\n" //
-				+ "\n" //
-				+ "        @Override\n" //
-				+ "        public int hashCode() {\n" //
-				+ "            final int prime = 31;\n" //
-				+ "            int result = 1;\n" //
-				+ "            result = prime * result + getEnclosingInstance().hashCode();\n" //
-				+ "            result = prime * result + (innerBoolean ? 1231 : 1237);\n" //
-				+ "            return result;\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private E getEnclosingInstance() {\n" //
-				+ "            return new E();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public class DoNotRefactorCustomHash {\n" //
-				+ "        private boolean innerBoolean;\n" //
-				+ "\n" //
-				+ "        @Override\n" //
-				+ "        public int hashCode() {\n" //
-				+ "            final int prime = 63;\n" //
-				+ "            int result = 1;\n" //
-				+ "            result = prime * result + (innerBoolean ? 1231 : 1237);\n" //
-				+ "            return result;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private boolean innerBoolean;\n" //
-				+ "\n" //
-				+ "    @Override\n" //
-				+ "    public int hashCode() {\n" //
-				+ "        final int prime = 31;\n" //
-				+ "        int result = 1;\n" //
-				+ "        result += prime * result + (innerBoolean ? 1231 : 1237);\n" //
-				+ "        return result;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public class DoNotRefactorNewClass {
+			        private boolean innerBoolean;
+			
+			        @Override
+			        public int hashCode() {
+			            final int prime = 31;
+			            int result = 1;
+			            result = prime * result + getEnclosingInstance().hashCode();
+			            result = prime * result + (innerBoolean ? 1231 : 1237);
+			            return result;
+			        }
+			
+			        private E getEnclosingInstance() {
+			            return new E();
+			        }
+			    }
+			
+			    public class DoNotRefactorCustomHash {
+			        private boolean innerBoolean;
+			
+			        @Override
+			        public int hashCode() {
+			            final int prime = 63;
+			            int result = 1;
+			            result = prime * result + (innerBoolean ? 1231 : 1237);
+			            return result;
+			        }
+			    }
+			
+			    private boolean innerBoolean;
+			
+			    @Override
+			    public int hashCode() {
+			        final int prime = 31;
+			        int result = 1;
+			        result += prime * result + (innerBoolean ? 1231 : 1237);
+			        return result;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MODERNIZE_HASH);
@@ -312,88 +317,90 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testObjectsEquals() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "\n" //
-				+ "    /* (non-Javadoc)\n" //
-				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
-				+ "     */\n" //
-				+ "    @Override\n" //
-				+ "    public boolean equals(Object obj) {\n" //
-				+ "        if (this == obj)\n" //
-				+ "            return true;\n" //
-				+ "        if (obj == null)\n" //
-				+ "            return false;\n" //
-				+ "        if (getClass() != obj.getClass())\n" //
-				+ "            return false;\n" //
-				+ "        E1 other = (E1) obj;\n" //
-				+ "        if (aText == null) {\n" //
-				+ "            if (other.aText != null)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!aText.equals(other.aText))\n" //
-				+ "            return false;\n" //
-				+ "        if (null == anObservable) {\n" //
-				+ "            if (null != other.anObservable)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!anObservable.equals(other.anObservable))\n" //
-				+ "            return false;\n" //
-				+ "        if (this.textById == null) {\n" //
-				+ "            if (other.textById != null)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!this.textById.equals(other.textById)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        return true;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Map;
+			import java.util.Observable;
+			
+			public class E1 {
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#equals(java.lang.Object)
+			     */
+			    @Override
+			    public boolean equals(Object obj) {
+			        if (this == obj)
+			            return true;
+			        if (obj == null)
+			            return false;
+			        if (getClass() != obj.getClass())
+			            return false;
+			        E1 other = (E1) obj;
+			        if (aText == null) {
+			            if (other.aText != null)
+			                return false;
+			        } else if (!aText.equals(other.aText))
+			            return false;
+			        if (null == anObservable) {
+			            if (null != other.anObservable)
+			                return false;
+			        } else if (!anObservable.equals(other.anObservable))
+			            return false;
+			        if (this.textById == null) {
+			            if (other.textById != null)
+			                return false;
+			        } else if (!this.textById.equals(other.textById)) {
+			            return false;
+			        }
+			        return true;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_OBJECTS_EQUALS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Objects;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "\n" //
-				+ "    /* (non-Javadoc)\n" //
-				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
-				+ "     */\n" //
-				+ "    @Override\n" //
-				+ "    public boolean equals(Object obj) {\n" //
-				+ "        if (this == obj)\n" //
-				+ "            return true;\n" //
-				+ "        if (obj == null)\n" //
-				+ "            return false;\n" //
-				+ "        if (getClass() != obj.getClass())\n" //
-				+ "            return false;\n" //
-				+ "        E1 other = (E1) obj;\n" //
-				+ "        if (!Objects.equals(aText, other.aText)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        if (!Objects.equals(anObservable, other.anObservable)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        if (!Objects.equals(this.textById, other.textById)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        return true;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.util.Map;
+			import java.util.Objects;
+			import java.util.Observable;
+			
+			public class E1 {
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#equals(java.lang.Object)
+			     */
+			    @Override
+			    public boolean equals(Object obj) {
+			        if (this == obj)
+			            return true;
+			        if (obj == null)
+			            return false;
+			        if (getClass() != obj.getClass())
+			            return false;
+			        E1 other = (E1) obj;
+			        if (!Objects.equals(aText, other.aText)) {
+			            return false;
+			        }
+			        if (!Objects.equals(anObservable, other.anObservable)) {
+			            return false;
+			        }
+			        if (!Objects.equals(this.textById, other.textById)) {
+			            return false;
+			        }
+			        return true;
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -402,47 +409,48 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testDoNotRefactorObjectsEquals() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "\n" //
-				+ "    /* (non-Javadoc)\n" //
-				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
-				+ "     */\n" //
-				+ "    @Override\n" //
-				+ "    public boolean equals(Object obj) {\n" //
-				+ "        if (this == obj)\n" //
-				+ "            return true;\n" //
-				+ "        if (obj == null)\n" //
-				+ "            return false;\n" //
-				+ "        if (getClass() != obj.getClass())\n" //
-				+ "            return false;\n" //
-				+ "        E1 other = (E1) obj;\n" //
-				+ "        if (aText == null) {\n" //
-				+ "            if (other.aText != null)\n" //
-				+ "                return true;\n" //
-				+ "        } else if (!aText.equals(other.aText))\n" //
-				+ "            return false;\n" //
-				+ "        if (null == anObservable) {\n" //
-				+ "            if (null != other.anObservable)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!anObservable.equals(other.anObservable))\n" //
-				+ "            return true;\n" //
-				+ "        if (this.textById == null) {\n" //
-				+ "            if (other.textById != null)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (this.textById.equals(other.textById))\n" //
-				+ "            return false;\n" //
-				+ "        return true;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Map;
+			import java.util.Observable;
+			
+			public class E1 {
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#equals(java.lang.Object)
+			     */
+			    @Override
+			    public boolean equals(Object obj) {
+			        if (this == obj)
+			            return true;
+			        if (obj == null)
+			            return false;
+			        if (getClass() != obj.getClass())
+			            return false;
+			        E1 other = (E1) obj;
+			        if (aText == null) {
+			            if (other.aText != null)
+			                return true;
+			        } else if (!aText.equals(other.aText))
+			            return false;
+			        if (null == anObservable) {
+			            if (null != other.anObservable)
+			                return false;
+			        } else if (!anObservable.equals(other.anObservable))
+			            return true;
+			        if (this.textById == null) {
+			            if (other.textById != null)
+			                return false;
+			        } else if (this.textById.equals(other.textById))
+			            return false;
+			        return true;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_OBJECTS_EQUALS);
@@ -453,110 +461,112 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testUseTryWithResource() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileInputStream;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            if (inputStream != null) {\n" //
-				+ "                inputStream.close();\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            if (inputStream != null) {\n" //
-				+ "                inputStream.close();\n" //
-				+ "            }\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			
+			public class E {
+			    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        // Keep this comment too
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			        }
+			    }
+			
+			    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        // Keep this comment too
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			            System.out.println("Done");
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        FileInputStream inputStream = null;
+			        // Keep this comment too
+			        try {
+			            inputStream = new FileInputStream("out.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            if (inputStream != null) {
+			                inputStream.close();
+			            }
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        FileInputStream inputStream = null;
+			        // Keep this comment too
+			        try {
+			            inputStream = new FileInputStream("out.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            if (inputStream != null) {
+			                inputStream.close();
+			            }
+			            System.out.println("Done");
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.TRY_WITH_RESOURCE);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileInputStream;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"out.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"out.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"out.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"out.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			
+			public class E {
+			    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        // Keep this comment too
+			        try (FileInputStream inputStream = new FileInputStream("out.txt")) {
+			            System.out.println(inputStream.read());
+			        }
+			    }
+			
+			    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        // Keep this comment too
+			        try (FileInputStream inputStream = new FileInputStream("out.txt")) {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            System.out.println("Done");
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        // Keep this comment too
+			        try (FileInputStream inputStream = new FileInputStream("out.txt")) {
+			            System.out.println(inputStream.read());
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        // Keep this comment too
+			        try (FileInputStream inputStream = new FileInputStream("out.txt")) {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            System.out.println("Done");
+			        }
+			    }
+			}
+			""";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -566,85 +576,86 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseTryWithResource() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileInputStream;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void doNotRefactorNonEffectivelyFinalResource() throws Exception {\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"out.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorFurtherAssignmentsToResource() throws Exception {\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public boolean doNotRefactorStillUsedCloseable() throws Exception {\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return inputStream != null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorUnrelated() throws Exception {\n" //
-				+ "        FileInputStream aStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        Object o = null;\n" //
-				+ "        try {\n" //
-				+ "            o = aStream.read();\n" //
-				+ "        } finally {\n" //
-				+ "            aStream.close();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorUnclosedStream(int i) throws Exception {\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            if (inputStream != null) {\n" //
-				+ "                i = inputStream.available();\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotMoveVariableFromOtherScope(boolean isValid) throws Exception {\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        if (isValid) {\n" //
-				+ "            try {\n" //
-				+ "                System.out.println(inputStream.read());\n" //
-				+ "            } finally {\n" //
-				+ "                inputStream.close();\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotMoveReusedVariable() throws Exception {\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        inputStream.getFD();\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			
+			public class E {
+			    public void doNotRefactorNonEffectivelyFinalResource() throws Exception {
+			        try (FileInputStream inputStream = new FileInputStream("out.txt")) {
+			            System.out.println(inputStream.read());
+			        }
+			    }
+			
+			    public void doNotRefactorFurtherAssignmentsToResource() throws Exception {
+			        FileInputStream inputStream = null;
+			        try {
+			            inputStream = new FileInputStream("out.txt");
+			            System.out.println(inputStream.read());
+			            inputStream = new FileInputStream("out.txt");
+			        } finally {
+			            inputStream.close();
+			        }
+			    }
+			
+			    public boolean doNotRefactorStillUsedCloseable() throws Exception {
+			        FileInputStream inputStream = null;
+			        try {
+			            inputStream = new FileInputStream("out.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			        }
+			
+			        return inputStream != null;
+			    }
+			
+			    public void doNotRefactorUnrelated() throws Exception {
+			        FileInputStream aStream = new FileInputStream("out.txt");
+			        Object o = null;
+			        try {
+			            o = aStream.read();
+			        } finally {
+			            aStream.close();
+			        }
+			    }
+			
+			    public void doNotRefactorUnclosedStream(int i) throws Exception {
+			        FileInputStream inputStream = null;
+			        try {
+			            inputStream = new FileInputStream("out.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            if (inputStream != null) {
+			                i = inputStream.available();
+			            }
+			        }
+			    }
+			
+			    public void doNotMoveVariableFromOtherScope(boolean isValid) throws Exception {
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        if (isValid) {
+			            try {
+			                System.out.println(inputStream.read());
+			            } finally {
+			                inputStream.close();
+			            }
+			        }
+			    }
+			
+			    public void doNotMoveReusedVariable() throws Exception {
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			        }
+			
+			        inputStream.getFD();
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.TRY_WITH_RESOURCE);
@@ -656,290 +667,292 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	public void testMultiCatch() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.IOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {\n" //
-				+ "        private void throwingMethod() throws E1, E2 {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex1 extends Exception {\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private String getExplanation() {\n" //
-				+ "            return \"\";\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex2 extends Exception {\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class OverridingException1 extends Exception {\n" //
-				+ "        @Override\n" //
-				+ "        public void printStackTrace() {\n" //
-				+ "            super.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class OverridingException2 extends Exception {\n" //
-				+ "        @Override\n" //
-				+ "        public void printStackTrace() {\n" //
-				+ "            super.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (IOException ioe) {\n" //
-				+ "            ioe.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorAddToMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException | IllegalStateException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (IOException ioe) {\n" //
-				+ "            ioe.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void removeMoreSpecializedException(ThrowingObject<IllegalArgumentException, RuntimeException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (RuntimeException re) {\n" //
-				+ "            re.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatchWithOverridenMethods(ThrowingObject<IllegalArgumentException, OverridingException1> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (OverridingException1 oe1) {\n" //
-				+ "            oe1.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatchWithOverridenMethodsFromSupertype(ThrowingObject<OverridingException1, OverridingException2> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (OverridingException1 oe1) {\n" //
-				+ "            oe1.printStackTrace();\n" //
-				+ "        } catch (OverridingException2 oe2) {\n" //
-				+ "            oe2.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorUp(ThrowingObject<IllegalArgumentException, IllegalAccessException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (RuntimeException re) {\n" //
-				+ "            re.toString();\n" //
-				+ "        } catch (IllegalAccessException ne) {\n" //
-				+ "            ne.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorDown(ThrowingObject<IllegalAccessException, RuntimeException> obj, int errorCount) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalAccessException iae) {\n" //
-				+ "            errorCount++;\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (RuntimeException ioe) {\n" //
-				+ "            errorCount++;\n" //
-				+ "            ioe.toString();\n" //
-				+ "        } catch (Exception e) {\n" //
-				+ "            errorCount = errorCount + 1;\n" //
-				+ "            e.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "        System.out.println(\"Error count: \" + errorCount);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatchWithLocalVariables(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException iae) {\n" //
-				+ "            String s = \"[\" + iae;\n" //
-				+ "            String s1 = \"]\";\n" //
-				+ "            System.out.println(s + s1);\n" //
-				+ "        } catch (IOException ioe) {\n" //
-				+ "            String s = \"[\" + ioe;\n" //
-				+ "            String s2 = \"]\";\n" //
-				+ "            System.out.println(s + s2);\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public class EA extends Exception {}\n" //
-				+ "    public class EB extends Exception {}\n" //
-				+ "    public class EB1 extends EB {}\n" //
-				+ "    public class EC extends Exception {}\n" //
-				+ "\n" //
-				+ "    public String refactorUp2() {\n" //
-				+ "        try {\n" //
-				+ "            return throwingMethod();\n" //
-				+ "        } catch (EA | EB1 e) {\n" //
-				+ "            throw new RuntimeException(\"v1\", e);\n" //
-				+ "        } catch (EB e) {\n" //
-				+ "            throw new RuntimeException(\"v2\", e);\n" //
-				+ "        } catch (EC e) {\n" //
-				+ "            throw new RuntimeException(\"v1\", e);\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private String throwingMethod() throws EA, EB1, EB, EC {\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			import java.io.IOException;
+			
+			public class E {
+			    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {
+			        private void throwingMethod() throws E1, E2 {
+			        }
+			    }
+			
+			    private static final class Ex1 extends Exception {
+			        private void print() {
+			        }
+			
+			        private String getExplanation() {
+			            return "";
+			        }
+			    }
+			
+			    private static final class Ex2 extends Exception {
+			        private void print() {
+			        }
+			    }
+			
+			    private static final class OverridingException1 extends Exception {
+			        @Override
+			        public void printStackTrace() {
+			            super.printStackTrace();
+			        }
+			    }
+			
+			    private static final class OverridingException2 extends Exception {
+			        @Override
+			        public void printStackTrace() {
+			            super.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException iae) {
+			            iae.printStackTrace();
+			        } catch (IOException ioe) {
+			            ioe.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorAddToMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException | IllegalStateException iae) {
+			            iae.printStackTrace();
+			        } catch (IOException ioe) {
+			            ioe.printStackTrace();
+			        }
+			    }
+			
+			    public void removeMoreSpecializedException(ThrowingObject<IllegalArgumentException, RuntimeException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException iae) {
+			            iae.printStackTrace();
+			        } catch (RuntimeException re) {
+			            re.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorMultiCatchWithOverridenMethods(ThrowingObject<IllegalArgumentException, OverridingException1> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException iae) {
+			            iae.printStackTrace();
+			        } catch (OverridingException1 oe1) {
+			            oe1.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorMultiCatchWithOverridenMethodsFromSupertype(ThrowingObject<OverridingException1, OverridingException2> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (OverridingException1 oe1) {
+			            oe1.printStackTrace();
+			        } catch (OverridingException2 oe2) {
+			            oe2.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorUp(ThrowingObject<IllegalArgumentException, IllegalAccessException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException iae) {
+			            iae.printStackTrace();
+			        } catch (RuntimeException re) {
+			            re.toString();
+			        } catch (IllegalAccessException ne) {
+			            ne.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorDown(ThrowingObject<IllegalAccessException, RuntimeException> obj, int errorCount) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalAccessException iae) {
+			            errorCount++;
+			            iae.printStackTrace();
+			        } catch (RuntimeException ioe) {
+			            errorCount++;
+			            ioe.toString();
+			        } catch (Exception e) {
+			            errorCount = errorCount + 1;
+			            e.printStackTrace();
+			        }
+			        System.out.println("Error count: " + errorCount);
+			    }
+			
+			    public void refactorMultiCatchWithLocalVariables(ThrowingObject<IllegalArgumentException, IOException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException iae) {
+			            String s = "[" + iae;
+			            String s1 = "]";
+			            System.out.println(s + s1);
+			        } catch (IOException ioe) {
+			            String s = "[" + ioe;
+			            String s2 = "]";
+			            System.out.println(s + s2);
+			        }
+			    }
+			
+			    public class EA extends Exception {}
+			    public class EB extends Exception {}
+			    public class EB1 extends EB {}
+			    public class EC extends Exception {}
+			
+			    public String refactorUp2() {
+			        try {
+			            return throwingMethod();
+			        } catch (EA | EB1 e) {
+			            throw new RuntimeException("v1", e);
+			        } catch (EB e) {
+			            throw new RuntimeException("v2", e);
+			        } catch (EC e) {
+			            throw new RuntimeException("v1", e);
+			        }
+			    }
+			
+			    private String throwingMethod() throws EA, EB1, EB, EC {
+			        return null;
+			    }
+			}
+			""";
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.IOException;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {\n" //
-				+ "        private void throwingMethod() throws E1, E2 {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex1 extends Exception {\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private String getExplanation() {\n" //
-				+ "            return \"\";\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex2 extends Exception {\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class OverridingException1 extends Exception {\n" //
-				+ "        @Override\n" //
-				+ "        public void printStackTrace() {\n" //
-				+ "            super.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class OverridingException2 extends Exception {\n" //
-				+ "        @Override\n" //
-				+ "        public void printStackTrace() {\n" //
-				+ "            super.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException | IOException ioe) {\n" //
-				+ "            ioe.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorAddToMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException | IllegalStateException | IOException ioe) {\n" //
-				+ "            ioe.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void removeMoreSpecializedException(ThrowingObject<IllegalArgumentException, RuntimeException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (RuntimeException re) {\n" //
-				+ "            re.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatchWithOverridenMethods(ThrowingObject<IllegalArgumentException, OverridingException1> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException | OverridingException1 oe1) {\n" //
-				+ "            oe1.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatchWithOverridenMethodsFromSupertype(ThrowingObject<OverridingException1, OverridingException2> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (OverridingException1 | OverridingException2 oe2) {\n" //
-				+ "            oe2.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorUp(ThrowingObject<IllegalArgumentException, IllegalAccessException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException | IllegalAccessException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (RuntimeException re) {\n" //
-				+ "            re.toString();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorDown(ThrowingObject<IllegalAccessException, RuntimeException> obj, int errorCount) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (RuntimeException ioe) {\n" //
-				+ "            errorCount++;\n" //
-				+ "            ioe.toString();\n" //
-				+ "        } catch (Exception e) {\n" //
-				+ "            errorCount = errorCount + 1;\n" //
-				+ "            e.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "        System.out.println(\"Error count: \" + errorCount);\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorMultiCatchWithLocalVariables(ThrowingObject<IllegalArgumentException, IOException> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException | IOException ioe) {\n" //
-				+ "            String s = \"[\" + ioe;\n" //
-				+ "            String s2 = \"]\";\n" //
-				+ "            System.out.println(s + s2);\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public class EA extends Exception {}\n" //
-				+ "    public class EB extends Exception {}\n" //
-				+ "    public class EB1 extends EB {}\n" //
-				+ "    public class EC extends Exception {}\n" //
-				+ "\n" //
-				+ "    public String refactorUp2() {\n" //
-				+ "        try {\n" //
-				+ "            return throwingMethod();\n" //
-				+ "        } catch (EA | EB1 | EC e) {\n" //
-				+ "            throw new RuntimeException(\"v1\", e);\n" //
-				+ "        } catch (EB e) {\n" //
-				+ "            throw new RuntimeException(\"v2\", e);\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private String throwingMethod() throws EA, EB1, EB, EC {\n" //
-				+ "        return null;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.io.IOException;
+			
+			public class E {
+			    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {
+			        private void throwingMethod() throws E1, E2 {
+			        }
+			    }
+			
+			    private static final class Ex1 extends Exception {
+			        private void print() {
+			        }
+			
+			        private String getExplanation() {
+			            return "";
+			        }
+			    }
+			
+			    private static final class Ex2 extends Exception {
+			        private void print() {
+			        }
+			    }
+			
+			    private static final class OverridingException1 extends Exception {
+			        @Override
+			        public void printStackTrace() {
+			            super.printStackTrace();
+			        }
+			    }
+			
+			    private static final class OverridingException2 extends Exception {
+			        @Override
+			        public void printStackTrace() {
+			            super.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException | IOException ioe) {
+			            ioe.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorAddToMultiCatch(ThrowingObject<IllegalArgumentException, IOException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException | IllegalStateException | IOException ioe) {
+			            ioe.printStackTrace();
+			        }
+			    }
+			
+			    public void removeMoreSpecializedException(ThrowingObject<IllegalArgumentException, RuntimeException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (RuntimeException re) {
+			            re.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorMultiCatchWithOverridenMethods(ThrowingObject<IllegalArgumentException, OverridingException1> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException | OverridingException1 oe1) {
+			            oe1.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorMultiCatchWithOverridenMethodsFromSupertype(ThrowingObject<OverridingException1, OverridingException2> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (OverridingException1 | OverridingException2 oe2) {
+			            oe2.printStackTrace();
+			        }
+			    }
+			
+			    public void refactorUp(ThrowingObject<IllegalArgumentException, IllegalAccessException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException | IllegalAccessException iae) {
+			            iae.printStackTrace();
+			        } catch (RuntimeException re) {
+			            re.toString();
+			        }
+			    }
+			
+			    public void refactorDown(ThrowingObject<IllegalAccessException, RuntimeException> obj, int errorCount) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (RuntimeException ioe) {
+			            errorCount++;
+			            ioe.toString();
+			        } catch (Exception e) {
+			            errorCount = errorCount + 1;
+			            e.printStackTrace();
+			        }
+			        System.out.println("Error count: " + errorCount);
+			    }
+			
+			    public void refactorMultiCatchWithLocalVariables(ThrowingObject<IllegalArgumentException, IOException> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException | IOException ioe) {
+			            String s = "[" + ioe;
+			            String s2 = "]";
+			            System.out.println(s + s2);
+			        }
+			    }
+			
+			    public class EA extends Exception {}
+			    public class EB extends Exception {}
+			    public class EB1 extends EB {}
+			    public class EC extends Exception {}
+			
+			    public String refactorUp2() {
+			        try {
+			            return throwingMethod();
+			        } catch (EA | EB1 | EC e) {
+			            throw new RuntimeException("v1", e);
+			        } catch (EB e) {
+			            throw new RuntimeException("v2", e);
+			        }
+			    }
+			
+			    private String throwingMethod() throws EA, EB1, EB, EC {
+			        return null;
+			    }
+			}
+			""";
 
 		// When
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
@@ -954,96 +967,97 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseMultiCatch() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private static final class MyException extends RuntimeException {\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "\n" //
-				+ "        private MyException(Ex1 ex1) {\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private MyException(Ex2 ex2) {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {\n" //
-				+ "        private void throwingMethod() throws E1, E2 {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex1 extends Exception {\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private String getExplanation() {\n" //
-				+ "            return \"\";\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex2 extends Exception {\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    private static final class Ex3 extends Exception {\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "\n" //
-				+ "        private void print() {\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        private String getExplanation() {\n" //
-				+ "            return \"\";\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorMultiCatchWithNoOverridenMethods(ThrowingObject<Ex3, Ex1> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (Ex3 ne) {\n" //
-				+ "            ne.getExplanation();\n" //
-				+ "        } catch (Ex1 ex1) {\n" //
-				+ "            ex1.getExplanation();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorNoCommonSuperType(ThrowingObject<Ex1, Ex2> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (Ex1 e1) {\n" //
-				+ "            e1.print();\n" //
-				+ "        } catch (Ex2 e2) {\n" //
-				+ "            e2.print();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorChangeInBehaviourClassHierarchy(ThrowingObject<IllegalArgumentException, Exception> obj) {\n" //
-				+ "        try {\n" //
-				+ "            obj.throwingMethod();\n" //
-				+ "        } catch (IllegalArgumentException iae) {\n" //
-				+ "            iae.printStackTrace();\n" //
-				+ "        } catch (Exception ioe) {\n" //
-				+ "            ioe.toString();\n" //
-				+ "        } catch (Throwable t) {\n" //
-				+ "            t.printStackTrace();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void doNotRefactorMultiCatchWhenMethodDoesNotCallCommonSupertype(ThrowingObject<Ex1, Ex2> object) {\n" //
-				+ "        try {\n" //
-				+ "            object.throwingMethod();\n" //
-				+ "        } catch (Ex1 ex1) {\n" //
-				+ "            throw new MyException(ex1);\n" //
-				+ "        } catch (Ex2 ex2) {\n" //
-				+ "            throw new MyException(ex2);\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    private static final class MyException extends RuntimeException {
+			        private static final long serialVersionUID = 1L;
+			
+			        private MyException(Ex1 ex1) {
+			        }
+			
+			        private MyException(Ex2 ex2) {
+			        }
+			    }
+			
+			    private static final class ThrowingObject<E1 extends Throwable, E2 extends Throwable> {
+			        private void throwingMethod() throws E1, E2 {
+			        }
+			    }
+			
+			    private static final class Ex1 extends Exception {
+			        private static final long serialVersionUID = 1L;
+			
+			        private void print() {
+			        }
+			
+			        private String getExplanation() {
+			            return "";
+			        }
+			    }
+			
+			    private static final class Ex2 extends Exception {
+			        private static final long serialVersionUID = 1L;
+			
+			        private void print() {
+			        }
+			    }
+			
+			    private static final class Ex3 extends Exception {
+			        private static final long serialVersionUID = 1L;
+			
+			        private void print() {
+			        }
+			
+			        private String getExplanation() {
+			            return "";
+			        }
+			    }
+			
+			    public void doNotRefactorMultiCatchWithNoOverridenMethods(ThrowingObject<Ex3, Ex1> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (Ex3 ne) {
+			            ne.getExplanation();
+			        } catch (Ex1 ex1) {
+			            ex1.getExplanation();
+			        }
+			    }
+			
+			    public void doNotRefactorNoCommonSuperType(ThrowingObject<Ex1, Ex2> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (Ex1 e1) {
+			            e1.print();
+			        } catch (Ex2 e2) {
+			            e2.print();
+			        }
+			    }
+			
+			    public void doNotRefactorChangeInBehaviourClassHierarchy(ThrowingObject<IllegalArgumentException, Exception> obj) {
+			        try {
+			            obj.throwingMethod();
+			        } catch (IllegalArgumentException iae) {
+			            iae.printStackTrace();
+			        } catch (Exception ioe) {
+			            ioe.toString();
+			        } catch (Throwable t) {
+			            t.printStackTrace();
+			        }
+			    }
+			
+			    public void doNotRefactorMultiCatchWhenMethodDoesNotCallCommonSupertype(ThrowingObject<Ex1, Ex2> object) {
+			        try {
+			            object.throwingMethod();
+			        } catch (Ex1 ex1) {
+			            throw new MyException(ex1);
+			        } catch (Ex2 ex2) {
+			            throw new MyException(ex2);
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.MULTI_CATCH);
@@ -1054,86 +1068,88 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testObjectsEqualsWithImportConflict() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class Objects {\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "\n" //
-				+ "    /* (non-Javadoc)\n" //
-				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
-				+ "     */\n" //
-				+ "    @Override\n" //
-				+ "    public boolean equals(Object obj) {\n" //
-				+ "        if (this == obj)\n" //
-				+ "            return true;\n" //
-				+ "        if (obj == null)\n" //
-				+ "            return false;\n" //
-				+ "        if (getClass() != obj.getClass())\n" //
-				+ "            return false;\n" //
-				+ "        Objects other = (Objects) obj;\n" //
-				+ "        if (aText == null) {\n" //
-				+ "            if (other.aText != null)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!aText.equals(other.aText))\n" //
-				+ "            return false;\n" //
-				+ "        if (null == anObservable) {\n" //
-				+ "            if (null != other.anObservable)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!anObservable.equals(other.anObservable))\n" //
-				+ "            return false;\n" //
-				+ "        if (this.textById == null) {\n" //
-				+ "            if (other.textById != null)\n" //
-				+ "                return false;\n" //
-				+ "        } else if (!this.textById.equals(other.textById))\n" //
-				+ "            return false;\n" //
-				+ "        return true;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.util.Map;
+			import java.util.Observable;
+			
+			public class Objects {
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#equals(java.lang.Object)
+			     */
+			    @Override
+			    public boolean equals(Object obj) {
+			        if (this == obj)
+			            return true;
+			        if (obj == null)
+			            return false;
+			        if (getClass() != obj.getClass())
+			            return false;
+			        Objects other = (Objects) obj;
+			        if (aText == null) {
+			            if (other.aText != null)
+			                return false;
+			        } else if (!aText.equals(other.aText))
+			            return false;
+			        if (null == anObservable) {
+			            if (null != other.anObservable)
+			                return false;
+			        } else if (!anObservable.equals(other.anObservable))
+			            return false;
+			        if (this.textById == null) {
+			            if (other.textById != null)
+			                return false;
+			        } else if (!this.textById.equals(other.textById))
+			            return false;
+			        return true;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("Objects.java", sample, false, null);
 
 		enable(CleanUpConstants.USE_OBJECTS_EQUALS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.util.Map;\n" //
-				+ "import java.util.Observable;\n" //
-				+ "\n" //
-				+ "public class Objects {\n" //
-				+ "    private Map<Integer, String> textById;\n" //
-				+ "    private Observable anObservable;\n" //
-				+ "    private String aText;\n" //
-				+ "\n" //
-				+ "    /* (non-Javadoc)\n" //
-				+ "     * @see java.lang.Object#equals(java.lang.Object)\n" //
-				+ "     */\n" //
-				+ "    @Override\n" //
-				+ "    public boolean equals(Object obj) {\n" //
-				+ "        if (this == obj)\n" //
-				+ "            return true;\n" //
-				+ "        if (obj == null)\n" //
-				+ "            return false;\n" //
-				+ "        if (getClass() != obj.getClass())\n" //
-				+ "            return false;\n" //
-				+ "        Objects other = (Objects) obj;\n" //
-				+ "        if (!java.util.Objects.equals(aText, other.aText)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        if (!java.util.Objects.equals(anObservable, other.anObservable)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        if (!java.util.Objects.equals(this.textById, other.textById)) {\n" //
-				+ "            return false;\n" //
-				+ "        }\n" //
-				+ "        return true;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.util.Map;
+			import java.util.Observable;
+			
+			public class Objects {
+			    private Map<Integer, String> textById;
+			    private Observable anObservable;
+			    private String aText;
+			
+			    /* (non-Javadoc)
+			     * @see java.lang.Object#equals(java.lang.Object)
+			     */
+			    @Override
+			    public boolean equals(Object obj) {
+			        if (this == obj)
+			            return true;
+			        if (obj == null)
+			            return false;
+			        if (getClass() != obj.getClass())
+			            return false;
+			        Objects other = (Objects) obj;
+			        if (!java.util.Objects.equals(aText, other.aText)) {
+			            return false;
+			        }
+			        if (!java.util.Objects.equals(anObservable, other.anObservable)) {
+			            return false;
+			        }
+			        if (!java.util.Objects.equals(this.textById, other.textById)) {
+			            return false;
+			        }
+			        return true;
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -1144,37 +1160,39 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=563267
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=565282
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "import java.io.InputStream;\n" //
-				+ "import java.util.Iterator;\n" //
-				+ "import java.util.List;\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo(List<InputStream> toClose) throws IOException {\n" //
-				+ "        for (Iterator<InputStream> it = toClose.iterator(); it.hasNext();) {\n" //
-				+ "            try (InputStream r = it.next()) {\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.util.Iterator;
+			import java.util.List;
+			public class E1 {
+			    public void foo(List<InputStream> toClose) throws IOException {
+			        for (Iterator<InputStream> it = toClose.iterator(); it.hasNext();) {
+			            try (InputStream r = it.next()) {
+			            }
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "import java.io.IOException;\n" //
-				+ "import java.io.InputStream;\n" //
-				+ "import java.util.List;\n" //
-				+ "public class E1 {\n" //
-				+ "    public void foo(List<InputStream> toClose) throws IOException {\n" //
-				+ "        for (InputStream inputStream : toClose) {\n" //
-				+ "            try (InputStream r = inputStream) {\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.util.List;
+			public class E1 {
+			    public void foo(List<InputStream> toClose) throws IOException {
+			        for (InputStream inputStream : toClose) {
+			            try (InputStream r = inputStream) {
+			            }
+			        }
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 },
@@ -1184,34 +1202,36 @@ public class CleanUpTest1d7 extends CleanUpTestCase {
 	@Test
 	public void testInstanceVarToLocal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= ""
-				+ "package test1;\n"
-				+ "\n"
-				+ "public class Bar {\n"
-				+ "    private transient int zoz=38, fubu;\n"
-				+ "    \n"
-				+ "    public void baz() {\n"
-				+ "        zoz = 37;\n"
-				+ "        System.out.println(zoz);\n"
-				+ "    }\n"
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class Bar {
+			    private transient int zoz=38, fubu;
+			   \s
+			    public void baz() {
+			        zoz = 37;
+			        System.out.println(zoz);
+			    }
+			}
+			""";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("Bar.java", sample, false, null);
 
 		enable(CleanUpConstants.SINGLE_USED_FIELD);
 
 
-		String expected=  ""
-				+ "package test1;\n"
-				+ "\n"
-				+ "public class Bar {\n"
-				+ "    private transient int fubu;\n"
-				+ "    \n"
-				+ "    public void baz() {\n"
-				+ "        int zoz = 37;\n"
-				+ "        System.out.println(zoz);\n"
-				+ "    }\n"
-				+ "}\n";
+		String expected=  """
+			package test1;
+			
+			public class Bar {
+			    private transient int fubu;
+			   \s
+			    public void baz() {
+			        int zoz = 37;
+			        System.out.println(zoz);
+			    }
+			}
+			""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}

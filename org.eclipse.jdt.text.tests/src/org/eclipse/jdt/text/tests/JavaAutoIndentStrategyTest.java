@@ -110,45 +110,48 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
-		fDocumentCommand.text= "String[]a=new String[] {\n" +
-				"\"X.java\",\n" +
-				"\"public class X extends B{\\n\"\n" +
-				"\"    public static int field1;\\n\"\n" +
-				"\"    public static X xfield;\\n\"\n" +
-				"\"    public void bar1(int i) {\\n\"\n" +
-				"\"        field1 = 1;\\n\"\n" +
-				"\"    }\\n\"\n" +
-				"\"    public void bar2(int i) {\\n\"\n" +
-				"\"        this.field1 = 1;\\n\"\n" +
-				"\"    }\\n\"\n" +
-				"\"}\\n\"\n" +
-				"\"class A{\\n\"\n" +
-				"\"    public static X xA;\\n\"\n" +
-				"\"}\\n\"\n" +
-				"\"class B{\\n\"\n" +
-				"\"    public static int b1;\\n\"\n" +
-				"\"}\"\n" +
-				"};";
+		fDocumentCommand.text= """
+			String[]a=new String[] {
+			"X.java",
+			"public class X extends B{\\n"
+			"    public static int field1;\\n"
+			"    public static X xfield;\\n"
+			"    public void bar1(int i) {\\n"
+			"        field1 = 1;\\n"
+			"    }\\n"
+			"    public void bar2(int i) {\\n"
+			"        this.field1 = 1;\\n"
+			"    }\\n"
+			"}\\n"
+			"class A{\\n"
+			"    public static X xA;\\n"
+			"}\\n"
+			"class B{\\n"
+			"    public static int b1;\\n"
+			"}"
+			};""";
 		performPaste();
-		String result= "\tString[]a=new String[] {\n" +
-				"\t\t\t\"X.java\",\n" +
-				"\t\t\t\"public class X extends B{\\n\"\n" +
-				"\t\t\t\"    public static int field1;\\n\"\n" +
-				"\t\t\t\"    public static X xfield;\\n\"\n" +
-				"\t\t\t\"    public void bar1(int i) {\\n\"\n" +
-				"\t\t\t\"        field1 = 1;\\n\"\n" +
-				"\t\t\t\"    }\\n\"\n" +
-				"\t\t\t\"    public void bar2(int i) {\\n\"\n" +
-				"\t\t\t\"        this.field1 = 1;\\n\"\n" +
-				"\t\t\t\"    }\\n\"\n" +
-				"\t\t\t\"}\\n\"\n" +
-				"\t\t\t\"class A{\\n\"\n" +
-				"\t\t\t\"    public static X xA;\\n\"\n" +
-				"\t\t\t\"}\\n\"\n" +
-				"\t\t\t\"class B{\\n\"\n" +
-				"\t\t\t\"    public static int b1;\\n\"\n" +
-				"\t\t\t\"}\"\n" +
-				"\t\t\t};";
+		String result= """
+				String[]a=new String[] {
+						"X.java",
+						"public class X extends B{\\n"
+						"    public static int field1;\\n"
+						"    public static X xfield;\\n"
+						"    public void bar1(int i) {\\n"
+						"        field1 = 1;\\n"
+						"    }\\n"
+						"    public void bar2(int i) {\\n"
+						"        this.field1 = 1;\\n"
+						"    }\\n"
+						"}\\n"
+						"class A{\\n"
+						"    public static X xA;\\n"
+						"}\\n"
+						"class B{\\n"
+						"    public static int b1;\\n"
+						"}"
+						};\
+			""";
 		assertEquals(result, fDocumentCommand.text);
 	}
 
@@ -159,13 +162,17 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
-		fDocumentCommand.text= "String array2= \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\";\n";
+		fDocumentCommand.text= """
+			String array2= "this is the 1st string"
+				+ "this is the 1st string"
+				+ "this is the 1st string";
+			""";
 		performPaste();
-		String result= "\tString array2= \"this is the 1st string\"\n" +
-				"\t\t\t+ \"this is the 1st string\"\n" +
-				"\t\t\t+ \"this is the 1st string\";\n";
+		String result= """
+				String array2= "this is the 1st string"
+						+ "this is the 1st string"
+						+ "this is the 1st string";
+			""";
 		assertEquals(result, fDocumentCommand.text);
 	}
 
@@ -176,13 +183,17 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
-		fDocumentCommand.text= "\tString array2= \"this is the 1st string\"\n" +
-				"+ \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\";\n";
+		fDocumentCommand.text= """
+				String array2= "this is the 1st string"
+			+ "this is the 1st string"
+				+ "this is the 1st string";
+			""";
 		performPaste();
-		String result= "\tString array2= \"this is the 1st string\"\n" +
-				"+ \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\";\n";
+		String result= """
+				String array2= "this is the 1st string"
+			+ "this is the 1st string"
+				+ "this is the 1st string";
+			""";
 		assertEquals(result, fDocumentCommand.text);
 	}
 
@@ -193,13 +204,17 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
-		fDocumentCommand.text= "\tString array2= \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\";\n";
+		fDocumentCommand.text= """
+				String array2= "this is the 1st string"
+				+ "this is the 1st string"
+				+ "this is the 1st string";
+			""";
 		performPaste();
-		String result= "\tString array2= \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\"\n" +
-				"\t+ \"this is the 1st string\";\n";
+		String result= """
+				String array2= "this is the 1st string"
+				+ "this is the 1st string"
+				+ "this is the 1st string";
+			""";
 		assertEquals(result, fDocumentCommand.text);
 	}
 
@@ -210,13 +225,17 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 21;
-		fDocumentCommand.text= "\tString array2= \"this is the 1st string\"\n" +
-				"\t\t\t\t\t+ \"this is the 1st string\"\n" +
-				"\t\t\t\t\t\t\t+ \"this is the 1st string\";\n";
+		fDocumentCommand.text= """
+				String array2= "this is the 1st string"
+								+ "this is the 1st string"
+										+ "this is the 1st string";
+			""";
 		performPaste();
-		String result= "\tString array2= \"this is the 1st string\"\n" +
-				"\t\t\t+ \"this is the 1st string\"\n" +
-				"\t\t\t\t\t+ \"this is the 1st string\";\n";
+		String result= """
+				String array2= "this is the 1st string"
+						+ "this is the 1st string"
+								+ "this is the 1st string";
+			""";
 		assertEquals(result, fDocumentCommand.text);
 	}
 
@@ -235,22 +254,22 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 21;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("main (new String [] {\r\n");
-		buf.append("\t\t\r\n");
-		buf.append("});");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			main (new String [] {\r
+					\r
+			});""";
+		assertEquals(str, fDocument.get());
 
 		fDocument.set("main (new String [] {\"a\");");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 24;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf1= new StringBuilder();
-		buf1.append("main (new String [] {\"a\"\r\n");
-		buf1.append("\t\t\r\n");
-		buf1.append("});");
-		assertEquals(buf1.toString(), fDocument.get());
+		String str1= """
+			main (new String [] {"a"\r
+					\r
+			});""";
+		assertEquals(str1, fDocument.get());
 	}
 
 	@Test
@@ -262,22 +281,22 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 25;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("main (new String [] {\"a\",\r\n");
-		buf.append("\t\t\r\n");
-		buf.append("});");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			main (new String [] {"a",\r
+					\r
+			});""";
+		assertEquals(str, fDocument.get());
 
 		fDocument.set("main (new String [] {\"a\", );");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 26;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf1= new StringBuilder();
-		buf1.append("main (new String [] {\"a\", \r\n");
-		buf1.append("\t\t\r\n");
-		buf1.append("});");
-		assertEquals(buf1.toString(), fDocument.get());
+		String str1= """
+			main (new String [] {"a", \r
+					\r
+			});""";
+		assertEquals(str1, fDocument.get());
 	}
 
 	@Test
@@ -289,11 +308,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 29;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("main (new String [] {\"a\",\"b\",\r\n");
-		buf.append("\t\t\r\n");
-		buf.append("});");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			main (new String [] {"a","b",\r
+					\r
+			});""";
+		assertEquals(str, fDocument.get());
 	}
 
 	@Test
@@ -305,11 +324,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 15;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("@NamedQueries({\r\n");
-		buf.append("\t\r\n");
-		buf.append("});");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			@NamedQueries({\r
+				\r
+			});""";
+		assertEquals(str, fDocument.get());
 
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=394467
 		fDocument.set("@MesageDriven( activationConfig ={)");
@@ -317,11 +336,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 34;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf1= new StringBuilder();
-		buf1.append("@MesageDriven( activationConfig ={\r\n");
-		buf1.append("\t\t\r\n");
-		buf1.append("})");
-		assertEquals(buf1.toString(), fDocument.get());
+		String str1= """
+			@MesageDriven( activationConfig ={\r
+					\r
+			})""";
+		assertEquals(str1, fDocument.get());
 	}
 
 	@Test
@@ -333,44 +352,44 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 12;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("if (false) {\r\n");
-		buf.append("\treturn false;\r\n");
-		buf.append("}");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			if (false) {\r
+				return false;\r
+			}""";
+		assertEquals(str, fDocument.get());
 
 		fDocument.set("if (false) { return false;");
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 13;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf1= new StringBuilder();
-		buf1.append("if (false) { \r\n");
-		buf1.append("\treturn false;\r\n");
-		buf1.append("}");
-		assertEquals(buf1.toString(), fDocument.get());
+		String str1= """
+			if (false) { \r
+				return false;\r
+			}""";
+		assertEquals(str1, fDocument.get());
 	}
 
 	@Test
 	public void testSmartIndentAfterNewLine6() {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=200015
 		fDocument.setInitialLineDelimiter("\r\n");
-		StringBuilder inBuf= new StringBuilder();
-		inBuf.append("enum ReviewResult {\n");
-		inBuf.append("    Good{, Bad\n");
-		inBuf.append("}");
-		fDocument.set(inBuf.toString());
+		String str= """
+			enum ReviewResult {
+			    Good{, Bad
+			}""";
+		fDocument.set(str);
 		fDocumentCommand.doit= true;
 		fDocumentCommand.offset= 29;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("enum ReviewResult {\n");
-		buf.append("    Good{\r\n");
-		buf.append("    \t\n");
-		buf.append("    }, Bad\n");
-		buf.append("}");
-		assertEquals(buf.toString(), fDocument.get());
+		String str1= """
+			enum ReviewResult {
+			    Good{\r
+			    \t
+			    }, Bad
+			}""";
+		assertEquals(str1, fDocument.get());
 	}
 
 	@Test
@@ -381,11 +400,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 21;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("int[] a= new int[] { \r\n");
-		buf.append("\t\t\r\n");
-		buf.append("};");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			int[] a= new int[] { \r
+					\r
+			};""";
+		assertEquals(str, fDocument.get());
 	}
 
 	@Test
@@ -396,11 +415,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 21;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("String[] strs = {\"a\",\r\n");
-		buf.append("\t\t\"b\",\r\n");
-		buf.append("}");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			String[] strs = {"a",\r
+					"b",\r
+			}""";
+		assertEquals(str, fDocument.get());
 	}
 
 	@Test
@@ -411,11 +430,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 1;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("{\r\n");
-		buf.append("\tint a;\r\n");
-		buf.append("}");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			{\r
+				int a;\r
+			}""";
+		assertEquals(str, fDocument.get());
 	}
 
 	@Test
@@ -427,11 +446,11 @@ public class JavaAutoIndentStrategyTest implements ILogListener {
 		fDocumentCommand.offset= 1;
 		fDocumentCommand.text= "\r\n";
 		performSmartIndentAfterNewLine();
-		StringBuilder buf= new StringBuilder();
-		buf.append("{\r\n");
-		buf.append("\tfoo();\r\n");
-		buf.append("}");
-		assertEquals(buf.toString(), fDocument.get());
+		String str= """
+			{\r
+				foo();\r
+			}""";
+		assertEquals(str, fDocument.get());
 	}
 
 	@Before

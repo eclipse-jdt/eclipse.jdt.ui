@@ -218,13 +218,13 @@ public class JavaElementLabelsTest1d8 extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.IntConsumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    IntConsumer c = (i) -> { };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.IntConsumer;
+			public class C {
+			    IntConsumer c = (i) -> { };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("i"), 1);
@@ -248,13 +248,13 @@ public class JavaElementLabelsTest1d8 extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    Consumer<String> c = (s) -> { };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.Consumer;
+			public class C {
+			    Consumer<String> c = (s) -> { };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("s"), 1);

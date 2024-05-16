@@ -72,19 +72,21 @@ public class JavaModelOpCompundUndoTest {
 	private static final String SEP= "/";
 
 	private static final String CU_NAME= "Bug75423.java";
-	private static final String CU_CONTENTS= "package com.example.bugs;\n" +
-				"\n" +
-			"public class Bug75423 {\n" +
-				"\n" +
-			"    void foo() {\n" +
-				"        \n" +
-				"    }\n" +
-			"    \n" +
-			"    void bar() {\n" +
-				"        \n" +
-				"    }\n" +
-				"    \n" +
-				"}\n";
+	private static final String CU_CONTENTS= """
+		package com.example.bugs;
+		
+		public class Bug75423 {
+		
+		    void foo() {
+		       \s
+		    }
+		   \s
+		    void bar() {
+		       \s
+		    }
+		   \s
+		}
+		""";
 
 	private JavaEditor fEditor;
 	private IDocument fDocument;

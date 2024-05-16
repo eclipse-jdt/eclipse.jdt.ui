@@ -49,50 +49,52 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionMethod() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i;\n" //
-				+ "        // logic comment\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "            case 2:\n" //
-				+ "                System.out.println(\"here\"); // comment 1\n" //
-				+ "                // comment 2\n" //
-				+ "                i = 7; // comment 3\n" //
-				+ "            break;\n" //
-				+ "            case 3: throw new RuntimeException(); // throw comment\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public int foo(int j) {
+			        // return value
+			        int i;
+			        // logic comment
+			        switch (j) {
+			            case 1:
+			            case 2:
+			                System.out.println("here"); // comment 1
+			                // comment 2
+			                i = 7; // comment 3
+			            break;
+			            case 3: throw new RuntimeException(); // throw comment
+			            default:
+			                i = 8; // value 8
+			        }
+			        return i;
+			    }
+			}
+			""";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i = switch (j) {\n" //
-				+ "            case 1, 2 -> {\n"
-				+ "                System.out.println(\"here\"); // comment 1\n" //
-				+ "                // comment 2\n" //
-				+ "                yield 7; // comment 3\n" //
-				+ "            }\n" //
-				+ "            case 3 -> throw new RuntimeException(); // throw comment\n" //
-				+ "            default -> 8; // value 8\n" //
-				+ "        };\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			public class E {
+			    public int foo(int j) {
+			        // return value
+			        int i = switch (j) {
+			            case 1, 2 -> {
+			                System.out.println("here"); // comment 1
+			                // comment 2
+			                yield 7; // comment 3
+			            }
+			            case 3 -> throw new RuntimeException(); // throw comment
+			            default -> 8; // value 8
+			        };
+			        return i;
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -101,47 +103,49 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private int i;\n" //
-				+ "    public void foo(int j) {\n" //
-				+ "        // logic comment\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "            case 2:\n" //
-				+ "                System.out.println(\"here\");\n" //
-				+ "                // comment 1\n" //
-				+ "                i = 7; // comment 2\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    private int i;
+			    public void foo(int j) {
+			        // logic comment
+			        switch (j) {
+			            case 1:
+			            case 2:
+			                System.out.println("here");
+			                // comment 1
+			                i = 7; // comment 2
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    private int i;\n" //
-				+ "    public void foo(int j) {\n" //
-				+ "        // logic comment\n" //
-				+ "        i = switch (j) {\n" //
-				+ "            case 1, 2 -> {\n"
-				+ "                System.out.println(\"here\");\n" //
-				+ "                // comment 1\n" //
-				+ "                yield 7; // comment 2\n" //
-				+ "            }\n" //
-				+ "            default -> 8; // value 8\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			public class E {
+			    private int i;
+			    public void foo(int j) {
+			        // logic comment
+			        i = switch (j) {
+			            case 1, 2 -> {
+			                System.out.println("here");
+			                // comment 1
+			                yield 7; // comment 2
+			            }
+			            default -> 8; // value 8
+			        };
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -150,51 +154,53 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionStaticInitializer() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "import java.util.Random;\n" //
-				+ "public class E {\n" //
-				+ "    private static int i;\n" //
-				+ "    static {\n" //
-				+ "        Random rand= new Random();\n" //
-				+ "        int j = rand.nextInt(10);\n" //
-				+ "        // logic comment\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "            case 2:\n" //
-				+ "                System.out.println(\"here\");\n" //
-				+ "                // comment 2\n" //
-				+ "                i = 7; // comment 3\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			import java.util.Random;
+			public class E {
+			    private static int i;
+			    static {
+			        Random rand= new Random();
+			        int j = rand.nextInt(10);
+			        // logic comment
+			        switch (j) {
+			            case 1:
+			            case 2:
+			                System.out.println("here");
+			                // comment 2
+			                i = 7; // comment 3
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "import java.util.Random;\n" //
-				+ "public class E {\n" //
-				+ "    private static int i;\n" //
-				+ "    static {\n" //
-				+ "        Random rand= new Random();\n" //
-				+ "        int j = rand.nextInt(10);\n" //
-				+ "        // logic comment\n" //
-				+ "        i = switch (j) {\n" //
-				+ "            case 1, 2 -> {\n"
-				+ "                System.out.println(\"here\");\n" //
-				+ "                // comment 2\n" //
-				+ "                yield 7; // comment 3\n" //
-				+ "            }\n" //
-				+ "            default -> 8; // value 8\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			import java.util.Random;
+			public class E {
+			    private static int i;
+			    static {
+			        Random rand= new Random();
+			        int j = rand.nextInt(10);
+			        // logic comment
+			        i = switch (j) {
+			            case 1, 2 -> {
+			                System.out.println("here");
+			                // comment 2
+			                yield 7; // comment 3
+			            }
+			            default -> 8; // value 8
+			        };
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -203,58 +209,60 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionEnumsNoDefault() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum Day {\n" //
-				+ "        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n" //
-				+ "    }\n" //
-				+ "    public int foo(Day day) {\n" //
-				+ "        // return value\n" //
-				+ "        int i = 0;\n" //
-				+ "        // logic comment\n" //
-				+ "        switch (day) {\n" //
-				+ "            case SATURDAY:\n" //
-				+ "            case SUNDAY:\n" //
-				+ "                i = 5;\n" //
-				+ "            break;\n" //
-				+ "            case MONDAY:\n" //
-				+ "            case TUESDAY:\n" //
-				+ "            case WEDNESDAY:\n" //
-				+ "                i = 7;\n" //
-				+ "            break;\n" //
-				+ "            case THURSDAY:\n" //
-				+ "            case FRIDAY:\n" //
-				+ "                i = 14;\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E {
+			    public enum Day {
+			        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			    }
+			    public int foo(Day day) {
+			        // return value
+			        int i = 0;
+			        // logic comment
+			        switch (day) {
+			            case SATURDAY:
+			            case SUNDAY:
+			                i = 5;
+			            break;
+			            case MONDAY:
+			            case TUESDAY:
+			            case WEDNESDAY:
+			                i = 7;
+			            break;
+			            case THURSDAY:
+			            case FRIDAY:
+			                i = 14;
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum Day {\n" //
-				+ "        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;\n" //
-				+ "    }\n" //
-				+ "    public int foo(Day day) {\n" //
-				+ "        // return value\n" //
-				+ "        int i = 0;\n" //
-				+ "        // logic comment\n" //
-				+ "        i = switch (day) {\n" //
-				+ "            case SATURDAY, SUNDAY -> 5;\n" //
-				+ "            case MONDAY, TUESDAY, WEDNESDAY -> 7;\n" //
-				+ "            case THURSDAY, FRIDAY -> 14;\n" //
-				+ "        };\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			public class E {
+			    public enum Day {
+			        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+			    }
+			    public int foo(Day day) {
+			        // return value
+			        int i = 0;
+			        // logic comment
+			        i = switch (day) {
+			            case SATURDAY, SUNDAY -> 5;
+			            case MONDAY, TUESDAY, WEDNESDAY -> 7;
+			            case THURSDAY, FRIDAY -> 14;
+			        };
+			        return i;
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -263,48 +271,50 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionBug574824() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(String[] args) {\n" //
-				+ "        // comment 1\n" //
-				+ "        final File file;\n" //
-				+ "        switch (args[1]) {\n" //
-				+ "            case \"foo\":\n" //
-				+ "                file = new File(\"foo.txt\");\n" //
-				+ "                break;\n" //
-				+ "            case \"bar\":\n" //
-				+ "                file = new File(\"bar.txt\");\n" //
-				+ "                break;\n" //
-				+ "            default:\n" //
-				+ "                file = new File(\"foobar.txt\");\n" //
-				+ "        }\n" //
-				+ "        System.err.println(file);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) {
+			        // comment 1
+			        final File file;
+			        switch (args[1]) {
+			            case "foo":
+			                file = new File("foo.txt");
+			                break;
+			            case "bar":
+			                file = new File("bar.txt");
+			                break;
+			            default:
+			                file = new File("foobar.txt");
+			        }
+			        System.err.println(file);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void foo(String[] args) {\n" //
-				+ "        // comment 1\n" //
-				+ "        final File file = switch (args[1]) {\n" //
-				+ "            case \"foo\" -> new File(\"foo.txt\");\n" //
-				+ "            case \"bar\" -> new File(\"bar.txt\");\n" //
-				+ "            default -> new File(\"foobar.txt\");\n" //
-				+ "        };\n" //
-				+ "        System.err.println(file);\n" //
-				+ "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) {
+			        // comment 1
+			        final File file = switch (args[1]) {
+			            case "foo" -> new File("foo.txt");
+			            case "bar" -> new File("bar.txt");
+			            default -> new File("foobar.txt");
+			        };
+			        System.err.println(file);
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -313,66 +323,68 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionBug578130() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-			    + "    public void foo(String[] args) throws Exception {\n" //
-			    + "        boolean isWhiteSpace;\n" //
-			    + "        switch (args[0].charAt(0)) {\n" //
-			    + "            case 10: /* \\ u000a: LINE FEED */\n" //
-			    + "            case 12: /* \\ u000c: FORM FEED */\n" //
-			    + "            case 13: /* \\ u000d: CARRIAGE RETURN */\n" //
-			    + "            case 32: /* \\ u0020: SPACE */\n" //
-			    + "            case 9: /* \\ u0009: HORIZONTAL TABULATION */\n" //
-			    + "                isWhiteSpace = true; /* comment x */\n" //
-			    + "                break;\n" //
-			    + "            case 0:\n" //
-			    + "            	   throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
-			    + "            case 95:\n" //
-			    + "            {\n" //
-			    + "                System.out.println(\"here\"); //$NON-NLS-1$\n" //
-			    + "            	   isWhiteSpace = false;\n" //
-			    + "            }\n" //
-			    + "            break;\n" //
-			    + "            default:\n" //
-			    + "                isWhiteSpace = false;\n" //
-			    + "        }\n" //
-			    + "        System.out.println(isWhiteSpace);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) throws Exception {
+			        boolean isWhiteSpace;
+			        switch (args[0].charAt(0)) {
+			            case 10: /* \\ u000a: LINE FEED */
+			            case 12: /* \\ u000c: FORM FEED */
+			            case 13: /* \\ u000d: CARRIAGE RETURN */
+			            case 32: /* \\ u0020: SPACE */
+			            case 9: /* \\ u0009: HORIZONTAL TABULATION */
+			                isWhiteSpace = true; /* comment x */
+			                break;
+			            case 0:
+			            	   throw new Exception("invalid char"); //$NON-NLS-1$
+			            case 95:
+			            {
+			                System.out.println("here"); //$NON-NLS-1$
+			            	   isWhiteSpace = false;
+			            }
+			            break;
+			            default:
+			                isWhiteSpace = false;
+			        }
+			        System.out.println(isWhiteSpace);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-			    + "    public void foo(String[] args) throws Exception {\n" //
-			    + "        boolean isWhiteSpace = switch (args[0].charAt(0)) {\n" //
-			    + "            case 10: /* \\ u000a: LINE FEED */\n" //
-			    + "            case 12: /* \\ u000c: FORM FEED */\n" //
-			    + "            case 13: /* \\ u000d: CARRIAGE RETURN */\n" //
-			    + "            case 32: /* \\ u0020: SPACE */\n" //
-			    + "            case 9: /* \\ u0009: HORIZONTAL TABULATION */\n" //
-			    + "                yield true; /* comment x */\n" //
-			    + "            case 0:\n" //
-			    + "                throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
-			    + "            case 95: {\n" //
-			    + "                System.out.println(\"here\"); //$NON-NLS-1$\n" //
-			    + "                yield false;\n" //
-			    + "            }\n" //
-			    + "            default:\n" //
-			    + "                yield false;\n" //
-			    + "        };\n" //
-			    + "        System.out.println(isWhiteSpace);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) throws Exception {
+			        boolean isWhiteSpace = switch (args[0].charAt(0)) {
+			            case 10: /* \\ u000a: LINE FEED */
+			            case 12: /* \\ u000c: FORM FEED */
+			            case 13: /* \\ u000d: CARRIAGE RETURN */
+			            case 32: /* \\ u0020: SPACE */
+			            case 9: /* \\ u0009: HORIZONTAL TABULATION */
+			                yield true; /* comment x */
+			            case 0:
+			                throw new Exception("invalid char"); //$NON-NLS-1$
+			            case 95: {
+			                System.out.println("here"); //$NON-NLS-1$
+			                yield false;
+			            }
+			            default:
+			                yield false;
+			        };
+			        System.out.println(isWhiteSpace);
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -381,51 +393,53 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionBug578129_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-			    + "    public void foo(String[] args) throws Exception {\n" //
-			    + "        boolean isWhiteSpace;\n" //
-			    + "        switch (args[0].charAt(0)) {\n" //
-			    + "            case 10:\n" //
-			    + "            case 12:\n" //
-			    + "            case 13:\n" //
-			    + "            case 32:\n" //
-			    + "            case 9:\n" //
-			    + "                isWhiteSpace = true; /* comment x */\n" //
-			    + "                break;\n" //
-			    + "            case 0:\n" //
-			    + "            	   throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
-			    + "            case 95:\n" //
-			    + "            default:\n" //
-			    + "                isWhiteSpace = false;\n" //
-			    + "        }\n" //
-			    + "        System.out.println(isWhiteSpace);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) throws Exception {
+			        boolean isWhiteSpace;
+			        switch (args[0].charAt(0)) {
+			            case 10:
+			            case 12:
+			            case 13:
+			            case 32:
+			            case 9:
+			                isWhiteSpace = true; /* comment x */
+			                break;
+			            case 0:
+			            	   throw new Exception("invalid char"); //$NON-NLS-1$
+			            case 95:
+			            default:
+			                isWhiteSpace = false;
+			        }
+			        System.out.println(isWhiteSpace);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-			    + "    public void foo(String[] args) throws Exception {\n" //
-			    + "        boolean isWhiteSpace = switch (args[0].charAt(0)) {\n" //
-			    + "            case 10, 12, 13, 32, 9 -> true; /* comment x */\n" //
-			    + "            case 0 -> throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
-			    + "            case 95 -> false;\n" //
-			    + "            default -> false;\n" //
-			    + "        };\n" //
-			    + "        System.out.println(isWhiteSpace);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) throws Exception {
+			        boolean isWhiteSpace = switch (args[0].charAt(0)) {
+			            case 10, 12, 13, 32, 9 -> true; /* comment x */
+			            case 0 -> throw new Exception("invalid char"); //$NON-NLS-1$
+			            case 95 -> false;
+			            default -> false;
+			        };
+			        System.out.println(isWhiteSpace);
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -434,60 +448,62 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionBug578129_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-			    + "    public void foo(String[] args) throws Exception {\n" //
-			    + "        boolean isWhiteSpace;\n" //
-			    + "        switch (args[0].charAt(0)) {\n" //
-			    + "            case 10:\n" //
-			    + "            case 12:\n" //
-			    + "            case 13:\n" //
-			    + "            case 32:\n" //
-			    + "            case 9:\n" //
-			    + "                // comment 1\n"
-			    + "                isWhiteSpace = true; /* comment x */\n" //
-			    + "                break;\n" //
-			    + "            case 0:\n" //
-			    + "            	   throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
-			    + "            case 95:\n" //
-			    + "            default: {\n" //
-			    + "                System.out.println(\"non-whitespace\");\n" //
-			    + "                isWhiteSpace = false;\n" //
-			    + "            }\n" //
-			    + "        }\n" //
-			    + "        System.out.println(isWhiteSpace);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) throws Exception {
+			        boolean isWhiteSpace;
+			        switch (args[0].charAt(0)) {
+			            case 10:
+			            case 12:
+			            case 13:
+			            case 32:
+			            case 9:
+			                // comment 1
+			                isWhiteSpace = true; /* comment x */
+			                break;
+			            case 0:
+			            	   throw new Exception("invalid char"); //$NON-NLS-1$
+			            case 95:
+			            default: {
+			                System.out.println("non-whitespace");
+			                isWhiteSpace = false;
+			            }
+			        }
+			        System.out.println(isWhiteSpace);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-			    + "    public void foo(String[] args) throws Exception {\n" //
-			    + "        boolean isWhiteSpace = switch (args[0].charAt(0)) {\n" //
-			    + "            case 10, 12, 13, 32, 9 -> /* comment 1 */ true; /* comment x */\n" //
-			    + "            case 0 -> throw new Exception(\"invalid char\"); //$NON-NLS-1$\n" //
-			    + "            case 95 -> {\n" //
-			    + "                System.out.println(\"non-whitespace\");\n" //
-			    + "                yield false;\n" //
-			    + "            }\n" //
-			    + "            default -> {\n" //
-			    + "                System.out.println(\"non-whitespace\");\n" //
-			    + "                yield false;\n" //
-			    + "            }\n" //
-			    + "        };\n" //
-			    + "        System.out.println(isWhiteSpace);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public void foo(String[] args) throws Exception {
+			        boolean isWhiteSpace = switch (args[0].charAt(0)) {
+			            case 10, 12, 13, 32, 9 -> /* comment 1 */ true; /* comment x */
+			            case 0 -> throw new Exception("invalid char"); //$NON-NLS-1$
+			            case 95 -> {
+			                System.out.println("non-whitespace");
+			                yield false;
+			            }
+			            default -> {
+			                System.out.println("non-whitespace");
+			                yield false;
+			            }
+			        };
+			        System.out.println(isWhiteSpace);
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -496,60 +512,62 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToReturnSwitchExpressionIssue104_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum InnerEnum {\n"
-				+ "        A, B, C, D;\n"
-				+ "    }\n"
-				+ "    public int foo(InnerEnum k) {\n"
-				+ "        switch (k) {\n"
-				+ "            case A:\n"
-				+ "            case B:\n"
-				+ "                /* comment 1 */\n"
-				+ "                return 6; /* abc */\n"
-				+ "            case C: {\n"
-				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
-				+ "                /* comment 2 */\n"
-				+ "                return 8; /* def */\n"
-				+ "            }\n"
-				+ "            case D:\n"
-				+ "                // comment 3\n"
-				+ "                return 9;\n"
-				+ "            default:\n"
-				+ "                throw new NullPointerException();\n"
-				+ "        }\n"
-				+ "    }\n"
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public enum InnerEnum {
+			        A, B, C, D;
+			    }
+			    public int foo(InnerEnum k) {
+			        switch (k) {
+			            case A:
+			            case B:
+			                /* comment 1 */
+			                return 6; /* abc */
+			            case C: {
+			                System.out.println("x"); //$NON-NLS-1$
+			                /* comment 2 */
+			                return 8; /* def */
+			            }
+			            case D:
+			                // comment 3
+			                return 9;
+			            default:
+			                throw new NullPointerException();
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum InnerEnum {\n"
-				+ "        A, B, C, D;\n"
-				+ "    }\n"
-				+ "    public int foo(InnerEnum k) {\n"
-				+ "        return switch (k) {\n"
-				+ "            case A, B -> /* comment 1 */ 6; /* abc */\n"
-				+ "            case C -> {\n"
-				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
-				+ "                /* comment 2 */\n"
-				+ "                yield 8; /* def */\n"
-				+ "            }\n"
-				+ "            case D -> /* comment 3 */ 9;\n"
-				+ "            default -> throw new NullPointerException();\n"
-				+ "        };\n"
-				+ "    }\n"
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public enum InnerEnum {
+			        A, B, C, D;
+			    }
+			    public int foo(InnerEnum k) {
+			        return switch (k) {
+			            case A, B -> /* comment 1 */ 6; /* abc */
+			            case C -> {
+			                System.out.println("x"); //$NON-NLS-1$
+			                /* comment 2 */
+			                yield 8; /* def */
+			            }
+			            case D -> /* comment 3 */ 9;
+			            default -> throw new NullPointerException();
+			        };
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -558,55 +576,57 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToReturnSwitchExpressionIssue104_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum InnerEnum {\n"
-				+ "        A, B, C, D;\n"
-				+ "    }\n"
-				+ "    public int foo(InnerEnum k) {\n"
-				+ "        switch (k) {\n"
-				+ "            case A:\n"
-				+ "            case B:\n"
-				+ "                /* comment 1 */\n"
-				+ "                return 6; /* abc */\n"
-				+ "            case C:\n"
-				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
-				+ "                /* comment 2 */\n"
-				+ "                return 8; /* def */\n"
-				+ "            case D:\n"
-				+ "                return 9;\n"
-				+ "        }\n"
-				+ "    }\n"
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public enum InnerEnum {
+			        A, B, C, D;
+			    }
+			    public int foo(InnerEnum k) {
+			        switch (k) {
+			            case A:
+			            case B:
+			                /* comment 1 */
+			                return 6; /* abc */
+			            case C:
+			                System.out.println("x"); //$NON-NLS-1$
+			                /* comment 2 */
+			                return 8; /* def */
+			            case D:
+			                return 9;
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum InnerEnum {\n"
-				+ "        A, B, C, D;\n"
-				+ "    }\n"
-				+ "    public int foo(InnerEnum k) {\n"
-				+ "        return switch (k) {\n"
-				+ "            case A, B -> /* comment 1 */ 6; /* abc */\n"
-				+ "            case C -> {\n"
-				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
-				+ "                /* comment 2 */\n"
-				+ "                yield 8; /* def */\n"
-				+ "            }\n"
-				+ "            case D -> 9;\n"
-				+ "        };\n"
-				+ "    }\n"
-				+ "}\n";
+		sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public enum InnerEnum {
+			        A, B, C, D;
+			    }
+			    public int foo(InnerEnum k) {
+			        return switch (k) {
+			            case A, B -> /* comment 1 */ 6; /* abc */
+			            case C -> {
+			                System.out.println("x"); //$NON-NLS-1$
+			                /* comment 2 */
+			                yield 8; /* def */
+			            }
+			            case D -> 9;
+			        };
+			    }
+			}
+			""";
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -615,43 +635,45 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionIssue380() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public void bar() {\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int foo(int i) {\n" //
-				+ "        switch (i) {\n" //
-				+ "        case 0:\n" //
-				+ "            return 0;\n" //
-				+ "        default:\n" //
-				+ "            bar(); //\n" //
-				+ "            throw new AssertionError();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n"; //
+		String sample= """
+			package test1;
+			public class E {
+			    public void bar() {
+			    }
+			
+			    public int foo(int i) {
+			        switch (i) {
+			        case 0:
+			            return 0;
+			        default:
+			            bar(); //
+			            throw new AssertionError();
+			        }
+			    }
+			}
+			"""; //
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public void bar() {\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int foo(int i) {\n" //
-				+ "        return switch (i) {\n" //
-				+ "            case 0 -> 0;\n" //
-				+ "            default -> {\n" //
-				+ "                bar(); //\n" //
-				+ "                throw new AssertionError();\n" //
-				+ "            }\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n"; //
+		sample= """
+			package test1;
+			public class E {
+			    public void bar() {
+			    }
+			
+			    public int foo(int i) {
+			        return switch (i) {
+			            case 0 -> 0;
+			            default -> {
+			                bar(); //
+			                throw new AssertionError();
+			            }
+			        };
+			    }
+			}
+			"""; //
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -660,41 +682,43 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testConvertToSwitchExpressionIssue388() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public void bar() {\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int foo(int i) {\n" //
-				+ "        switch (i) {\n" //
-				+ "        case 0: // comment\n" //
-				+ "            return 0;\n" //
-				+ "        default:\n" //
-				+ "            return 1;\n" //
-				+ "        }\n" //
-				+ "    }\n"
-				+ "}\n"; //
+		String sample= """
+			package test1;
+			public class E {
+			    public void bar() {
+			    }
+			
+			    public int foo(int i) {
+			        switch (i) {
+			        case 0: // comment
+			            return 0;
+			        default:
+			            return 1;
+			        }
+			    }
+			}
+			"""; //
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
 
-		sample= "" //
-				+ "package test1;\n" //
-				+ "public class E {\n" //
-				+ "    public void bar() {\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public int foo(int i) {\n" //
-				+ "        return switch (i) {\n" //
-				+ "            case 0: // comment\n" //
-				+ "                yield 0;\n" //
-				+ "            default:\n" //
-				+ "                yield 1;\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n"; //
+		sample= """
+			package test1;
+			public class E {
+			    public void bar() {
+			    }
+			
+			    public int foo(int i) {
+			        return switch (i) {
+			            case 0: // comment
+			                yield 0;
+			            default:
+			                yield 1;
+			        };
+			    }
+			}
+			"""; //
 		String expected1= sample;
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
@@ -703,34 +727,35 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToReturnSwitchExpressionIssue104_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum InnerEnum {\n"
-				+ "        A, B, C, D;\n"
-				+ "    }\n"
-				+ "    public int foo(InnerEnum k) {\n"
-				+ "        switch (k) {\n"
-				+ "            case A:\n"
-				+ "                System.out.println(\"a\");\n"
-				+ "            case B:\n"
-				+ "                /* comment 1 */\n"
-				+ "                return 6; /* abc */\n"
-				+ "            case C: {\n"
-				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
-				+ "                /* comment 2 */\n"
-				+ "                return 8; /* def */\n"
-				+ "            }\n"
-				+ "            case D:\n"
-				+ "                return 9;\n"
-				+ "            default:\n"
-				+ "                throw new NullPointerException();\n"
-				+ "        }\n"
-				+ "    }\n"
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public enum InnerEnum {
+			        A, B, C, D;
+			    }
+			    public int foo(InnerEnum k) {
+			        switch (k) {
+			            case A:
+			                System.out.println("a");
+			            case B:
+			                /* comment 1 */
+			                return 6; /* abc */
+			            case C: {
+			                System.out.println("x"); //$NON-NLS-1$
+			                /* comment 2 */
+			                return 8; /* def */
+			            }
+			            case D:
+			                return 9;
+			            default:
+			                throw new NullPointerException();
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -741,37 +766,38 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToReturnSwitchExpressionIssue104_2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.File;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public enum InnerEnum {\n"
-				+ "        A, B, C, D;\n"
-				+ "    }\n"
-				+ "    public int foo(InnerEnum k, int x) {\n"
-				+ "        switch (k) {\n"
-				+ "            case A:\n"
-				+ "                System.out.println(\"a\");\n"
-				+ "            case B:\n"
-				+ "                /* comment 1 */\n"
-				+ "                if (x > 3)\n"
-				+ "                    return 6; /* abc */\n"
-				+ "                else\n"
-				+ "                    return 10;\n"
-				+ "            case C: {\n"
-				+ "                System.out.println(\"x\"); //$NON-NLS-1$\n"
-				+ "                /* comment 2 */\n"
-				+ "                return 8; /* def */\n"
-				+ "            }\n"
-				+ "            case D:\n"
-				+ "                return 9;\n"
-				+ "            default:\n"
-				+ "                throw new NullPointerException();\n"
-				+ "        }\n"
-				+ "    }\n"
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.File;
+			
+			public class E {
+			    public enum InnerEnum {
+			        A, B, C, D;
+			    }
+			    public int foo(InnerEnum k, int x) {
+			        switch (k) {
+			            case A:
+			                System.out.println("a");
+			            case B:
+			                /* comment 1 */
+			                if (x > 3)
+			                    return 6; /* abc */
+			                else
+			                    return 10;
+			            case C: {
+			                System.out.println("x"); //$NON-NLS-1$
+			                /* comment 2 */
+			                return 8; /* def */
+			            }
+			            case D:
+			                return 9;
+			            default:
+			                throw new NullPointerException();
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -782,26 +808,27 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionNoBreak() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                i = 8; // can't refactor with no break\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j) {
+			        // return value
+			        int i;
+			        switch (j) {
+			            case 1:
+			                i = 8; // can't refactor with no break
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -812,26 +839,27 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionNoStatements() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                break; // can't refactor with no statements\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j) {
+			        // return value
+			        int i = 0;
+			        switch (j) {
+			            case 1:
+			                break; // can't refactor with no statements
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -842,27 +870,28 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionNoAssignment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                System.out.println(\"here\");\n" //
-				+ "                break; // can't refactor with no assignment to i\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j) {
+			        // return value
+			        int i = 0;
+			        switch (j) {
+			            case 1:
+			                System.out.println("here");
+			                break; // can't refactor with no assignment to i
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -873,28 +902,29 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionNoLastAssignment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i = 0;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                i = 6; // assignment not last statement\n" //
-				+ "                System.out.println(\"here\");\n" //
-				+ "                break;\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j) {
+			        // return value
+			        int i = 0;
+			        switch (j) {
+			            case 1:
+			                i = 6; // assignment not last statement
+			                System.out.println("here");
+			                break;
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -905,31 +935,32 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionIfElse() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j, int k) {\n" //
-				+ "        // return value\n" //
-				+ "        int i;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                if (k < 4) { // we don't delve into control statements\n" //
-				+ "                    i = 6;\n" //
-				+ "                } else {\n" //
-				+ "                    i = 9;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j, int k) {
+			        // return value
+			        int i;
+			        switch (j) {
+			            case 1:
+			                if (k < 4) { // we don't delve into control statements
+			                    i = 6;
+			                } else {
+			                    i = 9;
+			                }
+			                break;
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -940,31 +971,32 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionWithTry() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j, int k) {\n" //
-				+ "        // return value\n" //
-				+ "        int i;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                try { // we don't delve into try statements\n" //
-				+ "                    i = 6;\n" //
-				+ "                } finally {\n" //
-				+ "                    i = 9;\n" //
-				+ "                }\n" //
-				+ "                break;\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j, int k) {
+			        // return value
+			        int i;
+			        switch (j) {
+			            case 1:
+			                try { // we don't delve into try statements
+			                    i = 6;
+			                } finally {
+			                    i = 9;
+			                }
+			                break;
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -975,26 +1007,27 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionReturn() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public int foo(int j) {\n" //
-				+ "        // return value\n" //
-				+ "        int i;\n" //
-				+ "        switch (j) {\n" //
-				+ "            case 1:\n" //
-				+ "                return 6; // we don't support return\n" //
-				+ "            case 2:\n" //
-				+ "                i = 7; // value 7\n" //
-				+ "            break;\n" //
-				+ "            default:\n" //
-				+ "                i = 8; // value 8\n" //
-				+ "            break;\n" //
-				+ "        }\n" //
-				+ "        return i;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public int foo(int j) {
+			        // return value
+			        int i;
+			        switch (j) {
+			            case 1:
+			                return 6; // we don't support return
+			            case 2:
+			                i = 7; // value 7
+			            break;
+			            default:
+			                i = 8; // value 8
+			            break;
+			        }
+			        return i;
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -1005,31 +1038,32 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionBug578128() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-			    + "    public static void main(String[] args) {\n" //
-			    + "        boolean rulesOK = true;\n" //
-			    + "        switch (args[0].charAt(0)) {\n" //
-			    + "            case '+':\n" //
-			    + "                args[0] = \"+\";\n" //
-			    + "                break;\n" //
-			    + "            case '~':\n" //
-			    + "                args[0] = \"~\";\n" //
-			    + "                break;\n" //
-			    + "            case '-':\n" //
-			    + "                args[0] = \"-\";\n" //
-			    + "                break;\n" //
-			    + "            case '?':\n" //
-			    + "                args[0] = \"?\";\n" //
-			    + "                break;\n" //
-			    + "            default:\n" //
-			    + "                rulesOK = false;\n" //
-			    + "        }\n" //
-			    + "        System.out.println(rulesOK);\n" //
-			    + "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public static void main(String[] args) {
+			        boolean rulesOK = true;
+			        switch (args[0].charAt(0)) {
+			            case '+':
+			                args[0] = "+";
+			                break;
+			            case '~':
+			                args[0] = "~";
+			                break;
+			            case '-':
+			                args[0] = "-";
+			                break;
+			            case '?':
+			                args[0] = "?";
+			                break;
+			            default:
+			                rulesOK = false;
+			        }
+			        System.out.println(rulesOK);
+			    }
+			}
+			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
@@ -1040,19 +1074,20 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	@Test
 	public void testDoNotConvertToSwitchExpressionIssue381() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "public class E1 {\n" //
-				+ "    public void f(int i) {\n" //
-				+ "        switch (i) {\n" //
-				+ "        case 0:\n" //
-				+ "            return;\n" //
-				+ "        default:\n" //
-				+ "            throw new AssertionError();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n"; //
+		String sample= """
+			package test1;
+			
+			public class E1 {
+			    public void f(int i) {
+			        switch (i) {
+			        case 0:
+			            return;
+			        default:
+			            throw new AssertionError();
+			        }
+			    }
+			}
+			"""; //
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 

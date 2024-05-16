@@ -61,54 +61,57 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
 		IPackageFragment def= java9Src.createPackageFragment("", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("module annots {\n");
-		buf.append("     exports annots; \n");
-		buf.append("}\n");
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		String str= """
+			module annots {
+			     exports annots;\s
+			}
+			""";
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment annots= java9Src.createPackageFragment("annots", false, null);
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface Nullable {\n");
-		buf.append("}\n");
-		annots.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+		String str1= """
+			package annots;
+			
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			@Target(ElementType.TYPE_USE)
+			public @interface Nullable {
+			}
+			""";
+		annots.createCompilationUnit("Nullable.java", str1, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface NonNull {\n");
-		buf.append("}\n");
-		annots.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+		String str2= """
+			package annots;
+			
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			@Target(ElementType.TYPE_USE)
+			public @interface NonNull {
+			}
+			""";
+		annots.createCompilationUnit("NonNull.java", str2, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("public enum DefaultLocation {\n");
-		buf.append("	PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT\n");
-		buf.append("}\n");
-		buf.append("");
-		annots.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
+		String str3= """
+			package annots;
+			
+			public enum DefaultLocation {
+				PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT
+			}
+			""";
+		annots.createCompilationUnit("DefaultLocation.java", str3, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package annots;\n");
-		buf.append("\n");
-		buf.append("import static annots.DefaultLocation.*;\n");
-		buf.append("\n");
-		buf.append("public @interface NonNullByDefault {\n");
-		buf.append("	DefaultLocation[] value() default { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT };\n");
-		buf.append("}\n");
-		buf.append("");
-		annots.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+		String str4= """
+			package annots;
+			
+			import static annots.DefaultLocation.*;
+			
+			public @interface NonNullByDefault {
+				DefaultLocation[] value() default { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT };
+			}
+			""";
+		annots.createCompilationUnit("NonNullByDefault.java", str4, false, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject1);
@@ -143,28 +146,30 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 	@Test
 	public void testBug530580a() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("@annots.NonNullByDefault module test {\n");
-		buf.append(" requires annots;");
-		buf.append("}\n");
+		String str= """
+			@annots.NonNullByDefault module test {
+			 requires annots;\
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("abstract class Test {\n");
-		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
-		buf.append("\n");
-		buf.append("	public void g() {\n");
-		buf.append("		x=f();\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import java.util.Map;
+			import annots.*;
+			
+			abstract class Test {
+				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
+			
+				public void g() {
+					x=f();
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -175,21 +180,22 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("abstract class Test {\n");
-		buf.append("	private Map<? extends Map<String, @Nullable Integer>, String[][]> x;\n");
-		buf.append("\n");
-		buf.append("    abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
-		buf.append("\n");
-		buf.append("	public void g() {\n");
-		buf.append("		x=f();\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import java.util.Map;
+			import annots.*;
+			
+			abstract class Test {
+				private Map<? extends Map<String, @Nullable Integer>, String[][]> x;
+			
+			    abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
+			
+				public void g() {
+					x=f();
+				}
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -197,19 +203,20 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("abstract class Test {\n");
-		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
-		buf.append("\n");
-		buf.append("	public void g(Map<? extends Map<String, @Nullable Integer>, String[][]> x) {\n");
-		buf.append("		x=f();\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import java.util.Map;
+			import annots.*;
+			
+			abstract class Test {
+				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
+			
+				public void g(Map<? extends Map<String, @Nullable Integer>, String[][]> x) {
+					x=f();
+				}
+			}
+			""";
+		assertEqualString(preview, str3);
 
 		proposal= (CUCorrectionProposal)proposals.get(2);
 
@@ -217,45 +224,48 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("abstract class Test {\n");
-		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
-		buf.append("\n");
-		buf.append("	public void g() {\n");
-		buf.append("		Map<? extends Map<String, @Nullable Integer>, String[][]> x = f();\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str4= """
+			package test1;
+			import java.util.Map;
+			import annots.*;
+			
+			abstract class Test {
+				abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();
+			
+				public void g() {
+					Map<? extends Map<String, @Nullable Integer>, String[][]> x = f();
+				}
+			}
+			""";
+		assertEqualString(preview, str4);
 	}
 	@Test
 	public void testBug530580b() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("@annots.NonNullByDefault module test {\n");
-		buf.append(" requires annots;");
-		buf.append("}\n");
+		String str= """
+			@annots.NonNullByDefault module test {
+			 requires annots;\
+			}
+			""";
 		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
-		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("interface Type {\n");
-		buf.append("	void set(@Nullable String s);\n");
-		buf.append("\n");
-		buf.append("	class U implements Type {\n");
-		buf.append("		@Override\n");
-		buf.append("		public void set(String t) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import annots.*;
+			
+			interface Type {
+				void set(@Nullable String s);
+			
+				class U implements Type {
+					@Override
+					public void set(String t) {
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -266,20 +276,21 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		String preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("interface Type {\n");
-		buf.append("	void set(@Nullable String s);\n");
-		buf.append("\n");
-		buf.append("	class U implements Type {\n");
-		buf.append("		@Override\n");
-		buf.append("		public void set(@Nullable String t) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str2= """
+			package test1;
+			import annots.*;
+			
+			interface Type {
+				void set(@Nullable String s);
+			
+				class U implements Type {
+					@Override
+					public void set(@Nullable String t) {
+					}
+				}
+			}
+			""";
+		assertEqualString(preview, str2);
 
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
@@ -287,18 +298,19 @@ public class NullAnnotationsQuickFixTest9 extends QuickFixTest {
 
 		preview= getPreviewContent(proposal);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import annots.*;\n");
-		buf.append("\n");
-		buf.append("interface Type {\n");
-		buf.append("	void set(String s);\n");
-		buf.append("\n");
-		buf.append("	class U implements Type {\n");
-		buf.append("		@Override\n");
-		buf.append("		public void set(String t) {\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+		String str3= """
+			package test1;
+			import annots.*;
+			
+			interface Type {
+				void set(String s);
+			
+				class U implements Type {
+					@Override
+					public void set(String t) {
+					}
+				}
+			}
+			""";
+		assertEqualString(preview, str3);
 	}}

@@ -96,13 +96,14 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testIsStaticInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public interface Snippet {\n");
-		buf.append("    public static int staticMethod(Object[] o) throws IOException{return 10;}\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.IOException;
+			public interface Snippet {
+			    public static int staticMethod(Object[] o) throws IOException{return 10;}
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("public static");
 		IMethod method= (IMethod)cUnit.getElementAt(offset);
 		assertTrue(JdtFlags.isStatic(method));
@@ -120,25 +121,26 @@ public class JDTFlagsTest18 {
 		} catch (OperationCanceledException e) {
 		}
 
-		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(buf.toString()));
+		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(str));
 		assertTrue(JdtFlags.isStatic(methodNode));
 	}
 
 	@Test
 	public void testNestedEnumInEnum() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("enum Snippet {\n");
-		buf.append("    A;\n");
-		buf.append("    enum E {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			enum Snippet {
+			    A;
+			    enum E {
+			    }
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("enum E");
 		IJavaElement elem= cUnit.getElementAt(offset);
-		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(buf.toString()));
+		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(str));
 		assertTrue(JdtFlags.isStatic(enumNode));
 		assertTrue(JdtFlags.isStatic((IType)elem));
 	}
@@ -146,36 +148,37 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testNestedEnumInInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface Snippet {\n");
-		buf.append("    enum CoffeeSize {\n");
-		buf.append("        BIG, HUGE{\n");
-		buf.append("            public String getLidCode() {\n");
-		buf.append("                return \"B\";\n");
-		buf.append("            }\n");
-		buf.append("        }, OVERWHELMING {\n");
-		buf.append("\n");
-		buf.append("            public String getLidCode() {\n");
-		buf.append("                return \"A\";\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("        public String getLidCode() {\n");
-		buf.append("            return \"B\";\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("    enum Colors{\n");
-		buf.append("        RED, BLUE, GREEN;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			interface Snippet {
+			    enum CoffeeSize {
+			        BIG, HUGE{
+			            public String getLidCode() {
+			                return "B";
+			            }
+			        }, OVERWHELMING {
+			
+			            public String getLidCode() {
+			                return "A";
+			            }
+			        };
+			        public String getLidCode() {
+			            return "B";
+			        }
+			    }
+			    enum Colors{
+			        RED, BLUE, GREEN;
+			    }
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("enum CoffeeSize");
 		IJavaElement elem= cUnit.getElementAt(offset);
 		IMember type= (IMember)elem;
 		assertTrue(JdtFlags.isStatic(type));
 		assertFalse(JdtFlags.isAbstract(type));
 
-		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(buf.toString()));
+		EnumDeclaration enumNode= ASTNodeSearchUtil.getEnumDeclarationNode((IType)elem, getCompilationUnitNode(str));
 		assertTrue(JdtFlags.isStatic(enumNode));
 
 		// testcase for isF an enum
@@ -188,27 +191,28 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testNestedEnumInClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Snippet {    \n");
-		buf.append("    enum Color {\n");
-		buf.append("        RED,\n");
-		buf.append("        BLUE;\n");
-		buf.append("    Runnable r = new Runnable() {\n");
-		buf.append("        \n");
-		buf.append("        @Override\n");
-		buf.append("        public void run() {\n");
-		buf.append("            // TODO Auto-generated method stub\n");
-		buf.append("            \n");
-		buf.append("        }\n");
-		buf.append("    };\n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class Snippet {   \s
+			    enum Color {
+			        RED,
+			        BLUE;
+			    Runnable r = new Runnable() {
+			       \s
+			        @Override
+			        public void run() {
+			            // TODO Auto-generated method stub
+			           \s
+			        }
+			    };
+			    }
+			   \s
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		// testing nested enum
 		int offset= cUnit.getSource().indexOf("enum");
-		CompilationUnit cuNode= getCompilationUnitNode(buf.toString());
+		CompilationUnit cuNode= getCompilationUnitNode(str);
 		IJavaElement javaElem= cUnit.getElementAt(offset);
 		IMember element= (IMember)javaElem;
 		assertTrue(JdtFlags.isStatic(element));
@@ -237,14 +241,15 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testNestedEnumIsFinal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class Snippet {    \n");
-		buf.append("    enum Color {\n");
-		buf.append("        BLUE{};\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class Snippet {   \s
+			    enum Color {
+			        BLUE{};
+			    }
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("enum Color");
 		IMember element= (IMember)cUnit.getElementAt(offset);
 		assertFalse(JdtFlags.isFinal(element));
@@ -273,14 +278,15 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testIsDefaultInInterface() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface Snippet {\n");
-		buf.append("     public default String defaultMethod(){\n");
-		buf.append("         return \"default\";\n");
-		buf.append("     }\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			interface Snippet {
+			     public default String defaultMethod(){
+			         return "default";
+			     }
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("public default");
 		IMethod method= (IMethod)cUnit.getElementAt(offset);
 		assertFalse(JdtFlags.isStatic(method));
@@ -321,17 +327,18 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testIsDefaultInClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("class Snippet {\n");
-		buf.append("     public String notDefaultMethod(){\n");
-		buf.append("         return \"not default\";\n");
-		buf.append("     }\n");
-		buf.append("    public @interface A_test109 {\n");
-		buf.append("        public String notDefaultIntMet() default \"not default\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			class Snippet {
+			     public String notDefaultMethod(){
+			         return "not default";
+			     }
+			    public @interface A_test109 {
+			        public String notDefaultIntMet() default "not default";
+			    }
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("public String notDefaultMethod");
 		IMethod method= (IMethod)cUnit.getElementAt(offset);
 		assertFalse(JdtFlags.isStatic(method));
@@ -370,20 +377,21 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testImplicitAbstractInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public interface Snippet {\n");
-		buf.append("    float abstractMethod();\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.IOException;
+			public interface Snippet {
+			    float abstractMethod();
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("float");
 		IMethod method= (IMethod)cUnit.getElementAt(offset);
 		assertFalse(JdtFlags.isStatic(method));
 		assertFalse(JdtFlags.isDefaultMethod(method));
 		assertTrue(JdtFlags.isAbstract(method));
 
-		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(buf.toString()));
+		MethodDeclaration methodNode= ASTNodeSearchUtil.getMethodDeclarationNode(method, getCompilationUnitNode(str));
 		assertFalse(JdtFlags.isStatic(methodNode));
 
 		ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
@@ -401,13 +409,14 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testExplicitAbstractInSrcFile() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public interface Snippet {\n");
-		buf.append("    public abstract float abstractMethod();\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.IOException;
+			public interface Snippet {
+			    public abstract float abstractMethod();
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
 		int offset= cUnit.getSource().indexOf("public abstract");
 		IMethod method= (IMethod)cUnit.getElementAt(offset);
 		assertFalse(JdtFlags.isStatic(method));
@@ -467,15 +476,16 @@ public class JDTFlagsTest18 {
 	@Test
 	public void testIsStaticAnnotationType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public @interface Snippet {\n");
-		buf.append("    int i= 0;\n");
-		buf.append("    public String name();\n");
-		buf.append("}\n");
-		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
-		CompilationUnit cuNode= getCompilationUnitNode(buf.toString());
+		String str= """
+			package test1;
+			
+			public @interface Snippet {
+			    int i= 0;
+			    public String name();
+			}
+			""";
+		ICompilationUnit cUnit= pack1.createCompilationUnit("Snippet.java", str, false, null);
+		CompilationUnit cuNode= getCompilationUnitNode(str);
 
 		int offset= cUnit.getSource().indexOf("i=");
 		IJavaElement elem= cUnit.getElementAt(offset);

@@ -68,11 +68,11 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class Outer {\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			public class Outer {
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Outer"));
@@ -98,18 +98,18 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class Outer {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("    }\n");
-		buf.append("    public class Inner {\n");
-		buf.append("        public int inner(Vector vec) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Vector;
+			public class Outer {
+			    public void foo(Vector vec) {
+			    }
+			    public class Inner {
+			        public int inner(Vector vec) {
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Inner"));
@@ -135,16 +135,16 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class Outer {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        public class Local {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Vector;
+			public class Outer {
+			    public void foo(Vector vec) {
+			        public class Local {
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Local"));
@@ -170,13 +170,13 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.*;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("public class TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer> & Serializable, NoBound> {\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.*;
+			import java.io.Serializable;
+			public class TypeParams<Q extends ArrayList<? extends Number>, Element extends Map<String, Integer> & Serializable, NoBound> {
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("TypeParams.java", content, false, null);
 
 		IType typeParams= (IType)cu.getElementAt(content.indexOf("TypeParams"));
@@ -225,15 +225,15 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.*;\n");
-		buf.append("public class X {\n");
-		buf.append("    <Q extends ArrayList<? extends Number>, Element extends Map<String, Integer>, NoBound> Q method(Element e, NoBound n) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.*;
+			public class X {
+			    <Q extends ArrayList<? extends Number>, Element extends Map<String, Integer>, NoBound> Q method(Element e, NoBound n) {
+			        return null;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("X.java", content, false, null);
 
 		IMethod method= (IMethod)cu.getElementAt(content.indexOf("method"));
@@ -264,16 +264,16 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class Outer {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        new Object() {\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Vector;
+			public class Outer {
+			    public void foo(Vector vec) {
+			        new Object() {
+			        };
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Object"));
@@ -299,20 +299,20 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class Outer {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        new Object() {\n");
-		buf.append("            public void xoo() {\n");
-		buf.append("                new Serializable() {\n");
-		buf.append("                };\n");
-		buf.append("            }\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Vector;
+			public class Outer {
+			    public void foo(Vector vec) {
+			        new Object() {
+			            public void xoo() {
+			                new Serializable() {
+			                };
+			            }
+			        };
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Serializable"));
@@ -338,14 +338,14 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class Outer {\n");
-		buf.append("    Object o= new Thread() {\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Vector;
+			public class Outer {
+			    Object o= new Thread() {
+			    };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Thread"));
@@ -371,16 +371,16 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class Outer {\n");
-		buf.append("    static {\n");
-		buf.append("        new Object() {\n");
-		buf.append("        };\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Vector;
+			public class Outer {
+			    static {
+			        new Object() {
+			        };
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Outer.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("Object"));
@@ -406,14 +406,14 @@ public class JavaElementLabelsTest extends CoreTests {
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 			IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package org.test;\n");
-			buf.append("public class Wildcards<T> {\n");
-			buf.append("	Wildcards<? extends Number> upper;\n");
-			buf.append("	Wildcards<? super Number> lower;\n");
-			buf.append("	Wildcards<?> wild;\n");
-			buf.append("}\n");
-			String content= buf.toString();
+			String content= """
+				package org.test;
+				public class Wildcards<T> {
+					Wildcards<? extends Number> upper;
+					Wildcards<? super Number> lower;
+					Wildcards<?> wild;
+				}
+				""";
 			ICompilationUnit cu= pack1.createCompilationUnit("Wildcards.java", content, false, null);
 
 			IJavaElement elem= cu.getElementAt(content.indexOf("upper"));
@@ -517,13 +517,13 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class Varargs {\n");
-		buf.append("    public void foo(int i, String... varargs) {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			public class Varargs {
+			    public void foo(int i, String... varargs) {
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Varargs.java", content, false, null);
 
 		IJavaElement elem= cu.getElementAt(content.indexOf("foo"));
@@ -549,15 +549,15 @@ public class JavaElementLabelsTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.Arrays;\n");
-		buf.append("public class Varargs {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Arrays.asList();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.Arrays;
+			public class Varargs {
+			    void foo() {
+			        Arrays.asList();
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Varargs.java", content, false, null);
 
 		IJavaElement elem= cu.codeSelect(content.indexOf("asList"), 0)[0];
@@ -636,30 +636,30 @@ public class JavaElementLabelsTest extends CoreTests {
 	public void testMethodLabelAnnotatedParameters() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.Retention;\n");
-		buf.append("import java.lang.annotation.RetentionPolicy;\n");
-		buf.append("\n");
-		buf.append("public class Annotations {\n");
-		buf.append("    void foo(@Outer(a=@Ann(\"Hello world\\r\\n\\t\\\"<'#@%^&\")) String param) { }\n");
-		buf.append("    \n");
-		buf.append("    void foo2(@Ann(value=\"\", cl=Annotations.class, ints={1, 2, -19},\n");
-		buf.append("            ch='\\0', sh= 0x7FFF, r= @Retention(RetentionPolicy.SOURCE)) String param) { }\n");
-		buf.append("}\n");
-		buf.append("@interface Ann {\n");
-		buf.append("    String value();\n");
-		buf.append("    Class<?> cl() default Ann.class;\n");
-		buf.append("    int[] ints() default {1, 2};\n");
-		buf.append("    char ch() default 'a';\n");
-		buf.append("    short sh() default 1;\n");
-		buf.append("    Retention r() default @Retention(RetentionPolicy.CLASS);\n");
-		buf.append("}\n");
-		buf.append("@interface Outer {\n");
-		buf.append("    Ann a();\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			
+			import java.lang.annotation.Retention;
+			import java.lang.annotation.RetentionPolicy;
+			
+			public class Annotations {
+			    void foo(@Outer(a=@Ann("Hello world\\r\\n\\t\\"<'#@%^&")) String param) { }
+			   \s
+			    void foo2(@Ann(value="", cl=Annotations.class, ints={1, 2, -19},
+			            ch='\\0', sh= 0x7FFF, r= @Retention(RetentionPolicy.SOURCE)) String param) { }
+			}
+			@interface Ann {
+			    String value();
+			    Class<?> cl() default Ann.class;
+			    int[] ints() default {1, 2};
+			    char ch() default 'a';
+			    short sh() default 1;
+			    Retention r() default @Retention(RetentionPolicy.CLASS);
+			}
+			@interface Outer {
+			    Ann a();
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Annotations.java", content, false, null);
 
 		IJavaElement foo= cu.getElementAt(content.indexOf("foo"));

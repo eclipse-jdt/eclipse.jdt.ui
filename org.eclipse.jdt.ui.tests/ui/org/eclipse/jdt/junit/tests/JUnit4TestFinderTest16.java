@@ -72,16 +72,17 @@ public class JUnit4TestFinderTest16 {
 	@Test
 	public void testTestAnnotation_bug575762() throws Exception {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import org.junit.Test;\n");
-		buf.append("\n");
-		buf.append("public record Test1() {\n");
-		buf.append("        @Test public void testFoo() {\n");
-		buf.append("        }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= p.createCompilationUnit("Test1.java", buf.toString(), true, null);
+		String str= """
+			package p;
+			
+			import org.junit.Test;
+			
+			public record Test1() {
+			        @Test public void testFoo() {
+			        }
+			}
+			""";
+		ICompilationUnit cu1= p.createCompilationUnit("Test1.java", str, true, null);
 
 		IType[] types= cu1.getTypes();
 

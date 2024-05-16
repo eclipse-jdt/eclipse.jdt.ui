@@ -105,20 +105,21 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test01() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	java.lang.annotation.ElementType anEnum;\r\n" +
-				"\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				java.lang.annotation.ElementType anEnum;\r
+			\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "anEnum" });
 		runOperation(a.getType("A"), fields, false, false);
@@ -499,68 +500,70 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test07() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"import java.util.HashMap;\r\n" +
-				"import java.util.List;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	List<Integer> intList;\r\n" +
-				"	HashMap<Integer, List<Boolean>> intBoolHashMap;\r\n" +
-				"	E someEnum;\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"enum E {\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+				List<Integer> intList;\r
+				HashMap<Integer, List<Boolean>> intBoolHashMap;\r
+				E someEnum;\r
+			}\r
+			\r
+			enum E {\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"intList", "intBoolHashMap", "someEnum" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.HashMap;\r\n" +
-				"import java.util.List;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	List<Integer> intList;\r\n" +
-				"	HashMap<Integer, List<Boolean>> intBoolHashMap;\r\n" +
-				"	E someEnum;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + ((intList == null) ? 0 : intList.hashCode());\r\n" +
-				"		result = prime * result + ((intBoolHashMap == null) ? 0 : intBoolHashMap.hashCode());\r\n" +
-				"		result = prime * result + ((someEnum == null) ? 0 : someEnum.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (intList == null) {\r\n" +
-				"			if (other.intList != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!intList.equals(other.intList))\r\n" +
-				"			return false;\r\n" +
-				"		if (intBoolHashMap == null) {\r\n" +
-				"			if (other.intBoolHashMap != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!intBoolHashMap.equals(other.intBoolHashMap))\r\n" +
-				"			return false;\r\n" +
-				"		if (someEnum != other.someEnum)\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"enum E {\r\n" +
-				"}";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+				List<Integer> intList;\r
+				HashMap<Integer, List<Boolean>> intBoolHashMap;\r
+				E someEnum;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + ((intList == null) ? 0 : intList.hashCode());\r
+					result = prime * result + ((intBoolHashMap == null) ? 0 : intBoolHashMap.hashCode());\r
+					result = prime * result + ((someEnum == null) ? 0 : someEnum.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (intList == null) {\r
+						if (other.intList != null)\r
+							return false;\r
+					} else if (!intList.equals(other.intList))\r
+						return false;\r
+					if (intBoolHashMap == null) {\r
+						if (other.intBoolHashMap != null)\r
+							return false;\r
+					} else if (!intBoolHashMap.equals(other.intBoolHashMap))\r
+						return false;\r
+					if (someEnum != other.someEnum)\r
+						return false;\r
+					return true;\r
+				}\r
+			}\r
+			\r
+			enum E {\r
+			}""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -571,48 +574,50 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test08() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	double d1;\r\n" +
-				"	double d2;\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				double d1;\r
+				double d2;\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"d1", "d2" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	double d1;\r\n" +
-				"	double d2;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		long temp;\r\n" +
-				"		temp = Double.doubleToLongBits(d1);\r\n" +
-				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-				"		temp = Double.doubleToLongBits(d2);\r\n" +
-				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (Double.doubleToLongBits(d1) != Double.doubleToLongBits(other.d1))\r\n" +
-				"			return false;\r\n" +
-				"		if (Double.doubleToLongBits(d2) != Double.doubleToLongBits(other.d2))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				double d1;\r
+				double d2;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					long temp;\r
+					temp = Double.doubleToLongBits(d1);\r
+					result = prime * result + (int) (temp ^ (temp >>> 32));\r
+					temp = Double.doubleToLongBits(d2);\r
+					result = prime * result + (int) (temp ^ (temp >>> 32));\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (Double.doubleToLongBits(d1) != Double.doubleToLongBits(other.d1))\r
+						return false;\r
+					if (Double.doubleToLongBits(d2) != Double.doubleToLongBits(other.d2))\r
+						return false;\r
+					return true;\r
+				}\r
+			}""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -624,61 +629,63 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test09() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	double temp;\r\n" +
-				"	boolean result;\r\n" +
-				"	String obj;\r\n" +
-				"	double someOther;\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				double temp;\r
+				boolean result;\r
+				String obj;\r
+				double someOther;\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"temp", "result", "obj", "someOther" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	double temp;\r\n" +
-				"	boolean result;\r\n" +
-				"	String obj;\r\n" +
-				"	double someOther;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		long temp;\r\n" +
-				"		temp = Double.doubleToLongBits(this.temp);\r\n" +
-				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-				"		result = prime * result + (this.result ? 1231 : 1237);\r\n" +
-				"		result = prime * result + ((obj == null) ? 0 : obj.hashCode());\r\n" +
-				"		temp = Double.doubleToLongBits(someOther);\r\n" +
-				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (Double.doubleToLongBits(temp) != Double.doubleToLongBits(other.temp))\r\n" +
-				"			return false;\r\n" +
-				"		if (result != other.result)\r\n" +
-				"			return false;\r\n" +
-				"		if (this.obj == null) {\r\n" +
-				"			if (other.obj != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!this.obj.equals(other.obj))\r\n" +
-				"			return false;\r\n" +
-				"		if (Double.doubleToLongBits(someOther) != Double.doubleToLongBits(other.someOther))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				double temp;\r
+				boolean result;\r
+				String obj;\r
+				double someOther;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					long temp;\r
+					temp = Double.doubleToLongBits(this.temp);\r
+					result = prime * result + (int) (temp ^ (temp >>> 32));\r
+					result = prime * result + (this.result ? 1231 : 1237);\r
+					result = prime * result + ((obj == null) ? 0 : obj.hashCode());\r
+					temp = Double.doubleToLongBits(someOther);\r
+					result = prime * result + (int) (temp ^ (temp >>> 32));\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (Double.doubleToLongBits(temp) != Double.doubleToLongBits(other.temp))\r
+						return false;\r
+					if (result != other.result)\r
+						return false;\r
+					if (this.obj == null) {\r
+						if (other.obj != null)\r
+							return false;\r
+					} else if (!this.obj.equals(other.obj))\r
+						return false;\r
+					if (Double.doubleToLongBits(someOther) != Double.doubleToLongBits(other.someOther))\r
+						return false;\r
+					return true;\r
+				}\r
+			}""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -689,19 +696,20 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test10() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+			\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong" });
 		runOperation(a.getType("A"), fields, true, false);
@@ -1774,14 +1782,15 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void thenWithBlocks() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	Object obj;\r\n" +
-				"\r\n" +
-				"}", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				Object obj;\r
+			\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "obj" });
 		runOperation(a.getType("A"), fields, null, true, false, false, true, false);
@@ -2099,28 +2108,27 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 	@Test
 	public void insertAt() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class A  {\n");
-		buf.append("	Runnable x;\n");
-		buf.append("	\n");
-		buf.append("	A() {\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	void foo() {\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	{\n"); // initializer
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	static {\n"); // static initializer
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	class Inner {\n"); // inner class
-		buf.append("	}\n");
-		buf.append("}");
-		String originalContent= buf.toString();
+		String originalContent= """
+			package p;
+			
+			public class A  {
+				Runnable x;
+			\t
+				A() {
+				}
+			\t
+				void foo() {
+				}
+			\t
+				{
+				}
+			\t
+				static {
+				}
+			\t
+				class Inner {
+				}
+			}""";
 
 		final int NUM_MEMBERS= 6;
 

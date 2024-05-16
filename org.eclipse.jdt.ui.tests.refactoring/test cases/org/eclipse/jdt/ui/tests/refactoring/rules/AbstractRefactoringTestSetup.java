@@ -49,11 +49,11 @@ public class AbstractRefactoringTestSetup extends ExternalResource {
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();
 
-		StringBuilder comment= new StringBuilder();
-		comment.append("/**\n");
-		comment.append(" * ${tags}\n");
-		comment.append(" */");
-		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
+		String str= """
+			/**
+			 * ${tags}
+			 */""";
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, str, null);
 	}
 
 	@Override

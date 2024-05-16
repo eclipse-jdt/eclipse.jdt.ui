@@ -73,21 +73,23 @@ public class WorkspaceScopeTest {
 	}
 
 	private String getSource() {
-		return "package test;\n" +
-				"\n" +
-				"public class Test {\n" +
-				"	public void publicMethod() {\n" +
-				"	}\n" +
-				"	\n" +
-				"	private void privateMethod() {\n" +
-				"	}\n" +
-				"	\n" +
-				"	protected void protectedMethod() {\n" +
-				"	}\n" +
-				"	\n" +
-				"	void defaultMethod() {\n" +
-				"	}\n" +
-				"}\n";
+		return """
+			package test;
+			
+			public class Test {
+				public void publicMethod() {
+				}
+			\t
+				private void privateMethod() {
+				}
+			\t
+				protected void protectedMethod() {
+				}
+			\t
+				void defaultMethod() {
+				}
+			}
+			""";
 
 	}
 

@@ -79,24 +79,26 @@ public class BracketInserterTest {
 	private static final String SRC= "src";
 	private static final String SEP= "/";
 	private static final String CU_NAME= "PR75423.java";
-	private static final String CU_CONTENTS= "package com.example.bugs;\n" +
-				"\n" +
-				"import java.lang.String;\n" +
-				"import java.lang.Integer;\n" +
-				"\n" +
-				"public class PR75423 {\n" +
-				"    String string;\n" +
-				"    Integer integer;\n" +
-				"\n" +
-				"    public static void main(String[] args) {\n" +
-				"        \n" +
-				"    }\n" +
-				"    void foo(String[] args) {\n" +
-				"        \n" +
-				"    }\n" +
-				"    \n" +
-				"    HashMap hm= new HashMap();\n" +
-				"}\n";
+	private static final String CU_CONTENTS= """
+		package com.example.bugs;
+		
+		import java.lang.String;
+		import java.lang.Integer;
+		
+		public class PR75423 {
+		    String string;
+		    Integer integer;
+		
+		    public static void main(String[] args) {
+		       \s
+		    }
+		    void foo(String[] args) {
+		       \s
+		    }
+		   \s
+		    HashMap hm= new HashMap();
+		}
+		""";
 
 	// document offsets
 	private static final int BODY_OFFSET= 196;
