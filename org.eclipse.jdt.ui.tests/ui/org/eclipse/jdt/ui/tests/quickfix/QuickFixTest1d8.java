@@ -137,10 +137,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected2= """
 			package test1;
 			import java.io.IOException;
-			
+
 			import test2.Inter;
 			public class E implements Inter{
-			
+
 			    @Override
 			    public int getCount(Object[] o) throws IOException {
 			        return 0;
@@ -154,7 +154,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 	@Test
 	public void testUnimplementedMethods2() throws Exception {
-		StringBuilder buf= new StringBuilder();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
@@ -183,17 +182,17 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class MyString implements CharSequence{
-			
+
 			    @Override
 			    public char charAt(int arg0) {
 			        return 0;
 			    }
-			
+
 			    @Override
 			    public int length() {
 			        return 0;
 			    }
-			
+
 			    @Override
 			    public CharSequence subSequence(int arg0, int arg1) {
 			        return null;
@@ -266,29 +265,29 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.io.IOException;
 			import java.util.List;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			import test2.Inter;
 			public class E implements Inter{
-			
+
 			    @Override
 			    public int foo(@NonNull String @Nullable... s) throws IOException {
 			        return 0;
 			    }
-			
+
 			    @Override
 			    public int bug(@NonNull String... s) throws IOException {
 			        return 0;
 			    }
-			
+
 			    @Override
 			    public @NonNull String bar(@NonNull String s, @Nullable List<String> l1,
 			            test2.@NonNull List l2) {
 			        return null;
 			    }
-			
+
 			    @Override
 			    public int boo(Object @NonNull [] @Nullable... o1) {
 			        return 0;
@@ -310,7 +309,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.io.IOException;
-			
+
 			import org.eclipse.jdt.annotation.*;
 			public interface Inter {
 			    public int foo(@NonNull String @Nullable... s) throws IOException;
@@ -334,7 +333,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			import java.io.IOException;
-			
+
 			import org.eclipse.jdt.annotation.*;
 			public interface Inter {
 			    public int foo(@NonNull String @Nullable... s) throws IOException;
@@ -352,7 +351,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected2= """
 			package test1;
 			import java.io.IOException;
-			
+
 			import org.eclipse.jdt.annotation.*;
 			public interface Inter {
 			    public int foo(@NonNull String @Nullable... s) throws IOException;
@@ -361,12 +360,12 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			    default int defaultMethod(Object[] o) throws IOException{return 20;}
 			}
 			class E implements Inter{
-			
+
 			    @Override
 			    public int foo(@NonNull String @Nullable... s) throws IOException {
 			        return 0;
 			    }
-			
+
 			    @Override
 			    public int bar(@NonNull String... s) throws IOException {
 			        return 0;
@@ -439,7 +438,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			import test2.N3;
 			import test2.N4;
 			public class E implements Inter{
-			
+
 			    @Override
 			    public int foo2U(@N1 String @N3 [] @N2 [] s1,
 			            @N1 String @N2 [] @N3 [] @N4... s2) {
@@ -491,7 +490,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			    BigInteger getIntAsBigInteger();
 			}
 			class C implements IHasIntAsBigInteger {
-			
+
 			    @Override
 			    public BigInteger getIntAsBigInteger() {
 			        return null;
@@ -733,7 +732,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    int fun2() {
 			        I i= (int x) -> {
@@ -759,7 +758,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    int fun2() {
 			        I i= (int x) -> {
@@ -783,7 +782,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    void fun2() {
 			        I i= (int x) -> {
@@ -808,7 +807,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    void fun2() {
 			        I i= (int x) -> {
@@ -831,7 +830,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    void fun2() {
 			        I i= (x) -> {
@@ -857,7 +856,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    void fun2() {
 			        I i= (x) -> {
@@ -881,7 +880,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    I i2= (int x) -> {
 			        x++;
@@ -905,7 +904,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			     int foo(int x);   \s
 			}
-			
+
 			public class A {   \s
 			    I i2= (int x) -> {
 			        x++;
@@ -921,11 +920,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	// bug 424172
 	@Test
 	public void testImportTypeInMethodReference() throws Exception {
-		StringBuilder buf= new StringBuilder();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test.one", false, null);
 		String str= """
 			package test.one;
-			
+
 			public class X {
 			    public static F2 staticMethod() {
 			        return null;
@@ -935,7 +933,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		pack1.createCompilationUnit("X.java", str, false, null);
 		String str1= """
 			package test.one;
-			
+
 			@FunctionalInterface
 			public interface F2 {
 			    void foo();
@@ -946,9 +944,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.two", false, null);
 		String str2= """
 			package test.two;
-			
+
 			import test.one.F2;
-			
+
 			public class C1 {
 			    public void fun1() {
 			        F2 f = X::staticMethod;
@@ -966,10 +964,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test.two;
-			
+
 			import test.one.F2;
 			import test.one.X;
-			
+
 			public class C1 {
 			    public void fun1() {
 			        F2 f = X::staticMethod;
@@ -985,13 +983,13 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface C<T extends BigInteger> { Object m(Class<T> c); }
 			@FunctionalInterface
 			interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}
-			
+
 			class E {
 			    private void foo() {
 			         D<BigInteger,BigInteger> d1= (x) -> {
@@ -1011,13 +1009,13 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String str1= """
 			package test1;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface C<T extends BigInteger> { Object m(Class<T> c); }
 			@FunctionalInterface
 			interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}
-			
+
 			class E {
 			    private void foo() {
 			         D<BigInteger,BigInteger> d1= (x) -> {
@@ -1255,15 +1253,14 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	// bug 414084
 	@Test
 	public void testAbstractInterfaceMethodWithBody1() throws Exception {
-		StringBuilder buf= new StringBuilder();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public char m1(int arg0) {
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", str, false, null);
@@ -1279,9 +1276,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public char m1(int arg0);
-			
+
 			}
 			""";
 
@@ -1291,10 +1288,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public static char m1(int arg0) {
 			    }
-			
+
 			}
 			""";
 
@@ -1304,10 +1301,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected3= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public default char m1(int arg0) {
 			    }
-			
+
 			}
 			""";
 
@@ -1318,15 +1315,14 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	// bug 414084
 	@Test
 	public void testAbstractInterfaceMethodWithBody2() throws Exception {
-		StringBuilder buf= new StringBuilder();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public abstract char m1(int arg0) {
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", str, false, null);
@@ -1342,9 +1338,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public abstract char m1(int arg0);
-			
+
 			}
 			""";
 
@@ -1354,10 +1350,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public static char m1(int arg0) {
 			    }
-			
+
 			}
 			""";
 
@@ -1367,10 +1363,10 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		String expected3= """
 			package test1;
 			public interface Snippet{
-			
+
 			    public default char m1(int arg0) {
 			    }
-			
+
 			}
 			""";
 
@@ -1380,7 +1376,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	// bug 434173
 	@Test
 	public void testAbstractInterfaceMethodWithBody3() throws Exception {
-		StringBuilder buf= new StringBuilder();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
@@ -1419,7 +1414,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 	// bug 424616
 	@Test
 	public void testInferredExceptionType() throws Exception {
-		StringBuilder buf= new StringBuilder();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
@@ -1514,9 +1508,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class E {
 			    public <T extends Number> double foo(T t) {
 			        @NonNull Number n=t;
@@ -1565,9 +1559,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class E {
 			    public <T extends Number> double foo(T t) {
 			        @NonNull
@@ -1846,21 +1840,21 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
 			import org.eclipse.jdt.annotation.NonNullByDefault;
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				void g(@NonNull Number n1, @Nullable Number n2);
 			}
-			
+
 			interface I2 {
-			
+
 				void h(Number n1, @Nullable Number n2);
 			}
-			
+
 			class X {
 				public int f(Boolean n1, @Nullable Boolean n2, I1 i1, I2 i2) {
 					i1.g(n1, n2);
@@ -1877,21 +1871,21 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
 			import org.eclipse.jdt.annotation.NonNullByDefault;
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				void g(@NonNull Boolean n1, @Nullable Boolean n2);
 			}
-			
+
 			interface I2 {
-			
+
 				void h(Number n1, @Nullable Number n2);
 			}
-			
+
 			class X {
 				public int f(Boolean n1, @Nullable Boolean n2, I1 i1, I2 i2) {
 					i1.g(n1, n2);
@@ -1902,21 +1896,21 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
 			import org.eclipse.jdt.annotation.NonNullByDefault;
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				void g(@NonNull Number n1, @Nullable Number n2);
 			}
-			
+
 			interface I2 {
-			
+
 				void h(Boolean n1, @Nullable Boolean n2);
 			}
-			
+
 			class X {
 				public int f(Boolean n1, @Nullable Boolean n2, I1 i1, I2 i2) {
 					i1.g(n1, n2);
@@ -1943,38 +1937,38 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@NonNull @Mixed @Pure
 				public String g();
 			}
-			
+
 			interface I2 {
 				@Mixed @Pure
 				public String g();
 			}
-			
+
 			class X {
 				Map<? extends Number, @Nullable Integer> @Nullable [] f1;
 				Map<? extends Number, @Nullable Integer> @Nullable [] f2;
-			
+
 				public void f(I1 i1, I2 i2) {
 					f1 = i1.g();
 					f2 = i2.g();
-			
+
 				}
 			}""";
 		ICompilationUnit cu= pack1.createCompilationUnit("X.java", str1, false, null);
@@ -1987,150 +1981,150 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@NonNull @Mixed @Pure
 				public String g();
 			}
-			
+
 			interface I2 {
 				@Mixed @Pure
 				public String g();
 			}
-			
+
 			class X {
 				@Mixed @Pure String f1;
 				Map<? extends Number, @Nullable Integer> @Nullable [] f2;
-			
+
 				public void f(I1 i1, I2 i2) {
 					f1 = i1.g();
 					f2 = i2.g();
-			
+
 				}
 			}""";
 		assertProposalPreviewEquals(str2, "Change type of 'f1' to 'String'", proposals1);
 
 		String str3= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@NonNull @Mixed @Pure
 				public String g();
 			}
-			
+
 			interface I2 {
 				@Mixed @Pure
 				public String g();
 			}
-			
+
 			class X {
 				Map<? extends Number, @Nullable Integer> @Nullable [] f1;
 				@Mixed @Pure String f2;
-			
+
 				public void f(I1 i1, I2 i2) {
 					f1 = i1.g();
 					f2 = i2.g();
-			
+
 				}
 			}""";
 		assertProposalPreviewEquals(str3, "Change type of 'f2' to 'String'", proposals2);
 
 		String str4= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@Mixed public Map<? extends @NonNull Number, @Nullable Integer> @Nullable [] g();
 			}
-			
+
 			interface I2 {
 				@Mixed @Pure
 				public String g();
 			}
-			
+
 			class X {
 				Map<? extends Number, @Nullable Integer> @Nullable [] f1;
 				Map<? extends Number, @Nullable Integer> @Nullable [] f2;
-			
+
 				public void f(I1 i1, I2 i2) {
 					f1 = i1.g();
 					f2 = i2.g();
-			
+
 				}
 			}""";
 		assertProposalPreviewEquals(str4, "Change return type of 'g(..)' to 'Map<? extends Number, Integer>[]'", proposals1);
 
 		String str5= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@NonNull @Mixed @Pure
 				public String g();
 			}
-			
+
 			interface I2 {
 				@Mixed public Map<? extends Number, @Nullable Integer> @Nullable [] g();
 			}
-			
+
 			class X {
 				Map<? extends Number, @Nullable Integer> @Nullable [] f1;
 				Map<? extends Number, @Nullable Integer> @Nullable [] f2;
-			
+
 				public void f(I1 i1, I2 i2) {
 					f1 = i1.g();
 					f2 = i2.g();
-			
+
 				}
 			}""";
 		assertProposalPreviewEquals(str5, "Change return type of 'g(..)' to 'Map<? extends Number, Integer>[]'", proposals2);
@@ -2153,30 +2147,30 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			interface I2 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			class X {
 				public void f(I1 i1, I2 i2) {
 					Map<? extends Number, @Nullable Integer>[] l1;
@@ -2196,30 +2190,30 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			interface I2 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			class X {
 				public void f(I1 i1, I2 i2) {
 					@Mixed @Pure String l1;
@@ -2233,30 +2227,30 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			interface I2 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			class X {
 				public void f(I1 i1, I2 i2) {
 					Map<? extends Number, @Nullable Integer>[] l1;
@@ -2270,29 +2264,29 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str4= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@Mixed abstract Map<? extends @NonNull Number, @Nullable Integer>[] h();
 			}
-			
+
 			interface I2 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			class X {
 				public void f(I1 i1, I2 i2) {
 					Map<? extends Number, @Nullable Integer>[] l1;
@@ -2306,29 +2300,29 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str5= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.util.Map;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			@Target({ElementType.TYPE_USE})
 			@interface Pure {}
-			
+
 			@Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 			@interface Mixed {}
-			
+
 			@NonNullByDefault({})
 			interface I1 {
 				@Nullable @Mixed @Pure
 				abstract String h();
 			}
-			
+
 			interface I2 {
 				@Mixed abstract Map<? extends Number, @Nullable Integer>[] h();
 			}
-			
+
 			class X {
 				public void f(I1 i1, I2 i2) {
 					Map<? extends Number, @Nullable Integer>[] l1;
@@ -2396,7 +2390,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			}
 			public class F extends E {
 				private static String param1;
-			
+
 			    public F() {
 					super(param1);
 				}
@@ -2432,7 +2426,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			}
 			public class F extends E {
 				private static final String param1 = null;
-			
+
 			    public F() {
 					super(param1);
 				}
@@ -2591,54 +2585,54 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str= """
 			package test2;
-			
+
 			public interface ISomePath {
 			   \s
 			    public String getPath();
-			
+
 			}
 			""";
 		pack3.createCompilationUnit("ISomePath.java", str, false, null);
 
 		String str1= """
 			package test2;
-			
+
 			public class BundleInfo extends BundleInfoBasic implements ISomePath {
-			
+
 			    @Override
 			    public String getPath() {
 			        // TODO Auto-generated method stub
 			        return null;
 			    }
-			
+
 			}
 			""";
 		pack3.createCompilationUnit("BundleInfo.java", str1, false, null);
 
 		String str2= """
 			package test3;
-			
+
 			public class BundleInfo {
 			   \s
 			    public int getInt() {
 			        return 43;
 			    }
-			
+
 			}
 			""";
 		pack4.createCompilationUnit("BundleInfo.java", str2, false, null);
 
 		String str3= """
 			package test1;
-			
+
 			import test2.ISomePath;
-			
+
 			public class E {
 			   \s
 			    public ISomePath getSomePath() {
 			        return new BundleInfo();
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str3, false, null);
@@ -2649,16 +2643,16 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			import test2.BundleInfo;
 			import test2.ISomePath;
-			
+
 			public class E {
 			   \s
 			    public ISomePath getSomePath() {
 			        return new BundleInfo();
 			    }
-			
+
 			}
 			""";
 
@@ -2675,22 +2669,22 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str= """
 			package test2;
-			
+
 			public class Date {
 			   \s
 			    public String getDateString();
-			
+
 			}
 			""";
 		pack3.createCompilationUnit("Date.java", str, false, null);
 
 		String str1= """
 			package test1;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        Date d1= new Date();
-			
+
 			        Date d2;
 			        d2=new Date();
 			    }
@@ -2704,13 +2698,13 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			import test2.Date;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        Date d1= new Date();
-			
+
 			        Date d2;
 			        d2=new Date();
 			    }
@@ -2733,7 +2727,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			    public int foo(int a, int b) {
 			        return a + b;
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(int, int)} instead
 			     * @param x - x
@@ -2751,9 +2745,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			class E {
-			
+
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1 = new E1();
 			        return e1.foo(a, b, c);
@@ -2768,9 +2762,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			class E {
-			
+
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1 = new E1();
 			        int k = 2 * b + 3 * c;
@@ -2796,7 +2790,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			    public int foo(int a, int b) {
 			        return a + b;
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(int, int)} instead
 			     * @param x - x
@@ -2814,9 +2808,9 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			class E {
-			
+
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1 = new E1();
 			        return e1.foo(a, b, c);
@@ -2843,12 +2837,12 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.lang.annotation.Documented;
 			import java.lang.annotation.Target;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@Documented
 			@interface NonCritical { }
 			class E {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str, false, null);
@@ -2864,12 +2858,12 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			import java.lang.annotation.Documented;
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@Documented
 			@interface NonCritical { }
 			class E {
-			
+
 			}
 			""";
 
@@ -2889,12 +2883,12 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.lang.annotation.Documented;
 			import java.lang.annotation.Target;
-			
+
 			@Target(value=ElementType.TYPE_USE)
 			@Documented
 			@interface NonCritical { }
 			class E {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str, false, null);
@@ -2910,12 +2904,12 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			import java.lang.annotation.Documented;
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			@Target(value=ElementType.TYPE_USE)
 			@Documented
 			@interface NonCritical { }
 			class E {
-			
+
 			}
 			""";
 
@@ -2937,7 +2931,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			    public static void main(String[] args) {
 			        foo()[0];
 			    }
-			
+
 			    static Object[] foo() {
 			        return null;
 			    }
@@ -2957,7 +2951,7 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			    public static void main(String[] args) {
 			        Object object = foo()[0];
 			    }
-			
+
 			    static Object[] foo() {
 			        return null;
 			    }
@@ -2968,11 +2962,11 @@ public class QuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			public class E {
 			    private static Object object;
-			
+
 			    public static void main(String[] args) {
 			        object = foo()[0];
 			    }
-			
+
 			    static Object[] foo() {
 			        return null;
 			    }

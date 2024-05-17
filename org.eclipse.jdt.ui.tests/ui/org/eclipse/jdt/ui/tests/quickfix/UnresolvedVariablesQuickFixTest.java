@@ -113,7 +113,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Iterator iter;
-			
+
 			    void foo(Vector vec) {
 			        iter= vec.iterator();
 			    }
@@ -192,7 +192,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Iterator iter;
-			
+
 			    void foo(Vector vec) {
 			        if (vec != null)
 			            iter= vec.iterator();
@@ -278,7 +278,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Iterator iter;
-			
+
 			    void foo(Vector vec) {
 			        if (vec == null) {
 			        } else
@@ -366,7 +366,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Iterator<String> iter;
-			
+
 			    void foo(Vector<String> vec) {
 			        iter= vec.iterator();
 			    }
@@ -631,7 +631,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Iterator<String> iter;
-			
+
 			    void foo(Vector<String> vec) {
 			        if (vec != null)
 			            iter= vec.iterator();
@@ -717,7 +717,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Iterator<String> iter;
-			
+
 			    void foo(Vector<String> vec) {
 			        if (vec == null) {
 			        } else
@@ -804,7 +804,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Arrays;
 			public class E {
 			    private Number x;
-			
+
 			    public void foo() {
 			        Arrays.<Number>asList(x);
 			    }
@@ -816,7 +816,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.util.Arrays;
 			public class E {
 			    private static final Number x = null;
-			
+
 			    public void foo() {
 			        Arrays.<Number>asList(x);
 			    }
@@ -881,11 +881,11 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			import java.io.File;
-			
+
 			public class XXX extends File {
-			
+
 			}
 			""";
 
@@ -918,7 +918,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int i;
-			
+
 			    void foo() {
 			        for (i= 0;;) {
 			        }
@@ -985,7 +985,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int[] i;
-			
+
 			    /**
 			     * @return Returns a number
 			     */
@@ -1186,8 +1186,6 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testVarInSuper() throws Exception {
-		StringBuilder buf= new StringBuilder();
-
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
@@ -1246,7 +1244,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import test3.E;
 			public class F extends E {
 			    private test2.E color;
-			
+
 			    void foo() {
 			         this.color= baz();
 			    }
@@ -1289,7 +1287,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			    public void foo(int fcount) {
 			        new Runnable() {
 			            private int fCount;
-			
+
 			            public void run() {
 			                fCount= 7;
 			            }
@@ -1305,7 +1303,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    protected int fCount;
-			
+
 			    public void foo(int fcount) {
 			        new Runnable() {
 			            public void run() {
@@ -1412,7 +1410,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			    public @interface Annot {
 			        String value();
 			    }
-			
+
 			    private static final String x = null;
 			   \s
 			    @Annot(x)
@@ -1454,7 +1452,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			    public @interface Annot {
 			        float value();
 			    }
-			
+
 			    private static final float x = 0;
 			   \s
 			    @Annot(value=x)
@@ -1496,7 +1494,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			    public @interface Annot {
 			        float[] value();
 			    }
-			
+
 			    private static final float x = 0;
 			   \s
 			    @Annot(value={x})
@@ -1516,7 +1514,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 			String str= """
 				package pack;
-				
+
 				public class E {
 				    private float foo() {
 				        return PI;
@@ -1533,9 +1531,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			String[] expected= new String[1];
 			expected[0]= """
 				package pack;
-				
+
 				import static java.lang.Math.PI;
-				
+
 				public class E {
 				    private float foo() {
 				        return PI;
@@ -1634,7 +1632,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.io.File;
 			public class F {
 			    private Object Fixe;
-			
+
 			    void foo() {
 			        char ch= Fixe.pathSeparatorChar;
 			    }
@@ -1668,7 +1666,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			import java.io.File;
 			public class F {
 			    private static final String Fixe = null;
-			
+
 			    void foo() {
 			        char ch= Fixe.pathSeparatorChar;
 			    }
@@ -1677,25 +1675,25 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[i++]= """
 			package test1;
-			
+
 			public class Fixe {
-			
+
 			}
 			""";
 
 		expected[i++]= """
 			package test1;
-			
+
 			public interface Fixe {
-			
+
 			}
 			""";
 
 		expected[i++]= """
 			package test1;
-			
+
 			public enum Fixe {
-			
+
 			}
 			""";
 
@@ -1745,9 +1743,9 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E {
 			    protected int var1;
 			    public ArrayList<String> var2;
@@ -1775,8 +1773,6 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testSimilarVariableNames1() throws Exception {
-		StringBuilder buf= new StringBuilder();
-
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		String str= """
 			package test3;
@@ -1841,8 +1837,6 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testSimilarVariableNames2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test3", false, null);
 		String str= """
 			package test3;
@@ -1966,7 +1960,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        for (int number : numbers) {
@@ -1994,7 +1988,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(localProposal);
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        int[] numbers;
@@ -2012,7 +2006,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        for (Integer number : numbers) {
@@ -2040,7 +2034,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(localProposal);
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        Integer[] numbers;
@@ -2454,7 +2448,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E extends F {
 			    private static String x;
-			
+
 			    public E() {
 			        super(x);
 			    }
@@ -2480,7 +2474,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E extends F {
 			    private static final String x = null;
-			
+
 			    public E() {
 			        super(x);
 			    }
@@ -2524,7 +2518,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String x;
-			
+
 			    public E() {
 			        new F(x);
 			    }
@@ -2550,7 +2544,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private static final String x = null;
-			
+
 			    public E() {
 			        new F(x);
 			    }
@@ -2579,7 +2573,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    void foo(int i) {
 			        bar[0][i] = "bar";
@@ -2597,10 +2591,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[4];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    private String[][] bar;
-			
+
 			    void foo(int i) {
 			        bar[0][i] = "bar";
 			    }
@@ -2609,10 +2603,10 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package p;
-			
+
 			public class E {
 			    private static final String[][] bar = null;
-			
+
 			    void foo(int i) {
 			        bar[0][i] = "bar";
 			    }
@@ -2621,7 +2615,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package p;
-			
+
 			public class E {
 			    void foo(int i, String[][] bar) {
 			        bar[0][i] = "bar";
@@ -2631,7 +2625,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[3]= """
 			package p;
-			
+
 			public class E {
 			    void foo(int i) {
 			        String[][] bar;
@@ -2718,7 +2712,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String str= """
 			package test;
-			
+
 			public class E {
 			    int var1;
 			    static int var2;
@@ -2739,7 +2733,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[6];
 		expected[0]= """
 			package test;
-			
+
 			public class E {
 			    int var1;
 			    static int var2;
@@ -2752,7 +2746,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test;
-			
+
 			public class E {
 			    int var1;
 			    static int var2;
@@ -2765,7 +2759,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package test;
-			
+
 			public class E {
 			    int var1;
 			    static int var2;
@@ -2779,7 +2773,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[3]= """
 			package test;
-			
+
 			public class E {
 			    private static final String[] var = null;
 			    int var1;
@@ -2793,7 +2787,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[4]= """
 			package test;
-			
+
 			public class E {
 			    int var1;
 			    static int var2;
@@ -2806,7 +2800,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[5]= """
 			package test;
-			
+
 			public class E {
 			    int var1;
 			    static int var2;
@@ -2826,7 +2820,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    class Runnable { }
 			    public void test() {
@@ -2845,7 +2839,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[4];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    class Runnable { }
 			    private java.lang.Runnable myRunnable;
@@ -2857,7 +2851,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			public class E {
 			    class Runnable { }
 			    private static final java.lang.Runnable myRunnable = null;
@@ -2869,7 +2863,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package test1;
-			
+
 			public class E {
 			    class Runnable { }
 			    public void test(java.lang.Runnable myRunnable) {
@@ -2880,7 +2874,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 
 		expected[3]= """
 			package test1;
-			
+
 			public class E {
 			    class Runnable { }
 			    public void test() {
@@ -2976,7 +2970,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			package test1;
 			public class X {
 			    class ArrayList{}
-			
+
 			    public java.util.ArrayList<String> field;
 			}
 			""";

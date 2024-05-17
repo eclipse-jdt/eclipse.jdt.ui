@@ -141,7 +141,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private Class<? extends E> class1;
-			
+
 			    public void foo() {
 			        class1 = getClass();
 			    }
@@ -242,9 +242,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;
 			public class E {
-			
+
 			    private int fCount;
-			
+
 			    public void foo() {
 			        System.getSecurityManager();
 			    }
@@ -265,10 +265,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class E {
-			
+
 			    private int fCount;
 			    private SecurityManager fSecurityManager;
-			
+
 			    public void foo() {
 			        this.fSecurityManager = System.getSecurityManager();
 			    }
@@ -281,9 +281,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class E {
-			
+
 			    private int fCount;
-			
+
 			    public void foo() {
 			        SecurityManager _securityManager = System.getSecurityManager();
 			    }
@@ -301,9 +301,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;
 			public class E {
-			
+
 			    private int f;
-			
+
 			    public void foo() {
 			        Math.min(1.0f, 2.0f);
 			    }
@@ -324,10 +324,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class E {
-			
+
 			    private int f;
 			    private float min;
-			
+
 			    public void foo() {
 			        min = Math.min(1.0f, 2.0f);
 			    }
@@ -340,9 +340,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class E {
-			
+
 			    private int f;
-			
+
 			    public void foo() {
 			        float min = Math.min(1.0f, 2.0f);
 			    }
@@ -368,9 +368,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;
 			public class E {
-			
+
 			    private int fCount;
-			
+
 			    public static void foo() {
 			        System.getSecurityManager();
 			    }
@@ -391,10 +391,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class E {
-			
+
 			    private int fCount;
 			    private static SecurityManager fgSecurityManager;
-			
+
 			    public static void foo() {
 			        E.fgSecurityManager = System.getSecurityManager();
 			    }
@@ -407,9 +407,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class E {
-			
+
 			    private int fCount;
-			
+
 			    public static void foo() {
 			        SecurityManager _securityManager = System.getSecurityManager();
 			    }
@@ -446,7 +446,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private static Class<? extends E> class1;
-			
+
 			    static {
 			        class1 = getClass(); // comment
 			    }
@@ -722,9 +722,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Properties;
-			
+
 			public class E {
 			    public void foo() {
 			        Properties properties = System.getProperties();
@@ -737,12 +737,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Properties;
-			
+
 			public class E {
 			    private Properties properties;
-			
+
 			    public void foo() {
 			        properties = System.getProperties();
 			    }
@@ -781,9 +781,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Properties;
-			
+
 			public class E {
 			    public void foo(int i) {
 			        if (i == 0) {
@@ -798,12 +798,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Properties;
-			
+
 			public class E {
 			    private Properties properties;
-			
+
 			    public void foo(int i) {
 			        if (i == 0)
 			            properties = System.getProperties();
@@ -845,9 +845,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Properties;
-			
+
 			public class E {
 			    public void foo(int i) {
 			        if (i == 0)
@@ -864,12 +864,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Properties;
-			
+
 			public class E {
 			    private Properties properties;
-			
+
 			    public void foo(int i) {
 			        if (i == 0)
 			           i++
@@ -920,7 +920,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class Timer {
 			    private static java.util.Timer timer;
-			
+
 			    public static void main(String[] args) {
 			        timer = new java.util.Timer();
 			    }
@@ -949,7 +949,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class Timer {
 			    private static final java.util.Timer TIMER = new java.util.Timer();
-			
+
 			    public static void main(String[] args) {
 			        new java.util.Timer();
 			    }
@@ -968,7 +968,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.ArrayList;
 				import java.util.List;
 				import java.util.RandomAccess;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    void foo() {
 				        Gen<?> g = new Gen<>();
@@ -989,7 +989,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.ArrayList;
 				import java.util.List;
 				import java.util.RandomAccess;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    void foo() {
 				        Gen<?> g = new Gen<>();
@@ -1003,10 +1003,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.ArrayList;
 				import java.util.List;
 				import java.util.RandomAccess;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    private List<String> list;
-				
+
 				    void foo() {
 				        Gen<?> g = new Gen<>();
 				        list = g.get(0);
@@ -1027,7 +1027,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.ArrayList;
 				import java.util.List;
 				import java.util.RandomAccess;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    void foo() {
 				        Gen<? extends Cloneable> ge = new Gen<>();
@@ -1048,7 +1048,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.ArrayList;
 				import java.util.List;
 				import java.util.RandomAccess;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    void foo() {
 				        Gen<? extends Cloneable> ge = new Gen<>();
@@ -1062,10 +1062,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.ArrayList;
 				import java.util.List;
 				import java.util.RandomAccess;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    private Cloneable cloneable;
-				
+
 				    void foo() {
 				        Gen<? extends Cloneable> ge = new Gen<>();
 				        cloneable = ge.get(0);
@@ -1086,7 +1086,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.List;
 				import java.util.RandomAccess;
 				import java.util.Vector;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    void foo() {
 				        Gen<? super Vector<String>> gs = new Gen<>();
@@ -1108,7 +1108,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.List;
 				import java.util.RandomAccess;
 				import java.util.Vector;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    void foo() {
 				        Gen<? super Vector<String>> gs = new Gen<>();
@@ -1123,10 +1123,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.List;
 				import java.util.RandomAccess;
 				import java.util.Vector;
-				
+
 				class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {
 				    private List<String> list;
-				
+
 				    void foo() {
 				        Gen<? super Vector<String>> gs = new Gen<>();
 				        list = gs.get(0);
@@ -1143,12 +1143,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			String str1= """
 				package test1;
-				
+
 				interface WorkItem { }
 				enum RebaseWorkItem implements WorkItem {
 				    PREPARE, APPLY_COMMIT
 				}
-				
+
 				public class Snippet {
 				    void foo(Class<? extends WorkItem> workItemType) throws Exception {
 				        workItemType.getEnumConstants();
@@ -1165,12 +1165,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String expected1= """
 				package test1;
-				
+
 				interface WorkItem { }
 				enum RebaseWorkItem implements WorkItem {
 				    PREPARE, APPLY_COMMIT
 				}
-				
+
 				public class Snippet {
 				    void foo(Class<? extends WorkItem> workItemType) throws Exception {
 				        WorkItem[] enumConstants = workItemType.getEnumConstants();
@@ -1180,15 +1180,15 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String expected2= """
 				package test1;
-				
+
 				interface WorkItem { }
 				enum RebaseWorkItem implements WorkItem {
 				    PREPARE, APPLY_COMMIT
 				}
-				
+
 				public class Snippet {
 				    private WorkItem[] enumConstants;
-				
+
 				    void foo(Class<? extends WorkItem> workItemType) throws Exception {
 				        enumConstants = workItemType.getEnumConstants();
 				    }
@@ -1203,12 +1203,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str1= """
 			package p;
-			
+
 			public class E {
-			
+
 			    private E other;
 			    boolean b;
-			
+
 			    public void foo(boolean newB) {
 			        /*1*/other.b = newB;
 			        other.other.b = newB;
@@ -1226,12 +1226,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package p;
-			
+
 			public class E {
-			
+
 			    private E other;
 			    boolean b;
-			
+
 			    public void foo(boolean newB) {
 			        /*1*/E other2 = other;
 			        other2.b = newB;
@@ -1268,7 +1268,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int count;
-			
+
 			    public  E(int count) {
 			        this.count = count;
 			    }
@@ -1309,7 +1309,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private Vector[] fVec;
-			
+
 			    public  E(int count, Vector vec[]) {
 			        super();
 			        fVec = vec;
@@ -1334,7 +1334,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E {
 			    private int fgVec;
-			
+
 			    public static void foo(int count, Vector vec[]) {
 			        count++;
 			    }
@@ -1356,7 +1356,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    private int fgVec;
 			    private static Vector[] fgVec2;
-			
+
 			    public static void foo(int count, Vector vec[]) {
 			        E.fgVec2 = vec;
 			        count++;
@@ -1377,7 +1377,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private long count;
-			
+
 			    public void foo(int count) {
 			        count++;
 			    }
@@ -1400,7 +1400,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    private long count;
 			    private int count2;
-			
+
 			    public void foo(int count) {
 			        this.count2 = count;
 			        count++;
@@ -1415,7 +1415,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private long count;
-			
+
 			    public void foo(int count) {
 			        this.count = count;
 			        count++;
@@ -1436,7 +1436,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int p1;
-			
+
 			    public void foo(int p1, int p2) {
 			        this.p1 = p1;
 			    }
@@ -1459,7 +1459,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    private int p1;
 			    private int p2;
-			
+
 			    public void foo(int p1, int p2) {
 			        this.p1 = p1;
 			        this.p2 = p2;
@@ -1474,7 +1474,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int p1;
-			
+
 			    public void foo(int p1, int p2) {
 			        this.p1 = p1;
 			        this.p1 = p2;
@@ -1496,7 +1496,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    private Float p1;
 			    private Number p2;
-			
+
 			    public void foo(Float p1, Integer p2) {
 			        this.p1 = p1;
 			    }
@@ -1519,7 +1519,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    private Float p1;
 			    private Number p2;
-			
+
 			    public void foo(Float p1, Integer p2) {
 			        this.p1 = p1;
 			        this.p2 = p2;
@@ -1536,7 +1536,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    private Float p1;
 			    private Number p2;
 			    private Integer p22;
-			
+
 			    public void foo(Float p1, Integer p2) {
 			        this.p1 = p1;
 			        this.p22 = p2;
@@ -1556,7 +1556,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;
 			public class E {
-			
+
 			    public void foo(Float p1, Integer p2) {
 			    }
 			    private Float p1;
@@ -1578,7 +1578,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class E {
-			
+
 			    public void foo(Float p1, Integer p2) {
 			        this.p1 = p1;
 			    }
@@ -1593,7 +1593,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class E {
-			
+
 			    private Float p12;
 			    public void foo(Float p1, Integer p2) {
 			        this.p12 = p1;
@@ -1633,7 +1633,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int count;
-			
+
 			    public E(int count, long size, boolean state) {
 			        this.count = count;
 			    }
@@ -1649,7 +1649,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    private int count;
 			    private long size;
 			    private boolean state;
-			
+
 			    public E(int count, long size, boolean state) {
 			        this.count = count;
 			        this.size = size;
@@ -1688,7 +1688,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int count;
-			
+
 			    public void foo(int count, long size, boolean state) {
 			        this.count = count;
 			    }
@@ -1704,7 +1704,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    private int count;
 			    private long size;
 			    private boolean state;
-			
+
 			    public void foo(int count, long size, boolean state) {
 			        this.count = count;
 			        this.size = size;
@@ -1747,7 +1747,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			import java.util.Vector;
 			public class E<T> {
 			    private Vector<String>[] fVec;
-			
+
 			    public  E(int count, Vector<String>[] vec) {
 			        super();
 			        fVec = vec;
@@ -1873,7 +1873,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int b = 1;
 			        int d = extracted(a, b);
 			    }
-			
+
 			    private int extracted(int a, int b) {
 			        return a + b;
 			    }
@@ -2090,7 +2090,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test;
 			public class E {
 			    private static final int _1 = 1;
-			
+
 			    public E() {
 			        int a = _1;
 			        int b = 1;
@@ -2112,13 +2112,13 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    public Object getElementName() {
 			        return elementName;
 			    }
-			
+
 			    private class UtilClass {
 			        public static int combineHashCodes(int a, int b) {
 			            return a + b;
 			        }
 			    }
-			
+
 			    @Override
 			    public int hashCode() {
 			        int k = this.parent == null ? super.hashCode() :
@@ -2145,17 +2145,17 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= """
 			package test;
 			public class E {
-			
+
 			    public interface K {
 			        String getName();
 			        String getValue();
 			    }
-			
+
 			    public void foo(K k) {
 			        System.out.println(k.getName());
 			        System.out.println(k.getValue());
 			    }
-			
+
 			    public void foo2() {
 			        foo(new K() {
 			            @Override
@@ -2180,17 +2180,17 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String ex1= """
 			package test;
 			public class E {
-			
+
 			    public interface K {
 			        String getName();
 			        String getValue();
 			    }
-			
+
 			    public void foo(K k) {
 			        System.out.println(k.getName());
 			        System.out.println(k.getValue());
 			    }
-			
+
 			    public void foo2() {
 			        K k = new K() {
 			            @Override
@@ -2215,12 +2215,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String str= """
 			package test;
-			
+
 			class E {
 			    public final static E instance= new E();
 			   \s
 			    int s;
-			
+
 			    final static int f() {
 			        System.out.println(E.instance.s + 1);
 			        return 1;
@@ -2242,12 +2242,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String str= """
 			package test;
-			
+
 			class E {
 			    public final static E instance= new E();
-			
+
 			    static final int t = 5;
-			
+
 			    int f1() {
 			        return 23 * E.t; \s
 			    }
@@ -2264,14 +2264,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String ex1= """
 			package test;
-			
+
 			class E {
 			    public final static E instance= new E();
-			
+
 			    static final int t = 5;
-			
+
 			    private static final int INT = 23 * E.t;
-			
+
 			    int f1() {
 			        return INT; \s
 			    }
@@ -2313,7 +2313,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int b = 1;
 			        int d = extracted(a, b);
 			    }
-			
+
 			    private int extracted(int a, int b) {
 			        return a + b;
 			    }
@@ -2400,7 +2400,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int a = 1;
 			        extracted(a);
 			    }
-			
+
 			    private void extracted(int a) {
 			        int b = 1;
 			        int d = a + b;
@@ -2454,7 +2454,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    void foo() {
 			        extracted();
 			    }
-			
+
 			    private void extracted() {
 			        int a = 1;
 			        int b = 1;
@@ -2512,7 +2512,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        for (; true;)
 			            i = extracted(i);
 			    }
-			
+
 			    private int extracted(int i) {
 			        i++;
 			        return i;
@@ -2536,7 +2536,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int j;
-			
+
 			    void foo() {
 			        int i = 0;
 			        for (; true;)
@@ -3102,7 +3102,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private static final int ABS = Math.abs(9+ 8);
-			
+
 			    public int foo() {
 			        return ABS;
 			    }
@@ -3226,7 +3226,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int is[];
-			
+
 			    public void foo() {
 			        is = null;
 			    }
@@ -3552,7 +3552,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int vars[];
-			
+
 			    public void foo() {
 			        foo();
 			        vars = null;
@@ -3600,7 +3600,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int vars[];
-			
+
 			    public void foo() {
 			        foo();
 			        vars = null;
@@ -3659,7 +3659,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int vars[];
-			
+
 			    public void foo() {
 			        vars = null;
 			        foo();
@@ -3708,7 +3708,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        String message = "";
 			       \s
 			        // 2;
-			
+
 			       \s
 			        // 3;
 			    }
@@ -3719,7 +3719,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String message;
-			
+
 			    public void foo() {
 			        // 1;
 			       \s
@@ -3786,7 +3786,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String message;
-			
+
 			    public void foo() {
 			        // 1;
 			       \s
@@ -3841,7 +3841,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String var;
-			
+
 			    public void foo(int x) {
 			        if (x == 1)
 			           var = "abc";
@@ -3880,7 +3880,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String var;
-			
+
 			    public void foo(int x) {
 			        if (x == 1)
 			           var = "abc";
@@ -3929,7 +3929,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String var;
-			
+
 			    public void foo(int x) {
 			        if (x == 1) {
 			           var = "abc";
@@ -3973,7 +3973,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String var;
-			
+
 			    public void foo(int x) {
 			        if (x == 1) {
 			           var = "abc";
@@ -4020,7 +4020,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private String var;
-			
+
 			    public void foo(int x) {
 			        switch (x) {
 			        case 1:
@@ -4151,7 +4151,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        String s= "a";
 			        extracted(s);
 			    }
-			
+
 			    private boolean extracted(String s) {
 			        return s.equals("a");
 			    }
@@ -4204,7 +4204,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private static final String A = "a";
-			
+
 			    public void foo() {
 			        String s= A;
 			        A.equals(s);
@@ -5369,12 +5369,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String expected1= """
 				package test1;
-				
+
 				import java.io.IOException;
 				import java.util.Vector;
-				
+
 				public interface IB {
-				
+
 				    Vector foo(int count) throws IOException;
 				}
 				""";
@@ -5384,12 +5384,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String expected2= """
 				package test1;
-				
+
 				import java.io.IOException;
 				import java.util.Vector;
-				
+
 				public class A {
-				
+
 				    public Vector foo(int count) throws IOException {
 				        //TODO
 				        return null;
@@ -5448,12 +5448,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String expected1= """
 				package test1;
-				
+
 				import java.io.IOException;
 				import java.util.Vector;
-				
+
 				public interface IB<T> {
-				
+
 				    /**
 				     * Always return NULL
 				     * @param count
@@ -5469,12 +5469,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String expected2= """
 				package test1;
-				
+
 				import java.io.IOException;
 				import java.util.Vector;
-				
+
 				public class A<T> {
-				
+
 				    /**
 				     * Always return NULL
 				     * @param count
@@ -7389,7 +7389,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			            foo(name);
 			        }
 			    }
-			
+
 			    public Object foo(final String name) {
 			        return new RunnableImplementation(name);
 			    }
@@ -7448,7 +7448,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			            foo(fExisting);
 			        }
 			    }
-			
+
 			    public Object foo(final String pName) {
 			        int lVar= 8;
 			        return new ArrayListExtension2(lVar, pName);
@@ -7517,7 +7517,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			package test1;
 			public class A {
 			    private static final String FOO = "foo";
-			
+
 			    public void foo() {
 			        String strX = FOO+"bar"+"baz"+"biz";
 			    }
@@ -7923,9 +7923,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.text.MessageFormat;
-				
+
 				public class A {
 				    public void foo(Object o1, Object o2) {
 				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", new Object[]{o1, o2}));
@@ -7986,9 +7986,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.text.MessageFormat;
-				
+
 				public class A {
 				    public void foo(Object o1, Object o2) {
 				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" ", new Object[]{new Integer(1)}));
@@ -8021,9 +8021,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class A {
 			    public void foo(Object o1, Object o2) {
 			        System.out.println(MessageFormat.format("foo{0} \\"bar\\" ", 1));
@@ -8054,9 +8054,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class A {
 			    public void foo(Object o1, Object o2) {
 			        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", o1, o2));
@@ -8087,9 +8087,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class A {
 			    public void foo(Object o1, Object o2) {
 			        System.out.println(MessageFormat.format("foo''{0}'' \\"bar\\" {1}", o1, o2));
@@ -8119,9 +8119,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class A {
 			    public void foo() {
 			        String s2= MessageFormat.format("ab{0}c{1}def", 3L, (4-2));
@@ -8183,9 +8183,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class A {
 			    public void foo(Object o1, Object o2) {
 			        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", o1, o2)); //a comment //$NON-NLS-1$
@@ -8391,7 +8391,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8415,7 +8415,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String[] expected= new String[3];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8433,7 +8433,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8457,7 +8457,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8476,7 +8476,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8502,7 +8502,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String[] expected= new String[3];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8522,7 +8522,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8546,7 +8546,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8567,7 +8567,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8593,7 +8593,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8613,7 +8613,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8643,7 +8643,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8671,7 +8671,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8700,7 +8700,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8730,7 +8730,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -8754,7 +8754,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -10003,9 +10003,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String[] expected= new String[3];
 			expected[0]= """
 				package test1;
-				
+
 				import java.util.Date;
-				
+
 				public class A {
 				    class Iterator {}
 				    void foo() {
@@ -10018,9 +10018,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			expected[1]= """
 				package test1;
-				
+
 				import java.util.Date;
-				
+
 				public class A {
 				    class Iterator {}
 				    void foo() {
@@ -10035,9 +10035,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			expected[2]= """
 				package test1;
-				
+
 				import java.util.Date;
-				
+
 				public class A {
 				    class Iterator {}
 				    void foo() {
@@ -10343,9 +10343,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import static test1.T.str;
-			
+
 			public class S {
 				{
 					System.out.println(str);
@@ -10405,9 +10405,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import static test1.T.doIt;
-			
+
 			public class S {
 				{
 					doIt("");
@@ -10419,9 +10419,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import static test1.T.doIt;
-			
+
 			public class S {
 				{
 					doIt("");
@@ -10472,9 +10472,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import static test1.T.FOO;
-			
+
 			public class S {
 				{
 					public String foo = FOO;
@@ -10633,7 +10633,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test2;
 			import static test1.T.FOO;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10647,7 +10647,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str3= """
 			package test2;
 			import static test1.T.FOO;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10669,7 +10669,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str4= """
 			package test2;
 			import static test1.T.bar;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10683,7 +10683,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str5= """
 			package test2;
 			import static test1.T.bar;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10740,7 +10740,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test2;
 			import static test1.T.FOO;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10754,7 +10754,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str3= """
 			package test2;
 			import static test1.T.FOO;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10798,7 +10798,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str5= """
 			package test3;
 			import static test1.T.FOO;
-			
+
 			import test1.T
 			public class G {
 			    public G() {
@@ -10846,7 +10846,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str1= """
 			package test2;
 			import static test1.T.bar;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10869,7 +10869,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test2;
 			import static test1.T.bar;
-			
+
 			import test1.T
 			public class S {
 			    public S() {
@@ -10918,7 +10918,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		String str1= """
 			package test2;
-			
+
 			import test1.T;
 			public class S {
 			    public S() {
@@ -10941,9 +10941,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test2;
-			
+
 			import static test1.T.foo;
-			
+
 			import test1.T;
 			public class S {
 			    public S() {
@@ -10958,9 +10958,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str3= """
 			package test2;
-			
+
 			import static test1.T.foo;
-			
+
 			import test1.T;
 			public class S {
 			    public S() {
@@ -10989,7 +10989,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		String str1= """
 			package test2;
-			
+
 			import static test1.T.bar;
 			import static test1.T.foo;
 			public class S {
@@ -11042,7 +11042,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		String str2= """
 			package test2;
-			
+
 			import test1.TSub;
 			public class S {
 			    public S() {
@@ -11065,9 +11065,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String preview1= """
 			package test2;
-			
+
 			import static test1.T.foo;
-			
+
 			import test1.TSub;
 			public class S {
 			    public S() {
@@ -11079,7 +11079,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String preview2= """
 			package test2;
-			
+
 			import static test1.T.foo;
 			public class S {
 			    public S() {
@@ -11145,7 +11145,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				    private int value;
 				    public static class Inner {
 				        private int value;
-				
+
 				        public Inner (int value) {
 				            this.value = value;
 				        }
@@ -11255,7 +11255,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    public void replaceWithInitedBoolean(int i) {
 			        boolean isInitedToTrue= true;
-			
+
 			        // Keep this comment
 			        while (isInitedToTrue) {
 			           ); Keep this comment too
@@ -11280,7 +11280,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			public class E {
 			    public void replaceWithInitedBoolean(int i) {
 			        boolean isInitedToTrue= true;
-			
+
 			        // Keep this comment
 			        do {
 			           ); Keep this comment too
@@ -11306,7 +11306,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    public void replaceWithInitedBooleanAndInteger(int i) {
 			        int j= 1000;
 			        boolean isInitedToTrue= true;
-			
+
 			        // Keep this comment
 			        while (isInitedToTrue && j > 0) {
 			            // Keep this comment too
@@ -11333,7 +11333,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    public void replaceWithInitedBooleanAndInteger(int i) {
 			        int j= 1000;
 			        boolean isInitedToTrue= true;
-			
+
 			        // Keep this comment
 			        do {
 			            // Keep this comment too
@@ -11362,7 +11362,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int k= -1000;
 			        boolean isInitedToTrue= false;
 			        isInitedToTrue= k < 0;
-			
+
 			        // Keep this comment
 			        while (isInitedToTrue && j > 0) {
 			            // Keep this comment too
@@ -11391,7 +11391,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int k= -1000;
 			        boolean isInitedToTrue= false;
 			        isInitedToTrue= k < 0;
-			
+
 			        // Keep this comment
 			        do {
 			            // Keep this comment too
@@ -11420,7 +11420,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int k= -1000;
 			        boolean isInitedToTrue= false;
 			        isInitedToTrue= k < 0;
-			
+
 			        // Keep this comment
 			        while (isInitedToTrue && j > 0) {
 			            // Keep this comment too
@@ -11452,7 +11452,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			        int k= -1000;
 			        boolean isInitedToTrue= false;
 			        isInitedToTrue= k < 0;
-			
+
 			        // Keep this comment
 			        do {
 			            // Keep this comment too
@@ -11640,9 +11640,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		String str1= """
 			package test2;
-			
+
 			import test1.T;
-			
+
 			public class S {
 			    public S() {
 			        T.foo();
@@ -11659,11 +11659,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		String str2= """
 			package test2;
-			
+
 			import static test1.T.foo;
-			
+
 			import test1.T;
-			
+
 			public class S {
 			    public S() {
 			        foo();
@@ -11688,9 +11688,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		String str1= """
 			package test2;
-			
+
 			import test1.T;
-			
+
 			public class S {
 			    public S() {
 			        T.foo();
@@ -11710,11 +11710,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		String str2= """
 			package test2;
-			
+
 			import static test1.T.foo;
-			
+
 			import test1.T;
-			
+
 			public class S {
 			    public S() {
 			        foo();
