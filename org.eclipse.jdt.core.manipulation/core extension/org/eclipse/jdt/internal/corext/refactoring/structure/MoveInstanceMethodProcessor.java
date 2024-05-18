@@ -505,11 +505,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/** The anonymous class nesting counter */
 		protected int fAnonymousClass= 0;
 
+		/** The visibility adjustments */
+		private final Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments;
+
 		/** The method declaration to rewrite */
 		protected final MethodDeclaration fDeclaration;
 
 		/** The source ast rewrite to use */
 		protected final ASTRewrite fRewrite;
+
+		/** The compilation unit rewrites */
+		private final Map<ICompilationUnit, CompilationUnitRewrite> fRewrites;
 
 		/** The existing static imports */
 		protected final Set<IBinding> fStaticImports= new HashSet<>();
@@ -523,20 +529,26 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/**
 		 * Creates a new method body rewriter.
 		 *
+		 * @param rewrites
+		 *            the compilation unit rewrites
 		 * @param targetRewrite
 		 *            the target compilation unit rewrite to use
 		 * @param rewrite
 		 *            the source ast rewrite to use
 		 * @param sourceDeclaration
 		 *            the source method declaration
+		 * @param adjustments
+		 *            the map of elements to visibility adjustments
 		 */
-		public MethodBodyRewriter(final CompilationUnitRewrite targetRewrite, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration) {
+		public MethodBodyRewriter(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite targetRewrite, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
 			Assert.isNotNull(targetRewrite);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(sourceDeclaration);
 			fTargetRewrite= targetRewrite;
 			fRewrite= rewrite;
+			fRewrites= rewrites;
 			fDeclaration= sourceDeclaration;
+			fAdjustments= adjustments;
 			fStaticImports.clear();
 			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet<>(), fStaticImports, false);
 		}
@@ -571,7 +583,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		public boolean visit(SimpleType node) {
 			ITypeBinding nodeTypeBinding= ASTNodes.getEnclosingType(node);
 			ITypeBinding simpleTypeBinding= node.resolveBinding();
-			if (nodeTypeBinding != null && !nodeTypeBinding.isEqualTo(simpleTypeBinding) && simpleTypeBinding.isMember()) {
+			if (nodeTypeBinding != null && simpleTypeBinding != null && !nodeTypeBinding.isEqualTo(simpleTypeBinding) && simpleTypeBinding.isMember()) {
 				AST ast= node.getAST();
 				if (node.getParent() instanceof ClassInstanceCreation parent && parent.getExpression() == null && !Modifier.isStatic(simpleTypeBinding.getModifiers())) {
 					ClassInstanceCreation newCreation= ast.newClassInstanceCreation();
@@ -649,7 +661,28 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						fRewrite.replace(node, newCreation, null);
 					}
 				}
-
+				IMethodBinding constructorBinding= node.resolveConstructorBinding();
+				if (constructorBinding != null) {
+					IMethod constructor= (IMethod) constructorBinding.getJavaElement();
+					try {
+						if (constructor != null && !constructor.isBinary() && !constructor.isReadOnly() && !Modifier.isPublic(constructor.getFlags())) {
+							boolean same= false;
+							final CompilationUnitRewrite rewrite= getCompilationUnitRewrite(fRewrites, constructor.getCompilationUnit());
+							final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(constructor, rewrite.getRoot());
+							if (declaration != null) {
+								final ITypeBinding declaring= constructorBinding.getDeclaringClass();
+								if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
+									same= true;
+								final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
+								final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public;
+								if (MemberVisibilityAdjustor.hasLowerVisibility(constructorBinding.getModifiers(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(constructor, keyword, fAdjustments))
+									fAdjustments.put(constructor, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(constructor, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabelProviderCore.getBindingLabel(declaration.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(constructor.getCompilationUnit(), declaration))));
+							}
+						}
+					} catch (JavaModelException e) {
+						// unexpected
+					}
+				}
 			}
 			return super.visit(node);
 		}
@@ -1096,7 +1129,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		@Override
 		public boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
-			if (isFieldAccess(node) && !isTargetAccess(node)) {
+			if (isFieldAccess(node) && !isLocalQualified(node) && !isTargetAccess(node)) {
 				fResult.add(node);
 				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
 			} else if (node.getParent() instanceof ClassInstanceCreation constructor && constructor.getExpression() == null) {
@@ -1281,6 +1314,24 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			}
 		}
 		return !Modifier.isStatic(variable.getModifiers());
+	}
+
+	protected static boolean isLocalQualified(final SimpleName name) {
+		if (name.getParent() instanceof FieldAccess fieldAccess) {
+			Expression exp= fieldAccess.getExpression();
+			if (exp instanceof SimpleName qualifierName) {
+				IBinding qualifierBinding= qualifierName.resolveBinding();
+				if (qualifierBinding instanceof IVariableBinding varBinding && !varBinding.isField()) {
+					return true;
+				}
+			}
+		} else if (name.getParent() instanceof QualifiedName qualifiedName) {
+			IBinding qualifierBinding= qualifiedName.getQualifier().resolveBinding();
+			if (qualifierBinding instanceof IVariableBinding varBinding && !varBinding.isField()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The candidate targets */
@@ -2315,16 +2366,21 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the method body for the target method declaration.
 	 *
+	 * @param rewrites
+	 *            the compilation unit rewrites
 	 * @param rewriter
 	 *            the target compilation unit rewrite
 	 * @param rewrite
 	 *            the source ast rewrite
 	 * @param declaration
 	 *            the source method declaration
+	 * @param adjustments
+	 *            the map of elements to visibility adjustments
 	 */
-	protected void createMethodBody(final CompilationUnitRewrite rewriter, final ASTRewrite rewrite, final MethodDeclaration declaration) {
+	protected void createMethodBody(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite rewriter,
+			final ASTRewrite rewrite, final MethodDeclaration declaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
 		Assert.isNotNull(declaration);
-		declaration.getBody().accept(new MethodBodyRewriter(rewriter, rewrite, declaration));
+		declaration.getBody().accept(new MethodBodyRewriter(rewrites, rewriter, rewrite, declaration, adjustments));
 	}
 
 	/**
@@ -2514,7 +2570,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
 			createMethodTypeParameters(rewrite, declaration, status);
 			createMethodComment(rewrite, declaration);
-			createMethodBody(rewriter, rewrite, declaration);
+			createMethodBody(rewrites, rewriter, rewrite, declaration, adjustments);
 		} finally {
 			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
 				rewriter.clearImportRewrites();
