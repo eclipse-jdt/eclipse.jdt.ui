@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,9 @@ import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -469,7 +471,7 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 				return RefactoringCoreMessages.ExtractMethodAnalyzer_branch_mismatch;
 		}
 
-		final String continueMatchesLoopProblem[]= { null };
+		final Map<ASTNode, String> pendingProblems= new LinkedHashMap<>();
 		for (ASTNode astNode : selectedNodes) {
 			astNode.accept(new ASTVisitor() {
 				ArrayList<String> fLocalLoopLabels= new ArrayList<>();
@@ -479,14 +481,14 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 				public boolean visit(BreakStatement node) {
 					SimpleName label= node.getLabel();
 					if (label != null && !fLocalLoopLabels.contains(label.getIdentifier())) {
-						continueMatchesLoopProblem[0]= Messages.format(
+						pendingProblems.put(label, Messages.format(
 							RefactoringCoreMessages.ExtractMethodAnalyzer_branch_break_mismatch,
-							new Object[] { ("break " + label.getIdentifier()) }); //$NON-NLS-1$
+							new Object[] { ("break " + label.getIdentifier()) })); //$NON-NLS-1$
 					} else if (label == null) {
 						ASTNode parentStatement= ASTNodes.getFirstAncestorOrNull(node, WhileStatement.class, ForStatement.class,
 								DoStatement.class, SwitchStatement.class, EnhancedForStatement.class);
 						if (parentStatement != null && !fBreakTargets.contains(parentStatement)) {
-							continueMatchesLoopProblem[0]= RefactoringCoreMessages.ExtractMethodAnalyzer_break_parent_missing;
+							pendingProblems.put(parentStatement, RefactoringCoreMessages.ExtractMethodAnalyzer_break_parent_missing);
 						}
 					}
 					return false;
@@ -495,33 +497,39 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 				@Override
 				public boolean visit(LabeledStatement node) {
 					SimpleName label= node.getLabel();
-					if (label != null)
+					if (label != null) {
 						fLocalLoopLabels.add(label.getIdentifier());
+					}
 					return true;
 				}
 
 				@Override
 				public void endVisit(ForStatement node) {
+					pendingProblems.remove(node);
 					fBreakTargets.add(node);
 				}
 
 				@Override
 				public void endVisit(EnhancedForStatement node) {
+					pendingProblems.remove(node);
 					fBreakTargets.add(node);
 				}
 
 				@Override
 				public void endVisit(DoStatement node) {
+					pendingProblems.remove(node);
 					fBreakTargets.add(node);
 				}
 
 				@Override
 				public void endVisit(SwitchStatement node) {
+					pendingProblems.remove(node);
 					fBreakTargets.add(node);
 				}
 
 				@Override
 				public void endVisit(WhileStatement node) {
+					pendingProblems.remove(node);
 					fBreakTargets.add(node);
 				}
 
@@ -530,15 +538,18 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 					SimpleName label= node.getLabel();
 					if (label != null && !fLocalLoopLabels.contains(label.getIdentifier())) {
 						if (fEnclosingLoopLabel == null || ! label.getIdentifier().equals(fEnclosingLoopLabel.getIdentifier())) {
-							continueMatchesLoopProblem[0]= Messages.format(
+							pendingProblems.put(node, Messages.format(
 								RefactoringCoreMessages.ExtractMethodAnalyzer_branch_continue_mismatch,
-								new Object[] { "continue " + label.getIdentifier() }); //$NON-NLS-1$
+								new Object[] { "continue " + label.getIdentifier() })); //$NON-NLS-1$
 						}
 					}
 				}
 			});
 		}
-		return continueMatchesLoopProblem[0];
+		if (!pendingProblems.isEmpty()) {
+			return pendingProblems.values().iterator().next();
+		}
+		return null;
 	}
 
 	private Statement getParentLoopBody(ASTNode node) {
