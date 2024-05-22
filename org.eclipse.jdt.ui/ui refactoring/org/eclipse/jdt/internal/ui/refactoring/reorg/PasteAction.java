@@ -108,6 +108,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AbstractUnnamedTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -428,18 +429,18 @@ public class PasteAction extends SelectionDispatchAction{
 				}
 
 				ArrayList<ParsedCu> cus= new ArrayList<>();
-				List<AbstractTypeDeclaration> types= unit.types();
+				List<AbstractUnnamedTypeDeclaration> types= unit.types();
 
 				int startOffset= 0;
 				String typeName= null;
 				int maxVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
 
 				// Public types must be in separate CUs:
-				for (AbstractTypeDeclaration type : types) {
+				for (AbstractUnnamedTypeDeclaration type : types) {
 					if (typeName == null) {
 						// first in group:
 						maxVisibility= JdtFlags.getVisibilityCode(type);
-						typeName= type.getName().getIdentifier();
+						typeName= getTypeName(type);
 					} else {
 						int visibility= JdtFlags.getVisibilityCode(type);
 						if (visibility == Modifier.PUBLIC && maxVisibility == Modifier.PUBLIC) {
@@ -449,12 +450,12 @@ public class PasteAction extends SelectionDispatchAction{
 							cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
 							// ... and restart:
 							startOffset= prevEnd;
-							typeName= type.getName().getIdentifier();
+							typeName= getTypeName(type);
 							maxVisibility= visibility;
 						} else {
 							if (JdtFlags.isHigherVisibility(visibility, maxVisibility)) {
 								maxVisibility= visibility;
-								typeName= type.getName().getIdentifier();
+								typeName= getTypeName(type);
 							}
 						}
 					}
@@ -465,6 +466,10 @@ public class PasteAction extends SelectionDispatchAction{
 					cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
 				}
 				return cus;
+			}
+
+			private static String getTypeName(AbstractUnnamedTypeDeclaration type) {
+				return type instanceof AbstractTypeDeclaration named? named.getName().getIdentifier() : ""; //$NON-NLS-1$
 			}
 
 			private ParsedCu(String text, int kind, String typeName, String packageName) {
@@ -765,6 +770,12 @@ public class PasteAction extends SelectionDispatchAction{
 
 						String parsedText= Strings.trimIndentation(parsedCu.getText(), destinationPack.getJavaProject(), true);
 						int kind= parsedCu.getKind();
+						String typeName = parsedCu.getTypeName();
+						boolean implicitType = kind == ASTParser.K_COMPILATION_UNIT && typeName != null && typeName.isEmpty();
+						if (implicitType){
+							// only main method exists even if this is parsed K_COMPILATION_UNIT, so handle as body
+							kind = ASTParser.K_CLASS_BODY_DECLARATIONS;
+						}
 						if (kind == ASTParser.K_COMPILATION_UNIT) {
 							final String cuName;
 							if (parsedCu.fIsModuleInfo) {
