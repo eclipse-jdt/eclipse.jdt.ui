@@ -108,7 +108,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AbstractUnnamedTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -429,14 +428,14 @@ public class PasteAction extends SelectionDispatchAction{
 				}
 
 				ArrayList<ParsedCu> cus= new ArrayList<>();
-				List<AbstractUnnamedTypeDeclaration> types= unit.types();
+				List<AbstractTypeDeclaration> types= unit.types();
 
 				int startOffset= 0;
 				String typeName= null;
 				int maxVisibility= JdtFlags.VISIBILITY_CODE_INVALID;
 
 				// Public types must be in separate CUs:
-				for (AbstractUnnamedTypeDeclaration type : types) {
+				for (AbstractTypeDeclaration type : types) {
 					if (typeName == null) {
 						// first in group:
 						maxVisibility= JdtFlags.getVisibilityCode(type);
@@ -468,7 +467,7 @@ public class PasteAction extends SelectionDispatchAction{
 				return cus;
 			}
 
-			private static String getTypeName(AbstractUnnamedTypeDeclaration type) {
+			private static String getTypeName(AbstractTypeDeclaration type) {
 				return type instanceof AbstractTypeDeclaration named? named.getName().getIdentifier() : ""; //$NON-NLS-1$
 			}
 
