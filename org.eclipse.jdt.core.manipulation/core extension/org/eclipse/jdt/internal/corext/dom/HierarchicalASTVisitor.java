@@ -115,11 +115,11 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 
 	//---- Begin AbstractTypeDeclaration Hierarchy ---------------------------
 	public boolean visit(AbstractTypeDeclaration node) {
-		return visit((AbstractUnnamedTypeDeclaration)node);
+		return visit((BodyDeclaration)node);
 	}
 
 	public void endVisit(AbstractTypeDeclaration node) {
-		endVisit((AbstractUnnamedTypeDeclaration)node);
+		endVisit((BodyDeclaration)node);
 	}
 
 	@Override
@@ -154,29 +154,6 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 
 	//---- End AbstractTypeDeclaration Hierarchy ---------------------------
 
-	//---- Begin AbstractUnnamedTypeDeclaration Hierarchy ---------------------------
-
-	public boolean visit(AbstractUnnamedTypeDeclaration node) {
-		return visit((BodyDeclaration)node);
-	}
-
-	public void endVisit(AbstractUnnamedTypeDeclaration node) {
-		endVisit((BodyDeclaration)node);
-	}
-
-	@Override
-	public boolean visit(ImplicitTypeDeclaration node) {
-		return visit((AbstractUnnamedTypeDeclaration)node);
-	}
-
-	@Override
-	public void endVisit(ImplicitTypeDeclaration node) {
-		endVisit((AbstractUnnamedTypeDeclaration)node);
-	}
-
-	//---- End AbstractUnnamedTypeDeclaration Hierarchy ---------------------------
-
-
 	@Override
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
 		return visit((BodyDeclaration)node);
@@ -185,6 +162,16 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	@Override
 	public void endVisit(AnnotationTypeMemberDeclaration node) {
 		endVisit((BodyDeclaration)node);
+	}
+
+	@Override
+	public boolean visit(ImplicitTypeDeclaration node) {
+		return visit((AbstractTypeDeclaration)node);
+	}
+
+	@Override
+	public void endVisit(ImplicitTypeDeclaration node) {
+		endVisit((AbstractTypeDeclaration)node);
 	}
 
 	@Override
