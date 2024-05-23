@@ -1061,9 +1061,9 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class Cls {
 			    public void foo() {
 			        String statement= " * statement\\n";
@@ -1107,10 +1107,11 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \"/******************************\\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
 		buf.append("                statement +\n");
-		buf.append("                \" * copyright\\n\"; //$NON-NLS-1$\n");
+		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" ******************************/\\n\"; //$NON-NLS-1$\n");
 		buf.append("        System.out.println(copyright);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1122,19 +1123,20 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class Cls {
 			    public void foo() {
 			        String statement= " * statement\\n";
 			        // comment 1
 			        String copyright=
 			                MessageFormat.format(\"""
-					                /***********
+					                /******************************
 					                 * simple  \\s
 					                {0}\\
 					                 * copyright
+					                 ******************************/
 					                \""", statement); //$NON-NLS-1$
 			        System.out.println(copyright);
 			    }
@@ -1167,7 +1169,7 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \"/***************************************************\\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
 		buf.append("                statement;\n");
@@ -1182,16 +1184,16 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class Cls {
 			    public void foo() {
 			        String statement= " * statement\\n";
 			        // comment 1
 					        String copyright=
 					                MessageFormat.format(\"""
-					                /***********
+					                /***************************************************
 					                 * simple  \\s
 					                 * copyright
 					                {0}\""", statement); //$NON-NLS-1$
@@ -1226,10 +1228,10 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \"/*********************\\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement + \" * notice\\n\" + \"***********/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
+		buf.append("                statement + \" * notice\\n\" + \"*********************/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
 		buf.append("        System.out.println(copyright);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1241,21 +1243,21 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			import java.text.MessageFormat;
-			
+
 			public class Cls {
 			    public void foo() {
 			        String statement= " * statement\\n";
 			        // comment 1
 					        String copyright=
 					                MessageFormat.format(\"""
-					                /***********
+					                /*********************
 					                 * simple  \\s
 					                 * copyright
 					                {0}\\
 					                 * notice
-					                ***********/
+					                *********************/
 					                \""", statement); //comment 2 //$NON-NLS-1$
 			        System.out.println(copyright);
 			    }
@@ -1297,9 +1299,58 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			import java.text.MessageFormat;
-			
+
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = MessageFormat.format("Name: {0} ID: {1}", name, id);
+			        System.out.println(title);
+			    }
+			}
+			""";
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToMessageFormatTextBlock6() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo(String name, String id) {\n");
+		buf.append("        String title = \"Name: \" +\n");
+		buf.append("                          name + \n");
+		buf.append("                          \" ID: \" + \n");
+		buf.append("                          id;\n");
+		buf.append("        System.out.println(title);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("title");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+
+			import java.text.MessageFormat;
+
 			public class Cls {
 			    public void foo(String name, String id) {
 			        String title = MessageFormat.format("Name: {0} ID: {1}", name, id);
@@ -1334,12 +1385,12 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" +\n");
+		buf.append("                \"/*******************************\\n\" +\n");
 		buf.append("                \" * simple   \\n\" +\n");
 		buf.append("                \" * copyright %\\n\" +\n");
 		buf.append("                statement +\n");
 		buf.append("                \" * notice\\n\" +\n");
-		buf.append("                \"***********/\\n\"; // comment 2\n");
+		buf.append("                \" *******************************/\\n\"; // comment 2\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
@@ -1356,12 +1407,12 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			        // comment 1
 			        String copyright=
 			                String.format(\"""
-					                /***********
+					                /*******************************
 					                 * simple  \\s
 					                 * copyright %%
 					                %s\\
 					                 * notice
-					                ***********/
+					                 *******************************/
 					                \""", statement); // comment 2
 			    }
 			}
@@ -1393,10 +1444,11 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \"/******************************\\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
 		buf.append("                statement +\n");
-		buf.append("                \" * copyright\\n\"; //$NON-NLS-1$\n");
+		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \" ******************************/\\n\"; //$NON-NLS-1$\n");
 		buf.append("        System.out.println(copyright);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1414,10 +1466,11 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			        // comment 1
 			        String copyright=
 			                String.format(\"""
-					                /***********
+					                /******************************
 					                 * simple  \\s
 					                %s\\
 					                 * copyright
+					                 ******************************/
 					                \""", statement); //$NON-NLS-1$
 			        System.out.println(copyright);
 			    }
@@ -1450,7 +1503,7 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \"/***************************************************\\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
 		buf.append("                statement;\n");
@@ -1471,7 +1524,7 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			        // comment 1
 					        String copyright=
 					                String.format(\"""
-					                /***********
+					                /***************************************************
 					                 * simple  \\s
 					                 * copyright
 					                %s\""", statement); //$NON-NLS-1$
@@ -1506,10 +1559,10 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String statement= \" * statement\\n\";\n");
 		buf.append("        // comment 1\n");
 		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" + //$NON-NLS-1$\n");
+		buf.append("                \"/*********************\\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
 		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement + \" * notice\\n\" + \"***********/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
+		buf.append("                statement + \" * notice\\n\" + \"*********************/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
 		buf.append("        System.out.println(copyright);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -1527,12 +1580,12 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			        // comment 1
 					        String copyright=
 					                String.format(\"""
-					                /***********
+					                /*********************
 					                 * simple  \\s
 					                 * copyright
 					                %s\\
 					                 * notice
-					                ***********/
+					                *********************/
 					                \""", statement); //comment 2 //$NON-NLS-1$
 			        System.out.println(copyright);
 			    }
@@ -1563,6 +1616,52 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("public class Cls {\n");
 		buf.append("    public void foo(String name, String id) {\n");
 		buf.append("        String title = \"Name: \" + name + \" ID: \" + id;\n");
+		buf.append("        System.out.println(title);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		int index= buf.indexOf("title");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = String.format("Name: %s ID: %s", name, id);
+			        System.out.println(title);
+			    }
+			}
+			""";
+
+		assertProposalExists(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_string_format);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
+	public void testConcatToStringFormatTextBlock6() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo(String name, String id) {\n");
+		buf.append("        String title = \"Name: \" +\n");
+		buf.append("                          name + \n");
+		buf.append("                          \" ID: \" + \n");
+		buf.append("                          id;\n");
 		buf.append("        System.out.println(title);\n");
 		buf.append("    }\n");
 		buf.append("}\n");

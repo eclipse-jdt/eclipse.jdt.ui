@@ -235,6 +235,7 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			Expression lastStringLiteral= firstStringLiteral;
 			Expression firstArgumentExpression= operands.get(0);
 			Expression lastArgumentExpression= firstArgumentExpression;
+			int totalSize= 0;
 			for (Expression operand : operands) {
 				if (operand instanceof StringLiteral) {
 					if (isFirstStringLiteral) {
@@ -254,6 +255,7 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 						}
 					}
 					String value= ((StringLiteral) operand).getEscapedValue();
+					totalSize += value.length();
 					value= value.replace("%", "%%"); //$NON-NLS-1$ //$NON-NLS-2$
 					fLiterals.add(value);
 					value= value.substring(1, value.length() - 1);
@@ -281,9 +283,9 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			int maxOffset= lastStringLiteral.getStartPosition() > lastArgumentExpression.getStartPosition() ?
 					lastStringLiteral.getStartPosition() + lastStringLiteral.getLength() : lastArgumentExpression.getStartPosition() + lastArgumentExpression.getLength();
 
-			boolean isSingleLine= root.getLineNumber(maxOffset) == root.getLineNumber(minOffset);
+			boolean isLessThanThreeLines= root.getLineNumber(maxOffset) - root.getLineNumber(minOffset) < 2;
 
-			if (is15OrHigher && !isSingleLine) {
+			if (is15OrHigher && !isLessThanThreeLines && totalSize > 80) {
 				StringBuilder buf= new StringBuilder();
 
 				List<String> parts= new ArrayList<>();

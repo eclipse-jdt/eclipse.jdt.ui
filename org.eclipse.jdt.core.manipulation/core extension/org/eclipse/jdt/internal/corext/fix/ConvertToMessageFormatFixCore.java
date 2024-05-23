@@ -243,6 +243,7 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			Expression lastStringLiteral= firstStringLiteral;
 			Expression firstArgumentExpression= operands.get(0);
 			Expression lastArgumentExpression= firstArgumentExpression;
+			int totalSize= 0;
 			for (Expression operand : operands) {
 				if (operand instanceof StringLiteral) {
 					if (isFirstStringLiteral) {
@@ -262,6 +263,7 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 						}
 					}
 					String value= ((StringLiteral) operand).getEscapedValue();
+					totalSize += value.length();
 					value= value.replace("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 					value= value.replace("{", "'{'"); //$NON-NLS-1$ //$NON-NLS-2$
 					value= value.replace("}", "'}'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -304,7 +306,6 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 				}
 			}
 
-
 			importRewrite.addImport("java.text.MessageFormat", importContext); //$NON-NLS-1$
 
 			StringBuilder buffer= new StringBuilder();
@@ -314,9 +315,9 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			int maxOffset= lastStringLiteral.getStartPosition() > lastArgumentExpression.getStartPosition() ?
 					lastStringLiteral.getStartPosition() + lastStringLiteral.getLength() : lastArgumentExpression.getStartPosition() + lastArgumentExpression.getLength();
 
-			boolean isSingleLine= root.getLineNumber(maxOffset) == root.getLineNumber(minOffset);
+			boolean isLessThanThreeLines= root.getLineNumber(maxOffset) - root.getLineNumber(minOffset) < 2;
 
-			if (is15OrHigher && !isSingleLine) {
+			if (is15OrHigher && !isLessThanThreeLines && totalSize > 80) {
 				StringBuilder buf= new StringBuilder();
 
 				List<String> parts= new ArrayList<>();
