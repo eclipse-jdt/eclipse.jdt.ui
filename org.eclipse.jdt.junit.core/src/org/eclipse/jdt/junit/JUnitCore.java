@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
@@ -233,5 +234,25 @@ public class JUnitCore {
 		} catch (InterruptedException interrupt) {
 			return null;
 		}
+	}
+
+	/**
+	 * @param attributes the attributes to check here, can be <code>null</code>
+	 * @return <code>true</code> if vintage engine is enabled it <code>false</code> if not
+	 * @since 3.14
+	 */
+	public static boolean isVintage(IClasspathAttribute[] attributes) {
+		if (attributes != null) {
+			for (IClasspathAttribute attribute : attributes) {
+				if (JUnitCore.VINTAGE_ATTRIBUTE.equals(attribute.getName())) {
+					String value= attribute.getValue();
+					if (value != null && !value.isBlank()) {
+						return Boolean.parseBoolean(value);
+					}
+				}
+			}
+		}
+		// default is true for backward compat
+		return true;
 	}
 }
