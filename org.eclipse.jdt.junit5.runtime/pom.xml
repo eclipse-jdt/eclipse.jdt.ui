@@ -14,7 +14,7 @@
   <parent>
     <artifactId>eclipse.jdt.ui</artifactId>
     <groupId>eclipse.jdt.ui</groupId>
-    <version>4.32.0-SNAPSHOT</version>
+    <version>4.33.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.jdt</groupId>
   <artifactId>org.eclipse.jdt.junit5.runtime</artifactId>
