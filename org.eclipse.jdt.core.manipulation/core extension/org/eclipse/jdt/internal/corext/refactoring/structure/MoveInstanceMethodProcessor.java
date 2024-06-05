@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -98,12 +99,14 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -565,6 +568,56 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
+		public boolean visit(SimpleType node) {
+			ITypeBinding nodeTypeBinding= ASTNodes.getEnclosingType(node);
+			ITypeBinding simpleTypeBinding= node.resolveBinding();
+			if (nodeTypeBinding != null && !nodeTypeBinding.isEqualTo(simpleTypeBinding) && simpleTypeBinding.isMember()) {
+				AST ast= node.getAST();
+				if (node.getParent() instanceof ClassInstanceCreation parent && parent.getExpression() == null && !Modifier.isStatic(simpleTypeBinding.getModifiers())) {
+					ClassInstanceCreation newCreation= ast.newClassInstanceCreation();
+					newCreation.setType((Type) fRewrite.createCopyTarget(node));
+					newCreation.setExpression(ASTNodeFactory.newName(node.getAST(), fTargetName));
+					List<Expression> args= parent.arguments();
+					for (Expression arg : args) {
+						newCreation.arguments().add(fRewrite.createCopyTarget(arg));
+					}
+					List<Type> typeArgs= parent.typeArguments();
+					for (Type typeArg : typeArgs) {
+						newCreation.typeArguments().add(fRewrite.createCopyTarget(typeArg));
+					}
+					if (parent.getAnonymousClassDeclaration() != null) {
+						newCreation.setAnonymousClassDeclaration((AnonymousClassDeclaration) fRewrite.createCopyTarget(parent.getAnonymousClassDeclaration()));
+					}
+					fRewrite.replace(node.getParent(), newCreation, null);
+				} else {
+					try {
+						if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit())) {
+							String qualifiedTypeName= Bindings.getFullyQualifiedName(simpleTypeBinding);
+							int index= qualifiedTypeName.lastIndexOf("."); //$NON-NLS-1$
+							int startIndex= 0;
+							IPackageDeclaration[] packages= fMethod.getCompilationUnit().getPackageDeclarations();
+							if (packages.length > 0) {
+								String packageName= fMethod.getCompilationUnit().getPackageDeclarations()[0].getElementName();
+								if (packageName.length() > 0 && qualifiedTypeName.startsWith(packageName)) {
+									startIndex= packageName.length() + 1;
+								}
+								String qualifier= qualifiedTypeName.substring(startIndex, index);
+								QualifiedName qualifiedName= (QualifiedName) fRewrite.createStringPlaceholder(qualifier, ASTNode.QUALIFIED_NAME);
+								NameQualifiedType newQualifiedType= ast.newNameQualifiedType(qualifiedName, (SimpleName) fRewrite.createCopyTarget(node.getName()));
+								fRewrite.replace(node, newQualifiedType, null);
+							}
+						}
+
+					} catch (JavaModelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			return super.visit(node);
+		}
+
+		@Override
 		public boolean visit(final ClassInstanceCreation node) {
 			Assert.isNotNull(node);
 			if (node.getParent() instanceof ClassInstanceCreation) {
@@ -572,6 +625,31 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				if (declaration != null)
 					visit(declaration);
 				return false;
+			} else {
+				Type type= node.getType();
+				if (node.getExpression() == null && type.isSimpleType() && type.getRoot() == node.getRoot()) {
+					ITypeBinding nodeTypeBinding= ASTNodes.getEnclosingType(node);
+					ITypeBinding newTypeBinding= type.resolveBinding();
+					if (nodeTypeBinding != null && newTypeBinding.isMember() && !nodeTypeBinding.isEqualTo(newTypeBinding) && !Modifier.isStatic(newTypeBinding.getModifiers())) {
+						AST ast= node.getAST();
+						ClassInstanceCreation newCreation= ast.newClassInstanceCreation();
+						newCreation.setType((Type) fRewrite.createCopyTarget(type));
+						newCreation.setExpression(ASTNodeFactory.newName(node.getAST(), fTargetName));
+						List<Expression> args= node.arguments();
+						for (Expression arg : args) {
+							newCreation.arguments().add(fRewrite.createCopyTarget(arg));
+						}
+						List<Type> typeArgs= node.typeArguments();
+						for (Type typeArg : typeArgs) {
+							newCreation.typeArguments().add(fRewrite.createCopyTarget(typeArg));
+						}
+						if (node.getAnonymousClassDeclaration() != null) {
+							newCreation.setAnonymousClassDeclaration((AnonymousClassDeclaration) fRewrite.createCopyTarget(node.getAnonymousClassDeclaration()));
+						}
+						fRewrite.replace(node, newCreation, null);
+					}
+				}
+
 			}
 			return super.visit(node);
 		}
@@ -1021,6 +1099,19 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (isFieldAccess(node) && !isTargetAccess(node)) {
 				fResult.add(node);
 				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
+			} else if (node.getParent() instanceof ClassInstanceCreation constructor && constructor.getExpression() == null) {
+				Type type= constructor.getType();
+				ITypeBinding binding= type.resolveBinding();
+				if (binding != null && binding.isMember() && !Modifier.isPublic(binding.getModifiers()) && !Modifier.isStatic(binding.getModifiers())) {
+					fResult.add(node);
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
+				}
+			} else if (node.getParent() instanceof SimpleType simpleType) {
+				ITypeBinding binding= simpleType.resolveBinding();
+				if (binding != null && binding.isMember() && !Modifier.isPublic(binding.getModifiers()) && !Modifier.isStatic(binding.getModifiers())) {
+					fResult.add(node);
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
+				}
 			}
 			return false;
 		}

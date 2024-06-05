@@ -1,0 +1,17 @@
+package p1;
+
+public class A {
+
+    B b;
+    
+    private static class InnerInterface {
+        void innerMethod() {
+            
+        }
+    }
+    
+    public void m() {
+        InnerInterface inner = new InnerInterface();
+        inner.innerMethod();
+    }
+}
