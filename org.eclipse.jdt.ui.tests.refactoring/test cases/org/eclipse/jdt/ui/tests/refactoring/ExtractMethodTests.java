@@ -2125,6 +2125,11 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 		branchTest();
 	}
 
+	@Test
+	public void test770() throws Exception {
+		branchTest();
+	}
+
 	//---- Test for CUs with compiler errors
 
 	@Test
