@@ -521,10 +521,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		protected final Set<IBinding> fStaticImports= new HashSet<>();
 
 		/** The refactoring status */
-		protected final RefactoringStatus fStatus= new RefactoringStatus();
+		protected final RefactoringStatus fStatus;
 
 		/** The target compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fTargetRewrite;
+
+		/** List of member access adjustments needed */
+		protected Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments;
 
 		/**
 		 * Creates a new method body rewriter.
@@ -539,8 +542,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 *            the source method declaration
 		 * @param adjustments
 		 *            the map of elements to visibility adjustments
+		 * @param status
+		 *            refactoring status
 		 */
-		public MethodBodyRewriter(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite targetRewrite, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
+		public MethodBodyRewriter(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite targetRewrite, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status) {
 			Assert.isNotNull(targetRewrite);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(sourceDeclaration);
@@ -550,6 +555,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fDeclaration= sourceDeclaration;
 			fAdjustments= adjustments;
 			fStaticImports.clear();
+			fAdjustments= adjustments;
+			fStatus= status;
 			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet<>(), fStaticImports, false);
 		}
 
@@ -842,6 +849,30 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						if (fieldInHierarchy != null) {
 							targetType= enclosingType;
 						}
+					}
+					final IField field= (IField) variable.getJavaElement();
+					try {
+						if (field != null && !Modifier.isPublic(field.getFlags())) {
+							boolean checkRequired= true;
+							ITypeBinding pClass= fTarget.getType();
+							while (pClass != null && pClass.isMember()) {
+								pClass= pClass.getDeclaringClass();
+								if (pClass != null && pClass.isEqualTo(targetType)) {
+									checkRequired= false;
+									break;
+								}
+							}
+							if (checkRequired) {
+								boolean same= field.getAncestor(IJavaElement.PACKAGE_FRAGMENT).equals(fTarget.getJavaElement().getAncestor(IJavaElement.PACKAGE_FRAGMENT));
+								final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
+								final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public;
+								if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, fAdjustments)) {
+									fAdjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning, new String[] { BindingLabelProviderCore.getBindingLabel(variable, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(field))));
+								}
+							}
+						}
+					} catch (JavaModelException e) {
+						// ignore as this should not happen
 					}
 				}
 				if (method != null && targetType != null) {
@@ -2376,11 +2407,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the source method declaration
 	 * @param adjustments
 	 *            the map of elements to visibility adjustments
+	 * @param status
+	 *            refactoring status
 	 */
 	protected void createMethodBody(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite rewriter,
-			final ASTRewrite rewrite, final MethodDeclaration declaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments) {
+			final ASTRewrite rewrite, final MethodDeclaration declaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status) {
 		Assert.isNotNull(declaration);
-		declaration.getBody().accept(new MethodBodyRewriter(rewrites, rewriter, rewrite, declaration, adjustments));
+		declaration.getBody().accept(new MethodBodyRewriter(rewrites, rewriter, rewrite, declaration, adjustments, status));
 	}
 
 	/**
@@ -2570,7 +2603,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
 			createMethodTypeParameters(rewrite, declaration, status);
 			createMethodComment(rewrite, declaration);
-			createMethodBody(rewrites, rewriter, rewrite, declaration, adjustments);
+			createMethodBody(rewrites, rewriter, rewrite, declaration, adjustments, status);
 		} finally {
 			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
 				rewriter.clearImportRewrites();
