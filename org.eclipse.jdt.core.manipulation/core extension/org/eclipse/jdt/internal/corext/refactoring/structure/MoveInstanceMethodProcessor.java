@@ -550,7 +550,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fRewrite= rewrite;
 			fRewrites= rewrites;
 			fDeclaration= sourceDeclaration;
-			fAdjustments= adjustments;
 			fStaticImports.clear();
 			fAdjustments= adjustments;
 			fStatus= status;
