@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2023 Angelo Zerr and others.
+ * Copyright (c) 2017, 2024 Angelo Zerr and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,11 @@ package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import java.util.List;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.codemining.ICodeMining;
+import org.eclipse.jface.text.codemining.ICodeMiningProvider;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -25,10 +30,12 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jface.text.codemining.ICodeMining;
-import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 
 public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 
@@ -147,9 +154,14 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 		if (parameterNames.length < parameterIndex) {
 			return true;
 		}
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		boolean filter= store.getBoolean(PreferenceConstants.EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES);
+		if (!filter) {
+			return false;
+		}
 		String parameterName= parameterNames[parameterIndex].toLowerCase();
 		String expression= arguments.get(parameterIndex).toString().toLowerCase();
-		return expression.contains(parameterName);
+		return parameterName.length() > 3 && expression.contains(parameterName) || parameterName.equals(expression);
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method) {
@@ -157,6 +169,11 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method, String[] parameterNames) {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		boolean filter= store.getBoolean(PreferenceConstants.EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES);
+		if (!filter) {
+			return false;
+		}
 		// add default filtering to skip parameter names (based on original plug-in defaults)
 		String typeName= method.getDeclaringType().getTypeQualifiedName();
 		if (typeName.equals("Math")) { //$NON-NLS-1$

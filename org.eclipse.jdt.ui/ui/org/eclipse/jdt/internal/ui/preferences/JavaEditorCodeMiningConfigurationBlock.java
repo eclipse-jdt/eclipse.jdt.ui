@@ -75,6 +75,12 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	private static final Key PREF_SHOW_PARAMETER_NAMES= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES);
 
+	private static final Key PREF_FILTER_IMPLIED_PARAMETER_NAMES= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES);
+
+	private static final Key PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES);
+
 	private static final String SETTINGS_SECTION_NAME= "JavaEditorCodeMiningConfigurationBlock"; //$NON-NLS-1$
 
 	private static final String[] TRUE_FALSE= new String[] { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -95,7 +101,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	public static Key[] getAllKeys() {
 		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_TYPES, PREF_SHOW_REFERENCES_ON_FIELDS,
 				PREF_SHOW_REFERENCES_ON_METHODS,
-				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES };
+				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES, PREF_FILTER_IMPLIED_PARAMETER_NAMES, PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES };
 	}
 
 	@Override
@@ -183,6 +189,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 
 		Composite inner= createInnerComposite(excomposite, nColumns, parent.getFont());
 
+
 		// - Show references
 		PreferenceTreeNode<Button> showReferences= fFilteredPrefTree.addCheckBox(inner,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_label, PREF_SHOW_REFERENCES,
@@ -210,6 +217,16 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showParameterNames_label,
 				PREF_SHOW_PARAMETER_NAMES, TRUE_FALSE, defaultIndent, section);
 
+		// - Filter implied parameter names
+		fFilteredPrefTree.addCheckBox(inner,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_filterImpliedParameterNames_label,
+				PREF_FILTER_IMPLIED_PARAMETER_NAMES, TRUE_FALSE, extraIndent, section);
+
+		// - Filter known method parameter names
+		fFilteredPrefTree.addCheckBox(inner,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_defaultFilterForParameterNames_label,
+				PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES, TRUE_FALSE, extraIndent, section);
+
 	}
 
 	private void updateEnableStates() {
@@ -226,7 +243,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			getCheckBox(PREF_SHOW_REFERENCES_ON_METHODS).setEnabled(showReferences);
 			// Show implementations checkboxes
 			getCheckBox(PREF_SHOW_IMPLEMENTATIONS).getSelection();
-			getCheckBox(PREF_SHOW_PARAMETER_NAMES).getSelection();
+			boolean showParameterNames= getCheckBox(PREF_SHOW_PARAMETER_NAMES).getSelection();
+			getCheckBox(PREF_FILTER_IMPLIED_PARAMETER_NAMES).setEnabled(showParameterNames);
+			getCheckBox(PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES).setEnabled(showParameterNames);
 		} else {
 			atLeastOneCheckBox.setEnabled(false);
 			ignoreInexactReferenceMatches.setEnabled(false);
@@ -248,7 +267,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			return;
 		}
 		if (changedKey != null) {
-			if (PREF_CODEMINING_ENABLED.equals(changedKey) || PREF_SHOW_REFERENCES.equals(changedKey) || PREF_SHOW_IMPLEMENTATIONS.equals(changedKey)) {
+			if (PREF_CODEMINING_ENABLED.equals(changedKey) || PREF_SHOW_REFERENCES.equals(changedKey) || PREF_SHOW_IMPLEMENTATIONS.equals(changedKey)
+					|| PREF_SHOW_PARAMETER_NAMES.equals(changedKey)) {
 				updateEnableStates();
 			}
 		} else {
