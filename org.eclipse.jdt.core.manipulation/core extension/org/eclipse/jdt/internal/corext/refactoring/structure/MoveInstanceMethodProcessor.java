@@ -526,9 +526,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/** The target compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fTargetRewrite;
 
-		/** List of member access adjustments needed */
-		protected Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments;
-
 		/**
 		 * Creates a new method body rewriter.
 		 *
