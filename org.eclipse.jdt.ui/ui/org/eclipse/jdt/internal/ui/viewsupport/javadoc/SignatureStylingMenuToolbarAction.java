@@ -59,7 +59,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 				new ToggleSignatureTypeParametersColoringAction(),
 				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
 				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier)};
-		actions= enabledActions;
+		actions= noStylingActions;
 		setMenuCreator(this);
 		this.parent= parent;
 		this.enhancementsReconfiguredTask= enhancementsReconfiguredTask;
@@ -76,7 +76,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 			return;
 		}
 		var content= contentAccessor.get();
-		if (content != null && !content.isBlank() && content.contains(JavaElementLinks.CHECKBOX_ID_FORMATTIG)) {
+		if (content != null && !content.isBlank() && JavaElementLinks.isStylingPresent(content)) {
 			reAddActionItems(enabledActions);
 		} else {
 			reAddActionItems(noStylingActions);
@@ -141,6 +141,8 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		parent.getDisplay().execute(() -> {
 			enhancementsEnabled= isEnabled;
 			presentEnhancementsState();
+			// even if enhancements switched from off to on, only browserContentChanged() sets enabledActions
+			reAddActionItems(noStylingActions);
 			runEnhancementsReconfiguredTask();
 		});
 	}
