@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1426,9 +1426,12 @@ public class TestRunnerViewPart extends ViewPart {
 		try {
 			String attribute= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 			if (attribute.length() != 0) {
-				String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, configuration.getName());
+				String configName= configuration.getName();
+				if (configName.endsWith(JUnitMessages.TestRunnerViewPart_failures_first_suffix)) {
+					configName= configName.substring(0, configName.length() - JUnitMessages.TestRunnerViewPart_failures_first_suffix.length());
+				}
 				ILaunchConfigurationWorkingCopy tmp= configuration.copy(configName);
-				tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
+				tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, (String)null);
 				return tmp;
 			}
 		} catch (CoreException e) {
