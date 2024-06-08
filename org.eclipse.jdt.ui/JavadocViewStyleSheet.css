@@ -52,7 +52,6 @@ input#formattingSwitch:checked ~ .styleSwitchParent .methodParamName		{ font-sty
 input#formattingSwitch:checked ~ .styleSwitchParent .methodReturn			{ font-style: italic; }
 input#formattingSwitch:checked ~ .styleSwitchParent .methodName				{ font-weight: bold; }
 
-input#formattingSwitch:checked ~ .styleSwitchParent .typeParams				{ font-weight: 200; }
 input#formattingSwitch:checked ~ .styleSwitchParent .typeBrackets			{ font-weight: bold; }
 
 /* Start of dynamic type parameters references styling section (do not edit this line) */
