@@ -71,10 +71,10 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class JavaElementLinks {
 
-	/**
-	 * ID of the checkbox in generated HTML content that toggles formatting inside element labels.
-	 */
-	public static final String CHECKBOX_ID_FORMATTIG= "formattingSwitch"; //$NON-NLS-1$
+	private static final String CHECKBOX_FORMATTING_ID = "formattingSwitch"; //$NON-NLS-1$
+	// browser on windows changes single quotes to double quotes (other platforms don't do that) thus we use / primarily search for this one
+	private static final String CHECKBOX_FORMATTING_ID_ATTR_DQUOTES= "id=\"" + CHECKBOX_FORMATTING_ID + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final String CHECKBOX_FORMATTING_ID_ATTR_SQUOTES= "id='" + CHECKBOX_FORMATTING_ID + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final String PREFERENCE_KEY_POSTFIX_TYPE_PARAMETERS_REFERENCES_COLORING= "javadocElementsStyling.typeParamsReferencesColoring"; //$NON-NLS-1$
 
@@ -339,7 +339,7 @@ public class JavaElementLinks {
 				appendHoverParent= false;
 
 				// formatting checkbox
-				fBuffer.append("<input type='checkbox' id='" + CHECKBOX_ID_FORMATTIG + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+				fBuffer.append("<input type='checkbox' " + CHECKBOX_FORMATTING_ID_ATTR_DQUOTES + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (enableFormatting) {
 					fBuffer.append("checked=true "); //$NON-NLS-1$
 				}
@@ -487,18 +487,22 @@ public class JavaElementLinks {
 
 		@Override
 		protected void appendTypeArgumentSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
-			if (inBoundedTypeParam) {
+			if (noEnhancements || !inBoundedTypeParam) {
+				super.appendTypeArgumentSignaturesLabel(enclosingElement, typeArgsSig, flags);
+			} else {
 				inBoundedTypeParam= false;
 				super.appendTypeArgumentSignaturesLabel(enclosingElement, typeArgsSig, flags);
 				inBoundedTypeParam= true;
-			} else {
-				super.appendTypeArgumentSignaturesLabel(enclosingElement, typeArgsSig, flags);
 			}
 		}
 
 		@Override
-		protected void appendTypeParameteSignatureLabel(String typeVariableName) {
-			super.appendTypeParameteSignatureLabel(wrapWithTypeClass(typeVariableName, typeVariableName));
+		protected void appendTypeParameterSignatureLabel(String typeVariableName) {
+			if (noEnhancements) {
+				super.appendTypeParameterSignatureLabel(typeVariableName);
+			} else {
+				super.appendTypeParameterSignatureLabel(wrapWithTypeClass(typeVariableName, typeVariableName));
+			}
 		}
 	}
 
@@ -856,6 +860,10 @@ public class JavaElementLinks {
 
 	public static void setColorPreferenceForTypeParamsReference(int referenceIndex, RGB color) {
 		PreferenceConverter.setValue(preferenceStore(), getColorPreferenceKey(PREFERENCE_KEY_PREFIX_TYPE_PARAMETERS_REFERENCE_COLOR, referenceIndex), color);
+	}
+
+	public static boolean isStylingPresent(String browserContent) {
+		return browserContent.contains(CHECKBOX_FORMATTING_ID_ATTR_DQUOTES) || browserContent.contains(CHECKBOX_FORMATTING_ID_ATTR_SQUOTES);
 	}
 
 	public static String modifyCssStyleSheet(String css, StringBuilder buffer) {
