@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -30,6 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.text.tests.Accessor;
@@ -807,7 +809,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
@@ -905,13 +907,12 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
+		String[] expected= new String[2];
 
-		String expected1= """
+		expected[0]= """
 			package test1;
 			public class E {
 			    private class StringBuffer { }
@@ -922,7 +923,18 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 			}
 			""";
 
-		assertEqualString(preview1, expected1);
+		expected[1]= """
+				package test1;
+				public class E {
+				    private class StringBuffer { }
+				    private final StringBuffer sb;
+				    public E() {
+				        sb= new StringBuffer();
+				    }
+				}
+				""";
+
+		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	@Test
@@ -2214,9 +2226,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		expected[0]= """
 			package test1;
 			public class Test {
@@ -2232,6 +2244,14 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 			    E e1;
 			}
 			""";
+
+		expected[2]= """
+				package test1;
+				public class Test {
+				    test2.E e2= new test2.E();
+				    E e1;
+				}
+				""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -2623,4 +2643,126 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	@Test
+	public void testTypeMismatchInterfaceConstructorInvocation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String str= """
+			package pack;
+
+			import java.util.HashMap;
+			import java.util.List;
+
+			public class E {
+			    List<String> foo= new HashMap();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[2];
+		String[] possibleConstructors = new String[3];
+		expected[0]= """
+			package pack;
+
+			import java.util.HashMap;
+			import java.util.List;
+
+			public class E {
+			    List<String> foo= (List<String>) new HashMap();
+			}
+			""";
+
+		expected[1]= """
+			package pack;
+
+			import java.util.HashMap;
+			import java.util.List;
+
+			public class E {
+			    HashMap foo= new HashMap();
+			}
+			""";
+
+		possibleConstructors[0]= """
+			package pack;
+
+			import java.util.ArrayList;
+			import java.util.HashMap;
+			import java.util.List;
+
+			public class E {
+			    List<String> foo= new ArrayList();
+			}
+			""";
+
+		possibleConstructors[1]= """
+				package pack;
+
+				import java.util.HashMap;
+				import java.util.List;
+				import java.util.Vector;
+
+				public class E {
+				    List<String> foo= new Vector();
+				}
+				""";
+
+		possibleConstructors[2]= """
+				package pack;
+
+				import java.util.HashMap;
+				import java.util.LinkedList;
+				import java.util.List;
+
+				public class E {
+				    List<String> foo= new LinkedList();
+				}
+				""";
+
+		assertExpectedExistInProposals(proposals, expected);
+		StringAsserts.assertExpectedExistInProposals(possibleConstructors,  getPreviewContents(Arrays.asList(proposals.get(2))));
+	}
+
+	@Test
+	public void testTypeMismatchClassConstructorInvocation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String str= """
+				package pack;
+
+				public class Foo {
+					Foo test= new String();
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Foo.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		expected[0]= """
+			package pack;
+
+			public class Foo {
+				String test= new String();
+			}
+			""";
+
+		expected[1]= """
+			package pack;
+
+			public class Foo {
+				Foo test= new Foo();
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }

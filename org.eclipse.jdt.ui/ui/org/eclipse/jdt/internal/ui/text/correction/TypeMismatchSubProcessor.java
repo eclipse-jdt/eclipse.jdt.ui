@@ -139,6 +139,11 @@ public class TypeMismatchSubProcessor extends TypeMismatchBaseSubProcessor<IComm
 	}
 
 	@Override
+	protected ICommandAccess createChangeConstructorTypeProposal(ICompilationUnit targetCu, ASTNode callerNode, CompilationUnit astRoot, ITypeBinding castTypeBinding, int relevance) {
+		return new TypeChangeCorrectionProposal(targetCu, callerNode, astRoot, castTypeBinding, relevance);
+	}
+
+	@Override
 	protected ICommandAccess createCastCorrectionProposal(String label, ICompilationUnit cu, Expression nodeToCast, ITypeBinding castTypeBinding, int relevance) {
 		return new CastCorrectionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}

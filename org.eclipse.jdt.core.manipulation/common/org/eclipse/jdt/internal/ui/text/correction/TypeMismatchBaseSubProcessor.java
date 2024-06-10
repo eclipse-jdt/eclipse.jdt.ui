@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -324,6 +325,17 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 						proposals.add(p2);
 				}
 			}
+
+			if (nodeToCast.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
+				ASTNode constructorNode = context.getCoveringNode();
+				if(!(constructorNode instanceof ClassInstanceCreation)) {
+					constructorNode = ASTNodes.getParent(constructorNode, ClassInstanceCreation.class);
+				}
+				T p3= createChangeConstructorTypeProposal(cu, constructorNode, astRoot,
+						castTypeBinding, relevance);
+				if (p3 != null)
+					proposals.add(p3);
+			}
 		}
 	}
 
@@ -541,6 +553,8 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 
 	protected abstract T createChangeSenderTypeProposal(ICompilationUnit targetCu, IBinding callerBindingDecl, CompilationUnit astRoot, ITypeBinding castTypeBinding, boolean isAssignedNode,
 			int relevance);
+
+	protected abstract T createChangeConstructorTypeProposal(ICompilationUnit targetCu, ASTNode callerNode, CompilationUnit astRoot, ITypeBinding castTypeBinding, int relevance);
 
 	protected abstract T createCastCorrectionProposal(String label, ICompilationUnit cu, Expression nodeToCast, ITypeBinding castTypeBinding, int relevance);
 

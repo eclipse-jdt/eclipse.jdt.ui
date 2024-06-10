@@ -370,6 +370,7 @@ public final class CorrectionMessages extends NLS {
 	public static String TypeChangeCompletionProposal_variable_name;
 	public static String TypeChangeCompletionProposal_param_name;
 	public static String TypeChangeCompletionProposal_method_name;
+	public static String TypeChangeCompletionProposal_constructor_name;
 	public static String ImplementInterfaceProposal_name;
 	public static String AddUnimplementedMethodsOperation_AddMissingMethod_group;
 	public static String AddUnimplementedMethodReferenceOperation_AddMissingMethod_group;
