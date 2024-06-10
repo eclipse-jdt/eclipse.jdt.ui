@@ -17,19 +17,33 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -37,6 +51,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -59,22 +74,29 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
+import org.eclipse.jdt.internal.ui.text.CompletionTimeoutProgressMonitor;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessorCore;
 
 public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCore {
 	private final IBinding fBinding;
+	private final ASTNode fNode;
 	private final CompilationUnit fAstRoot;
-	private final ITypeBinding fNewType;
-	private final ITypeBinding[] fTypeProposals;
+	private final ICompilationUnit fCompilationUnit;
+	private ITypeBinding fNewType;
+	private ITypeBinding[] fTypeProposals;
 	private final TypeLocation fTypeLocation;
 	private final boolean fIsNewTypeVar;
 	private static String VAR_TYPE= "var"; //$NON-NLS-1$
+	private static String CONSTRUCTOR= "constructor"; //$NON-NLS-1$
+	private static final int SKIP_NEW_KEYWORD = 4;
 
 	public TypeChangeCorrectionProposalCore(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		this(targetCU, binding, astRoot, newType, false, offerSuperTypeProposals, relevance);
@@ -93,7 +115,9 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 
 		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;
+		fCompilationUnit = targetCU;
 		fIsNewTypeVar= isNewTypeVar;
+		fNode = null;
 
 		if (offerSuperTypeProposals) {
 			fTypeProposals= ASTResolving.getRelaxingTypes(astRoot.getAST(), newType);
@@ -138,6 +162,32 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 			fTypeLocation= TypeLocation.RETURN_TYPE;
 			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args));
 		}
+	}
+
+	//This needs to be used to convert a given constructor invocation
+	public TypeChangeCorrectionProposalCore(ICompilationUnit targetCU, ASTNode nodeToChange, CompilationUnit astRoot, ITypeBinding variableTypeBinding, int relevance) {
+		super("", targetCU, null, relevance); //$NON-NLS-1$
+
+		Assert.isTrue(nodeToChange instanceof ClassInstanceCreation);
+
+		fBinding= variableTypeBinding;
+		fAstRoot= astRoot;
+		fCompilationUnit = targetCU;
+		fIsNewTypeVar= false;
+		fNode = nodeToChange;
+		fTypeLocation= TypeLocation.NEW;
+		fTypeProposals = null;
+		fNewType = null;
+
+		IBinding nodeBinding = Bindings.resolveExpressionBinding((Expression)nodeToChange, false);
+		String[] arg = new String[1];
+		if (nodeBinding != null) {
+			arg[0] = nodeBinding.getName();
+		} else {
+			arg[0] = CONSTRUCTOR;
+		}
+
+		setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_constructor_name, arg));
 	}
 
 	private boolean containsNestedCapture(ITypeBinding binding, boolean isNested) {
@@ -185,7 +235,19 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
-		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
+		ASTNode boundNode;
+		if (fNode != null) {
+			boundNode = fNode;
+			ITypeBinding[] newTypes = getNewConstructorProposals();
+			if(newTypes == null) {
+				return null;
+			}
+			fTypeProposals = new ITypeBinding[newTypes.length-1];
+			fNewType= newTypes[0];
+			System.arraycopy(newTypes, 1, fTypeProposals, 0, fTypeProposals.length);
+		} else {
+			boundNode = fAstRoot.findDeclaringNode(fBinding);
+		}
 		ASTNode declNode= null;
 		CompilationUnit newRoot= fAstRoot;
 		if (boundNode != null) {
@@ -308,6 +370,9 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 						remover.registerRemovedNode(oldType);
 					}
 				}
+			} else if (declNode instanceof ClassInstanceCreation) {
+				ClassInstanceCreation constructor = (ClassInstanceCreation) declNode;
+				rewrite.set(constructor, ClassInstanceCreation.TYPE_PROPERTY, type, null);
 			}
 
 			// set up linked mode
@@ -322,6 +387,70 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 				remover.applyRemoves(imports);
 			}
 			return rewrite;
+		}
+		return null;
+	}
+
+	private ITypeBinding[] getNewConstructorProposals() {
+		HashSet<CompletionProposal> completionProposals = new HashSet<>();
+		CompletionRequestor requestor = new CompletionRequestor(false) {
+			@Override
+			public void accept(CompletionProposal proposal) {
+				completionProposals.add(proposal);
+			}
+		};
+
+		requestor.setAllowsRequiredProposals(CompletionProposal.CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		final ExecutorService executor= Executors.newSingleThreadExecutor();
+		try {
+			Future<?> future= executor.submit(() -> {
+				try {
+					fCompilationUnit.codeComplete(fNode.getStartPosition() + SKIP_NEW_KEYWORD, requestor, new CompletionTimeoutProgressMonitor());
+				} catch (JavaModelException e) {
+					// do nothing
+				}
+			});
+			future.get(1, TimeUnit.SECONDS);
+		} catch (final Exception e) {
+			executor.shutdownNow();
+		}
+
+		IJavaProject project= fCompilationUnit.getJavaProject();
+		List<String> typeSuggestions = new ArrayList<>();
+		for (CompletionProposal p: completionProposals) {
+			String typeName;
+			try {
+				typeName = p.getDeclarationSignature() != null ? new String(Signature.toCharArray(Signature.getTypeErasure(p.getDeclarationSignature()))) : null;
+			} catch (IllegalArgumentException e) {
+				typeName = p.getSignature() != null ? new String(Signature.toCharArray(Signature.getTypeErasure(p.getSignature()))) : null;
+			}
+			if (typeName != null && !TypeFilter.isFiltered(typeName) && !typeSuggestions.contains(typeName)) {
+				typeSuggestions.add(typeName);
+			}
+		}
+		IJavaElement[] typeElements= typeSuggestions.stream().map(b -> {
+			try {
+				return project.findType(b);
+			} catch (JavaModelException e) {
+				return null;
+			}
+		})
+				.filter(e -> {
+					try {
+						return e != null && !Modifier.isAbstract(e.getFlags());
+					} catch (JavaModelException e1) {
+						return false;
+					}
+				})
+				.toArray(IJavaElement[]::new);
+		ASTParser parser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		parser.setProject(project);
+		ITypeBinding[] newBindings = Arrays.stream(parser.createBindings(typeElements, new NullProgressMonitor())).map(b -> (ITypeBinding)b)
+				.filter(b -> Bindings.isSuperType(((ITypeBinding) fBinding).getTypeDeclaration(), b, false))
+				.toArray(ITypeBinding[]::new);
+		if (newBindings.length > 0 ) {
+			return newBindings;
 		}
 		return null;
 	}
