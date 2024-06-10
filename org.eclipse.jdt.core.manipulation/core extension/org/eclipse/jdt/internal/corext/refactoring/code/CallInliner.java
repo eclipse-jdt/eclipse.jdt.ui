@@ -480,7 +480,7 @@ public class CallInliner {
 		// of a SwitchExpression, we need to check if we are about to replace it with a non-implicit
 		// yield statement in which case, we need to remove the yield qualifier.
 		if (fContext.callMode == ASTNode.YIELD_STATEMENT && fTargetNode instanceof YieldStatement yieldStatement
-				&& yieldStatement.isImplicit() && blocks.length > 0 && blocks[0].startsWith("yield ")) { //$NON-NLS-1$
+				&& yieldStatement.isImplicit() && fBlock == null && blocks.length > 0 && blocks[0].startsWith("yield ")) { //$NON-NLS-1$
 			blocks[0]= blocks[0].substring(6);
 		}
 		replaceCall(result, blocks, textEditGroup);
