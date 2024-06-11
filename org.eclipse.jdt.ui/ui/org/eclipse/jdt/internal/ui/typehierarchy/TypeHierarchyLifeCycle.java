@@ -280,10 +280,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				}
 				if (pm.isCanceled())
 					return;
-				JavaCore.runReadOnly(() -> {
-					fTypeHierarchyViewPart.setViewersInput();
-					fTypeHierarchyViewPart.updateViewers();
-				});
+				fTypeHierarchyViewPart.setViewersInput();
+				fTypeHierarchyViewPart.updateViewers();
 			});
 		}
 	}

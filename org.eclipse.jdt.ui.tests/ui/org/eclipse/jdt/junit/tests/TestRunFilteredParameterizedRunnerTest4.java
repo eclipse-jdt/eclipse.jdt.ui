@@ -50,38 +50,40 @@ public class TestRunFilteredParameterizedRunnerTest4 extends AbstractTestRunList
 		JavaProjectHelper.addToClasspath(fProject, JavaCore.newContainerEntry(JUnitCore.JUNIT4_CONTAINER_PATH));
 		JavaProjectHelper.addRTJar15(fProject);
 		String source=
-				"package pack;\n"+
-				"\n"+
-				"import java.util.Arrays;\n"+
-				"\n"+
-				"import org.junit.Assert;\n"+
-				"import org.junit.Test;\n"+
-				"import org.junit.runner.RunWith;\n"+
-				"import org.junit.runners.Parameterized;\n"+
-				"import org.junit.runners.Parameterized.Parameter;\n"+
-				"import org.junit.runners.Parameterized.Parameters;\n"+
-				"\n" +
-				"@RunWith(Parameterized.class)\n"+
-				"public class ATestCase {\n"+
-				"\n"+
-				"	@Parameters\n"+
-				"	public static Iterable<Object[]> data() {\n"+
-				"		return Arrays.asList(new Object[][] { { 6 }, { 12 } });\n"+
-				"	}\n"+
-				"\n"+
-				"	@Parameter\n"+
-				"	public int param;\n"+
-				"\n"+
-				"	@Test\n"+
-				"	public void testDiv() {\n"+
-				"		Assert.assertEquals(0, param % 2);\n"+
-				"	}\n"+
-				"\n"+
-				"	@Test\n"+
-				"	public void testDiv2() {\n"+
-				"		Assert.assertEquals(0, param % 3);\n"+
-				"	}\n"+
-				"}\n;";
+				"""
+			package pack;
+			
+			import java.util.Arrays;
+			
+			import org.junit.Assert;
+			import org.junit.Test;
+			import org.junit.runner.RunWith;
+			import org.junit.runners.Parameterized;
+			import org.junit.runners.Parameterized.Parameter;
+			import org.junit.runners.Parameterized.Parameters;
+			
+			@RunWith(Parameterized.class)
+			public class ATestCase {
+			
+				@Parameters
+				public static Iterable<Object[]> data() {
+					return Arrays.asList(new Object[][] { { 6 }, { 12 } });
+				}
+			
+				@Parameter
+				public int param;
+			
+				@Test
+				public void testDiv() {
+					Assert.assertEquals(0, param % 2);
+				}
+			
+				@Test
+				public void testDiv2() {
+					Assert.assertEquals(0, param % 3);
+				}
+			}
+			;""";
 		fATestCase= createType(source, "pack", "ATestCase.java");
 	}
 

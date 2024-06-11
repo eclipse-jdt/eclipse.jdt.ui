@@ -51,17 +51,21 @@ public class NLSHintTest {
     private IPackageFragmentRoot fSourceFolder;
 
     private final static String TEST_KLAZZ =
-        "public class Test {" +
-        "	private String str=TestMessages.getString(\"whateverKey\");//$NON-NLS-1$\n" +
-        "}\n";
+        """
+		public class Test {\
+			private String str=TestMessages.getString("whateverKey");//$NON-NLS-1$
+		}
+		""";
 
     private final static String ACCESSOR_KLAZZ =
-		"public class TestMessages {\n" +
-		"	private static final String BUNDLE_NAME = \"test.test\";//$NON-NLS-1$\n" +
-		"	public static String getString(String s) {" +
-		"		return \"\";\n" +
-		"	}\n" +
-		"}\n";
+		"""
+		public class TestMessages {
+			private static final String BUNDLE_NAME = "test.test";//$NON-NLS-1$
+			public static String getString(String s) {\
+				return "";
+			}
+		}
+		""";
 
     @Before
 	public void setUp() throws Exception {
@@ -81,10 +85,12 @@ public class NLSHintTest {
 	public void nlsedButNotTranslated() throws Exception {
     	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
     	String klazz =
-    		"package test;\n" +
-    		"public class Test {" +
-			"	private String str=\"whateverKey\";//$NON-NLS-1$\n" +
-			"}\n";
+    		"""
+			package test;
+			public class Test {\
+				private String str="whateverKey";//$NON-NLS-1$
+			}
+			""";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());
@@ -97,10 +103,12 @@ public class NLSHintTest {
 	public void looksLikeAccessor() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz =
-            "package test;\n" +
-            "public class Test {\n" +
-            "	String[] foo = {\"ab\", String.valueOf(Boolean.valueOf(\"cd\")), \"de\"}; //$NON-NLS-1$ //$NON-NLS-2$\n" +
-			"}\n";
+            """
+			package test;
+			public class Test {
+				String[] foo = {"ab", String.valueOf(Boolean.valueOf("cd")), "de"}; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			""";
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());
@@ -116,10 +124,12 @@ public class NLSHintTest {
 	public void noAccessorClassHint1() throws Exception {
     	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
     	String klazz =
-    		"package test;\n" +
-    		"public class Test {" +
-			"	private String str=\"whateverKey\".toString();//$NON-NLS-1$\n" +
-			"}\n";
+    		"""
+			package test;
+			public class Test {\
+				private String str="whateverKey".toString();//$NON-NLS-1$
+			}
+			""";
     	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
         NLSHint hint = createNLSHint(cu);
         assertEquals("Messages", hint.getAccessorClassName());
@@ -132,16 +142,20 @@ public class NLSHintTest {
 	public void noAccessorClassHint2() throws Exception {
     	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
     	String klazz =
-    		"package test;\n" +
-    		"public class Test {" +
-			"	private String str=new Wrong().meth(\"whatever\");//$NON-NLS-1$\n" +
-			"}\n";
+    		"""
+			package test;
+			public class Test {\
+				private String str=new Wrong().meth("whatever");//$NON-NLS-1$
+			}
+			""";
 
     	String klazz2 =
-    		"package test;\n" +
-			"public class Wrong {\n" +
-			"	public void meth(String str) {};\n" +
-			"}\n";
+    		"""
+			package test;
+			public class Wrong {
+				public void meth(String str) {};
+			}
+			""";
     	ICompilationUnit cu= pack.createCompilationUnit("Wrong.java", klazz2, false, null);
     	cu= pack.createCompilationUnit("Test.java", klazz, false, null);
 
@@ -226,13 +240,16 @@ public class NLSHintTest {
 
         IPackageFragment fooPackage = fSourceFolder.createPackageFragment("test.foo", false, null);
         klazz =
-            "package test.foo;\n" +
-            "public class TestMessages {\n" +
-            "	private static final String BUNDLE_NAME = TestMessages.class.getName();\n" +
-            "	public static String getString(String s) {\n" +
-            "		return \"\"\n;" +
-            "	}\n" +
-            "}\n";
+            """
+				package test.foo;
+				public class TestMessages {
+					private static final String BUNDLE_NAME = TestMessages.class.getName();
+					public static String getString(String s) {
+						return ""
+				;\
+					}
+				}
+				""";
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
 
         NLSHint hint = createNLSHint(cu);
@@ -267,13 +284,16 @@ public class NLSHintTest {
 
         IPackageFragment fooPackage = fSourceFolder.createPackageFragment("test.foo", false, null);
         klazz =
-            "package test.foo;\n" +
-            "public class TestMessages {\n" +
-            "	private static final String BUNDLE_NAME = TestMessages.class.getName();\n" +
-            "	public static String getString(String s) {\n" +
-            "		return \"\"\n;" +
-            "	}\n" +
-            "}\n";
+            """
+				package test.foo;
+				public class TestMessages {
+					private static final String BUNDLE_NAME = TestMessages.class.getName();
+					public static String getString(String s) {
+						return ""
+				;\
+					}
+				}
+				""";
         fooPackage.createCompilationUnit("TestMessages.java", klazz, false, null);
 
         createResource(fooPackage, "TestMessages.properties", "a=0");

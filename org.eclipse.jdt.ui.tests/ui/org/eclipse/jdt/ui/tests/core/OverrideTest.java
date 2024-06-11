@@ -74,17 +74,18 @@ public class OverrideTest {
 
 	@Test
 	public void test14Overloaded() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("public class Top {\n");
-		buf.append("    void m(Integer i) {}\n");
-		buf.append("}\n");
-		buf.append("class Sub extends Top {\n");
-		buf.append("    void m(Integer arg) {}\n");
-		buf.append("    void m(String string) {}\n");
-		buf.append("    void m(Object o) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("Top.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			public class Top {
+			    void m(Integer i) {}
+			}
+			class Sub extends Top {
+			    void m(Integer arg) {}
+			    void m(String string) {}
+			    void m(Object o) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("Top.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -105,26 +106,27 @@ public class OverrideTest {
 
 	@Test
 	public void test14Overloaded2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("public interface ITop {\n");
-		buf.append("    void m(Integer i);\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class Middle1 implements ITop {\n");
-		buf.append("    public void m(Integer arg) {}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("abstract class Middle2 implements ITop {\n");
-		buf.append("}\n");
-		buf.append("class Sub1 extends Middle1 {\n");
-		buf.append("    public void m(Integer arg) {}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class Sub2 extends Middle2 {\n");
-		buf.append("    public void m(Integer arg) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("ITop.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			public interface ITop {
+			    void m(Integer i);
+			}
+			
+			class Middle1 implements ITop {
+			    public void m(Integer arg) {}
+			}
+			
+			abstract class Middle2 implements ITop {
+			}
+			class Sub1 extends Middle1 {
+			    public void m(Integer arg) {}
+			}
+			
+			class Sub2 extends Middle2 {
+			    public void m(Integer arg) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("ITop.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -150,31 +152,32 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug100233() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("abstract class A<T> {\n");
-		buf.append("  void g1 (T t) {\n");
-		buf.append("    System.out.println(\"g1 base: \" + t);\n");
-		buf.append("  }\n");
-		buf.append("  void g2 (T t) {\n");
-		buf.append("    System.out.println(\"g2 base: \" + t);\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("public class B extends A<java.util.List<Number>> {\n");
-		buf.append("  void g1 (java.util.List<?> t) {\n");
-		buf.append("    System.out.println(\"g1 derived: \" + t);\n");
-		buf.append("  }\n");
-		buf.append("  void g2 (java.util.List<Number> t) {\n");
-		buf.append("    System.out.println(\"g2 derived: \" + t);\n");
-		buf.append("  }\n");
-		buf.append("  public static void main (String[] args) {\n");
-		buf.append("    B b = new B();\n");
-		buf.append("    b.g1(new java.util.ArrayList<Number>());\n");
-		buf.append("    b.g2(new java.util.ArrayList<Number>());\n");
-		buf.append("  }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("B.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			abstract class A<T> {
+			  void g1 (T t) {
+			    System.out.println("g1 base: " + t);
+			  }
+			  void g2 (T t) {
+			    System.out.println("g2 base: " + t);
+			  }
+			}
+			
+			public class B extends A<java.util.List<Number>> {
+			  void g1 (java.util.List<?> t) {
+			    System.out.println("g1 derived: " + t);
+			  }
+			  void g2 (java.util.List<Number> t) {
+			    System.out.println("g2 derived: " + t);
+			  }
+			  public static void main (String[] args) {
+			    B b = new B();
+			    b.g1(new java.util.ArrayList<Number>());
+			    b.g2(new java.util.ArrayList<Number>());
+			  }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("B.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -193,16 +196,17 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug97027() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class AA<T> {\n");
-		buf.append("    public AA<Object> test() { return null; }\n");
-		buf.append("}\n");
-		buf.append("class BB extends AA<CC> {\n");
-		buf.append("    public <T> BB test() { return null; }\n");
-		buf.append("}\n");
-		buf.append("class CC {}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("AA.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class AA<T> {
+			    public AA<Object> test() { return null; }
+			}
+			class BB extends AA<CC> {
+			    public <T> BB test() { return null; }
+			}
+			class CC {}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("AA.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -218,17 +222,18 @@ public class OverrideTest {
 
 	@Test
 	public void test15JLS3_842() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.util.Collection;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("class CollectionConverter {\n");
-		buf.append("    <T> List<T> toList(Collection<T> c) { return null; }\n");
-		buf.append("}\n");
-		buf.append("class Overrider extends CollectionConverter {\n");
-		buf.append("    List toList(Collection c) { return null; }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("CollectionConverter.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.util.Collection;
+			import java.util.List;
+			class CollectionConverter {
+			    <T> List<T> toList(Collection<T> c) { return null; }
+			}
+			class Overrider extends CollectionConverter {
+			    List toList(Collection c) { return null; }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("CollectionConverter.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -247,15 +252,16 @@ public class OverrideTest {
 
 	@Test
 	public void test15JLS3_848_1() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class C implements Cloneable {\n");
-		buf.append("    C copy() { return (C)clone(); }\n");
-		buf.append("}\n");
-		buf.append("class D extends C implements Cloneable {\n");
-		buf.append("    D copy() { return (D)clone(); }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class C implements Cloneable {
+			    C copy() { return (C)clone(); }
+			}
+			class D extends C implements Cloneable {
+			    D copy() { return (D)clone(); }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -274,18 +280,19 @@ public class OverrideTest {
 
 	@Test
 	public void test15JLS3_848_2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.Collection;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("class StringSorter {\n");
-		buf.append("    List<String> toList(Collection<String> c) { return new ArrayList<String>(c); }\n");
-		buf.append("}\n");
-		buf.append("class Overrider extends StringSorter {\n");
-		buf.append("    List toList(Collection c) { return new ArrayList(c); }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("StringSorter.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.util.ArrayList;
+			import java.util.Collection;
+			import java.util.List;
+			class StringSorter {
+			    List<String> toList(Collection<String> c) { return new ArrayList<String>(c); }
+			}
+			class Overrider extends StringSorter {
+			    List toList(Collection c) { return new ArrayList(c); }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("StringSorter.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -304,16 +311,17 @@ public class OverrideTest {
 
 	@Test
 	public void test15JLS3_848_3() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class C<T> {\n");
-		buf.append("    T id(T x) { return x; }\n");
-		buf.append("}\n");
-		buf.append("class D extends C<String> {\n");
-		buf.append("    Object id(Object x) { return x; }\n");
-		buf.append("    String id(String x) { return x; }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class C<T> {
+			    T id(T x) { return x; }
+			}
+			class D extends C<String> {
+			    Object id(Object x) { return x; }
+			    String id(String x) { return x; }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -333,19 +341,20 @@ public class OverrideTest {
 
 	@Test
 	public void test15JLS3_848_4() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class C<T> {\n");
-		buf.append("    public T id (T x) { return x; }\n");
-		buf.append("}\n");
-		buf.append("interface I<T> {\n");
-		buf.append("    public T id(T x);\n");
-		buf.append("}\n");
-		buf.append("class D extends C<String> implements I<Integer> {\n");
-		buf.append("    public String id(String x) { return x; }\n");
-		buf.append("    public Integer id(Integer x) { return x; }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class C<T> {
+			    public T id (T x) { return x; }
+			}
+			interface I<T> {
+			    public T id(T x);
+			}
+			class D extends C<String> implements I<Integer> {
+			    public String id(String x) { return x; }
+			    public Integer id(Integer x) { return x; }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("C.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -368,17 +377,18 @@ public class OverrideTest {
 
 	@Test
 	public void test15ClassTypeVars1() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class A<E extends Number, F> {\n");
-		buf.append("    void take(E e, F f) {}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B<S extends Number, T> extends A<S, T> {\n");
-		buf.append("    void take(S e, T f) {}\n");
-		buf.append("    void take(T f, S e) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class A<E extends Number, F> {
+			    void take(E e, F f) {}
+			}
+			
+			class B<S extends Number, T> extends A<S, T> {
+			    void take(S e, T f) {}
+			    void take(T f, S e) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -397,33 +407,34 @@ public class OverrideTest {
 
 	@Test
 	public void test15ClassTypeVars2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class A<T extends Number> {\n");
-		buf.append("    void m(T t) {}\n");
-		buf.append("}\n");
-		buf.append("class B<S extends Integer> extends A<S> {\n");
-		buf.append("    @Override\n");
-		buf.append("     void m(S t) { System.out.println(\"B: \" + t); }\n");
-		buf.append("}\n");
-		buf.append("class C extends A/*raw*/ {\n");
-		buf.append("    @Override\n");
-		buf.append("    void m(Number t) { System.out.println(\"C: \" + t); }\n");
-		buf.append("}\n");
-		buf.append("class D extends B/*raw*/ {\n");
-		buf.append("    @Override\n");
-		buf.append("    void m(Number t) { System.out.println(\"C#m(Number): \" + t); }\n");
-		buf.append("    @Override\n");
-		buf.append("    void m(Integer t) { System.out.println(\"C#m(Integer): \" + t); }\n");
-		buf.append("}\n");
-		buf.append("class E extends B<Integer> {\n");
-		buf.append("    //illegal:\n");
-		buf.append("    void m(Number t) { System.out.println(\"D#m(Number): \" + t); }\n");
-		buf.append("    @Override\n");
-		buf.append("    void m(Integer t) { System.out.println(\"D#m(Integer): \" + t); }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class A<T extends Number> {
+			    void m(T t) {}
+			}
+			class B<S extends Integer> extends A<S> {
+			    @Override
+			     void m(S t) { System.out.println("B: " + t); }
+			}
+			class C extends A/*raw*/ {
+			    @Override
+			    void m(Number t) { System.out.println("C: " + t); }
+			}
+			class D extends B/*raw*/ {
+			    @Override
+			    void m(Number t) { System.out.println("C#m(Number): " + t); }
+			    @Override
+			    void m(Integer t) { System.out.println("C#m(Integer): " + t); }
+			}
+			class E extends B<Integer> {
+			    //illegal:
+			    void m(Number t) { System.out.println("D#m(Number): " + t); }
+			    @Override
+			    void m(Integer t) { System.out.println("D#m(Integer): " + t); }
+			}
+			
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 //		IProblem[] problems= astRoot.getProblems();
@@ -457,18 +468,19 @@ public class OverrideTest {
 
 	@Test
 	public void test15MethodTypeVars1() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class A {\n");
-		buf.append("    <E extends Number, F> void take(E e, F f) {}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B extends A {\n");
-		buf.append("    <S extends Number, T> void take(S e, T f) {}\n");
-		buf.append("    <S extends Number, T> void take(T f, S e) {}\n");
-		buf.append("    <S extends Number, T extends S> void take(S e, T f) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class A {
+			    <E extends Number, F> void take(E e, F f) {}
+			}
+			
+			class B extends A {
+			    <S extends Number, T> void take(S e, T f) {}
+			    <S extends Number, T> void take(T f, S e) {}
+			    <S extends Number, T extends S> void take(S e, T f) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -489,19 +501,20 @@ public class OverrideTest {
 
 	@Test
 	public void test15MethodTypeVars2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class A {\n");
-		buf.append("    <E extends Number, F> void take(E e, F f) {}\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B extends A {\n");
-		buf.append("    <S extends Number, T extends Object> void take(S e, T f) {}\n");
-		buf.append("    <S extends Integer, T> void take(S e, T f) {}\n");
-		buf.append("    <S extends Number, T> void take(T f, S e) {}\n");
-		buf.append("    <S extends Number, T extends S> void take(T f, S e) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class A {
+			    <E extends Number, F> void take(E e, F f) {}
+			}
+			
+			class B extends A {
+			    <S extends Number, T extends Object> void take(S e, T f) {}
+			    <S extends Integer, T> void take(S e, T f) {}
+			    <S extends Number, T> void take(T f, S e) {}
+			    <S extends Number, T extends S> void take(T f, S e) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -523,17 +536,18 @@ public class OverrideTest {
 
 	@Test
 	public void test15MethodTypeVars3() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class A {\n");
-		buf.append("    void take(Object t) {}\n");
-		buf.append("    <T> void take2(T t) {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A {\n");
-		buf.append("    <T> void take(T t) {}\n");
-		buf.append("    <T, S> void take2(T t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class A {
+			    void take(Object t) {}
+			    <T> void take2(T t) {}
+			}
+			class B extends A {
+			    <T> void take(T t) {}
+			    <T, S> void take2(T t) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -551,16 +565,17 @@ public class OverrideTest {
 
 	@Test
 	public void test15MethodTypeVars4() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("public class A {\n");
-		buf.append("    <T, U extends T> void m(T t, U u) { }\n");
-		buf.append("}\n");
-		buf.append("class B extends A {\n");
-		buf.append("    @Override\n");
-		buf.append("    <X, Y extends X> void m(X t, Y u) { }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			public class A {
+			    <T, U extends T> void m(T t, U u) { }
+			}
+			class B extends A {
+			    @Override
+			    <X, Y extends X> void m(X t, Y u) { }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -577,16 +592,17 @@ public class OverrideTest {
 
 	@Test
 	public void test15MethodTypeVars5() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("class A {\n");
-		buf.append("    <T extends List<Number>> void m(T t) {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A {\n");
-		buf.append("    <S extends List<Integer>> void m(S t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.util.List;
+			class A {
+			    <T extends List<Number>> void m(T t) {}
+			}
+			class B extends A {
+			    <S extends List<Integer>> void m(S t) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -601,17 +617,18 @@ public class OverrideTest {
 
 	@Test
 	public void test15MethodTypeVars6() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("class A {\n");
-		buf.append("    <T extends List<T>> void m(T t) {}\n");
-		buf.append("}\n");
-		buf.append("class B extends A {\n");
-		buf.append("    @Override\n");
-		buf.append("    <S extends List<S>> void m(S t) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.util.List;
+			class A {
+			    <T extends List<T>> void m(T t) {}
+			}
+			class B extends A {
+			    @Override
+			    <S extends List<S>> void m(S t) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -628,17 +645,18 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug99608() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class Top<E> {\n");
-		buf.append("    void add(E[] e) {}\n");
-		buf.append("    void remove(E... e) {}\n");
-		buf.append("}\n");
-		buf.append("class Sub extends Top<String> {\n");
-		buf.append("    void add(String... s) {}\n");
-		buf.append("    void remove(String[] s) {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("Top.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class Top<E> {
+			    void add(E[] e) {}
+			    void remove(E... e) {}
+			}
+			class Sub extends Top<String> {
+			    void add(String... s) {}
+			    void remove(String[] s) {}
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("Top.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -660,19 +678,20 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug90114() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("class SuperX {\n");
-		buf.append("    static void notOverridden() {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("public class X extends SuperX {\n");
-		buf.append("    static void notOverridden() {\n");
-		buf.append("        return;\n");
-		buf.append("    }\n");
-		buf.append("} \n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("X.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			class SuperX {
+			    static void notOverridden() {
+			        return;
+			    }
+			}
+			public class X extends SuperX {
+			    static void notOverridden() {
+			        return;
+			    }
+			}\s
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("X.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -686,16 +705,17 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug89516primitive() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("public class Test extends ArrayList<String> {\n");
-		buf.append("    static final long serialVersionUID= 1L;\n");
-		buf.append("    public boolean add(int i) {\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.util.ArrayList;
+			public class Test extends ArrayList<String> {
+			    static final long serialVersionUID= 1L;
+			    public boolean add(int i) {
+			        return false;
+			    }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("Test.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -709,17 +729,18 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug105669() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.util.*;\n");
-		buf.append("class I extends Vector<Number> {\n");
-		buf.append("    static final long serialVersionUID= 1L;\n");
-		buf.append("    @Override\n");
-		buf.append("    public synchronized boolean addAll(Collection c) {\n");
-		buf.append("        return false;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("I.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.util.*;
+			class I extends Vector<Number> {
+			    static final long serialVersionUID= 1L;
+			    @Override
+			    public synchronized boolean addAll(Collection c) {
+			        return false;
+			    }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("I.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
@@ -736,34 +757,35 @@ public class OverrideTest {
 
 	@Test
 	public void test15Bug107105() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package override.test;\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("\n");
-		buf.append("class A {\n");
-		buf.append("    <S extends Number & Serializable & Runnable > void foo2(S s) { }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class B extends A {\n");
-		buf.append("    @Override // should error\n");
-		buf.append("    <S extends Number & Runnable> void foo2(S s) { }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class C extends A {\n");
-		buf.append("    @Override // should error\n");
-		buf.append("    <S extends Number & Runnable & Cloneable> void foo2(S s) { }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class D extends A {\n");
-		buf.append("    @Override // correct\n");
-		buf.append("    <S extends Number & Runnable & Serializable> void foo2(S s) { }\n");
-		buf.append("}\n");
-		buf.append("interface I extends Runnable, Serializable { }\n");
-		buf.append("class E extends A {\n");
-		buf.append("    @Override //should error\n");
-		buf.append("    <S extends Number & I> void foo2(S s) { }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package override.test;
+			import java.io.Serializable;
+			
+			class A {
+			    <S extends Number & Serializable & Runnable > void foo2(S s) { }
+			}
+			
+			class B extends A {
+			    @Override // should error
+			    <S extends Number & Runnable> void foo2(S s) { }
+			}
+			
+			class C extends A {
+			    @Override // should error
+			    <S extends Number & Runnable & Cloneable> void foo2(S s) { }
+			}
+			
+			class D extends A {
+			    @Override // correct
+			    <S extends Number & Runnable & Serializable> void foo2(S s) { }
+			}
+			interface I extends Runnable, Serializable { }
+			class E extends A {
+			    @Override //should error
+			    <S extends Number & I> void foo2(S s) { }
+			}
+			""";
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= createAST(cu);
 //		IProblem[] problems= astRoot.getProblems();

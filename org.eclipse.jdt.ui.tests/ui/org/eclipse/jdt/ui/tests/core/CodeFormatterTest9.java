@@ -61,9 +61,11 @@ public class CodeFormatterTest9 extends CodeFormatterTest {
 		String formatted= format(cu, 0, 0);
 
 		String expected=
-			"module pack {\n" +
-			"    requires java.something;\n" +
-			"}\n";
+			"""
+			module pack {
+			    requires java.something;
+			}
+			""";
 		assertEqualString(formatted, expected);
 	}
 

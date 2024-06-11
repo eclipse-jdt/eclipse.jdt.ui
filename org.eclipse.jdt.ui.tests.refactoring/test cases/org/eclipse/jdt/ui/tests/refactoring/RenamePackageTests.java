@@ -587,12 +587,13 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	public void testPackageRenameWithResource1() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("	org.test.MyClass me;\n");
-		buf.append("}\n");
-		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+				org.test.MyClass me;
+			}
+			""";
+		fragment.createCompilationUnit("MyClass.java", str, true, null);
 
 		IFile file= ((IFolder) getRoot().getResource()).getFile("x.properties");
 		byte[] content= "This is about 'org.test' and more".getBytes(ENCODING);
@@ -625,11 +626,12 @@ public class RenamePackageTests extends GenericRefactoringTest {
 	public void testPackageRenameWithResource2() throws Exception {
 		IPackageFragment fragment= getRoot().createPackageFragment("org.test", true, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("public class MyClass {\n");
-		buf.append("}\n");
-		fragment.createCompilationUnit("MyClass.java", buf.toString(), true, null);
+		String str= """
+			package org.test;
+			public class MyClass {
+			}
+			""";
+		fragment.createCompilationUnit("MyClass.java", str, true, null);
 
 		IFile file= ((IFolder) fragment.getResource()).getFile("x.properties");
 		byte[] content= "This is about 'org.test' and more".getBytes(ENCODING);

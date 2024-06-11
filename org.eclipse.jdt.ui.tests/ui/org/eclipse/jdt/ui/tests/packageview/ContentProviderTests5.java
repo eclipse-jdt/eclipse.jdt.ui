@@ -166,9 +166,11 @@ public class ContentProviderTests5{
 		description.create(asInputStream("description"), true, null);
 
 		IPackageFragment exclInclPackage= root.createPackageFragment("excl.incl", true, null);
-		ICompilationUnit In= exclInclPackage.createCompilationUnit("In.java", "package excl.incl;\r\n" +
-				"public class In {\r\n" +
-				"}\r\n", true, null);
+		ICompilationUnit In= exclInclPackage.createCompilationUnit("In.java", """
+			package excl.incl;\r
+			public class In {\r
+			}\r
+			""", true, null);
 
 		IFolder excl= fJProject.getProject().getFolder("excl");
 		IFile Ex= excl.getFile("Ex.java");

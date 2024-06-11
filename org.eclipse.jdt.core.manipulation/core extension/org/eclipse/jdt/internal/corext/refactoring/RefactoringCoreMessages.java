@@ -1319,6 +1319,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_add_moved_method;
 
+	public static String MoveInstanceMethodProcessor_cannot_access_or_adjust;
+
 	public static String MoveInstanceMethodProcessor_cannot_be_moved;
 
 	public static String MoveInstanceMethodProcessor_checking;
@@ -1334,6 +1336,14 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInstanceMethodProcessor_inline_method_invocation;
 
 	public static String MoveInstanceMethodProcessor_inline_overridden;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_protected;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_has_errors;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_package_private;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_private;
 
 	public static String MoveInstanceMethodProcessor_method_already_exists;
 
@@ -1809,6 +1819,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameMethodRefactoring_not_in_model;
 
+	public static String RenameMethodRefactoring_overrides_static_name;
+
+	public static String RenameMethodRefactoring_overrides_static_name2;
+
 	public static String RenameMethodRefactoring_same_name;
 
 	public static String RenameMethodRefactoring_same_name2;
@@ -2060,6 +2074,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgPolicyFactory_cannot;
 
 	public static String ReorgPolicyFactory_cannot_modify;
+
+	public static String ReorgPolicyFactory_cannot_move_interface_member;
 
 	public static String ReorgPolicyFactory_cannot_move_package_to_parent;
 

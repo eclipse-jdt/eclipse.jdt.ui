@@ -64,20 +64,22 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack0;\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface TypeUse {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("TypeUse.java", buf.toString(), false, null);
+		String str= """
+			package pack0;
+			@Target(ElementType.TYPE_USE)
+			public @interface TypeUse {
+			}
+			""";
+		pack0.createCompilationUnit("TypeUse.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("public class C{\n");
-		buf.append("    @TypeUse int i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			public class C{
+			    @TypeUse int i;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
@@ -85,15 +87,16 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import pack0.TypeUse;\n");
-		buf.append("\n");
-		buf.append("public class C{\n");
-		buf.append("    @TypeUse int i;\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str2= """
+			package pack1;
+			
+			import pack0.TypeUse;
+			
+			public class C{
+			    @TypeUse int i;
+			}
+			""";
+		assertEqualString(cu.getSource(), str2);
 	}
 
 	@Test
@@ -101,20 +104,22 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack0;\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface TypeUse {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("TypeUse.java", buf.toString(), false, null);
+		String str= """
+			package pack0;
+			@Target(ElementType.TYPE_USE)
+			public @interface TypeUse {
+			}
+			""";
+		pack0.createCompilationUnit("TypeUse.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<@TypeUse String> list1;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			public class C{
+			    ArrayList<@TypeUse String> list1;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
@@ -122,16 +127,17 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import pack0.TypeUse;\n");
-		buf.append("\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<@TypeUse String> list1;\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str2= """
+			package pack1;
+			
+			import java.util.ArrayList;
+			import pack0.TypeUse;
+			
+			public class C{
+			    ArrayList<@TypeUse String> list1;
+			}
+			""";
+		assertEqualString(cu.getSource(), str2);
 	}
 
 	@Test
@@ -139,26 +145,28 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack0;\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface TypeUse {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("TypeUse.java", buf.toString(), false, null);
+		String str= """
+			package pack0;
+			@Target(ElementType.TYPE_USE)
+			public @interface TypeUse {
+			}
+			""";
+		pack0.createCompilationUnit("TypeUse.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<@TypeUse A.B> list2;\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class A {\n");
-		buf.append("    public class B {\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			public class C{
+			    ArrayList<@TypeUse A.B> list2;
+			}
+			
+			class A {
+			    public class B {
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
@@ -166,22 +174,23 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import pack0.TypeUse;\n");
-		buf.append("\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<@TypeUse A.B> list2;\n");
-		buf.append("}\n");
-		buf.append("\n");
-		buf.append("class A {\n");
-		buf.append("    public class B {\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str2= """
+			package pack1;
+			
+			import java.util.ArrayList;
+			import pack0.TypeUse;
+			
+			public class C{
+			    ArrayList<@TypeUse A.B> list2;
+			}
+			
+			class A {
+			    public class B {
+			       \s
+			    }
+			}
+			""";
+		assertEqualString(cu.getSource(), str2);
 	}
 
 	@Test
@@ -189,20 +198,22 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack0;\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface TypeUse {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("TypeUse.java", buf.toString(), false, null);
+		String str= """
+			package pack0;
+			@Target(ElementType.TYPE_USE)
+			public @interface TypeUse {
+			}
+			""";
+		pack0.createCompilationUnit("TypeUse.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<java.io.@TypeUse FileNotFoundException> list;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			public class C{
+			    ArrayList<java.io.@TypeUse FileNotFoundException> list;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
@@ -210,16 +221,17 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import pack0.TypeUse;\n");
-		buf.append("\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<java.io.@TypeUse FileNotFoundException> list;\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str2= """
+			package pack1;
+			
+			import java.util.ArrayList;
+			import pack0.TypeUse;
+			
+			public class C{
+			    ArrayList<java.io.@TypeUse FileNotFoundException> list;
+			}
+			""";
+		assertEqualString(cu.getSource(), str2);
 	}
 
 	@Test
@@ -227,20 +239,22 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack0;\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface TypeUse {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("TypeUse.java", buf.toString(), false, null);
+		String str= """
+			package pack0;
+			@Target(ElementType.TYPE_USE)
+			public @interface TypeUse {
+			}
+			""";
+		pack0.createCompilationUnit("TypeUse.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<@TypeUse ?> list3;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			public class C{
+			    ArrayList<@TypeUse ?> list3;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
@@ -248,16 +262,17 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import pack0.TypeUse;\n");
-		buf.append("\n");
-		buf.append("public class C{\n");
-		buf.append("    ArrayList<@TypeUse ?> list3;\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str2= """
+			package pack1;
+			
+			import java.util.ArrayList;
+			import pack0.TypeUse;
+			
+			public class C{
+			    ArrayList<@TypeUse ?> list3;
+			}
+			""";
+		assertEqualString(cu.getSource(), str2);
 	}
 
 	@Test
@@ -265,20 +280,22 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack0;\n");
-		buf.append("@Target(ElementType.TYPE_USE)\n");
-		buf.append("public @interface TypeUse {\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("TypeUse.java", buf.toString(), false, null);
+		String str= """
+			package pack0;
+			@Target(ElementType.TYPE_USE)
+			public @interface TypeUse {
+			}
+			""";
+		pack0.createCompilationUnit("TypeUse.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("public class C{\n");
-		buf.append("    int[] arr = new int @TypeUse [5];\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			public class C{
+			    int[] arr = new int @TypeUse [5];
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
@@ -286,15 +303,16 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import pack0.TypeUse;\n");
-		buf.append("\n");
-		buf.append("public class C{\n");
-		buf.append("    int[] arr = new int @TypeUse [5];\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str2= """
+			package pack1;
+			
+			import pack0.TypeUse;
+			
+			public class C{
+			    int[] arr = new int @TypeUse [5];
+			}
+			""";
+		assertEqualString(cu.getSource(), str2);
 	}
 
 	@Test
@@ -302,19 +320,20 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import java.util.function.IntPredicate;\n");
-		buf.append("\n");
-		buf.append("class UnusedStaticImport {\n");
-		buf.append("    boolean value = match(Character::isUpperCase, 'A');\n");
-		buf.append("\n");
-		buf.append("    public static boolean match(IntPredicate matcher, int codePoint) {\n");
-		buf.append("        return matcher.test(codePoint);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack0.createCompilationUnit("UnusedStaticImport.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			
+			import java.util.function.IntPredicate;
+			
+			class UnusedStaticImport {
+			    boolean value = match(Character::isUpperCase, 'A');
+			
+			    public static boolean match(IntPredicate matcher, int codePoint) {
+			        return matcher.test(codePoint);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack0.createCompilationUnit("UnusedStaticImport.java", str, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("StaticMethodReferenceImports_bug424172", new String[] {}, new int[] {});
@@ -322,19 +341,20 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("import java.util.function.IntPredicate;\n");
-		buf.append("\n");
-		buf.append("class UnusedStaticImport {\n");
-		buf.append("    boolean value = match(Character::isUpperCase, 'A');\n");
-		buf.append("\n");
-		buf.append("    public static boolean match(IntPredicate matcher, int codePoint) {\n");
-		buf.append("        return matcher.test(codePoint);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str1= """
+			package p;
+			
+			import java.util.function.IntPredicate;
+			
+			class UnusedStaticImport {
+			    boolean value = match(Character::isUpperCase, 'A');
+			
+			    public static boolean match(IntPredicate matcher, int codePoint) {
+			        return matcher.test(codePoint);
+			    }
+			}
+			""";
+		assertEqualString(cu.getSource(), str1);
 	}
 
 	@Test
@@ -342,31 +362,34 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack0= sourceFolder.createPackageFragment("p0", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p0;\n");
-		buf.append("@FunctionalInterface\n");
-		buf.append("public interface FI {\n");
-		buf.append("    FI foo();\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("FI.java", buf.toString(), false, null);
+		String str= """
+			package p0;
+			@FunctionalInterface
+			public interface FI {
+			    FI foo();
+			}
+			""";
+		pack0.createCompilationUnit("FI.java", str, false, null);
 
-		buf= new StringBuilder();
-		buf.append("package p0;\n");
-		buf.append("public class X {\n");
-		buf.append("    public static FI staticMethodX() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack0.createCompilationUnit("X.java", buf.toString(), false, null);
+		String str1= """
+			package p0;
+			public class X {
+			    public static FI staticMethodX() {
+			        return null;
+			    }
+			}
+			""";
+		pack0.createCompilationUnit("X.java", str1, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("p1", false, null);
-		buf= new StringBuilder();
-		buf.append("package p1;\n");
-		buf.append("\n");
-		buf.append("public class C1 {\n");
-		buf.append("    FI fi = X::staticMethodX;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+		String str2= """
+			package p1;
+			
+			public class C1 {
+			    FI fi = X::staticMethodX;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", str2, false, null);
 
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MethodReferenceImports_bug424227", new String[] {}, new int[] {});
@@ -374,15 +397,16 @@ public class ImportOrganizeTest1d8 extends ImportOrganizeTest {
 		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
-		buf= new StringBuilder();
-		buf.append("package p1;\n");
-		buf.append("\n");
-		buf.append("import p0.FI;\n");
-		buf.append("import p0.X;\n");
-		buf.append("\n");
-		buf.append("public class C1 {\n");
-		buf.append("    FI fi = X::staticMethodX;\n");
-		buf.append("}\n");
-		assertEqualString(cu.getSource(), buf.toString());
+		String str3= """
+			package p1;
+			
+			import p0.FI;
+			import p0.X;
+			
+			public class C1 {
+			    FI fi = X::staticMethodX;
+			}
+			""";
+		assertEqualString(cu.getSource(), str3);
 	}
 }

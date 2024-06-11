@@ -3927,6 +3927,31 @@ public class PreferenceConstants {
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES = "java.codemining.parameterNames"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that stores the value for "Default Filter for code mining parameter names" when showing parameter names
+	 * in codemining.  This will filter out parameter names for methods in java.lang.Math, org.slf4j.Logging,
+	 * Immutable*.of() methods, Arrays.asList(), and various standard methods such as set() methods, setProperties()
+	 * methods, compare() methods, parameter names that start with "begin", "end", "first", "last", to name a few.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.33
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES = "java.codemining.defalt.filter.for.parameterNames"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Filter matching parameter names" when showing parameter names
+	 * in codemining.  This will filter out parameter names when the passed parameter name implies the parameter name.
+	 * For example, if the parameter name is "format" and the parameter passed is "stringFormat".
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.33
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES = "java.codemining.filter.implied.parameterNames"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the maximum number of chain completions
 	 * to be proposed at one time.
 	 * <p>
@@ -4347,6 +4372,8 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES, true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES, true);
 
 		// Javadoc hover & view
 		JavaElementLinks.initDefaultPreferences(store);

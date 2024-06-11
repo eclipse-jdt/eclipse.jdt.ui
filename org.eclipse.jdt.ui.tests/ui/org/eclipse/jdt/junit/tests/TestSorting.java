@@ -54,27 +54,28 @@ public class TestSorting extends AbstractTestRunListenerTest {
 		TestRunnerViewPart testRunnerViewPart= (TestRunnerViewPart)activePage.showView(TestRunnerViewPart.NAME);
 		testRunnerViewPart.setLayoutMode(TestRunnerViewPart.LAYOUT_FLAT); // TableViewer
 
-		String source= "package pack;\n"
-				+ "import junit.framework.TestCase;\n"
-				+ "public class ATestCase extends TestCase {\n"
-				+ "	private String fString;\n"
-				+ "	public void testB_FirstTest() throws Exception {\n"
-				+ "	    fString= \"first\";\n"
-				+ "	    Thread.sleep(30);\n"
-				+ "	}\n"
-				+ "	public void testa_SecondTest() throws Exception {\n"
-				+ "	    fString= \"second\";\n"
-				+ "	    Thread.sleep(50);\n"
-				+ "	}\n"
-				+ "	public void testC_ThirdTest() throws Exception {\n"
-				+ "	    fString= \"second\";\n"
-				+ "	    Thread.sleep(50);\n"
-				+ "	}\n"
-				+ "	public void testA_FourthTest() throws Exception {\n"
-				+ "	    fString= \"third\";\n"
-				+ "	    Thread.sleep(40);\n"
-				+ "	}\n"
-				+ "}";
+		String source= """
+			package pack;
+			import junit.framework.TestCase;
+			public class ATestCase extends TestCase {
+				private String fString;
+				public void testB_FirstTest() throws Exception {
+				    fString= "first";
+				    Thread.sleep(30);
+				}
+				public void testa_SecondTest() throws Exception {
+				    fString= "second";
+				    Thread.sleep(50);
+				}
+				public void testC_ThirdTest() throws Exception {
+				    fString= "second";
+				    Thread.sleep(50);
+				}
+				public void testA_FourthTest() throws Exception {
+				    fString= "third";
+				    Thread.sleep(40);
+				}
+			}""";
 
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 		runSequenceTest(aTestCase);

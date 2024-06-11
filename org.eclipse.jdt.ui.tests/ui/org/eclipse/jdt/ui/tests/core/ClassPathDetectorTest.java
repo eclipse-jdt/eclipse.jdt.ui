@@ -185,14 +185,15 @@ public class ClassPathDetectorTest {
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        getClass();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        getClass();
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
 		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
 			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
@@ -229,14 +230,15 @@ public class ClassPathDetectorTest {
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1/src2");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        getClass();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        getClass();
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
 		for (IClasspathEntry jreEntry : PreferenceConstants.getDefaultJRELibrary()) {
 			JavaProjectHelper.addToClasspath(fJProject1, jreEntry);
@@ -298,14 +300,15 @@ public class ClassPathDetectorTest {
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1");
 		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        getClass();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class E {
+			    public void foo() {
+			        getClass();
+			    }
+			}
+			""";
+		pack1.createCompilationUnit("E.java", str, false, null);
 
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertNotNull("lib not found", lib);

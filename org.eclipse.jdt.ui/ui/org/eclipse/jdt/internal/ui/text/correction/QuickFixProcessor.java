@@ -776,7 +776,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UsingDeprecatedMethod:
 				ASTNode deprecatedMethodNode= context.getCoveredNode();
-				if (!(deprecatedMethodNode instanceof MethodInvocation)) {
+				if (deprecatedMethodNode != null && !(deprecatedMethodNode instanceof MethodInvocation)) {
 					deprecatedMethodNode= deprecatedMethodNode.getParent();
 				}
 				if (deprecatedMethodNode instanceof MethodInvocation methodInvocation

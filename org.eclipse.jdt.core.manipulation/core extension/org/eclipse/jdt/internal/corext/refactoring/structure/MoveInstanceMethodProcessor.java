@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -98,12 +99,14 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -269,6 +272,57 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 */
 		public final RefactoringStatus getStatus() {
 			return fStatus;
+		}
+	}
+
+	protected static class AccessAnalyzer extends ASTVisitor {
+		public boolean fAccessesPrivate;
+		public boolean fAccessesProtected;
+		public boolean fAccessesPackagePrivate;
+		@Override
+		public boolean visit(SimpleName node) {
+			IBinding binding= node.resolveBinding();
+			if (binding != null) {
+				int modifiers= binding.getModifiers();
+				boolean isPublic= Modifier.isPublic(modifiers);
+				boolean isPrivate= Modifier.isPrivate(modifiers);
+				boolean isProtected= Modifier.isProtected(modifiers);
+				if (!isPublic) {
+					if (binding instanceof IVariableBinding varBinding) {
+						ITypeBinding declClass= varBinding.getDeclaringClass();
+						if (!varBinding.isField() || declClass == null || declClass.isLocal()) {
+							return true;
+						}
+					} else if (binding instanceof IMethodBinding methodBinding) {
+						ITypeBinding declClass= methodBinding.getDeclaringClass();
+						if (declClass == null || declClass.isLocal()) {
+							return true;
+						}
+					} else {
+						return true;
+					}
+				}
+				fAccessesPrivate= fAccessesPrivate || isPrivate;
+				fAccessesProtected= fAccessesProtected || isProtected;
+				fAccessesPackagePrivate= fAccessesPackagePrivate || (!isPublic && !isPrivate && !isProtected);
+			}
+			return true;
+		}
+
+		public boolean accessesPrivate() {
+			return fAccessesPrivate;
+		}
+
+		public boolean accessesProtected() {
+			return fAccessesProtected;
+		}
+
+		public boolean accessesPackagePrivate() {
+			return fAccessesPackagePrivate;
+		}
+
+		public boolean onlyAccessesPublic() {
+			return !fAccessesPrivate && !fAccessesProtected && !fAccessesPackagePrivate;
 		}
 	}
 
@@ -451,17 +505,23 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/** The anonymous class nesting counter */
 		protected int fAnonymousClass= 0;
 
+		/** The visibility adjustments */
+		private final Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments;
+
 		/** The method declaration to rewrite */
 		protected final MethodDeclaration fDeclaration;
 
 		/** The source ast rewrite to use */
 		protected final ASTRewrite fRewrite;
 
+		/** The compilation unit rewrites */
+		private final Map<ICompilationUnit, CompilationUnitRewrite> fRewrites;
+
 		/** The existing static imports */
 		protected final Set<IBinding> fStaticImports= new HashSet<>();
 
 		/** The refactoring status */
-		protected final RefactoringStatus fStatus= new RefactoringStatus();
+		protected final RefactoringStatus fStatus;
 
 		/** The target compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fTargetRewrite;
@@ -469,21 +529,30 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		/**
 		 * Creates a new method body rewriter.
 		 *
+		 * @param rewrites
+		 *            the compilation unit rewrites
 		 * @param targetRewrite
 		 *            the target compilation unit rewrite to use
 		 * @param rewrite
 		 *            the source ast rewrite to use
 		 * @param sourceDeclaration
 		 *            the source method declaration
+		 * @param adjustments
+		 *            the map of elements to visibility adjustments
+		 * @param status
+		 *            refactoring status
 		 */
-		public MethodBodyRewriter(final CompilationUnitRewrite targetRewrite, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration) {
+		public MethodBodyRewriter(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite targetRewrite, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status) {
 			Assert.isNotNull(targetRewrite);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(sourceDeclaration);
 			fTargetRewrite= targetRewrite;
 			fRewrite= rewrite;
+			fRewrites= rewrites;
 			fDeclaration= sourceDeclaration;
 			fStaticImports.clear();
+			fAdjustments= adjustments;
+			fStatus= status;
 			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet<>(), fStaticImports, false);
 		}
 
@@ -514,6 +583,56 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		@Override
+		public boolean visit(SimpleType node) {
+			ITypeBinding nodeTypeBinding= ASTNodes.getEnclosingType(node);
+			ITypeBinding simpleTypeBinding= node.resolveBinding();
+			if (nodeTypeBinding != null && simpleTypeBinding != null && !nodeTypeBinding.isEqualTo(simpleTypeBinding) && simpleTypeBinding.isMember()) {
+				AST ast= node.getAST();
+				if (node.getParent() instanceof ClassInstanceCreation parent && parent.getExpression() == null && !Modifier.isStatic(simpleTypeBinding.getModifiers())) {
+					ClassInstanceCreation newCreation= ast.newClassInstanceCreation();
+					newCreation.setType((Type) fRewrite.createCopyTarget(node));
+					newCreation.setExpression(ASTNodeFactory.newName(node.getAST(), fTargetName));
+					List<Expression> args= parent.arguments();
+					for (Expression arg : args) {
+						newCreation.arguments().add(fRewrite.createCopyTarget(arg));
+					}
+					List<Type> typeArgs= parent.typeArguments();
+					for (Type typeArg : typeArgs) {
+						newCreation.typeArguments().add(fRewrite.createCopyTarget(typeArg));
+					}
+					if (parent.getAnonymousClassDeclaration() != null) {
+						newCreation.setAnonymousClassDeclaration((AnonymousClassDeclaration) fRewrite.createCopyTarget(parent.getAnonymousClassDeclaration()));
+					}
+					fRewrite.replace(node.getParent(), newCreation, null);
+				} else {
+					try {
+						if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit())) {
+							String qualifiedTypeName= Bindings.getFullyQualifiedName(simpleTypeBinding);
+							int index= qualifiedTypeName.lastIndexOf("."); //$NON-NLS-1$
+							int startIndex= 0;
+							IPackageDeclaration[] packages= fMethod.getCompilationUnit().getPackageDeclarations();
+							if (packages.length > 0) {
+								String packageName= fMethod.getCompilationUnit().getPackageDeclarations()[0].getElementName();
+								if (packageName.length() > 0 && qualifiedTypeName.startsWith(packageName)) {
+									startIndex= packageName.length() + 1;
+								}
+								String qualifier= qualifiedTypeName.substring(startIndex, index);
+								QualifiedName qualifiedName= (QualifiedName) fRewrite.createStringPlaceholder(qualifier, ASTNode.QUALIFIED_NAME);
+								NameQualifiedType newQualifiedType= ast.newNameQualifiedType(qualifiedName, (SimpleName) fRewrite.createCopyTarget(node.getName()));
+								fRewrite.replace(node, newQualifiedType, null);
+							}
+						}
+
+					} catch (JavaModelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			return super.visit(node);
+		}
+
+		@Override
 		public boolean visit(final ClassInstanceCreation node) {
 			Assert.isNotNull(node);
 			if (node.getParent() instanceof ClassInstanceCreation) {
@@ -521,6 +640,52 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				if (declaration != null)
 					visit(declaration);
 				return false;
+			} else {
+				Type type= node.getType();
+				if (node.getExpression() == null && type.isSimpleType() && type.getRoot() == node.getRoot()) {
+					ITypeBinding nodeTypeBinding= ASTNodes.getEnclosingType(node);
+					ITypeBinding newTypeBinding= type.resolveBinding();
+					if (nodeTypeBinding != null && newTypeBinding.isMember() && !nodeTypeBinding.isEqualTo(newTypeBinding) && !Modifier.isStatic(newTypeBinding.getModifiers())) {
+						AST ast= node.getAST();
+						ClassInstanceCreation newCreation= ast.newClassInstanceCreation();
+						newCreation.setType((Type) fRewrite.createCopyTarget(type));
+						newCreation.setExpression(ASTNodeFactory.newName(node.getAST(), fTargetName));
+						List<Expression> args= node.arguments();
+						for (Expression arg : args) {
+							newCreation.arguments().add(fRewrite.createCopyTarget(arg));
+						}
+						List<Type> typeArgs= node.typeArguments();
+						for (Type typeArg : typeArgs) {
+							newCreation.typeArguments().add(fRewrite.createCopyTarget(typeArg));
+						}
+						if (node.getAnonymousClassDeclaration() != null) {
+							newCreation.setAnonymousClassDeclaration((AnonymousClassDeclaration) fRewrite.createCopyTarget(node.getAnonymousClassDeclaration()));
+						}
+						fRewrite.replace(node, newCreation, null);
+					}
+				}
+				IMethodBinding constructorBinding= node.resolveConstructorBinding();
+				if (constructorBinding != null) {
+					IMethod constructor= (IMethod) constructorBinding.getJavaElement();
+					try {
+						if (constructor != null && !constructor.isBinary() && !constructor.isReadOnly() && !Modifier.isPublic(constructor.getFlags())) {
+							boolean same= false;
+							final CompilationUnitRewrite rewrite= getCompilationUnitRewrite(fRewrites, constructor.getCompilationUnit());
+							final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(constructor, rewrite.getRoot());
+							if (declaration != null) {
+								final ITypeBinding declaring= constructorBinding.getDeclaringClass();
+								if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
+									same= true;
+								final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
+								final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public;
+								if (MemberVisibilityAdjustor.hasLowerVisibility(constructorBinding.getModifiers(), same ? Modifier.NONE : keyword == null ? Modifier.NONE : keyword.toFlagValue()) && MemberVisibilityAdjustor.needsVisibilityAdjustments(constructor, keyword, fAdjustments))
+									fAdjustments.put(constructor, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(constructor, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabelProviderCore.getBindingLabel(declaration.resolveBinding(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(constructor.getCompilationUnit(), declaration))));
+							}
+						}
+					} catch (JavaModelException e) {
+						// unexpected
+					}
+				}
 			}
 			return super.visit(node);
 		}
@@ -680,6 +845,30 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						if (fieldInHierarchy != null) {
 							targetType= enclosingType;
 						}
+					}
+					final IField field= (IField) variable.getJavaElement();
+					try {
+						if (field != null && !Modifier.isPublic(field.getFlags())) {
+							boolean checkRequired= true;
+							ITypeBinding pClass= fTarget.getType();
+							while (pClass != null && pClass.isMember()) {
+								pClass= pClass.getDeclaringClass();
+								if (pClass != null && pClass.isEqualTo(targetType)) {
+									checkRequired= false;
+									break;
+								}
+							}
+							if (checkRequired) {
+								boolean same= field.getAncestor(IJavaElement.PACKAGE_FRAGMENT).equals(fTarget.getJavaElement().getAncestor(IJavaElement.PACKAGE_FRAGMENT));
+								final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
+								final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public;
+								if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, fAdjustments)) {
+									fAdjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning, new String[] { BindingLabelProviderCore.getBindingLabel(variable, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(field))));
+								}
+							}
+						}
+					} catch (JavaModelException e) {
+						// ignore as this should not happen
 					}
 				}
 				if (method != null && targetType != null) {
@@ -967,9 +1156,22 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		@Override
 		public boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
-			if (isFieldAccess(node) && !isTargetAccess(node)) {
+			if (isFieldAccess(node) && !isLocalQualified(node) && !isTargetAccess(node)) {
 				fResult.add(node);
 				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
+			} else if (node.getParent() instanceof ClassInstanceCreation constructor && constructor.getExpression() == null) {
+				Type type= constructor.getType();
+				ITypeBinding binding= type.resolveBinding();
+				if (binding != null && binding.isMember() && !Modifier.isPublic(binding.getModifiers()) && !Modifier.isStatic(binding.getModifiers())) {
+					fResult.add(node);
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
+				}
+			} else if (node.getParent() instanceof SimpleType simpleType) {
+				ITypeBinding binding= simpleType.resolveBinding();
+				if (binding != null && binding.isMember() && !Modifier.isPublic(binding.getModifiers()) && !Modifier.isStatic(binding.getModifiers())) {
+					fResult.add(node);
+					fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_this_reference, JavaStatusContext.create(fMethod.getCompilationUnit(), node)));
+				}
 			}
 			return false;
 		}
@@ -1139,6 +1341,24 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			}
 		}
 		return !Modifier.isStatic(variable.getModifiers());
+	}
+
+	protected static boolean isLocalQualified(final SimpleName name) {
+		if (name.getParent() instanceof FieldAccess fieldAccess) {
+			Expression exp= fieldAccess.getExpression();
+			if (exp instanceof SimpleName qualifierName) {
+				IBinding qualifierBinding= qualifierName.resolveBinding();
+				if (qualifierBinding instanceof IVariableBinding varBinding && !varBinding.isField()) {
+					return true;
+				}
+			}
+		} else if (name.getParent() instanceof QualifiedName qualifiedName) {
+			IBinding qualifierBinding= qualifiedName.getQualifier().resolveBinding();
+			if (qualifierBinding instanceof IVariableBinding varBinding && !varBinding.isField()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** The candidate targets */
@@ -1469,8 +1689,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				declaration.accept(finder);
 				if (!finder.getStatus().isOK())
 					status.merge(finder.getStatus());
+
 				monitor.worked(1);
 			}
+
 		} finally {
 			monitor.done();
 		}
@@ -1691,7 +1913,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @throws JavaModelException
 	 *             if an error occurs while accessing the target expression
 	 */
-	protected Expression createAdjustedTargetExpression(final IJavaElement enclosingElement, final Expression expression, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final ASTRewrite rewrite) throws JavaModelException {
+	protected Expression createAdjustedTargetExpression(final IJavaElement enclosingElement, final Expression expression, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final ASTRewrite rewrite, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(enclosingElement);
 		Assert.isNotNull(adjustments);
 		Assert.isNotNull(rewrite);
@@ -1717,8 +1939,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						}
 					}
 				}
-				if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, adjustments))
+				if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, adjustments)) {
+					if (MemberVisibilityAdjustor.hasLowerVisibility(fTarget.getType().getModifiers(), keyword == null ? Modifier.NONE : keyword.toFlagValue())) {
+						status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_cannot_access_or_adjust, new String[] { BindingLabelProviderCore.getBindingLabel(fTarget.getType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(field)));
+					}
 					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning, new String[] { BindingLabelProviderCore.getBindingLabel(fTarget, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), modifier }), JavaStatusContext.create(field))));
+				}
 			}
 		}
 		return null;
@@ -1971,6 +2197,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				Expression access= null;
 				if (invocation.getExpression() != null) {
 					access= createInlinedTargetExpression(rewriter, (IJavaElement) match.getElement(), invocation.getExpression(), adjustments, status);
+					if (status.hasError()) {
+						result= false;
+						return result;
+					}
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, access, group);
 				} else
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()), group);
@@ -2055,8 +2285,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(status);
 		Assert.isTrue(fTarget.isField());
 		final Expression expression= (Expression) ASTNode.copySubtree(fSourceRewrite.getASTRewrite().getAST(), original);
-		final Expression result= createAdjustedTargetExpression(enclosingElement, expression, adjustments, fSourceRewrite.getASTRewrite());
-		if (result == null) {
+		final Expression result= createAdjustedTargetExpression(enclosingElement, expression, adjustments, fSourceRewrite.getASTRewrite(), status);
+		if (result == null && !status.hasError()) {
 			final FieldAccess access= fSourceRewrite.getASTRewrite().getAST().newFieldAccess();
 			access.setExpression(expression);
 			access.setName(fSourceRewrite.getASTRewrite().getAST().newSimpleName(fTarget.getName()));
@@ -2163,16 +2393,23 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates the method body for the target method declaration.
 	 *
+	 * @param rewrites
+	 *            the compilation unit rewrites
 	 * @param rewriter
 	 *            the target compilation unit rewrite
 	 * @param rewrite
 	 *            the source ast rewrite
 	 * @param declaration
 	 *            the source method declaration
+	 * @param adjustments
+	 *            the map of elements to visibility adjustments
+	 * @param status
+	 *            refactoring status
 	 */
-	protected void createMethodBody(final CompilationUnitRewrite rewriter, final ASTRewrite rewrite, final MethodDeclaration declaration) {
+	protected void createMethodBody(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final CompilationUnitRewrite rewriter,
+			final ASTRewrite rewrite, final MethodDeclaration declaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status) {
 		Assert.isNotNull(declaration);
-		declaration.getBody().accept(new MethodBodyRewriter(rewriter, rewrite, declaration));
+		declaration.getBody().accept(new MethodBodyRewriter(rewrites, rewriter, rewrite, declaration, adjustments, status));
 	}
 
 	/**
@@ -2362,7 +2599,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
 			createMethodTypeParameters(rewrite, declaration, status);
 			createMethodComment(rewrite, declaration);
-			createMethodBody(rewriter, rewrite, declaration);
+			createMethodBody(rewrites, rewriter, rewrite, declaration, adjustments, status);
 		} finally {
 			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
 				rewriter.clearImportRewrites();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1272,7 +1272,15 @@ public final class MemberVisibilityAdjustor {
 		}
 		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
 		if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
-			if (referenced.getDeclaringType().getDeclaringType() != null)
+			IType referencedType= referenced.getDeclaringType();
+			while (referencedType.getDeclaringType() != null) {
+				referencedType= referencedType.getDeclaringType();
+			}
+			IType referencingType= referencing;
+			while (referencingType.getDeclaringType() != null) {
+				referencingType= referencingType.getDeclaringType();
+			}
+			if (!referencedType.getFullyQualifiedName().equals(referencingType.getFullyQualifiedName()))
 				keyword= null;
 			else
 				keyword= ModifierKeyword.PRIVATE_KEYWORD;

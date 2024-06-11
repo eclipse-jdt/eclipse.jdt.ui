@@ -41,18 +41,20 @@ import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
  */
 public class TextDiffContentTest {
 	private static final String MODIFIED_SOURCE_CONTENTS =
-		"// my file\n"+
-		"\n"+
-		"CMyClass::CMyClass()\n"+
-		"\t{\n"+
-		"\tGoodCall();\n"+
-		"\tDumbCall();\n"+
-		"\t// [[[ begin\n"+
-		"\tMagicCall();\n"+
-		"\t// ]]] end\n"+
-		"\t}\n"+
-		"\n"+
-		"// other stuff\n";
+		"""
+		// my file
+		
+		CMyClass::CMyClass()
+			{
+			GoodCall();
+			DumbCall();
+			// [[[ begin
+			MagicCall();
+			// ]]] end
+			}
+		
+		// other stuff
+		""";
 
 	private DocumentChange fDocumentChange;
 
@@ -149,14 +151,18 @@ public class TextDiffContentTest {
 	public void testEmptySourceRangeContext() throws Exception {
 		String src = getSource(fEdit1.getRegion(), 2);
 		String preview = getPreview(fChange1, 2);
-		assertEquals("\tMagicCall();\n" +
-				"\t// ]]] end\n" +
-				"\t}\n",
+		assertEquals("""
+				MagicCall();
+				// ]]] end
+				}
+			""",
 				src);
-		assertEquals("	MagicCall();\n" +
-				"	// ]]] end\n" +
-				"	FinalCall();\n" +
-				"	}\n",
+		assertEquals("""
+				MagicCall();
+				// ]]] end
+				FinalCall();
+				}
+			""",
 			preview);
 	}
 	@Test
@@ -182,14 +188,20 @@ public class TextDiffContentTest {
 	public void testEmptyTargetRangeContext() throws Exception {
 		String src = getSource(fEdit3.getRegion(), 2);
 		String preview = getPreview(fChange3, 2);
-		assertEquals("\t{\n"+"\tGoodCall();\n"+
-				"\tDumbCall();\n"+
-				"\t// [[[ begin\n"+
-				"\tMagicCall();",
+		assertEquals("""
+				{
+				GoodCall();
+				DumbCall();
+				// [[[ begin
+				MagicCall();\
+			""",
 				src);
-		assertEquals("\t{\n"+"\tGoodCall();\n"+
-				"\t// [[[ begin\n"+
-				"\tMagicCall();",
+		assertEquals("""
+				{
+				GoodCall();
+				// [[[ begin
+				MagicCall();\
+			""",
 				preview);
 
 	}

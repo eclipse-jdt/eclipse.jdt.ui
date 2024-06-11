@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTagElement;
 import org.eclipse.jdt.core.dom.AbstractTextElement;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AbstractUnnamedTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -165,24 +164,6 @@ public class HierarchicalASTVisitorTest {
 		}
 		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(AbstractTextElement node) {
-			super.visit(node);
-		}
-
-		@Override
-		public boolean visit(AbstractUnnamedTypeDeclaration node) {
-			registerCall(AbstractUnnamedTypeDeclaration.class);
-			return false;
-		}
-		@SuppressWarnings("unused") // called reflectively
-		public void superVisit(AbstractUnnamedTypeDeclaration node) {
-			super.visit(node);
-		}
-		@Override
-		public void endVisit(AbstractUnnamedTypeDeclaration node) {
-			registerCall(AbstractUnnamedTypeDeclaration.class);
-		}
-		@SuppressWarnings("unused") // called reflectively
-		public void superEndVisit(AbstractUnnamedTypeDeclaration node) {
 			super.visit(node);
 		}
 
@@ -490,10 +471,11 @@ public class HierarchicalASTVisitorTest {
 		}
 
 		private void registerCall(Class<? extends ASTNode> nodeClassForMethod) {
-			assertNull("The invocation of a visit(XX) method in HierarchicalASTVisitor has caused " +
-					"more than one other visit(XX) method to be called.  Every visit(XX) method in " +
-					"HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), " +
-					"where YY is the superclass of XX.", fNodeClassForCalledMethod);
+			assertNull("""
+				The invocation of a visit(XX) method in HierarchicalASTVisitor has caused \
+				more than one other visit(XX) method to be called.  Every visit(XX) method in \
+				HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), \
+				where YY is the superclass of XX.""", fNodeClassForCalledMethod);
 			fNodeClassForCalledMethod= nodeClassForMethod;
 		}
 	}

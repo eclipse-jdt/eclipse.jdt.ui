@@ -82,15 +82,16 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 	@Test
 	public void testAddSafeVarargs1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    private <T> List<T> asList(T ... a) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			import java.util.List;
+			public class E {
+			    private <T> List<T> asList(T ... a) {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -99,16 +100,16 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    @SafeVarargs\n");
-		buf.append("    private <T> List<T> asList(T ... a) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			import java.util.List;
+			public class E {
+			    @SafeVarargs
+			    private <T> List<T> asList(T ... a) {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -116,15 +117,16 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 	@Test
 	public void testAddSafeVarargs2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public interface E {\n");
-		buf.append("    private <T> List<T> asList(T ... a) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package p;
+			import java.util.List;
+			public interface E {
+			    private <T> List<T> asList(T ... a) {
+			        return null;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -133,16 +135,16 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public interface E {\n");
-		buf.append("    @SafeVarargs\n");
-		buf.append("    private <T> List<T> asList(T ... a) {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package p;
+			import java.util.List;
+			public interface E {
+			    @SafeVarargs
+			    private <T> List<T> asList(T ... a) {
+			        return null;
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -156,22 +158,23 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(since=\"3\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class E {
+			    @Deprecated(since="3")
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    public void foo() {
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -180,42 +183,42 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(since=\"3\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			public class E {
+			    @Deprecated(since="3")
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     * @deprecated
+			     */
+			    @Deprecated
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(since=\"3\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    @SuppressWarnings(\"deprecation\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			public class E {
+			    @Deprecated(since="3")
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    @SuppressWarnings("deprecation")
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -229,22 +232,23 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(forRemoval=true)\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class E {
+			    @Deprecated(forRemoval=true)
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    public void foo() {
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -253,42 +257,42 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(forRemoval=true)\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			public class E {
+			    @Deprecated(forRemoval=true)
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     * @deprecated
+			     */
+			    @Deprecated
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(forRemoval=true)\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    @SuppressWarnings(\"removal\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			public class E {
+			    @Deprecated(forRemoval=true)
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    @SuppressWarnings("removal")
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -302,22 +306,23 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package pack;
+			public class E {
+			    @Deprecated(since="4.2",forRemoval=true)
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    public void foo() {
+			    }
+			}
+			
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -326,42 +331,42 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     * @deprecated\n");
-		buf.append("     */\n");
-		buf.append("    @Deprecated\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package pack;
+			public class E {
+			    @Deprecated(since="4.2",forRemoval=true)
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     * @deprecated
+			     */
+			    @Deprecated
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
-		buf= new StringBuilder();
-		buf.append("package pack;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}    \n");
-		buf.append("\n");
-		buf.append("class F extends E {\n");
-		buf.append("    /**\n");
-		buf.append("     */\n");
-		buf.append("    @SuppressWarnings(\"removal\")\n");
-		buf.append("    public void foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("\n");
-		expected[1]= buf.toString();
+		expected[1]= """
+			package pack;
+			public class E {
+			    @Deprecated(since="4.2",forRemoval=true)
+			    public void foo() {
+			    }
+			}   \s
+			
+			class F extends E {
+			    /**
+			     */
+			    @SuppressWarnings("removal")
+			    public void foo() {
+			    }
+			}
+			
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

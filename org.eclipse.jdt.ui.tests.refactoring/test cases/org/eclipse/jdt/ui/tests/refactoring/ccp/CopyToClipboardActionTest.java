@@ -85,24 +85,26 @@ public class CopyToClipboardActionTest extends GenericRefactoringTest {
 		fDefaultPackage= rts.getDefaultSourceFolder().createPackageFragment("", true, null);
 
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java",
-			"package p;" +
-			"import java.util.List;" +
-			"class A{" +
-			"int f;" +
-			"{}" +
-			"void foo(){}" +
-			"class Inner{}" +
-			"}");
+			"""
+				package p;\
+				import java.util.List;\
+				class A{\
+				int f;\
+				{}\
+				void foo(){}\
+				class Inner{}\
+				}""");
 
 		fPackage_Q= rts.getDefaultSourceFolder().createPackageFragment("q", true, null);
 		fCuB= createCU(fPackage_Q, CU_B_NAME + ".java",
-				"package q;" +
-				"import java.util.Set;" +
-				"class B{" +
-				"int x;" +
-				"void bar(){}" +
-				"class InnerB{}" +
-				"}");
+				"""
+					package q;\
+					import java.util.Set;\
+					class B{\
+					int x;\
+					void bar(){}\
+					class InnerB{}\
+					}""");
 
 		fPackage_Q_R= rts.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 

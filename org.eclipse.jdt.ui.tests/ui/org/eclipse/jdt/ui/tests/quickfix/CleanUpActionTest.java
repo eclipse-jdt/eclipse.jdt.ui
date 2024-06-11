@@ -63,15 +63,16 @@ public class CleanUpActionTest extends CleanUpTestCase {
 	@Test
 	public void testSortMembersAction() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testSortMembersAction", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package testSortMembersAction;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private void methodX() {}\n");
-		buf.append("    private void methodA() {}\n");
-		buf.append("    private int fieldX;\n");
-		buf.append("    private int fieldA;\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		String str= """
+			package testSortMembersAction;
+			public class E1 {
+			    private void methodX() {}
+			    private void methodA() {}
+			    private int fieldX;
+			    private int fieldA;
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", str, false, null);
 
 		IWorkbenchPartSite site= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite();
 		MultiSortMembersAction action= new MultiSortMembersAction(site) {
@@ -89,15 +90,15 @@ public class CleanUpActionTest extends CleanUpTestCase {
 
 		action.run(selection);
 
-		buf= new StringBuilder();
-		buf.append("package testSortMembersAction;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    private int fieldA;\n");
-		buf.append("    private int fieldX;\n");
-		buf.append("    private void methodA() {}\n");
-		buf.append("    private void methodX() {}\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected1= """
+			package testSortMembersAction;
+			public class E1 {
+			    private int fieldA;
+			    private int fieldX;
+			    private void methodA() {}
+			    private void methodX() {}
+			}
+			""";
 
 		assertEquals(expected1, cu1.getBuffer().getContents());
 	}

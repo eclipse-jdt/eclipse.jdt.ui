@@ -227,13 +227,13 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.IntConsumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    IntConsumer c = (i) -> { };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.IntConsumer;
+			public class C {
+			    IntConsumer c = (i) -> { };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("i"), 1);
@@ -259,13 +259,13 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    Consumer<String> c = (s) -> { };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.Consumer;
+			public class C {
+			    Consumer<String> c = (s) -> { };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("s"), 1);
@@ -292,15 +292,15 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    Consumer<String> c = (s) -> {\n");
-		buf.append("    	new Thread() { public void run() { } }.start();\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.Consumer;
+			public class C {
+			    Consumer<String> c = (s) -> {
+			    	new Thread() { public void run() { } }.start();
+			    };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement thread= cu.getElementAt(content.lastIndexOf("Thread"));
@@ -317,17 +317,17 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    Thread t= new Thread() {\n");
-		buf.append("    	public void run() {\n");
-		buf.append("    		Consumer<String> c = (s) -> { };\n");
-		buf.append("    	}\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.Consumer;
+			public class C {
+			    Thread t= new Thread() {
+			    	public void run() {
+			    		Consumer<String> c = (s) -> { };
+			    	}
+			    };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("s)"), 1);
@@ -347,15 +347,15 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.util.function.Consumer;\n");
-		buf.append("public class C {\n");
-		buf.append("    {\n");
-		buf.append("    	Consumer<String> c = (s) -> { System.out.print(s.toUpperCase()); };\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.util.function.Consumer;
+			public class C {
+			    {
+			    	Consumer<String> c = (s) -> { System.out.print(s.toUpperCase()); };
+			    };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("s.toUpperCase"), 1);
@@ -373,19 +373,19 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.lang.annotation.*;\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE) @interface TAnn {}\n");
-		buf.append("\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    void test (String [] @TAnn[] argss) {\n");
-		buf.append("    	String[] args = argss[0];\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.lang.annotation.*;
+			
+			@Target(ElementType.TYPE_USE) @interface TAnn {}
+			
+			
+			public class C {
+			    void test (String [] @TAnn[] argss) {
+			    	String[] args = argss[0];
+			    };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("argss[0]"), "argss".length());
@@ -403,21 +403,21 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.test;\n");
-		buf.append("import java.lang.annotation.*;\n");
-		buf.append("\n");
-		buf.append("@Target(ElementType.TYPE_USE) @interface TA1 {}\n");
-		buf.append("@Target(ElementType.TYPE_USE) @interface TA2 {}\n");
-		buf.append("@Target(ElementType.TYPE_USE) @interface TA3 {}\n");
-		buf.append("\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    void test (@TA1 String @TA2[] @TA3[] argss) {\n");
-		buf.append("    	String[] args = argss[0];\n");
-		buf.append("    };\n");
-		buf.append("}\n");
-		String content= buf.toString();
+		String content= """
+			package org.test;
+			import java.lang.annotation.*;
+			
+			@Target(ElementType.TYPE_USE) @interface TA1 {}
+			@Target(ElementType.TYPE_USE) @interface TA2 {}
+			@Target(ElementType.TYPE_USE) @interface TA3 {}
+			
+			
+			public class C {
+			    void test (@TA1 String @TA2[] @TA3[] argss) {
+			    	String[] args = argss[0];
+			    };
+			}
+			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
 
 		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("argss[0]"), "argss".length());
@@ -437,23 +437,22 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(javaProject, "src");
 
 			IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
-			StringBuilder buf= new StringBuilder();
-			buf.append("package p;\n");
-			buf.append("\n");
-			buf.append("import java.util.List;\n");
-			buf.append("\n");
-			buf.append("public class Test {\n");
-			buf.append("\n");
-			buf.append("	protected <E extends Comparable<E>> List<E> createEmptySet() {\n");
-			buf.append("		return null;\n");
-			buf.append("	}\n");
-			buf.append("\n");
-			buf.append("	public void emptySet() {\n");
-			buf.append("		s = createEmptySet();\n");
-			buf.append("	}\n");
-			buf.append("\n");
-			buf.append("}");
-			String content= buf.toString();
+			String content= """
+				package p;
+				
+				import java.util.List;
+				
+				public class Test {
+				
+					protected <E extends Comparable<E>> List<E> createEmptySet() {
+						return null;
+					}
+				
+					public void emptySet() {
+						s = createEmptySet();
+					}
+				
+				}""";
 			ICompilationUnit cu= pack1.createCompilationUnit("Test.java", content, false, null);
 			IJavaElement enclElement= cu.getTypes()[0].getMethods()[1];
 

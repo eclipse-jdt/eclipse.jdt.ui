@@ -87,9 +87,10 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTempl
 
 public class QuickFixTest {
 
-	protected static String MODULE_INFO_FILE_CONTENT = ""
-			+ "module test {\n"
-			+ "}\n";
+	protected static String MODULE_INFO_FILE_CONTENT = """
+		module test {
+		}
+		""";
 
 	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {
 		for (ICompletionProposal proposal : proposals) {

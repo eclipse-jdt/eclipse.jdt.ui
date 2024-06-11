@@ -68,14 +68,15 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int x= 9999999999999999999999;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class A {
+			    public void foo() {
+			        int x= 9999999999999999999999;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -84,14 +85,14 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 		String[] previewContents= getPreviewContents(proposals);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int x= 0;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected= buf.toString();
+		String expected= """
+			package test1;
+			public class A {
+			    public void foo() {
+			        int x= 0;
+			    }
+			}
+			""";
 		assertEqualString(previewContents[0], expected);
 	}
 
@@ -100,14 +101,15 @@ public class QuickFixEnablementTest extends QuickFixTest {
 	public void testContributedQuickFix2() throws Exception {
 		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int x= 9999999999999999999999;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public class A {
+			    public void foo() {
+			        int x= 9999999999999999999999;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
 		HashMap<String, String> options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_6);
@@ -121,14 +123,15 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 0); // wrong version
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class B {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        int x= 9999999999999999999999;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			public class B {
+			    public void foo() {
+			        int x= 9999999999999999999999;
+			    }
+			}
+			""";
+		cu= pack1.createCompilationUnit("B.java", str1, false, null);
 
 		options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);

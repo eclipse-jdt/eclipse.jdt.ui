@@ -55,164 +55,166 @@ public class CleanUpTest9 extends CleanUpTestCase {
 	@Test
 	public void testUseTryWithResource() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileInputStream;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"data.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public boolean removeClosureOnStillUsedCloseable() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"input.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return inputStream != null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorFullyInitializedResourceOnlyRemoveFinallyIf() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            if (inputStream != null) {\n" //
-				+ "                inputStream.close();\n" //
-				+ "            }\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"output.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            if (inputStream != null) {\n" //
-				+ "                inputStream.close();\n" //
-				+ "            }\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"file.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            if (null != inputStream) {\n" //
-				+ "                inputStream.close();\n" //
-				+ "            }\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String given= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			
+			public class E {
+			    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("data.txt");
+			        // Keep this comment too
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			        }
+			    }
+			
+			    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        // Keep this comment too
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			            System.out.println("Done");
+			        }
+			    }
+			
+			    public boolean removeClosureOnStillUsedCloseable() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("input.txt");
+			        // Keep this comment too
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			            System.out.println("Done");
+			        }
+			
+			        return inputStream != null;
+			    }
+			
+			    public void refactorFullyInitializedResourceOnlyRemoveFinallyIf() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        // Keep this comment too
+			        try {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            if (inputStream != null) {
+			                inputStream.close();
+			            }
+			            System.out.println("Done");
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        FileInputStream inputStream = null;
+			        // Keep this comment too
+			        try {
+			            inputStream = new FileInputStream("output.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            if (inputStream != null) {
+			                inputStream.close();
+			            }
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        FileInputStream inputStream = null;
+			        // Keep this comment too
+			        try {
+			            inputStream = new FileInputStream("file.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            if (null != inputStream) {
+			                inputStream.close();
+			            }
+			            System.out.println("Done");
+			        }
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
 
 		enable(CleanUpConstants.TRY_WITH_RESOURCE);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileInputStream;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"data.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (inputStream) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (inputStream) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public boolean removeClosureOnStillUsedCloseable() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"input.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (inputStream) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return inputStream != null;\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorFullyInitializedResourceOnlyRemoveFinallyIf() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (inputStream) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"output.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "\n" //
-				+ "    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {\n" //
-				+ "        // Keep this comment\n" //
-				+ "        // Keep this comment too\n" //
-				+ "        try (FileInputStream inputStream = new FileInputStream(\"file.txt\")) {\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            System.out.println(\"Done\");\n" //
-				+ "        }\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			
+			public class E {
+			    public void refactorFullyInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("data.txt");
+			        // Keep this comment too
+			        try (inputStream) {
+			            System.out.println(inputStream.read());
+			        }
+			    }
+			
+			    public void refactorFullyInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        // Keep this comment too
+			        try (inputStream) {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            System.out.println("Done");
+			        }
+			    }
+			
+			    public boolean removeClosureOnStillUsedCloseable() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("input.txt");
+			        // Keep this comment too
+			        try (inputStream) {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            System.out.println("Done");
+			        }
+			
+			        return inputStream != null;
+			    }
+			
+			    public void refactorFullyInitializedResourceOnlyRemoveFinallyIf() throws Exception {
+			        // Keep this comment
+			        final FileInputStream inputStream = new FileInputStream("out.txt");
+			        // Keep this comment too
+			        try (inputStream) {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            System.out.println("Done");
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceRemoveFinally() throws Exception {
+			        // Keep this comment
+			        // Keep this comment too
+			        try (FileInputStream inputStream = new FileInputStream("output.txt")) {
+			            System.out.println(inputStream.read());
+			        }
+			    }
+			
+			    public void refactorNullInitializedResourceDoNotRemoveFinally() throws Exception {
+			        // Keep this comment
+			        // Keep this comment too
+			        try (FileInputStream inputStream = new FileInputStream("file.txt")) {
+			            System.out.println(inputStream.read());
+			        } finally {
+			            System.out.println("Done");
+			        }
+			    }
+			}
+			""";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -222,24 +224,25 @@ public class CleanUpTest9 extends CleanUpTestCase {
 	@Test
 	public void testDoNotUseTryWithResource() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= "" //
-				+ "package test1;\n" //
-				+ "\n" //
-				+ "import java.io.FileInputStream;\n" //
-				+ "\n" //
-				+ "public class E {\n" //
-				+ "    public boolean doNotRefactorStillUsedCloseable() throws Exception {\n" //
-				+ "        FileInputStream inputStream = null;\n" //
-				+ "        try {\n" //
-				+ "            inputStream = new FileInputStream(\"out.txt\");\n" //
-				+ "            System.out.println(inputStream.read());\n" //
-				+ "        } finally {\n" //
-				+ "            inputStream.close();\n" //
-				+ "        }\n" //
-				+ "\n" //
-				+ "        return inputStream != null;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String sample= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			
+			public class E {
+			    public boolean doNotRefactorStillUsedCloseable() throws Exception {
+			        FileInputStream inputStream = null;
+			        try {
+			            inputStream = new FileInputStream("out.txt");
+			            System.out.println(inputStream.read());
+			        } finally {
+			            inputStream.close();
+			        }
+			
+			        return inputStream != null;
+			    }
+			}
+			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.TRY_WITH_RESOURCE);

@@ -93,5152 +93,5152 @@ public class CleanUpStressTest extends CleanUpTestCase {
     private Hashtable<String, String> fExpectedChangesAllTests;
     {
         fExpectedChangesAllTests= new Hashtable<>();
-        StringBuffer buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("import java.io.BufferedReader;\n");
-        buf.append("import java.io.File;\n");
-        buf.append("import java.io.FileInputStream;\n");
-        buf.append("import java.io.FileOutputStream;\n");
-        buf.append("import java.io.IOException;\n");
-        buf.append("import java.io.InputStream;\n");
-        buf.append("import java.io.PrintWriter;\n");
-        buf.append("import java.io.StringReader;\n");
-        buf.append("import java.io.StringWriter;\n");
-        buf.append("import java.lang.reflect.InvocationTargetException;\n");
-        buf.append("import java.lang.reflect.Method;\n");
-        buf.append("import java.lang.reflect.Modifier;\n");
-        buf.append("import java.text.NumberFormat;\n");
-        buf.append("import java.util.Properties;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestListener;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Base class for all test runners. This class was born live on stage in\n");
-        buf.append(" * Sardinia during XP2000.\n");
-        buf.append(" */\n");
-        buf.append("public abstract class BaseTestRunner implements TestListener {\n");
-        buf.append("    static boolean fgFilterStack = true;\n");
-        buf.append("\n");
-        buf.append("    static int fgMaxMessageLength = 500;\n");
-        buf.append("    private static Properties fPreferences;\n");
-        buf.append("    public static final String SUITE_METHODNAME = \"suite\"; //$NON-NLS-1$\n");
-        buf.append("    static {\n");
-        buf.append("        BaseTestRunner.fgMaxMessageLength = BaseTestRunner\n");
-        buf.append("                .getPreference(\"maxmessage\", BaseTestRunner.fgMaxMessageLength); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    static boolean filterLine(final String line) {\n");
-        buf.append("        final String[] patterns = new String[]{\"junit.framework.TestCase\", //$NON-NLS-1$\n");
-        buf.append("                \"junit.framework.TestResult\", //$NON-NLS-1$\n");
-        buf.append("                \"junit.framework.TestSuite\", //$NON-NLS-1$\n");
-        buf.append("                \"junit.framework.Assert.\", // don't filter //$NON-NLS-1$\n");
-        buf.append("                                           // AssertionFailure\n");
-        buf.append("                \"junit.swingui.TestRunner\", //$NON-NLS-1$\n");
-        buf.append("                \"junit.awtui.TestRunner\", //$NON-NLS-1$\n");
-        buf.append("                \"junit.textui.TestRunner\", //$NON-NLS-1$\n");
-        buf.append("                \"java.lang.reflect.Method.invoke(\" //$NON-NLS-1$\n");
-        buf.append("        };\n");
-        buf.append("        for (final String pattern : patterns) {\n");
-        buf.append("            if (line.indexOf(pattern) > 0) {\n");
-        buf.append("                return true;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return false;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Filters stack frames from internal JUnit classes\n");
-        buf.append("     */\n");
-        buf.append("    public static String getFilteredTrace(final String stack) {\n");
-        buf.append("        if (BaseTestRunner.showStackRaw()) {\n");
-        buf.append("            return stack;\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        final StringWriter sw = new StringWriter();\n");
-        buf.append("        final PrintWriter pw = new PrintWriter(sw);\n");
-        buf.append("        final StringReader sr = new StringReader(stack);\n");
-        buf.append("        final BufferedReader br = new BufferedReader(sr);\n");
-        buf.append("\n");
-        buf.append("        String line;\n");
-        buf.append("        try {\n");
-        buf.append("            while ((line = br.readLine()) != null) {\n");
-        buf.append("                if (!BaseTestRunner.filterLine(line)) {\n");
-        buf.append("                    pw.println(line);\n");
-        buf.append("                }\n");
-        buf.append("            }\n");
-        buf.append("        } catch (final Exception IOException) {\n");
-        buf.append("            return stack; // return the stack unfiltered\n");
-        buf.append("        }\n");
-        buf.append("        return sw.toString();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns a filtered stack trace\n");
-        buf.append("     */\n");
-        buf.append("    public static String getFilteredTrace(final Throwable t) {\n");
-        buf.append("        final StringWriter stringWriter = new StringWriter();\n");
-        buf.append("        final PrintWriter writer = new PrintWriter(stringWriter);\n");
-        buf.append("        t.printStackTrace(writer);\n");
-        buf.append("        final StringBuffer buffer = stringWriter.getBuffer();\n");
-        buf.append("        final String trace = buffer.toString();\n");
-        buf.append("        return BaseTestRunner.getFilteredTrace(trace);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static String getPreference(final String key) {\n");
-        buf.append("        return BaseTestRunner.getPreferences().getProperty(key);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static int getPreference(final String key, final int dflt) {\n");
-        buf.append("        final String value = BaseTestRunner.getPreference(key);\n");
-        buf.append("        int intValue = dflt;\n");
-        buf.append("        if (value == null) {\n");
-        buf.append("            return intValue;\n");
-        buf.append("        }\n");
-        buf.append("        try {\n");
-        buf.append("            intValue = Integer.parseInt(value);\n");
-        buf.append("        } catch (final NumberFormatException ne) {\n");
-        buf.append("        }\n");
-        buf.append("        return intValue;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected static Properties getPreferences() {\n");
-        buf.append("        if (BaseTestRunner.fPreferences == null) {\n");
-        buf.append("            BaseTestRunner.fPreferences = new Properties();\n");
-        buf.append("            BaseTestRunner.fPreferences.put(\"loading\", \"true\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("            BaseTestRunner.fPreferences.put(\"filterstack\", \"true\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("            BaseTestRunner.readPreferences();\n");
-        buf.append("        }\n");
-        buf.append("        return BaseTestRunner.fPreferences;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private static File getPreferencesFile() {\n");
-        buf.append("        final String home = System.getProperty(\"user.home\"); //$NON-NLS-1$\n");
-        buf.append("        return new File(home, \"junit.properties\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static boolean inVAJava() {\n");
-        buf.append("        try {\n");
-        buf.append("            Class.forName(\"com.ibm.uvm.tools.DebugSupport\"); //$NON-NLS-1$\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            return false;\n");
-        buf.append("        }\n");
-        buf.append("        return true;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    // TestRunListener implementation\n");
-        buf.append("\n");
-        buf.append("    private static void readPreferences() {\n");
-        buf.append("        InputStream is = null;\n");
-        buf.append("        try {\n");
-        buf.append("            is = new FileInputStream(BaseTestRunner.getPreferencesFile());\n");
-        buf.append("            BaseTestRunner.setPreferences(\n");
-        buf.append("                    new Properties(BaseTestRunner.getPreferences()));\n");
-        buf.append("            BaseTestRunner.getPreferences().load(is);\n");
-        buf.append("        } catch (final IOException e) {\n");
-        buf.append("            try {\n");
-        buf.append("                if (is != null) {\n");
-        buf.append("                    is.close();\n");
-        buf.append("                }\n");
-        buf.append("            } catch (final IOException e1) {\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static void savePreferences() throws IOException {\n");
-        buf.append("        final FileOutputStream fos = new FileOutputStream(\n");
-        buf.append("                BaseTestRunner.getPreferencesFile());\n");
-        buf.append("        try {\n");
-        buf.append("            BaseTestRunner.getPreferences().store(fos, \"\"); //$NON-NLS-1$\n");
-        buf.append("        } finally {\n");
-        buf.append("            fos.close();\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected static void setPreferences(final Properties preferences) {\n");
-        buf.append("        BaseTestRunner.fPreferences = preferences;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected static boolean showStackRaw() {\n");
-        buf.append("        return !BaseTestRunner.getPreference(\"filterstack\").equals(\"true\") //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                || (BaseTestRunner.fgFilterStack == false);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Truncates a String to the maximum length.\n");
-        buf.append("     */\n");
-        buf.append("    public static String truncate(String s) {\n");
-        buf.append("        if ((BaseTestRunner.fgMaxMessageLength != -1)\n");
-        buf.append("                && (s.length() > BaseTestRunner.fgMaxMessageLength)) {\n");
-        buf.append("            s = s.substring(0, BaseTestRunner.fgMaxMessageLength) + \"...\"; //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        return s;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    boolean fLoading = true;\n");
-        buf.append("\n");
-        buf.append("    public synchronized void addError(final Test test, final Throwable t) {\n");
-        buf.append("        this.testFailed(TestRunListener.STATUS_ERROR, test, t);\n");
-        buf.append("    }\n");
-        buf.append("    public synchronized void addFailure(final Test test,\n");
-        buf.append("            final AssertionFailedError t) {\n");
-        buf.append("        this.testFailed(TestRunListener.STATUS_FAILURE, test, t);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Clears the status message.\n");
-        buf.append("     */\n");
-        buf.append("    protected void clearStatus() { // Belongs in the GUI TestRunner class\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the formatted string of the elapsed time.\n");
-        buf.append("     */\n");
-        buf.append("    public String elapsedTimeAsString(final long runTime) {\n");
-        buf.append("        return NumberFormat.getInstance().format((double) runTime / 1000);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public synchronized void endTest(final Test test) {\n");
-        buf.append("        this.testEnded(test.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Extract the class name from a String in VA/Java style\n");
-        buf.append("     */\n");
-        buf.append("    public String extractClassName(final String className) {\n");
-        buf.append("        if (className.startsWith(\"Default package for\")) { // $NON-NLS-1$\n");
-        buf.append("            return className.substring(className.lastIndexOf(\".\") + 1); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        return className;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the loader to be used.\n");
-        buf.append("     */\n");
-        buf.append("    public TestSuiteLoader getLoader() {\n");
-        buf.append("        if (this.useReloadingTestSuiteLoader()) {\n");
-        buf.append("            return new ReloadingTestSuiteLoader();\n");
-        buf.append("        }\n");
-        buf.append("        return new StandardTestSuiteLoader();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the Test corresponding to the given suite. This is a template\n");
-        buf.append("     * method, subclasses override runFailed(), clearStatus().\n");
-        buf.append("     */\n");
-        buf.append("    public Test getTest(final String suiteClassName) {\n");
-        buf.append("        if (suiteClassName.length() <= 0) {\n");
-        buf.append("            this.clearStatus();\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("        Class testClass = null;\n");
-        buf.append("        try {\n");
-        buf.append("            testClass = this.loadSuiteClass(suiteClassName);\n");
-        buf.append("        } catch (final ClassNotFoundException e) {\n");
-        buf.append("            String clazz = e.getMessage();\n");
-        buf.append("            if (clazz == null) {\n");
-        buf.append("                clazz = suiteClassName;\n");
-        buf.append("            }\n");
-        buf.append("            this.runFailed(\"Class not found \\\"\" + clazz + \"\\\"\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("            return null;\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            this.runFailed(\"Error: \" + e.toString()); //$NON-NLS-1$\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("        Method suiteMethod = null;\n");
-        buf.append("        try {\n");
-        buf.append("            suiteMethod = testClass.getMethod(BaseTestRunner.SUITE_METHODNAME,\n");
-        buf.append("                    new Class[0]);\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            // try to extract a test suite automatically\n");
-        buf.append("            this.clearStatus();\n");
-        buf.append("            return new TestSuite(testClass);\n");
-        buf.append("        }\n");
-        buf.append("        if (!Modifier.isStatic(suiteMethod.getModifiers())) {\n");
-        buf.append("            this.runFailed(\"Suite() method must be static\"); //$NON-NLS-1$\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("        Test test = null;\n");
-        buf.append("        try {\n");
-        buf.append("            test = (Test) suiteMethod.invoke(null, new Class[0]); // static\n");
-        buf.append("                                                                  // method\n");
-        buf.append("            if (test == null) {\n");
-        buf.append("                return test;\n");
-        buf.append("            }\n");
-        buf.append("        } catch (final InvocationTargetException e) {\n");
-        buf.append("            this.runFailed(\"Failed to invoke suite():\" //$NON-NLS-1$\n");
-        buf.append("                    + e.getTargetException().toString());\n");
-        buf.append("            return null;\n");
-        buf.append("        } catch (final IllegalAccessException e) {\n");
-        buf.append("            this.runFailed(\"Failed to invoke suite():\" + e.toString()); //$NON-NLS-1$\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        this.clearStatus();\n");
-        buf.append("        return test;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the loaded Class for a suite name.\n");
-        buf.append("     */\n");
-        buf.append("    protected Class loadSuiteClass(final String suiteClassName)\n");
-        buf.append("            throws ClassNotFoundException {\n");
-        buf.append("        return this.getLoader().load(suiteClassName);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Processes the command line arguments and returns the name of the suite\n");
-        buf.append("     * class to run or null\n");
-        buf.append("     */\n");
-        buf.append("    protected String processArguments(final String[] args) {\n");
-        buf.append("        String suiteName = null;\n");
-        buf.append("        for (int i = 0; i < args.length; i++) {\n");
-        buf.append("            if (args[i].equals(\"-noloading\")) { //$NON-NLS-1$\n");
-        buf.append("                this.setLoading(false);\n");
-        buf.append("            } else if (args[i].equals(\"-nofilterstack\")) { //$NON-NLS-1$\n");
-        buf.append("                BaseTestRunner.fgFilterStack = false;\n");
-        buf.append("            } else if (args[i].equals(\"-c\")) { //$NON-NLS-1$\n");
-        buf.append("                if (args.length > (i + 1)) {\n");
-        buf.append("                    suiteName = this.extractClassName(args[i + 1]);\n");
-        buf.append("                } else {\n");
-        buf.append("                    System.out.println(\"Missing Test class name\"); //$NON-NLS-1$\n");
-        buf.append("                }\n");
-        buf.append("                i++;\n");
-        buf.append("            } else {\n");
-        buf.append("                suiteName = args[i];\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return suiteName;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Override to define how to handle a failed loading of a test suite.\n");
-        buf.append("     */\n");
-        buf.append("    protected abstract void runFailed(String message);\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Sets the loading behaviour of the test runner\n");
-        buf.append("     */\n");
-        buf.append("    public void setLoading(final boolean enable) {\n");
-        buf.append("        this.fLoading = enable;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void setPreference(final String key, final String value) {\n");
-        buf.append("        BaseTestRunner.getPreferences().setProperty(key, value);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /*\n");
-        buf.append("     * Implementation of TestListener\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized void startTest(final Test test) {\n");
-        buf.append("        this.testStarted(test.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public abstract void testEnded(String testName);\n");
-        buf.append("\n");
-        buf.append("    public abstract void testFailed(int status, Test test, Throwable t);\n");
-        buf.append("\n");
-        buf.append("    public abstract void testStarted(String testName);\n");
-        buf.append("\n");
-        buf.append("    protected boolean useReloadingTestSuiteLoader() {\n");
-        buf.append("        return BaseTestRunner.getPreference(\"loading\").equals(\"true\") //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                && !BaseTestRunner.inVAJava() && this.fLoading;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.runner.BaseTestRunner.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class NotVoidTestCase extends TestCase {\n");
-        buf.append("    public int testNotVoid() {\n");
-        buf.append("        return 1;\n");
-        buf.append("    }\n");
-        buf.append("    public void testVoid() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.NotVoidTestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import java.io.PrintWriter;\n");
-        buf.append("import java.io.StringWriter;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.runner.BaseTestRunner;\n");
-        buf.append("\n");
-        buf.append("public class StackFilterTest extends TestCase {\n");
-        buf.append("    String fFiltered;\n");
-        buf.append("    String fUnfiltered;\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void setUp() {\n");
-        buf.append("        final StringWriter swin = new StringWriter();\n");
-        buf.append("        final PrintWriter pwin = new PrintWriter(swin);\n");
-        buf.append("        pwin.println(\"junit.framework.AssertionFailedError\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at junit.framework.Assert.fail(Assert.java:144)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at junit.framework.Assert.assert(Assert.java:19)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at junit.framework.Assert.assert(Assert.java:26)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at MyTest.f(MyTest.java:13)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at MyTest.testStackTrace(MyTest.java:8)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at java.lang.reflect.Method.invoke(Native Method)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestCase.runTest(TestCase.java:156)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestCase.runBare(TestCase.java:130)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestResult$1.protect(TestResult.java:100)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestResult.runProtected(TestResult.java:118)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestResult.run(TestResult.java:103)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\"    at junit.framework.TestCase.run(TestCase.java:121)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestSuite.runTest(TestSuite.java:157)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.framework.TestSuite.run(TestSuite.java, Compiled Code)\"); //$NON-NLS-1$\n");
-        buf.append("        pwin.println(\n");
-        buf.append("                \"    at junit.swingui.TestRunner$17.run(TestRunner.java:669)\"); //$NON-NLS-1$\n");
-        buf.append("        this.fUnfiltered = swin.toString();\n");
-        buf.append("\n");
-        buf.append("        final StringWriter swout = new StringWriter();\n");
-        buf.append("        final PrintWriter pwout = new PrintWriter(swout);\n");
-        buf.append("        pwout.println(\"junit.framework.AssertionFailedError\"); //$NON-NLS-1$\n");
-        buf.append("        pwout.println(\"    at MyTest.f(MyTest.java:13)\"); //$NON-NLS-1$\n");
-        buf.append("        pwout.println(\"    at MyTest.testStackTrace(MyTest.java:8)\"); //$NON-NLS-1$\n");
-        buf.append("        this.fFiltered = swout.toString();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testFilter() {\n");
-        buf.append("        Assert.assertEquals(this.fFiltered,\n");
-        buf.append("                BaseTestRunner.getFilteredTrace(this.fUnfiltered));\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.StackFilterTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class DoublePrecisionAssertTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Test for the special Double.NaN value.\n");
-        buf.append("     */\n");
-        buf.append("    public void testAssertEqualsNaNFails() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(1.234, Double.NaN, 0.0);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNaNEqualsFails() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(Double.NaN, 1.234, 0.0);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNaNEqualsNaNFails() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(Double.NaN, Double.NaN, 0.0);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNegInfinityEqualsInfinity() {\n");
-        buf.append("        Assert.assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,\n");
-        buf.append("                0.0);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertPosInfinityEqualsInfinity() {\n");
-        buf.append("        Assert.assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,\n");
-        buf.append("                0.0);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertPosInfinityNotEquals() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(Double.POSITIVE_INFINITY, 1.23, 0.0);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertPosInfinityNotEqualsNegInfinity() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(Double.POSITIVE_INFINITY,\n");
-        buf.append("                    Double.NEGATIVE_INFINITY, 0.0);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.framework.DoublePrecisionAssertTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.ComparisonFailure;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class AssertTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    public void testAssertEquals() {\n");
-        buf.append("        final Object o = new Object();\n");
-        buf.append("        Assert.assertEquals(o, o);\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(new Object(), new Object());\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertEqualsNull() {\n");
-        buf.append("        Assert.assertEquals(null, null);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertFalse() {\n");
-        buf.append("        Assert.assertFalse(false);\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertFalse(true);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNotNull() {\n");
-        buf.append("        Assert.assertNotNull(new Object());\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertNotNull(null);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNotSame() {\n");
-        buf.append("        Assert.assertNotSame(new Integer(1), null);\n");
-        buf.append("        Assert.assertNotSame(null, new Integer(1));\n");
-        buf.append("        Assert.assertNotSame(new Integer(1), new Integer(1));\n");
-        buf.append("        try {\n");
-        buf.append("            final Integer obj = new Integer(1);\n");
-        buf.append("            Assert.assertNotSame(obj, obj);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNotSameFailsNull() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertNotSame(null, null);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNull() {\n");
-        buf.append("        Assert.assertNull(null);\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertNull(new Object());\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNullNotEqualsNull() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(null, new Object());\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            e.getMessage(); // why no assertion?\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertNullNotEqualsString() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(null, \"foo\"); //$NON-NLS-1$\n");
-        buf.append("            Assert.fail();\n");
-        buf.append("        } catch (final ComparisonFailure e) {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertSame() {\n");
-        buf.append("        final Object o = new Object();\n");
-        buf.append("        Assert.assertSame(o, o);\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertSame(new Integer(1), new Integer(1));\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertStringEquals() {\n");
-        buf.append("        Assert.assertEquals(\"a\", \"a\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertStringNotEqualsNull() {\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertEquals(\"foo\", null); //$NON-NLS-1$\n");
-        buf.append("            Assert.fail();\n");
-        buf.append("        } catch (final ComparisonFailure e) {\n");
-        buf.append("            e.getMessage(); // why no assertion?\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testAssertTrue() {\n");
-        buf.append("        Assert.assertTrue(true);\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.assertTrue(false);\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /*\n");
-        buf.append("     * In the tests that follow, we can't use standard formatting for exception\n");
-        buf.append("     * tests: try { somethingThatShouldThrow(); fail(); catch\n");
-        buf.append("     * (AssertionFailedError e) { } because fail() would never be reported.\n");
-        buf.append("     */\n");
-        buf.append("    public void testFail() {\n");
-        buf.append("        // Also, we are testing fail, so we can't rely on fail() working.\n");
-        buf.append("        // We have to throw the exception manually, .\n");
-        buf.append("        try {\n");
-        buf.append("            Assert.fail();\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        throw new AssertionFailedError();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.AssertTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * TestSuite that runs all the sample tests\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class AllTests {\n");
-        buf.append("\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(AllTests.suite());\n");
-        buf.append("    }\n");
-        buf.append("    public static Test suite() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(\"All JUnit Tests\"); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(VectorTest.suite());\n");
-        buf.append("        suite.addTest(new TestSuite(junit.samples.money.MoneyTest.class));\n");
-        buf.append("        suite.addTest(junit.tests.AllTests.suite());\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.AllTests.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.extensions.ExceptionTestCase;\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("public class ExceptionTestCaseTest extends junit.framework.TestCase {\n");
-        buf.append("\n");
-        buf.append("    static public class ThrowExceptionTestCase extends ExceptionTestCase {\n");
-        buf.append("        public ThrowExceptionTestCase(final String name,\n");
-        buf.append("                final Class exception) {\n");
-        buf.append("            super(name, exception);\n");
-        buf.append("        }\n");
-        buf.append("        public void test() {\n");
-        buf.append("            throw new IndexOutOfBoundsException();\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    static public class ThrowNoExceptionTestCase extends ExceptionTestCase {\n");
-        buf.append("        public ThrowNoExceptionTestCase(final String name,\n");
-        buf.append("                final Class exception) {\n");
-        buf.append("            super(name, exception);\n");
-        buf.append("        }\n");
-        buf.append("        public void test() {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    static public class ThrowRuntimeExceptionTestCase\n");
-        buf.append("            extends\n");
-        buf.append("                ExceptionTestCase {\n");
-        buf.append("        public ThrowRuntimeExceptionTestCase(final String name,\n");
-        buf.append("                final Class exception) {\n");
-        buf.append("            super(name, exception);\n");
-        buf.append("        }\n");
-        buf.append("        public void test() {\n");
-        buf.append("            throw new RuntimeException();\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testExceptionSubclass() {\n");
-        buf.append("        final ExceptionTestCase test = new ThrowExceptionTestCase(\"test\", //$NON-NLS-1$\n");
-        buf.append("                IndexOutOfBoundsException.class);\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertEquals(1, result.runCount());\n");
-        buf.append("        Assert.assertTrue(result.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("    public void testExceptionTest() {\n");
-        buf.append("        final ExceptionTestCase test = new ThrowExceptionTestCase(\"test\", //$NON-NLS-1$\n");
-        buf.append("                IndexOutOfBoundsException.class);\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertEquals(1, result.runCount());\n");
-        buf.append("        Assert.assertTrue(result.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("    public void testFailure() {\n");
-        buf.append("        final ExceptionTestCase test = new ThrowRuntimeExceptionTestCase(\"test\", //$NON-NLS-1$\n");
-        buf.append("                IndexOutOfBoundsException.class);\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertEquals(1, result.runCount());\n");
-        buf.append("        Assert.assertEquals(1, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("    public void testNoException() {\n");
-        buf.append("        final ExceptionTestCase test = new ThrowNoExceptionTestCase(\"test\", //$NON-NLS-1$\n");
-        buf.append("                Exception.class);\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertEquals(1, result.runCount());\n");
-        buf.append("        Assert.assertEquals(1, result.failureCount());\n");
-        buf.append("    }\n");
-        buf.append("    public void testWrongException() {\n");
-        buf.append("        final ExceptionTestCase test = new ThrowRuntimeExceptionTestCase(\"test\", //$NON-NLS-1$\n");
-        buf.append("                IndexOutOfBoundsException.class);\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertEquals(1, result.runCount());\n");
-        buf.append("        Assert.assertEquals(1, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.extensions.ExceptionTestCaseTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestListener;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("public class TestListenerTest extends TestCase implements TestListener {\n");
-        buf.append("    private int fEndCount;\n");
-        buf.append("    private int fErrorCount;\n");
-        buf.append("    private int fFailureCount;\n");
-        buf.append("    private TestResult fResult;\n");
-        buf.append("    private int fStartCount;\n");
-        buf.append("\n");
-        buf.append("    public void addError(final Test test, final Throwable t) {\n");
-        buf.append("        this.fErrorCount++;\n");
-        buf.append("    }\n");
-        buf.append("    public void addFailure(final Test test, final AssertionFailedError t) {\n");
-        buf.append("        this.fFailureCount++;\n");
-        buf.append("    }\n");
-        buf.append("    public void endTest(final Test test) {\n");
-        buf.append("        this.fEndCount++;\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void setUp() {\n");
-        buf.append("        this.fResult = new TestResult();\n");
-        buf.append("        this.fResult.addListener(this);\n");
-        buf.append("\n");
-        buf.append("        this.fStartCount = 0;\n");
-        buf.append("        this.fEndCount = 0;\n");
-        buf.append("        this.fFailureCount = 0;\n");
-        buf.append("    }\n");
-        buf.append("    public void startTest(final Test test) {\n");
-        buf.append("        this.fStartCount++;\n");
-        buf.append("    }\n");
-        buf.append("    public void testError() {\n");
-        buf.append("        final TestCase test = new TestCase(\"noop\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        test.run(this.fResult);\n");
-        buf.append("        Assert.assertEquals(1, this.fErrorCount);\n");
-        buf.append("        Assert.assertEquals(1, this.fEndCount);\n");
-        buf.append("    }\n");
-        buf.append("    public void testFailure() {\n");
-        buf.append("        final TestCase test = new TestCase(\"noop\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("                Assert.fail();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        test.run(this.fResult);\n");
-        buf.append("        Assert.assertEquals(1, this.fFailureCount);\n");
-        buf.append("        Assert.assertEquals(1, this.fEndCount);\n");
-        buf.append("    }\n");
-        buf.append("    public void testStartStop() {\n");
-        buf.append("        final TestCase test = new TestCase(\"noop\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        test.run(this.fResult);\n");
-        buf.append("        Assert.assertEquals(1, this.fStartCount);\n");
-        buf.append("        Assert.assertEquals(1, this.fEndCount);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.TestListenerTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.runner.Sorter;\n");
-        buf.append("\n");
-        buf.append("public class SorterTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    static class Swapper implements Sorter.Swapper {\n");
-        buf.append("        public void swap(final Vector values, final int left, final int right) {\n");
-        buf.append("            final Object tmp = values.elementAt(left);\n");
-        buf.append("            values.setElementAt(values.elementAt(right), left);\n");
-        buf.append("            values.setElementAt(tmp, right);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testSort() throws Exception {\n");
-        buf.append("        final Vector v = new Vector();\n");
-        buf.append("        v.addElement(\"c\"); //$NON-NLS-1$\n");
-        buf.append("        v.addElement(\"b\"); //$NON-NLS-1$\n");
-        buf.append("        v.addElement(\"a\"); //$NON-NLS-1$\n");
-        buf.append("        Sorter.sortStrings(v, 0, v.size() - 1, new Swapper());\n");
-        buf.append("        Assert.assertEquals(v.elementAt(0), \"a\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(v.elementAt(1), \"b\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(v.elementAt(2), \"c\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.SorterTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class OneTestCase extends TestCase {\n");
-        buf.append("    public void noTestCase() {\n");
-        buf.append("    }\n");
-        buf.append("    public void testCase() {\n");
-        buf.append("    }\n");
-        buf.append("    public void testCase(final int arg) {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.OneTestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Protectable;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test an implementor of junit.framework.Test other than TestCase or TestSuite\n");
-        buf.append(" */\n");
-        buf.append("public class TestImplementorTest extends TestCase {\n");
-        buf.append("    public static class DoubleTestCase implements Test {\n");
-        buf.append("        private final TestCase fTestCase;\n");
-        buf.append("\n");
-        buf.append("        public DoubleTestCase(final TestCase testCase) {\n");
-        buf.append("            this.fTestCase = testCase;\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        public int countTestCases() {\n");
-        buf.append("            return 2;\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        public void run(final TestResult result) {\n");
-        buf.append("            result.startTest(this);\n");
-        buf.append("            final Protectable p = new Protectable() {\n");
-        buf.append("                public void protect() throws Throwable {\n");
-        buf.append("                    DoubleTestCase.this.fTestCase.runBare();\n");
-        buf.append("                    DoubleTestCase.this.fTestCase.runBare();\n");
-        buf.append("                }\n");
-        buf.append("            };\n");
-        buf.append("            result.runProtected(this, p);\n");
-        buf.append("            result.endTest(this);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private final DoubleTestCase fTest;\n");
-        buf.append("\n");
-        buf.append("    public TestImplementorTest() {\n");
-        buf.append("        final TestCase testCase = new TestCase() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.fTest = new DoubleTestCase(testCase);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testSuccessfulRun() {\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        this.fTest.run(result);\n");
-        buf.append("        Assert.assertEquals(this.fTest.countTestCases(), result.runCount());\n");
-        buf.append("        Assert.assertEquals(0, result.errorCount());\n");
-        buf.append("        Assert.assertEquals(0, result.failureCount());\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.framework.TestImplementorTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A Decorator for Tests. Use TestDecorator as the base class for defining new\n");
-        buf.append(" * test decorators. Test decorator subclasses can be introduced to add behaviour\n");
-        buf.append(" * before or after a test is run.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class TestDecorator extends Assert implements Test {\n");
-        buf.append("    protected Test fTest;\n");
-        buf.append("\n");
-        buf.append("    public TestDecorator(final Test test) {\n");
-        buf.append("        this.fTest = test;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * The basic run behaviour.\n");
-        buf.append("     */\n");
-        buf.append("    public void basicRun(final TestResult result) {\n");
-        buf.append("        this.fTest.run(result);\n");
-        buf.append("    }\n");
-        buf.append("    public int countTestCases() {\n");
-        buf.append("        return this.fTest.countTestCases();\n");
-        buf.append("    }\n");
-        buf.append("    public Test getTest() {\n");
-        buf.append("        return this.fTest;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void run(final TestResult result) {\n");
-        buf.append("        this.basicRun(result);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        return this.fTest.toString();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.extensions.TestDecorator.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * An interface to define how a test suite should be loaded.\n");
-        buf.append(" */\n");
-        buf.append("public interface TestSuiteLoader {\n");
-        buf.append("    Class load(String suiteClassName) throws ClassNotFoundException;\n");
-        buf.append("    Class reload(Class aClass) throws ClassNotFoundException;\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.runner.TestSuiteLoader.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("import java.util.Enumeration;\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A <code>TestResult</code> collects the results of executing a test case. It\n");
-        buf.append(" * is an instance of the Collecting Parameter pattern. The test framework\n");
-        buf.append(" * distinguishes between <i>failures</i> and <i>errors</i>. A failure is\n");
-        buf.append(" * anticipated and checked for with assertions. Errors are unanticipated\n");
-        buf.append(" * problems like an <code>ArrayIndexOutOfBoundsException</code>.\n");
-        buf.append(" *\n");
-        buf.append(" * @see Test\n");
-        buf.append(" */\n");
-        buf.append("public class TestResult extends Object {\n");
-        buf.append("    protected Vector fErrors;\n");
-        buf.append("    protected Vector fFailures;\n");
-        buf.append("    protected Vector fListeners;\n");
-        buf.append("    protected int fRunTests;\n");
-        buf.append("    private boolean fStop;\n");
-        buf.append("\n");
-        buf.append("    public TestResult() {\n");
-        buf.append("        this.fFailures = new Vector();\n");
-        buf.append("        this.fErrors = new Vector();\n");
-        buf.append("        this.fListeners = new Vector();\n");
-        buf.append("        this.fRunTests = 0;\n");
-        buf.append("        this.fStop = false;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds an error to the list of errors. The passed in exception caused the\n");
-        buf.append("     * error.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized void addError(final Test test, final Throwable t) {\n");
-        buf.append("        this.fErrors.addElement(new TestFailure(test, t));\n");
-        buf.append("        for (final Object element : this.cloneListeners()) {\n");
-        buf.append("            ((TestListener) element).addError(test, t);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds a failure to the list of failures. The passed in exception caused\n");
-        buf.append("     * the failure.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized void addFailure(final Test test,\n");
-        buf.append("            final AssertionFailedError t) {\n");
-        buf.append("        this.fFailures.addElement(new TestFailure(test, t));\n");
-        buf.append("        for (final Object element : this.cloneListeners()) {\n");
-        buf.append("            ((TestListener) element).addFailure(test, t);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Registers a TestListener\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized void addListener(final TestListener listener) {\n");
-        buf.append("        this.fListeners.addElement(listener);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns a copy of the listeners.\n");
-        buf.append("     */\n");
-        buf.append("    private synchronized Vector cloneListeners() {\n");
-        buf.append("        return (Vector) this.fListeners.clone();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Informs the result that a test was completed.\n");
-        buf.append("     */\n");
-        buf.append("    public void endTest(final Test test) {\n");
-        buf.append("        for (final Object element : this.cloneListeners()) {\n");
-        buf.append("            ((TestListener) element).endTest(test);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets the number of detected errors.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized int errorCount() {\n");
-        buf.append("        return this.fErrors.size();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns an Enumeration for the errors\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized Enumeration errors() {\n");
-        buf.append("        return this.fErrors.elements();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets the number of detected failures.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized int failureCount() {\n");
-        buf.append("        return this.fFailures.size();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns an Enumeration for the failures\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized Enumeration failures() {\n");
-        buf.append("        return this.fFailures.elements();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Unregisters a TestListener\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized void removeListener(final TestListener listener) {\n");
-        buf.append("        this.fListeners.removeElement(listener);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs a TestCase.\n");
-        buf.append("     */\n");
-        buf.append("    protected void run(final TestCase test) {\n");
-        buf.append("        this.startTest(test);\n");
-        buf.append("        final Protectable p = new Protectable() {\n");
-        buf.append("            public void protect() throws Throwable {\n");
-        buf.append("                test.runBare();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.runProtected(test, p);\n");
-        buf.append("\n");
-        buf.append("        this.endTest(test);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets the number of run tests.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized int runCount() {\n");
-        buf.append("        return this.fRunTests;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs a TestCase.\n");
-        buf.append("     */\n");
-        buf.append("    public void runProtected(final Test test, final Protectable p) {\n");
-        buf.append("        try {\n");
-        buf.append("            p.protect();\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("            this.addFailure(test, e);\n");
-        buf.append("        } catch (final ThreadDeath e) { // don't catch ThreadDeath by accident\n");
-        buf.append("            throw e;\n");
-        buf.append("        } catch (final Throwable e) {\n");
-        buf.append("            this.addError(test, e);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Checks whether the test run should stop\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized boolean shouldStop() {\n");
-        buf.append("        return this.fStop;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Informs the result that a test will be started.\n");
-        buf.append("     */\n");
-        buf.append("    public void startTest(final Test test) {\n");
-        buf.append("        final int count = test.countTestCases();\n");
-        buf.append("        synchronized (this) {\n");
-        buf.append("            this.fRunTests += count;\n");
-        buf.append("        }\n");
-        buf.append("        for (final Object element : this.cloneListeners()) {\n");
-        buf.append("            ((TestListener) element).startTest(test);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Marks that the test run should stop.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized void stop() {\n");
-        buf.append("        this.fStop = true;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns whether the entire test was successful or not.\n");
-        buf.append("     */\n");
-        buf.append("    public synchronized boolean wasSuccessful() {\n");
-        buf.append("        return (this.failureCount() == 0) && (this.errorCount() == 0);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.TestResult.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class NotPublicTestCase extends TestCase {\n");
-        buf.append("    protected void testNotPublic() {\n");
-        buf.append("    }\n");
-        buf.append("    public void testPublic() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.NotPublicTestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A TestSuite for active Tests. It runs each test in a separate thread and\n");
-        buf.append(" * waits until all threads have terminated. -- Aarhus Radisson Scandinavian\n");
-        buf.append(" * Center 11th floor\n");
-        buf.append(" */\n");
-        buf.append("public class ActiveTestSuite extends TestSuite {\n");
-        buf.append("    private volatile int fActiveTestDeathCount;\n");
-        buf.append("\n");
-        buf.append("    public ActiveTestSuite() {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public ActiveTestSuite(final Class theClass) {\n");
-        buf.append("        super(theClass);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public ActiveTestSuite(final Class theClass, final String name) {\n");
-        buf.append("        super(theClass, name);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public ActiveTestSuite(final String name) {\n");
-        buf.append("        super(name);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void run(final TestResult result) {\n");
-        buf.append("        this.fActiveTestDeathCount = 0;\n");
-        buf.append("        super.run(result);\n");
-        buf.append("        this.waitUntilFinished();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    synchronized public void runFinished(final Test test) {\n");
-        buf.append("        this.fActiveTestDeathCount++;\n");
-        buf.append("        this.notifyAll();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void runTest(final Test test, final TestResult result) {\n");
-        buf.append("        final Thread t = new Thread() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void run() {\n");
-        buf.append("                try {\n");
-        buf.append("                    // inlined due to limitation in VA/Java\n");
-        buf.append("                    // ActiveTestSuite.super.runTest(test, result);\n");
-        buf.append("                    test.run(result);\n");
-        buf.append("                } finally {\n");
-        buf.append("                    ActiveTestSuite.this.runFinished(test);\n");
-        buf.append("                }\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        t.start();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    synchronized void waitUntilFinished() {\n");
-        buf.append("        while (this.fActiveTestDeathCount < this.testCount()) {\n");
-        buf.append("            try {\n");
-        buf.append("                this.wait();\n");
-        buf.append("            } catch (final InterruptedException e) {\n");
-        buf.append("                return; // ignore\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.extensions.ActiveTestSuite.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A fixture for testing the \"auto\" test suite feature.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class SuiteTest extends TestCase {\n");
-        buf.append("    public static Test suite() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(\"Suite Tests\"); //$NON-NLS-1$\n");
-        buf.append("        // build the suite manually, because some of the suites are testing\n");
-        buf.append("        // the functionality that automatically builds suites\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testNoTestCaseClass\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testNoTestCases\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testOneTestCase\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testNotPublicTestCase\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testNotVoidTestCase\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testNotExistingTestCase\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testInheritedTests\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testShadowedTests\")); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(new SuiteTest(\"testAddTestSuite\")); //$NON-NLS-1$\n");
-        buf.append("\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("    protected TestResult fResult;\n");
-        buf.append("    public SuiteTest(final String name) {\n");
-        buf.append("        super(name);\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void setUp() {\n");
-        buf.append("        this.fResult = new TestResult();\n");
-        buf.append("    }\n");
-        buf.append("    public void testAddTestSuite() {\n");
-        buf.append("        final TestSuite suite = new TestSuite();\n");
-        buf.append("        suite.addTestSuite(OneTestCase.class);\n");
-        buf.append("        suite.run(this.fResult);\n");
-        buf.append("        Assert.assertEquals(1, this.fResult.runCount());\n");
-        buf.append("    }\n");
-        buf.append("    public void testInheritedTests() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(InheritedTestCase.class);\n");
-        buf.append("        suite.run(this.fResult);\n");
-        buf.append("        Assert.assertTrue(this.fResult.wasSuccessful());\n");
-        buf.append("        Assert.assertEquals(2, this.fResult.runCount());\n");
-        buf.append("    }\n");
-        buf.append("    public void testNoTestCaseClass() {\n");
-        buf.append("        final Test t = new TestSuite(NoTestCaseClass.class);\n");
-        buf.append("        t.run(this.fResult);\n");
-        buf.append("        Assert.assertEquals(1, this.fResult.runCount()); // warning test\n");
-        buf.append("        Assert.assertTrue(!this.fResult.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("    public void testNoTestCases() {\n");
-        buf.append("        final Test t = new TestSuite(NoTestCases.class);\n");
-        buf.append("        t.run(this.fResult);\n");
-        buf.append("        Assert.assertTrue(this.fResult.runCount() == 1); // warning test\n");
-        buf.append("        Assert.assertTrue(this.fResult.failureCount() == 1);\n");
-        buf.append("        Assert.assertTrue(!this.fResult.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("    public void testNotExistingTestCase() {\n");
-        buf.append("        final Test t = new SuiteTest(\"notExistingMethod\"); //$NON-NLS-1$\n");
-        buf.append("        t.run(this.fResult);\n");
-        buf.append("        Assert.assertTrue(this.fResult.runCount() == 1);\n");
-        buf.append("        Assert.assertTrue(this.fResult.failureCount() == 1);\n");
-        buf.append("        Assert.assertTrue(this.fResult.errorCount() == 0);\n");
-        buf.append("    }\n");
-        buf.append("    public void testNotPublicTestCase() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(NotPublicTestCase.class);\n");
-        buf.append("        // 1 public test case + 1 warning for the non-public test case\n");
-        buf.append("        Assert.assertEquals(2, suite.countTestCases());\n");
-        buf.append("    }\n");
-        buf.append("    public void testNotVoidTestCase() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(NotVoidTestCase.class);\n");
-        buf.append("        Assert.assertTrue(suite.countTestCases() == 1);\n");
-        buf.append("    }\n");
-        buf.append("    public void testOneTestCase() {\n");
-        buf.append("        final Test t = new TestSuite(OneTestCase.class);\n");
-        buf.append("        t.run(this.fResult);\n");
-        buf.append("        Assert.assertTrue(this.fResult.runCount() == 1);\n");
-        buf.append("        Assert.assertTrue(this.fResult.failureCount() == 0);\n");
-        buf.append("        Assert.assertTrue(this.fResult.errorCount() == 0);\n");
-        buf.append("        Assert.assertTrue(this.fResult.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("    public void testShadowedTests() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(OverrideTestCase.class);\n");
-        buf.append("        suite.run(this.fResult);\n");
-        buf.append("        Assert.assertEquals(1, this.fResult.runCount());\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.SuiteTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * An implementation of a TestCollector that considers a class to be a test\n");
-        buf.append(" * class when it contains the pattern \"Test\" in its name\n");
-        buf.append(" * \n");
-        buf.append(" * @see TestCollector\n");
-        buf.append(" */\n");
-        buf.append("public class SimpleTestCollector extends ClassPathTestCollector {\n");
-        buf.append("\n");
-        buf.append("    public SimpleTestCollector() {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    protected boolean isTestClass(final String classFileName) {\n");
-        buf.append("        return classFileName.endsWith(\".class\") && //$NON-NLS-1$\n");
-        buf.append("                (classFileName.indexOf('$') < 0)\n");
-        buf.append("                && (classFileName.indexOf(\"Test\") > 0); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.runner.SimpleTestCollector.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A <em>Test</em> can be run and collect its results.\n");
-        buf.append(" *\n");
-        buf.append(" * @see TestResult\n");
-        buf.append(" */\n");
-        buf.append("public interface Test {\n");
-        buf.append("    /**\n");
-        buf.append("     * Counts the number of test cases that will be run by this test.\n");
-        buf.append("     */\n");
-        buf.append("    int countTestCases();\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs a test and collects its result in a TestResult instance.\n");
-        buf.append("     */\n");
-        buf.append("    void run(TestResult result);\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.Test.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("\n");
-        buf.append("public class NoTestCaseClass extends Object {\n");
-        buf.append("    public void testSuccess() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.NoTestCaseClass.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A test case testing the testing framework.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class Success extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void runTest() {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testSuccess() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.Success.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("import java.lang.reflect.Modifier;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * An implementation of a TestCollector that loads all classes on the class path\n");
-        buf.append(" * and tests whether it is assignable from Test or provides a static suite\n");
-        buf.append(" * method.\n");
-        buf.append(" * \n");
-        buf.append(" * @see TestCollector\n");
-        buf.append(" */\n");
-        buf.append("public class LoadingTestCollector extends ClassPathTestCollector {\n");
-        buf.append("\n");
-        buf.append("    TestCaseClassLoader fLoader;\n");
-        buf.append("\n");
-        buf.append("    public LoadingTestCollector() {\n");
-        buf.append("        this.fLoader = new TestCaseClassLoader();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    Class classFromFile(final String classFileName)\n");
-        buf.append("            throws ClassNotFoundException {\n");
-        buf.append("        final String className = this.classNameFromFile(classFileName);\n");
-        buf.append("        if (!this.fLoader.isExcluded(className)) {\n");
-        buf.append("            return this.fLoader.loadClass(className, false);\n");
-        buf.append("        }\n");
-        buf.append("        return null;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    boolean hasPublicConstructor(final Class testClass) {\n");
-        buf.append("        try {\n");
-        buf.append("            TestSuite.getTestConstructor(testClass);\n");
-        buf.append("        } catch (final NoSuchMethodException e) {\n");
-        buf.append("            return false;\n");
-        buf.append("        }\n");
-        buf.append("        return true;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    boolean hasSuiteMethod(final Class testClass) {\n");
-        buf.append("        try {\n");
-        buf.append("            testClass.getMethod(BaseTestRunner.SUITE_METHODNAME, new Class[0]);\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            return false;\n");
-        buf.append("        }\n");
-        buf.append("        return true;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    boolean isTestClass(final Class testClass) {\n");
-        buf.append("        if (this.hasSuiteMethod(testClass)) {\n");
-        buf.append("            return true;\n");
-        buf.append("        }\n");
-        buf.append("        if (Test.class.isAssignableFrom(testClass)\n");
-        buf.append("                && Modifier.isPublic(testClass.getModifiers())\n");
-        buf.append("                && this.hasPublicConstructor(testClass)) {\n");
-        buf.append("            return true;\n");
-        buf.append("        }\n");
-        buf.append("        return false;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    protected boolean isTestClass(final String classFileName) {\n");
-        buf.append("        try {\n");
-        buf.append("            if (classFileName.endsWith(\".class\")) { //$NON-NLS-1$\n");
-        buf.append("                final Class testClass = this.classFromFile(classFileName);\n");
-        buf.append("                return (testClass != null) && this.isTestClass(testClass);\n");
-        buf.append("            }\n");
-        buf.append("        } catch (final ClassNotFoundException expected) {\n");
-        buf.append("        } catch (final NoClassDefFoundError notFatal) {\n");
-        buf.append("        }\n");
-        buf.append("        return false;\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.runner.LoadingTestCollector.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("import java.io.ByteArrayOutputStream;\n");
-        buf.append("import java.io.File;\n");
-        buf.append("import java.io.FileInputStream;\n");
-        buf.append("import java.io.IOException;\n");
-        buf.append("import java.io.InputStream;\n");
-        buf.append("import java.net.URL;\n");
-        buf.append("import java.util.Enumeration;\n");
-        buf.append("import java.util.Properties;\n");
-        buf.append("import java.util.StringTokenizer;\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("import java.util.zip.ZipEntry;\n");
-        buf.append("import java.util.zip.ZipFile;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A custom class loader which enables the reloading of classes for each test\n");
-        buf.append(" * run. The class loader can be configured with a list of package paths that\n");
-        buf.append(" * should be excluded from loading. The loading of these packages is delegated\n");
-        buf.append(" * to the system class loader. They will be shared across test runs.\n");
-        buf.append(" * <p>\n");
-        buf.append(" * The list of excluded package paths is specified in a properties file\n");
-        buf.append(" * \"excluded.properties\" that is located in the same place as the\n");
-        buf.append(" * TestCaseClassLoader class.\n");
-        buf.append(" * <p>\n");
-        buf.append(" * <b>Known limitation:</b> the TestCaseClassLoader cannot load classes from jar\n");
-        buf.append(" * files.\n");
-        buf.append(" */\n");
-        buf.append("\n");
-        buf.append("public class TestCaseClassLoader extends ClassLoader {\n");
-        buf.append("    /** name of excluded properties file */\n");
-        buf.append("    static final String EXCLUDED_FILE = \"excluded.properties\"; //$NON-NLS-1$\n");
-        buf.append("    /** default excluded paths */\n");
-        buf.append("    private final String[] defaultExclusions = {\"junit.framework.\", //$NON-NLS-1$\n");
-        buf.append("            \"junit.extensions.\", //$NON-NLS-1$\n");
-        buf.append("            \"junit.runner.\" //$NON-NLS-1$\n");
-        buf.append("    };\n");
-        buf.append("    /** excluded paths */\n");
-        buf.append("    private Vector fExcluded;\n");
-        buf.append("    /** scanned class path */\n");
-        buf.append("    private Vector fPathItems;\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestCaseLoader. It scans the class path and the excluded\n");
-        buf.append("     * package paths\n");
-        buf.append("     */\n");
-        buf.append("    public TestCaseClassLoader() {\n");
-        buf.append("        this(System.getProperty(\"java.class.path\")); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestCaseLoader. It scans the class path and the excluded\n");
-        buf.append("     * package paths\n");
-        buf.append("     */\n");
-        buf.append("    public TestCaseClassLoader(final String classPath) {\n");
-        buf.append("        this.scanPath(classPath);\n");
-        buf.append("        this.readExcludedPackages();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private byte[] getClassData(final File f) {\n");
-        buf.append("        try {\n");
-        buf.append("            final FileInputStream stream = new FileInputStream(f);\n");
-        buf.append("            final ByteArrayOutputStream out = new ByteArrayOutputStream(1000);\n");
-        buf.append("            final byte[] b = new byte[1000];\n");
-        buf.append("            int n;\n");
-        buf.append("            while ((n = stream.read(b)) != -1) {\n");
-        buf.append("                out.write(b, 0, n);\n");
-        buf.append("            }\n");
-        buf.append("            stream.close();\n");
-        buf.append("            out.close();\n");
-        buf.append("            return out.toByteArray();\n");
-        buf.append("\n");
-        buf.append("        } catch (final IOException e) {\n");
-        buf.append("        }\n");
-        buf.append("        return null;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public URL getResource(final String name) {\n");
-        buf.append("        return ClassLoader.getSystemResource(name);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public InputStream getResourceAsStream(final String name) {\n");
-        buf.append("        return ClassLoader.getSystemResourceAsStream(name);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public boolean isExcluded(final String name) {\n");
-        buf.append("        for (int i = 0; i < this.fExcluded.size(); i++) {\n");
-        buf.append("            if (name.startsWith((String) this.fExcluded.elementAt(i))) {\n");
-        buf.append("                return true;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return false;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    boolean isJar(final String pathEntry) {\n");
-        buf.append("        return pathEntry.endsWith(\".jar\") || pathEntry.endsWith(\".zip\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public synchronized Class loadClass(final String name,\n");
-        buf.append("            final boolean resolve) throws ClassNotFoundException {\n");
-        buf.append("\n");
-        buf.append("        Class c = this.findLoadedClass(name);\n");
-        buf.append("        if (c != null) {\n");
-        buf.append("            return c;\n");
-        buf.append("        }\n");
-        buf.append("        //\n");
-        buf.append("        // Delegate the loading of excluded classes to the\n");
-        buf.append("        // standard class loader.\n");
-        buf.append("        //\n");
-        buf.append("        if (this.isExcluded(name)) {\n");
-        buf.append("            try {\n");
-        buf.append("                c = this.findSystemClass(name);\n");
-        buf.append("                return c;\n");
-        buf.append("            } catch (final ClassNotFoundException e) {\n");
-        buf.append("                // keep searching\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        if (c == null) {\n");
-        buf.append("            final byte[] data = this.lookupClassData(name);\n");
-        buf.append("            if (data == null) {\n");
-        buf.append("                throw new ClassNotFoundException();\n");
-        buf.append("            }\n");
-        buf.append("            c = this.defineClass(name, data, 0, data.length);\n");
-        buf.append("        }\n");
-        buf.append("        if (resolve) {\n");
-        buf.append("            this.resolveClass(c);\n");
-        buf.append("        }\n");
-        buf.append("        return c;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private byte[] loadFileData(final String path, final String fileName) {\n");
-        buf.append("        final File file = new File(path, fileName);\n");
-        buf.append("        if (file.exists()) {\n");
-        buf.append("            return this.getClassData(file);\n");
-        buf.append("        }\n");
-        buf.append("        return null;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private byte[] loadJarData(final String path, final String fileName) {\n");
-        buf.append("        ZipFile zipFile = null;\n");
-        buf.append("        InputStream stream = null;\n");
-        buf.append("        final File archive = new File(path);\n");
-        buf.append("        if (!archive.exists()) {\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("        try {\n");
-        buf.append("            zipFile = new ZipFile(archive);\n");
-        buf.append("        } catch (final IOException io) {\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("        final ZipEntry entry = zipFile.getEntry(fileName);\n");
-        buf.append("        if (entry == null) {\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("        final int size = (int) entry.getSize();\n");
-        buf.append("        try {\n");
-        buf.append("            stream = zipFile.getInputStream(entry);\n");
-        buf.append("            final byte[] data = new byte[size];\n");
-        buf.append("            int pos = 0;\n");
-        buf.append("            while (pos < size) {\n");
-        buf.append("                final int n = stream.read(data, pos, data.length - pos);\n");
-        buf.append("                pos += n;\n");
-        buf.append("            }\n");
-        buf.append("            zipFile.close();\n");
-        buf.append("            return data;\n");
-        buf.append("        } catch (final IOException e) {\n");
-        buf.append("        } finally {\n");
-        buf.append("            try {\n");
-        buf.append("                if (stream != null) {\n");
-        buf.append("                    stream.close();\n");
-        buf.append("                }\n");
-        buf.append("            } catch (final IOException e) {\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return null;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private byte[] lookupClassData(final String className)\n");
-        buf.append("            throws ClassNotFoundException {\n");
-        buf.append("        byte[] data = null;\n");
-        buf.append("        for (int i = 0; i < this.fPathItems.size(); i++) {\n");
-        buf.append("            final String path = (String) this.fPathItems.elementAt(i);\n");
-        buf.append("            final String fileName = className.replace('.', '/') + \".class\"; //$NON-NLS-1$\n");
-        buf.append("            if (this.isJar(path)) {\n");
-        buf.append("                data = this.loadJarData(path, fileName);\n");
-        buf.append("            } else {\n");
-        buf.append("                data = this.loadFileData(path, fileName);\n");
-        buf.append("            }\n");
-        buf.append("            if (data != null) {\n");
-        buf.append("                return data;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        throw new ClassNotFoundException(className);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private void readExcludedPackages() {\n");
-        buf.append("        this.fExcluded = new Vector(10);\n");
-        buf.append("        for (final String defaultExclusion : this.defaultExclusions) {\n");
-        buf.append("            this.fExcluded.addElement(defaultExclusion);\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        final InputStream is = this.getClass()\n");
-        buf.append("                .getResourceAsStream(TestCaseClassLoader.EXCLUDED_FILE);\n");
-        buf.append("        if (is == null) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        final Properties p = new Properties();\n");
-        buf.append("        try {\n");
-        buf.append("            p.load(is);\n");
-        buf.append("        } catch (final IOException e) {\n");
-        buf.append("            return;\n");
-        buf.append("        } finally {\n");
-        buf.append("            try {\n");
-        buf.append("                is.close();\n");
-        buf.append("            } catch (final IOException e) {\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        for (final Enumeration e = p.propertyNames(); e.hasMoreElements();) {\n");
-        buf.append("            final String key = (String) e.nextElement();\n");
-        buf.append("            if (key.startsWith(\"excluded.\")) { //$NON-NLS-1$\n");
-        buf.append("                String path = p.getProperty(key);\n");
-        buf.append("                path = path.trim();\n");
-        buf.append("                if (path.endsWith(\"*\")) { //$NON-NLS-1$\n");
-        buf.append("                    path = path.substring(0, path.length() - 1);\n");
-        buf.append("                }\n");
-        buf.append("                if (path.length() > 0) {\n");
-        buf.append("                    this.fExcluded.addElement(path);\n");
-        buf.append("                }\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private void scanPath(final String classPath) {\n");
-        buf.append("        final String separator = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n");
-        buf.append("        this.fPathItems = new Vector(10);\n");
-        buf.append("        final StringTokenizer st = new StringTokenizer(classPath, separator);\n");
-        buf.append("        while (st.hasMoreTokens()) {\n");
-        buf.append("            this.fPathItems.addElement(st.nextToken());\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.runner.TestCaseClassLoader.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Thrown when an assertion failed.\n");
-        buf.append(" */\n");
-        buf.append("public class AssertionFailedError extends Error {\n");
-        buf.append("\n");
-        buf.append("    /* Test */\n");
-        buf.append("    private static final long serialVersionUID = 1L;\n");
-        buf.append("    public AssertionFailedError() {\n");
-        buf.append("    }\n");
-        buf.append("    public AssertionFailedError(final String message) {\n");
-        buf.append("        super(message);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.AssertionFailedError.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("public class InheritedTestCase extends OneTestCase {\n");
-        buf.append("    public void test2() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.InheritedTestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Some simple tests.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class SimpleTest extends TestCase {\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(SimpleTest.suite());\n");
-        buf.append("    }\n");
-        buf.append("    public static Test suite() {\n");
-        buf.append("\n");
-        buf.append("        /*\n");
-        buf.append("         * the type safe way\n");
-        buf.append("         *\n");
-        buf.append("         * TestSuite suite= new TestSuite(); suite.addTest( new\n");
-        buf.append("         * SimpleTest(\"add\") { protected void runTest() { testAdd(); } } );\n");
-        buf.append("         * \n");
-        buf.append("         * suite.addTest( new SimpleTest(\"testDivideByZero\") { protected void\n");
-        buf.append("         * runTest() { testDivideByZero(); } } ); return suite;\n");
-        buf.append("         */\n");
-        buf.append("\n");
-        buf.append("        /*\n");
-        buf.append("         * the dynamic way\n");
-        buf.append("         */\n");
-        buf.append("        return new TestSuite(SimpleTest.class);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected int fValue1;\n");
-        buf.append("    protected int fValue2;\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void setUp() {\n");
-        buf.append("        this.fValue1 = 2;\n");
-        buf.append("        this.fValue2 = 3;\n");
-        buf.append("    }\n");
-        buf.append("    public void testAdd() {\n");
-        buf.append("        final double result = this.fValue1 + this.fValue2;\n");
-        buf.append("        // forced failure result == 5\n");
-        buf.append("        Assert.assertTrue(result == 6);\n");
-        buf.append("    }\n");
-        buf.append("    public void testDivideByZero() {\n");
-        buf.append("        final int zero = 0;\n");
-        buf.append("    }\n");
-        buf.append("    public void testEquals() {\n");
-        buf.append("        Assert.assertEquals(12, 12);\n");
-        buf.append("        Assert.assertEquals(12L, 12L);\n");
-        buf.append("        Assert.assertEquals(new Long(12), new Long(12));\n");
-        buf.append("\n");
-        buf.append("        Assert.assertEquals(\"Size\", 12, 13); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"Capacity\", 12.0, 11.99, 0.0); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.SimpleTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * This class defines the current version of JUnit\n");
-        buf.append(" */\n");
-        buf.append("public class Version {\n");
-        buf.append("    public static String id() {\n");
-        buf.append("        return \"3.8.1\"; //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private Version() {\n");
-        buf.append("        // don't instantiate\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.runner.Version.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("\n");
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.runner.BaseTestRunner;\n");
-        buf.append("\n");
-        buf.append("public class BaseTestRunnerTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    public class MockRunner extends BaseTestRunner {\n");
-        buf.append("        @Override\n");
-        buf.append("        protected void runFailed(final String message) {\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        @Override\n");
-        buf.append("        public void testEnded(final String testName) {\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        @Override\n");
-        buf.append("        public void testFailed(final int status, final Test test,\n");
-        buf.append("                final Throwable t) {\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        @Override\n");
-        buf.append("        public void testStarted(final String testName) {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static class NonStatic {\n");
-        buf.append("        public Test suite() {\n");
-        buf.append("            return null;\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testInvokeNonStaticSuite() {\n");
-        buf.append("        final BaseTestRunner runner = new MockRunner();\n");
-        buf.append("        runner.getTest(\"junit.tests.runner.BaseTestRunnerTest$NonStatic\"); // Used //$NON-NLS-1$\n");
-        buf.append("                                                                           // to\n");
-        buf.append("                                                                           // throw\n");
-        buf.append("                                                                           // NullPointerException\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.runner.BaseTestRunnerTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A helper test case for testing whether the testing method is run.\n");
-        buf.append(" */\n");
-        buf.append("public class WasRun extends TestCase {\n");
-        buf.append("    public boolean fWasRun = false;\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void runTest() {\n");
-        buf.append("        this.fWasRun = true;\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.WasRun.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("import java.io.PrintWriter;\n");
-        buf.append("import java.io.StringWriter;\n");
-        buf.append("import java.lang.reflect.Constructor;\n");
-        buf.append("import java.lang.reflect.InvocationTargetException;\n");
-        buf.append("import java.lang.reflect.Method;\n");
-        buf.append("import java.lang.reflect.Modifier;\n");
-        buf.append("import java.util.Enumeration;\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A <code>TestSuite</code> is a <code>Composite</code> of Tests. It runs a\n");
-        buf.append(" * collection of test cases. Here is an example using the dynamic test\n");
-        buf.append(" * definition.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * TestSuite suite = new TestSuite();\n");
-        buf.append(" * suite.addTest(new MathTest(\"testAdd\"));\n");
-        buf.append(" * suite.addTest(new MathTest(\"testDivideByZero\"));\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * Alternatively, a TestSuite can extract the tests to be run automatically. To\n");
-        buf.append(" * do so you pass the class of your TestCase class to the TestSuite constructor.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * TestSuite suite = new TestSuite(MathTest.class);\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * This constructor creates a suite with all the methods starting with \"test\"\n");
-        buf.append(" * that take no arguments.\n");
-        buf.append(" *\n");
-        buf.append(" * @see Test\n");
-        buf.append(" */\n");
-        buf.append("public class TestSuite implements Test {\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * ...as the moon sets over the early morning Merlin, Oregon mountains, our\n");
-        buf.append("     * intrepid adventurers type...\n");
-        buf.append("     */\n");
-        buf.append("    static public Test createTest(final Class theClass, final String name) {\n");
-        buf.append("        Constructor constructor;\n");
-        buf.append("        try {\n");
-        buf.append("            constructor = TestSuite.getTestConstructor(theClass);\n");
-        buf.append("        } catch (final NoSuchMethodException e) {\n");
-        buf.append("            return TestSuite.warning(\"Class \" + theClass.getName() //$NON-NLS-1$\n");
-        buf.append("                    + \" has no public constructor TestCase(String name) or TestCase()\"); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        Object test;\n");
-        buf.append("        try {\n");
-        buf.append("            if (constructor.getParameterTypes().length == 0) {\n");
-        buf.append("                test = constructor.newInstance(new Object[0]);\n");
-        buf.append("                if (test instanceof TestCase) {\n");
-        buf.append("                    ((TestCase) test).setName(name);\n");
-        buf.append("                }\n");
-        buf.append("            } else {\n");
-        buf.append("                test = constructor.newInstance(new Object[]{name});\n");
-        buf.append("            }\n");
-        buf.append("        } catch (final InstantiationException e) {\n");
-        buf.append("            return (TestSuite.warning(\"Cannot instantiate test case: \" + name //$NON-NLS-1$\n");
-        buf.append("                    + \" (\" + TestSuite.exceptionToString(e) + \")\")); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("        } catch (final InvocationTargetException e) {\n");
-        buf.append("            return (TestSuite.warning(\"Exception in constructor: \" + name + \" (\" //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                    + TestSuite.exceptionToString(e.getTargetException())\n");
-        buf.append("                    + \")\")); //$NON-NLS-1$\n");
-        buf.append("        } catch (final IllegalAccessException e) {\n");
-        buf.append("            return (TestSuite.warning(\"Cannot access test case: \" + name + \" (\" //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                    + TestSuite.exceptionToString(e) + \")\")); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        return (Test) test;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Converts the stack trace into a string\n");
-        buf.append("     */\n");
-        buf.append("    private static String exceptionToString(final Throwable t) {\n");
-        buf.append("        final StringWriter stringWriter = new StringWriter();\n");
-        buf.append("        final PrintWriter writer = new PrintWriter(stringWriter);\n");
-        buf.append("        t.printStackTrace(writer);\n");
-        buf.append("        return stringWriter.toString();\n");
-        buf.append("\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets a constructor which takes a single String as its argument or a no\n");
-        buf.append("     * arg constructor.\n");
-        buf.append("     */\n");
-        buf.append("    public static Constructor getTestConstructor(final Class theClass)\n");
-        buf.append("            throws NoSuchMethodException {\n");
-        buf.append("        final Class[] args = {String.class};\n");
-        buf.append("        try {\n");
-        buf.append("            return theClass.getConstructor(args);\n");
-        buf.append("        } catch (final NoSuchMethodException e) {\n");
-        buf.append("            // fall through\n");
-        buf.append("        }\n");
-        buf.append("        return theClass.getConstructor(new Class[0]);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns a test which will fail and log a warning message.\n");
-        buf.append("     */\n");
-        buf.append("    private static Test warning(final String message) {\n");
-        buf.append("        return new TestCase(\"warning\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("                Assert.fail(message);\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private String fName;\n");
-        buf.append("\n");
-        buf.append("    private final Vector fTests = new Vector(10);\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs an empty TestSuite.\n");
-        buf.append("     */\n");
-        buf.append("    public TestSuite() {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestSuite from the given class. Adds all the methods\n");
-        buf.append("     * starting with \"test\" as test cases to the suite. Parts of this method was\n");
-        buf.append("     * written at 2337 meters in the Hüffihütte, Kanton Uri\n");
-        buf.append("     */\n");
-        buf.append("    public TestSuite(final Class theClass) {\n");
-        buf.append("        this.fName = theClass.getName();\n");
-        buf.append("        try {\n");
-        buf.append("            TestSuite.getTestConstructor(theClass); // Avoid generating multiple\n");
-        buf.append("                                                    // error messages\n");
-        buf.append("        } catch (final NoSuchMethodException e) {\n");
-        buf.append("            this.addTest(TestSuite.warning(\"Class \" + theClass.getName() //$NON-NLS-1$\n");
-        buf.append("                    + \" has no public constructor TestCase(String name) or TestCase()\")); //$NON-NLS-1$\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        if (!Modifier.isPublic(theClass.getModifiers())) {\n");
-        buf.append("            this.addTest(TestSuite\n");
-        buf.append("                    .warning(\"Class \" + theClass.getName() + \" is not public\")); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        Class superClass = theClass;\n");
-        buf.append("        final Vector names = new Vector();\n");
-        buf.append("        while (Test.class.isAssignableFrom(superClass)) {\n");
-        buf.append("            final Method[] methods = superClass.getDeclaredMethods();\n");
-        buf.append("            for (final Method method : methods) {\n");
-        buf.append("                this.addTestMethod(method, names, theClass);\n");
-        buf.append("            }\n");
-        buf.append("            superClass = superClass.getSuperclass();\n");
-        buf.append("        }\n");
-        buf.append("        if (this.fTests.size() == 0) {\n");
-        buf.append("            this.addTest(TestSuite\n");
-        buf.append("                    .warning(\"No tests found in \" + theClass.getName())); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestSuite from the given class with the given name.\n");
-        buf.append("     * \n");
-        buf.append("     * @see TestSuite#TestSuite(Class)\n");
-        buf.append("     */\n");
-        buf.append("    public TestSuite(final Class theClass, final String name) {\n");
-        buf.append("        this(theClass);\n");
-        buf.append("        this.setName(name);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs an empty TestSuite.\n");
-        buf.append("     */\n");
-        buf.append("    public TestSuite(final String name) {\n");
-        buf.append("        this.setName(name);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds a test to the suite.\n");
-        buf.append("     */\n");
-        buf.append("    public void addTest(final Test test) {\n");
-        buf.append("        this.fTests.addElement(test);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private void addTestMethod(final Method m, final Vector names,\n");
-        buf.append("            final Class theClass) {\n");
-        buf.append("        final String name = m.getName();\n");
-        buf.append("        if (names.contains(name)) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        if (!this.isPublicTestMethod(m)) {\n");
-        buf.append("            if (this.isTestMethod(m)) {\n");
-        buf.append("                this.addTest(TestSuite\n");
-        buf.append("                        .warning(\"Test method isn't public: \" + m.getName())); //$NON-NLS-1$\n");
-        buf.append("            }\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        names.addElement(name);\n");
-        buf.append("        this.addTest(TestSuite.createTest(theClass, name));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds the tests from the given class to the suite\n");
-        buf.append("     */\n");
-        buf.append("    public void addTestSuite(final Class testClass) {\n");
-        buf.append("        this.addTest(new TestSuite(testClass));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Counts the number of test cases that will be run by this test.\n");
-        buf.append("     */\n");
-        buf.append("    public int countTestCases() {\n");
-        buf.append("        int count = 0;\n");
-        buf.append("        for (final Enumeration e = this.tests(); e.hasMoreElements();) {\n");
-        buf.append("            final Test test = (Test) e.nextElement();\n");
-        buf.append("            count = count + test.countTestCases();\n");
-        buf.append("        }\n");
-        buf.append("        return count;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the name of the suite. Not all test suites have a name and this\n");
-        buf.append("     * method can return null.\n");
-        buf.append("     */\n");
-        buf.append("    public String getName() {\n");
-        buf.append("        return this.fName;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private boolean isPublicTestMethod(final Method m) {\n");
-        buf.append("        return this.isTestMethod(m) && Modifier.isPublic(m.getModifiers());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private boolean isTestMethod(final Method m) {\n");
-        buf.append("        final String name = m.getName();\n");
-        buf.append("        final Class[] parameters = m.getParameterTypes();\n");
-        buf.append("        final Class returnType = m.getReturnType();\n");
-        buf.append("        return (parameters.length == 0) && name.startsWith(\"test\") //$NON-NLS-1$\n");
-        buf.append("                && returnType.equals(Void.TYPE);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs the tests and collects their result in a TestResult.\n");
-        buf.append("     */\n");
-        buf.append("    public void run(final TestResult result) {\n");
-        buf.append("        for (final Enumeration e = this.tests(); e.hasMoreElements();) {\n");
-        buf.append("            if (result.shouldStop()) {\n");
-        buf.append("                break;\n");
-        buf.append("            }\n");
-        buf.append("            final Test test = (Test) e.nextElement();\n");
-        buf.append("            this.runTest(test, result);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void runTest(final Test test, final TestResult result) {\n");
-        buf.append("        test.run(result);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Sets the name of the suite.\n");
-        buf.append("     * \n");
-        buf.append("     * @param name The name to set\n");
-        buf.append("     */\n");
-        buf.append("    public void setName(final String name) {\n");
-        buf.append("        this.fName = name;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the test at the given index\n");
-        buf.append("     */\n");
-        buf.append("    public Test testAt(final int index) {\n");
-        buf.append("        return (Test) this.fTests.elementAt(index);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the number of tests in this suite\n");
-        buf.append("     */\n");
-        buf.append("    public int testCount() {\n");
-        buf.append("        return this.fTests.size();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the tests as an enumeration\n");
-        buf.append("     */\n");
-        buf.append("    public Enumeration tests() {\n");
-        buf.append("        return this.fTests.elements();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     */\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        if (this.getName() != null) {\n");
-        buf.append("            return this.getName();\n");
-        buf.append("        }\n");
-        buf.append("        return super.toString();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.TestSuite.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A TestCase that expects an Exception of class fExpected to be thrown. The\n");
-        buf.append(" * other way to check that an expected exception is thrown is:\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * try {\n");
-        buf.append(" *     shouldThrow();\n");
-        buf.append(" * } catch (SpecialException e) {\n");
-        buf.append(" *     return;\n");
-        buf.append(" * }\n");
-        buf.append(" * fail(\"Expected SpecialException\");\n");
-        buf.append(" * </pre>\n");
-        buf.append(" *\n");
-        buf.append(" * To use ExceptionTestCase, create a TestCase like:\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * new ExceptionTestCase(\"testShouldThrow\", SpecialException.class);\n");
-        buf.append(" * </pre>\n");
-        buf.append(" */\n");
-        buf.append("public class ExceptionTestCase extends TestCase {\n");
-        buf.append("    Class fExpected;\n");
-        buf.append("\n");
-        buf.append("    public ExceptionTestCase(final String name, final Class exception) {\n");
-        buf.append("        super(name);\n");
-        buf.append("        this.fExpected = exception;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Execute the test method expecting that an Exception of class fExpected or\n");
-        buf.append("     * one of its subclasses will be thrown\n");
-        buf.append("     */\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void runTest() throws Throwable {\n");
-        buf.append("        try {\n");
-        buf.append("            super.runTest();\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            if (this.fExpected.isAssignableFrom(e.getClass())) {\n");
-        buf.append("                return;\n");
-        buf.append("            } else {\n");
-        buf.append("                throw e;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail(\"Expected exception \" + this.fExpected); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.extensions.ExceptionTestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A set of assert methods. Messages are only displayed when an assert fails.\n");
-        buf.append(" */\n");
-        buf.append("\n");
-        buf.append("public class Assert {\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two booleans are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final boolean expected,\n");
-        buf.append("            final boolean actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two bytes are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final byte expected, final byte actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two chars are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final char expected, final char actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two doubles are equal concerning a delta. If the expected\n");
-        buf.append("     * value is infinity then the delta value is ignored.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final double expected, final double actual,\n");
-        buf.append("            final double delta) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual, delta);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two floats are equal concerning a delta. If the expected\n");
-        buf.append("     * value is infinity then the delta value is ignored.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final float expected, final float actual,\n");
-        buf.append("            final float delta) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual, delta);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two ints are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final int expected, final int actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two longs are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final long expected, final long actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two objects are equal. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final Object expected,\n");
-        buf.append("            final Object actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two shorts are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final short expected, final short actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two booleans are equal. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message,\n");
-        buf.append("            final boolean expected, final boolean actual) {\n");
-        buf.append("        Assert.assertEquals(message, new Boolean(expected),\n");
-        buf.append("                new Boolean(actual));\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two bytes are equal. If they are not an AssertionFailedError\n");
-        buf.append("     * is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final byte expected,\n");
-        buf.append("            final byte actual) {\n");
-        buf.append("        Assert.assertEquals(message, new Byte(expected), new Byte(actual));\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two chars are equal. If they are not an AssertionFailedError\n");
-        buf.append("     * is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final char expected,\n");
-        buf.append("            final char actual) {\n");
-        buf.append("        Assert.assertEquals(message, new Character(expected),\n");
-        buf.append("                new Character(actual));\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two doubles are equal concerning a delta. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message. If the expected\n");
-        buf.append("     * value is infinity then the delta value is ignored.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final double expected,\n");
-        buf.append("            final double actual, final double delta) {\n");
-        buf.append("        // handle infinity specially since subtracting to infinite values gives\n");
-        buf.append("        // NaN and the\n");
-        buf.append("        // the following test fails\n");
-        buf.append("        if (Double.isInfinite(expected)) {\n");
-        buf.append("            if (!(expected == actual)) {\n");
-        buf.append("                Assert.failNotEquals(message, new Double(expected),\n");
-        buf.append("                        new Double(actual));\n");
-        buf.append("            }\n");
-        buf.append("        } else if (!(Math.abs(expected - actual) <= delta)) { // Because\n");
-        buf.append("                                                              // comparison with\n");
-        buf.append("                                                              // NaN always\n");
-        buf.append("                                                              // returns false\n");
-        buf.append("            Assert.failNotEquals(message, new Double(expected),\n");
-        buf.append("                    new Double(actual));\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two floats are equal concerning a delta. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message. If the expected\n");
-        buf.append("     * value is infinity then the delta value is ignored.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final float expected,\n");
-        buf.append("            final float actual, final float delta) {\n");
-        buf.append("        // handle infinity specially since subtracting to infinite values gives\n");
-        buf.append("        // NaN and the\n");
-        buf.append("        // the following test fails\n");
-        buf.append("        if (Float.isInfinite(expected)) {\n");
-        buf.append("            if (!(expected == actual)) {\n");
-        buf.append("                Assert.failNotEquals(message, new Float(expected),\n");
-        buf.append("                        new Float(actual));\n");
-        buf.append("            }\n");
-        buf.append("        } else if (!(Math.abs(expected - actual) <= delta)) {\n");
-        buf.append("            Assert.failNotEquals(message, new Float(expected),\n");
-        buf.append("                    new Float(actual));\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two ints are equal. If they are not an AssertionFailedError\n");
-        buf.append("     * is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final int expected,\n");
-        buf.append("            final int actual) {\n");
-        buf.append("        Assert.assertEquals(message, new Integer(expected),\n");
-        buf.append("                new Integer(actual));\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two longs are equal. If they are not an AssertionFailedError\n");
-        buf.append("     * is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final long expected,\n");
-        buf.append("            final long actual) {\n");
-        buf.append("        Assert.assertEquals(message, new Long(expected), new Long(actual));\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two objects are equal. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final Object expected,\n");
-        buf.append("            final Object actual) {\n");
-        buf.append("        if ((expected == null) && (actual == null)) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        if ((expected != null) && expected.equals(actual)) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.failNotEquals(message, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two shorts are equal. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final short expected,\n");
-        buf.append("            final short actual) {\n");
-        buf.append("        Assert.assertEquals(message, new Short(expected), new Short(actual));\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two Strings are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String expected,\n");
-        buf.append("            final String actual) {\n");
-        buf.append("        Assert.assertEquals(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two Strings are equal.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertEquals(final String message, final String expected,\n");
-        buf.append("            final String actual) {\n");
-        buf.append("        if ((expected == null) && (actual == null)) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        if ((expected != null) && expected.equals(actual)) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        throw new ComparisonFailure(message, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that a condition is false. If it isn't it throws an\n");
-        buf.append("     * AssertionFailedError.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertFalse(final boolean condition) {\n");
-        buf.append("        Assert.assertFalse(null, condition);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that a condition is false. If it isn't it throws an\n");
-        buf.append("     * AssertionFailedError with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertFalse(final String message,\n");
-        buf.append("            final boolean condition) {\n");
-        buf.append("        Assert.assertTrue(message, !condition);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that an object isn't null.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertNotNull(final Object object) {\n");
-        buf.append("        Assert.assertNotNull(null, object);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that an object isn't null. If it is an AssertionFailedError is\n");
-        buf.append("     * thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertNotNull(final String message,\n");
-        buf.append("            final Object object) {\n");
-        buf.append("        Assert.assertTrue(message, object != null);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two objects refer to the same object. If they are not the\n");
-        buf.append("     * same an AssertionFailedError is thrown.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertNotSame(final Object expected,\n");
-        buf.append("            final Object actual) {\n");
-        buf.append("        Assert.assertNotSame(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two objects refer to the same object. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertNotSame(final String message,\n");
-        buf.append("            final Object expected, final Object actual) {\n");
-        buf.append("        if (expected == actual) {\n");
-        buf.append("            Assert.failSame(message);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that an object is null.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertNull(final Object object) {\n");
-        buf.append("        Assert.assertNull(null, object);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that an object is null. If it is not an AssertionFailedError is\n");
-        buf.append("     * thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertNull(final String message, final Object object) {\n");
-        buf.append("        Assert.assertTrue(message, object == null);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two objects refer to the same object. If they are not the\n");
-        buf.append("     * same an AssertionFailedError is thrown.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertSame(final Object expected, final Object actual) {\n");
-        buf.append("        Assert.assertSame(null, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that two objects refer to the same object. If they are not an\n");
-        buf.append("     * AssertionFailedError is thrown with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertSame(final String message, final Object expected,\n");
-        buf.append("            final Object actual) {\n");
-        buf.append("        if (expected == actual) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.failNotSame(message, expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that a condition is true. If it isn't it throws an\n");
-        buf.append("     * AssertionFailedError.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertTrue(final boolean condition) {\n");
-        buf.append("        Assert.assertTrue(null, condition);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Asserts that a condition is true. If it isn't it throws an\n");
-        buf.append("     * AssertionFailedError with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void assertTrue(final String message,\n");
-        buf.append("            final boolean condition) {\n");
-        buf.append("        if (!condition) {\n");
-        buf.append("            Assert.fail(message);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Fails a test with no message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void fail() {\n");
-        buf.append("        Assert.fail(null);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Fails a test with the given message.\n");
-        buf.append("     */\n");
-        buf.append("    static public void fail(final String message) {\n");
-        buf.append("        throw new AssertionFailedError(message);\n");
-        buf.append("    }\n");
-        buf.append("    static private void failNotEquals(final String message,\n");
-        buf.append("            final Object expected, final Object actual) {\n");
-        buf.append("        Assert.fail(Assert.format(message, expected, actual));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    static private void failNotSame(final String message, final Object expected,\n");
-        buf.append("            final Object actual) {\n");
-        buf.append("        String formatted = \"\"; //$NON-NLS-1$\n");
-        buf.append("        if (message != null) {\n");
-        buf.append("            formatted = message + \" \"; //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail(formatted + \"expected same:<\" + expected + \"> was not:<\" //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                + actual + \">\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    static private void failSame(final String message) {\n");
-        buf.append("        String formatted = \"\"; //$NON-NLS-1$\n");
-        buf.append("        if (message != null) {\n");
-        buf.append("            formatted = message + \" \"; //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail(formatted + \"expected not same\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    static String format(final String message, final Object expected,\n");
-        buf.append("            final Object actual) {\n");
-        buf.append("        String formatted = \"\"; //$NON-NLS-1$\n");
-        buf.append("        if (message != null) {\n");
-        buf.append("            formatted = message + \" \"; //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        return formatted + \"expected:<\" + expected + \"> but was:<\" + actual //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                + \">\"; //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Protect constructor since it is a static only class\n");
-        buf.append("     */\n");
-        buf.append("    protected Assert() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.Assert.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("import java.io.File;\n");
-        buf.append("import java.util.Enumeration;\n");
-        buf.append("import java.util.Hashtable;\n");
-        buf.append("import java.util.StringTokenizer;\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * An implementation of a TestCollector that consults the class path. It\n");
-        buf.append(" * considers all classes on the class path excluding classes in JARs. It leaves\n");
-        buf.append(" * it up to subclasses to decide whether a class is a runnable Test.\n");
-        buf.append(" *\n");
-        buf.append(" * @see TestCollector\n");
-        buf.append(" */\n");
-        buf.append("public abstract class ClassPathTestCollector implements TestCollector {\n");
-        buf.append("\n");
-        buf.append("    static final int SUFFIX_LENGTH = \".class\".length(); //$NON-NLS-1$\n");
-        buf.append("\n");
-        buf.append("    public ClassPathTestCollector() {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected String classNameFromFile(final String classFileName) {\n");
-        buf.append("        // convert /a/b.class to a.b\n");
-        buf.append("        final String s = classFileName.substring(0,\n");
-        buf.append("                classFileName.length() - ClassPathTestCollector.SUFFIX_LENGTH);\n");
-        buf.append("        final String s2 = s.replace(File.separatorChar, '.');\n");
-        buf.append("        if (s2.startsWith(\".\")) { //$NON-NLS-1$\n");
-        buf.append("            return s2.substring(1);\n");
-        buf.append("        }\n");
-        buf.append("        return s2;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public Hashtable collectFilesInPath(final String classPath) {\n");
-        buf.append("        final Hashtable result = this\n");
-        buf.append("                .collectFilesInRoots(this.splitClassPath(classPath));\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    Hashtable collectFilesInRoots(final Vector roots) {\n");
-        buf.append("        final Hashtable result = new Hashtable(100);\n");
-        buf.append("        final Enumeration e = roots.elements();\n");
-        buf.append("        while (e.hasMoreElements()) {\n");
-        buf.append("            this.gatherFiles(new File((String) e.nextElement()), \"\", result); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public Enumeration collectTests() {\n");
-        buf.append("        final String classPath = System.getProperty(\"java.class.path\"); //$NON-NLS-1$\n");
-        buf.append("        final Hashtable result = this.collectFilesInPath(classPath);\n");
-        buf.append("        return result.elements();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    void gatherFiles(final File classRoot, final String classFileName,\n");
-        buf.append("            final Hashtable result) {\n");
-        buf.append("        final File thisRoot = new File(classRoot, classFileName);\n");
-        buf.append("        if (thisRoot.isFile()) {\n");
-        buf.append("            if (this.isTestClass(classFileName)) {\n");
-        buf.append("                final String className = this.classNameFromFile(classFileName);\n");
-        buf.append("                result.put(className, className);\n");
-        buf.append("            }\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        final String[] contents = thisRoot.list();\n");
-        buf.append("        if (contents != null) {\n");
-        buf.append("            for (final String content : contents) {\n");
-        buf.append("                this.gatherFiles(classRoot,\n");
-        buf.append("                        classFileName + File.separatorChar + content, result);\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected boolean isTestClass(final String classFileName) {\n");
-        buf.append("        return classFileName.endsWith(\".class\") && //$NON-NLS-1$\n");
-        buf.append("                (classFileName.indexOf('$') < 0)\n");
-        buf.append("                && (classFileName.indexOf(\"Test\") > 0); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    Vector splitClassPath(final String classPath) {\n");
-        buf.append("        final Vector result = new Vector();\n");
-        buf.append("        final String separator = System.getProperty(\"path.separator\"); //$NON-NLS-1$\n");
-        buf.append("        final StringTokenizer tokenizer = new StringTokenizer(classPath,\n");
-        buf.append("                separator);\n");
-        buf.append("        while (tokenizer.hasMoreTokens()) {\n");
-        buf.append("            result.addElement(tokenizer.nextToken());\n");
-        buf.append("        }\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.runner.ClassPathTestCollector.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A Listener for test progress\n");
-        buf.append(" */\n");
-        buf.append("public interface TestListener {\n");
-        buf.append("    /**\n");
-        buf.append("     * An error occurred.\n");
-        buf.append("     */\n");
-        buf.append("    void addError(Test test, Throwable t);\n");
-        buf.append("    /**\n");
-        buf.append("     * A failure occurred.\n");
-        buf.append("     */\n");
-        buf.append("    void addFailure(Test test, AssertionFailedError t);\n");
-        buf.append("    /**\n");
-        buf.append("     * A test ended.\n");
-        buf.append("     */\n");
-        buf.append("    void endTest(Test test);\n");
-        buf.append("    /**\n");
-        buf.append("     * A test started.\n");
-        buf.append("     */\n");
-        buf.append("    void startTest(Test test);\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.TestListener.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.extensions.ActiveTestSuite;\n");
-        buf.append("import junit.extensions.RepeatedTest;\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Testing the ActiveTest support\n");
-        buf.append(" */\n");
-        buf.append("\n");
-        buf.append("public class ActiveTestTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    public static class SuccessTest extends TestCase {\n");
-        buf.append("        @Override\n");
-        buf.append("        public void runTest() {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    ActiveTestSuite createActiveTestSuite() {\n");
-        buf.append("        final ActiveTestSuite suite = new ActiveTestSuite();\n");
-        buf.append("        for (int i = 0; i < 100; i++) {\n");
-        buf.append("            suite.addTest(new SuccessTest());\n");
-        buf.append("        }\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testActiveRepeatedTest() {\n");
-        buf.append("        final Test test = new RepeatedTest(this.createActiveTestSuite(), 5);\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(500, result.runCount());\n");
-        buf.append("        Assert.assertEquals(0, result.failureCount());\n");
-        buf.append("        Assert.assertEquals(0, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testActiveRepeatedTest0() {\n");
-        buf.append("        final Test test = new RepeatedTest(this.createActiveTestSuite(), 0);\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(0, result.runCount());\n");
-        buf.append("        Assert.assertEquals(0, result.failureCount());\n");
-        buf.append("        Assert.assertEquals(0, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testActiveRepeatedTest1() {\n");
-        buf.append("        final Test test = new RepeatedTest(this.createActiveTestSuite(), 1);\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(100, result.runCount());\n");
-        buf.append("        Assert.assertEquals(0, result.failureCount());\n");
-        buf.append("        Assert.assertEquals(0, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testActiveTest() {\n");
-        buf.append("        final Test test = this.createActiveTestSuite();\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(100, result.runCount());\n");
-        buf.append("        Assert.assertEquals(0, result.failureCount());\n");
-        buf.append("        Assert.assertEquals(0, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.extensions.ActiveTestTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A <em>Protectable</em> can be run and can throw a Throwable.\n");
-        buf.append(" *\n");
-        buf.append(" * @see TestResult\n");
-        buf.append(" */\n");
-        buf.append("public interface Protectable {\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Run the the following method protected.\n");
-        buf.append("     */\n");
-        buf.append("    void protect() throws Throwable;\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.Protectable.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples.money;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * The common interface for simple Monies and MoneyBags\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public interface IMoney {\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds a money to this money.\n");
-        buf.append("     */\n");
-        buf.append("    IMoney add(IMoney m);\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds a simple Money to this money. This is a helper method for\n");
-        buf.append("     * implementing double dispatch\n");
-        buf.append("     */\n");
-        buf.append("    IMoney addMoney(Money m);\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds a MoneyBag to this money. This is a helper method for implementing\n");
-        buf.append("     * double dispatch\n");
-        buf.append("     */\n");
-        buf.append("    IMoney addMoneyBag(MoneyBag s);\n");
-        buf.append("    /**\n");
-        buf.append("     * Append this to a MoneyBag m.\n");
-        buf.append("     */\n");
-        buf.append("    void appendTo(MoneyBag m);\n");
-        buf.append("    /**\n");
-        buf.append("     * Tests whether this money is zero\n");
-        buf.append("     */\n");
-        buf.append("    boolean isZero();\n");
-        buf.append("    /**\n");
-        buf.append("     * Multiplies a money by the given factor.\n");
-        buf.append("     */\n");
-        buf.append("    IMoney multiply(int factor);\n");
-        buf.append("    /**\n");
-        buf.append("     * Negates this money.\n");
-        buf.append("     */\n");
-        buf.append("    IMoney negate();\n");
-        buf.append("    /**\n");
-        buf.append("     * Subtracts a money from this money.\n");
-        buf.append("     */\n");
-        buf.append("    IMoney subtract(IMoney m);\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.money.IMoney.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.textui;\n");
-        buf.append("\n");
-        buf.append("import java.io.PrintStream;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("import junit.runner.BaseTestRunner;\n");
-        buf.append("import junit.runner.StandardTestSuiteLoader;\n");
-        buf.append("import junit.runner.TestSuiteLoader;\n");
-        buf.append("import junit.runner.Version;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A command line based tool to run tests.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * java junit.textui.TestRunner [-wait] TestCaseClass\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * TestRunner expects the name of a TestCase class as argument. If this class\n");
-        buf.append(" * defines a static <code>suite</code> method it will be invoked and the\n");
-        buf.append(" * returned test is run. Otherwise all the methods starting with \"test\" having\n");
-        buf.append(" * no arguments are run.\n");
-        buf.append(" * <p>\n");
-        buf.append(" * When the wait command line argument is given TestRunner waits until the users\n");
-        buf.append(" * types RETURN.\n");
-        buf.append(" * <p>\n");
-        buf.append(" * TestRunner prints a trace as the tests are executed followed by a summary at\n");
-        buf.append(" * the end.\n");
-        buf.append(" */\n");
-        buf.append("public class TestRunner extends BaseTestRunner {\n");
-        buf.append("    public static final int EXCEPTION_EXIT = 2;\n");
-        buf.append("\n");
-        buf.append("    public static final int FAILURE_EXIT = 1;\n");
-        buf.append("    public static final int SUCCESS_EXIT = 0;\n");
-        buf.append("    public static void main(final String args[]) {\n");
-        buf.append("        final TestRunner aTestRunner = new TestRunner();\n");
-        buf.append("        try {\n");
-        buf.append("            final TestResult r = aTestRunner.start(args);\n");
-        buf.append("            if (!r.wasSuccessful()) {\n");
-        buf.append("                System.exit(TestRunner.FAILURE_EXIT);\n");
-        buf.append("            }\n");
-        buf.append("            System.exit(TestRunner.SUCCESS_EXIT);\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            System.err.println(e.getMessage());\n");
-        buf.append("            System.exit(TestRunner.EXCEPTION_EXIT);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs a suite extracted from a TestCase subclass.\n");
-        buf.append("     */\n");
-        buf.append("    static public void run(final Class testClass) {\n");
-        buf.append("        TestRunner.run(new TestSuite(testClass));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs a single test and collects its results. This method can be used to\n");
-        buf.append("     * start a test run from your program.\n");
-        buf.append("     * \n");
-        buf.append("     * <pre>\n");
-        buf.append("     * public static void main(String[] args) {\n");
-        buf.append("     *     test.textui.TestRunner.run(suite());\n");
-        buf.append("     * }\n");
-        buf.append("     * </pre>\n");
-        buf.append("     */\n");
-        buf.append("    static public TestResult run(final Test test) {\n");
-        buf.append("        final TestRunner runner = new TestRunner();\n");
-        buf.append("        return runner.doRun(test);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs a single test and waits until the user types RETURN.\n");
-        buf.append("     */\n");
-        buf.append("    static public void runAndWait(final Test suite) {\n");
-        buf.append("        final TestRunner aTestRunner = new TestRunner();\n");
-        buf.append("        aTestRunner.doRun(suite, true);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private ResultPrinter fPrinter;\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestRunner.\n");
-        buf.append("     */\n");
-        buf.append("    public TestRunner() {\n");
-        buf.append("        this(System.out);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestRunner using the given stream for all the output\n");
-        buf.append("     */\n");
-        buf.append("    public TestRunner(final PrintStream writer) {\n");
-        buf.append("        this(new ResultPrinter(writer));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestRunner using the given ResultPrinter all the output\n");
-        buf.append("     */\n");
-        buf.append("    public TestRunner(final ResultPrinter printer) {\n");
-        buf.append("        this.fPrinter = printer;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Creates the TestResult to be used for the test run.\n");
-        buf.append("     */\n");
-        buf.append("    protected TestResult createTestResult() {\n");
-        buf.append("        return new TestResult();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public TestResult doRun(final Test test) {\n");
-        buf.append("        return this.doRun(test, false);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public TestResult doRun(final Test suite, final boolean wait) {\n");
-        buf.append("        final TestResult result = this.createTestResult();\n");
-        buf.append("        result.addListener(this.fPrinter);\n");
-        buf.append("        final long startTime = System.currentTimeMillis();\n");
-        buf.append("        suite.run(result);\n");
-        buf.append("        final long endTime = System.currentTimeMillis();\n");
-        buf.append("        final long runTime = endTime - startTime;\n");
-        buf.append("        this.fPrinter.print(result, runTime);\n");
-        buf.append("\n");
-        buf.append("        this.pause(wait);\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Always use the StandardTestSuiteLoader. Overridden from BaseTestRunner.\n");
-        buf.append("     */\n");
-        buf.append("    @Override\n");
-        buf.append("    public TestSuiteLoader getLoader() {\n");
-        buf.append("        return new StandardTestSuiteLoader();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void pause(final boolean wait) {\n");
-        buf.append("        if (!wait) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        this.fPrinter.printWaitPrompt();\n");
-        buf.append("        try {\n");
-        buf.append("            System.in.read();\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void runFailed(final String message) {\n");
-        buf.append("        System.err.println(message);\n");
-        buf.append("        System.exit(TestRunner.FAILURE_EXIT);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void setPrinter(final ResultPrinter printer) {\n");
-        buf.append("        this.fPrinter = printer;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Starts a test run. Analyzes the command line arguments and runs the given\n");
-        buf.append("     * test suite.\n");
-        buf.append("     */\n");
-        buf.append("    protected TestResult start(final String args[]) throws Exception {\n");
-        buf.append("        String testCase = \"\"; //$NON-NLS-1$\n");
-        buf.append("        boolean wait = false;\n");
-        buf.append("\n");
-        buf.append("        for (int i = 0; i < args.length; i++) {\n");
-        buf.append("            if (args[i].equals(\"-wait\")) { //$NON-NLS-1$\n");
-        buf.append("                wait = true;\n");
-        buf.append("            } else if (args[i].equals(\"-c\")) { //$NON-NLS-1$\n");
-        buf.append("                testCase = this.extractClassName(args[++i]);\n");
-        buf.append("            } else if (args[i].equals(\"-v\")) { //$NON-NLS-1$\n");
-        buf.append("                System.err.println(\"JUnit \" + Version.id() //$NON-NLS-1$\n");
-        buf.append("                        + \" by Kent Beck and Erich Gamma\"); //$NON-NLS-1$\n");
-        buf.append("            } else { // $NON-NLS-1$\n");
-        buf.append("                testCase = args[i];\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        if (testCase.equals(\"\")) { // $NON-NLS-1$\n");
-        buf.append("            throw new Exception(\n");
-        buf.append("                    \"Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class\"); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        try {\n");
-        buf.append("            final Test suite = this.getTest(testCase);\n");
-        buf.append("            return this.doRun(suite, wait);\n");
-        buf.append("        } catch (final Exception e) {\n");
-        buf.append("            throw new Exception(\"Could not create and run test suite: \" + e); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void testEnded(final String testName) {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void testFailed(final int status, final Test test,\n");
-        buf.append("            final Throwable t) {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void testStarted(final String testName) {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.textui.TestRunner.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in TestTestCaseClassLoader\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class ClassLoaderTest extends Assert {\n");
-        buf.append("    public ClassLoaderTest() {\n");
-        buf.append("    }\n");
-        buf.append("    private boolean isTestCaseClassLoader(final ClassLoader cl) {\n");
-        buf.append("        return ((cl != null) && cl.getClass().getName()\n");
-        buf.append("                .equals(junit.runner.TestCaseClassLoader.class.getName()));\n");
-        buf.append("    }\n");
-        buf.append("    public void verify() {\n");
-        buf.append("        this.verifyApplicationClassLoadedByTestLoader();\n");
-        buf.append("        this.verifySystemClassNotLoadedByTestLoader();\n");
-        buf.append("    }\n");
-        buf.append("    private void verifyApplicationClassLoadedByTestLoader() {\n");
-        buf.append("        Assert.assertTrue(\n");
-        buf.append("                this.isTestCaseClassLoader(this.getClass().getClassLoader()));\n");
-        buf.append("    }\n");
-        buf.append("    private void verifySystemClassNotLoadedByTestLoader() {\n");
-        buf.append("        Assert.assertTrue(\n");
-        buf.append("                !this.isTestCaseClassLoader(Object.class.getClassLoader()));\n");
-        buf.append("        Assert.assertTrue(\n");
-        buf.append("                !this.isTestCaseClassLoader(TestCase.class.getClassLoader()));\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.ClassLoaderTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("/**\n");
-        buf.append(" * A listener interface for observing the execution of a test run. Unlike\n");
-        buf.append(" * TestListener, this interface using only primitive objects, making it suitable\n");
-        buf.append(" * for remote test execution.\n");
-        buf.append(" */\n");
-        buf.append("public interface TestRunListener {\n");
-        buf.append("    /* test status constants */\n");
-        buf.append("    int STATUS_ERROR = 1;\n");
-        buf.append("    int STATUS_FAILURE = 2;\n");
-        buf.append("\n");
-        buf.append("    void testEnded(String testName);\n");
-        buf.append("    void testFailed(int status, String testName, String trace);\n");
-        buf.append("    void testRunEnded(long elapsedTime);\n");
-        buf.append("    void testRunStarted(String testSuiteName, int testCount);\n");
-        buf.append("    void testRunStopped(long elapsedTime);\n");
-        buf.append("    void testStarted(String testName);\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.runner.TestRunListener.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("\n");
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import java.io.ByteArrayOutputStream;\n");
-        buf.append("import java.io.OutputStream;\n");
-        buf.append("import java.io.PrintStream;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("import junit.textui.ResultPrinter;\n");
-        buf.append("import junit.textui.TestRunner;\n");
-        buf.append("\n");
-        buf.append("public class TextFeedbackTest extends TestCase {\n");
-        buf.append("    class TestResultPrinter extends ResultPrinter {\n");
-        buf.append("        TestResultPrinter(final PrintStream writer) {\n");
-        buf.append("            super(writer);\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        /*\n");
-        buf.append("         * Spoof printing time so the tests are deterministic\n");
-        buf.append("         */\n");
-        buf.append("        @Override\n");
-        buf.append("        protected String elapsedTimeAsString(final long runTime) {\n");
-        buf.append("            return \"0\"; //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        TestRunner.run(TextFeedbackTest.class);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    OutputStream output;\n");
-        buf.append("\n");
-        buf.append("    TestRunner runner;\n");
-        buf.append("\n");
-        buf.append("    private String expected(final String[] lines) {\n");
-        buf.append("        final OutputStream expected = new ByteArrayOutputStream();\n");
-        buf.append("        final PrintStream expectedWriter = new PrintStream(expected);\n");
-        buf.append("        for (final String line : lines) {\n");
-        buf.append("            expectedWriter.println(line);\n");
-        buf.append("        }\n");
-        buf.append("        return expected.toString();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    @Override\n");
-        buf.append("    public void setUp() {\n");
-        buf.append("        this.output = new ByteArrayOutputStream();\n");
-        buf.append("        this.runner = new TestRunner(\n");
-        buf.append("                new TestResultPrinter(new PrintStream(this.output)));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testEmptySuite() {\n");
-        buf.append("        final String expected = this\n");
-        buf.append("                .expected(new String[]{\"\", \"Time: 0\", \"\", \"OK (0 tests)\", \"\"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$\n");
-        buf.append("        this.runner.doRun(new TestSuite());\n");
-        buf.append("        Assert.assertEquals(expected.toString(), this.output.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testError() {\n");
-        buf.append("        final String expected = this.expected(\n");
-        buf.append("                new String[]{\".E\", \"Time: 0\", \"Errors here\", \"\", \"FAILURES!!!\", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$\n");
-        buf.append("                        \"Tests run: 1,  Failures: 0,  Errors: 1\", \"\"}); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("        final ResultPrinter printer = new TestResultPrinter(\n");
-        buf.append("                new PrintStream(this.output)) {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void printErrors(final TestResult result) {\n");
-        buf.append("                this.getWriter().println(\"Errors here\"); //$NON-NLS-1$\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.runner.setPrinter(printer);\n");
-        buf.append("        final TestSuite suite = new TestSuite();\n");
-        buf.append("        suite.addTest(new TestCase() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() throws Exception {\n");
-        buf.append("                throw new Exception();\n");
-        buf.append("            }\n");
-        buf.append("        });\n");
-        buf.append("        this.runner.doRun(suite);\n");
-        buf.append("        Assert.assertEquals(expected.toString(), this.output.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testFailure() {\n");
-        buf.append("        final String expected = this.expected(new String[]{\".F\", \"Time: 0\", //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                \"Failures here\", \"\", \"FAILURES!!!\", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$\n");
-        buf.append("                \"Tests run: 1,  Failures: 1,  Errors: 0\", \"\"}); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("        final ResultPrinter printer = new TestResultPrinter(\n");
-        buf.append("                new PrintStream(this.output)) {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void printFailures(final TestResult result) {\n");
-        buf.append("                this.getWriter().println(\"Failures here\"); //$NON-NLS-1$\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.runner.setPrinter(printer);\n");
-        buf.append("        final TestSuite suite = new TestSuite();\n");
-        buf.append("        suite.addTest(new TestCase() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("                throw new AssertionFailedError();\n");
-        buf.append("            }\n");
-        buf.append("        });\n");
-        buf.append("        this.runner.doRun(suite);\n");
-        buf.append("        Assert.assertEquals(expected.toString(), this.output.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testOneTest() {\n");
-        buf.append("        final String expected = this\n");
-        buf.append("                .expected(new String[]{\".\", \"Time: 0\", \"\", \"OK (1 test)\", \"\"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$\n");
-        buf.append("        final TestSuite suite = new TestSuite();\n");
-        buf.append("        suite.addTest(new TestCase() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("        });\n");
-        buf.append("        this.runner.doRun(suite);\n");
-        buf.append("        Assert.assertEquals(expected.toString(), this.output.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testTwoTests() {\n");
-        buf.append("        final String expected = this.expected(\n");
-        buf.append("                new String[]{\"..\", \"Time: 0\", \"\", \"OK (2 tests)\", \"\"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$\n");
-        buf.append("        final TestSuite suite = new TestSuite();\n");
-        buf.append("        suite.addTest(new TestCase() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("        });\n");
-        buf.append("        suite.addTest(new TestCase() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("        });\n");
-        buf.append("        this.runner.doRun(suite);\n");
-        buf.append("        Assert.assertEquals(expected.toString(), this.output.toString());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.runner.TextFeedbackTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.extensions.TestSetup;\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("import junit.tests.WasRun;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A test case testing the extensions to the testing framework.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class ExtensionTest extends TestCase {\n");
-        buf.append("    static class TornDown extends TestSetup {\n");
-        buf.append("        boolean fTornDown = false;\n");
-        buf.append("\n");
-        buf.append("        TornDown(final Test test) {\n");
-        buf.append("            super(test);\n");
-        buf.append("        }\n");
-        buf.append("        @Override\n");
-        buf.append("        protected void tearDown() {\n");
-        buf.append("            this.fTornDown = true;\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    public void testRunningErrorInTestSetup() {\n");
-        buf.append("        final TestCase test = new TestCase(\"failure\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("                Assert.fail();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("\n");
-        buf.append("        final TestSetup wrapper = new TestSetup(test);\n");
-        buf.append("\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        wrapper.run(result);\n");
-        buf.append("        Assert.assertTrue(!result.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("    public void testRunningErrorsInTestSetup() {\n");
-        buf.append("        final TestCase failure = new TestCase(\"failure\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("                Assert.fail();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("\n");
-        buf.append("        final TestCase error = new TestCase(\"error\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            public void runTest() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("\n");
-        buf.append("        final TestSuite suite = new TestSuite();\n");
-        buf.append("        suite.addTest(failure);\n");
-        buf.append("        suite.addTest(error);\n");
-        buf.append("\n");
-        buf.append("        final TestSetup wrapper = new TestSetup(suite);\n");
-        buf.append("\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        wrapper.run(result);\n");
-        buf.append("\n");
-        buf.append("        Assert.assertEquals(1, result.failureCount());\n");
-        buf.append("        Assert.assertEquals(1, result.errorCount());\n");
-        buf.append("    }\n");
-        buf.append("    public void testSetupErrorDontTearDown() {\n");
-        buf.append("        final WasRun test = new WasRun();\n");
-        buf.append("\n");
-        buf.append("        final TornDown wrapper = new TornDown(test) {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void setUp() {\n");
-        buf.append("                Assert.fail();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        wrapper.run(result);\n");
-        buf.append("\n");
-        buf.append("        Assert.assertTrue(!wrapper.fTornDown);\n");
-        buf.append("    }\n");
-        buf.append("    public void testSetupErrorInTestSetup() {\n");
-        buf.append("        final WasRun test = new WasRun();\n");
-        buf.append("\n");
-        buf.append("        final TestSetup wrapper = new TestSetup(test) {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void setUp() {\n");
-        buf.append("                Assert.fail();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        wrapper.run(result);\n");
-        buf.append("\n");
-        buf.append("        Assert.assertTrue(!test.fWasRun);\n");
-        buf.append("        Assert.assertTrue(!result.wasSuccessful());\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.extensions.ExtensionTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * TestSuite that runs all the JUnit tests\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class AllTests {\n");
-        buf.append("\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(AllTests.suite());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static Test suite() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
-        buf.append("        suite.addTest(junit.tests.framework.AllTests.suite());\n");
-        buf.append("        suite.addTest(junit.tests.runner.AllTests.suite());\n");
-        buf.append("        suite.addTest(junit.tests.extensions.AllTests.suite());\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.AllTests.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in TestTestCaseClassLoader\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("\n");
-        buf.append("public class LoadedFromJar extends Assert {\n");
-        buf.append("    private boolean isTestCaseClassLoader(final ClassLoader cl) {\n");
-        buf.append("        return ((cl != null) && cl.getClass().getName()\n");
-        buf.append("                .equals(junit.runner.TestCaseClassLoader.class.getName()));\n");
-        buf.append("    }\n");
-        buf.append("    public void verify() {\n");
-        buf.append("        this.verifyApplicationClassLoadedByTestLoader();\n");
-        buf.append("    }\n");
-        buf.append("    private void verifyApplicationClassLoadedByTestLoader() {\n");
-        buf.append("        Assert.assertTrue(\n");
-        buf.append("                this.isTestCaseClassLoader(this.getClass().getClassLoader()));\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.LoadedFromJar.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.ComparisonFailure;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class ComparisonFailureTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorEndSame() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"ab\", //$NON-NLS-1$\n");
-        buf.append("                \"cb\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<a...> but was:<c...>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorEndSameComplete() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"bc\", //$NON-NLS-1$\n");
-        buf.append("                \"abc\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<...> but was:<a...>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorMessage() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(\"a\", \"b\", \"c\"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$\n");
-        buf.append("        Assert.assertEquals(\"a expected:<b> but was:<c>\", failure.getMessage()); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorOverlapingMatches() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"abc\", //$NON-NLS-1$\n");
-        buf.append("                \"abbc\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<......> but was:<...b...>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorOverlapingMatches2() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"abcdde\", //$NON-NLS-1$\n");
-        buf.append("                \"abcde\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<...d...> but was:<......>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorSame() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"ab\", //$NON-NLS-1$\n");
-        buf.append("                \"ab\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<ab> but was:<ab>\", failure.getMessage()); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorStartAndEndSame() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"abc\", //$NON-NLS-1$\n");
-        buf.append("                \"adc\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<...b...> but was:<...d...>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorStartSame() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"ba\", //$NON-NLS-1$\n");
-        buf.append("                \"bc\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<...a> but was:<...c>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorStartSameComplete() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"ab\", //$NON-NLS-1$\n");
-        buf.append("                \"abc\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<...> but was:<...c>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorWithActualNull() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, \"a\", //$NON-NLS-1$\n");
-        buf.append("                null);\n");
-        buf.append("        Assert.assertEquals(\"expected:<a> but was:<null>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testComparisonErrorWithExpectedNull() {\n");
-        buf.append("        final ComparisonFailure failure = new ComparisonFailure(null, null,\n");
-        buf.append("                \"a\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(\"expected:<null> but was:<a>\", //$NON-NLS-1$\n");
-        buf.append("                failure.getMessage());\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.framework.ComparisonFailureTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("\n");
-        buf.append("package junit.textui;\n");
-        buf.append("\n");
-        buf.append("import java.io.PrintStream;\n");
-        buf.append("import java.text.NumberFormat;\n");
-        buf.append("import java.util.Enumeration;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestFailure;\n");
-        buf.append("import junit.framework.TestListener;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.runner.BaseTestRunner;\n");
-        buf.append("\n");
-        buf.append("public class ResultPrinter implements TestListener {\n");
-        buf.append("    int fColumn = 0;\n");
-        buf.append("    PrintStream fWriter;\n");
-        buf.append("\n");
-        buf.append("    public ResultPrinter(final PrintStream writer) {\n");
-        buf.append("        this.fWriter = writer;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /*\n");
-        buf.append("     * API for use by textui.TestRunner\n");
-        buf.append("     */\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * @see junit.framework.TestListener#addError(Test, Throwable)\n");
-        buf.append("     */\n");
-        buf.append("    public void addError(final Test test, final Throwable t) {\n");
-        buf.append("        this.getWriter().print(\"E\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * @see junit.framework.TestListener#addFailure(Test, AssertionFailedError)\n");
-        buf.append("     */\n");
-        buf.append("    public void addFailure(final Test test, final AssertionFailedError t) {\n");
-        buf.append("        this.getWriter().print(\"F\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /*\n");
-        buf.append("     * Internal methods\n");
-        buf.append("     */\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns the formatted string of the elapsed time. Duplicated from\n");
-        buf.append("     * BaseTestRunner. Fix it.\n");
-        buf.append("     */\n");
-        buf.append("    protected String elapsedTimeAsString(final long runTime) {\n");
-        buf.append("        return NumberFormat.getInstance().format((double) runTime / 1000);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * @see junit.framework.TestListener#endTest(Test)\n");
-        buf.append("     */\n");
-        buf.append("    public void endTest(final Test test) {\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public PrintStream getWriter() {\n");
-        buf.append("        return this.fWriter;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    synchronized void print(final TestResult result, final long runTime) {\n");
-        buf.append("        this.printHeader(runTime);\n");
-        buf.append("        this.printErrors(result);\n");
-        buf.append("        this.printFailures(result);\n");
-        buf.append("        this.printFooter(result);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void printDefect(final TestFailure booBoo, final int count) { // only\n");
-        buf.append("                                                                         // public\n");
-        buf.append("                                                                         // for\n");
-        buf.append("                                                                         // testing\n");
-        buf.append("                                                                         // purposes\n");
-        buf.append("        this.printDefectHeader(booBoo, count);\n");
-        buf.append("        this.printDefectTrace(booBoo);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void printDefectHeader(final TestFailure booBoo,\n");
-        buf.append("            final int count) {\n");
-        buf.append("        // I feel like making this a println, then adding a line giving the\n");
-        buf.append("        // throwable a chance to print something\n");
-        buf.append("        // before we get to the stack trace.\n");
-        buf.append("        this.getWriter().print(count + \") \" + booBoo.failedTest()); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void printDefects(final Enumeration booBoos, final int count,\n");
-        buf.append("            final String type) {\n");
-        buf.append("        if (count == 0) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        if (count == 1) {\n");
-        buf.append("            this.getWriter().println(\"There was \" + count + \" \" + type + \":\"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$\n");
-        buf.append("        } else {\n");
-        buf.append("            this.getWriter().println(\"There were \" + count + \" \" + type + \"s:\"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$\n");
-        buf.append("        }\n");
-        buf.append("        for (int i = 1; booBoos.hasMoreElements(); i++) {\n");
-        buf.append("            this.printDefect((TestFailure) booBoos.nextElement(), i);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void printDefectTrace(final TestFailure booBoo) {\n");
-        buf.append("        this.getWriter().print(BaseTestRunner.getFilteredTrace(booBoo.trace()));\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void printErrors(final TestResult result) {\n");
-        buf.append("        this.printDefects(result.errors(), result.errorCount(), \"error\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void printFailures(final TestResult result) {\n");
-        buf.append("        this.printDefects(result.failures(), result.failureCount(), \"failure\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("    protected void printFooter(final TestResult result) {\n");
-        buf.append("        if (result.wasSuccessful()) {\n");
-        buf.append("            this.getWriter().println();\n");
-        buf.append("            this.getWriter().print(\"OK\"); //$NON-NLS-1$\n");
-        buf.append("            this.getWriter().println(\" (\" + result.runCount() + \" test\" //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                    + (result.runCount() == 1 ? \"\" : \"s\") + \")\"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$\n");
-        buf.append("\n");
-        buf.append("        } else {\n");
-        buf.append("            this.getWriter().println();\n");
-        buf.append("            this.getWriter().println(\"FAILURES!!!\"); //$NON-NLS-1$\n");
-        buf.append("            this.getWriter().println(\"Tests run: \" + result.runCount() + //$NON-NLS-1$\n");
-        buf.append("                    \",  Failures: \" + result.failureCount() + //$NON-NLS-1$\n");
-        buf.append("                    \",  Errors: \" + result.errorCount()); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        this.getWriter().println();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected void printHeader(final long runTime) {\n");
-        buf.append("        this.getWriter().println();\n");
-        buf.append("        this.getWriter().println(\"Time: \" + this.elapsedTimeAsString(runTime)); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    void printWaitPrompt() {\n");
-        buf.append("        this.getWriter().println();\n");
-        buf.append("        this.getWriter().println(\"<RETURN> to continue\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * @see junit.framework.TestListener#startTest(Test)\n");
-        buf.append("     */\n");
-        buf.append("    public void startTest(final Test test) {\n");
-        buf.append("        this.getWriter().print(\".\"); //$NON-NLS-1$\n");
-        buf.append("        if (this.fColumn++ >= 40) {\n");
-        buf.append("            this.getWriter().println();\n");
-        buf.append("            this.fColumn = 0;\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.textui.ResultPrinter.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples;\n");
-        buf.append("\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A sample test case, testing <code>java.util.Vector</code>.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class VectorTest extends TestCase {\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(VectorTest.suite());\n");
-        buf.append("    }\n");
-        buf.append("    public static Test suite() {\n");
-        buf.append("        return new TestSuite(VectorTest.class);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    protected Vector fEmpty;\n");
-        buf.append("    protected Vector fFull;\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void setUp() {\n");
-        buf.append("        this.fEmpty = new Vector();\n");
-        buf.append("        this.fFull = new Vector();\n");
-        buf.append("        this.fFull.addElement(new Integer(1));\n");
-        buf.append("        this.fFull.addElement(new Integer(2));\n");
-        buf.append("        this.fFull.addElement(new Integer(3));\n");
-        buf.append("    }\n");
-        buf.append("    public void testCapacity() {\n");
-        buf.append("        final int size = this.fFull.size();\n");
-        buf.append("        for (int i = 0; i < 100; i++) {\n");
-        buf.append("            this.fFull.addElement(new Integer(i));\n");
-        buf.append("        }\n");
-		buf.append("        Assert.assertTrue(this.fFull.size() == (100 + size));\n");
-        buf.append("    }\n");
-        buf.append("    public void testClone() {\n");
-        buf.append("        final Vector clone = (Vector) this.fFull.clone();\n");
-        buf.append("        Assert.assertTrue(clone.size() == this.fFull.size());\n");
-        buf.append("        Assert.assertTrue(clone.contains(new Integer(1)));\n");
-        buf.append("    }\n");
-        buf.append("    public void testContains() {\n");
-        buf.append("        Assert.assertTrue(this.fFull.contains(new Integer(1)));\n");
-        buf.append("        Assert.assertTrue(!this.fEmpty.contains(new Integer(1)));\n");
-        buf.append("    }\n");
-        buf.append("    public void testElementAt() {\n");
-        buf.append("        final Integer i = (Integer) this.fFull.elementAt(0);\n");
-        buf.append("        Assert.assertTrue(i.intValue() == 1);\n");
-        buf.append("\n");
-        buf.append("        try {\n");
-        buf.append("            this.fFull.elementAt(this.fFull.size());\n");
-        buf.append("        } catch (final ArrayIndexOutOfBoundsException e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail(\"Should raise an ArrayIndexOutOfBoundsException\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("    public void testRemoveAll() {\n");
-        buf.append("        this.fFull.removeAllElements();\n");
-        buf.append("        this.fEmpty.removeAllElements();\n");
-        buf.append("        Assert.assertTrue(this.fFull.isEmpty());\n");
-        buf.append("        Assert.assertTrue(this.fEmpty.isEmpty());\n");
-        buf.append("    }\n");
-        buf.append("    public void testRemoveElement() {\n");
-        buf.append("        this.fFull.removeElement(new Integer(3));\n");
-        buf.append("        Assert.assertTrue(!this.fFull.contains(new Integer(3)));\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.VectorTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Thrown when an assert equals for Strings failed.\n");
-        buf.append(" * \n");
-        buf.append(" * Inspired by a patch from Alex Chaffee mailto:alex@purpletech.com\n");
-        buf.append(" */\n");
-        buf.append("public class ComparisonFailure extends AssertionFailedError {\n");
-        buf.append("    /* Test */\n");
-        buf.append("    private static final long serialVersionUID = 1L;\n");
-        buf.append("    private final String fActual;\n");
-        buf.append("    private final String fExpected;\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a comparison failure.\n");
-        buf.append("     * \n");
-        buf.append("     * @param message  the identifying message or null\n");
-        buf.append("     * @param expected the expected string value\n");
-        buf.append("     * @param actual   the actual string value\n");
-        buf.append("     */\n");
-        buf.append("    public ComparisonFailure(final String message, final String expected,\n");
-        buf.append("            final String actual) {\n");
-        buf.append("        super(message);\n");
-        buf.append("        this.fExpected = expected;\n");
-        buf.append("        this.fActual = actual;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns \"...\" in place of common prefix and \"...\" in place of common\n");
-        buf.append("     * suffix between expected and actual.\n");
-        buf.append("     * \n");
-        buf.append("     * @see java.lang.Throwable#getMessage()\n");
-        buf.append("     */\n");
-        buf.append("    @Override\n");
-        buf.append("    public String getMessage() {\n");
-        buf.append("        if ((this.fExpected == null) || (this.fActual == null)) {\n");
-        buf.append("            return Assert.format(super.getMessage(), this.fExpected,\n");
-        buf.append("                    this.fActual);\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        final int end = Math.min(this.fExpected.length(),\n");
-        buf.append("                this.fActual.length());\n");
-        buf.append("\n");
-        buf.append("        int i = 0;\n");
-        buf.append("        for (; i < end; i++) {\n");
-        buf.append("            if (this.fExpected.charAt(i) != this.fActual.charAt(i)) {\n");
-        buf.append("                break;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        int j = this.fExpected.length() - 1;\n");
-        buf.append("        int k = this.fActual.length() - 1;\n");
-        buf.append("        for (; (k >= i) && (j >= i); k--, j--) {\n");
-        buf.append("            if (this.fExpected.charAt(j) != this.fActual.charAt(k)) {\n");
-        buf.append("                break;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        String actual, expected;\n");
-        buf.append("\n");
-        buf.append("        // equal strings\n");
-        buf.append("        if ((j < i) && (k < i)) {\n");
-        buf.append("            expected = this.fExpected;\n");
-        buf.append("            actual = this.fActual;\n");
-        buf.append("        } else {\n");
-        buf.append("            expected = this.fExpected.substring(i, j + 1);\n");
-        buf.append("            actual = this.fActual.substring(i, k + 1);\n");
-        buf.append("            if ((i <= end) && (i > 0)) {\n");
-        buf.append("                expected = \"...\" + expected; //$NON-NLS-1$\n");
-        buf.append("                actual = \"...\" + actual; //$NON-NLS-1$\n");
-        buf.append("            }\n");
-        buf.append("\n");
-		buf.append("            if (j < (this.fExpected.length() - 1)) {\n");
-        buf.append("                expected = expected + \"...\"; //$NON-NLS-1$\n");
-        buf.append("            }\n");
-		buf.append("            if (k < (this.fActual.length() - 1)) {\n");
-        buf.append("                actual = actual + \"...\"; //$NON-NLS-1$\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return Assert.format(super.getMessage(), expected, actual);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.ComparisonFailure.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.AssertionFailedError;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestFailure;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("import junit.tests.WasRun;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A test case testing the testing framework.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class TestCaseTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    static class TornDown extends TestCase {\n");
-        buf.append("        boolean fTornDown = false;\n");
-        buf.append("\n");
-        buf.append("        @Override\n");
-        buf.append("        protected void runTest() {\n");
-        buf.append("            throw new Error();\n");
-        buf.append("        }\n");
-        buf.append("        @Override\n");
-        buf.append("        protected void tearDown() {\n");
-        buf.append("            this.fTornDown = true;\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testCaseToString() {\n");
-        buf.append("        // This test wins the award for twisted snake tail eating while\n");
-        buf.append("        // writing self tests. And you thought those weird anonymous\n");
-        buf.append("        // inner classes were bad...\n");
-        buf.append("        Assert.assertEquals(\n");
-        buf.append("                \"testCaseToString(junit.tests.framework.TestCaseTest)\", //$NON-NLS-1$\n");
-        buf.append("                this.toString());\n");
-        buf.append("    }\n");
-        buf.append("    public void testError() {\n");
-        buf.append("        final TestCase error = new TestCase(\"error\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifyError(error);\n");
-        buf.append("    }\n");
-        buf.append("    public void testExceptionRunningAndTearDown() {\n");
-        buf.append("        // This test documents the current behavior. With 1.4, we should\n");
-        buf.append("        // wrap the exception thrown while running with the exception thrown\n");
-        buf.append("        // while tearing down\n");
-        buf.append("        final Test t = new TornDown() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void tearDown() {\n");
-        buf.append("                throw new Error(\"tearDown\"); //$NON-NLS-1$\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        t.run(result);\n");
-        buf.append("        final TestFailure failure = (TestFailure) result.errors().nextElement();\n");
-        buf.append("        Assert.assertEquals(\"tearDown\", failure.thrownException().getMessage()); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("    public void testFailure() {\n");
-        buf.append("        final TestCase failure = new TestCase(\"failure\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("                Assert.fail();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifyFailure(failure);\n");
-        buf.append("    }\n");
-        buf.append("    public void testNamelessTestCase() {\n");
-        buf.append("        final TestCase t = new TestCase() {\n");
-        buf.append("        };\n");
-        buf.append("        try {\n");
-        buf.append("            t.run();\n");
-        buf.append("            Assert.fail();\n");
-        buf.append("        } catch (final AssertionFailedError e) {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    public void testNoArgTestCasePasses() {\n");
-        buf.append("        final Test t = new TestSuite(NoArgTestCaseTest.class);\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        t.run(result);\n");
-        buf.append("        Assert.assertTrue(result.runCount() == 1);\n");
-        buf.append("        Assert.assertTrue(result.failureCount() == 0);\n");
-        buf.append("        Assert.assertTrue(result.errorCount() == 0);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testRunAndTearDownFails() {\n");
-        buf.append("        final TornDown fails = new TornDown() {\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void tearDown() {\n");
-        buf.append("                super.tearDown();\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifyError(fails);\n");
-        buf.append("        Assert.assertTrue(fails.fTornDown);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testSetupFails() {\n");
-        buf.append("        final TestCase fails = new TestCase(\"success\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void setUp() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifyError(fails);\n");
-        buf.append("    }\n");
-        buf.append("    public void testSuccess() {\n");
-        buf.append("        final TestCase success = new TestCase(\"success\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifySuccess(success);\n");
-        buf.append("    }\n");
-        buf.append("    public void testTearDownAfterError() {\n");
-        buf.append("        final TornDown fails = new TornDown();\n");
-        buf.append("        this.verifyError(fails);\n");
-        buf.append("        Assert.assertTrue(fails.fTornDown);\n");
-        buf.append("    }\n");
-        buf.append("    public void testTearDownFails() {\n");
-        buf.append("        final TestCase fails = new TestCase(\"success\") { //$NON-NLS-1$\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void runTest() {\n");
-        buf.append("            }\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void tearDown() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifyError(fails);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testTearDownSetupFails() {\n");
-        buf.append("        final TornDown fails = new TornDown() {\n");
-        buf.append("            @Override\n");
-        buf.append("            protected void setUp() {\n");
-        buf.append("                throw new Error();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        this.verifyError(fails);\n");
-        buf.append("        Assert.assertTrue(!fails.fTornDown);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testWasRun() {\n");
-        buf.append("        final WasRun test = new WasRun();\n");
-        buf.append("        test.run();\n");
-        buf.append("        Assert.assertTrue(test.fWasRun);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    void verifyError(final TestCase test) {\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertTrue(result.runCount() == 1);\n");
-        buf.append("        Assert.assertTrue(result.failureCount() == 0);\n");
-        buf.append("        Assert.assertTrue(result.errorCount() == 1);\n");
-        buf.append("    }\n");
-        buf.append("    void verifyFailure(final TestCase test) {\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertTrue(result.runCount() == 1);\n");
-        buf.append("        Assert.assertTrue(result.failureCount() == 1);\n");
-        buf.append("        Assert.assertTrue(result.errorCount() == 0);\n");
-        buf.append("    }\n");
-        buf.append("    void verifySuccess(final TestCase test) {\n");
-        buf.append("        final TestResult result = test.run();\n");
-        buf.append("        Assert.assertTrue(result.runCount() == 1);\n");
-        buf.append("        Assert.assertTrue(result.failureCount() == 0);\n");
-        buf.append("        Assert.assertTrue(result.errorCount() == 0);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.TestCaseTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("import java.io.PrintWriter;\n");
-        buf.append("import java.io.StringWriter;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A <code>TestFailure</code> collects a failed test together with the caught\n");
-        buf.append(" * exception.\n");
-        buf.append(" * \n");
-        buf.append(" * @see TestResult\n");
-        buf.append(" */\n");
-        buf.append("public class TestFailure extends Object {\n");
-        buf.append("    protected Test fFailedTest;\n");
-        buf.append("    protected Throwable fThrownException;\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a TestFailure with the given test and exception.\n");
-        buf.append("     */\n");
-        buf.append("    public TestFailure(final Test failedTest, final Throwable thrownException) {\n");
-        buf.append("        this.fFailedTest = failedTest;\n");
-        buf.append("        this.fThrownException = thrownException;\n");
-        buf.append("    }\n");
-        buf.append("    public String exceptionMessage() {\n");
-        buf.append("        return this.thrownException().getMessage();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets the failed test.\n");
-        buf.append("     */\n");
-        buf.append("    public Test failedTest() {\n");
-        buf.append("        return this.fFailedTest;\n");
-        buf.append("    }\n");
-        buf.append("    public boolean isFailure() {\n");
-        buf.append("        return this.thrownException() instanceof AssertionFailedError;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets the thrown exception.\n");
-        buf.append("     */\n");
-        buf.append("    public Throwable thrownException() {\n");
-        buf.append("        return this.fThrownException;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns a short description of the failure.\n");
-        buf.append("     */\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        final StringBuffer buffer = new StringBuffer();\n");
-        buf.append("        buffer.append(\n");
-        buf.append("                this.fFailedTest + \": \" + this.fThrownException.getMessage()); //$NON-NLS-1$\n");
-        buf.append("        return buffer.toString();\n");
-        buf.append("    }\n");
-        buf.append("    public String trace() {\n");
-        buf.append("        final StringWriter stringWriter = new StringWriter();\n");
-        buf.append("        final PrintWriter writer = new PrintWriter(stringWriter);\n");
-        buf.append("        this.thrownException().printStackTrace(writer);\n");
-        buf.append("        final StringBuffer buffer = stringWriter.getBuffer();\n");
-        buf.append("        return buffer.toString();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.TestFailure.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A TestSuite loader that can reload classes.\n");
-        buf.append(" */\n");
-        buf.append("public class ReloadingTestSuiteLoader implements TestSuiteLoader {\n");
-        buf.append("\n");
-        buf.append("    protected TestCaseClassLoader createLoader() {\n");
-        buf.append("        return new TestCaseClassLoader();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public Class load(final String suiteClassName)\n");
-        buf.append("            throws ClassNotFoundException {\n");
-        buf.append("        return this.createLoader().loadClass(suiteClassName, true);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public Class reload(final Class aClass) throws ClassNotFoundException {\n");
-        buf.append("        return this.createLoader().loadClass(aClass.getName(), true);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.runner.ReloadingTestSuiteLoader.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * The standard test suite loader. It can only load the same class once.\n");
-        buf.append(" */\n");
-        buf.append("public class StandardTestSuiteLoader implements TestSuiteLoader {\n");
-        buf.append("    /**\n");
-        buf.append("     * Uses the system class loader to load the test class\n");
-        buf.append("     */\n");
-        buf.append("    public Class load(final String suiteClassName)\n");
-        buf.append("            throws ClassNotFoundException {\n");
-        buf.append("        return Class.forName(suiteClassName);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Uses the system class loader to load the test class\n");
-        buf.append("     */\n");
-        buf.append("    public Class reload(final Class aClass) throws ClassNotFoundException {\n");
-        buf.append("        return aClass;\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.runner.StandardTestSuiteLoader.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Protectable;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A Decorator to set up and tear down additional fixture state. Subclass\n");
-        buf.append(" * TestSetup and insert it into your tests when you want to set up additional\n");
-        buf.append(" * state once before the tests are run.\n");
-        buf.append(" */\n");
-        buf.append("public class TestSetup extends TestDecorator {\n");
-        buf.append("\n");
-        buf.append("    public TestSetup(final Test test) {\n");
-        buf.append("        super(test);\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public void run(final TestResult result) {\n");
-        buf.append("        final Protectable p = new Protectable() {\n");
-        buf.append("            public void protect() throws Exception {\n");
-        buf.append("                TestSetup.this.setUp();\n");
-        buf.append("                TestSetup.this.basicRun(result);\n");
-        buf.append("                TestSetup.this.tearDown();\n");
-        buf.append("            }\n");
-        buf.append("        };\n");
-        buf.append("        result.runProtected(this, p);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Sets up the fixture. Override to set up additional fixture state.\n");
-        buf.append("     */\n");
-        buf.append("    protected void setUp() throws Exception {\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Tears down the fixture. Override to tear down the additional fixture\n");
-        buf.append("     * state.\n");
-        buf.append("     */\n");
-        buf.append("    protected void tearDown() throws Exception {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.extensions.TestSetup.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import java.io.File;\n");
-        buf.append("import java.io.IOException;\n");
-        buf.append("import java.io.InputStream;\n");
-        buf.append("import java.io.OutputStream;\n");
-        buf.append("import java.io.PrintStream;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("public class TextRunnerTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    void execTest(final String testClass, final boolean success)\n");
-        buf.append("            throws Exception {\n");
-        buf.append("        final String java = System.getProperty(\"java.home\") + File.separator //$NON-NLS-1$\n");
-        buf.append("                + \"bin\" + File.separator + \"java\"; //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("        final String cp = System.getProperty(\"java.class.path\"); //$NON-NLS-1$\n");
-        buf.append("        // use -classpath for JDK 1.1.7 compatibility\n");
-        buf.append("        final String[] cmd = {java, \"-classpath\", cp, \"junit.textui.TestRunner\", //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("                testClass};\n");
-        buf.append("        final Process p = Runtime.getRuntime().exec(cmd);\n");
-        buf.append("        final InputStream i = p.getInputStream();\n");
-        buf.append("        while ((i.read()) != -1) {\n");
-        buf.append("            ; // System.out.write(b);\n");
-        buf.append("        }\n");
-        buf.append("        Assert.assertTrue((p.waitFor() == 0) == success);\n");
-        buf.append("        if (success) {\n");
-        buf.append("            Assert.assertEquals(junit.textui.TestRunner.SUCCESS_EXIT,\n");
-        buf.append("                    p.exitValue());\n");
-        buf.append("        } else {\n");
-        buf.append("            Assert.assertEquals(junit.textui.TestRunner.FAILURE_EXIT,\n");
-        buf.append("                    p.exitValue());\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testError() throws Exception {\n");
-        buf.append("        this.execTest(\"junit.tests.BogusDude\", false); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testFailure() throws Exception {\n");
-        buf.append("        this.execTest(\"junit.tests.framework.Failure\", false); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testRunReturnsResult() {\n");
-        buf.append("        final PrintStream oldOut = System.out;\n");
-        buf.append("        System.setOut(new PrintStream(new OutputStream() {\n");
-        buf.append("            @Override\n");
-        buf.append("            public void write(final int arg0) throws IOException {\n");
-        buf.append("            }\n");
-        buf.append("        }));\n");
-        buf.append("        try {\n");
-        buf.append("            final TestResult result = junit.textui.TestRunner\n");
-        buf.append("                    .run(new TestSuite());\n");
-        buf.append("            Assert.assertTrue(result.wasSuccessful());\n");
-        buf.append("        } finally {\n");
-        buf.append("            System.setOut(oldOut);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testSuccess() throws Exception {\n");
-        buf.append("        this.execTest(\"junit.tests.framework.Success\", true); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.TextRunnerTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A test case testing the testing framework.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class Failure extends TestCase {\n");
-        buf.append("    @Override\n");
-        buf.append("    public void runTest() {\n");
-        buf.append("        Assert.fail();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.Failure.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("public class OverrideTestCase extends OneTestCase {\n");
-        buf.append("    @Override\n");
-        buf.append("    public void testCase() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.OverrideTestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A Decorator that runs a test repeatedly.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class RepeatedTest extends TestDecorator {\n");
-        buf.append("    private final int fTimesRepeat;\n");
-        buf.append("\n");
-        buf.append("    public RepeatedTest(final Test test, final int repeat) {\n");
-        buf.append("        super(test);\n");
-        buf.append("        if (repeat < 0) {\n");
-        buf.append("            throw new IllegalArgumentException(\"Repetition count must be > 0\"); //$NON-NLS-1$\n");
-        buf.append("        }\n");
-        buf.append("        this.fTimesRepeat = repeat;\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public int countTestCases() {\n");
-        buf.append("        return super.countTestCases() * this.fTimesRepeat;\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public void run(final TestResult result) {\n");
-        buf.append("        for (int i = 0; i < this.fTimesRepeat; i++) {\n");
-        buf.append("            if (result.shouldStop()) {\n");
-        buf.append("                break;\n");
-        buf.append("            }\n");
-        buf.append("            super.run(result);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        return super.toString() + \"(repeated)\"; //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.extensions.RepeatedTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("\n");
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class NoArgTestCaseTest extends TestCase {\n");
-        buf.append("    public void testNothing() { // If this compiles, the no arg ctor is there\n");
-        buf.append("    }\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.framework.NoArgTestCaseTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A custom quick sort with support to customize the swap behaviour. NOTICE: We\n");
-        buf.append(" * can't use the the sorting support from the JDK 1.2 collection classes because\n");
-        buf.append(" * of the JDK 1.1.7 compatibility.\n");
-        buf.append(" */\n");
-        buf.append("public class Sorter {\n");
-        buf.append("    public interface Swapper {\n");
-        buf.append("        void swap(Vector values, int left, int right);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static void sortStrings(final Vector values, int left, int right,\n");
-        buf.append("            final Swapper swapper) {\n");
-        buf.append("        final int oleft = left;\n");
-        buf.append("        final int oright = right;\n");
-        buf.append("        final String mid = (String) values.elementAt((left + right) / 2);\n");
-        buf.append("        do {\n");
-        buf.append("            while (((String) (values.elementAt(left))).compareTo(mid) < 0) {\n");
-        buf.append("                left++;\n");
-        buf.append("            }\n");
-        buf.append("            while (mid.compareTo((String) (values.elementAt(right))) < 0) {\n");
-        buf.append("                right--;\n");
-        buf.append("            }\n");
-        buf.append("            if (left <= right) {\n");
-        buf.append("                swapper.swap(values, left, right);\n");
-        buf.append("                left++;\n");
-        buf.append("                right--;\n");
-        buf.append("            }\n");
-        buf.append("        } while (left <= right);\n");
-        buf.append("\n");
-        buf.append("        if (oleft < right) {\n");
-        buf.append("            Sorter.sortStrings(values, oleft, right, swapper);\n");
-        buf.append("        }\n");
-        buf.append("        if (left < oright) {\n");
-        buf.append("            Sorter.sortStrings(values, left, oright, swapper);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.runner.Sorter.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * TestSuite that runs all the sample tests\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class AllTests {\n");
-        buf.append("\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(AllTests.suite());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static Test suite() {\n");
-        buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
-        buf.append("        suite.addTestSuite(TestCaseTest.class);\n");
-        buf.append("        suite.addTest(SuiteTest.suite()); // Tests suite building, so can't use\n");
-		buf.append("                                          // automatic test extraction\n");
-        buf.append("        suite.addTestSuite(TestListenerTest.class);\n");
-        buf.append("        suite.addTestSuite(AssertTest.class);\n");
-        buf.append("        suite.addTestSuite(TestImplementorTest.class);\n");
-        buf.append("        suite.addTestSuite(NoArgTestCaseTest.class);\n");
-        buf.append("        suite.addTestSuite(ComparisonFailureTest.class);\n");
-        buf.append("        suite.addTestSuite(DoublePrecisionAssertTest.class);\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.AllTests.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.extensions.RepeatedTest;\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.framework.TestResult;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Testing the RepeatedTest support.\n");
-        buf.append(" */\n");
-        buf.append("\n");
-        buf.append("public class RepeatedTestTest extends TestCase {\n");
-        buf.append("    public static class SuccessTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("        @Override\n");
-        buf.append("        public void runTest() {\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private final TestSuite fSuite;\n");
-        buf.append("\n");
-        buf.append("    public RepeatedTestTest(final String name) {\n");
-        buf.append("        super(name);\n");
-        buf.append("        this.fSuite = new TestSuite();\n");
-        buf.append("        this.fSuite.addTest(new SuccessTest());\n");
-        buf.append("        this.fSuite.addTest(new SuccessTest());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testRepeatedMoreThanOnce() {\n");
-        buf.append("        final Test test = new RepeatedTest(this.fSuite, 3);\n");
-        buf.append("        Assert.assertEquals(6, test.countTestCases());\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(6, result.runCount());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testRepeatedNegative() {\n");
-        buf.append("        try {\n");
-        buf.append("            new RepeatedTest(this.fSuite, -1);\n");
-        buf.append("        } catch (final IllegalArgumentException e) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        Assert.fail(\"Should throw an IllegalArgumentException\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testRepeatedOnce() {\n");
-        buf.append("        final Test test = new RepeatedTest(this.fSuite, 1);\n");
-        buf.append("        Assert.assertEquals(2, test.countTestCases());\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(2, result.runCount());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testRepeatedZero() {\n");
-        buf.append("        final Test test = new RepeatedTest(this.fSuite, 0);\n");
-        buf.append("        Assert.assertEquals(0, test.countTestCases());\n");
-        buf.append("        final TestResult result = new TestResult();\n");
-        buf.append("        test.run(result);\n");
-        buf.append("        Assert.assertEquals(0, result.runCount());\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.extensions.RepeatedTestTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("import junit.runner.BaseTestRunner;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * TestSuite that runs all the sample tests\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class AllTests {\n");
-        buf.append("\n");
-        buf.append("    static boolean isJDK11() {\n");
-        buf.append("        final String version = System.getProperty(\"java.version\"); //$NON-NLS-1$\n");
-        buf.append("        return version.startsWith(\"1.1\"); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(AllTests.suite());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static Test suite() { // Collect tests manually because we have to\n");
-        buf.append("                                 // test class collection code\n");
-        buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
-        buf.append("        suite.addTestSuite(StackFilterTest.class);\n");
-        buf.append("        suite.addTestSuite(SorterTest.class);\n");
-        buf.append("        suite.addTestSuite(SimpleTestCollectorTest.class);\n");
-        buf.append("        suite.addTestSuite(BaseTestRunnerTest.class);\n");
-        buf.append("        suite.addTestSuite(TextFeedbackTest.class);\n");
-        buf.append("        if (!BaseTestRunner.inVAJava()) {\n");
-        buf.append("            suite.addTestSuite(TextRunnerTest.class);\n");
-        buf.append("            if (!AllTests.isJDK11()) {\n");
-        buf.append("                suite.addTest(new TestSuite(TestCaseClassLoaderTest.class));\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.AllTests.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.runner;\n");
-        buf.append("\n");
-        buf.append("import java.util.Enumeration;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Collects Test class names to be presented by the TestSelector.\n");
-        buf.append(" * \n");
-        buf.append(" * @see TestSelector\n");
-        buf.append(" */\n");
-        buf.append("public interface TestCollector {\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns an enumeration of Strings with qualified class names\n");
-        buf.append("     */\n");
-        buf.append("    Enumeration collectTests();\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.runner.TestCollector.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples.money;\n");
-        buf.append("\n");
-        buf.append("import java.util.Vector;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A MoneyBag defers exchange rate conversions. For example adding 12 Swiss\n");
-        buf.append(" * Francs to 14 US Dollars is represented as a bag containing the two Monies 12\n");
-        buf.append(" * CHF and 14 USD. Adding another 10 Swiss francs gives a bag with 22 CHF and 14\n");
-        buf.append(" * USD. Due to the deferred exchange rate conversion we can later value a\n");
-        buf.append(" * MoneyBag with different exchange rates.\n");
-        buf.append(" *\n");
-        buf.append(" * A MoneyBag is represented as a list of Monies and provides different\n");
-        buf.append(" * constructors to create a MoneyBag.\n");
-        buf.append(" */\n");
-        buf.append("class MoneyBag implements IMoney {\n");
-        buf.append("    static IMoney create(final IMoney m1, final IMoney m2) {\n");
-        buf.append("        final MoneyBag result = new MoneyBag();\n");
-        buf.append("        m1.appendTo(result);\n");
-        buf.append("        m2.appendTo(result);\n");
-        buf.append("        return result.simplify();\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    private final Vector fMonies = new Vector(5);\n");
-        buf.append("    public IMoney add(final IMoney m) {\n");
-        buf.append("        return m.addMoneyBag(this);\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney addMoney(final Money m) {\n");
-        buf.append("        return MoneyBag.create(m, this);\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney addMoneyBag(final MoneyBag s) {\n");
-        buf.append("        return MoneyBag.create(s, this);\n");
-        buf.append("    }\n");
-        buf.append("    void appendBag(final MoneyBag aBag) {\n");
-        buf.append("        for (final Object element : aBag.fMonies) {\n");
-        buf.append("            this.appendMoney((Money) element);\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    void appendMoney(final Money aMoney) {\n");
-        buf.append("        if (aMoney.isZero()) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        final IMoney old = this.findMoney(aMoney.currency());\n");
-        buf.append("        if (old == null) {\n");
-        buf.append("            this.fMonies.addElement(aMoney);\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        this.fMonies.removeElement(old);\n");
-        buf.append("        final IMoney sum = old.add(aMoney);\n");
-        buf.append("        if (sum.isZero()) {\n");
-        buf.append("            return;\n");
-        buf.append("        }\n");
-        buf.append("        this.fMonies.addElement(sum);\n");
-        buf.append("    }\n");
-        buf.append("    public void appendTo(final MoneyBag m) {\n");
-        buf.append("        m.appendBag(this);\n");
-        buf.append("    }\n");
-        buf.append("    private boolean contains(final Money m) {\n");
-        buf.append("        final Money found = this.findMoney(m.currency());\n");
-        buf.append("        if (found == null) {\n");
-        buf.append("            return false;\n");
-        buf.append("        }\n");
-        buf.append("        return found.amount() == m.amount();\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public boolean equals(final Object anObject) {\n");
-        buf.append("        if (this.isZero()) {\n");
-        buf.append("            if (anObject instanceof IMoney) {\n");
-        buf.append("                return ((IMoney) anObject).isZero();\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        if (anObject instanceof MoneyBag) {\n");
-        buf.append("            final MoneyBag aMoneyBag = (MoneyBag) anObject;\n");
-        buf.append("            if (aMoneyBag.fMonies.size() != this.fMonies.size()) {\n");
-        buf.append("                return false;\n");
-        buf.append("            }\n");
-        buf.append("\n");
-        buf.append("            for (final Object element : this.fMonies) {\n");
-        buf.append("                final Money m = (Money) element;\n");
-        buf.append("                if (!aMoneyBag.contains(m)) {\n");
-        buf.append("                    return false;\n");
-        buf.append("                }\n");
-        buf.append("            }\n");
-        buf.append("            return true;\n");
-        buf.append("        }\n");
-        buf.append("        return false;\n");
-        buf.append("    }\n");
-        buf.append("    private Money findMoney(final String currency) {\n");
-        buf.append("        for (final Object element : this.fMonies) {\n");
-        buf.append("            final Money m = (Money) element;\n");
-        buf.append("            if (m.currency().equals(currency)) {\n");
-        buf.append("                return m;\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return null;\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public int hashCode() {\n");
-        buf.append("        int hash = 0;\n");
-        buf.append("        for (Object m : this.fMonies) {\n");
-        buf.append("            hash ^= m.hashCode();\n");
-        buf.append("        }\n");
-        buf.append("        return hash;\n");
-        buf.append("    }\n");
-        buf.append("    public boolean isZero() {\n");
-        buf.append("        return this.fMonies.size() == 0;\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney multiply(final int factor) {\n");
-        buf.append("        final MoneyBag result = new MoneyBag();\n");
-        buf.append("        if (factor != 0) {\n");
-        buf.append("            for (final Object element : this.fMonies) {\n");
-        buf.append("                final Money m = (Money) element;\n");
-        buf.append("                result.appendMoney((Money) m.multiply(factor));\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney negate() {\n");
-        buf.append("        final MoneyBag result = new MoneyBag();\n");
-        buf.append("        for (final Object element : this.fMonies) {\n");
-        buf.append("            final Money m = (Money) element;\n");
-        buf.append("            result.appendMoney((Money) m.negate());\n");
-        buf.append("        }\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("    private IMoney simplify() {\n");
-        buf.append("        if (this.fMonies.size() == 1) {\n");
-        buf.append("            return (IMoney) this.fMonies.elements().nextElement();\n");
-        buf.append("        }\n");
-        buf.append("        return this;\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney subtract(final IMoney m) {\n");
-        buf.append("        return this.add(m.negate());\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        final StringBuffer buffer = new StringBuffer();\n");
-        buf.append("        buffer.append(\"{\"); //$NON-NLS-1$\n");
-        buf.append("        for (final Object element : this.fMonies) {\n");
-        buf.append("            buffer.append(element);\n");
-        buf.append("        }\n");
-        buf.append("        buffer.append(\"}\"); //$NON-NLS-1$\n");
-        buf.append("        return buffer.toString();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.money.MoneyBag.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.runner.SimpleTestCollector;\n");
-        buf.append("\n");
-        buf.append("public class SimpleTestCollectorTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    public void testMissingDirectory() {\n");
-        buf.append("        final SimpleTestCollector collector = new SimpleTestCollector();\n");
-        buf.append("        Assert.assertFalse(collector.collectFilesInPath(\"foobar\").elements() //$NON-NLS-1$\n");
-        buf.append("                .hasMoreElements());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("}\n");
-        buf.append("");
-        fExpectedChangesAllTests.put("junit.tests.runner.SimpleTestCollectorTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.framework;\n");
-        buf.append("\n");
-        buf.append("import java.lang.reflect.InvocationTargetException;\n");
-        buf.append("import java.lang.reflect.Method;\n");
-        buf.append("import java.lang.reflect.Modifier;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A test case defines the fixture to run multiple tests. To define a test\n");
-        buf.append(" * case<br>\n");
-        buf.append(" * 1) implement a subclass of TestCase<br>\n");
-        buf.append(" * 2) define instance variables that store the state of the fixture<br>\n");
-        buf.append(" * 3) initialize the fixture state by overriding <code>setUp</code><br>\n");
-        buf.append(" * 4) clean-up after a test by overriding <code>tearDown</code>.<br>\n");
-        buf.append(" * Each test runs in its own fixture so there can be no side effects among test\n");
-        buf.append(" * runs. Here is an example:\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * public class MathTest extends TestCase {\n");
-        buf.append(" *     protected double fValue1;\n");
-        buf.append(" *     protected double fValue2;\n");
-        buf.append(" *\n");
-        buf.append(" *     protected void setUp() {\n");
-        buf.append(" *         fValue1 = 2.0;\n");
-        buf.append(" *         fValue2 = 3.0;\n");
-        buf.append(" *     }\n");
-        buf.append(" * }\n");
-        buf.append(" * </pre>\n");
-        buf.append(" *\n");
-        buf.append(" * For each test implement a method which interacts with the fixture. Verify the\n");
-        buf.append(" * expected results with assertions specified by calling <code>assertTrue</code>\n");
-        buf.append(" * with a boolean.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * public void testAdd() {\n");
-        buf.append(" *     double result = fValue1 + fValue2;\n");
-        buf.append(" *     assertTrue(result == 5.0);\n");
-        buf.append(" * }\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * Once the methods are defined you can run them. The framework supports both a\n");
-        buf.append(" * static type safe and more dynamic way to run a test. In the static way you\n");
-        buf.append(" * override the runTest method and define the method to be invoked. A convenient\n");
-        buf.append(" * way to do so is with an anonymous inner class.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * TestCase test = new MathTest(\"add\") {\n");
-        buf.append(" *     public void runTest() {\n");
-        buf.append(" *         testAdd();\n");
-        buf.append(" *     }\n");
-        buf.append(" * };\n");
-        buf.append(" * test.run();\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * The dynamic way uses reflection to implement <code>runTest</code>. It\n");
-        buf.append(" * dynamically finds and invokes a method. In this case the name of the test\n");
-        buf.append(" * case has to correspond to the test method to be run.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * TestCase = new MathTest(\"testAdd\");\n");
-        buf.append(" * test.run();\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * The tests to be run can be collected into a TestSuite. JUnit provides\n");
-        buf.append(" * different <i>test runners</i> which can run a test suite and collect the\n");
-        buf.append(" * results. A test runner either expects a static method <code>suite</code> as\n");
-        buf.append(" * the entry point to get a test to run or it will extract the suite\n");
-        buf.append(" * automatically.\n");
-        buf.append(" * \n");
-        buf.append(" * <pre>\n");
-        buf.append(" * public static Test suite() {\n");
-        buf.append(" *     suite.addTest(new MathTest(\"testAdd\"));\n");
-        buf.append(" *     suite.addTest(new MathTest(\"testDivideByZero\"));\n");
-        buf.append(" *     return suite;\n");
-        buf.append(" * }\n");
-        buf.append(" * </pre>\n");
-        buf.append(" * \n");
-        buf.append(" * @see TestResult\n");
-        buf.append(" * @see TestSuite\n");
-        buf.append(" */\n");
-        buf.append("\n");
-        buf.append("public abstract class TestCase extends Assert implements Test {\n");
-        buf.append("    /**\n");
-        buf.append("     * the name of the test case\n");
-        buf.append("     */\n");
-        buf.append("    private String fName;\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * No-arg constructor to enable serialization. This method is not intended\n");
-        buf.append("     * to be used by mere mortals without calling setName().\n");
-        buf.append("     */\n");
-        buf.append("    public TestCase() {\n");
-        buf.append("        this.fName = null;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a test case with the given name.\n");
-        buf.append("     */\n");
-        buf.append("    public TestCase(final String name) {\n");
-        buf.append("        this.fName = name;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Counts the number of test cases executed by run(TestResult result).\n");
-        buf.append("     */\n");
-        buf.append("    public int countTestCases() {\n");
-        buf.append("        return 1;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Creates a default TestResult object\n");
-        buf.append("     *\n");
-        buf.append("     * @see TestResult\n");
-        buf.append("     */\n");
-        buf.append("    protected TestResult createResult() {\n");
-        buf.append("        return new TestResult();\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Gets the name of a TestCase\n");
-        buf.append("     * \n");
-        buf.append("     * @return returns a String\n");
-        buf.append("     */\n");
-        buf.append("    public String getName() {\n");
-        buf.append("        return this.fName;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * A convenience method to run this test, collecting the results with a\n");
-        buf.append("     * default TestResult object.\n");
-        buf.append("     *\n");
-        buf.append("     * @see TestResult\n");
-        buf.append("     */\n");
-        buf.append("    public TestResult run() {\n");
-        buf.append("        final TestResult result = this.createResult();\n");
-        buf.append("        this.run(result);\n");
-        buf.append("        return result;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs the test case and collects the results in TestResult.\n");
-        buf.append("     */\n");
-        buf.append("    public void run(final TestResult result) {\n");
-        buf.append("        result.run(this);\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Runs the bare test sequence.\n");
-        buf.append("     * \n");
-        buf.append("     * @exception Throwable if any exception is thrown\n");
-        buf.append("     */\n");
-        buf.append("    public void runBare() throws Throwable {\n");
-        buf.append("        this.setUp();\n");
-        buf.append("        try {\n");
-        buf.append("            this.runTest();\n");
-        buf.append("        } finally {\n");
-        buf.append("            this.tearDown();\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Override to run the test and assert its state.\n");
-        buf.append("     * \n");
-        buf.append("     * @exception Throwable if any exception is thrown\n");
-        buf.append("     */\n");
-        buf.append("    protected void runTest() throws Throwable {\n");
-        buf.append("        Assert.assertNotNull(this.fName);\n");
-        buf.append("        Method runMethod = null;\n");
-        buf.append("        try {\n");
-        buf.append("            // use getMethod to get all public inherited\n");
-        buf.append("            // methods. getDeclaredMethods returns all\n");
-        buf.append("            // methods of this class but excludes the\n");
-        buf.append("            // inherited ones.\n");
-        buf.append("            runMethod = this.getClass().getMethod(this.fName, null);\n");
-        buf.append("        } catch (final NoSuchMethodException e) {\n");
-        buf.append("            Assert.fail(\"Method \\\"\" + this.fName + \"\\\" not found\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("        }\n");
-        buf.append("        if (!Modifier.isPublic(runMethod.getModifiers())) {\n");
-        buf.append("            Assert.fail(\"Method \\\"\" + this.fName + \"\\\" should be public\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("        }\n");
-        buf.append("\n");
-        buf.append("        try {\n");
-        buf.append("            runMethod.invoke(this, new Class[0]);\n");
-        buf.append("        } catch (final InvocationTargetException e) {\n");
-        buf.append("            e.fillInStackTrace();\n");
-        buf.append("            throw e.getTargetException();\n");
-        buf.append("        } catch (final IllegalAccessException e) {\n");
-        buf.append("            e.fillInStackTrace();\n");
-        buf.append("            throw e;\n");
-        buf.append("        }\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Sets the name of a TestCase\n");
-        buf.append("     * \n");
-        buf.append("     * @param name The name to set\n");
-        buf.append("     */\n");
-        buf.append("    public void setName(final String name) {\n");
-        buf.append("        this.fName = name;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Sets up the fixture, for example, open a network connection. This method\n");
-        buf.append("     * is called before a test is executed.\n");
-        buf.append("     */\n");
-        buf.append("    protected void setUp() throws Exception {\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Tears down the fixture, for example, close a network connection. This\n");
-        buf.append("     * method is called after a test is executed.\n");
-        buf.append("     */\n");
-        buf.append("    protected void tearDown() throws Exception {\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Returns a string representation of the test case\n");
-        buf.append("     */\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        return this.getName() + \"(\" + this.getClass().getName() + \")\"; //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.framework.TestCase.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples.money;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class MoneyTest extends TestCase {\n");
-        buf.append("    public static void main(final String args[]) {\n");
-        buf.append("        junit.textui.TestRunner.run(MoneyTest.class);\n");
-        buf.append("    }\n");
-        buf.append("    private Money f12CHF;\n");
-        buf.append("    private Money f14CHF;\n");
-        buf.append("    private Money f21USD;\n");
-        buf.append("\n");
-        buf.append("    private Money f7USD;\n");
-        buf.append("    private IMoney fMB1;\n");
-        buf.append("\n");
-        buf.append("    private IMoney fMB2;\n");
-        buf.append("    @Override\n");
-        buf.append("    protected void setUp() {\n");
-        buf.append("        this.f12CHF = new Money(12, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        this.f14CHF = new Money(14, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        this.f7USD = new Money(7, \"USD\"); //$NON-NLS-1$\n");
-        buf.append("        this.f21USD = new Money(21, \"USD\"); //$NON-NLS-1$\n");
-        buf.append("\n");
-        buf.append("        this.fMB1 = MoneyBag.create(this.f12CHF, this.f7USD);\n");
-        buf.append("        this.fMB2 = MoneyBag.create(this.f14CHF, this.f21USD);\n");
-        buf.append("    }\n");
-        buf.append("    public void testBagMultiply() {\n");
-        buf.append("        // {[12 CHF][7 USD]} *2 == {[24 CHF][14 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(new Money(24, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(14, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.multiply(2));\n");
-        buf.append("        Assert.assertEquals(this.fMB1, this.fMB1.multiply(1));\n");
-        buf.append("        Assert.assertTrue(this.fMB1.multiply(0).isZero());\n");
-        buf.append("    }\n");
-        buf.append("    public void testBagNegate() {\n");
-        buf.append("        // {[12 CHF][7 USD]} negate == {[-12 CHF][-7 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(new Money(-12, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(-7, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.negate());\n");
-        buf.append("    }\n");
-        buf.append("    public void testBagNotEquals() {\n");
-        buf.append("        final IMoney bag = MoneyBag.create(this.f12CHF, this.f7USD);\n");
-        buf.append("        Assert.assertFalse(bag.equals(new Money(12, \"DEM\").add(this.f7USD))); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("    public void testBagSimpleAdd() {\n");
-        buf.append("        // {[12 CHF][7 USD]} + [14 CHF] == {[26 CHF][7 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(new Money(26, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(7, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.add(this.f14CHF));\n");
-        buf.append("    }\n");
-        buf.append("    public void testBagSubtract() {\n");
-        buf.append("        // {[12 CHF][7 USD]} - {[14 CHF][21 USD] == {[-2 CHF][-14 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(new Money(-2, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(-14, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.subtract(this.fMB2));\n");
-        buf.append("    }\n");
-        buf.append("    public void testBagSumAdd() {\n");
-        buf.append("        // {[12 CHF][7 USD]} + {[14 CHF][21 USD]} == {[26 CHF][28 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(new Money(26, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(28, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.add(this.fMB2));\n");
-        buf.append("    }\n");
-        buf.append("    public void testIsZero() {\n");
-        buf.append("        Assert.assertTrue(this.fMB1.subtract(this.fMB1).isZero());\n");
-        buf.append("        Assert.assertTrue(MoneyBag\n");
-        buf.append("                .create(new Money(0, \"CHF\"), new Money(0, \"USD\")).isZero()); //$NON-NLS-1$ //$NON-NLS-2$\n");
-        buf.append("    }\n");
-        buf.append("    public void testMixedSimpleAdd() {\n");
-        buf.append("        // [12 CHF] + [7 USD] == {[12 CHF][7 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(this.f12CHF, this.f7USD);\n");
-        buf.append("        Assert.assertEquals(expected, this.f12CHF.add(this.f7USD));\n");
-        buf.append("    }\n");
-        buf.append("    public void testMoneyBagEquals() {\n");
-        buf.append("        Assert.assertTrue(!this.fMB1.equals(null));\n");
-        buf.append("\n");
-        buf.append("        Assert.assertEquals(this.fMB1, this.fMB1);\n");
-        buf.append("        final IMoney equal = MoneyBag.create(new Money(12, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(7, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertTrue(this.fMB1.equals(equal));\n");
-        buf.append("        Assert.assertTrue(!this.fMB1.equals(this.f12CHF));\n");
-        buf.append("        Assert.assertTrue(!this.f12CHF.equals(this.fMB1));\n");
-        buf.append("        Assert.assertTrue(!this.fMB1.equals(this.fMB2));\n");
-        buf.append("    }\n");
-        buf.append("    public void testMoneyBagHash() {\n");
-        buf.append("        final IMoney equal = MoneyBag.create(new Money(12, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(7, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(this.fMB1.hashCode(), equal.hashCode());\n");
-        buf.append("    }\n");
-        buf.append("    public void testMoneyEquals() {\n");
-        buf.append("        Assert.assertTrue(!this.f12CHF.equals(null));\n");
-        buf.append("        final Money equalMoney = new Money(12, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(this.f12CHF, this.f12CHF);\n");
-        buf.append("        Assert.assertEquals(this.f12CHF, equalMoney);\n");
-        buf.append("        Assert.assertEquals(this.f12CHF.hashCode(), equalMoney.hashCode());\n");
-        buf.append("        Assert.assertTrue(!this.f12CHF.equals(this.f14CHF));\n");
-        buf.append("    }\n");
-        buf.append("    public void testMoneyHash() {\n");
-        buf.append("        Assert.assertTrue(!this.f12CHF.equals(null));\n");
-        buf.append("        final Money equal = new Money(12, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(this.f12CHF.hashCode(), equal.hashCode());\n");
-        buf.append("    }\n");
-        buf.append("    public void testNormalize2() {\n");
-        buf.append("        // {[12 CHF][7 USD]} - [12 CHF] == [7 USD]\n");
-        buf.append("        final Money expected = new Money(7, \"USD\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.subtract(this.f12CHF));\n");
-        buf.append("    }\n");
-        buf.append("    public void testNormalize3() {\n");
-        buf.append("        // {[12 CHF][7 USD]} - {[12 CHF][3 USD]} == [4 USD]\n");
-        buf.append("        final IMoney ms1 = MoneyBag.create(new Money(12, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(3, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        final Money expected = new Money(4, \"USD\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.fMB1.subtract(ms1));\n");
-        buf.append("    }\n");
-        buf.append("    public void testNormalize4() {\n");
-        buf.append("        // [12 CHF] - {[12 CHF][3 USD]} == [-3 USD]\n");
-        buf.append("        final IMoney ms1 = MoneyBag.create(new Money(12, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(3, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        final Money expected = new Money(-3, \"USD\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.f12CHF.subtract(ms1));\n");
-        buf.append("    }\n");
-        buf.append("    public void testPrint() {\n");
-        buf.append("        Assert.assertEquals(\"[12 CHF]\", this.f12CHF.toString()); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("    public void testSimpleAdd() {\n");
-        buf.append("        // [12 CHF] + [14 CHF] == [26 CHF]\n");
-        buf.append("        final Money expected = new Money(26, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.f12CHF.add(this.f14CHF));\n");
-        buf.append("    }\n");
-        buf.append("    public void testSimpleBagAdd() {\n");
-        buf.append("        // [14 CHF] + {[12 CHF][7 USD]} == {[26 CHF][7 USD]}\n");
-        buf.append("        final IMoney expected = MoneyBag.create(new Money(26, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(7, \"USD\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.f14CHF.add(this.fMB1));\n");
-        buf.append("    }\n");
-        buf.append("    public void testSimpleMultiply() {\n");
-        buf.append("        // [14 CHF] *2 == [28 CHF]\n");
-        buf.append("        final Money expected = new Money(28, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.f14CHF.multiply(2));\n");
-        buf.append("    }\n");
-        buf.append("    public void testSimpleNegate() {\n");
-        buf.append("        // [14 CHF] negate == [-14 CHF]\n");
-        buf.append("        final Money expected = new Money(-14, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.f14CHF.negate());\n");
-        buf.append("    }\n");
-        buf.append("    public void testSimpleSubtract() {\n");
-        buf.append("        // [14 CHF] - [12 CHF] == [2 CHF]\n");
-        buf.append("        final Money expected = new Money(2, \"CHF\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(expected, this.f14CHF.subtract(this.f12CHF));\n");
-        buf.append("    }\n");
-        buf.append("    public void testSimplify() {\n");
-        buf.append("        final IMoney money = MoneyBag.create(new Money(26, \"CHF\"), //$NON-NLS-1$\n");
-        buf.append("                new Money(28, \"CHF\")); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertEquals(new Money(54, \"CHF\"), money); //$NON-NLS-1$\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.money.MoneyTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.extensions;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Test;\n");
-        buf.append("import junit.framework.TestSuite;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * TestSuite that runs all the extension tests\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class AllTests {\n");
-        buf.append("\n");
-        buf.append("    public static void main(final String[] args) {\n");
-        buf.append("        junit.textui.TestRunner.run(AllTests.suite());\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public static Test suite() { // Collect tests manually because we have to\n");
-        buf.append("                                 // test class collection code\n");
-        buf.append("        final TestSuite suite = new TestSuite(\"Framework Tests\"); //$NON-NLS-1$\n");
-        buf.append("        suite.addTestSuite(ExtensionTest.class);\n");
-        buf.append("        suite.addTestSuite(ExceptionTestCaseTest.class);\n");
-        buf.append("        suite.addTestSuite(ActiveTestTest.class);\n");
-        buf.append("        suite.addTestSuite(RepeatedTestTest.class);\n");
-        buf.append("        return suite;\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.extensions.AllTests.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.framework;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * Test class used in SuiteTest\n");
-        buf.append(" */\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("\n");
-        buf.append("public class NoTestCases extends TestCase {\n");
-        buf.append("    public void noTestCase() {\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.framework.NoTestCases.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.tests.runner;\n");
-        buf.append("\n");
-        buf.append("import java.lang.reflect.Method;\n");
-        buf.append("import java.net.URL;\n");
-        buf.append("\n");
-        buf.append("import junit.framework.Assert;\n");
-        buf.append("import junit.framework.TestCase;\n");
-        buf.append("import junit.runner.TestCaseClassLoader;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A TestCase for testing the TestCaseClassLoader\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class TestCaseClassLoaderTest extends TestCase {\n");
-        buf.append("\n");
-        buf.append("    public void testClassLoading() throws Exception {\n");
-        buf.append("        final TestCaseClassLoader loader = new TestCaseClassLoader();\n");
-        buf.append("        final Class loadedClass = loader\n");
-        buf.append("                .loadClass(\"junit.tests.runner.ClassLoaderTest\", true); //$NON-NLS-1$\n");
-        buf.append("        final Object o = loadedClass.newInstance();\n");
-        buf.append("        //\n");
-        buf.append("        // Invoke the assertClassLoaders method via reflection.\n");
-        buf.append("        // We use reflection since the class is loaded by\n");
-        buf.append("        // another class loader and we can't do a successfull downcast to\n");
-        buf.append("        // ClassLoaderTestCase.\n");
-        buf.append("        //\n");
-        buf.append("        final Method method = loadedClass.getDeclaredMethod(\"verify\", //$NON-NLS-1$\n");
-        buf.append("                new Class[0]);\n");
-        buf.append("        method.invoke(o, new Class[0]);\n");
-        buf.append("    }\n");
-        buf.append("\n");
-        buf.append("    public void testJarClassLoading() throws Exception {\n");
-        buf.append("        final URL url = this.getClass().getResource(\"test.jar\"); //$NON-NLS-1$\n");
-        buf.append("        Assert.assertNotNull(\"Cannot find test.jar\", url); //$NON-NLS-1$\n");
-        buf.append("        final String path = url.getFile();\n");
-        buf.append("        final TestCaseClassLoader loader = new TestCaseClassLoader(path);\n");
-        buf.append("        final Class loadedClass = loader\n");
-        buf.append("                .loadClass(\"junit.tests.runner.LoadedFromJar\", true); //$NON-NLS-1$\n");
-        buf.append("        final Object o = loadedClass.newInstance();\n");
-        buf.append("        //\n");
-        buf.append("        // Invoke the assertClassLoaders method via reflection.\n");
-        buf.append("        // We use reflection since the class is loaded by\n");
-        buf.append("        // another class loader and we can't do a successfull downcast to\n");
-        buf.append("        // ClassLoaderTestCase.\n");
-        buf.append("        //\n");
-        buf.append("        final Method method = loadedClass.getDeclaredMethod(\"verify\", //$NON-NLS-1$\n");
-        buf.append("                new Class[0]);\n");
-        buf.append("        method.invoke(o, new Class[0]);\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.tests.runner.TestCaseClassLoaderTest.java", buf.toString());
-        buf= new StringBuffer();
-        buf.append("package junit.samples.money;\n");
-        buf.append("\n");
-        buf.append("/**\n");
-        buf.append(" * A simple Money.\n");
-        buf.append(" *\n");
-        buf.append(" */\n");
-        buf.append("public class Money implements IMoney {\n");
-        buf.append("\n");
-        buf.append("    private final int fAmount;\n");
-        buf.append("    private final String fCurrency;\n");
-        buf.append("\n");
-        buf.append("    /**\n");
-        buf.append("     * Constructs a money from the given amount and currency.\n");
-        buf.append("     */\n");
-        buf.append("    public Money(final int amount, final String currency) {\n");
-        buf.append("        this.fAmount = amount;\n");
-        buf.append("        this.fCurrency = currency;\n");
-        buf.append("    }\n");
-        buf.append("    /**\n");
-        buf.append("     * Adds a money to this money. Forwards the request to the addMoney helper.\n");
-        buf.append("     */\n");
-        buf.append("    public IMoney add(final IMoney m) {\n");
-        buf.append("        return m.addMoney(this);\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney addMoney(final Money m) {\n");
-        buf.append("        if (m.currency().equals(this.currency())) {\n");
-        buf.append("            return new Money(this.amount() + m.amount(), this.currency());\n");
-        buf.append("        }\n");
-        buf.append("        return MoneyBag.create(this, m);\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney addMoneyBag(final MoneyBag s) {\n");
-        buf.append("        return s.addMoney(this);\n");
-        buf.append("    }\n");
-        buf.append("    public int amount() {\n");
-        buf.append("        return this.fAmount;\n");
-        buf.append("    }\n");
-        buf.append("    public /* this makes no sense */ void appendTo(final MoneyBag m) {\n");
-        buf.append("        m.appendMoney(this);\n");
-        buf.append("    }\n");
-        buf.append("    public String currency() {\n");
-        buf.append("        return this.fCurrency;\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public boolean equals(final Object anObject) {\n");
-        buf.append("        if (this.isZero()) {\n");
-        buf.append("            if (anObject instanceof IMoney) {\n");
-        buf.append("                return ((IMoney) anObject).isZero();\n");
-        buf.append("            }\n");
-        buf.append("        }\n");
-        buf.append("        if (anObject instanceof Money) {\n");
-        buf.append("            final Money aMoney = (Money) anObject;\n");
-        buf.append("            return aMoney.currency().equals(this.currency())\n");
-        buf.append("                    && (this.amount() == aMoney.amount());\n");
-        buf.append("        }\n");
-        buf.append("        return false;\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public int hashCode() {\n");
-        buf.append("        return this.fCurrency.hashCode() + this.fAmount;\n");
-        buf.append("    }\n");
-        buf.append("    public boolean isZero() {\n");
-        buf.append("        return this.amount() == 0;\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney multiply(final int factor) {\n");
-        buf.append("        return new Money(this.amount() * factor, this.currency());\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney negate() {\n");
-        buf.append("        return new Money(-this.amount(), this.currency());\n");
-        buf.append("    }\n");
-        buf.append("    public IMoney subtract(final IMoney m) {\n");
-        buf.append("        return this.add(m.negate());\n");
-        buf.append("    }\n");
-        buf.append("    @Override\n");
-        buf.append("    public String toString() {\n");
-        buf.append("        final StringBuffer buffer = new StringBuffer();\n");
-        buf.append("        buffer.append(\"[\" + this.amount() + \" \" + this.currency() + \"]\"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$\n");
-        buf.append("        return buffer.toString();\n");
-        buf.append("    }\n");
-        buf.append("}");
-        fExpectedChangesAllTests.put("junit.samples.money.Money.java", buf.toString());
+        String str= """
+			package junit.runner;
+			
+			import java.io.BufferedReader;
+			import java.io.File;
+			import java.io.FileInputStream;
+			import java.io.FileOutputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.io.PrintWriter;
+			import java.io.StringReader;
+			import java.io.StringWriter;
+			import java.lang.reflect.InvocationTargetException;
+			import java.lang.reflect.Method;
+			import java.lang.reflect.Modifier;
+			import java.text.NumberFormat;
+			import java.util.Properties;
+			
+			import junit.framework.AssertionFailedError;
+			import junit.framework.Test;
+			import junit.framework.TestListener;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * Base class for all test runners. This class was born live on stage in
+			 * Sardinia during XP2000.
+			 */
+			public abstract class BaseTestRunner implements TestListener {
+			    static boolean fgFilterStack = true;
+			
+			    static int fgMaxMessageLength = 500;
+			    private static Properties fPreferences;
+			    public static final String SUITE_METHODNAME = "suite"; //$NON-NLS-1$
+			    static {
+			        BaseTestRunner.fgMaxMessageLength = BaseTestRunner
+			                .getPreference("maxmessage", BaseTestRunner.fgMaxMessageLength); //$NON-NLS-1$
+			    }
+			
+			    static boolean filterLine(final String line) {
+			        final String[] patterns = new String[]{"junit.framework.TestCase", //$NON-NLS-1$
+			                "junit.framework.TestResult", //$NON-NLS-1$
+			                "junit.framework.TestSuite", //$NON-NLS-1$
+			                "junit.framework.Assert.", // don't filter //$NON-NLS-1$
+			                                           // AssertionFailure
+			                "junit.swingui.TestRunner", //$NON-NLS-1$
+			                "junit.awtui.TestRunner", //$NON-NLS-1$
+			                "junit.textui.TestRunner", //$NON-NLS-1$
+			                "java.lang.reflect.Method.invoke(" //$NON-NLS-1$
+			        };
+			        for (final String pattern : patterns) {
+			            if (line.indexOf(pattern) > 0) {
+			                return true;
+			            }
+			        }
+			        return false;
+			    }
+			
+			    /**
+			     * Filters stack frames from internal JUnit classes
+			     */
+			    public static String getFilteredTrace(final String stack) {
+			        if (BaseTestRunner.showStackRaw()) {
+			            return stack;
+			        }
+			
+			        final StringWriter sw = new StringWriter();
+			        final PrintWriter pw = new PrintWriter(sw);
+			        final StringReader sr = new StringReader(stack);
+			        final BufferedReader br = new BufferedReader(sr);
+			
+			        String line;
+			        try {
+			            while ((line = br.readLine()) != null) {
+			                if (!BaseTestRunner.filterLine(line)) {
+			                    pw.println(line);
+			                }
+			            }
+			        } catch (final Exception IOException) {
+			            return stack; // return the stack unfiltered
+			        }
+			        return sw.toString();
+			    }
+			
+			    /**
+			     * Returns a filtered stack trace
+			     */
+			    public static String getFilteredTrace(final Throwable t) {
+			        final StringWriter stringWriter = new StringWriter();
+			        final PrintWriter writer = new PrintWriter(stringWriter);
+			        t.printStackTrace(writer);
+			        final StringBuffer buffer = stringWriter.getBuffer();
+			        final String trace = buffer.toString();
+			        return BaseTestRunner.getFilteredTrace(trace);
+			    }
+			
+			    public static String getPreference(final String key) {
+			        return BaseTestRunner.getPreferences().getProperty(key);
+			    }
+			
+			    public static int getPreference(final String key, final int dflt) {
+			        final String value = BaseTestRunner.getPreference(key);
+			        int intValue = dflt;
+			        if (value == null) {
+			            return intValue;
+			        }
+			        try {
+			            intValue = Integer.parseInt(value);
+			        } catch (final NumberFormatException ne) {
+			        }
+			        return intValue;
+			    }
+			
+			    protected static Properties getPreferences() {
+			        if (BaseTestRunner.fPreferences == null) {
+			            BaseTestRunner.fPreferences = new Properties();
+			            BaseTestRunner.fPreferences.put("loading", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+			            BaseTestRunner.fPreferences.put("filterstack", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+			            BaseTestRunner.readPreferences();
+			        }
+			        return BaseTestRunner.fPreferences;
+			    }
+			
+			    private static File getPreferencesFile() {
+			        final String home = System.getProperty("user.home"); //$NON-NLS-1$
+			        return new File(home, "junit.properties"); //$NON-NLS-1$
+			    }
+			
+			    public static boolean inVAJava() {
+			        try {
+			            Class.forName("com.ibm.uvm.tools.DebugSupport"); //$NON-NLS-1$
+			        } catch (final Exception e) {
+			            return false;
+			        }
+			        return true;
+			    }
+			
+			    // TestRunListener implementation
+			
+			    private static void readPreferences() {
+			        InputStream is = null;
+			        try {
+			            is = new FileInputStream(BaseTestRunner.getPreferencesFile());
+			            BaseTestRunner.setPreferences(
+			                    new Properties(BaseTestRunner.getPreferences()));
+			            BaseTestRunner.getPreferences().load(is);
+			        } catch (final IOException e) {
+			            try {
+			                if (is != null) {
+			                    is.close();
+			                }
+			            } catch (final IOException e1) {
+			            }
+			        }
+			    }
+			
+			    public static void savePreferences() throws IOException {
+			        final FileOutputStream fos = new FileOutputStream(
+			                BaseTestRunner.getPreferencesFile());
+			        try {
+			            BaseTestRunner.getPreferences().store(fos, ""); //$NON-NLS-1$
+			        } finally {
+			            fos.close();
+			        }
+			    }
+			
+			    protected static void setPreferences(final Properties preferences) {
+			        BaseTestRunner.fPreferences = preferences;
+			    }
+			
+			    protected static boolean showStackRaw() {
+			        return !BaseTestRunner.getPreference("filterstack").equals("true") //$NON-NLS-1$ //$NON-NLS-2$
+			                || (BaseTestRunner.fgFilterStack == false);
+			    }
+			
+			    /**
+			     * Truncates a String to the maximum length.
+			     */
+			    public static String truncate(String s) {
+			        if ((BaseTestRunner.fgMaxMessageLength != -1)
+			                && (s.length() > BaseTestRunner.fgMaxMessageLength)) {
+			            s = s.substring(0, BaseTestRunner.fgMaxMessageLength) + "..."; //$NON-NLS-1$
+			        }
+			        return s;
+			    }
+			
+			    boolean fLoading = true;
+			
+			    public synchronized void addError(final Test test, final Throwable t) {
+			        this.testFailed(TestRunListener.STATUS_ERROR, test, t);
+			    }
+			    public synchronized void addFailure(final Test test,
+			            final AssertionFailedError t) {
+			        this.testFailed(TestRunListener.STATUS_FAILURE, test, t);
+			    }
+			
+			    /**
+			     * Clears the status message.
+			     */
+			    protected void clearStatus() { // Belongs in the GUI TestRunner class
+			    }
+			
+			    /**
+			     * Returns the formatted string of the elapsed time.
+			     */
+			    public String elapsedTimeAsString(final long runTime) {
+			        return NumberFormat.getInstance().format((double) runTime / 1000);
+			    }
+			
+			    public synchronized void endTest(final Test test) {
+			        this.testEnded(test.toString());
+			    }
+			
+			    /**
+			     * Extract the class name from a String in VA/Java style
+			     */
+			    public String extractClassName(final String className) {
+			        if (className.startsWith("Default package for")) { // $NON-NLS-1$
+			            return className.substring(className.lastIndexOf(".") + 1); //$NON-NLS-1$
+			        }
+			        return className;
+			    }
+			
+			    /**
+			     * Returns the loader to be used.
+			     */
+			    public TestSuiteLoader getLoader() {
+			        if (this.useReloadingTestSuiteLoader()) {
+			            return new ReloadingTestSuiteLoader();
+			        }
+			        return new StandardTestSuiteLoader();
+			    }
+			
+			    /**
+			     * Returns the Test corresponding to the given suite. This is a template
+			     * method, subclasses override runFailed(), clearStatus().
+			     */
+			    public Test getTest(final String suiteClassName) {
+			        if (suiteClassName.length() <= 0) {
+			            this.clearStatus();
+			            return null;
+			        }
+			        Class testClass = null;
+			        try {
+			            testClass = this.loadSuiteClass(suiteClassName);
+			        } catch (final ClassNotFoundException e) {
+			            String clazz = e.getMessage();
+			            if (clazz == null) {
+			                clazz = suiteClassName;
+			            }
+			            this.runFailed("Class not found \\"" + clazz + "\\""); //$NON-NLS-1$ //$NON-NLS-2$
+			            return null;
+			        } catch (final Exception e) {
+			            this.runFailed("Error: " + e.toString()); //$NON-NLS-1$
+			            return null;
+			        }
+			        Method suiteMethod = null;
+			        try {
+			            suiteMethod = testClass.getMethod(BaseTestRunner.SUITE_METHODNAME,
+			                    new Class[0]);
+			        } catch (final Exception e) {
+			            // try to extract a test suite automatically
+			            this.clearStatus();
+			            return new TestSuite(testClass);
+			        }
+			        if (!Modifier.isStatic(suiteMethod.getModifiers())) {
+			            this.runFailed("Suite() method must be static"); //$NON-NLS-1$
+			            return null;
+			        }
+			        Test test = null;
+			        try {
+			            test = (Test) suiteMethod.invoke(null, new Class[0]); // static
+			                                                                  // method
+			            if (test == null) {
+			                return test;
+			            }
+			        } catch (final InvocationTargetException e) {
+			            this.runFailed("Failed to invoke suite():" //$NON-NLS-1$
+			                    + e.getTargetException().toString());
+			            return null;
+			        } catch (final IllegalAccessException e) {
+			            this.runFailed("Failed to invoke suite():" + e.toString()); //$NON-NLS-1$
+			            return null;
+			        }
+			
+			        this.clearStatus();
+			        return test;
+			    }
+			
+			    /**
+			     * Returns the loaded Class for a suite name.
+			     */
+			    protected Class loadSuiteClass(final String suiteClassName)
+			            throws ClassNotFoundException {
+			        return this.getLoader().load(suiteClassName);
+			    }
+			
+			    /**
+			     * Processes the command line arguments and returns the name of the suite
+			     * class to run or null
+			     */
+			    protected String processArguments(final String[] args) {
+			        String suiteName = null;
+			        for (int i = 0; i < args.length; i++) {
+			            if (args[i].equals("-noloading")) { //$NON-NLS-1$
+			                this.setLoading(false);
+			            } else if (args[i].equals("-nofilterstack")) { //$NON-NLS-1$
+			                BaseTestRunner.fgFilterStack = false;
+			            } else if (args[i].equals("-c")) { //$NON-NLS-1$
+			                if (args.length > (i + 1)) {
+			                    suiteName = this.extractClassName(args[i + 1]);
+			                } else {
+			                    System.out.println("Missing Test class name"); //$NON-NLS-1$
+			                }
+			                i++;
+			            } else {
+			                suiteName = args[i];
+			            }
+			        }
+			        return suiteName;
+			    }
+			
+			    /**
+			     * Override to define how to handle a failed loading of a test suite.
+			     */
+			    protected abstract void runFailed(String message);
+			
+			    /**
+			     * Sets the loading behaviour of the test runner
+			     */
+			    public void setLoading(final boolean enable) {
+			        this.fLoading = enable;
+			    }
+			
+			    public void setPreference(final String key, final String value) {
+			        BaseTestRunner.getPreferences().setProperty(key, value);
+			    }
+			
+			    /*
+			     * Implementation of TestListener
+			     */
+			    public synchronized void startTest(final Test test) {
+			        this.testStarted(test.toString());
+			    }
+			
+			    public abstract void testEnded(String testName);
+			
+			    public abstract void testFailed(int status, Test test, Throwable t);
+			
+			    public abstract void testStarted(String testName);
+			
+			    protected boolean useReloadingTestSuiteLoader() {
+			        return BaseTestRunner.getPreference("loading").equals("true") //$NON-NLS-1$ //$NON-NLS-2$
+			                && !BaseTestRunner.inVAJava() && this.fLoading;
+			    }
+			
+			}""";
+        fExpectedChangesAllTests.put("junit.runner.BaseTestRunner.java", str);
+        String str1= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			import junit.framework.TestCase;
+			
+			public class NotVoidTestCase extends TestCase {
+			    public int testNotVoid() {
+			        return 1;
+			    }
+			    public void testVoid() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.NotVoidTestCase.java", str1);
+        String str2= """
+			package junit.tests.runner;
+			
+			import java.io.PrintWriter;
+			import java.io.StringWriter;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			import junit.runner.BaseTestRunner;
+			
+			public class StackFilterTest extends TestCase {
+			    String fFiltered;
+			    String fUnfiltered;
+			
+			    @Override
+			    protected void setUp() {
+			        final StringWriter swin = new StringWriter();
+			        final PrintWriter pwin = new PrintWriter(swin);
+			        pwin.println("junit.framework.AssertionFailedError"); //$NON-NLS-1$
+			        pwin.println("    at junit.framework.Assert.fail(Assert.java:144)"); //$NON-NLS-1$
+			        pwin.println("    at junit.framework.Assert.assert(Assert.java:19)"); //$NON-NLS-1$
+			        pwin.println("    at junit.framework.Assert.assert(Assert.java:26)"); //$NON-NLS-1$
+			        pwin.println("    at MyTest.f(MyTest.java:13)"); //$NON-NLS-1$
+			        pwin.println("    at MyTest.testStackTrace(MyTest.java:8)"); //$NON-NLS-1$
+			        pwin.println("    at java.lang.reflect.Method.invoke(Native Method)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestCase.runTest(TestCase.java:156)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestCase.runBare(TestCase.java:130)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestResult$1.protect(TestResult.java:100)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestResult.runProtected(TestResult.java:118)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestResult.run(TestResult.java:103)"); //$NON-NLS-1$
+			        pwin.println("    at junit.framework.TestCase.run(TestCase.java:121)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestSuite.runTest(TestSuite.java:157)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.framework.TestSuite.run(TestSuite.java, Compiled Code)"); //$NON-NLS-1$
+			        pwin.println(
+			                "    at junit.swingui.TestRunner$17.run(TestRunner.java:669)"); //$NON-NLS-1$
+			        this.fUnfiltered = swin.toString();
+			
+			        final StringWriter swout = new StringWriter();
+			        final PrintWriter pwout = new PrintWriter(swout);
+			        pwout.println("junit.framework.AssertionFailedError"); //$NON-NLS-1$
+			        pwout.println("    at MyTest.f(MyTest.java:13)"); //$NON-NLS-1$
+			        pwout.println("    at MyTest.testStackTrace(MyTest.java:8)"); //$NON-NLS-1$
+			        this.fFiltered = swout.toString();
+			    }
+			
+			    public void testFilter() {
+			        Assert.assertEquals(this.fFiltered,
+			                BaseTestRunner.getFilteredTrace(this.fUnfiltered));
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.StackFilterTest.java", str2);
+        String str3= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.AssertionFailedError;
+			import junit.framework.TestCase;
+			
+			public class DoublePrecisionAssertTest extends TestCase {
+			
+			    /**
+			     * Test for the special Double.NaN value.
+			     */
+			    public void testAssertEqualsNaNFails() {
+			        try {
+			            Assert.assertEquals(1.234, Double.NaN, 0.0);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNaNEqualsFails() {
+			        try {
+			            Assert.assertEquals(Double.NaN, 1.234, 0.0);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNaNEqualsNaNFails() {
+			        try {
+			            Assert.assertEquals(Double.NaN, Double.NaN, 0.0);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNegInfinityEqualsInfinity() {
+			        Assert.assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+			                0.0);
+			    }
+			
+			    public void testAssertPosInfinityEqualsInfinity() {
+			        Assert.assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+			                0.0);
+			    }
+			
+			    public void testAssertPosInfinityNotEquals() {
+			        try {
+			            Assert.assertEquals(Double.POSITIVE_INFINITY, 1.23, 0.0);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertPosInfinityNotEqualsNegInfinity() {
+			        try {
+			            Assert.assertEquals(Double.POSITIVE_INFINITY,
+			                    Double.NEGATIVE_INFINITY, 0.0);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.framework.DoublePrecisionAssertTest.java", str3);
+        String str4= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.AssertionFailedError;
+			import junit.framework.ComparisonFailure;
+			import junit.framework.TestCase;
+			
+			public class AssertTest extends TestCase {
+			
+			    public void testAssertEquals() {
+			        final Object o = new Object();
+			        Assert.assertEquals(o, o);
+			        try {
+			            Assert.assertEquals(new Object(), new Object());
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertEqualsNull() {
+			        Assert.assertEquals(null, null);
+			    }
+			
+			    public void testAssertFalse() {
+			        Assert.assertFalse(false);
+			        try {
+			            Assert.assertFalse(true);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNotNull() {
+			        Assert.assertNotNull(new Object());
+			        try {
+			            Assert.assertNotNull(null);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNotSame() {
+			        Assert.assertNotSame(new Integer(1), null);
+			        Assert.assertNotSame(null, new Integer(1));
+			        Assert.assertNotSame(new Integer(1), new Integer(1));
+			        try {
+			            final Integer obj = new Integer(1);
+			            Assert.assertNotSame(obj, obj);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNotSameFailsNull() {
+			        try {
+			            Assert.assertNotSame(null, null);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNull() {
+			        Assert.assertNull(null);
+			        try {
+			            Assert.assertNull(new Object());
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNullNotEqualsNull() {
+			        try {
+			            Assert.assertEquals(null, new Object());
+			        } catch (final AssertionFailedError e) {
+			            e.getMessage(); // why no assertion?
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertNullNotEqualsString() {
+			        try {
+			            Assert.assertEquals(null, "foo"); //$NON-NLS-1$
+			            Assert.fail();
+			        } catch (final ComparisonFailure e) {
+			        }
+			    }
+			
+			    public void testAssertSame() {
+			        final Object o = new Object();
+			        Assert.assertSame(o, o);
+			        try {
+			            Assert.assertSame(new Integer(1), new Integer(1));
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    public void testAssertStringEquals() {
+			        Assert.assertEquals("a", "a"); //$NON-NLS-1$ //$NON-NLS-2$
+			    }
+			
+			    public void testAssertStringNotEqualsNull() {
+			        try {
+			            Assert.assertEquals("foo", null); //$NON-NLS-1$
+			            Assert.fail();
+			        } catch (final ComparisonFailure e) {
+			            e.getMessage(); // why no assertion?
+			        }
+			    }
+			
+			    public void testAssertTrue() {
+			        Assert.assertTrue(true);
+			        try {
+			            Assert.assertTrue(false);
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        Assert.fail();
+			    }
+			
+			    /*
+			     * In the tests that follow, we can't use standard formatting for exception
+			     * tests: try { somethingThatShouldThrow(); fail(); catch
+			     * (AssertionFailedError e) { } because fail() would never be reported.
+			     */
+			    public void testFail() {
+			        // Also, we are testing fail, so we can't rely on fail() working.
+			        // We have to throw the exception manually, .
+			        try {
+			            Assert.fail();
+			        } catch (final AssertionFailedError e) {
+			            return;
+			        }
+			        throw new AssertionFailedError();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.AssertTest.java", str4);
+        String str5= """
+			package junit.samples;
+			
+			import junit.framework.Test;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * TestSuite that runs all the sample tests
+			 *
+			 */
+			public class AllTests {
+			
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(AllTests.suite());
+			    }
+			    public static Test suite() {
+			        final TestSuite suite = new TestSuite("All JUnit Tests"); //$NON-NLS-1$
+			        suite.addTest(VectorTest.suite());
+			        suite.addTest(new TestSuite(junit.samples.money.MoneyTest.class));
+			        suite.addTest(junit.tests.AllTests.suite());
+			        return suite;
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.AllTests.java", str5);
+        String str6= """
+			package junit.tests.extensions;
+			
+			import junit.extensions.ExceptionTestCase;
+			import junit.framework.Assert;
+			import junit.framework.TestResult;
+			
+			public class ExceptionTestCaseTest extends junit.framework.TestCase {
+			
+			    static public class ThrowExceptionTestCase extends ExceptionTestCase {
+			        public ThrowExceptionTestCase(final String name,
+			                final Class exception) {
+			            super(name, exception);
+			        }
+			        public void test() {
+			            throw new IndexOutOfBoundsException();
+			        }
+			    }
+			
+			    static public class ThrowNoExceptionTestCase extends ExceptionTestCase {
+			        public ThrowNoExceptionTestCase(final String name,
+			                final Class exception) {
+			            super(name, exception);
+			        }
+			        public void test() {
+			        }
+			    }
+			
+			    static public class ThrowRuntimeExceptionTestCase
+			            extends
+			                ExceptionTestCase {
+			        public ThrowRuntimeExceptionTestCase(final String name,
+			                final Class exception) {
+			            super(name, exception);
+			        }
+			        public void test() {
+			            throw new RuntimeException();
+			        }
+			    }
+			
+			    public void testExceptionSubclass() {
+			        final ExceptionTestCase test = new ThrowExceptionTestCase("test", //$NON-NLS-1$
+			                IndexOutOfBoundsException.class);
+			        final TestResult result = test.run();
+			        Assert.assertEquals(1, result.runCount());
+			        Assert.assertTrue(result.wasSuccessful());
+			    }
+			    public void testExceptionTest() {
+			        final ExceptionTestCase test = new ThrowExceptionTestCase("test", //$NON-NLS-1$
+			                IndexOutOfBoundsException.class);
+			        final TestResult result = test.run();
+			        Assert.assertEquals(1, result.runCount());
+			        Assert.assertTrue(result.wasSuccessful());
+			    }
+			    public void testFailure() {
+			        final ExceptionTestCase test = new ThrowRuntimeExceptionTestCase("test", //$NON-NLS-1$
+			                IndexOutOfBoundsException.class);
+			        final TestResult result = test.run();
+			        Assert.assertEquals(1, result.runCount());
+			        Assert.assertEquals(1, result.errorCount());
+			    }
+			    public void testNoException() {
+			        final ExceptionTestCase test = new ThrowNoExceptionTestCase("test", //$NON-NLS-1$
+			                Exception.class);
+			        final TestResult result = test.run();
+			        Assert.assertEquals(1, result.runCount());
+			        Assert.assertEquals(1, result.failureCount());
+			    }
+			    public void testWrongException() {
+			        final ExceptionTestCase test = new ThrowRuntimeExceptionTestCase("test", //$NON-NLS-1$
+			                IndexOutOfBoundsException.class);
+			        final TestResult result = test.run();
+			        Assert.assertEquals(1, result.runCount());
+			        Assert.assertEquals(1, result.errorCount());
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.extensions.ExceptionTestCaseTest.java", str6);
+        String str7= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			import junit.framework.Assert;
+			import junit.framework.AssertionFailedError;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestListener;
+			import junit.framework.TestResult;
+			
+			public class TestListenerTest extends TestCase implements TestListener {
+			    private int fEndCount;
+			    private int fErrorCount;
+			    private int fFailureCount;
+			    private TestResult fResult;
+			    private int fStartCount;
+			
+			    public void addError(final Test test, final Throwable t) {
+			        this.fErrorCount++;
+			    }
+			    public void addFailure(final Test test, final AssertionFailedError t) {
+			        this.fFailureCount++;
+			    }
+			    public void endTest(final Test test) {
+			        this.fEndCount++;
+			    }
+			    @Override
+			    protected void setUp() {
+			        this.fResult = new TestResult();
+			        this.fResult.addListener(this);
+			
+			        this.fStartCount = 0;
+			        this.fEndCount = 0;
+			        this.fFailureCount = 0;
+			    }
+			    public void startTest(final Test test) {
+			        this.fStartCount++;
+			    }
+			    public void testError() {
+			        final TestCase test = new TestCase("noop") { //$NON-NLS-1$
+			            @Override
+			            public void runTest() {
+			                throw new Error();
+			            }
+			        };
+			        test.run(this.fResult);
+			        Assert.assertEquals(1, this.fErrorCount);
+			        Assert.assertEquals(1, this.fEndCount);
+			    }
+			    public void testFailure() {
+			        final TestCase test = new TestCase("noop") { //$NON-NLS-1$
+			            @Override
+			            public void runTest() {
+			                Assert.fail();
+			            }
+			        };
+			        test.run(this.fResult);
+			        Assert.assertEquals(1, this.fFailureCount);
+			        Assert.assertEquals(1, this.fEndCount);
+			    }
+			    public void testStartStop() {
+			        final TestCase test = new TestCase("noop") { //$NON-NLS-1$
+			            @Override
+			            public void runTest() {
+			            }
+			        };
+			        test.run(this.fResult);
+			        Assert.assertEquals(1, this.fStartCount);
+			        Assert.assertEquals(1, this.fEndCount);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.TestListenerTest.java", str7);
+        String str8= """
+			package junit.tests.runner;
+			
+			import java.util.Vector;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			import junit.runner.Sorter;
+			
+			public class SorterTest extends TestCase {
+			
+			    static class Swapper implements Sorter.Swapper {
+			        public void swap(final Vector values, final int left, final int right) {
+			            final Object tmp = values.elementAt(left);
+			            values.setElementAt(values.elementAt(right), left);
+			            values.setElementAt(tmp, right);
+			        }
+			    }
+			
+			    public void testSort() throws Exception {
+			        final Vector v = new Vector();
+			        v.addElement("c"); //$NON-NLS-1$
+			        v.addElement("b"); //$NON-NLS-1$
+			        v.addElement("a"); //$NON-NLS-1$
+			        Sorter.sortStrings(v, 0, v.size() - 1, new Swapper());
+			        Assert.assertEquals(v.elementAt(0), "a"); //$NON-NLS-1$
+			        Assert.assertEquals(v.elementAt(1), "b"); //$NON-NLS-1$
+			        Assert.assertEquals(v.elementAt(2), "c"); //$NON-NLS-1$
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.SorterTest.java", str8);
+        String str9= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			import junit.framework.TestCase;
+			
+			public class OneTestCase extends TestCase {
+			    public void noTestCase() {
+			    }
+			    public void testCase() {
+			    }
+			    public void testCase(final int arg) {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.OneTestCase.java", str9);
+        String str10= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.Protectable;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			
+			/**
+			 * Test an implementor of junit.framework.Test other than TestCase or TestSuite
+			 */
+			public class TestImplementorTest extends TestCase {
+			    public static class DoubleTestCase implements Test {
+			        private final TestCase fTestCase;
+			
+			        public DoubleTestCase(final TestCase testCase) {
+			            this.fTestCase = testCase;
+			        }
+			
+			        public int countTestCases() {
+			            return 2;
+			        }
+			
+			        public void run(final TestResult result) {
+			            result.startTest(this);
+			            final Protectable p = new Protectable() {
+			                public void protect() throws Throwable {
+			                    DoubleTestCase.this.fTestCase.runBare();
+			                    DoubleTestCase.this.fTestCase.runBare();
+			                }
+			            };
+			            result.runProtected(this, p);
+			            result.endTest(this);
+			        }
+			    }
+			
+			    private final DoubleTestCase fTest;
+			
+			    public TestImplementorTest() {
+			        final TestCase testCase = new TestCase() {
+			            @Override
+			            public void runTest() {
+			            }
+			        };
+			        this.fTest = new DoubleTestCase(testCase);
+			    }
+			
+			    public void testSuccessfulRun() {
+			        final TestResult result = new TestResult();
+			        this.fTest.run(result);
+			        Assert.assertEquals(this.fTest.countTestCases(), result.runCount());
+			        Assert.assertEquals(0, result.errorCount());
+			        Assert.assertEquals(0, result.failureCount());
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.framework.TestImplementorTest.java", str10);
+        String str11= """
+			package junit.extensions;
+			
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestResult;
+			
+			/**
+			 * A Decorator for Tests. Use TestDecorator as the base class for defining new
+			 * test decorators. Test decorator subclasses can be introduced to add behaviour
+			 * before or after a test is run.
+			 *
+			 */
+			public class TestDecorator extends Assert implements Test {
+			    protected Test fTest;
+			
+			    public TestDecorator(final Test test) {
+			        this.fTest = test;
+			    }
+			    /**
+			     * The basic run behaviour.
+			     */
+			    public void basicRun(final TestResult result) {
+			        this.fTest.run(result);
+			    }
+			    public int countTestCases() {
+			        return this.fTest.countTestCases();
+			    }
+			    public Test getTest() {
+			        return this.fTest;
+			    }
+			
+			    public void run(final TestResult result) {
+			        this.basicRun(result);
+			    }
+			
+			    @Override
+			    public String toString() {
+			        return this.fTest.toString();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.extensions.TestDecorator.java", str11);
+        String str12= """
+			package junit.runner;
+			
+			/**
+			 * An interface to define how a test suite should be loaded.
+			 */
+			public interface TestSuiteLoader {
+			    Class load(String suiteClassName) throws ClassNotFoundException;
+			    Class reload(Class aClass) throws ClassNotFoundException;
+			}""";
+        fExpectedChangesAllTests.put("junit.runner.TestSuiteLoader.java", str12);
+        String str13= """
+			package junit.framework;
+			
+			import java.util.Enumeration;
+			import java.util.Vector;
+			
+			/**
+			 * A <code>TestResult</code> collects the results of executing a test case. It
+			 * is an instance of the Collecting Parameter pattern. The test framework
+			 * distinguishes between <i>failures</i> and <i>errors</i>. A failure is
+			 * anticipated and checked for with assertions. Errors are unanticipated
+			 * problems like an <code>ArrayIndexOutOfBoundsException</code>.
+			 *
+			 * @see Test
+			 */
+			public class TestResult extends Object {
+			    protected Vector fErrors;
+			    protected Vector fFailures;
+			    protected Vector fListeners;
+			    protected int fRunTests;
+			    private boolean fStop;
+			
+			    public TestResult() {
+			        this.fFailures = new Vector();
+			        this.fErrors = new Vector();
+			        this.fListeners = new Vector();
+			        this.fRunTests = 0;
+			        this.fStop = false;
+			    }
+			    /**
+			     * Adds an error to the list of errors. The passed in exception caused the
+			     * error.
+			     */
+			    public synchronized void addError(final Test test, final Throwable t) {
+			        this.fErrors.addElement(new TestFailure(test, t));
+			        for (final Object element : this.cloneListeners()) {
+			            ((TestListener) element).addError(test, t);
+			        }
+			    }
+			    /**
+			     * Adds a failure to the list of failures. The passed in exception caused
+			     * the failure.
+			     */
+			    public synchronized void addFailure(final Test test,
+			            final AssertionFailedError t) {
+			        this.fFailures.addElement(new TestFailure(test, t));
+			        for (final Object element : this.cloneListeners()) {
+			            ((TestListener) element).addFailure(test, t);
+			        }
+			    }
+			    /**
+			     * Registers a TestListener
+			     */
+			    public synchronized void addListener(final TestListener listener) {
+			        this.fListeners.addElement(listener);
+			    }
+			    /**
+			     * Returns a copy of the listeners.
+			     */
+			    private synchronized Vector cloneListeners() {
+			        return (Vector) this.fListeners.clone();
+			    }
+			    /**
+			     * Informs the result that a test was completed.
+			     */
+			    public void endTest(final Test test) {
+			        for (final Object element : this.cloneListeners()) {
+			            ((TestListener) element).endTest(test);
+			        }
+			    }
+			    /**
+			     * Gets the number of detected errors.
+			     */
+			    public synchronized int errorCount() {
+			        return this.fErrors.size();
+			    }
+			    /**
+			     * Returns an Enumeration for the errors
+			     */
+			    public synchronized Enumeration errors() {
+			        return this.fErrors.elements();
+			    }
+			    /**
+			     * Gets the number of detected failures.
+			     */
+			    public synchronized int failureCount() {
+			        return this.fFailures.size();
+			    }
+			    /**
+			     * Returns an Enumeration for the failures
+			     */
+			    public synchronized Enumeration failures() {
+			        return this.fFailures.elements();
+			    }
+			    /**
+			     * Unregisters a TestListener
+			     */
+			    public synchronized void removeListener(final TestListener listener) {
+			        this.fListeners.removeElement(listener);
+			    }
+			    /**
+			     * Runs a TestCase.
+			     */
+			    protected void run(final TestCase test) {
+			        this.startTest(test);
+			        final Protectable p = new Protectable() {
+			            public void protect() throws Throwable {
+			                test.runBare();
+			            }
+			        };
+			        this.runProtected(test, p);
+			
+			        this.endTest(test);
+			    }
+			    /**
+			     * Gets the number of run tests.
+			     */
+			    public synchronized int runCount() {
+			        return this.fRunTests;
+			    }
+			    /**
+			     * Runs a TestCase.
+			     */
+			    public void runProtected(final Test test, final Protectable p) {
+			        try {
+			            p.protect();
+			        } catch (final AssertionFailedError e) {
+			            this.addFailure(test, e);
+			        } catch (final ThreadDeath e) { // don't catch ThreadDeath by accident
+			            throw e;
+			        } catch (final Throwable e) {
+			            this.addError(test, e);
+			        }
+			    }
+			    /**
+			     * Checks whether the test run should stop
+			     */
+			    public synchronized boolean shouldStop() {
+			        return this.fStop;
+			    }
+			    /**
+			     * Informs the result that a test will be started.
+			     */
+			    public void startTest(final Test test) {
+			        final int count = test.countTestCases();
+			        synchronized (this) {
+			            this.fRunTests += count;
+			        }
+			        for (final Object element : this.cloneListeners()) {
+			            ((TestListener) element).startTest(test);
+			        }
+			    }
+			    /**
+			     * Marks that the test run should stop.
+			     */
+			    public synchronized void stop() {
+			        this.fStop = true;
+			    }
+			    /**
+			     * Returns whether the entire test was successful or not.
+			     */
+			    public synchronized boolean wasSuccessful() {
+			        return (this.failureCount() == 0) && (this.errorCount() == 0);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.TestResult.java", str13);
+        String str14= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			import junit.framework.TestCase;
+			
+			public class NotPublicTestCase extends TestCase {
+			    protected void testNotPublic() {
+			    }
+			    public void testPublic() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.NotPublicTestCase.java", str14);
+        String str15= """
+			package junit.extensions;
+			
+			import junit.framework.Test;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * A TestSuite for active Tests. It runs each test in a separate thread and
+			 * waits until all threads have terminated. -- Aarhus Radisson Scandinavian
+			 * Center 11th floor
+			 */
+			public class ActiveTestSuite extends TestSuite {
+			    private volatile int fActiveTestDeathCount;
+			
+			    public ActiveTestSuite() {
+			    }
+			
+			    public ActiveTestSuite(final Class theClass) {
+			        super(theClass);
+			    }
+			
+			    public ActiveTestSuite(final Class theClass, final String name) {
+			        super(theClass, name);
+			    }
+			
+			    public ActiveTestSuite(final String name) {
+			        super(name);
+			    }
+			
+			    @Override
+			    public void run(final TestResult result) {
+			        this.fActiveTestDeathCount = 0;
+			        super.run(result);
+			        this.waitUntilFinished();
+			    }
+			
+			    synchronized public void runFinished(final Test test) {
+			        this.fActiveTestDeathCount++;
+			        this.notifyAll();
+			    }
+			
+			    @Override
+			    public void runTest(final Test test, final TestResult result) {
+			        final Thread t = new Thread() {
+			            @Override
+			            public void run() {
+			                try {
+			                    // inlined due to limitation in VA/Java
+			                    // ActiveTestSuite.super.runTest(test, result);
+			                    test.run(result);
+			                } finally {
+			                    ActiveTestSuite.this.runFinished(test);
+			                }
+			            }
+			        };
+			        t.start();
+			    }
+			
+			    synchronized void waitUntilFinished() {
+			        while (this.fActiveTestDeathCount < this.testCount()) {
+			            try {
+			                this.wait();
+			            } catch (final InterruptedException e) {
+			                return; // ignore
+			            }
+			        }
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.extensions.ActiveTestSuite.java", str15);
+        String str16= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * A fixture for testing the "auto" test suite feature.
+			 *
+			 */
+			public class SuiteTest extends TestCase {
+			    public static Test suite() {
+			        final TestSuite suite = new TestSuite("Suite Tests"); //$NON-NLS-1$
+			        // build the suite manually, because some of the suites are testing
+			        // the functionality that automatically builds suites
+			        suite.addTest(new SuiteTest("testNoTestCaseClass")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testNoTestCases")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testOneTestCase")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testNotPublicTestCase")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testNotVoidTestCase")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testNotExistingTestCase")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testInheritedTests")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testShadowedTests")); //$NON-NLS-1$
+			        suite.addTest(new SuiteTest("testAddTestSuite")); //$NON-NLS-1$
+			
+			        return suite;
+			    }
+			    protected TestResult fResult;
+			    public SuiteTest(final String name) {
+			        super(name);
+			    }
+			    @Override
+			    protected void setUp() {
+			        this.fResult = new TestResult();
+			    }
+			    public void testAddTestSuite() {
+			        final TestSuite suite = new TestSuite();
+			        suite.addTestSuite(OneTestCase.class);
+			        suite.run(this.fResult);
+			        Assert.assertEquals(1, this.fResult.runCount());
+			    }
+			    public void testInheritedTests() {
+			        final TestSuite suite = new TestSuite(InheritedTestCase.class);
+			        suite.run(this.fResult);
+			        Assert.assertTrue(this.fResult.wasSuccessful());
+			        Assert.assertEquals(2, this.fResult.runCount());
+			    }
+			    public void testNoTestCaseClass() {
+			        final Test t = new TestSuite(NoTestCaseClass.class);
+			        t.run(this.fResult);
+			        Assert.assertEquals(1, this.fResult.runCount()); // warning test
+			        Assert.assertTrue(!this.fResult.wasSuccessful());
+			    }
+			    public void testNoTestCases() {
+			        final Test t = new TestSuite(NoTestCases.class);
+			        t.run(this.fResult);
+			        Assert.assertTrue(this.fResult.runCount() == 1); // warning test
+			        Assert.assertTrue(this.fResult.failureCount() == 1);
+			        Assert.assertTrue(!this.fResult.wasSuccessful());
+			    }
+			    public void testNotExistingTestCase() {
+			        final Test t = new SuiteTest("notExistingMethod"); //$NON-NLS-1$
+			        t.run(this.fResult);
+			        Assert.assertTrue(this.fResult.runCount() == 1);
+			        Assert.assertTrue(this.fResult.failureCount() == 1);
+			        Assert.assertTrue(this.fResult.errorCount() == 0);
+			    }
+			    public void testNotPublicTestCase() {
+			        final TestSuite suite = new TestSuite(NotPublicTestCase.class);
+			        // 1 public test case + 1 warning for the non-public test case
+			        Assert.assertEquals(2, suite.countTestCases());
+			    }
+			    public void testNotVoidTestCase() {
+			        final TestSuite suite = new TestSuite(NotVoidTestCase.class);
+			        Assert.assertTrue(suite.countTestCases() == 1);
+			    }
+			    public void testOneTestCase() {
+			        final Test t = new TestSuite(OneTestCase.class);
+			        t.run(this.fResult);
+			        Assert.assertTrue(this.fResult.runCount() == 1);
+			        Assert.assertTrue(this.fResult.failureCount() == 0);
+			        Assert.assertTrue(this.fResult.errorCount() == 0);
+			        Assert.assertTrue(this.fResult.wasSuccessful());
+			    }
+			    public void testShadowedTests() {
+			        final TestSuite suite = new TestSuite(OverrideTestCase.class);
+			        suite.run(this.fResult);
+			        Assert.assertEquals(1, this.fResult.runCount());
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.SuiteTest.java", str16);
+        String str17= """
+			package junit.runner;
+			
+			/**
+			 * An implementation of a TestCollector that considers a class to be a test
+			 * class when it contains the pattern "Test" in its name
+			 *\s
+			 * @see TestCollector
+			 */
+			public class SimpleTestCollector extends ClassPathTestCollector {
+			
+			    public SimpleTestCollector() {
+			    }
+			
+			    @Override
+			    protected boolean isTestClass(final String classFileName) {
+			        return classFileName.endsWith(".class") && //$NON-NLS-1$
+			                (classFileName.indexOf('$') < 0)
+			                && (classFileName.indexOf("Test") > 0); //$NON-NLS-1$
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.runner.SimpleTestCollector.java", str17);
+        String str18= """
+			package junit.framework;
+			
+			/**
+			 * A <em>Test</em> can be run and collect its results.
+			 *
+			 * @see TestResult
+			 */
+			public interface Test {
+			    /**
+			     * Counts the number of test cases that will be run by this test.
+			     */
+			    int countTestCases();
+			    /**
+			     * Runs a test and collects its result in a TestResult instance.
+			     */
+			    void run(TestResult result);
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.Test.java", str18);
+        String str19= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			
+			public class NoTestCaseClass extends Object {
+			    public void testSuccess() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.NoTestCaseClass.java", str19);
+        String str20= """
+			package junit.tests.framework;
+			
+			import junit.framework.TestCase;
+			
+			/**
+			 * A test case testing the testing framework.
+			 *
+			 */
+			public class Success extends TestCase {
+			
+			    @Override
+			    public void runTest() {
+			    }
+			
+			    public void testSuccess() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.Success.java", str20);
+        String str21= """
+			package junit.runner;
+			
+			import java.lang.reflect.Modifier;
+			
+			import junit.framework.Test;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * An implementation of a TestCollector that loads all classes on the class path
+			 * and tests whether it is assignable from Test or provides a static suite
+			 * method.
+			 *\s
+			 * @see TestCollector
+			 */
+			public class LoadingTestCollector extends ClassPathTestCollector {
+			
+			    TestCaseClassLoader fLoader;
+			
+			    public LoadingTestCollector() {
+			        this.fLoader = new TestCaseClassLoader();
+			    }
+			
+			    Class classFromFile(final String classFileName)
+			            throws ClassNotFoundException {
+			        final String className = this.classNameFromFile(classFileName);
+			        if (!this.fLoader.isExcluded(className)) {
+			            return this.fLoader.loadClass(className, false);
+			        }
+			        return null;
+			    }
+			
+			    boolean hasPublicConstructor(final Class testClass) {
+			        try {
+			            TestSuite.getTestConstructor(testClass);
+			        } catch (final NoSuchMethodException e) {
+			            return false;
+			        }
+			        return true;
+			    }
+			
+			    boolean hasSuiteMethod(final Class testClass) {
+			        try {
+			            testClass.getMethod(BaseTestRunner.SUITE_METHODNAME, new Class[0]);
+			        } catch (final Exception e) {
+			            return false;
+			        }
+			        return true;
+			    }
+			
+			    boolean isTestClass(final Class testClass) {
+			        if (this.hasSuiteMethod(testClass)) {
+			            return true;
+			        }
+			        if (Test.class.isAssignableFrom(testClass)
+			                && Modifier.isPublic(testClass.getModifiers())
+			                && this.hasPublicConstructor(testClass)) {
+			            return true;
+			        }
+			        return false;
+			    }
+			
+			    @Override
+			    protected boolean isTestClass(final String classFileName) {
+			        try {
+			            if (classFileName.endsWith(".class")) { //$NON-NLS-1$
+			                final Class testClass = this.classFromFile(classFileName);
+			                return (testClass != null) && this.isTestClass(testClass);
+			            }
+			        } catch (final ClassNotFoundException expected) {
+			        } catch (final NoClassDefFoundError notFatal) {
+			        }
+			        return false;
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.runner.LoadingTestCollector.java", str21);
+        String str22= """
+			package junit.runner;
+			
+			import java.io.ByteArrayOutputStream;
+			import java.io.File;
+			import java.io.FileInputStream;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.net.URL;
+			import java.util.Enumeration;
+			import java.util.Properties;
+			import java.util.StringTokenizer;
+			import java.util.Vector;
+			import java.util.zip.ZipEntry;
+			import java.util.zip.ZipFile;
+			
+			/**
+			 * A custom class loader which enables the reloading of classes for each test
+			 * run. The class loader can be configured with a list of package paths that
+			 * should be excluded from loading. The loading of these packages is delegated
+			 * to the system class loader. They will be shared across test runs.
+			 * <p>
+			 * The list of excluded package paths is specified in a properties file
+			 * "excluded.properties" that is located in the same place as the
+			 * TestCaseClassLoader class.
+			 * <p>
+			 * <b>Known limitation:</b> the TestCaseClassLoader cannot load classes from jar
+			 * files.
+			 */
+			
+			public class TestCaseClassLoader extends ClassLoader {
+			    /** name of excluded properties file */
+			    static final String EXCLUDED_FILE = "excluded.properties"; //$NON-NLS-1$
+			    /** default excluded paths */
+			    private final String[] defaultExclusions = {"junit.framework.", //$NON-NLS-1$
+			            "junit.extensions.", //$NON-NLS-1$
+			            "junit.runner." //$NON-NLS-1$
+			    };
+			    /** excluded paths */
+			    private Vector fExcluded;
+			    /** scanned class path */
+			    private Vector fPathItems;
+			
+			    /**
+			     * Constructs a TestCaseLoader. It scans the class path and the excluded
+			     * package paths
+			     */
+			    public TestCaseClassLoader() {
+			        this(System.getProperty("java.class.path")); //$NON-NLS-1$
+			    }
+			
+			    /**
+			     * Constructs a TestCaseLoader. It scans the class path and the excluded
+			     * package paths
+			     */
+			    public TestCaseClassLoader(final String classPath) {
+			        this.scanPath(classPath);
+			        this.readExcludedPackages();
+			    }
+			
+			    private byte[] getClassData(final File f) {
+			        try {
+			            final FileInputStream stream = new FileInputStream(f);
+			            final ByteArrayOutputStream out = new ByteArrayOutputStream(1000);
+			            final byte[] b = new byte[1000];
+			            int n;
+			            while ((n = stream.read(b)) != -1) {
+			                out.write(b, 0, n);
+			            }
+			            stream.close();
+			            out.close();
+			            return out.toByteArray();
+			
+			        } catch (final IOException e) {
+			        }
+			        return null;
+			    }
+			
+			    @Override
+			    public URL getResource(final String name) {
+			        return ClassLoader.getSystemResource(name);
+			    }
+			
+			    @Override
+			    public InputStream getResourceAsStream(final String name) {
+			        return ClassLoader.getSystemResourceAsStream(name);
+			    }
+			
+			    public boolean isExcluded(final String name) {
+			        for (int i = 0; i < this.fExcluded.size(); i++) {
+			            if (name.startsWith((String) this.fExcluded.elementAt(i))) {
+			                return true;
+			            }
+			        }
+			        return false;
+			    }
+			
+			    boolean isJar(final String pathEntry) {
+			        return pathEntry.endsWith(".jar") || pathEntry.endsWith(".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+			    }
+			
+			    @Override
+			    public synchronized Class loadClass(final String name,
+			            final boolean resolve) throws ClassNotFoundException {
+			
+			        Class c = this.findLoadedClass(name);
+			        if (c != null) {
+			            return c;
+			        }
+			        //
+			        // Delegate the loading of excluded classes to the
+			        // standard class loader.
+			        //
+			        if (this.isExcluded(name)) {
+			            try {
+			                c = this.findSystemClass(name);
+			                return c;
+			            } catch (final ClassNotFoundException e) {
+			                // keep searching
+			            }
+			        }
+			        if (c == null) {
+			            final byte[] data = this.lookupClassData(name);
+			            if (data == null) {
+			                throw new ClassNotFoundException();
+			            }
+			            c = this.defineClass(name, data, 0, data.length);
+			        }
+			        if (resolve) {
+			            this.resolveClass(c);
+			        }
+			        return c;
+			    }
+			
+			    private byte[] loadFileData(final String path, final String fileName) {
+			        final File file = new File(path, fileName);
+			        if (file.exists()) {
+			            return this.getClassData(file);
+			        }
+			        return null;
+			    }
+			
+			    private byte[] loadJarData(final String path, final String fileName) {
+			        ZipFile zipFile = null;
+			        InputStream stream = null;
+			        final File archive = new File(path);
+			        if (!archive.exists()) {
+			            return null;
+			        }
+			        try {
+			            zipFile = new ZipFile(archive);
+			        } catch (final IOException io) {
+			            return null;
+			        }
+			        final ZipEntry entry = zipFile.getEntry(fileName);
+			        if (entry == null) {
+			            return null;
+			        }
+			        final int size = (int) entry.getSize();
+			        try {
+			            stream = zipFile.getInputStream(entry);
+			            final byte[] data = new byte[size];
+			            int pos = 0;
+			            while (pos < size) {
+			                final int n = stream.read(data, pos, data.length - pos);
+			                pos += n;
+			            }
+			            zipFile.close();
+			            return data;
+			        } catch (final IOException e) {
+			        } finally {
+			            try {
+			                if (stream != null) {
+			                    stream.close();
+			                }
+			            } catch (final IOException e) {
+			            }
+			        }
+			        return null;
+			    }
+			
+			    private byte[] lookupClassData(final String className)
+			            throws ClassNotFoundException {
+			        byte[] data = null;
+			        for (int i = 0; i < this.fPathItems.size(); i++) {
+			            final String path = (String) this.fPathItems.elementAt(i);
+			            final String fileName = className.replace('.', '/') + ".class"; //$NON-NLS-1$
+			            if (this.isJar(path)) {
+			                data = this.loadJarData(path, fileName);
+			            } else {
+			                data = this.loadFileData(path, fileName);
+			            }
+			            if (data != null) {
+			                return data;
+			            }
+			        }
+			        throw new ClassNotFoundException(className);
+			    }
+			
+			    private void readExcludedPackages() {
+			        this.fExcluded = new Vector(10);
+			        for (final String defaultExclusion : this.defaultExclusions) {
+			            this.fExcluded.addElement(defaultExclusion);
+			        }
+			
+			        final InputStream is = this.getClass()
+			                .getResourceAsStream(TestCaseClassLoader.EXCLUDED_FILE);
+			        if (is == null) {
+			            return;
+			        }
+			        final Properties p = new Properties();
+			        try {
+			            p.load(is);
+			        } catch (final IOException e) {
+			            return;
+			        } finally {
+			            try {
+			                is.close();
+			            } catch (final IOException e) {
+			            }
+			        }
+			        for (final Enumeration e = p.propertyNames(); e.hasMoreElements();) {
+			            final String key = (String) e.nextElement();
+			            if (key.startsWith("excluded.")) { //$NON-NLS-1$
+			                String path = p.getProperty(key);
+			                path = path.trim();
+			                if (path.endsWith("*")) { //$NON-NLS-1$
+			                    path = path.substring(0, path.length() - 1);
+			                }
+			                if (path.length() > 0) {
+			                    this.fExcluded.addElement(path);
+			                }
+			            }
+			        }
+			    }
+			
+			    private void scanPath(final String classPath) {
+			        final String separator = System.getProperty("path.separator"); //$NON-NLS-1$
+			        this.fPathItems = new Vector(10);
+			        final StringTokenizer st = new StringTokenizer(classPath, separator);
+			        while (st.hasMoreTokens()) {
+			            this.fPathItems.addElement(st.nextToken());
+			        }
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.runner.TestCaseClassLoader.java", str22);
+        String str23= """
+			package junit.framework;
+			
+			/**
+			 * Thrown when an assertion failed.
+			 */
+			public class AssertionFailedError extends Error {
+			
+			    /* Test */
+			    private static final long serialVersionUID = 1L;
+			    public AssertionFailedError() {
+			    }
+			    public AssertionFailedError(final String message) {
+			        super(message);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.AssertionFailedError.java", str23);
+        String str24= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			public class InheritedTestCase extends OneTestCase {
+			    public void test2() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.InheritedTestCase.java", str24);
+        String str25= """
+			package junit.samples;
+			
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * Some simple tests.
+			 *
+			 */
+			public class SimpleTest extends TestCase {
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(SimpleTest.suite());
+			    }
+			    public static Test suite() {
+			
+			        /*
+			         * the type safe way
+			         *
+			         * TestSuite suite= new TestSuite(); suite.addTest( new
+			         * SimpleTest("add") { protected void runTest() { testAdd(); } } );
+			         *\s
+			         * suite.addTest( new SimpleTest("testDivideByZero") { protected void
+			         * runTest() { testDivideByZero(); } } ); return suite;
+			         */
+			
+			        /*
+			         * the dynamic way
+			         */
+			        return new TestSuite(SimpleTest.class);
+			    }
+			
+			    protected int fValue1;
+			    protected int fValue2;
+			    @Override
+			    protected void setUp() {
+			        this.fValue1 = 2;
+			        this.fValue2 = 3;
+			    }
+			    public void testAdd() {
+			        final double result = this.fValue1 + this.fValue2;
+			        // forced failure result == 5
+			        Assert.assertTrue(result == 6);
+			    }
+			    public void testDivideByZero() {
+			        final int zero = 0;
+			    }
+			    public void testEquals() {
+			        Assert.assertEquals(12, 12);
+			        Assert.assertEquals(12L, 12L);
+			        Assert.assertEquals(new Long(12), new Long(12));
+			
+			        Assert.assertEquals("Size", 12, 13); //$NON-NLS-1$
+			        Assert.assertEquals("Capacity", 12.0, 11.99, 0.0); //$NON-NLS-1$
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.SimpleTest.java", str25);
+        String str26= """
+			package junit.runner;
+			
+			/**
+			 * This class defines the current version of JUnit
+			 */
+			public class Version {
+			    public static String id() {
+			        return "3.8.1"; //$NON-NLS-1$
+			    }
+			
+			    private Version() {
+			        // don't instantiate
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.runner.Version.java", str26);
+        String str27= """
+			
+			package junit.tests.runner;
+			
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.runner.BaseTestRunner;
+			
+			public class BaseTestRunnerTest extends TestCase {
+			
+			    public class MockRunner extends BaseTestRunner {
+			        @Override
+			        protected void runFailed(final String message) {
+			        }
+			
+			        @Override
+			        public void testEnded(final String testName) {
+			        }
+			
+			        @Override
+			        public void testFailed(final int status, final Test test,
+			                final Throwable t) {
+			        }
+			
+			        @Override
+			        public void testStarted(final String testName) {
+			        }
+			    }
+			
+			    public static class NonStatic {
+			        public Test suite() {
+			            return null;
+			        }
+			    }
+			
+			    public void testInvokeNonStaticSuite() {
+			        final BaseTestRunner runner = new MockRunner();
+			        runner.getTest("junit.tests.runner.BaseTestRunnerTest$NonStatic"); // Used //$NON-NLS-1$
+			                                                                           // to
+			                                                                           // throw
+			                                                                           // NullPointerException
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.runner.BaseTestRunnerTest.java", str27);
+        String str28= """
+			package junit.tests;
+			
+			import junit.framework.TestCase;
+			
+			/**
+			 * A helper test case for testing whether the testing method is run.
+			 */
+			public class WasRun extends TestCase {
+			    public boolean fWasRun = false;
+			    @Override
+			    protected void runTest() {
+			        this.fWasRun = true;
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.WasRun.java", str28);
+        String str29= """
+			package junit.framework;
+			
+			import java.io.PrintWriter;
+			import java.io.StringWriter;
+			import java.lang.reflect.Constructor;
+			import java.lang.reflect.InvocationTargetException;
+			import java.lang.reflect.Method;
+			import java.lang.reflect.Modifier;
+			import java.util.Enumeration;
+			import java.util.Vector;
+			
+			/**
+			 * A <code>TestSuite</code> is a <code>Composite</code> of Tests. It runs a
+			 * collection of test cases. Here is an example using the dynamic test
+			 * definition.
+			 *\s
+			 * <pre>
+			 * TestSuite suite = new TestSuite();
+			 * suite.addTest(new MathTest("testAdd"));
+			 * suite.addTest(new MathTest("testDivideByZero"));
+			 * </pre>
+			 *\s
+			 * Alternatively, a TestSuite can extract the tests to be run automatically. To
+			 * do so you pass the class of your TestCase class to the TestSuite constructor.
+			 *\s
+			 * <pre>
+			 * TestSuite suite = new TestSuite(MathTest.class);
+			 * </pre>
+			 *\s
+			 * This constructor creates a suite with all the methods starting with "test"
+			 * that take no arguments.
+			 *
+			 * @see Test
+			 */
+			public class TestSuite implements Test {
+			
+			    /**
+			     * ...as the moon sets over the early morning Merlin, Oregon mountains, our
+			     * intrepid adventurers type...
+			     */
+			    static public Test createTest(final Class theClass, final String name) {
+			        Constructor constructor;
+			        try {
+			            constructor = TestSuite.getTestConstructor(theClass);
+			        } catch (final NoSuchMethodException e) {
+			            return TestSuite.warning("Class " + theClass.getName() //$NON-NLS-1$
+			                    + " has no public constructor TestCase(String name) or TestCase()"); //$NON-NLS-1$
+			        }
+			        Object test;
+			        try {
+			            if (constructor.getParameterTypes().length == 0) {
+			                test = constructor.newInstance(new Object[0]);
+			                if (test instanceof TestCase) {
+			                    ((TestCase) test).setName(name);
+			                }
+			            } else {
+			                test = constructor.newInstance(new Object[]{name});
+			            }
+			        } catch (final InstantiationException e) {
+			            return (TestSuite.warning("Cannot instantiate test case: " + name //$NON-NLS-1$
+			                    + " (" + TestSuite.exceptionToString(e) + ")")); //$NON-NLS-1$ //$NON-NLS-2$
+			        } catch (final InvocationTargetException e) {
+			            return (TestSuite.warning("Exception in constructor: " + name + " (" //$NON-NLS-1$ //$NON-NLS-2$
+			                    + TestSuite.exceptionToString(e.getTargetException())
+			                    + ")")); //$NON-NLS-1$
+			        } catch (final IllegalAccessException e) {
+			            return (TestSuite.warning("Cannot access test case: " + name + " (" //$NON-NLS-1$ //$NON-NLS-2$
+			                    + TestSuite.exceptionToString(e) + ")")); //$NON-NLS-1$
+			        }
+			        return (Test) test;
+			    }
+			    /**
+			     * Converts the stack trace into a string
+			     */
+			    private static String exceptionToString(final Throwable t) {
+			        final StringWriter stringWriter = new StringWriter();
+			        final PrintWriter writer = new PrintWriter(stringWriter);
+			        t.printStackTrace(writer);
+			        return stringWriter.toString();
+			
+			    }
+			
+			    /**
+			     * Gets a constructor which takes a single String as its argument or a no
+			     * arg constructor.
+			     */
+			    public static Constructor getTestConstructor(final Class theClass)
+			            throws NoSuchMethodException {
+			        final Class[] args = {String.class};
+			        try {
+			            return theClass.getConstructor(args);
+			        } catch (final NoSuchMethodException e) {
+			            // fall through
+			        }
+			        return theClass.getConstructor(new Class[0]);
+			    }
+			
+			    /**
+			     * Returns a test which will fail and log a warning message.
+			     */
+			    private static Test warning(final String message) {
+			        return new TestCase("warning") { //$NON-NLS-1$
+			            @Override
+			            protected void runTest() {
+			                Assert.fail(message);
+			            }
+			        };
+			    }
+			
+			    private String fName;
+			
+			    private final Vector fTests = new Vector(10);
+			
+			    /**
+			     * Constructs an empty TestSuite.
+			     */
+			    public TestSuite() {
+			    }
+			
+			    /**
+			     * Constructs a TestSuite from the given class. Adds all the methods
+			     * starting with "test" as test cases to the suite. Parts of this method was
+			     * written at 2337 meters in the Hüffihütte, Kanton Uri
+			     */
+			    public TestSuite(final Class theClass) {
+			        this.fName = theClass.getName();
+			        try {
+			            TestSuite.getTestConstructor(theClass); // Avoid generating multiple
+			                                                    // error messages
+			        } catch (final NoSuchMethodException e) {
+			            this.addTest(TestSuite.warning("Class " + theClass.getName() //$NON-NLS-1$
+			                    + " has no public constructor TestCase(String name) or TestCase()")); //$NON-NLS-1$
+			            return;
+			        }
+			
+			        if (!Modifier.isPublic(theClass.getModifiers())) {
+			            this.addTest(TestSuite
+			                    .warning("Class " + theClass.getName() + " is not public")); //$NON-NLS-1$ //$NON-NLS-2$
+			            return;
+			        }
+			
+			        Class superClass = theClass;
+			        final Vector names = new Vector();
+			        while (Test.class.isAssignableFrom(superClass)) {
+			            final Method[] methods = superClass.getDeclaredMethods();
+			            for (final Method method : methods) {
+			                this.addTestMethod(method, names, theClass);
+			            }
+			            superClass = superClass.getSuperclass();
+			        }
+			        if (this.fTests.size() == 0) {
+			            this.addTest(TestSuite
+			                    .warning("No tests found in " + theClass.getName())); //$NON-NLS-1$
+			        }
+			    }
+			
+			    /**
+			     * Constructs a TestSuite from the given class with the given name.
+			     *\s
+			     * @see TestSuite#TestSuite(Class)
+			     */
+			    public TestSuite(final Class theClass, final String name) {
+			        this(theClass);
+			        this.setName(name);
+			    }
+			
+			    /**
+			     * Constructs an empty TestSuite.
+			     */
+			    public TestSuite(final String name) {
+			        this.setName(name);
+			    }
+			
+			    /**
+			     * Adds a test to the suite.
+			     */
+			    public void addTest(final Test test) {
+			        this.fTests.addElement(test);
+			    }
+			
+			    private void addTestMethod(final Method m, final Vector names,
+			            final Class theClass) {
+			        final String name = m.getName();
+			        if (names.contains(name)) {
+			            return;
+			        }
+			        if (!this.isPublicTestMethod(m)) {
+			            if (this.isTestMethod(m)) {
+			                this.addTest(TestSuite
+			                        .warning("Test method isn't public: " + m.getName())); //$NON-NLS-1$
+			            }
+			            return;
+			        }
+			        names.addElement(name);
+			        this.addTest(TestSuite.createTest(theClass, name));
+			    }
+			
+			    /**
+			     * Adds the tests from the given class to the suite
+			     */
+			    public void addTestSuite(final Class testClass) {
+			        this.addTest(new TestSuite(testClass));
+			    }
+			
+			    /**
+			     * Counts the number of test cases that will be run by this test.
+			     */
+			    public int countTestCases() {
+			        int count = 0;
+			        for (final Enumeration e = this.tests(); e.hasMoreElements();) {
+			            final Test test = (Test) e.nextElement();
+			            count = count + test.countTestCases();
+			        }
+			        return count;
+			    }
+			
+			    /**
+			     * Returns the name of the suite. Not all test suites have a name and this
+			     * method can return null.
+			     */
+			    public String getName() {
+			        return this.fName;
+			    }
+			
+			    private boolean isPublicTestMethod(final Method m) {
+			        return this.isTestMethod(m) && Modifier.isPublic(m.getModifiers());
+			    }
+			
+			    private boolean isTestMethod(final Method m) {
+			        final String name = m.getName();
+			        final Class[] parameters = m.getParameterTypes();
+			        final Class returnType = m.getReturnType();
+			        return (parameters.length == 0) && name.startsWith("test") //$NON-NLS-1$
+			                && returnType.equals(Void.TYPE);
+			    }
+			
+			    /**
+			     * Runs the tests and collects their result in a TestResult.
+			     */
+			    public void run(final TestResult result) {
+			        for (final Enumeration e = this.tests(); e.hasMoreElements();) {
+			            if (result.shouldStop()) {
+			                break;
+			            }
+			            final Test test = (Test) e.nextElement();
+			            this.runTest(test, result);
+			        }
+			    }
+			
+			    public void runTest(final Test test, final TestResult result) {
+			        test.run(result);
+			    }
+			
+			    /**
+			     * Sets the name of the suite.
+			     *\s
+			     * @param name The name to set
+			     */
+			    public void setName(final String name) {
+			        this.fName = name;
+			    }
+			
+			    /**
+			     * Returns the test at the given index
+			     */
+			    public Test testAt(final int index) {
+			        return (Test) this.fTests.elementAt(index);
+			    }
+			
+			    /**
+			     * Returns the number of tests in this suite
+			     */
+			    public int testCount() {
+			        return this.fTests.size();
+			    }
+			
+			    /**
+			     * Returns the tests as an enumeration
+			     */
+			    public Enumeration tests() {
+			        return this.fTests.elements();
+			    }
+			
+			    /**
+			     */
+			    @Override
+			    public String toString() {
+			        if (this.getName() != null) {
+			            return this.getName();
+			        }
+			        return super.toString();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.TestSuite.java", str29);
+        String str30= """
+			package junit.extensions;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			
+			/**
+			 * A TestCase that expects an Exception of class fExpected to be thrown. The
+			 * other way to check that an expected exception is thrown is:
+			 *\s
+			 * <pre>
+			 * try {
+			 *     shouldThrow();
+			 * } catch (SpecialException e) {
+			 *     return;
+			 * }
+			 * fail("Expected SpecialException");
+			 * </pre>
+			 *
+			 * To use ExceptionTestCase, create a TestCase like:
+			 *\s
+			 * <pre>
+			 * new ExceptionTestCase("testShouldThrow", SpecialException.class);
+			 * </pre>
+			 */
+			public class ExceptionTestCase extends TestCase {
+			    Class fExpected;
+			
+			    public ExceptionTestCase(final String name, final Class exception) {
+			        super(name);
+			        this.fExpected = exception;
+			    }
+			    /**
+			     * Execute the test method expecting that an Exception of class fExpected or
+			     * one of its subclasses will be thrown
+			     */
+			    @Override
+			    protected void runTest() throws Throwable {
+			        try {
+			            super.runTest();
+			        } catch (final Exception e) {
+			            if (this.fExpected.isAssignableFrom(e.getClass())) {
+			                return;
+			            } else {
+			                throw e;
+			            }
+			        }
+			        Assert.fail("Expected exception " + this.fExpected); //$NON-NLS-1$
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.extensions.ExceptionTestCase.java", str30);
+        String str31= """
+			package junit.framework;
+			
+			/**
+			 * A set of assert methods. Messages are only displayed when an assert fails.
+			 */
+			
+			public class Assert {
+			    /**
+			     * Asserts that two booleans are equal.
+			     */
+			    static public void assertEquals(final boolean expected,
+			            final boolean actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			
+			    /**
+			     * Asserts that two bytes are equal.
+			     */
+			    static public void assertEquals(final byte expected, final byte actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two chars are equal.
+			     */
+			    static public void assertEquals(final char expected, final char actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two doubles are equal concerning a delta. If the expected
+			     * value is infinity then the delta value is ignored.
+			     */
+			    static public void assertEquals(final double expected, final double actual,
+			            final double delta) {
+			        Assert.assertEquals(null, expected, actual, delta);
+			    }
+			    /**
+			     * Asserts that two floats are equal concerning a delta. If the expected
+			     * value is infinity then the delta value is ignored.
+			     */
+			    static public void assertEquals(final float expected, final float actual,
+			            final float delta) {
+			        Assert.assertEquals(null, expected, actual, delta);
+			    }
+			    /**
+			     * Asserts that two ints are equal.
+			     */
+			    static public void assertEquals(final int expected, final int actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two longs are equal.
+			     */
+			    static public void assertEquals(final long expected, final long actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two objects are equal. If they are not an
+			     * AssertionFailedError is thrown.
+			     */
+			    static public void assertEquals(final Object expected,
+			            final Object actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two shorts are equal.
+			     */
+			    static public void assertEquals(final short expected, final short actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two booleans are equal. If they are not an
+			     * AssertionFailedError is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message,
+			            final boolean expected, final boolean actual) {
+			        Assert.assertEquals(message, new Boolean(expected),
+			                new Boolean(actual));
+			    }
+			    /**
+			     * Asserts that two bytes are equal. If they are not an AssertionFailedError
+			     * is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message, final byte expected,
+			            final byte actual) {
+			        Assert.assertEquals(message, new Byte(expected), new Byte(actual));
+			    }
+			    /**
+			     * Asserts that two chars are equal. If they are not an AssertionFailedError
+			     * is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message, final char expected,
+			            final char actual) {
+			        Assert.assertEquals(message, new Character(expected),
+			                new Character(actual));
+			    }
+			    /**
+			     * Asserts that two doubles are equal concerning a delta. If they are not an
+			     * AssertionFailedError is thrown with the given message. If the expected
+			     * value is infinity then the delta value is ignored.
+			     */
+			    static public void assertEquals(final String message, final double expected,
+			            final double actual, final double delta) {
+			        // handle infinity specially since subtracting to infinite values gives
+			        // NaN and the
+			        // the following test fails
+			        if (Double.isInfinite(expected)) {
+			            if (!(expected == actual)) {
+			                Assert.failNotEquals(message, new Double(expected),
+			                        new Double(actual));
+			            }
+			        } else if (!(Math.abs(expected - actual) <= delta)) { // Because
+			                                                              // comparison with
+			                                                              // NaN always
+			                                                              // returns false
+			            Assert.failNotEquals(message, new Double(expected),
+			                    new Double(actual));
+			        }
+			    }
+			    /**
+			     * Asserts that two floats are equal concerning a delta. If they are not an
+			     * AssertionFailedError is thrown with the given message. If the expected
+			     * value is infinity then the delta value is ignored.
+			     */
+			    static public void assertEquals(final String message, final float expected,
+			            final float actual, final float delta) {
+			        // handle infinity specially since subtracting to infinite values gives
+			        // NaN and the
+			        // the following test fails
+			        if (Float.isInfinite(expected)) {
+			            if (!(expected == actual)) {
+			                Assert.failNotEquals(message, new Float(expected),
+			                        new Float(actual));
+			            }
+			        } else if (!(Math.abs(expected - actual) <= delta)) {
+			            Assert.failNotEquals(message, new Float(expected),
+			                    new Float(actual));
+			        }
+			    }
+			    /**
+			     * Asserts that two ints are equal. If they are not an AssertionFailedError
+			     * is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message, final int expected,
+			            final int actual) {
+			        Assert.assertEquals(message, new Integer(expected),
+			                new Integer(actual));
+			    }
+			    /**
+			     * Asserts that two longs are equal. If they are not an AssertionFailedError
+			     * is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message, final long expected,
+			            final long actual) {
+			        Assert.assertEquals(message, new Long(expected), new Long(actual));
+			    }
+			    /**
+			     * Asserts that two objects are equal. If they are not an
+			     * AssertionFailedError is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message, final Object expected,
+			            final Object actual) {
+			        if ((expected == null) && (actual == null)) {
+			            return;
+			        }
+			        if ((expected != null) && expected.equals(actual)) {
+			            return;
+			        }
+			        Assert.failNotEquals(message, expected, actual);
+			    }
+			    /**
+			     * Asserts that two shorts are equal. If they are not an
+			     * AssertionFailedError is thrown with the given message.
+			     */
+			    static public void assertEquals(final String message, final short expected,
+			            final short actual) {
+			        Assert.assertEquals(message, new Short(expected), new Short(actual));
+			    }
+			    /**
+			     * Asserts that two Strings are equal.
+			     */
+			    static public void assertEquals(final String expected,
+			            final String actual) {
+			        Assert.assertEquals(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two Strings are equal.
+			     */
+			    static public void assertEquals(final String message, final String expected,
+			            final String actual) {
+			        if ((expected == null) && (actual == null)) {
+			            return;
+			        }
+			        if ((expected != null) && expected.equals(actual)) {
+			            return;
+			        }
+			        throw new ComparisonFailure(message, expected, actual);
+			    }
+			    /**
+			     * Asserts that a condition is false. If it isn't it throws an
+			     * AssertionFailedError.
+			     */
+			    static public void assertFalse(final boolean condition) {
+			        Assert.assertFalse(null, condition);
+			    }
+			    /**
+			     * Asserts that a condition is false. If it isn't it throws an
+			     * AssertionFailedError with the given message.
+			     */
+			    static public void assertFalse(final String message,
+			            final boolean condition) {
+			        Assert.assertTrue(message, !condition);
+			    }
+			    /**
+			     * Asserts that an object isn't null.
+			     */
+			    static public void assertNotNull(final Object object) {
+			        Assert.assertNotNull(null, object);
+			    }
+			    /**
+			     * Asserts that an object isn't null. If it is an AssertionFailedError is
+			     * thrown with the given message.
+			     */
+			    static public void assertNotNull(final String message,
+			            final Object object) {
+			        Assert.assertTrue(message, object != null);
+			    }
+			    /**
+			     * Asserts that two objects refer to the same object. If they are not the
+			     * same an AssertionFailedError is thrown.
+			     */
+			    static public void assertNotSame(final Object expected,
+			            final Object actual) {
+			        Assert.assertNotSame(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two objects refer to the same object. If they are not an
+			     * AssertionFailedError is thrown with the given message.
+			     */
+			    static public void assertNotSame(final String message,
+			            final Object expected, final Object actual) {
+			        if (expected == actual) {
+			            Assert.failSame(message);
+			        }
+			    }
+			    /**
+			     * Asserts that an object is null.
+			     */
+			    static public void assertNull(final Object object) {
+			        Assert.assertNull(null, object);
+			    }
+			    /**
+			     * Asserts that an object is null. If it is not an AssertionFailedError is
+			     * thrown with the given message.
+			     */
+			    static public void assertNull(final String message, final Object object) {
+			        Assert.assertTrue(message, object == null);
+			    }
+			    /**
+			     * Asserts that two objects refer to the same object. If they are not the
+			     * same an AssertionFailedError is thrown.
+			     */
+			    static public void assertSame(final Object expected, final Object actual) {
+			        Assert.assertSame(null, expected, actual);
+			    }
+			    /**
+			     * Asserts that two objects refer to the same object. If they are not an
+			     * AssertionFailedError is thrown with the given message.
+			     */
+			    static public void assertSame(final String message, final Object expected,
+			            final Object actual) {
+			        if (expected == actual) {
+			            return;
+			        }
+			        Assert.failNotSame(message, expected, actual);
+			    }
+			    /**
+			     * Asserts that a condition is true. If it isn't it throws an
+			     * AssertionFailedError.
+			     */
+			    static public void assertTrue(final boolean condition) {
+			        Assert.assertTrue(null, condition);
+			    }
+			    /**
+			     * Asserts that a condition is true. If it isn't it throws an
+			     * AssertionFailedError with the given message.
+			     */
+			    static public void assertTrue(final String message,
+			            final boolean condition) {
+			        if (!condition) {
+			            Assert.fail(message);
+			        }
+			    }
+			    /**
+			     * Fails a test with no message.
+			     */
+			    static public void fail() {
+			        Assert.fail(null);
+			    }
+			    /**
+			     * Fails a test with the given message.
+			     */
+			    static public void fail(final String message) {
+			        throw new AssertionFailedError(message);
+			    }
+			    static private void failNotEquals(final String message,
+			            final Object expected, final Object actual) {
+			        Assert.fail(Assert.format(message, expected, actual));
+			    }
+			
+			    static private void failNotSame(final String message, final Object expected,
+			            final Object actual) {
+			        String formatted = ""; //$NON-NLS-1$
+			        if (message != null) {
+			            formatted = message + " "; //$NON-NLS-1$
+			        }
+			        Assert.fail(formatted + "expected same:<" + expected + "> was not:<" //$NON-NLS-1$ //$NON-NLS-2$
+			                + actual + ">"); //$NON-NLS-1$
+			    }
+			
+			    static private void failSame(final String message) {
+			        String formatted = ""; //$NON-NLS-1$
+			        if (message != null) {
+			            formatted = message + " "; //$NON-NLS-1$
+			        }
+			        Assert.fail(formatted + "expected not same"); //$NON-NLS-1$
+			    }
+			
+			    static String format(final String message, final Object expected,
+			            final Object actual) {
+			        String formatted = ""; //$NON-NLS-1$
+			        if (message != null) {
+			            formatted = message + " "; //$NON-NLS-1$
+			        }
+			        return formatted + "expected:<" + expected + "> but was:<" + actual //$NON-NLS-1$ //$NON-NLS-2$
+			                + ">"; //$NON-NLS-1$
+			    }
+			
+			    /**
+			     * Protect constructor since it is a static only class
+			     */
+			    protected Assert() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.Assert.java", str31);
+        String str32= """
+			package junit.runner;
+			
+			import java.io.File;
+			import java.util.Enumeration;
+			import java.util.Hashtable;
+			import java.util.StringTokenizer;
+			import java.util.Vector;
+			
+			/**
+			 * An implementation of a TestCollector that consults the class path. It
+			 * considers all classes on the class path excluding classes in JARs. It leaves
+			 * it up to subclasses to decide whether a class is a runnable Test.
+			 *
+			 * @see TestCollector
+			 */
+			public abstract class ClassPathTestCollector implements TestCollector {
+			
+			    static final int SUFFIX_LENGTH = ".class".length(); //$NON-NLS-1$
+			
+			    public ClassPathTestCollector() {
+			    }
+			
+			    protected String classNameFromFile(final String classFileName) {
+			        // convert /a/b.class to a.b
+			        final String s = classFileName.substring(0,
+			                classFileName.length() - ClassPathTestCollector.SUFFIX_LENGTH);
+			        final String s2 = s.replace(File.separatorChar, '.');
+			        if (s2.startsWith(".")) { //$NON-NLS-1$
+			            return s2.substring(1);
+			        }
+			        return s2;
+			    }
+			
+			    public Hashtable collectFilesInPath(final String classPath) {
+			        final Hashtable result = this
+			                .collectFilesInRoots(this.splitClassPath(classPath));
+			        return result;
+			    }
+			
+			    Hashtable collectFilesInRoots(final Vector roots) {
+			        final Hashtable result = new Hashtable(100);
+			        final Enumeration e = roots.elements();
+			        while (e.hasMoreElements()) {
+			            this.gatherFiles(new File((String) e.nextElement()), "", result); //$NON-NLS-1$
+			        }
+			        return result;
+			    }
+			
+			    public Enumeration collectTests() {
+			        final String classPath = System.getProperty("java.class.path"); //$NON-NLS-1$
+			        final Hashtable result = this.collectFilesInPath(classPath);
+			        return result.elements();
+			    }
+			
+			    void gatherFiles(final File classRoot, final String classFileName,
+			            final Hashtable result) {
+			        final File thisRoot = new File(classRoot, classFileName);
+			        if (thisRoot.isFile()) {
+			            if (this.isTestClass(classFileName)) {
+			                final String className = this.classNameFromFile(classFileName);
+			                result.put(className, className);
+			            }
+			            return;
+			        }
+			        final String[] contents = thisRoot.list();
+			        if (contents != null) {
+			            for (final String content : contents) {
+			                this.gatherFiles(classRoot,
+			                        classFileName + File.separatorChar + content, result);
+			            }
+			        }
+			    }
+			
+			    protected boolean isTestClass(final String classFileName) {
+			        return classFileName.endsWith(".class") && //$NON-NLS-1$
+			                (classFileName.indexOf('$') < 0)
+			                && (classFileName.indexOf("Test") > 0); //$NON-NLS-1$
+			    }
+			
+			    Vector splitClassPath(final String classPath) {
+			        final Vector result = new Vector();
+			        final String separator = System.getProperty("path.separator"); //$NON-NLS-1$
+			        final StringTokenizer tokenizer = new StringTokenizer(classPath,
+			                separator);
+			        while (tokenizer.hasMoreTokens()) {
+			            result.addElement(tokenizer.nextToken());
+			        }
+			        return result;
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.runner.ClassPathTestCollector.java", str32);
+        String str33= """
+			package junit.framework;
+			
+			/**
+			 * A Listener for test progress
+			 */
+			public interface TestListener {
+			    /**
+			     * An error occurred.
+			     */
+			    void addError(Test test, Throwable t);
+			    /**
+			     * A failure occurred.
+			     */
+			    void addFailure(Test test, AssertionFailedError t);
+			    /**
+			     * A test ended.
+			     */
+			    void endTest(Test test);
+			    /**
+			     * A test started.
+			     */
+			    void startTest(Test test);
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.TestListener.java", str33);
+        String str34= """
+			package junit.tests.extensions;
+			
+			import junit.extensions.ActiveTestSuite;
+			import junit.extensions.RepeatedTest;
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			
+			/**
+			 * Testing the ActiveTest support
+			 */
+			
+			public class ActiveTestTest extends TestCase {
+			
+			    public static class SuccessTest extends TestCase {
+			        @Override
+			        public void runTest() {
+			        }
+			    }
+			
+			    ActiveTestSuite createActiveTestSuite() {
+			        final ActiveTestSuite suite = new ActiveTestSuite();
+			        for (int i = 0; i < 100; i++) {
+			            suite.addTest(new SuccessTest());
+			        }
+			        return suite;
+			    }
+			
+			    public void testActiveRepeatedTest() {
+			        final Test test = new RepeatedTest(this.createActiveTestSuite(), 5);
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(500, result.runCount());
+			        Assert.assertEquals(0, result.failureCount());
+			        Assert.assertEquals(0, result.errorCount());
+			    }
+			
+			    public void testActiveRepeatedTest0() {
+			        final Test test = new RepeatedTest(this.createActiveTestSuite(), 0);
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(0, result.runCount());
+			        Assert.assertEquals(0, result.failureCount());
+			        Assert.assertEquals(0, result.errorCount());
+			    }
+			
+			    public void testActiveRepeatedTest1() {
+			        final Test test = new RepeatedTest(this.createActiveTestSuite(), 1);
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(100, result.runCount());
+			        Assert.assertEquals(0, result.failureCount());
+			        Assert.assertEquals(0, result.errorCount());
+			    }
+			
+			    public void testActiveTest() {
+			        final Test test = this.createActiveTestSuite();
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(100, result.runCount());
+			        Assert.assertEquals(0, result.failureCount());
+			        Assert.assertEquals(0, result.errorCount());
+			    }
+			
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.extensions.ActiveTestTest.java", str34);
+        String str35= """
+			package junit.framework;
+			
+			/**
+			 * A <em>Protectable</em> can be run and can throw a Throwable.
+			 *
+			 * @see TestResult
+			 */
+			public interface Protectable {
+			
+			    /**
+			     * Run the the following method protected.
+			     */
+			    void protect() throws Throwable;
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.Protectable.java", str35);
+        String str36= """
+			package junit.samples.money;
+			
+			/**
+			 * The common interface for simple Monies and MoneyBags
+			 *
+			 */
+			public interface IMoney {
+			    /**
+			     * Adds a money to this money.
+			     */
+			    IMoney add(IMoney m);
+			    /**
+			     * Adds a simple Money to this money. This is a helper method for
+			     * implementing double dispatch
+			     */
+			    IMoney addMoney(Money m);
+			    /**
+			     * Adds a MoneyBag to this money. This is a helper method for implementing
+			     * double dispatch
+			     */
+			    IMoney addMoneyBag(MoneyBag s);
+			    /**
+			     * Append this to a MoneyBag m.
+			     */
+			    void appendTo(MoneyBag m);
+			    /**
+			     * Tests whether this money is zero
+			     */
+			    boolean isZero();
+			    /**
+			     * Multiplies a money by the given factor.
+			     */
+			    IMoney multiply(int factor);
+			    /**
+			     * Negates this money.
+			     */
+			    IMoney negate();
+			    /**
+			     * Subtracts a money from this money.
+			     */
+			    IMoney subtract(IMoney m);
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.money.IMoney.java", str36);
+        String str37= """
+			package junit.textui;
+			
+			import java.io.PrintStream;
+			
+			import junit.framework.Test;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			import junit.runner.BaseTestRunner;
+			import junit.runner.StandardTestSuiteLoader;
+			import junit.runner.TestSuiteLoader;
+			import junit.runner.Version;
+			
+			/**
+			 * A command line based tool to run tests.
+			 *\s
+			 * <pre>
+			 * java junit.textui.TestRunner [-wait] TestCaseClass
+			 * </pre>
+			 *\s
+			 * TestRunner expects the name of a TestCase class as argument. If this class
+			 * defines a static <code>suite</code> method it will be invoked and the
+			 * returned test is run. Otherwise all the methods starting with "test" having
+			 * no arguments are run.
+			 * <p>
+			 * When the wait command line argument is given TestRunner waits until the users
+			 * types RETURN.
+			 * <p>
+			 * TestRunner prints a trace as the tests are executed followed by a summary at
+			 * the end.
+			 */
+			public class TestRunner extends BaseTestRunner {
+			    public static final int EXCEPTION_EXIT = 2;
+			
+			    public static final int FAILURE_EXIT = 1;
+			    public static final int SUCCESS_EXIT = 0;
+			    public static void main(final String args[]) {
+			        final TestRunner aTestRunner = new TestRunner();
+			        try {
+			            final TestResult r = aTestRunner.start(args);
+			            if (!r.wasSuccessful()) {
+			                System.exit(TestRunner.FAILURE_EXIT);
+			            }
+			            System.exit(TestRunner.SUCCESS_EXIT);
+			        } catch (final Exception e) {
+			            System.err.println(e.getMessage());
+			            System.exit(TestRunner.EXCEPTION_EXIT);
+			        }
+			    }
+			
+			    /**
+			     * Runs a suite extracted from a TestCase subclass.
+			     */
+			    static public void run(final Class testClass) {
+			        TestRunner.run(new TestSuite(testClass));
+			    }
+			
+			    /**
+			     * Runs a single test and collects its results. This method can be used to
+			     * start a test run from your program.
+			     *\s
+			     * <pre>
+			     * public static void main(String[] args) {
+			     *     test.textui.TestRunner.run(suite());
+			     * }
+			     * </pre>
+			     */
+			    static public TestResult run(final Test test) {
+			        final TestRunner runner = new TestRunner();
+			        return runner.doRun(test);
+			    }
+			
+			    /**
+			     * Runs a single test and waits until the user types RETURN.
+			     */
+			    static public void runAndWait(final Test suite) {
+			        final TestRunner aTestRunner = new TestRunner();
+			        aTestRunner.doRun(suite, true);
+			    }
+			
+			    private ResultPrinter fPrinter;
+			
+			    /**
+			     * Constructs a TestRunner.
+			     */
+			    public TestRunner() {
+			        this(System.out);
+			    }
+			
+			    /**
+			     * Constructs a TestRunner using the given stream for all the output
+			     */
+			    public TestRunner(final PrintStream writer) {
+			        this(new ResultPrinter(writer));
+			    }
+			
+			    /**
+			     * Constructs a TestRunner using the given ResultPrinter all the output
+			     */
+			    public TestRunner(final ResultPrinter printer) {
+			        this.fPrinter = printer;
+			    }
+			
+			    /**
+			     * Creates the TestResult to be used for the test run.
+			     */
+			    protected TestResult createTestResult() {
+			        return new TestResult();
+			    }
+			
+			    public TestResult doRun(final Test test) {
+			        return this.doRun(test, false);
+			    }
+			
+			    public TestResult doRun(final Test suite, final boolean wait) {
+			        final TestResult result = this.createTestResult();
+			        result.addListener(this.fPrinter);
+			        final long startTime = System.currentTimeMillis();
+			        suite.run(result);
+			        final long endTime = System.currentTimeMillis();
+			        final long runTime = endTime - startTime;
+			        this.fPrinter.print(result, runTime);
+			
+			        this.pause(wait);
+			        return result;
+			    }
+			
+			    /**
+			     * Always use the StandardTestSuiteLoader. Overridden from BaseTestRunner.
+			     */
+			    @Override
+			    public TestSuiteLoader getLoader() {
+			        return new StandardTestSuiteLoader();
+			    }
+			
+			    protected void pause(final boolean wait) {
+			        if (!wait) {
+			            return;
+			        }
+			        this.fPrinter.printWaitPrompt();
+			        try {
+			            System.in.read();
+			        } catch (final Exception e) {
+			        }
+			    }
+			
+			    @Override
+			    protected void runFailed(final String message) {
+			        System.err.println(message);
+			        System.exit(TestRunner.FAILURE_EXIT);
+			    }
+			
+			    public void setPrinter(final ResultPrinter printer) {
+			        this.fPrinter = printer;
+			    }
+			
+			    /**
+			     * Starts a test run. Analyzes the command line arguments and runs the given
+			     * test suite.
+			     */
+			    protected TestResult start(final String args[]) throws Exception {
+			        String testCase = ""; //$NON-NLS-1$
+			        boolean wait = false;
+			
+			        for (int i = 0; i < args.length; i++) {
+			            if (args[i].equals("-wait")) { //$NON-NLS-1$
+			                wait = true;
+			            } else if (args[i].equals("-c")) { //$NON-NLS-1$
+			                testCase = this.extractClassName(args[++i]);
+			            } else if (args[i].equals("-v")) { //$NON-NLS-1$
+			                System.err.println("JUnit " + Version.id() //$NON-NLS-1$
+			                        + " by Kent Beck and Erich Gamma"); //$NON-NLS-1$
+			            } else { // $NON-NLS-1$
+			                testCase = args[i];
+			            }
+			        }
+			
+			        if (testCase.equals("")) { // $NON-NLS-1$
+			            throw new Exception(
+			                    "Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class"); //$NON-NLS-1$
+			        }
+			
+			        try {
+			            final Test suite = this.getTest(testCase);
+			            return this.doRun(suite, wait);
+			        } catch (final Exception e) {
+			            throw new Exception("Could not create and run test suite: " + e); //$NON-NLS-1$
+			        }
+			    }
+			
+			    @Override
+			    public void testEnded(final String testName) {
+			    }
+			
+			    @Override
+			    public void testFailed(final int status, final Test test,
+			            final Throwable t) {
+			    }
+			
+			    @Override
+			    public void testStarted(final String testName) {
+			    }
+			
+			}""";
+        fExpectedChangesAllTests.put("junit.textui.TestRunner.java", str37);
+        String str38= """
+			package junit.tests.runner;
+			
+			/**
+			 * Test class used in TestTestCaseClassLoader
+			 */
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			
+			public class ClassLoaderTest extends Assert {
+			    public ClassLoaderTest() {
+			    }
+			    private boolean isTestCaseClassLoader(final ClassLoader cl) {
+			        return ((cl != null) && cl.getClass().getName()
+			                .equals(junit.runner.TestCaseClassLoader.class.getName()));
+			    }
+			    public void verify() {
+			        this.verifyApplicationClassLoadedByTestLoader();
+			        this.verifySystemClassNotLoadedByTestLoader();
+			    }
+			    private void verifyApplicationClassLoadedByTestLoader() {
+			        Assert.assertTrue(
+			                this.isTestCaseClassLoader(this.getClass().getClassLoader()));
+			    }
+			    private void verifySystemClassNotLoadedByTestLoader() {
+			        Assert.assertTrue(
+			                !this.isTestCaseClassLoader(Object.class.getClassLoader()));
+			        Assert.assertTrue(
+			                !this.isTestCaseClassLoader(TestCase.class.getClassLoader()));
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.ClassLoaderTest.java", str38);
+        String str39= """
+			package junit.runner;
+			/**
+			 * A listener interface for observing the execution of a test run. Unlike
+			 * TestListener, this interface using only primitive objects, making it suitable
+			 * for remote test execution.
+			 */
+			public interface TestRunListener {
+			    /* test status constants */
+			    int STATUS_ERROR = 1;
+			    int STATUS_FAILURE = 2;
+			
+			    void testEnded(String testName);
+			    void testFailed(int status, String testName, String trace);
+			    void testRunEnded(long elapsedTime);
+			    void testRunStarted(String testSuiteName, int testCount);
+			    void testRunStopped(long elapsedTime);
+			    void testStarted(String testName);
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.runner.TestRunListener.java", str39);
+        String str40= """
+			
+			package junit.tests.runner;
+			
+			import java.io.ByteArrayOutputStream;
+			import java.io.OutputStream;
+			import java.io.PrintStream;
+			
+			import junit.framework.Assert;
+			import junit.framework.AssertionFailedError;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			import junit.textui.ResultPrinter;
+			import junit.textui.TestRunner;
+			
+			public class TextFeedbackTest extends TestCase {
+			    class TestResultPrinter extends ResultPrinter {
+			        TestResultPrinter(final PrintStream writer) {
+			            super(writer);
+			        }
+			
+			        /*
+			         * Spoof printing time so the tests are deterministic
+			         */
+			        @Override
+			        protected String elapsedTimeAsString(final long runTime) {
+			            return "0"; //$NON-NLS-1$
+			        }
+			    }
+			    public static void main(final String[] args) {
+			        TestRunner.run(TextFeedbackTest.class);
+			    }
+			
+			    OutputStream output;
+			
+			    TestRunner runner;
+			
+			    private String expected(final String[] lines) {
+			        final OutputStream expected = new ByteArrayOutputStream();
+			        final PrintStream expectedWriter = new PrintStream(expected);
+			        for (final String line : lines) {
+			            expectedWriter.println(line);
+			        }
+			        return expected.toString();
+			    }
+			
+			    @Override
+			    public void setUp() {
+			        this.output = new ByteArrayOutputStream();
+			        this.runner = new TestRunner(
+			                new TestResultPrinter(new PrintStream(this.output)));
+			    }
+			
+			    public void testEmptySuite() {
+			        final String expected = this
+			                .expected(new String[]{"", "Time: 0", "", "OK (0 tests)", ""}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			        this.runner.doRun(new TestSuite());
+			        Assert.assertEquals(expected.toString(), this.output.toString());
+			    }
+			
+			    public void testError() {
+			        final String expected = this.expected(
+			                new String[]{".E", "Time: 0", "Errors here", "", "FAILURES!!!", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			                        "Tests run: 1,  Failures: 0,  Errors: 1", ""}); //$NON-NLS-1$ //$NON-NLS-2$
+			        final ResultPrinter printer = new TestResultPrinter(
+			                new PrintStream(this.output)) {
+			            @Override
+			            public void printErrors(final TestResult result) {
+			                this.getWriter().println("Errors here"); //$NON-NLS-1$
+			            }
+			        };
+			        this.runner.setPrinter(printer);
+			        final TestSuite suite = new TestSuite();
+			        suite.addTest(new TestCase() {
+			            @Override
+			            public void runTest() throws Exception {
+			                throw new Exception();
+			            }
+			        });
+			        this.runner.doRun(suite);
+			        Assert.assertEquals(expected.toString(), this.output.toString());
+			    }
+			
+			    public void testFailure() {
+			        final String expected = this.expected(new String[]{".F", "Time: 0", //$NON-NLS-1$ //$NON-NLS-2$
+			                "Failures here", "", "FAILURES!!!", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			                "Tests run: 1,  Failures: 1,  Errors: 0", ""}); //$NON-NLS-1$ //$NON-NLS-2$
+			        final ResultPrinter printer = new TestResultPrinter(
+			                new PrintStream(this.output)) {
+			            @Override
+			            public void printFailures(final TestResult result) {
+			                this.getWriter().println("Failures here"); //$NON-NLS-1$
+			            }
+			        };
+			        this.runner.setPrinter(printer);
+			        final TestSuite suite = new TestSuite();
+			        suite.addTest(new TestCase() {
+			            @Override
+			            public void runTest() {
+			                throw new AssertionFailedError();
+			            }
+			        });
+			        this.runner.doRun(suite);
+			        Assert.assertEquals(expected.toString(), this.output.toString());
+			    }
+			
+			    public void testOneTest() {
+			        final String expected = this
+			                .expected(new String[]{".", "Time: 0", "", "OK (1 test)", ""}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			        final TestSuite suite = new TestSuite();
+			        suite.addTest(new TestCase() {
+			            @Override
+			            public void runTest() {
+			            }
+			        });
+			        this.runner.doRun(suite);
+			        Assert.assertEquals(expected.toString(), this.output.toString());
+			    }
+			
+			    public void testTwoTests() {
+			        final String expected = this.expected(
+			                new String[]{"..", "Time: 0", "", "OK (2 tests)", ""}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			        final TestSuite suite = new TestSuite();
+			        suite.addTest(new TestCase() {
+			            @Override
+			            public void runTest() {
+			            }
+			        });
+			        suite.addTest(new TestCase() {
+			            @Override
+			            public void runTest() {
+			            }
+			        });
+			        this.runner.doRun(suite);
+			        Assert.assertEquals(expected.toString(), this.output.toString());
+			    }
+			
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.runner.TextFeedbackTest.java", str40);
+        String str41= """
+			package junit.tests.extensions;
+			
+			import junit.extensions.TestSetup;
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			import junit.tests.WasRun;
+			
+			/**
+			 * A test case testing the extensions to the testing framework.
+			 *
+			 */
+			public class ExtensionTest extends TestCase {
+			    static class TornDown extends TestSetup {
+			        boolean fTornDown = false;
+			
+			        TornDown(final Test test) {
+			            super(test);
+			        }
+			        @Override
+			        protected void tearDown() {
+			            this.fTornDown = true;
+			        }
+			    }
+			    public void testRunningErrorInTestSetup() {
+			        final TestCase test = new TestCase("failure") { //$NON-NLS-1$
+			            @Override
+			            public void runTest() {
+			                Assert.fail();
+			            }
+			        };
+			
+			        final TestSetup wrapper = new TestSetup(test);
+			
+			        final TestResult result = new TestResult();
+			        wrapper.run(result);
+			        Assert.assertTrue(!result.wasSuccessful());
+			    }
+			    public void testRunningErrorsInTestSetup() {
+			        final TestCase failure = new TestCase("failure") { //$NON-NLS-1$
+			            @Override
+			            public void runTest() {
+			                Assert.fail();
+			            }
+			        };
+			
+			        final TestCase error = new TestCase("error") { //$NON-NLS-1$
+			            @Override
+			            public void runTest() {
+			                throw new Error();
+			            }
+			        };
+			
+			        final TestSuite suite = new TestSuite();
+			        suite.addTest(failure);
+			        suite.addTest(error);
+			
+			        final TestSetup wrapper = new TestSetup(suite);
+			
+			        final TestResult result = new TestResult();
+			        wrapper.run(result);
+			
+			        Assert.assertEquals(1, result.failureCount());
+			        Assert.assertEquals(1, result.errorCount());
+			    }
+			    public void testSetupErrorDontTearDown() {
+			        final WasRun test = new WasRun();
+			
+			        final TornDown wrapper = new TornDown(test) {
+			            @Override
+			            public void setUp() {
+			                Assert.fail();
+			            }
+			        };
+			
+			        final TestResult result = new TestResult();
+			        wrapper.run(result);
+			
+			        Assert.assertTrue(!wrapper.fTornDown);
+			    }
+			    public void testSetupErrorInTestSetup() {
+			        final WasRun test = new WasRun();
+			
+			        final TestSetup wrapper = new TestSetup(test) {
+			            @Override
+			            public void setUp() {
+			                Assert.fail();
+			            }
+			        };
+			
+			        final TestResult result = new TestResult();
+			        wrapper.run(result);
+			
+			        Assert.assertTrue(!test.fWasRun);
+			        Assert.assertTrue(!result.wasSuccessful());
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.extensions.ExtensionTest.java", str41);
+        String str42= """
+			package junit.tests;
+			
+			import junit.framework.Test;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * TestSuite that runs all the JUnit tests
+			 *
+			 */
+			public class AllTests {
+			
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(AllTests.suite());
+			    }
+			
+			    public static Test suite() {
+			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
+			        suite.addTest(junit.tests.framework.AllTests.suite());
+			        suite.addTest(junit.tests.runner.AllTests.suite());
+			        suite.addTest(junit.tests.extensions.AllTests.suite());
+			        return suite;
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.AllTests.java", str42);
+        String str43= """
+			package junit.tests.runner;
+			
+			/**
+			 * Test class used in TestTestCaseClassLoader
+			 */
+			import junit.framework.Assert;
+			
+			public class LoadedFromJar extends Assert {
+			    private boolean isTestCaseClassLoader(final ClassLoader cl) {
+			        return ((cl != null) && cl.getClass().getName()
+			                .equals(junit.runner.TestCaseClassLoader.class.getName()));
+			    }
+			    public void verify() {
+			        this.verifyApplicationClassLoadedByTestLoader();
+			    }
+			    private void verifyApplicationClassLoadedByTestLoader() {
+			        Assert.assertTrue(
+			                this.isTestCaseClassLoader(this.getClass().getClassLoader()));
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.LoadedFromJar.java", str43);
+        String str44= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.ComparisonFailure;
+			import junit.framework.TestCase;
+			
+			public class ComparisonFailureTest extends TestCase {
+			
+			    public void testComparisonErrorEndSame() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
+			                "cb"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<a...> but was:<c...>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorEndSameComplete() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "bc", //$NON-NLS-1$
+			                "abc"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<...> but was:<a...>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorMessage() {
+			        final ComparisonFailure failure = new ComparisonFailure("a", "b", "c"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			        Assert.assertEquals("a expected:<b> but was:<c>", failure.getMessage()); //$NON-NLS-1$
+			    }
+			
+			    public void testComparisonErrorOverlapingMatches() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", //$NON-NLS-1$
+			                "abbc"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<......> but was:<...b...>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorOverlapingMatches2() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "abcdde", //$NON-NLS-1$
+			                "abcde"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<...d...> but was:<......>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorSame() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
+			                "ab"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<ab> but was:<ab>", failure.getMessage()); //$NON-NLS-1$
+			    }
+			
+			    public void testComparisonErrorStartAndEndSame() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", //$NON-NLS-1$
+			                "adc"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<...b...> but was:<...d...>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorStartSame() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ba", //$NON-NLS-1$
+			                "bc"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<...a> but was:<...c>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorStartSameComplete() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
+			                "abc"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<...> but was:<...c>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorWithActualNull() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, "a", //$NON-NLS-1$
+			                null);
+			        Assert.assertEquals("expected:<a> but was:<null>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			
+			    public void testComparisonErrorWithExpectedNull() {
+			        final ComparisonFailure failure = new ComparisonFailure(null, null,
+			                "a"); //$NON-NLS-1$
+			        Assert.assertEquals("expected:<null> but was:<a>", //$NON-NLS-1$
+			                failure.getMessage());
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.framework.ComparisonFailureTest.java", str44);
+        String str45= """
+			
+			package junit.textui;
+			
+			import java.io.PrintStream;
+			import java.text.NumberFormat;
+			import java.util.Enumeration;
+			
+			import junit.framework.AssertionFailedError;
+			import junit.framework.Test;
+			import junit.framework.TestFailure;
+			import junit.framework.TestListener;
+			import junit.framework.TestResult;
+			import junit.runner.BaseTestRunner;
+			
+			public class ResultPrinter implements TestListener {
+			    int fColumn = 0;
+			    PrintStream fWriter;
+			
+			    public ResultPrinter(final PrintStream writer) {
+			        this.fWriter = writer;
+			    }
+			
+			    /*
+			     * API for use by textui.TestRunner
+			     */
+			
+			    /**
+			     * @see junit.framework.TestListener#addError(Test, Throwable)
+			     */
+			    public void addError(final Test test, final Throwable t) {
+			        this.getWriter().print("E"); //$NON-NLS-1$
+			    }
+			
+			    /**
+			     * @see junit.framework.TestListener#addFailure(Test, AssertionFailedError)
+			     */
+			    public void addFailure(final Test test, final AssertionFailedError t) {
+			        this.getWriter().print("F"); //$NON-NLS-1$
+			    }
+			
+			    /*
+			     * Internal methods
+			     */
+			
+			    /**
+			     * Returns the formatted string of the elapsed time. Duplicated from
+			     * BaseTestRunner. Fix it.
+			     */
+			    protected String elapsedTimeAsString(final long runTime) {
+			        return NumberFormat.getInstance().format((double) runTime / 1000);
+			    }
+			
+			    /**
+			     * @see junit.framework.TestListener#endTest(Test)
+			     */
+			    public void endTest(final Test test) {
+			    }
+			
+			    public PrintStream getWriter() {
+			        return this.fWriter;
+			    }
+			
+			    synchronized void print(final TestResult result, final long runTime) {
+			        this.printHeader(runTime);
+			        this.printErrors(result);
+			        this.printFailures(result);
+			        this.printFooter(result);
+			    }
+			
+			    public void printDefect(final TestFailure booBoo, final int count) { // only
+			                                                                         // public
+			                                                                         // for
+			                                                                         // testing
+			                                                                         // purposes
+			        this.printDefectHeader(booBoo, count);
+			        this.printDefectTrace(booBoo);
+			    }
+			
+			    protected void printDefectHeader(final TestFailure booBoo,
+			            final int count) {
+			        // I feel like making this a println, then adding a line giving the
+			        // throwable a chance to print something
+			        // before we get to the stack trace.
+			        this.getWriter().print(count + ") " + booBoo.failedTest()); //$NON-NLS-1$
+			    }
+			
+			    protected void printDefects(final Enumeration booBoos, final int count,
+			            final String type) {
+			        if (count == 0) {
+			            return;
+			        }
+			        if (count == 1) {
+			            this.getWriter().println("There was " + count + " " + type + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			        } else {
+			            this.getWriter().println("There were " + count + " " + type + "s:"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			        }
+			        for (int i = 1; booBoos.hasMoreElements(); i++) {
+			            this.printDefect((TestFailure) booBoos.nextElement(), i);
+			        }
+			    }
+			
+			    protected void printDefectTrace(final TestFailure booBoo) {
+			        this.getWriter().print(BaseTestRunner.getFilteredTrace(booBoo.trace()));
+			    }
+			
+			    protected void printErrors(final TestResult result) {
+			        this.printDefects(result.errors(), result.errorCount(), "error"); //$NON-NLS-1$
+			    }
+			
+			    protected void printFailures(final TestResult result) {
+			        this.printDefects(result.failures(), result.failureCount(), "failure"); //$NON-NLS-1$
+			    }
+			    protected void printFooter(final TestResult result) {
+			        if (result.wasSuccessful()) {
+			            this.getWriter().println();
+			            this.getWriter().print("OK"); //$NON-NLS-1$
+			            this.getWriter().println(" (" + result.runCount() + " test" //$NON-NLS-1$ //$NON-NLS-2$
+			                    + (result.runCount() == 1 ? "" : "s") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			
+			        } else {
+			            this.getWriter().println();
+			            this.getWriter().println("FAILURES!!!"); //$NON-NLS-1$
+			            this.getWriter().println("Tests run: " + result.runCount() + //$NON-NLS-1$
+			                    ",  Failures: " + result.failureCount() + //$NON-NLS-1$
+			                    ",  Errors: " + result.errorCount()); //$NON-NLS-1$
+			        }
+			        this.getWriter().println();
+			    }
+			
+			    protected void printHeader(final long runTime) {
+			        this.getWriter().println();
+			        this.getWriter().println("Time: " + this.elapsedTimeAsString(runTime)); //$NON-NLS-1$
+			    }
+			
+			    void printWaitPrompt() {
+			        this.getWriter().println();
+			        this.getWriter().println("<RETURN> to continue"); //$NON-NLS-1$
+			    }
+			
+			    /**
+			     * @see junit.framework.TestListener#startTest(Test)
+			     */
+			    public void startTest(final Test test) {
+			        this.getWriter().print("."); //$NON-NLS-1$
+			        if (this.fColumn++ >= 40) {
+			            this.getWriter().println();
+			            this.fColumn = 0;
+			        }
+			    }
+			
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.textui.ResultPrinter.java", str45);
+        String str46= """
+			package junit.samples;
+			
+			import java.util.Vector;
+			
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * A sample test case, testing <code>java.util.Vector</code>.
+			 *
+			 */
+			public class VectorTest extends TestCase {
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(VectorTest.suite());
+			    }
+			    public static Test suite() {
+			        return new TestSuite(VectorTest.class);
+			    }
+			
+			    protected Vector fEmpty;
+			    protected Vector fFull;
+			    @Override
+			    protected void setUp() {
+			        this.fEmpty = new Vector();
+			        this.fFull = new Vector();
+			        this.fFull.addElement(new Integer(1));
+			        this.fFull.addElement(new Integer(2));
+			        this.fFull.addElement(new Integer(3));
+			    }
+			    public void testCapacity() {
+			        final int size = this.fFull.size();
+			        for (int i = 0; i < 100; i++) {
+			            this.fFull.addElement(new Integer(i));
+			        }
+			        Assert.assertTrue(this.fFull.size() == (100 + size));
+			    }
+			    public void testClone() {
+			        final Vector clone = (Vector) this.fFull.clone();
+			        Assert.assertTrue(clone.size() == this.fFull.size());
+			        Assert.assertTrue(clone.contains(new Integer(1)));
+			    }
+			    public void testContains() {
+			        Assert.assertTrue(this.fFull.contains(new Integer(1)));
+			        Assert.assertTrue(!this.fEmpty.contains(new Integer(1)));
+			    }
+			    public void testElementAt() {
+			        final Integer i = (Integer) this.fFull.elementAt(0);
+			        Assert.assertTrue(i.intValue() == 1);
+			
+			        try {
+			            this.fFull.elementAt(this.fFull.size());
+			        } catch (final ArrayIndexOutOfBoundsException e) {
+			            return;
+			        }
+			        Assert.fail("Should raise an ArrayIndexOutOfBoundsException"); //$NON-NLS-1$
+			    }
+			    public void testRemoveAll() {
+			        this.fFull.removeAllElements();
+			        this.fEmpty.removeAllElements();
+			        Assert.assertTrue(this.fFull.isEmpty());
+			        Assert.assertTrue(this.fEmpty.isEmpty());
+			    }
+			    public void testRemoveElement() {
+			        this.fFull.removeElement(new Integer(3));
+			        Assert.assertTrue(!this.fFull.contains(new Integer(3)));
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.VectorTest.java", str46);
+        String str47= """
+			package junit.framework;
+			
+			/**
+			 * Thrown when an assert equals for Strings failed.
+			 *\s
+			 * Inspired by a patch from Alex Chaffee mailto:alex@purpletech.com
+			 */
+			public class ComparisonFailure extends AssertionFailedError {
+			    /* Test */
+			    private static final long serialVersionUID = 1L;
+			    private final String fActual;
+			    private final String fExpected;
+			
+			    /**
+			     * Constructs a comparison failure.
+			     *\s
+			     * @param message  the identifying message or null
+			     * @param expected the expected string value
+			     * @param actual   the actual string value
+			     */
+			    public ComparisonFailure(final String message, final String expected,
+			            final String actual) {
+			        super(message);
+			        this.fExpected = expected;
+			        this.fActual = actual;
+			    }
+			
+			    /**
+			     * Returns "..." in place of common prefix and "..." in place of common
+			     * suffix between expected and actual.
+			     *\s
+			     * @see java.lang.Throwable#getMessage()
+			     */
+			    @Override
+			    public String getMessage() {
+			        if ((this.fExpected == null) || (this.fActual == null)) {
+			            return Assert.format(super.getMessage(), this.fExpected,
+			                    this.fActual);
+			        }
+			
+			        final int end = Math.min(this.fExpected.length(),
+			                this.fActual.length());
+			
+			        int i = 0;
+			        for (; i < end; i++) {
+			            if (this.fExpected.charAt(i) != this.fActual.charAt(i)) {
+			                break;
+			            }
+			        }
+			        int j = this.fExpected.length() - 1;
+			        int k = this.fActual.length() - 1;
+			        for (; (k >= i) && (j >= i); k--, j--) {
+			            if (this.fExpected.charAt(j) != this.fActual.charAt(k)) {
+			                break;
+			            }
+			        }
+			        String actual, expected;
+			
+			        // equal strings
+			        if ((j < i) && (k < i)) {
+			            expected = this.fExpected;
+			            actual = this.fActual;
+			        } else {
+			            expected = this.fExpected.substring(i, j + 1);
+			            actual = this.fActual.substring(i, k + 1);
+			            if ((i <= end) && (i > 0)) {
+			                expected = "..." + expected; //$NON-NLS-1$
+			                actual = "..." + actual; //$NON-NLS-1$
+			            }
+			
+			            if (j < (this.fExpected.length() - 1)) {
+			                expected = expected + "..."; //$NON-NLS-1$
+			            }
+			            if (k < (this.fActual.length() - 1)) {
+			                actual = actual + "..."; //$NON-NLS-1$
+			            }
+			        }
+			        return Assert.format(super.getMessage(), expected, actual);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.ComparisonFailure.java", str47);
+        String str48= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.AssertionFailedError;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestFailure;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			import junit.tests.WasRun;
+			
+			/**
+			 * A test case testing the testing framework.
+			 *
+			 */
+			public class TestCaseTest extends TestCase {
+			
+			    static class TornDown extends TestCase {
+			        boolean fTornDown = false;
+			
+			        @Override
+			        protected void runTest() {
+			            throw new Error();
+			        }
+			        @Override
+			        protected void tearDown() {
+			            this.fTornDown = true;
+			        }
+			    }
+			
+			    public void testCaseToString() {
+			        // This test wins the award for twisted snake tail eating while
+			        // writing self tests. And you thought those weird anonymous
+			        // inner classes were bad...
+			        Assert.assertEquals(
+			                "testCaseToString(junit.tests.framework.TestCaseTest)", //$NON-NLS-1$
+			                this.toString());
+			    }
+			    public void testError() {
+			        final TestCase error = new TestCase("error") { //$NON-NLS-1$
+			            @Override
+			            protected void runTest() {
+			                throw new Error();
+			            }
+			        };
+			        this.verifyError(error);
+			    }
+			    public void testExceptionRunningAndTearDown() {
+			        // This test documents the current behavior. With 1.4, we should
+			        // wrap the exception thrown while running with the exception thrown
+			        // while tearing down
+			        final Test t = new TornDown() {
+			            @Override
+			            public void tearDown() {
+			                throw new Error("tearDown"); //$NON-NLS-1$
+			            }
+			        };
+			        final TestResult result = new TestResult();
+			        t.run(result);
+			        final TestFailure failure = (TestFailure) result.errors().nextElement();
+			        Assert.assertEquals("tearDown", failure.thrownException().getMessage()); //$NON-NLS-1$
+			    }
+			    public void testFailure() {
+			        final TestCase failure = new TestCase("failure") { //$NON-NLS-1$
+			            @Override
+			            protected void runTest() {
+			                Assert.fail();
+			            }
+			        };
+			        this.verifyFailure(failure);
+			    }
+			    public void testNamelessTestCase() {
+			        final TestCase t = new TestCase() {
+			        };
+			        try {
+			            t.run();
+			            Assert.fail();
+			        } catch (final AssertionFailedError e) {
+			        }
+			    }
+			    public void testNoArgTestCasePasses() {
+			        final Test t = new TestSuite(NoArgTestCaseTest.class);
+			        final TestResult result = new TestResult();
+			        t.run(result);
+			        Assert.assertTrue(result.runCount() == 1);
+			        Assert.assertTrue(result.failureCount() == 0);
+			        Assert.assertTrue(result.errorCount() == 0);
+			    }
+			
+			    public void testRunAndTearDownFails() {
+			        final TornDown fails = new TornDown() {
+			            @Override
+			            protected void runTest() {
+			                throw new Error();
+			            }
+			            @Override
+			            protected void tearDown() {
+			                super.tearDown();
+			                throw new Error();
+			            }
+			        };
+			        this.verifyError(fails);
+			        Assert.assertTrue(fails.fTornDown);
+			    }
+			
+			    public void testSetupFails() {
+			        final TestCase fails = new TestCase("success") { //$NON-NLS-1$
+			            @Override
+			            protected void runTest() {
+			            }
+			            @Override
+			            protected void setUp() {
+			                throw new Error();
+			            }
+			        };
+			        this.verifyError(fails);
+			    }
+			    public void testSuccess() {
+			        final TestCase success = new TestCase("success") { //$NON-NLS-1$
+			            @Override
+			            protected void runTest() {
+			            }
+			        };
+			        this.verifySuccess(success);
+			    }
+			    public void testTearDownAfterError() {
+			        final TornDown fails = new TornDown();
+			        this.verifyError(fails);
+			        Assert.assertTrue(fails.fTornDown);
+			    }
+			    public void testTearDownFails() {
+			        final TestCase fails = new TestCase("success") { //$NON-NLS-1$
+			            @Override
+			            protected void runTest() {
+			            }
+			            @Override
+			            protected void tearDown() {
+			                throw new Error();
+			            }
+			        };
+			        this.verifyError(fails);
+			    }
+			
+			    public void testTearDownSetupFails() {
+			        final TornDown fails = new TornDown() {
+			            @Override
+			            protected void setUp() {
+			                throw new Error();
+			            }
+			        };
+			        this.verifyError(fails);
+			        Assert.assertTrue(!fails.fTornDown);
+			    }
+			
+			    public void testWasRun() {
+			        final WasRun test = new WasRun();
+			        test.run();
+			        Assert.assertTrue(test.fWasRun);
+			    }
+			
+			    void verifyError(final TestCase test) {
+			        final TestResult result = test.run();
+			        Assert.assertTrue(result.runCount() == 1);
+			        Assert.assertTrue(result.failureCount() == 0);
+			        Assert.assertTrue(result.errorCount() == 1);
+			    }
+			    void verifyFailure(final TestCase test) {
+			        final TestResult result = test.run();
+			        Assert.assertTrue(result.runCount() == 1);
+			        Assert.assertTrue(result.failureCount() == 1);
+			        Assert.assertTrue(result.errorCount() == 0);
+			    }
+			    void verifySuccess(final TestCase test) {
+			        final TestResult result = test.run();
+			        Assert.assertTrue(result.runCount() == 1);
+			        Assert.assertTrue(result.failureCount() == 0);
+			        Assert.assertTrue(result.errorCount() == 0);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.TestCaseTest.java", str48);
+        String str49= """
+			package junit.framework;
+			
+			import java.io.PrintWriter;
+			import java.io.StringWriter;
+			
+			/**
+			 * A <code>TestFailure</code> collects a failed test together with the caught
+			 * exception.
+			 *\s
+			 * @see TestResult
+			 */
+			public class TestFailure extends Object {
+			    protected Test fFailedTest;
+			    protected Throwable fThrownException;
+			
+			    /**
+			     * Constructs a TestFailure with the given test and exception.
+			     */
+			    public TestFailure(final Test failedTest, final Throwable thrownException) {
+			        this.fFailedTest = failedTest;
+			        this.fThrownException = thrownException;
+			    }
+			    public String exceptionMessage() {
+			        return this.thrownException().getMessage();
+			    }
+			    /**
+			     * Gets the failed test.
+			     */
+			    public Test failedTest() {
+			        return this.fFailedTest;
+			    }
+			    public boolean isFailure() {
+			        return this.thrownException() instanceof AssertionFailedError;
+			    }
+			    /**
+			     * Gets the thrown exception.
+			     */
+			    public Throwable thrownException() {
+			        return this.fThrownException;
+			    }
+			    /**
+			     * Returns a short description of the failure.
+			     */
+			    @Override
+			    public String toString() {
+			        final StringBuffer buffer = new StringBuffer();
+			        buffer.append(
+			                this.fFailedTest + ": " + this.fThrownException.getMessage()); //$NON-NLS-1$
+			        return buffer.toString();
+			    }
+			    public String trace() {
+			        final StringWriter stringWriter = new StringWriter();
+			        final PrintWriter writer = new PrintWriter(stringWriter);
+			        this.thrownException().printStackTrace(writer);
+			        final StringBuffer buffer = stringWriter.getBuffer();
+			        return buffer.toString();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.TestFailure.java", str49);
+        String str50= """
+			package junit.runner;
+			
+			/**
+			 * A TestSuite loader that can reload classes.
+			 */
+			public class ReloadingTestSuiteLoader implements TestSuiteLoader {
+			
+			    protected TestCaseClassLoader createLoader() {
+			        return new TestCaseClassLoader();
+			    }
+			
+			    public Class load(final String suiteClassName)
+			            throws ClassNotFoundException {
+			        return this.createLoader().loadClass(suiteClassName, true);
+			    }
+			
+			    public Class reload(final Class aClass) throws ClassNotFoundException {
+			        return this.createLoader().loadClass(aClass.getName(), true);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.runner.ReloadingTestSuiteLoader.java", str50);
+        String str51= """
+			package junit.runner;
+			
+			/**
+			 * The standard test suite loader. It can only load the same class once.
+			 */
+			public class StandardTestSuiteLoader implements TestSuiteLoader {
+			    /**
+			     * Uses the system class loader to load the test class
+			     */
+			    public Class load(final String suiteClassName)
+			            throws ClassNotFoundException {
+			        return Class.forName(suiteClassName);
+			    }
+			    /**
+			     * Uses the system class loader to load the test class
+			     */
+			    public Class reload(final Class aClass) throws ClassNotFoundException {
+			        return aClass;
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.runner.StandardTestSuiteLoader.java", str51);
+        String str52= """
+			package junit.extensions;
+			
+			import junit.framework.Protectable;
+			import junit.framework.Test;
+			import junit.framework.TestResult;
+			
+			/**
+			 * A Decorator to set up and tear down additional fixture state. Subclass
+			 * TestSetup and insert it into your tests when you want to set up additional
+			 * state once before the tests are run.
+			 */
+			public class TestSetup extends TestDecorator {
+			
+			    public TestSetup(final Test test) {
+			        super(test);
+			    }
+			    @Override
+			    public void run(final TestResult result) {
+			        final Protectable p = new Protectable() {
+			            public void protect() throws Exception {
+			                TestSetup.this.setUp();
+			                TestSetup.this.basicRun(result);
+			                TestSetup.this.tearDown();
+			            }
+			        };
+			        result.runProtected(this, p);
+			    }
+			    /**
+			     * Sets up the fixture. Override to set up additional fixture state.
+			     */
+			    protected void setUp() throws Exception {
+			    }
+			    /**
+			     * Tears down the fixture. Override to tear down the additional fixture
+			     * state.
+			     */
+			    protected void tearDown() throws Exception {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.extensions.TestSetup.java", str52);
+        String str53= """
+			package junit.tests.runner;
+			
+			import java.io.File;
+			import java.io.IOException;
+			import java.io.InputStream;
+			import java.io.OutputStream;
+			import java.io.PrintStream;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			
+			public class TextRunnerTest extends TestCase {
+			
+			    void execTest(final String testClass, final boolean success)
+			            throws Exception {
+			        final String java = System.getProperty("java.home") + File.separator //$NON-NLS-1$
+			                + "bin" + File.separator + "java"; //$NON-NLS-1$ //$NON-NLS-2$
+			        final String cp = System.getProperty("java.class.path"); //$NON-NLS-1$
+			        // use -classpath for JDK 1.1.7 compatibility
+			        final String[] cmd = {java, "-classpath", cp, "junit.textui.TestRunner", //$NON-NLS-1$ //$NON-NLS-2$
+			                testClass};
+			        final Process p = Runtime.getRuntime().exec(cmd);
+			        final InputStream i = p.getInputStream();
+			        while ((i.read()) != -1) {
+			            ; // System.out.write(b);
+			        }
+			        Assert.assertTrue((p.waitFor() == 0) == success);
+			        if (success) {
+			            Assert.assertEquals(junit.textui.TestRunner.SUCCESS_EXIT,
+			                    p.exitValue());
+			        } else {
+			            Assert.assertEquals(junit.textui.TestRunner.FAILURE_EXIT,
+			                    p.exitValue());
+			        }
+			    }
+			
+			    public void testError() throws Exception {
+			        this.execTest("junit.tests.BogusDude", false); //$NON-NLS-1$
+			    }
+			
+			    public void testFailure() throws Exception {
+			        this.execTest("junit.tests.framework.Failure", false); //$NON-NLS-1$
+			    }
+			
+			    public void testRunReturnsResult() {
+			        final PrintStream oldOut = System.out;
+			        System.setOut(new PrintStream(new OutputStream() {
+			            @Override
+			            public void write(final int arg0) throws IOException {
+			            }
+			        }));
+			        try {
+			            final TestResult result = junit.textui.TestRunner
+			                    .run(new TestSuite());
+			            Assert.assertTrue(result.wasSuccessful());
+			        } finally {
+			            System.setOut(oldOut);
+			        }
+			    }
+			
+			    public void testSuccess() throws Exception {
+			        this.execTest("junit.tests.framework.Success", true); //$NON-NLS-1$
+			    }
+			
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.TextRunnerTest.java", str53);
+        String str54= """
+			package junit.tests.framework;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			
+			/**
+			 * A test case testing the testing framework.
+			 *
+			 */
+			public class Failure extends TestCase {
+			    @Override
+			    public void runTest() {
+			        Assert.fail();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.Failure.java", str54);
+        String str55= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			public class OverrideTestCase extends OneTestCase {
+			    @Override
+			    public void testCase() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.OverrideTestCase.java", str55);
+        String str56= """
+			package junit.extensions;
+			
+			import junit.framework.Test;
+			import junit.framework.TestResult;
+			
+			/**
+			 * A Decorator that runs a test repeatedly.
+			 *
+			 */
+			public class RepeatedTest extends TestDecorator {
+			    private final int fTimesRepeat;
+			
+			    public RepeatedTest(final Test test, final int repeat) {
+			        super(test);
+			        if (repeat < 0) {
+			            throw new IllegalArgumentException("Repetition count must be > 0"); //$NON-NLS-1$
+			        }
+			        this.fTimesRepeat = repeat;
+			    }
+			    @Override
+			    public int countTestCases() {
+			        return super.countTestCases() * this.fTimesRepeat;
+			    }
+			    @Override
+			    public void run(final TestResult result) {
+			        for (int i = 0; i < this.fTimesRepeat; i++) {
+			            if (result.shouldStop()) {
+			                break;
+			            }
+			            super.run(result);
+			        }
+			    }
+			    @Override
+			    public String toString() {
+			        return super.toString() + "(repeated)"; //$NON-NLS-1$
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.extensions.RepeatedTest.java", str56);
+        String str57= """
+			
+			package junit.tests.framework;
+			
+			import junit.framework.TestCase;
+			
+			public class NoArgTestCaseTest extends TestCase {
+			    public void testNothing() { // If this compiles, the no arg ctor is there
+			    }
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.framework.NoArgTestCaseTest.java", str57);
+        String str58= """
+			package junit.runner;
+			
+			import java.util.Vector;
+			
+			/**
+			 * A custom quick sort with support to customize the swap behaviour. NOTICE: We
+			 * can't use the the sorting support from the JDK 1.2 collection classes because
+			 * of the JDK 1.1.7 compatibility.
+			 */
+			public class Sorter {
+			    public interface Swapper {
+			        void swap(Vector values, int left, int right);
+			    }
+			
+			    public static void sortStrings(final Vector values, int left, int right,
+			            final Swapper swapper) {
+			        final int oleft = left;
+			        final int oright = right;
+			        final String mid = (String) values.elementAt((left + right) / 2);
+			        do {
+			            while (((String) (values.elementAt(left))).compareTo(mid) < 0) {
+			                left++;
+			            }
+			            while (mid.compareTo((String) (values.elementAt(right))) < 0) {
+			                right--;
+			            }
+			            if (left <= right) {
+			                swapper.swap(values, left, right);
+			                left++;
+			                right--;
+			            }
+			        } while (left <= right);
+			
+			        if (oleft < right) {
+			            Sorter.sortStrings(values, oleft, right, swapper);
+			        }
+			        if (left < oright) {
+			            Sorter.sortStrings(values, left, oright, swapper);
+			        }
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.runner.Sorter.java", str58);
+        String str59= """
+			package junit.tests.framework;
+			
+			import junit.framework.Test;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * TestSuite that runs all the sample tests
+			 *
+			 */
+			public class AllTests {
+			
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(AllTests.suite());
+			    }
+			
+			    public static Test suite() {
+			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
+			        suite.addTestSuite(TestCaseTest.class);
+			        suite.addTest(SuiteTest.suite()); // Tests suite building, so can't use
+			                                          // automatic test extraction
+			        suite.addTestSuite(TestListenerTest.class);
+			        suite.addTestSuite(AssertTest.class);
+			        suite.addTestSuite(TestImplementorTest.class);
+			        suite.addTestSuite(NoArgTestCaseTest.class);
+			        suite.addTestSuite(ComparisonFailureTest.class);
+			        suite.addTestSuite(DoublePrecisionAssertTest.class);
+			        return suite;
+			    }
+			
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.AllTests.java", str59);
+        String str60= """
+			package junit.tests.extensions;
+			
+			import junit.extensions.RepeatedTest;
+			import junit.framework.Assert;
+			import junit.framework.Test;
+			import junit.framework.TestCase;
+			import junit.framework.TestResult;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * Testing the RepeatedTest support.
+			 */
+			
+			public class RepeatedTestTest extends TestCase {
+			    public static class SuccessTest extends TestCase {
+			
+			        @Override
+			        public void runTest() {
+			        }
+			    }
+			
+			    private final TestSuite fSuite;
+			
+			    public RepeatedTestTest(final String name) {
+			        super(name);
+			        this.fSuite = new TestSuite();
+			        this.fSuite.addTest(new SuccessTest());
+			        this.fSuite.addTest(new SuccessTest());
+			    }
+			
+			    public void testRepeatedMoreThanOnce() {
+			        final Test test = new RepeatedTest(this.fSuite, 3);
+			        Assert.assertEquals(6, test.countTestCases());
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(6, result.runCount());
+			    }
+			
+			    public void testRepeatedNegative() {
+			        try {
+			            new RepeatedTest(this.fSuite, -1);
+			        } catch (final IllegalArgumentException e) {
+			            return;
+			        }
+			        Assert.fail("Should throw an IllegalArgumentException"); //$NON-NLS-1$
+			    }
+			
+			    public void testRepeatedOnce() {
+			        final Test test = new RepeatedTest(this.fSuite, 1);
+			        Assert.assertEquals(2, test.countTestCases());
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(2, result.runCount());
+			    }
+			
+			    public void testRepeatedZero() {
+			        final Test test = new RepeatedTest(this.fSuite, 0);
+			        Assert.assertEquals(0, test.countTestCases());
+			        final TestResult result = new TestResult();
+			        test.run(result);
+			        Assert.assertEquals(0, result.runCount());
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.extensions.RepeatedTestTest.java", str60);
+        String str61= """
+			package junit.tests.runner;
+			
+			import junit.framework.Test;
+			import junit.framework.TestSuite;
+			import junit.runner.BaseTestRunner;
+			
+			/**
+			 * TestSuite that runs all the sample tests
+			 *
+			 */
+			public class AllTests {
+			
+			    static boolean isJDK11() {
+			        final String version = System.getProperty("java.version"); //$NON-NLS-1$
+			        return version.startsWith("1.1"); //$NON-NLS-1$
+			    }
+			
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(AllTests.suite());
+			    }
+			
+			    public static Test suite() { // Collect tests manually because we have to
+			                                 // test class collection code
+			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
+			        suite.addTestSuite(StackFilterTest.class);
+			        suite.addTestSuite(SorterTest.class);
+			        suite.addTestSuite(SimpleTestCollectorTest.class);
+			        suite.addTestSuite(BaseTestRunnerTest.class);
+			        suite.addTestSuite(TextFeedbackTest.class);
+			        if (!BaseTestRunner.inVAJava()) {
+			            suite.addTestSuite(TextRunnerTest.class);
+			            if (!AllTests.isJDK11()) {
+			                suite.addTest(new TestSuite(TestCaseClassLoaderTest.class));
+			            }
+			        }
+			        return suite;
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.AllTests.java", str61);
+        String str62= """
+			package junit.runner;
+			
+			import java.util.Enumeration;
+			
+			/**
+			 * Collects Test class names to be presented by the TestSelector.
+			 *\s
+			 * @see TestSelector
+			 */
+			public interface TestCollector {
+			    /**
+			     * Returns an enumeration of Strings with qualified class names
+			     */
+			    Enumeration collectTests();
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.runner.TestCollector.java", str62);
+        String str63= """
+			package junit.samples.money;
+			
+			import java.util.Vector;
+			
+			/**
+			 * A MoneyBag defers exchange rate conversions. For example adding 12 Swiss
+			 * Francs to 14 US Dollars is represented as a bag containing the two Monies 12
+			 * CHF and 14 USD. Adding another 10 Swiss francs gives a bag with 22 CHF and 14
+			 * USD. Due to the deferred exchange rate conversion we can later value a
+			 * MoneyBag with different exchange rates.
+			 *
+			 * A MoneyBag is represented as a list of Monies and provides different
+			 * constructors to create a MoneyBag.
+			 */
+			class MoneyBag implements IMoney {
+			    static IMoney create(final IMoney m1, final IMoney m2) {
+			        final MoneyBag result = new MoneyBag();
+			        m1.appendTo(result);
+			        m2.appendTo(result);
+			        return result.simplify();
+			    }
+			
+			    private final Vector fMonies = new Vector(5);
+			    public IMoney add(final IMoney m) {
+			        return m.addMoneyBag(this);
+			    }
+			    public IMoney addMoney(final Money m) {
+			        return MoneyBag.create(m, this);
+			    }
+			    public IMoney addMoneyBag(final MoneyBag s) {
+			        return MoneyBag.create(s, this);
+			    }
+			    void appendBag(final MoneyBag aBag) {
+			        for (final Object element : aBag.fMonies) {
+			            this.appendMoney((Money) element);
+			        }
+			    }
+			    void appendMoney(final Money aMoney) {
+			        if (aMoney.isZero()) {
+			            return;
+			        }
+			        final IMoney old = this.findMoney(aMoney.currency());
+			        if (old == null) {
+			            this.fMonies.addElement(aMoney);
+			            return;
+			        }
+			        this.fMonies.removeElement(old);
+			        final IMoney sum = old.add(aMoney);
+			        if (sum.isZero()) {
+			            return;
+			        }
+			        this.fMonies.addElement(sum);
+			    }
+			    public void appendTo(final MoneyBag m) {
+			        m.appendBag(this);
+			    }
+			    private boolean contains(final Money m) {
+			        final Money found = this.findMoney(m.currency());
+			        if (found == null) {
+			            return false;
+			        }
+			        return found.amount() == m.amount();
+			    }
+			    @Override
+			    public boolean equals(final Object anObject) {
+			        if (this.isZero()) {
+			            if (anObject instanceof IMoney) {
+			                return ((IMoney) anObject).isZero();
+			            }
+			        }
+			
+			        if (anObject instanceof MoneyBag) {
+			            final MoneyBag aMoneyBag = (MoneyBag) anObject;
+			            if (aMoneyBag.fMonies.size() != this.fMonies.size()) {
+			                return false;
+			            }
+			
+			            for (final Object element : this.fMonies) {
+			                final Money m = (Money) element;
+			                if (!aMoneyBag.contains(m)) {
+			                    return false;
+			                }
+			            }
+			            return true;
+			        }
+			        return false;
+			    }
+			    private Money findMoney(final String currency) {
+			        for (final Object element : this.fMonies) {
+			            final Money m = (Money) element;
+			            if (m.currency().equals(currency)) {
+			                return m;
+			            }
+			        }
+			        return null;
+			    }
+			    @Override
+			    public int hashCode() {
+			        int hash = 0;
+			        for (Object m : this.fMonies) {
+			            hash ^= m.hashCode();
+			        }
+			        return hash;
+			    }
+			    public boolean isZero() {
+			        return this.fMonies.size() == 0;
+			    }
+			    public IMoney multiply(final int factor) {
+			        final MoneyBag result = new MoneyBag();
+			        if (factor != 0) {
+			            for (final Object element : this.fMonies) {
+			                final Money m = (Money) element;
+			                result.appendMoney((Money) m.multiply(factor));
+			            }
+			        }
+			        return result;
+			    }
+			    public IMoney negate() {
+			        final MoneyBag result = new MoneyBag();
+			        for (final Object element : this.fMonies) {
+			            final Money m = (Money) element;
+			            result.appendMoney((Money) m.negate());
+			        }
+			        return result;
+			    }
+			    private IMoney simplify() {
+			        if (this.fMonies.size() == 1) {
+			            return (IMoney) this.fMonies.elements().nextElement();
+			        }
+			        return this;
+			    }
+			    public IMoney subtract(final IMoney m) {
+			        return this.add(m.negate());
+			    }
+			    @Override
+			    public String toString() {
+			        final StringBuffer buffer = new StringBuffer();
+			        buffer.append("{"); //$NON-NLS-1$
+			        for (final Object element : this.fMonies) {
+			            buffer.append(element);
+			        }
+			        buffer.append("}"); //$NON-NLS-1$
+			        return buffer.toString();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.money.MoneyBag.java", str63);
+        String str64= """
+			package junit.tests.runner;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			import junit.runner.SimpleTestCollector;
+			
+			public class SimpleTestCollectorTest extends TestCase {
+			
+			    public void testMissingDirectory() {
+			        final SimpleTestCollector collector = new SimpleTestCollector();
+			        Assert.assertFalse(collector.collectFilesInPath("foobar").elements() //$NON-NLS-1$
+			                .hasMoreElements());
+			    }
+			
+			}
+			""";
+        fExpectedChangesAllTests.put("junit.tests.runner.SimpleTestCollectorTest.java", str64);
+        String str65= """
+			package junit.framework;
+			
+			import java.lang.reflect.InvocationTargetException;
+			import java.lang.reflect.Method;
+			import java.lang.reflect.Modifier;
+			
+			/**
+			 * A test case defines the fixture to run multiple tests. To define a test
+			 * case<br>
+			 * 1) implement a subclass of TestCase<br>
+			 * 2) define instance variables that store the state of the fixture<br>
+			 * 3) initialize the fixture state by overriding <code>setUp</code><br>
+			 * 4) clean-up after a test by overriding <code>tearDown</code>.<br>
+			 * Each test runs in its own fixture so there can be no side effects among test
+			 * runs. Here is an example:
+			 *\s
+			 * <pre>
+			 * public class MathTest extends TestCase {
+			 *     protected double fValue1;
+			 *     protected double fValue2;
+			 *
+			 *     protected void setUp() {
+			 *         fValue1 = 2.0;
+			 *         fValue2 = 3.0;
+			 *     }
+			 * }
+			 * </pre>
+			 *
+			 * For each test implement a method which interacts with the fixture. Verify the
+			 * expected results with assertions specified by calling <code>assertTrue</code>
+			 * with a boolean.
+			 *\s
+			 * <pre>
+			 * public void testAdd() {
+			 *     double result = fValue1 + fValue2;
+			 *     assertTrue(result == 5.0);
+			 * }
+			 * </pre>
+			 *\s
+			 * Once the methods are defined you can run them. The framework supports both a
+			 * static type safe and more dynamic way to run a test. In the static way you
+			 * override the runTest method and define the method to be invoked. A convenient
+			 * way to do so is with an anonymous inner class.
+			 *\s
+			 * <pre>
+			 * TestCase test = new MathTest("add") {
+			 *     public void runTest() {
+			 *         testAdd();
+			 *     }
+			 * };
+			 * test.run();
+			 * </pre>
+			 *\s
+			 * The dynamic way uses reflection to implement <code>runTest</code>. It
+			 * dynamically finds and invokes a method. In this case the name of the test
+			 * case has to correspond to the test method to be run.
+			 *\s
+			 * <pre>
+			 * TestCase = new MathTest("testAdd");
+			 * test.run();
+			 * </pre>
+			 *\s
+			 * The tests to be run can be collected into a TestSuite. JUnit provides
+			 * different <i>test runners</i> which can run a test suite and collect the
+			 * results. A test runner either expects a static method <code>suite</code> as
+			 * the entry point to get a test to run or it will extract the suite
+			 * automatically.
+			 *\s
+			 * <pre>
+			 * public static Test suite() {
+			 *     suite.addTest(new MathTest("testAdd"));
+			 *     suite.addTest(new MathTest("testDivideByZero"));
+			 *     return suite;
+			 * }
+			 * </pre>
+			 *\s
+			 * @see TestResult
+			 * @see TestSuite
+			 */
+			
+			public abstract class TestCase extends Assert implements Test {
+			    /**
+			     * the name of the test case
+			     */
+			    private String fName;
+			
+			    /**
+			     * No-arg constructor to enable serialization. This method is not intended
+			     * to be used by mere mortals without calling setName().
+			     */
+			    public TestCase() {
+			        this.fName = null;
+			    }
+			    /**
+			     * Constructs a test case with the given name.
+			     */
+			    public TestCase(final String name) {
+			        this.fName = name;
+			    }
+			    /**
+			     * Counts the number of test cases executed by run(TestResult result).
+			     */
+			    public int countTestCases() {
+			        return 1;
+			    }
+			    /**
+			     * Creates a default TestResult object
+			     *
+			     * @see TestResult
+			     */
+			    protected TestResult createResult() {
+			        return new TestResult();
+			    }
+			    /**
+			     * Gets the name of a TestCase
+			     *\s
+			     * @return returns a String
+			     */
+			    public String getName() {
+			        return this.fName;
+			    }
+			    /**
+			     * A convenience method to run this test, collecting the results with a
+			     * default TestResult object.
+			     *
+			     * @see TestResult
+			     */
+			    public TestResult run() {
+			        final TestResult result = this.createResult();
+			        this.run(result);
+			        return result;
+			    }
+			    /**
+			     * Runs the test case and collects the results in TestResult.
+			     */
+			    public void run(final TestResult result) {
+			        result.run(this);
+			    }
+			    /**
+			     * Runs the bare test sequence.
+			     *\s
+			     * @exception Throwable if any exception is thrown
+			     */
+			    public void runBare() throws Throwable {
+			        this.setUp();
+			        try {
+			            this.runTest();
+			        } finally {
+			            this.tearDown();
+			        }
+			    }
+			    /**
+			     * Override to run the test and assert its state.
+			     *\s
+			     * @exception Throwable if any exception is thrown
+			     */
+			    protected void runTest() throws Throwable {
+			        Assert.assertNotNull(this.fName);
+			        Method runMethod = null;
+			        try {
+			            // use getMethod to get all public inherited
+			            // methods. getDeclaredMethods returns all
+			            // methods of this class but excludes the
+			            // inherited ones.
+			            runMethod = this.getClass().getMethod(this.fName, null);
+			        } catch (final NoSuchMethodException e) {
+			            Assert.fail("Method \\"" + this.fName + "\\" not found"); //$NON-NLS-1$ //$NON-NLS-2$
+			        }
+			        if (!Modifier.isPublic(runMethod.getModifiers())) {
+			            Assert.fail("Method \\"" + this.fName + "\\" should be public"); //$NON-NLS-1$ //$NON-NLS-2$
+			        }
+			
+			        try {
+			            runMethod.invoke(this, new Class[0]);
+			        } catch (final InvocationTargetException e) {
+			            e.fillInStackTrace();
+			            throw e.getTargetException();
+			        } catch (final IllegalAccessException e) {
+			            e.fillInStackTrace();
+			            throw e;
+			        }
+			    }
+			    /**
+			     * Sets the name of a TestCase
+			     *\s
+			     * @param name The name to set
+			     */
+			    public void setName(final String name) {
+			        this.fName = name;
+			    }
+			    /**
+			     * Sets up the fixture, for example, open a network connection. This method
+			     * is called before a test is executed.
+			     */
+			    protected void setUp() throws Exception {
+			    }
+			    /**
+			     * Tears down the fixture, for example, close a network connection. This
+			     * method is called after a test is executed.
+			     */
+			    protected void tearDown() throws Exception {
+			    }
+			    /**
+			     * Returns a string representation of the test case
+			     */
+			    @Override
+			    public String toString() {
+			        return this.getName() + "(" + this.getClass().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.framework.TestCase.java", str65);
+        String str66= """
+			package junit.samples.money;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			
+			public class MoneyTest extends TestCase {
+			    public static void main(final String args[]) {
+			        junit.textui.TestRunner.run(MoneyTest.class);
+			    }
+			    private Money f12CHF;
+			    private Money f14CHF;
+			    private Money f21USD;
+			
+			    private Money f7USD;
+			    private IMoney fMB1;
+			
+			    private IMoney fMB2;
+			    @Override
+			    protected void setUp() {
+			        this.f12CHF = new Money(12, "CHF"); //$NON-NLS-1$
+			        this.f14CHF = new Money(14, "CHF"); //$NON-NLS-1$
+			        this.f7USD = new Money(7, "USD"); //$NON-NLS-1$
+			        this.f21USD = new Money(21, "USD"); //$NON-NLS-1$
+			
+			        this.fMB1 = MoneyBag.create(this.f12CHF, this.f7USD);
+			        this.fMB2 = MoneyBag.create(this.f14CHF, this.f21USD);
+			    }
+			    public void testBagMultiply() {
+			        // {[12 CHF][7 USD]} *2 == {[24 CHF][14 USD]}
+			        final IMoney expected = MoneyBag.create(new Money(24, "CHF"), //$NON-NLS-1$
+			                new Money(14, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.multiply(2));
+			        Assert.assertEquals(this.fMB1, this.fMB1.multiply(1));
+			        Assert.assertTrue(this.fMB1.multiply(0).isZero());
+			    }
+			    public void testBagNegate() {
+			        // {[12 CHF][7 USD]} negate == {[-12 CHF][-7 USD]}
+			        final IMoney expected = MoneyBag.create(new Money(-12, "CHF"), //$NON-NLS-1$
+			                new Money(-7, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.negate());
+			    }
+			    public void testBagNotEquals() {
+			        final IMoney bag = MoneyBag.create(this.f12CHF, this.f7USD);
+			        Assert.assertFalse(bag.equals(new Money(12, "DEM").add(this.f7USD))); //$NON-NLS-1$
+			    }
+			    public void testBagSimpleAdd() {
+			        // {[12 CHF][7 USD]} + [14 CHF] == {[26 CHF][7 USD]}
+			        final IMoney expected = MoneyBag.create(new Money(26, "CHF"), //$NON-NLS-1$
+			                new Money(7, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.add(this.f14CHF));
+			    }
+			    public void testBagSubtract() {
+			        // {[12 CHF][7 USD]} - {[14 CHF][21 USD] == {[-2 CHF][-14 USD]}
+			        final IMoney expected = MoneyBag.create(new Money(-2, "CHF"), //$NON-NLS-1$
+			                new Money(-14, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.subtract(this.fMB2));
+			    }
+			    public void testBagSumAdd() {
+			        // {[12 CHF][7 USD]} + {[14 CHF][21 USD]} == {[26 CHF][28 USD]}
+			        final IMoney expected = MoneyBag.create(new Money(26, "CHF"), //$NON-NLS-1$
+			                new Money(28, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.add(this.fMB2));
+			    }
+			    public void testIsZero() {
+			        Assert.assertTrue(this.fMB1.subtract(this.fMB1).isZero());
+			        Assert.assertTrue(MoneyBag
+			                .create(new Money(0, "CHF"), new Money(0, "USD")).isZero()); //$NON-NLS-1$ //$NON-NLS-2$
+			    }
+			    public void testMixedSimpleAdd() {
+			        // [12 CHF] + [7 USD] == {[12 CHF][7 USD]}
+			        final IMoney expected = MoneyBag.create(this.f12CHF, this.f7USD);
+			        Assert.assertEquals(expected, this.f12CHF.add(this.f7USD));
+			    }
+			    public void testMoneyBagEquals() {
+			        Assert.assertTrue(!this.fMB1.equals(null));
+			
+			        Assert.assertEquals(this.fMB1, this.fMB1);
+			        final IMoney equal = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
+			                new Money(7, "USD")); //$NON-NLS-1$
+			        Assert.assertTrue(this.fMB1.equals(equal));
+			        Assert.assertTrue(!this.fMB1.equals(this.f12CHF));
+			        Assert.assertTrue(!this.f12CHF.equals(this.fMB1));
+			        Assert.assertTrue(!this.fMB1.equals(this.fMB2));
+			    }
+			    public void testMoneyBagHash() {
+			        final IMoney equal = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
+			                new Money(7, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(this.fMB1.hashCode(), equal.hashCode());
+			    }
+			    public void testMoneyEquals() {
+			        Assert.assertTrue(!this.f12CHF.equals(null));
+			        final Money equalMoney = new Money(12, "CHF"); //$NON-NLS-1$
+			        Assert.assertEquals(this.f12CHF, this.f12CHF);
+			        Assert.assertEquals(this.f12CHF, equalMoney);
+			        Assert.assertEquals(this.f12CHF.hashCode(), equalMoney.hashCode());
+			        Assert.assertTrue(!this.f12CHF.equals(this.f14CHF));
+			    }
+			    public void testMoneyHash() {
+			        Assert.assertTrue(!this.f12CHF.equals(null));
+			        final Money equal = new Money(12, "CHF"); //$NON-NLS-1$
+			        Assert.assertEquals(this.f12CHF.hashCode(), equal.hashCode());
+			    }
+			    public void testNormalize2() {
+			        // {[12 CHF][7 USD]} - [12 CHF] == [7 USD]
+			        final Money expected = new Money(7, "USD"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.subtract(this.f12CHF));
+			    }
+			    public void testNormalize3() {
+			        // {[12 CHF][7 USD]} - {[12 CHF][3 USD]} == [4 USD]
+			        final IMoney ms1 = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
+			                new Money(3, "USD")); //$NON-NLS-1$
+			        final Money expected = new Money(4, "USD"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.fMB1.subtract(ms1));
+			    }
+			    public void testNormalize4() {
+			        // [12 CHF] - {[12 CHF][3 USD]} == [-3 USD]
+			        final IMoney ms1 = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
+			                new Money(3, "USD")); //$NON-NLS-1$
+			        final Money expected = new Money(-3, "USD"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.f12CHF.subtract(ms1));
+			    }
+			    public void testPrint() {
+			        Assert.assertEquals("[12 CHF]", this.f12CHF.toString()); //$NON-NLS-1$
+			    }
+			    public void testSimpleAdd() {
+			        // [12 CHF] + [14 CHF] == [26 CHF]
+			        final Money expected = new Money(26, "CHF"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.f12CHF.add(this.f14CHF));
+			    }
+			    public void testSimpleBagAdd() {
+			        // [14 CHF] + {[12 CHF][7 USD]} == {[26 CHF][7 USD]}
+			        final IMoney expected = MoneyBag.create(new Money(26, "CHF"), //$NON-NLS-1$
+			                new Money(7, "USD")); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.f14CHF.add(this.fMB1));
+			    }
+			    public void testSimpleMultiply() {
+			        // [14 CHF] *2 == [28 CHF]
+			        final Money expected = new Money(28, "CHF"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.f14CHF.multiply(2));
+			    }
+			    public void testSimpleNegate() {
+			        // [14 CHF] negate == [-14 CHF]
+			        final Money expected = new Money(-14, "CHF"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.f14CHF.negate());
+			    }
+			    public void testSimpleSubtract() {
+			        // [14 CHF] - [12 CHF] == [2 CHF]
+			        final Money expected = new Money(2, "CHF"); //$NON-NLS-1$
+			        Assert.assertEquals(expected, this.f14CHF.subtract(this.f12CHF));
+			    }
+			    public void testSimplify() {
+			        final IMoney money = MoneyBag.create(new Money(26, "CHF"), //$NON-NLS-1$
+			                new Money(28, "CHF")); //$NON-NLS-1$
+			        Assert.assertEquals(new Money(54, "CHF"), money); //$NON-NLS-1$
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.money.MoneyTest.java", str66);
+        String str67= """
+			package junit.tests.extensions;
+			
+			import junit.framework.Test;
+			import junit.framework.TestSuite;
+			
+			/**
+			 * TestSuite that runs all the extension tests
+			 *
+			 */
+			public class AllTests {
+			
+			    public static void main(final String[] args) {
+			        junit.textui.TestRunner.run(AllTests.suite());
+			    }
+			
+			    public static Test suite() { // Collect tests manually because we have to
+			                                 // test class collection code
+			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
+			        suite.addTestSuite(ExtensionTest.class);
+			        suite.addTestSuite(ExceptionTestCaseTest.class);
+			        suite.addTestSuite(ActiveTestTest.class);
+			        suite.addTestSuite(RepeatedTestTest.class);
+			        return suite;
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.extensions.AllTests.java", str67);
+        String str68= """
+			package junit.tests.framework;
+			
+			/**
+			 * Test class used in SuiteTest
+			 */
+			import junit.framework.TestCase;
+			
+			public class NoTestCases extends TestCase {
+			    public void noTestCase() {
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.framework.NoTestCases.java", str68);
+        String str69= """
+			package junit.tests.runner;
+			
+			import java.lang.reflect.Method;
+			import java.net.URL;
+			
+			import junit.framework.Assert;
+			import junit.framework.TestCase;
+			import junit.runner.TestCaseClassLoader;
+			
+			/**
+			 * A TestCase for testing the TestCaseClassLoader
+			 *
+			 */
+			public class TestCaseClassLoaderTest extends TestCase {
+			
+			    public void testClassLoading() throws Exception {
+			        final TestCaseClassLoader loader = new TestCaseClassLoader();
+			        final Class loadedClass = loader
+			                .loadClass("junit.tests.runner.ClassLoaderTest", true); //$NON-NLS-1$
+			        final Object o = loadedClass.newInstance();
+			        //
+			        // Invoke the assertClassLoaders method via reflection.
+			        // We use reflection since the class is loaded by
+			        // another class loader and we can't do a successfull downcast to
+			        // ClassLoaderTestCase.
+			        //
+			        final Method method = loadedClass.getDeclaredMethod("verify", //$NON-NLS-1$
+			                new Class[0]);
+			        method.invoke(o, new Class[0]);
+			    }
+			
+			    public void testJarClassLoading() throws Exception {
+			        final URL url = this.getClass().getResource("test.jar"); //$NON-NLS-1$
+			        Assert.assertNotNull("Cannot find test.jar", url); //$NON-NLS-1$
+			        final String path = url.getFile();
+			        final TestCaseClassLoader loader = new TestCaseClassLoader(path);
+			        final Class loadedClass = loader
+			                .loadClass("junit.tests.runner.LoadedFromJar", true); //$NON-NLS-1$
+			        final Object o = loadedClass.newInstance();
+			        //
+			        // Invoke the assertClassLoaders method via reflection.
+			        // We use reflection since the class is loaded by
+			        // another class loader and we can't do a successfull downcast to
+			        // ClassLoaderTestCase.
+			        //
+			        final Method method = loadedClass.getDeclaredMethod("verify", //$NON-NLS-1$
+			                new Class[0]);
+			        method.invoke(o, new Class[0]);
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.tests.runner.TestCaseClassLoaderTest.java", str69);
+        String str70= """
+			package junit.samples.money;
+			
+			/**
+			 * A simple Money.
+			 *
+			 */
+			public class Money implements IMoney {
+			
+			    private final int fAmount;
+			    private final String fCurrency;
+			
+			    /**
+			     * Constructs a money from the given amount and currency.
+			     */
+			    public Money(final int amount, final String currency) {
+			        this.fAmount = amount;
+			        this.fCurrency = currency;
+			    }
+			    /**
+			     * Adds a money to this money. Forwards the request to the addMoney helper.
+			     */
+			    public IMoney add(final IMoney m) {
+			        return m.addMoney(this);
+			    }
+			    public IMoney addMoney(final Money m) {
+			        if (m.currency().equals(this.currency())) {
+			            return new Money(this.amount() + m.amount(), this.currency());
+			        }
+			        return MoneyBag.create(this, m);
+			    }
+			    public IMoney addMoneyBag(final MoneyBag s) {
+			        return s.addMoney(this);
+			    }
+			    public int amount() {
+			        return this.fAmount;
+			    }
+			    public /* this makes no sense */ void appendTo(final MoneyBag m) {
+			        m.appendMoney(this);
+			    }
+			    public String currency() {
+			        return this.fCurrency;
+			    }
+			    @Override
+			    public boolean equals(final Object anObject) {
+			        if (this.isZero()) {
+			            if (anObject instanceof IMoney) {
+			                return ((IMoney) anObject).isZero();
+			            }
+			        }
+			        if (anObject instanceof Money) {
+			            final Money aMoney = (Money) anObject;
+			            return aMoney.currency().equals(this.currency())
+			                    && (this.amount() == aMoney.amount());
+			        }
+			        return false;
+			    }
+			    @Override
+			    public int hashCode() {
+			        return this.fCurrency.hashCode() + this.fAmount;
+			    }
+			    public boolean isZero() {
+			        return this.amount() == 0;
+			    }
+			    public IMoney multiply(final int factor) {
+			        return new Money(this.amount() * factor, this.currency());
+			    }
+			    public IMoney negate() {
+			        return new Money(-this.amount(), this.currency());
+			    }
+			    public IMoney subtract(final IMoney m) {
+			        return this.add(m.negate());
+			    }
+			    @Override
+			    public String toString() {
+			        final StringBuffer buffer = new StringBuffer();
+			        buffer.append("[" + this.amount() + " " + this.currency() + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			        return buffer.toString();
+			    }
+			}""";
+        fExpectedChangesAllTests.put("junit.samples.money.Money.java", str70);
     }
 
 	@Test

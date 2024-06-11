@@ -64,11 +64,12 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testOK() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.Test;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.Test;
+			public class ATestCase {
+			    @Test public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -83,33 +84,35 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOK() throws Exception {
 		String source=
-				"package pack;\n"+
-				"\n"+
-				"import java.util.Arrays;\n"+
-				"\n"+
-				"import org.junit.Assert;\n"+
-				"import org.junit.Test;\n"+
-				"import org.junit.runner.RunWith;\n"+
-				"import org.junit.runners.Parameterized;\n"+
-				"import org.junit.runners.Parameterized.Parameter;\n"+
-				"import org.junit.runners.Parameterized.Parameters;\n"+
-				"\n" +
-				"@RunWith(Parameterized.class)\n"+
-				"public class ATestCase {\n"+
-				"\n"+
-				"	@Parameters\n"+
-				"	public static Iterable<Object[]> data() {\n"+
-				"		return Arrays.asList(new Object[][] { { 2 }, { 4 } });\n"+
-				"	}\n"+
-				"\n"+
-				"	@Parameter\n"+
-				"	public int param;\n"+
-				"\n"+
-				"	@Test\n"+
-				"	public void testEven() {\n"+
-				"		Assert.assertEquals(0, param % 2);\n"+
-				"	}\n"+
-				"}\n";
+				"""
+			package pack;
+			
+			import java.util.Arrays;
+			
+			import org.junit.Assert;
+			import org.junit.Test;
+			import org.junit.runner.RunWith;
+			import org.junit.runners.Parameterized;
+			import org.junit.runners.Parameterized.Parameter;
+			import org.junit.runners.Parameterized.Parameters;
+			
+			@RunWith(Parameterized.class)
+			public class ATestCase {
+			
+				@Parameters
+				public static Iterable<Object[]> data() {
+					return Arrays.asList(new Object[][] { { 2 }, { 4 } });
+				}
+			
+				@Parameter
+				public int param;
+			
+				@Test
+				public void testEven() {
+					Assert.assertEquals(0, param % 2);
+				}
+			}
+			""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -127,12 +130,13 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testFail() throws Exception {
 		String source=
-			"package pack;\n" +
-			"import org.junit.Test;\n"+
-			"import static org.junit.Assert.*;\n"+
-			"public class ATestCase {\n" +
-			"    @Test public void testFail() { fail(); }\n" +
-			"}";
+			"""
+			package pack;
+			import org.junit.Test;
+			import static org.junit.Assert.*;
+			public class ATestCase {
+			    @Test public void testFail() { fail(); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -148,38 +152,39 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testSimpleTest() throws Exception {
 		String source=
-			"package pack;\n" +
-			"import org.junit.Test;\n"+
-			"import org.junit.FixMethodOrder;\n"+
-			"import org.junit.runners.MethodSorters;\n"+
-			"import static org.junit.Assert.*;\n"+
-			"\n" +
-			"@FixMethodOrder(MethodSorters.NAME_ASCENDING)\n" +
-			"public class ATestCase {\n" +
-			"	protected int fValue1;\n" +
-			"	protected int fValue2;\n" +
-			"\n" +
-			"	protected void setUp() {\n" +
-			"		fValue1= 2;\n" +
-			"		fValue2= 3;\n" +
-			"	}\n" +
-			"	@Test public void testAdd() {\n" +
-			"		double result= fValue1 + fValue2;\n" +
-			"		// forced failure result == 5\n" +
-			"		assertTrue(result == 6);\n" +
-			"	}\n" +
-			"	@Test public void testDivideByZero() {\n" +
-			"		int zero= 0;\n" +
-			"		int result= 8/zero;\n" +
-			"	}\n" +
-			"	@Test public void testEquals() {\n" +
-			"		assertEquals(12, 12);\n" +
-			"		assertEquals(12L, 12L);\n" +
-			"		assertEquals(Long.valueOf(12), Long.valueOf(12));\n" +
-			"\n" +
-			"		assertEquals(\"Size\", String.valueOf(12), String.valueOf(13));\n" +
-			"	}\n" +
-			"}";
+			"""
+			package pack;
+			import org.junit.Test;
+			import org.junit.FixMethodOrder;
+			import org.junit.runners.MethodSorters;
+			import static org.junit.Assert.*;
+			
+			@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+			public class ATestCase {
+				protected int fValue1;
+				protected int fValue2;
+			
+				protected void setUp() {
+					fValue1= 2;
+					fValue2= 3;
+				}
+				@Test public void testAdd() {
+					double result= fValue1 + fValue2;
+					// forced failure result == 5
+					assertTrue(result == 6);
+				}
+				@Test public void testDivideByZero() {
+					int zero= 0;
+					int result= 8/zero;
+				}
+				@Test public void testEquals() {
+					assertEquals(12, 12);
+					assertEquals(12L, 12L);
+					assertEquals(Long.valueOf(12), Long.valueOf(12));
+			
+					assertEquals("Size", String.valueOf(12), String.valueOf(13));
+				}
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -200,11 +205,12 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSessionStarted() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.Test;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testSucceed() { }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.Test;
+			public class ATestCase {
+			    @Test public void testSucceed() { }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -219,12 +225,13 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSessionEnded() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.Test;\n"+
-				"import static org.junit.Assert.*;\n"+
-				"public class ATestCase {\n" +
-				"    @Test public void testFail() { fail(); }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.Test;
+			import static org.junit.Assert.*;
+			public class ATestCase {
+			    @Test public void testFail() { fail(); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -239,17 +246,18 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSecondTestStarted() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.Test;\n"+
-				"import org.junit.FixMethodOrder;\n"+
-				"import org.junit.runners.MethodSorters;\n"+
-				"import static org.junit.Assert.*;\n"+
-				"\n" +
-				"@FixMethodOrder(MethodSorters.NAME_ASCENDING)\n" +
-				"public class ATestCase {\n" +
-				"    @Test public void test1Succeed() { }\n" +
-				"    @Test public void test2Fail() { fail(); }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.Test;
+			import org.junit.FixMethodOrder;
+			import org.junit.runners.MethodSorters;
+			import static org.junit.Assert.*;
+			
+			@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+			public class ATestCase {
+			    @Test public void test1Succeed() { }
+			    @Test public void test2Fail() { fail(); }
+			}""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedTree= new String[] {
@@ -265,17 +273,18 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testTreeOnSecondTestStarted2() throws Exception {
 		String source=
-				"package pack;\n" +
-				"import org.junit.Test;\n"+
-				"import org.junit.FixMethodOrder;\n"+
-				"import org.junit.runners.MethodSorters;\n"+
-				"import static org.junit.Assert.*;\n"+
-				"\n" +
-				"@FixMethodOrder(MethodSorters.NAME_ASCENDING)\n" +
-				"public class ATestCase {\n" +
-				"    @Test public void test2Succeed() { }\n" +
-				"    @Test public void test1Fail() { fail(); }\n" +
-				"}";
+				"""
+			package pack;
+			import org.junit.Test;
+			import org.junit.FixMethodOrder;
+			import org.junit.runners.MethodSorters;
+			import static org.junit.Assert.*;
+			
+			@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+			public class ATestCase {
+			    @Test public void test2Succeed() { }
+			    @Test public void test1Fail() { fail(); }
+			}""";
 
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
@@ -292,33 +301,35 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 	@Test
 	public void testParametrizedWithEvilChars() throws Exception {
 		String source=
-				"package pack;\n"+
-				"\n"+
-				"import java.util.Arrays;\n"+
-				"\n"+
-				"import org.junit.Assert;\n"+
-				"import org.junit.Test;\n"+
-				"import org.junit.runner.RunWith;\n"+
-				"import org.junit.runners.Parameterized;\n"+
-				"import org.junit.runners.Parameterized.Parameter;\n"+
-				"import org.junit.runners.Parameterized.Parameters;\n"+
-				"\n" +
-				"@RunWith(Parameterized.class)\n"+
-				"public class ATestCase {\n"+
-				"\n"+
-				"	@Parameters(name = \"{index}: testEven({0})\")\n"+
-				"	public static Iterable<String[]> data() {\n"+
-				"		return Arrays.asList(new String[][] { { \"2\" }, { \"4\\n\" }, { \"6\\r\" }, { \"8\\r\\n\" }, { \"0\\\\,\" } });\n"+
-				"	}\n"+
-				"\n"+
-				"	@Parameter\n"+
-				"	public String param;\n"+
-				"\n"+
-				"	@Test\n"+
-				"	public void testEven() {\n"+
-				"		Assert.assertEquals(0, Integer.parseInt(param.trim()) % 2);\n"+
-				"	}\n"+
-				"}\n";
+				"""
+			package pack;
+			
+			import java.util.Arrays;
+			
+			import org.junit.Assert;
+			import org.junit.Test;
+			import org.junit.runner.RunWith;
+			import org.junit.runners.Parameterized;
+			import org.junit.runners.Parameterized.Parameter;
+			import org.junit.runners.Parameterized.Parameters;
+			
+			@RunWith(Parameterized.class)
+			public class ATestCase {
+			
+				@Parameters(name = "{index}: testEven({0})")
+				public static Iterable<String[]> data() {
+					return Arrays.asList(new String[][] { { "2" }, { "4\\n" }, { "6\\r" }, { "8\\r\\n" }, { "0\\\\," } });
+				}
+			
+				@Parameter
+				public String param;
+			
+				@Test
+				public void testEven() {
+					Assert.assertEquals(0, Integer.parseInt(param.trim()) % 2);
+				}
+			}
+			""";
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {

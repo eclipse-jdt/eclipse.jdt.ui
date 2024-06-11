@@ -117,24 +117,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("String field1;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	String field1;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the field1.\r\n" +
-				"	 */\r\n" +
-				"	public String getField1() {\r\n" +
-				"		return field1;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param field1 The field1 to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setField1(String field1) {\r\n" +
-				"		this.field1 = field1;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				String field1;\r
+			\r
+				/**\r
+				 * @return Returns the field1.\r
+				 */\r
+				public String getField1() {\r
+					return field1;\r
+				}\r
+			\r
+				/**\r
+				 * @param field1 The field1 to set.\r
+				 */\r
+				public void setField1(String field1) {\r
+					this.field1 = field1;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -148,24 +149,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("boolean done;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	boolean done;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the done.\r\n" +
-				"	 */\r\n" +
-				"	public boolean isDone() {\r\n" +
-				"		return done;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param done The done to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setDone(boolean done) {\r\n" +
-				"		this.done = done;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				boolean done;\r
+			\r
+				/**\r
+				 * @return Returns the done.\r
+				 */\r
+				public boolean isDone() {\r
+					return done;\r
+				}\r
+			\r
+				/**\r
+				 * @param done The done to set.\r
+				 */\r
+				public void setDone(boolean done) {\r
+					this.done = done;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -179,24 +181,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("boolean isDone;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	boolean isDone;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the isDone.\r\n" +
-				"	 */\r\n" +
-				"	public boolean isDone() {\r\n" +
-				"		return isDone;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param isDone The isDone to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setDone(boolean isDone) {\r\n" +
-				"		this.isDone = isDone;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				boolean isDone;\r
+			\r
+				/**\r
+				 * @return Returns the isDone.\r
+				 */\r
+				public boolean isDone() {\r
+					return isDone;\r
+				}\r
+			\r
+				/**\r
+				 * @param isDone The isDone to set.\r
+				 */\r
+				public void setDone(boolean isDone) {\r
+					this.isDone = isDone;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -212,24 +215,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 			IField field1= fClassA.createField("boolean done;", null, false, new NullProgressMonitor());
 			runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-			String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	boolean done;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the done.\r\n" +
-				"	 */\r\n" +
-					"	public boolean getDone() {\r\n" +
-				"		return done;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param done The done to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setDone(boolean done) {\r\n" +
-				"		this.done = done;\r\n" +
-				"	}\r\n" +
-				"}";
+			String expected= """
+				public class A {\r
+				\r
+					boolean done;\r
+				\r
+					/**\r
+					 * @return Returns the done.\r
+					 */\r
+					public boolean getDone() {\r
+						return done;\r
+					}\r
+				\r
+					/**\r
+					 * @param done The done to set.\r
+					 */\r
+					public void setDone(boolean done) {\r
+						this.done = done;\r
+					}\r
+				}""";
 
 			compareSource(expected, fClassA.getSource());
 		} finally {
@@ -248,24 +252,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 			IField field1= fClassA.createField("boolean isDone;", null, false, new NullProgressMonitor());
 			runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-			String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	boolean isDone;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the isDone.\r\n" +
-				"	 */\r\n" +
-					"	public boolean getIsDone() {\r\n" +
-				"		return isDone;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param isDone The isDone to set.\r\n" +
-				"	 */\r\n" +
-					"	public void setIsDone(boolean isDone) {\r\n" +
-				"		this.isDone = isDone;\r\n" +
-				"	}\r\n" +
-				"}";
+			String expected= """
+				public class A {\r
+				\r
+					boolean isDone;\r
+				\r
+					/**\r
+					 * @return Returns the isDone.\r
+					 */\r
+					public boolean getIsDone() {\r
+						return isDone;\r
+					}\r
+				\r
+					/**\r
+					 * @param isDone The isDone to set.\r
+					 */\r
+					public void setIsDone(boolean isDone) {\r
+						this.isDone = isDone;\r
+					}\r
+				}""";
 
 			compareSource(expected, fClassA.getSource());
 		} finally {
@@ -282,24 +287,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("final String field1 = null;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	String field1 = null;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the field1.\r\n" +
-				"	 */\r\n" +
-				"	public String getField1() {\r\n" +
-				"		return field1;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param field1 The field1 to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setField1(String field1) {\r\n" +
-				"		this.field1 = field1;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				String field1 = null;\r
+			\r
+				/**\r
+				 * @return Returns the field1.\r
+				 */\r
+				public String getField1() {\r
+					return field1;\r
+				}\r
+			\r
+				/**\r
+				 * @param field1 The field1 to set.\r
+				 */\r
+				public void setField1(String field1) {\r
+					this.field1 = field1;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -314,24 +320,25 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("q.Other field1;", null, false, new NullProgressMonitor());
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	q.Other field1;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the field1.\r\n" +
-				"	 */\r\n" +
-				"	public q.Other getField1() {\r\n" +
-				"		return field1;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param field1 The field1 to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setField1(q.Other field1) {\r\n" +
-				"		this.field1 = field1;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				q.Other field1;\r
+			\r
+				/**\r
+				 * @return Returns the field1.\r
+				 */\r
+				public q.Other getField1() {\r
+					return field1;\r
+				}\r
+			\r
+				/**\r
+				 * @param field1 The field1 to set.\r
+				 */\r
+				public void setField1(q.Other field1) {\r
+					this.field1 = field1;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -343,39 +350,41 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	@Test
 	public void test3() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"import java.util.HashMap;\r\n" +
-				"import java.util.Map;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"	Map<String,String> a = new HashMap<String,String>();\r\n" +
-				"}", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			import java.util.HashMap;\r
+			import java.util.Map;\r
+			\r
+			public class B {\r
+			\r
+				Map<String,String> a = new HashMap<String,String>();\r
+			}""", true, null);
 
 		IType classB= b.getType("B");
 		IField field1= classB.getField("a");
 
 		runOperation(classB, NOFIELDS,NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class B {\r\n" +
-				"\r\n" +
-				"	Map<String,String> a = new HashMap<String,String>();\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the a.\r\n" +
-				"	 */\r\n" +
-				"	public Map<String, String> getA() {\r\n" +
-				"		return a;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param a The a to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setA(Map<String, String> a) {\r\n" +
-				"		this.a = a;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class B {\r
+			\r
+				Map<String,String> a = new HashMap<String,String>();\r
+			\r
+				/**\r
+				 * @return Returns the a.\r
+				 */\r
+				public Map<String, String> getA() {\r
+					return a;\r
+				}\r
+			\r
+				/**\r
+				 * @param a The a to set.\r
+				 */\r
+				public void setA(Map<String, String> a) {\r
+					this.a = a;\r
+				}\r
+			}""";
 
 		compareSource(expected, classB.getSource());
 	}
@@ -391,26 +400,27 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("private ENUM someEnum;", theEnum, false, null);
 		runOperation(NOFIELDS, NOFIELDS, new IField[] { field1 });
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	private ENUM someEnum;\r\n" +
-				"\r\n" +
-				"	private enum ENUM { C,D,E }\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the someEnum.\r\n" +
-				"	 */\r\n" +
-				"	public ENUM getSomeEnum() {\r\n" +
-				"		return someEnum;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param someEnum The someEnum to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setSomeEnum(ENUM someEnum) {\r\n" +
-				"		this.someEnum = someEnum;\r\n" +
-				"	};\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				private ENUM someEnum;\r
+			\r
+				private enum ENUM { C,D,E }\r
+			\r
+				/**\r
+				 * @return Returns the someEnum.\r
+				 */\r
+				public ENUM getSomeEnum() {\r
+					return someEnum;\r
+				}\r
+			\r
+				/**\r
+				 * @param someEnum The someEnum to set.\r
+				 */\r
+				public void setSomeEnum(ENUM someEnum) {\r
+					this.someEnum = someEnum;\r
+				};\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -422,17 +432,18 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	public void test5() throws Exception {
 
 		createNewType("q.Other");
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"import q.Other;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"	private String a;\r\n" +
-				"	private String b;\r\n" +
-				"	protected Other c;\r\n" +
-				"	public String d;\r\n" +
-				"}", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			import q.Other;\r
+			\r
+			public class B {\r
+			\r
+				private String a;\r
+				private String b;\r
+				protected Other c;\r
+				public String d;\r
+			}""", true, null);
 
 		IType classB= b.getType("B");
 		IField field1= classB.getField("a");
@@ -441,61 +452,62 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field4= classB.getField("d");
 		runOperation(classB, NOFIELDS, NOFIELDS, new IField[] { field1, field2, field3, field4 });
 
-		String expected= "public class B {\r\n" +
-				"\r\n" +
-				"	private String a;\r\n" +
-				"	private String b;\r\n" +
-				"	protected Other c;\r\n" +
-				"	public String d;\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the a.\r\n" +
-				"	 */\r\n" +
-				"	public String getA() {\r\n" +
-				"		return a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param a The a to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setA(String a) {\r\n" +
-				"		this.a = a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the b.\r\n" +
-				"	 */\r\n" +
-				"	public String getB() {\r\n" +
-				"		return b;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param b The b to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setB(String b) {\r\n" +
-				"		this.b = b;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the c.\r\n" +
-				"	 */\r\n" +
-				"	public Other getC() {\r\n" +
-				"		return c;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param c The c to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setC(Other c) {\r\n" +
-				"		this.c = c;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the d.\r\n" +
-				"	 */\r\n" +
-				"	public String getD() {\r\n" +
-				"		return d;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param d The d to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setD(String d) {\r\n" +
-				"		this.d = d;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class B {\r
+			\r
+				private String a;\r
+				private String b;\r
+				protected Other c;\r
+				public String d;\r
+				/**\r
+				 * @return Returns the a.\r
+				 */\r
+				public String getA() {\r
+					return a;\r
+				}\r
+				/**\r
+				 * @param a The a to set.\r
+				 */\r
+				public void setA(String a) {\r
+					this.a = a;\r
+				}\r
+				/**\r
+				 * @return Returns the b.\r
+				 */\r
+				public String getB() {\r
+					return b;\r
+				}\r
+				/**\r
+				 * @param b The b to set.\r
+				 */\r
+				public void setB(String b) {\r
+					this.b = b;\r
+				}\r
+				/**\r
+				 * @return Returns the c.\r
+				 */\r
+				public Other getC() {\r
+					return c;\r
+				}\r
+				/**\r
+				 * @param c The c to set.\r
+				 */\r
+				public void setC(Other c) {\r
+					this.c = c;\r
+				}\r
+				/**\r
+				 * @return Returns the d.\r
+				 */\r
+				public String getD() {\r
+					return d;\r
+				}\r
+				/**\r
+				 * @param d The d to set.\r
+				 */\r
+				public void setD(String d) {\r
+					this.d = d;\r
+				}\r
+			}""";
 
 		compareSource(expected, classB.getSource());
 	}
@@ -512,48 +524,49 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		//Note that in sorted mode, the fields must be provided separately
 		runOperation(new IField[] { field1, field2, field3 }, new IField[] { field1, field2, field3 }, NOFIELDS, true);
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	private String a;\r\n" +
-				"	private String b;\r\n" +
-				"	public String d;\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the a.\r\n" +
-				"	 */\r\n" +
-				"	public String getA() {\r\n" +
-				"		return a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the b.\r\n" +
-				"	 */\r\n" +
-				"	public String getB() {\r\n" +
-				"		return b;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the d.\r\n" +
-				"	 */\r\n" +
-				"	public String getD() {\r\n" +
-				"		return d;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param a The a to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setA(String a) {\r\n" +
-				"		this.a = a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param b The b to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setB(String b) {\r\n" +
-				"		this.b = b;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param d The d to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setD(String d) {\r\n" +
-				"		this.d = d;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				private String a;\r
+				private String b;\r
+				public String d;\r
+				/**\r
+				 * @return Returns the a.\r
+				 */\r
+				public String getA() {\r
+					return a;\r
+				}\r
+				/**\r
+				 * @return Returns the b.\r
+				 */\r
+				public String getB() {\r
+					return b;\r
+				}\r
+				/**\r
+				 * @return Returns the d.\r
+				 */\r
+				public String getD() {\r
+					return d;\r
+				}\r
+				/**\r
+				 * @param a The a to set.\r
+				 */\r
+				public void setA(String a) {\r
+					this.a = a;\r
+				}\r
+				/**\r
+				 * @param b The b to set.\r
+				 */\r
+				public void setB(String b) {\r
+					this.b = b;\r
+				}\r
+				/**\r
+				 * @param d The d to set.\r
+				 */\r
+				public void setD(String d) {\r
+					this.d = d;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -564,47 +577,49 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	@Test
 	public void test7() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"	{\r\n" +
-				"		B someAnon = new B() {\r\n" +
-				"			\r\n" +
-				"			A innerfield;\r\n" +
-				"			\r\n" +
-				"		};\r\n" +
-				"	}\r\n" +
-				"}", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+				{\r
+					B someAnon = new B() {\r
+						\r
+						A innerfield;\r
+						\r
+					};\r
+				}\r
+			}""", true, null);
 
 		IType anon= (IType)b.getElementAt(60); // This is the position of the constructor of the anonymous type
 		IField field= anon.getField("innerfield");
 		runOperation(anon, NOFIELDS, NOFIELDS, new IField[] { field } , false, Modifier.PUBLIC, null);
 
-		String expected= "public class B {\r\n" +
-				"\r\n" +
-				"	{\r\n" +
-				"		B someAnon = new B() {\r\n" +
-				"			\r\n" +
-				"			A innerfield;\r\n" +
-				"\r\n" +
-				"			/**\r\n" +
-				"			 * @return Returns the innerfield.\r\n" +
-				"			 */\r\n" +
-				"			public A getInnerfield() {\r\n" +
-				"				return innerfield;\r\n" +
-				"			}\r\n" +
-				"\r\n" +
-				"			/**\r\n" +
-				"			 * @param innerfield The innerfield to set.\r\n" +
-				"			 */\r\n" +
-				"			public void setInnerfield(A innerfield) {\r\n" +
-				"				this.innerfield = innerfield;\r\n" +
-				"			}\r\n" +
-				"			\r\n" +
-				"		};\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class B {\r
+			\r
+				{\r
+					B someAnon = new B() {\r
+						\r
+						A innerfield;\r
+			\r
+						/**\r
+						 * @return Returns the innerfield.\r
+						 */\r
+						public A getInnerfield() {\r
+							return innerfield;\r
+						}\r
+			\r
+						/**\r
+						 * @param innerfield The innerfield to set.\r
+						 */\r
+						public void setInnerfield(A innerfield) {\r
+							this.innerfield = innerfield;\r
+						}\r
+						\r
+					};\r
+				}\r
+			}""";
 		compareSource(expected, b.getType("B").getSource());
 	}
 
@@ -617,17 +632,18 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field1= fClassA.createField("private Object o;", null, false, new NullProgressMonitor());
 		runOperation(fClassA, new IField[] { field1 }, NOFIELDS, NOFIELDS, false, Modifier.NONE | Modifier.SYNCHRONIZED, null);
 
-		String expected= "public class A {\r\n" +
-				"\r\n" +
-				"	private Object o;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the o.\r\n" +
-				"	 */\r\n" +
-				"	synchronized Object getO() {\r\n" +
-				"		return o;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class A {\r
+			\r
+				private Object o;\r
+			\r
+				/**\r
+				 * @return Returns the o.\r
+				 */\r
+				synchronized Object getO() {\r
+					return o;\r
+				}\r
+			}""";
 
 		compareSource(expected, fClassA.getSource());
 	}
@@ -638,42 +654,44 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	@Test
 	public void test9() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"	private Object o;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the o.\r\n" +
-				"	 */\r\n" +
-				"	synchronized Object getO() {\r\n" +
-				"		return o;\r\n" +
-				"	}\r\n" +
-				"}", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+				private Object o;\r
+			\r
+				/**\r
+				 * @return Returns the o.\r
+				 */\r
+				synchronized Object getO() {\r
+					return o;\r
+				}\r
+			}""", true, null);
 
 		IType classB= b.getType("B");
 		IField field= classB.getField("o");
 		runOperation(classB, NOFIELDS, NOFIELDS, new IField[] { field }, false, Modifier.PUBLIC, field);
 
-		String expected= "public class B {\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param o The o to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setO(Object o) {\r\n" +
-				"		this.o = o;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	private Object o;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the o.\r\n" +
-				"	 */\r\n" +
-				"	synchronized Object getO() {\r\n" +
-				"		return o;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class B {\r
+			\r
+				/**\r
+				 * @param o The o to set.\r
+				 */\r
+				public void setO(Object o) {\r
+					this.o = o;\r
+				}\r
+			\r
+				private Object o;\r
+			\r
+				/**\r
+				 * @return Returns the o.\r
+				 */\r
+				synchronized Object getO() {\r
+					return o;\r
+				}\r
+			}""";
 
 		compareSource(expected, classB.getSource());
 	}
@@ -698,31 +716,33 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		IField field2= classB.getField("e");
 		runOperation(classB, NOFIELDS, new IField[] { field2 }, new IField[] { field1 }, false, Modifier.PUBLIC, null);
 
-		String expected= "public class B {\r\n" +
-				"\r\n" +
-				"	private float c, d, e = 0;\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the d.\r\n" +
-				"	 */\r\n" +
-				"	public float getD() {\r\n" +
-				"		return d;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param d The d to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setD(float d) {\r\n" +
-				"		this.d = d;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/**\r\n" +
-				"	 * @param e The e to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setE(float e) {\r\n" +
-				"		this.e = e;\r\n" +
-				"	}\r\n" +
-				"}\r\n";
+		String expected= """
+			public class B {\r
+			\r
+				private float c, d, e = 0;\r
+			\r
+				/**\r
+				 * @return Returns the d.\r
+				 */\r
+				public float getD() {\r
+					return d;\r
+				}\r
+			\r
+				/**\r
+				 * @param d The d to set.\r
+				 */\r
+				public void setD(float d) {\r
+					this.d = d;\r
+				}\r
+			\r
+				/**\r
+				 * @param e The e to set.\r
+				 */\r
+				public void setE(float e) {\r
+					this.e = e;\r
+				}\r
+			}\r
+			""";
 
 		compareSource(expected, classB.getSource());
 	}
@@ -733,36 +753,38 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	@Test
 	public void test11() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "public class B {\r\n" +
-				"	\r\n" +
-				"	private float a;\r\n" +
-				"	private float b;\r\n" +
-				"	private float c;\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the a.\r\n" +
-				"	 */\r\n" +
-				"	public float getA() {\r\n" +
-				"		return a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param a The a to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setA(float a) {\r\n" +
-				"		this.a = a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the b.\r\n" +
-				"	 */\r\n" +
-				"	public float getB() {\r\n" +
-				"		return b;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param b The b to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setB(float b) {\r\n" +
-				"		this.b = b;\r\n" +
-				"	}\r\n" +
-				"}\r\n", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			public class B {\r
+				\r
+				private float a;\r
+				private float b;\r
+				private float c;\r
+				/**\r
+				 * @return Returns the a.\r
+				 */\r
+				public float getA() {\r
+					return a;\r
+				}\r
+				/**\r
+				 * @param a The a to set.\r
+				 */\r
+				public void setA(float a) {\r
+					this.a = a;\r
+				}\r
+				/**\r
+				 * @return Returns the b.\r
+				 */\r
+				public float getB() {\r
+					return b;\r
+				}\r
+				/**\r
+				 * @param b The b to set.\r
+				 */\r
+				public void setB(float b) {\r
+					this.b = b;\r
+				}\r
+			}\r
+			""", true, null);
 
 		IType classB= b.getType("B");
 		IField field= classB.getField("c");
@@ -771,117 +793,114 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 		//Insert before getB.
 		runOperation(classB, NOFIELDS, NOFIELDS, new IField[] { field }, false, Modifier.PUBLIC, getB);
 
-		String expected= "public class B {\r\n" +
-				"	\r\n" +
-				"	private float a;\r\n" +
-				"	private float b;\r\n" +
-				"	private float c;\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the a.\r\n" +
-				"	 */\r\n" +
-				"	public float getA() {\r\n" +
-				"		return a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param a The a to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setA(float a) {\r\n" +
-				"		this.a = a;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the c.\r\n" +
-				"	 */\r\n" +
-				"	public float getC() {\r\n" +
-				"		return c;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param c The c to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setC(float c) {\r\n" +
-				"		this.c = c;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @return Returns the b.\r\n" +
-				"	 */\r\n" +
-				"	public float getB() {\r\n" +
-				"		return b;\r\n" +
-				"	}\r\n" +
-				"	/**\r\n" +
-				"	 * @param b The b to set.\r\n" +
-				"	 */\r\n" +
-				"	public void setB(float b) {\r\n" +
-				"		this.b = b;\r\n" +
-				"	}\r\n" +
-				"}";
+		String expected= """
+			public class B {\r
+				\r
+				private float a;\r
+				private float b;\r
+				private float c;\r
+				/**\r
+				 * @return Returns the a.\r
+				 */\r
+				public float getA() {\r
+					return a;\r
+				}\r
+				/**\r
+				 * @param a The a to set.\r
+				 */\r
+				public void setA(float a) {\r
+					this.a = a;\r
+				}\r
+				/**\r
+				 * @return Returns the c.\r
+				 */\r
+				public float getC() {\r
+					return c;\r
+				}\r
+				/**\r
+				 * @param c The c to set.\r
+				 */\r
+				public void setC(float c) {\r
+					this.c = c;\r
+				}\r
+				/**\r
+				 * @return Returns the b.\r
+				 */\r
+				public float getB() {\r
+					return b;\r
+				}\r
+				/**\r
+				 * @param b The b to set.\r
+				 */\r
+				public void setB(float b) {\r
+					this.b = b;\r
+				}\r
+			}""";
 
 		compareSource(expected, classB.getSource());
 	}
 
 	@Test
 	public void insertSetterAtLocation() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append("	 * @return Returns the x.\n");
-		buf.append("	 */\n");
-		buf.append("	public Runnable getX() {\n");
-		buf.append("		return x;\n");
-		buf.append("	}");
-		String expectedGetter= buf.toString();
+		String expectedGetter= """
+			/**
+				 * @return Returns the x.
+				 */
+				public Runnable getX() {
+					return x;
+				}""";
 
 		assertInsertAt(expectedGetter, true);
 	}
 
 	@Test
 	public void insertGetterAtLocation() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append("	 * @param x The x to set.\n");
-		buf.append("	 */\n");
-		buf.append("	public void setX(Runnable x) {\n");
-		buf.append("		this.x = x;\n");
-		buf.append("	}");
-		String expectedSetter= buf.toString();
+		String expectedSetter= """
+			/**
+				 * @param x The x to set.
+				 */
+				public void setX(Runnable x) {
+					this.x = x;
+				}""";
 
 		assertInsertAt(expectedSetter, false);
 	}
 
 	@Test
 	public void insertGetterAtLocation2() throws Exception {
-		StringBuilder buf= new StringBuilder();
-		buf.append("/**\n");
-		buf.append("	 * @param x The x to set.\n");
-		buf.append("	 */\n");
-		buf.append("	public void setX(Runnable x) {\n");
-		buf.append("		this.x = x;\n");
-		buf.append("	}");
-		String expectedSetter= buf.toString();
+		String expectedSetter= """
+			/**
+				 * @param x The x to set.
+				 */
+				public void setX(Runnable x) {
+					this.x = x;
+				}""";
 
 		assertInsertAt2(expectedSetter, false);
 	}
 
 	private void assertInsertAt(String expectedMethod, boolean isGetter) throws CoreException {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class A  {\n");
-		buf.append("	Runnable x;\n");
-		buf.append("	\n");
-		buf.append("	A() {\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	void foo() {\n");
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	{\n"); // initializer
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	static {\n"); // static initializer
-		buf.append("	}\n");
-		buf.append("	\n");
-		buf.append("	class Inner {\n"); // inner class
-		buf.append("	}\n");
-		buf.append("}");
-		String originalContent= buf.toString();
+		String originalContent= """
+			package p;
+			
+			public class A  {
+				Runnable x;
+			\t
+				A() {
+				}
+			\t
+				void foo() {
+				}
+			\t
+				{
+				}
+			\t
+				static {
+				}
+			\t
+				class Inner {
+				}
+			}""";
 
 		final int NUM_MEMBERS= 6;
 
@@ -917,36 +936,35 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	}
 
 	private void assertInsertAt2(String expectedMethod, boolean isGetter) throws CoreException {
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("public class A  {\n");
-		buf.append("	Runnable x;\n");
-		buf.append("	\n");
-		buf.append(" // begin\n");
-		buf.append("	/**\n");
-		buf.append("	 * Javadoc\n");
-		buf.append("	 */\n");
-		buf.append("	A() {\n");
-		buf.append("	} // end of line\n");
-		buf.append("	\n");
-		buf.append(" // begin\n");
-		buf.append("	void foo() {\n");
-		buf.append("	} // end of line\n");
-		buf.append("	\n");
-		buf.append(" // begin\n");
-		buf.append("	{\n"); // initializer
-		buf.append("	} // end of line\n");
-		buf.append("	\n");
-		buf.append(" // begin\n");
-		buf.append("	static {\n"); // static initializer
-		buf.append("	} // end of line\n");
-		buf.append("	\n");
-		buf.append(" // begin\n");
-		buf.append("	class Inner {\n"); // inner class
-		buf.append("	} // end of line\n");
-		buf.append("}");
-		String originalContent= buf.toString();
+		String originalContent= """
+			package p;
+			
+			public class A  {
+				Runnable x;
+			\t
+			 // begin
+				/**
+				 * Javadoc
+				 */
+				A() {
+				} // end of line
+			\t
+			 // begin
+				void foo() {
+				} // end of line
+			\t
+			 // begin
+				{
+				} // end of line
+			\t
+			 // begin
+				static {
+				} // end of line
+			\t
+			 // begin
+				class Inner {
+				} // end of line
+			}""";
 
 		final int NUM_MEMBERS= 6;
 

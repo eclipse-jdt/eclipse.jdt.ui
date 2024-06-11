@@ -114,17 +114,19 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, SOURCE_FOLDER);
 		IPackageFragment fragment= fSourceFolder.createPackageFragment(PACKAGE, false, null);
-		fContents= "package test1;\n" +
-				 "\n" +
-				 "public class Completion {\n" +
-				 "    \n" +
-				 "    void foomethod() {\n" +
-				 "        int intVal=5;\n" +
-				 "        long longVal=3;\n" +
-				 "        Runnable run= null;\n" +
-				 "        run.//here\n" +
-				 "    }\n" +
-				 "}\n";
+		fContents= """
+			package test1;
+			
+			public class Completion {
+			   \s
+			    void foomethod() {
+			        int intVal=5;
+			        long longVal=3;
+			        Runnable run= null;
+			        run.//here
+			    }
+			}
+			""";
 		fCU= fragment.createCompilationUnit(CU_NAME, fContents, false, null);
 
 		String str= "//here";

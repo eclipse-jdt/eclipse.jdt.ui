@@ -123,48 +123,49 @@ public class MarkOccurrenceTest1d8 {
 
 	@Test
 	public void testThrowingAnnotatedException1() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"import java.lang.annotation.Documented;\n" +
-				"import java.lang.annotation.ElementType;\n" +
-				"import java.lang.annotation.Retention;\n" +
-				"import java.lang.annotation.RetentionPolicy;\n" +
-				"import java.lang.annotation.Target;\n" +
-				"\n" +
-				"public class E {\n" +
-				"    @Target(ElementType.TYPE_USE)\n" +
-				"    @Retention(RetentionPolicy.RUNTIME)\n" +
-				"    @Documented\n" +
-				"    static @interface Critical {\n" +
-				"        String msg() default \"We're all going to die!\";\n" +
-				"    }\n" +
-				"\n" +
-				"    class InnerException extends Exception {\n" +
-				"        private static final long serialVersionUID = 1L;\n" +
-				"    }\n" +
-				"\n" +
-				"    /**\n" +
-				"     * @throws E.InnerException\n" +
-				"     */\n" +
-				"    void foo() throws @Critical() E.@Critical() InnerException, IllegalArgumentException {\n" +
-				"        if (Boolean.TRUE)\n" +
-				"            throw new @Critical() InnerException();\n" +
-				"        else\n" +
-				"            throw new @Critical() E.@Critical() InnerException();\n" +
-				"    }\n" +
-				"\n" +
-				"    void tryCatch() {\n" +
-				"        try {\n" +
-				"            foo();\n" +
-				"        } catch (@Critical() E.@Critical() InnerException e) {\n" +
-				"        } catch (RuntimeException e) {\n" +
-				"        }\n" +
-				"        try {\n" +
-				"            foo();\n" +
-				"        } catch (RuntimeException | @Critical(msg=\"He\"+\"llo\") E.@Critical() InnerException e) {\n" +
-				"        }\n" +
-				"    }\n" +
-				"}\n";
+		String s= """
+			package test1;
+			import java.lang.annotation.Documented;
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Retention;
+			import java.lang.annotation.RetentionPolicy;
+			import java.lang.annotation.Target;
+			
+			public class E {
+			    @Target(ElementType.TYPE_USE)
+			    @Retention(RetentionPolicy.RUNTIME)
+			    @Documented
+			    static @interface Critical {
+			        String msg() default "We're all going to die!";
+			    }
+			
+			    class InnerException extends Exception {
+			        private static final long serialVersionUID = 1L;
+			    }
+			
+			    /**
+			     * @throws E.InnerException
+			     */
+			    void foo() throws @Critical() E.@Critical() InnerException, IllegalArgumentException {
+			        if (Boolean.TRUE)
+			            throw new @Critical() InnerException();
+			        else
+			            throw new @Critical() E.@Critical() InnerException();
+			    }
+			
+			    void tryCatch() {
+			        try {
+			            foo();
+			        } catch (@Critical() E.@Critical() InnerException e) {
+			        } catch (RuntimeException e) {
+			        }
+			        try {
+			            foo();
+			        } catch (RuntimeException | @Critical(msg="He"+"llo") E.@Critical() InnerException e) {
+			        }
+			    }
+			}
+			""";
 
 		fFinder= new ExceptionOccurrencesFinder();
 		int offset= 8 + s.indexOf("@throws E.InnerException"); // in Javadoc
@@ -204,25 +205,26 @@ public class MarkOccurrenceTest1d8 {
 
 	@Test
 	public void testThrownExceptionInLambda() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"\n" +
-				"import java.io.IOException;\n" +
-				"\n" +
-				"public class E {\n" +
-				"    void test(int i) throws IOException {\n" +
-				"        if (i == 0) {\n" +
-				"            throw new IOException();\n" +
-				"        } else {\n" +
-				"            FI fi = () -> { throw new IOException(); };\n" +
-				"        }\n" +
-				"    }\n" +
-				"}\n" +
-				"\n" +
-				"@FunctionalInterface\n" +
-				"interface FI {\n" +
-				"    void foo() throws IOException;\n" +
-				"}\n";
+		String s= """
+			package test1;
+			
+			import java.io.IOException;
+			
+			public class E {
+			    void test(int i) throws IOException {
+			        if (i == 0) {
+			            throw new IOException();
+			        } else {
+			            FI fi = () -> { throw new IOException(); };
+			        }
+			    }
+			}
+			
+			@FunctionalInterface
+			interface FI {
+			    void foo() throws IOException;
+			}
+			""";
 
 		fFinder= new ExceptionOccurrencesFinder();
 		int offset= s.indexOf("IOException {");
@@ -233,20 +235,21 @@ public class MarkOccurrenceTest1d8 {
 
 	@Test
 	public void testTryCatchInLambda() throws Exception {
-		String s= "" +
-				"package test1;\n" +
-				"\n" +
-				"import java.io.FileInputStream;\n" +
-				"import java.io.FileNotFoundException;\n" +
-				"\n" +
-				"public class E {\n" +
-				"    Runnable lambda = () -> {\n" +
-				"        try {\n" +
-				"            new FileInputStream(\"dummy\");\n" +
-				"        } catch (FileNotFoundException e) {\n" +
-				"        }\n" +
-				"    };\n" +
-				"}\n";
+		String s= """
+			package test1;
+			
+			import java.io.FileInputStream;
+			import java.io.FileNotFoundException;
+			
+			public class E {
+			    Runnable lambda = () -> {
+			        try {
+			            new FileInputStream("dummy");
+			        } catch (FileNotFoundException e) {
+			        }
+			    };
+			}
+			""";
 
 		fFinder= new ExceptionOccurrencesFinder();
 		int offset= s.indexOf("FileNotFoundException e");
@@ -258,16 +261,18 @@ public class MarkOccurrenceTest1d8 {
 	@Test
 	public void testMarkMethodExitsBug565387() throws Exception {
 		fFinder= new MethodExitsFinder();
-		String s= "" +
-				"import java.util.function.Function;\n\n" +
-				"public class TestClass {\n" +
-				"	String foo() {\n" +
-				"		Function<Object,Object> f = o -> {\n" +
-				"			return o;\n" +
-			    "		};\n" +
-				"		return null;\n" +
-			    "	}\n" +
-				"}\n";
+		String s= """
+			import java.util.function.Function;
+			
+			public class TestClass {
+				String foo() {
+					Function<Object,Object> f = o -> {
+						return o;
+					};
+					return null;
+				}
+			}
+			""";
 
 		int offset= 1 + s.indexOf("String");//middle of word
 		int length= 0;

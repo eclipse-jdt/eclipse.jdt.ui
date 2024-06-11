@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -650,6 +650,64 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		helper1(new String[] { "p1.A", "p2.B"}, "p1.A", 11, 17, 11, 23, FIELD, "b", true, true);
 	}
 
+	// Issue 1300
+	@Test
+	public void test70() throws Exception {
+		helper1(new String[] { "A" }, "A", 10, 17, 10, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1301
+	@Test
+	public void test71() throws Exception {
+		helper1(new String[] { "p1.A" }, "p1.A", 13, 17, 13, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1301
+	@Test
+	public void test72() throws Exception {
+		helper1(new String[] { "p1.A" }, "p1.A", 13, 17, 13, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1301
+	@Test
+	public void test73() throws Exception {
+		helper1(new String[] { "p1.A", "p1.B" }, "p1.A", 13, 17, 13, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1301
+	@Test
+	public void test74() throws Exception {
+		helper1(new String[] { "p1.A", "p1.B" }, "p1.A", 13, 17, 13, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1303
+	@Test
+	public void test75() throws Exception {
+		helper1(new String[] { "p1.A" }, "p1.A", 13, 17, 13, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1303
+	@Test
+	public void test76() throws Exception {
+		helper1(new String[] { "p1.A", "p1.B" }, "p1.A", 13, 17, 13, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1304
+	@Test
+	public void test77() throws Exception {
+		helper1(new String[] { "p1.A" }, "p1.A", 12, 17, 12, 18, FIELD, "b", true, true);
+	}
+
+	// Issue 1304
+	@Test
+	public void test78() throws Exception {
+		helper1(new String[] { "p1.A", "p1.B" }, "p1.A", 12, 17, 12, 18, FIELD, "b", true, true);
+	}
+
+	@Test
+	public void test79() throws Exception {
+		helper1(new String[] { "A" }, "A", 11, 17, 11, 18, FIELD, "b", true, true);
+	}
 	// Move mA1 to field fB, do not inline delegator
 	@Test
 	public void test3() throws Exception {
@@ -747,6 +805,12 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 	@Test
 	public void testFail16() throws Exception {
 		failHelper1(new String[] { "p1.A", "p1.B"}, "p1.A", 8, 14, 8, 15, PARAMETER, "b", true, true);
+	}
+
+	// Issue 1404
+	@Test
+	public void testFail17() throws Exception {
+		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 13, 16, 13, 24, FIELD, "a1", true, true);
 	}
 
 	// Cannot move static method

@@ -74,10 +74,16 @@ public class SourceTestCase16 {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD, "1");
 		JavaCore.setOptions(options);
 
-		String getterComment= "/**\r\n" + " * @return Returns the ${bare_field_name}.\r\n" + " */";
+		String getterComment= """
+			/**\r
+			 * @return Returns the ${bare_field_name}.\r
+			 */""";
 		String getterBody= "return ${field};";
 
-		String setterComment= "/**\r\n" + " * @param ${param} The ${bare_field_name} to set.\r\n" + " */";
+		String setterComment= """
+			/**\r
+			 * @param ${param} The ${bare_field_name} to set.\r
+			 */""";
 		String setterBody= "${field} = ${param};";
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.GETTERCOMMENT_ID, getterComment, null);
@@ -86,10 +92,16 @@ public class SourceTestCase16 {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.SETTERSTUB_ID, setterBody, null);
 
 
-		String methodComment= "/**\r\n" + " * ${tags}\r\n" + " */";
+		String methodComment= """
+			/**\r
+			 * ${tags}\r
+			 */""";
 		String methodBody= "// ${todo} Auto-generated method stub\r\n" + "${body_statement}";
 
-		String constructorComment= "/**\r\n" + " * ${tags}\r\n" + " */";
+		String constructorComment= """
+			/**\r
+			 * ${tags}\r
+			 */""";
 		String constructorBody= "${body_statement}\r\n" + "// ${todo} Auto-generated constructor stub";
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, methodComment, null);

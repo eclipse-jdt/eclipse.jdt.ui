@@ -88,18 +88,19 @@ public class PlainJarExportTests {
 
 		fMainRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 		IPackageFragment fragment= fMainRoot.createPackageFragment("org.eclipse.jdt.ui.test", true, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package org.eclipse.jdt.ui.test;\n");
-		buf.append("public class Main {\n");
-		buf.append("    public class MainInner {\n");
-		buf.append("    }\n");
-		buf.append("    public static void main(String[] args) {\n");
-		buf.append("        new Main() {\n");
-		buf.append("            \n");
-		buf.append("        }.hashCode();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		fCU= fragment.createCompilationUnit("Main.java", buf.toString(), true, null);
+		String str= """
+			package org.eclipse.jdt.ui.test;
+			public class Main {
+			    public class MainInner {
+			    }
+			    public static void main(String[] args) {
+			        new Main() {
+			           \s
+			        }.hashCode();
+			    }
+			}
+			""";
+		fCU= fragment.createCompilationUnit("Main.java", str, true, null);
 	}
 
 	@After

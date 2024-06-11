@@ -87,14 +87,16 @@ public class UnresolvedMethodsQuickFixTest16 extends QuickFixTest {
 	@Test
 	public void testMethodInRecord() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface Snippet {\n");
-		buf.append("    String name();\n");
-		buf.append("}\n\n");
-		buf.append("public record XX(String bla) implements Snippet {\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("XX.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			interface Snippet {
+			    String name();
+			}
+			
+			public record XX(String bla) implements Snippet {
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("XX.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
@@ -103,19 +105,21 @@ public class UnresolvedMethodsQuickFixTest16 extends QuickFixTest {
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("interface Snippet {\n");
-		buf.append("    String name();\n");
-		buf.append("}\n\n");
-		buf.append("public record XX(String bla) implements Snippet {\n");
-		buf.append("\n");
-		buf.append("    @Override\n");
-		buf.append("    public String name() {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+		String str1= """
+			package test1;
+			interface Snippet {
+			    String name();
+			}
+			
+			public record XX(String bla) implements Snippet {
+			
+			    @Override
+			    public String name() {
+			        return null;
+			    }
+			}
+			""";
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { str1 });
 	}
 
 }

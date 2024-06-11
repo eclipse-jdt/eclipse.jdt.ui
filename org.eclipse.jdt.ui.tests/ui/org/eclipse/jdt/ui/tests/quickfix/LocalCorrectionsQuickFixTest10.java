@@ -95,24 +95,24 @@ public class LocalCorrectionsQuickFixTest10 extends QuickFixTest {
 
             IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-            StringBuilder buf= new StringBuilder();
-            buf.append("package test1;\n");
-            buf.append("import java.util.List;\n");
-            buf.append("\n");
-            buf.append("class E1 {\n");
-            buf.append("    void f() {\n");
-            buf.append("        var list = T.forClass(List.class);\n");
-            buf.append("        doSomethingWith(list.get()); // (1)\n");
-            buf.append("    }\n");
-            buf.append("    @SuppressWarnings(\"unused\")\n");
-            buf.append("    void doSomethingWith(List<Object> list) {}\n");
-            buf.append("    static class T<A> {\n");
-            buf.append("        static <O> T<O> forClass(@SuppressWarnings(\"unused\") Class<O> clazz) { return null; }\n");
-            buf.append("        A get() { return null; }\n");
-            buf.append("    }\n");
-            buf.append("}\n");
-
-            ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+            String str= """
+				package test1;
+				import java.util.List;
+				
+				class E1 {
+				    void f() {
+				        var list = T.forClass(List.class);
+				        doSomethingWith(list.get()); // (1)
+				    }
+				    @SuppressWarnings("unused")
+				    void doSomethingWith(List<Object> list) {}
+				    static class T<A> {
+				        static <O> T<O> forClass(@SuppressWarnings("unused") Class<O> clazz) { return null; }
+				        A get() { return null; }
+				    }
+				}
+				""";
+            ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
             CompilationUnit astRoot= getASTRoot(cu);
             ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -133,20 +133,20 @@ public class LocalCorrectionsQuickFixTest10 extends QuickFixTest {
 
             IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-            StringBuilder buf= new StringBuilder();
-            buf.append("package test1;\n");
-            buf.append("import java.util.List;\n");
-            buf.append("import java.util.ArrayList;\n");
-            buf.append("\n");
-            buf.append("class E1 {\n");
-            buf.append("    void f() {\n");
-            buf.append("        var list = new ArrayList(); // (1)\n");
-            buf.append("        doSomethingWith(list);      // (2)\n");
-            buf.append("    }\n");
-            buf.append("    void doSomethingWith(List<String> list) {}\n");
-            buf.append("}\n");
-
-            ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+            String str= """
+				package test1;
+				import java.util.List;
+				import java.util.ArrayList;
+				
+				class E1 {
+				    void f() {
+				        var list = new ArrayList(); // (1)
+				        doSomethingWith(list);      // (2)
+				    }
+				    void doSomethingWith(List<String> list) {}
+				}
+				""";
+            ICompilationUnit cu= pack1.createCompilationUnit("E1.java", str, false, null);
 
             CompilationUnit astRoot= getASTRoot(cu);
             ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);

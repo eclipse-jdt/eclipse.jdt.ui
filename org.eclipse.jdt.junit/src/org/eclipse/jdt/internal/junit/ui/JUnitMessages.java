@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -296,6 +296,8 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_ExportTestRunSessionAction_name;
 
 	public static String TestRunnerViewPart_ExportTestRunSessionAction_title;
+
+	public static String TestRunnerViewPart_failures_first_suffix;
 
 	public static String TestRunnerViewPart_ImportTestRunSessionAction_error_title;
 

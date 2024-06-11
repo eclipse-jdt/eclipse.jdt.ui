@@ -439,7 +439,7 @@ public class PasteAction extends SelectionDispatchAction{
 					if (typeName == null) {
 						// first in group:
 						maxVisibility= JdtFlags.getVisibilityCode(type);
-						typeName= type.getName().getIdentifier();
+						typeName= getTypeName(type);
 					} else {
 						int visibility= JdtFlags.getVisibilityCode(type);
 						if (visibility == Modifier.PUBLIC && maxVisibility == Modifier.PUBLIC) {
@@ -449,12 +449,12 @@ public class PasteAction extends SelectionDispatchAction{
 							cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
 							// ... and restart:
 							startOffset= prevEnd;
-							typeName= type.getName().getIdentifier();
+							typeName= getTypeName(type);
 							maxVisibility= visibility;
 						} else {
 							if (JdtFlags.isHigherVisibility(visibility, maxVisibility)) {
 								maxVisibility= visibility;
-								typeName= type.getName().getIdentifier();
+								typeName= getTypeName(type);
 							}
 						}
 					}
@@ -465,6 +465,10 @@ public class PasteAction extends SelectionDispatchAction{
 					cus.add(new ParsedCu(source, ASTParser.K_COMPILATION_UNIT, typeName, packageName));
 				}
 				return cus;
+			}
+
+			private static String getTypeName(AbstractTypeDeclaration type) {
+				return type.getName().getIdentifier();
 			}
 
 			private ParsedCu(String text, int kind, String typeName, String packageName) {
@@ -765,6 +769,12 @@ public class PasteAction extends SelectionDispatchAction{
 
 						String parsedText= Strings.trimIndentation(parsedCu.getText(), destinationPack.getJavaProject(), true);
 						int kind= parsedCu.getKind();
+						String typeName = parsedCu.getTypeName();
+						boolean implicitType = kind == ASTParser.K_COMPILATION_UNIT && typeName != null && typeName.isEmpty();
+						if (implicitType){
+							// only main method exists even if this is parsed K_COMPILATION_UNIT, so handle as body
+							kind = ASTParser.K_CLASS_BODY_DECLARATIONS;
+						}
 						if (kind == ASTParser.K_COMPILATION_UNIT) {
 							final String cuName;
 							if (parsedCu.fIsModuleInfo) {

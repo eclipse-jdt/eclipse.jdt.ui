@@ -93,18 +93,19 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String x = \"\"\"\n");
-		buf.append("                a line is here\n");
-		buf.append("                and here too\n");
-		buf.append("                \"\"\";\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        String x = \"""
+			                a line is here
+			                and here too
+			                \""";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -112,18 +113,18 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String x = \"\"\"\n");
-		buf.append("                a line is here\n");
-		buf.append("                and here too\n");
-		buf.append("                \"\"\"; //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        String x = \"""
+			                a line is here
+			                and here too
+			                \"""; //$NON-NLS-1$
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -135,17 +136,18 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(\"\"\"\n");
-		buf.append("                abcdefgh\n");
-		buf.append("                \"\"\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        System.out.println(\"""
+			                abcdefgh
+			                \""");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -153,17 +155,17 @@ public class LocalCorrectionsQuickFixTest15 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String[] expected= new String[1];
-		buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(\"\"\"\n");
-		buf.append("                abcdefgh\n");
-		buf.append("                \"\"\"); //$NON-NLS-1$\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		expected[0]= buf.toString();
+		expected[0]= """
+			package test1;
+			
+			public class E {
+			    public void foo() {
+			        System.out.println(\"""
+			                abcdefgh
+			                \"""); //$NON-NLS-1$
+			    }
+			}
+			""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

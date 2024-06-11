@@ -53,18 +53,22 @@ public abstract class AbstractForLoopJavaContextTest {
 
 	private static final String CU_NAME= "A.java";
 
-	private static final String CU_PREFIX= "package test;\n" +
-			"\n" +
-			"import java.io.Serializable;\n" +
-			"import java.util.Collection;\n" +
-			"import java.util.List;\n" +
-			"\n" +
-			"public class A<E extends Number> {\n";
+	private static final String CU_PREFIX= """
+		package test;
+		
+		import java.io.Serializable;
+		import java.util.Collection;
+		import java.util.List;
+		
+		public class A<E extends Number> {
+		""";
 
-	private static final String CU_POSTFIX= " {\n" +
-			"	\n" +
-			"}\n" +
-			"}\n";
+	private static final String CU_POSTFIX= """
+		 {
+		\t
+		}
+		}
+		""";
 
 	private IJavaProject fProject;
 
