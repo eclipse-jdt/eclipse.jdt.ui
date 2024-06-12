@@ -166,14 +166,14 @@ public final class MemberVisibilityAdjustor {
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(root);
 			final int visibility= fKeyword != null ? fKeyword.toFlagValue() : Modifier.NONE;
-			if (fMember instanceof IField && !Flags.isEnum(fMember.getFlags())) {
+			if (fMember instanceof IField && !Flags.isEnum(fMember.getFlags()) && !Flags.isRecord(fMember.getFlags())) {
 				final VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) fMember, root);
 				final FieldDeclaration declaration= (FieldDeclaration) fragment.getParent();
 				VariableDeclarationFragment[] fragmentsToChange= new VariableDeclarationFragment[] { fragment };
 				VariableDeclarationRewrite.rewriteModifiers(declaration, fragmentsToChange, visibility, ModifierRewrite.VISIBILITY_MODIFIERS, rewrite, group);
 				if (status != null)
 					adjustor.fStatus.merge(status);
-			} else if (fMember != null) {
+			} else if (fMember != null && !Flags.isRecord(fMember.getFlags())) {
 				final BodyDeclaration declaration= ASTNodeSearchUtil.getBodyDeclarationNode(fMember, root);
 				if (declaration != null) {
 					ModifierRewrite.create(rewrite, declaration).setVisibility(visibility, group);
