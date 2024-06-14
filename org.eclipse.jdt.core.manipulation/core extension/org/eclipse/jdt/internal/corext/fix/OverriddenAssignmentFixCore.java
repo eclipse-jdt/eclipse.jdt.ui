@@ -210,7 +210,16 @@ public class OverriddenAssignmentFixCore extends CompilationUnitRewriteOperation
 			Expression rhs= overridingAssignment.getRightHandSide();
 			String rhsText= cu.getBuffer().getText(rhs.getStartPosition(), extendedEnd(cuRewrite.getRoot(), overridingAssignment.getParent()) - rhs.getStartPosition());
 
-			String declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
+			String declarationText= ""; //$NON-NLS-1$
+			if (fragment.getInitializer() != null) {
+				declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getInitializer().getStartPosition() - declaration.getStartPosition());
+			} else {
+				declarationText= cu.getBuffer().getText(declaration.getStartPosition(), fragment.getStartPosition() + fragment.getLength() - declaration.getStartPosition());
+				Hashtable<String, String> options= JavaCore.getOptions();
+				String spaceBeforeAssignment= options.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR) == JavaCore.INSERT ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
+				String spaceAfterAssignment= options.get(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR) == JavaCore.INSERT ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
+				declarationText= declarationText + spaceBeforeAssignment + "=" + spaceAfterAssignment; //$NON-NLS-1$
+			}
 			String targetText= declarationText + rhsText;
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			ASTNode replacementNode= astRewrite.createStringPlaceholder(targetText, ASTNode.VARIABLE_DECLARATION_STATEMENT);
