@@ -2617,7 +2617,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 				// marker annotation with no members
 			}
 			""";
-		ICompilationUnit cu0= pack1.createCompilationUnit("SomeAnnotation.java", str0, false, null);
+		pack1.createCompilationUnit("SomeAnnotation.java", str0, false, null);
 
 		String str= """
 			package test1;
