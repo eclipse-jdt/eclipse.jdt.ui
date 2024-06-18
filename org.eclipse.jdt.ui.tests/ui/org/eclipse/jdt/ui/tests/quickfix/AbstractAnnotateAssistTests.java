@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
@@ -35,16 +37,18 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
 import org.eclipse.ui.part.FileEditorInput;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
@@ -52,6 +56,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -76,9 +81,14 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 			viewer.setSelection(new TextSelection(offset, 0));
 
 			JavaCorrectionAssistant correctionAssist= new JavaCorrectionAssistant(javaEditor);
-			IQuickAssistProcessor assistProcessor= new ExternalNullAnnotationQuickAssistProcessor(correctionAssist);
-			ICompletionProposal[] proposals= assistProcessor.computeQuickAssistProposals(viewer.getQuickAssistInvocationContext());
-
+			ExternalNullAnnotationQuickAssistProcessor assistProcessor= new ExternalNullAnnotationQuickAssistProcessor(correctionAssist);
+			IQuickAssistInvocationContext quickAssistInvocationContext= viewer.getQuickAssistInvocationContext();
+			ICompletionProposal[] proposals= assistProcessor.computeQuickAssistProposals(quickAssistInvocationContext);
+			if (proposals==null) {
+				IClassFile classFile= ((IClassFileEditorInput) javaEditor.getEditorInput()).getClassFile();
+				ICompilationUnit cu= classFile.getWorkingCopy((WorkingCopyOwner) null, null);
+				Assert.assertNotNull("cu=" + cu + " source=" + classFile.getSource(), proposals);
+			}
 			List<ICompletionProposal> list= Arrays.asList(proposals);
 			return list;
 		} else {
