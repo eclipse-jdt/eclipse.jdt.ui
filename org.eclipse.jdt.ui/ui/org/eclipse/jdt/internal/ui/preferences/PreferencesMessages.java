@@ -536,11 +536,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_warning;
 	public static String ComplianceConfigurationBlock_info;
 	public static String ComplianceConfigurationBlock_ignore;
-	public static String ComplianceConfigurationBlock_version11;
-	public static String ComplianceConfigurationBlock_version12;
-	public static String ComplianceConfigurationBlock_version13;
-	public static String ComplianceConfigurationBlock_version14;
-	public static String ComplianceConfigurationBlock_version15;
 	public static String ComplianceConfigurationBlock_needsbuild_title;
 	public static String ComplianceConfigurationBlock_needsfullbuild_message;
 	public static String ComplianceConfigurationBlock_needsprojectbuild_message;
@@ -848,8 +843,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
 	public static String CodeAssistConfigurationBlock_matchSubword_label;
-	public static String ComplianceConfigurationBlock_version16;
-	public static String ComplianceConfigurationBlock_version17;
 	public static String ComplianceConfigurationBlock_version18;
 	public static String ComplianceConfigurationBlock_version9;
 	public static String ComplianceConfigurationBlock_version10;
@@ -865,7 +858,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version_20;
 	public static String ComplianceConfigurationBlock_version_21;
 	public static String ComplianceConfigurationBlock_version_22;
-	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_source;

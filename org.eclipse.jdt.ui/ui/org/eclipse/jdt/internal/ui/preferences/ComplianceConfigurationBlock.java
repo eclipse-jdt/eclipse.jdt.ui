@@ -133,15 +133,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PRESERVE= JavaCore.PRESERVE;
 	private static final String OPTIMIZE_OUT= JavaCore.OPTIMIZE_OUT;
 
-	private static final String VERSION_CLDC_1_1= JavaCore.VERSION_CLDC_1_1;
-	private static final String VERSION_1_1= JavaCore.VERSION_1_1;
-	private static final String VERSION_1_2= JavaCore.VERSION_1_2;
-	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
-
-	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
-	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
-	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
-	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
 	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
 	private static final String VERSION_9= JavaCore.VERSION_9;
 	private static final String VERSION_10= JavaCore.VERSION_10;
@@ -313,14 +304,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
-		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
+		final String[] complianceVersions= new String[] { VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
 		final String[] complianceLabels= new String[] {
-			PreferencesMessages.ComplianceConfigurationBlock_version13,
-			PreferencesMessages.ComplianceConfigurationBlock_version14,
-			PreferencesMessages.ComplianceConfigurationBlock_version15,
-			PreferencesMessages.ComplianceConfigurationBlock_version16,
-			PreferencesMessages.ComplianceConfigurationBlock_version17,
 			PreferencesMessages.ComplianceConfigurationBlock_version18,
 			PreferencesMessages.ComplianceConfigurationBlock_version9,
 			PreferencesMessages.ComplianceConfigurationBlock_version10,
@@ -338,17 +323,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version_22
 		};
 
-		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
+		String[] targetVersions= new String[] { VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
 		String[] targetLabels= new String[] {
-				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
-				PreferencesMessages.ComplianceConfigurationBlock_version11,
-				PreferencesMessages.ComplianceConfigurationBlock_version12,
-				PreferencesMessages.ComplianceConfigurationBlock_version13,
-				PreferencesMessages.ComplianceConfigurationBlock_version14,
-				PreferencesMessages.ComplianceConfigurationBlock_version15,
-				PreferencesMessages.ComplianceConfigurationBlock_version16,
-				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 				PreferencesMessages.ComplianceConfigurationBlock_version9,
 				PreferencesMessages.ComplianceConfigurationBlock_version10,
@@ -371,14 +347,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			targetLabels= append(targetLabels, ComplianceConfigurationBlock.VERSION_JSR14);
 		}
 
-		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
+		String[] sourceVersions= new String[] {VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
 		String[] sourceLabels= new String[] {
-				PreferencesMessages.ComplianceConfigurationBlock_version13,
-				PreferencesMessages.ComplianceConfigurationBlock_version14,
-				PreferencesMessages.ComplianceConfigurationBlock_version15,
-				PreferencesMessages.ComplianceConfigurationBlock_version16,
-				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 				PreferencesMessages.ComplianceConfigurationBlock_version9,
 				PreferencesMessages.ComplianceConfigurationBlock_version10,
@@ -542,7 +512,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fJRE50InfoText= new Link(infoComposite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
 		// set a text: not the real one, just for layouting
-		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { getVersionLabel(VERSION_1_3), getVersionLabel(VERSION_1_3) }));
+		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { getVersionLabel(VERSION_1_8), getVersionLabel(VERSION_1_8) }));
 		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			@Override
@@ -668,16 +638,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey)) {
-				if (VERSION_CLDC_1_1.equals(newValue) && !oldValue.equals(newValue)) {
-					String compliance= getValue(PREF_COMPLIANCE);
-					String source= getValue(PREF_SOURCE_COMPATIBILITY);
-					if (!JavaModelUtil.isVersionLessThan(compliance, VERSION_1_5)) {
-						setValue(PREF_COMPLIANCE, VERSION_1_4);
-					}
-					if (!VERSION_1_3.equals(source)) {
-						setValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
-					}
-				}
 				updateControls();
 				updateInlineJSREnableState();
 				updateStoreMethodParamNamesEnableState();
@@ -1000,15 +960,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			return status;
 		}
 
-		if (VERSION_CLDC_1_1.equals(target)) {
-			if (!VERSION_1_3.equals(source) || !JavaModelUtil.isVersionLessThan(compliance, VERSION_1_5)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cldc11_requires_source13_compliance_se14);
-				return status;
-			}
-		}
-
 		// target must not be smaller than source
-		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
+		if (JavaModelUtil.isVersionLessThan(target, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source);
 			return status;
 		}
@@ -1119,12 +1072,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private void updateAssertEnumAsIdentifierEnableState() {
 		if (checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF)) {
-			String compatibility= getValue(PREF_SOURCE_COMPATIBILITY);
-
-			boolean isLessThan14= VERSION_1_3.equals(compatibility);
+			boolean isLessThan14= false;
 			updateRememberedComplianceOption(PREF_PB_ASSERT_AS_IDENTIFIER, IDX_ASSERT_AS_IDENTIFIER, isLessThan14, ERROR);
 
-			boolean isLessThan15= isLessThan14 || VERSION_1_4.equals(compatibility);
+			boolean isLessThan15= false;
 			updateRememberedComplianceOption(PREF_PB_ENUM_AS_IDENTIFIER, IDX_ENUM_AS_IDENTIFIER, isLessThan15, ERROR);
 		}
 	}
@@ -1178,9 +1129,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updateInlineJSREnableState() {
-		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
-
-		boolean enabled= JavaModelUtil.isVersionLessThan(target, VERSION_1_5);
+		boolean isTargetLessThan15= false;
+		boolean enabled= isTargetLessThan15;
 		Button checkBox= getCheckBox(PREF_CODEGEN_INLINE_JSR_BYTECODE);
 		boolean wasCheckBoxEnabled= checkBox.isEnabled();
 		checkBox.setEnabled(enabled);
@@ -1309,8 +1259,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					reportPreview= WARNING;
 					assertAsId= IGNORE;
 					enumAsId= IGNORE;
-					source= VERSION_1_3;
-					target= VERSION_1_1;
+					source= VERSION_1_8;
+					target= VERSION_1_8;
 				}
 			}
 		} else {
