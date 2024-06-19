@@ -14,9 +14,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import static org.eclipse.jdt.core.JavaCore.DISABLED;
+import static org.eclipse.jdt.core.JavaCore.DO_NOT_GENERATE;
+import static org.eclipse.jdt.core.JavaCore.ENABLED;
+import static org.eclipse.jdt.core.JavaCore.ERROR;
+import static org.eclipse.jdt.core.JavaCore.GENERATE;
+import static org.eclipse.jdt.core.JavaCore.IGNORE;
+import static org.eclipse.jdt.core.JavaCore.INFO;
+import static org.eclipse.jdt.core.JavaCore.OPTIMIZE_OUT;
+import static org.eclipse.jdt.core.JavaCore.PRESERVE;
+import static org.eclipse.jdt.core.JavaCore.WARNING;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -80,7 +92,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.LibrariesWorkbookPage;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 
-
 /**
  * Configuration block for the 'Java Compiler' page.
  */
@@ -126,47 +137,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEGEN_UNUSED_LOCAL= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_UNUSED_LOCAL);
 	private static final Key PREF_CODEGEN_METHOD_PARAMETERS_ATTR= getJDTCoreKey(JavaCore.COMPILER_CODEGEN_METHOD_PARAMETERS_ATTR);
 
-	// values
-	private static final String GENERATE= JavaCore.GENERATE;
-	private static final String DO_NOT_GENERATE= JavaCore.DO_NOT_GENERATE;
 
-	private static final String PRESERVE= JavaCore.PRESERVE;
-	private static final String OPTIMIZE_OUT= JavaCore.OPTIMIZE_OUT;
-
-	private static final String VERSION_CLDC_1_1= JavaCore.VERSION_CLDC_1_1;
-	private static final String VERSION_1_1= JavaCore.VERSION_1_1;
-	private static final String VERSION_1_2= JavaCore.VERSION_1_2;
-	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
-
-	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
-	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
-	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
-	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
-	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
-	private static final String VERSION_9= JavaCore.VERSION_9;
-	private static final String VERSION_10= JavaCore.VERSION_10;
-	private static final String VERSION_11= JavaCore.VERSION_11;
-	private static final String VERSION_12 = JavaCore.VERSION_12;
-	private static final String VERSION_13 = JavaCore.VERSION_13;
-	private static final String VERSION_14 = JavaCore.VERSION_14;
-	private static final String VERSION_15 = JavaCore.VERSION_15;
-	private static final String VERSION_16 = JavaCore.VERSION_16;
-	private static final String VERSION_17 = JavaCore.VERSION_17;
-	private static final String VERSION_18 = JavaCore.VERSION_18;
-	private static final String VERSION_19 = JavaCore.VERSION_19;
-	private static final String VERSION_20 = JavaCore.VERSION_20;
-	private static final String VERSION_21 = JavaCore.VERSION_21;
-	private static final String VERSION_22 = JavaCore.VERSION_22;
 	private static final String VERSION_LATEST = JavaCore.latestSupportedJavaVersion();
-	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
-
-	private static final String ERROR= JavaCore.ERROR;
-	private static final String WARNING= JavaCore.WARNING;
-	private static final String INFO= JavaCore.INFO;
-	private static final String IGNORE= JavaCore.IGNORE;
-
-	private static final String ENABLED= JavaCore.ENABLED;
-	private static final String DISABLED= JavaCore.DISABLED;
 
 	private static final String DEFAULT_CONF= "default"; //$NON-NLS-1$
 	private static final String USER_CONF= "user";	 //$NON-NLS-1$
@@ -313,88 +285,16 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
-		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
-		final String[] complianceLabels= new String[] {
-			PreferencesMessages.ComplianceConfigurationBlock_version13,
-			PreferencesMessages.ComplianceConfigurationBlock_version14,
-			PreferencesMessages.ComplianceConfigurationBlock_version15,
-			PreferencesMessages.ComplianceConfigurationBlock_version16,
-			PreferencesMessages.ComplianceConfigurationBlock_version17,
-			PreferencesMessages.ComplianceConfigurationBlock_version18,
-			PreferencesMessages.ComplianceConfigurationBlock_version9,
-			PreferencesMessages.ComplianceConfigurationBlock_version10,
-			PreferencesMessages.ComplianceConfigurationBlock_version_11,
-			PreferencesMessages.ComplianceConfigurationBlock_version_12,
-			PreferencesMessages.ComplianceConfigurationBlock_version_13,
-			PreferencesMessages.ComplianceConfigurationBlock_version_14,
-			PreferencesMessages.ComplianceConfigurationBlock_version_15,
-			PreferencesMessages.ComplianceConfigurationBlock_version_16,
-			PreferencesMessages.ComplianceConfigurationBlock_version_17,
-			PreferencesMessages.ComplianceConfigurationBlock_version_18,
-			PreferencesMessages.ComplianceConfigurationBlock_version_19,
-			PreferencesMessages.ComplianceConfigurationBlock_version_20,
-			PreferencesMessages.ComplianceConfigurationBlock_version_21,
-			PreferencesMessages.ComplianceConfigurationBlock_version_22
-		};
+		ArrayList<String> allJavaProjectVersions = new ArrayList<>(JavaCore.getAllJavaSourceVersionsSupportedByCompiler());
+		Collections.reverse(allJavaProjectVersions);
+		final String[] complianceVersions= allJavaProjectVersions.toArray(String[]::new);
+		final String[] complianceLabels= complianceVersions;
 
-		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
-		String[] targetLabels= new String[] {
-				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
-				PreferencesMessages.ComplianceConfigurationBlock_version11,
-				PreferencesMessages.ComplianceConfigurationBlock_version12,
-				PreferencesMessages.ComplianceConfigurationBlock_version13,
-				PreferencesMessages.ComplianceConfigurationBlock_version14,
-				PreferencesMessages.ComplianceConfigurationBlock_version15,
-				PreferencesMessages.ComplianceConfigurationBlock_version16,
-				PreferencesMessages.ComplianceConfigurationBlock_version17,
-				PreferencesMessages.ComplianceConfigurationBlock_version18,
-				PreferencesMessages.ComplianceConfigurationBlock_version9,
-				PreferencesMessages.ComplianceConfigurationBlock_version10,
-				PreferencesMessages.ComplianceConfigurationBlock_version_11,
-				PreferencesMessages.ComplianceConfigurationBlock_version_12,
-				PreferencesMessages.ComplianceConfigurationBlock_version_13,
-				PreferencesMessages.ComplianceConfigurationBlock_version_14,
-				PreferencesMessages.ComplianceConfigurationBlock_version_15,
-				PreferencesMessages.ComplianceConfigurationBlock_version_16,
-				PreferencesMessages.ComplianceConfigurationBlock_version_17,
-				PreferencesMessages.ComplianceConfigurationBlock_version_18,
-				PreferencesMessages.ComplianceConfigurationBlock_version_19,
-				PreferencesMessages.ComplianceConfigurationBlock_version_20,
-				PreferencesMessages.ComplianceConfigurationBlock_version_21,
-				PreferencesMessages.ComplianceConfigurationBlock_version_22
+		final String[] targetVersions= complianceVersions;
+		final String[] targetLabels= targetVersions;
 
-		};
-		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
-			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
-			targetLabels= append(targetLabels, ComplianceConfigurationBlock.VERSION_JSR14);
-		}
-
-		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11, VERSION_12, VERSION_13, VERSION_14, VERSION_15, VERSION_16, VERSION_17, VERSION_18, VERSION_19, VERSION_20, VERSION_21, VERSION_22 };
-		String[] sourceLabels= new String[] {
-				PreferencesMessages.ComplianceConfigurationBlock_version13,
-				PreferencesMessages.ComplianceConfigurationBlock_version14,
-				PreferencesMessages.ComplianceConfigurationBlock_version15,
-				PreferencesMessages.ComplianceConfigurationBlock_version16,
-				PreferencesMessages.ComplianceConfigurationBlock_version17,
-				PreferencesMessages.ComplianceConfigurationBlock_version18,
-				PreferencesMessages.ComplianceConfigurationBlock_version9,
-				PreferencesMessages.ComplianceConfigurationBlock_version10,
-				PreferencesMessages.ComplianceConfigurationBlock_version_11,
-				PreferencesMessages.ComplianceConfigurationBlock_version_12,
-				PreferencesMessages.ComplianceConfigurationBlock_version_13,
-				PreferencesMessages.ComplianceConfigurationBlock_version_14,
-				PreferencesMessages.ComplianceConfigurationBlock_version_15,
-				PreferencesMessages.ComplianceConfigurationBlock_version_16,
-				PreferencesMessages.ComplianceConfigurationBlock_version_17,
-				PreferencesMessages.ComplianceConfigurationBlock_version_18,
-				PreferencesMessages.ComplianceConfigurationBlock_version_19,
-				PreferencesMessages.ComplianceConfigurationBlock_version_20,
-				PreferencesMessages.ComplianceConfigurationBlock_version_21,
-				PreferencesMessages.ComplianceConfigurationBlock_version_22
-		};
+		final String[] sourceVersions= complianceVersions;
+		final String[] sourceLabels= sourceVersions;
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		Composite composite= sc1.getBody();
@@ -542,7 +442,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fJRE50InfoText= new Link(infoComposite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
 		// set a text: not the real one, just for layouting
-		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { getVersionLabel(VERSION_1_3), getVersionLabel(VERSION_1_3) }));
+		String versionLabel= getVersionLabel(JavaCore.getFirstJavaSourceVersionSupportedByCompiler());
+		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { versionLabel, versionLabel }));
 		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			@Override
@@ -589,13 +490,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				fCompilerReleaseCheck.setSelection(false);
 			}
 		}
-	}
-
-	private static String[] append(String[] versions, String version) {
-		String[] result= new String[versions.length + 1];
-		System.arraycopy(versions, 0, result, 0, versions.length);
-		result[versions.length]= version;
-		return result;
 	}
 
 	protected final void openBuildPathPropertyPage() {
@@ -668,16 +562,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_CODEGEN_TARGET_PLATFORM.equals(changedKey)) {
-				if (VERSION_CLDC_1_1.equals(newValue) && !oldValue.equals(newValue)) {
-					String compliance= getValue(PREF_COMPLIANCE);
-					String source= getValue(PREF_SOURCE_COMPATIBILITY);
-					if (!JavaModelUtil.isVersionLessThan(compliance, VERSION_1_5)) {
-						setValue(PREF_COMPLIANCE, VERSION_1_4);
-					}
-					if (!VERSION_1_3.equals(source)) {
-						setValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
-					}
-				}
 				updateControls();
 				updateInlineJSREnableState();
 				updateStoreMethodParamNamesEnableState();
@@ -853,14 +737,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 
-			//TODO: Comment once Java SE 22 has been shipped:
-//			String selectedCompliance= getValue(PREF_COMPLIANCE);
-//			if (VERSION_22.equals(selectedCompliance)) {
-//				fJRE50InfoText.setText(
-//						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
-//				isVisible= true;
-//			}
-
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
 			fJRE50InfoImage.getParent().layout();
@@ -946,7 +822,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private boolean isJREVersionUnsupportedAndGreater(String version, String compilerCompliance) {
 		boolean isJREUnsupportedAndGreater= false;
 		String versionStr= version;
-		if (!JavaCore.isSupportedJavaVersion(versionStr)) {
+		if (!JavaCore.isJavaSourceVersionSupportedByCompiler(versionStr)) {
 			try {
 				versionStr= getJREVersionString(versionStr);
 				int jreVersion= Integer.parseInt(versionStr);
@@ -985,10 +861,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		String source= getValue(PREF_SOURCE_COMPATIBILITY);
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 
-		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(target)) {
-			target= source;
-		}
-
 		// compliance must not be smaller than source or target
 		if (JavaModelUtil.isVersionLessThan(compliance, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_src_greater_compliance);
@@ -1000,15 +872,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			return status;
 		}
 
-		if (VERSION_CLDC_1_1.equals(target)) {
-			if (!VERSION_1_3.equals(source) || !JavaModelUtil.isVersionLessThan(compliance, VERSION_1_5)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cldc11_requires_source13_compliance_se14);
-				return status;
-			}
-		}
-
 		// target must not be smaller than source
-		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
+		if (JavaModelUtil.isVersionLessThan(target, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source);
 			return status;
 		}
@@ -1119,12 +984,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private void updateAssertEnumAsIdentifierEnableState() {
 		if (checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF)) {
-			String compatibility= getValue(PREF_SOURCE_COMPATIBILITY);
-
-			boolean isLessThan14= VERSION_1_3.equals(compatibility);
+			final boolean isLessThan14= false;
 			updateRememberedComplianceOption(PREF_PB_ASSERT_AS_IDENTIFIER, IDX_ASSERT_AS_IDENTIFIER, isLessThan14, ERROR);
 
-			boolean isLessThan15= isLessThan14 || VERSION_1_4.equals(compatibility);
+			final boolean isLessThan15= false;
 			updateRememberedComplianceOption(PREF_PB_ENUM_AS_IDENTIFIER, IDX_ENUM_AS_IDENTIFIER, isLessThan15, ERROR);
 		}
 	}
@@ -1178,14 +1041,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updateInlineJSREnableState() {
-		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
-
-		boolean enabled= JavaModelUtil.isVersionLessThan(target, VERSION_1_5);
+		final boolean lessThan15= false;
 		Button checkBox= getCheckBox(PREF_CODEGEN_INLINE_JSR_BYTECODE);
 		boolean wasCheckBoxEnabled= checkBox.isEnabled();
-		checkBox.setEnabled(enabled);
+		checkBox.setEnabled(lessThan15);
 
-		if (!enabled) {
+		if (!lessThan15) {
 			String val= getValue(PREF_CODEGEN_INLINE_JSR_BYTECODE);
 			if (wasCheckBoxEnabled)
 				fRememberedUserCompliance[IDX_INLINE_JSR_BYTECODE]= val;
@@ -1307,10 +1168,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				} else {
 					enablePreview= DISABLED;
 					reportPreview= WARNING;
-					assertAsId= IGNORE;
-					enumAsId= IGNORE;
-					source= VERSION_1_3;
-					target= VERSION_1_1;
+					assertAsId= ERROR;
+					enumAsId= ERROR;
+					source= JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+					target= JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
 				}
 			}
 		} else {

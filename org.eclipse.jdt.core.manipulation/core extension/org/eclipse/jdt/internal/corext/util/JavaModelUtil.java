@@ -1143,28 +1143,20 @@ public final class JavaModelUtil {
 			return JavaCore.VERSION_9;
 		} else if (version.startsWith(JavaCore.VERSION_1_8)) {
 			return JavaCore.VERSION_1_8;
-		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
-			return JavaCore.VERSION_1_7;
-		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
-			return JavaCore.VERSION_1_6;
-		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
-			return JavaCore.VERSION_1_5;
-		} else if (version.startsWith(JavaCore.VERSION_1_4)) {
-			return JavaCore.VERSION_1_4;
-		} else if (version.startsWith(JavaCore.VERSION_1_3)
-				|| version.startsWith(JavaCore.VERSION_1_2)
-				|| version.startsWith(JavaCore.VERSION_1_1)) {
-			return JavaCore.VERSION_1_3;
 		}
-		return JavaCore.isSupportedJavaVersion(version) ? defaultCompliance : JavaModelUtil.VERSION_LATEST;
+		return JavaCore.isJavaSourceVersionSupportedByCompiler(version) ? defaultCompliance : JavaModelUtil.VERSION_LATEST;
 	}
 
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {
 		Map<String, String> complianceOptions= executionEnvironment.getComplianceOptions();
 		if (complianceOptions != null) {
 			String compliance= complianceOptions.get(JavaCore.COMPILER_COMPLIANCE);
-			if (compliance != null)
-				return compliance;
+			if (compliance != null) {
+				if(JavaCore.isJavaSourceVersionSupportedByCompiler(compliance)) {
+					return compliance;
+				}
+				return JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+			}
 		}
 
 		// fallback:
@@ -1199,16 +1191,8 @@ public final class JavaModelUtil {
 			return JavaCore.VERSION_9;
 		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;
-		} else if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
-			return JavaCore.VERSION_1_7;
-		} else if (desc.indexOf(JavaCore.VERSION_1_6) != -1) {
-			return JavaCore.VERSION_1_6;
-		} else if (desc.indexOf(JavaCore.VERSION_1_5) != -1) {
-			return JavaCore.VERSION_1_5;
-		} else if (desc.indexOf(JavaCore.VERSION_1_4) != -1) {
-			return JavaCore.VERSION_1_4;
 		}
-		return JavaCore.VERSION_1_3;
+		return JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
 	}
 
 	/**
