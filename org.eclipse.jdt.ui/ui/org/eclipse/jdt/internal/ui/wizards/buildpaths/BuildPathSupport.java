@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -422,6 +423,16 @@ public class BuildPathSupport {
 		String complianceOption= eeOptions.get(JavaCore.COMPILER_COMPLIANCE);
 		if (complianceOption == null)
 			return null;
+		String latestCompilerVersion= CompilerOptions.getLatestVersion();
+		if (Integer.parseInt(latestCompilerVersion) < Integer.parseInt(complianceOption)) {
+			eeOptions.put(JavaCore.COMPILER_COMPLIANCE, latestCompilerVersion);
+			if(eeOptions.containsKey(JavaCore.COMPILER_SOURCE)) {
+				eeOptions.put(JavaCore.COMPILER_SOURCE, latestCompilerVersion);
+			}
+			if(eeOptions.containsKey(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM)) {
+				eeOptions.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, latestCompilerVersion);
+			}
+		}
 
 		// eeOptions can miss some options, make sure they are complete:
 		HashMap<String, String> options= new HashMap<>();
