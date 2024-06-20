@@ -951,8 +951,10 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 			handleSummary(node.fragments());
 		else if (isIndex)
 			handleIndex(node.fragments());
-		else if (isCode || isLiteral || isReturn)
+		else if (isCode || isLiteral)
 			handleContentElements(node.fragments(), true, node);
+		else if (isReturn)
+			handleContentElements(node.fragments(), false, node);
 		else if (isSnippet) {
 			handleSnippet(node);
 		} else if (handleInheritDoc(node) || handleDocRoot(node)) {
