@@ -70,7 +70,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -488,11 +487,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		// do process import if selection spans over import declaration or package
 		List<ImportDeclaration> list= astRoot.imports();
 		if (!list.isEmpty()) {
-			if (offset < ((ASTNode) list.get(list.size() - 1)).getStartPosition()) {
+			if (offset < list.get(list.size() - 1).getStartPosition()) {
 				return null;
 			}
 		} else if (astRoot.getPackage() != null) {
-			if (offset < ((ASTNode) astRoot.getPackage()).getStartPosition()) {
+			if (offset < astRoot.getPackage().getStartPosition()) {
 				return null;
 			}
 		}

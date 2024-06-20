@@ -772,7 +772,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus findField() {
-		fField= (IField) ((IVariableBinding) fSelectedConstantName.resolveBinding()).getJavaElement();
+		fField= (IField) fSelectedConstantName.resolveBinding().getJavaElement();
 		if (fField != null && ! fField.exists())
 			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_local_anonymous_unsupported, null, CorextCore.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null);
 

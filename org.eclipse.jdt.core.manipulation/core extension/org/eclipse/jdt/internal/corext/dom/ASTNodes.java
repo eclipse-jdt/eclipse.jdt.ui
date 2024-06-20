@@ -560,7 +560,7 @@ public class ASTNodes {
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).getType();
 		} else if (declaration instanceof VariableDeclarationFragment) {
-			ASTNode parent= ((VariableDeclarationFragment)declaration).getParent();
+			ASTNode parent= declaration.getParent();
 			if (parent instanceof VariableDeclarationExpression)
 				return ((VariableDeclarationExpression)parent).getType();
 			else if (parent instanceof VariableDeclarationStatement)

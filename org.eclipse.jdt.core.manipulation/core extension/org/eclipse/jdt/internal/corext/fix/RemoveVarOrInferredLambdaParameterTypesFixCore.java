@@ -61,7 +61,7 @@ public class RemoveVarOrInferredLambdaParameterTypesFixCore extends CompilationU
 		if (node instanceof LambdaExpression) {
 			lambda= (LambdaExpression) node;
 		} else if (node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
-				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+				parent.getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 			lambda= (LambdaExpression) node.getParent().getParent();
 		} else {
 			return null;

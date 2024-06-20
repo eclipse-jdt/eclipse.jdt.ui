@@ -340,7 +340,7 @@ public class InlineMethodRefactoring extends Refactoring {
 						}
 						if (rewrite.hasRecordedChanges()) {
 							TextEdit edit= rewrite.rewriteImports(null);
-							if (edit instanceof MultiTextEdit ? ((MultiTextEdit)edit).getChildrenSize() > 0 : true) {
+							if (edit instanceof MultiTextEdit ? edit.getChildrenSize() > 0 : true) {
 								root.addChild(edit);
 								change.addTextEditGroup(
 										new TextEditGroup(RefactoringCoreMessages.InlineMethodRefactoring_edit_import, new TextEdit[] {edit}));

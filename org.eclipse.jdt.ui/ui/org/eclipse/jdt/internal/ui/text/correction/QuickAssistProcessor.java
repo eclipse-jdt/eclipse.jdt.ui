@@ -956,7 +956,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode instanceof LambdaExpression) {
 			enclosingLambda= (LambdaExpression) coveringNode;
 		} else if (coveringNode.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY
-				&& ((VariableDeclarationFragment) coveringNode.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+				&& coveringNode.getParent().getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 			enclosingLambda= (LambdaExpression) coveringNode.getParent().getParent();
 		} else {
 			return false;

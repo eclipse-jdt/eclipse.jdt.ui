@@ -229,7 +229,7 @@ public class ModifierCorrectionSubProcessor {
 		} else if (kind == TO_STATIC && bindingDecl.getKind() == IBinding.VARIABLE
 				&& problem.getProblemId() == IProblem.InstanceFieldDuringConstructorInvocation) {
 			if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME) {
-				if (((SimpleName)selectedNode).getLocationInParent() == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
+				if (selectedNode.getLocationInParent() == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
 					UnresolvedElementsSubProcessor.getVariableProposals(context, problem, (IVariableBinding) bindingDecl, proposals);
 				}
 			}
@@ -949,10 +949,10 @@ public class ModifierCorrectionSubProcessor {
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
-		if (!(((SimpleName) selectedNode).getParent() instanceof TypeDeclaration)) {
+		if (!(selectedNode.getParent() instanceof TypeDeclaration)) {
 			return;
 		}
-		TypeDeclaration typeDecl= (TypeDeclaration) ((SimpleName) selectedNode).getParent();
+		TypeDeclaration typeDecl= (TypeDeclaration) selectedNode.getParent();
 		boolean isInterface= typeDecl.isInterface();
 
 		ICompilationUnit cu= context.getCompilationUnit();

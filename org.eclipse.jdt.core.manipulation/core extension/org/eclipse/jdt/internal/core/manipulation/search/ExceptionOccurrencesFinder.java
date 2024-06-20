@@ -163,7 +163,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			if (variable instanceof VariableDeclarationExpression) {
 				typeBinding= ((VariableDeclarationExpression) variable).getType().resolveBinding();
 			} else if (variable instanceof Name) {
-				typeBinding= ((Name) variable).resolveTypeBinding();
+				typeBinding= variable.resolveTypeBinding();
 			}
 			if (typeBinding != null) {
 				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(typeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$

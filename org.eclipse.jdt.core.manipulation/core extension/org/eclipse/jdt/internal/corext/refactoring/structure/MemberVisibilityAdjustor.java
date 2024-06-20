@@ -508,7 +508,7 @@ public final class MemberVisibilityAdjustor {
 
 		if (member instanceof IType) {
 			// recursively check accessibility of member type's members
-			final IJavaElement[] typeMembers= ((IType) member).getChildren();
+			final IJavaElement[] typeMembers= member.getChildren();
 			for (IJavaElement typeMember : typeMembers) {
 				if (! (typeMember instanceof IInitializer))
 					adjustMemberVisibility((IMember) typeMember, monitor);

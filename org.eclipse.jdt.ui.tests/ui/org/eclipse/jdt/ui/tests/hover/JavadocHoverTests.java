@@ -141,7 +141,7 @@ public class JavadocHoverTests extends CoreTests {
 		IType type= myEnumCu.getType("MyEnum");
 		IField field = type.getField("ENUM1");
 		IJavaElement[] elements= { field };
-		ISourceRange range= ((ISourceReference) field).getNameRange();
+		ISourceRange range= field.getNameRange();
 		// Should not throw ClassCastException
 		JavadocHover.getHoverInfo(elements, myEnumCu, new Region(range.getOffset(), range.getLength()), null);
 	}

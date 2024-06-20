@@ -481,7 +481,7 @@ public class JavaPostfixContext extends JavaContext {
 			return -1;
 		}
 		if (node.getParent() instanceof MethodInvocation) {
-			return ((MethodInvocation) node.getParent()).getStartPosition();
+			return node.getParent().getStartPosition();
 		} else if (node.getParent() instanceof FieldAccess || node.getParent() instanceof SuperFieldAccess) {
 			return node.getParent().getStartPosition();
 		} else if (node instanceof Name) {
@@ -489,7 +489,7 @@ public class JavaPostfixContext extends JavaContext {
 			while (n.getParent() instanceof QualifiedName) {
 				n= n.getParent();
 			}
-			return ((Name) n).getStartPosition();
+			return n.getStartPosition();
 		}
 		return node.getStartPosition();
 	}

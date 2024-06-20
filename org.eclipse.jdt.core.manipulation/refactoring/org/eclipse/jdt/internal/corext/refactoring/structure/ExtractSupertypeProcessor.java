@@ -47,7 +47,6 @@ import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.Flags;
@@ -1320,7 +1319,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 						CompilationUnitChange change= rewrite.createChange(true);
 
 						if (change != null) {
-							final TextEdit edit= ((TextChange) change).getEdit();
+							final TextEdit edit= change.getEdit();
 							if (edit != null) {
 								final IDocument document= new Document(fSuperSource);
 								try {

@@ -383,15 +383,15 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 
 				if (assignment.getRightHandSide().equals(node)) {
 					if (assignment.getLeftHandSide() instanceof Name) {
-						return isOfType(((Name) assignment.getLeftHandSide()).resolveTypeBinding());
+						return isOfType(assignment.getLeftHandSide().resolveTypeBinding());
 					}
 
 					if (assignment.getLeftHandSide() instanceof FieldAccess) {
-						return isOfType(((FieldAccess) assignment.getLeftHandSide()).resolveTypeBinding());
+						return isOfType(assignment.getLeftHandSide().resolveTypeBinding());
 					}
 
 					if (assignment.getLeftHandSide() instanceof SuperFieldAccess) {
-						return isOfType(((SuperFieldAccess) assignment.getLeftHandSide()).resolveTypeBinding());
+						return isOfType(assignment.getLeftHandSide().resolveTypeBinding());
 					}
 				}
 
