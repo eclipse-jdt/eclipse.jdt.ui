@@ -61,7 +61,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 		} else if (obj instanceof ASTAttribute) {
 			return ((ASTAttribute) obj).getLabel();
 		} else if (obj instanceof ASTNode) {
-			return Signature.getSimpleName(((ASTNode) obj).getClass().getName());
+			return Signature.getSimpleName(obj.getClass().getName());
 		} else {
 			return ""; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=126017
 		}

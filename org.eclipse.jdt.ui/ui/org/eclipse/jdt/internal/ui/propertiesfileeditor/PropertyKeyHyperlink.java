@@ -25,7 +25,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
@@ -370,7 +369,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 			String message= null;
 
-			IWorkbenchAdapter wbAdapter= ((IAdaptable)keyReference).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbAdapter= keyReference.getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
 				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_messageArgs,
 						new String[] { wbAdapter.getLabel(keyReference), x.getLocalizedMessage() } );

@@ -128,7 +128,7 @@ public class NewAnnotationMemberProposalCore extends LinkedCorrectionProposalCor
 		List<BodyDeclaration> methodDecls= targetTypeDecl.bodyDeclarations();
 		for (BodyDeclaration curr : methodDecls) {
 			if (curr instanceof AnnotationTypeMemberDeclaration) {
-				return ((AnnotationTypeMemberDeclaration) curr).getModifiers();
+				return curr.getModifiers();
 			}
 		}
 		return 0;

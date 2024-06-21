@@ -359,7 +359,7 @@ public class Java50FixCore extends CompilationUnitRewriteOperationsFixCore {
 
 	private static boolean hasFatalError(CompilationUnit compilationUnit) {
 		try {
-			if (!((ICompilationUnit) compilationUnit.getJavaElement()).isStructureKnown())
+			if (!compilationUnit.getJavaElement().isStructureKnown())
 				return true;
 		} catch (JavaModelException e) {
 			JavaManipulationPlugin.log(e);

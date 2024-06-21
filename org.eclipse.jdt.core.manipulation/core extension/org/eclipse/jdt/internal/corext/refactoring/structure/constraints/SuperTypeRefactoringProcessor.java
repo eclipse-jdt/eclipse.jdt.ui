@@ -845,7 +845,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				binding= ((VariableDeclaration) ((VariableDeclarationStatement) node).fragments().get(0)).resolveBinding();
 				node= target.findDeclaringNode(binding.getKey());
 				if (node instanceof VariableDeclarationFragment)
-					rewriteTypeOccurrence(estimate, rewrite, ((VariableDeclarationStatement) ((VariableDeclarationFragment) node).getParent()).getType(), group);
+					rewriteTypeOccurrence(estimate, rewrite, ((VariableDeclarationStatement) node.getParent()).getType(), group);
 			} else if (node instanceof MethodDeclaration) {
 				binding= ((MethodDeclaration) node).resolveBinding();
 				node= target.findDeclaringNode(binding.getKey());

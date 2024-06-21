@@ -120,7 +120,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 			}
 			for (Object element : selection) {
 				if (element instanceof IType){
-					if (((IType)element).equals(suiteClass)){
+					if (element.equals(suiteClass)){
 						return new JUnitStatus(IStatus.WARNING, WizardMessages.UpdateTestSuite_infinite_recursion);
 					}
 				}

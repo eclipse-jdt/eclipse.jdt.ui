@@ -529,7 +529,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private RefactoringStatus checkMovedMemberAvailability(IMember memberToMove, IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		if (memberToMove instanceof IType) { // recursively check accessibility of member type's members
-			IJavaElement[] typeMembers= ((IType) memberToMove).getChildren();
+			IJavaElement[] typeMembers= memberToMove.getChildren();
 			pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, typeMembers.length + 1);
 			for (IJavaElement typeMember : typeMembers) {
 				if (typeMember instanceof IInitializer)

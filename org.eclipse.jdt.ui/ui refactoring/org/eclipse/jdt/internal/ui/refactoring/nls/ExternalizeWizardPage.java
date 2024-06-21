@@ -720,7 +720,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			@Override
 			protected void hookControl(Control control) {
 				super.hookControl(control);
-				((Table) control).addMouseListener(new MouseAdapter() {
+				control.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseDoubleClick(MouseEvent e) {
 						if (getTable().getSelection().length == 0)

@@ -37,7 +37,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -172,8 +171,8 @@ class DeleteChangeCreator {
 
 			case IJavaElement.CLASS_FILE:
 				//if this assert fails, it means that a precondition is missing
-				Assert.isTrue(((IClassFile)javaElement).getResource() instanceof IFile);
-				return createDeleteChange(((IClassFile)javaElement).getResource());
+				Assert.isTrue(javaElement.getResource() instanceof IFile);
+				return createDeleteChange(javaElement.getResource());
 
 			case IJavaElement.JAVA_MODEL: //cannot be done
 			case IJavaElement.JAVA_PROJECT: //handled differently

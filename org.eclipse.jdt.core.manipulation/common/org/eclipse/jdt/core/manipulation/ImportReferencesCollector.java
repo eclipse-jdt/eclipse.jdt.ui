@@ -228,7 +228,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	private void doVisitChildren(List<? extends ASTNode> elements) {
 		int nElements= elements.size();
 		for (int i= 0; i < nElements; i++) {
-			((ASTNode) elements.get(i)).accept(this);
+			elements.get(i).accept(this);
 		}
 	}
 

@@ -30,7 +30,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -126,7 +125,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			if (input.equals(fLastInput) && modStamp == fLastModStamp && wordRegion.equals(fLastWordRegion)) {
 				elements= fLastElements;
 			} else {
-				elements= ((ICodeAssist) input).codeSelect(wordRegion.getOffset(), wordRegion.getLength());
+				elements= input.codeSelect(wordRegion.getOffset(), wordRegion.getLength());
 				elements= selectOpenableElements(elements);
 				fLastInput= input;
 				fLastModStamp= modStamp;

@@ -49,8 +49,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IShowInTargetList;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -322,9 +320,9 @@ public class PackagesView extends JavaBrowsingPart{
 			case IJavaElement.PACKAGE_FRAGMENT:
 				return je;
 			case IJavaElement.COMPILATION_UNIT:
-				return ((ICompilationUnit)je).getParent();
+				return je.getParent();
 			case IJavaElement.CLASS_FILE:
-				return ((IClassFile)je).getParent();
+				return je.getParent();
 			case IJavaElement.TYPE:
 				return ((IType)je).getPackageFragment();
 			default:

@@ -461,7 +461,7 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	public boolean rerunTest(String testId, String className, String testName) {
 		if (isKeptAlive()) {
-			Status status= ((TestCaseElement) getTestElement(testId)).getStatus();
+			Status status= getTestElement(testId).getStatus();
 			if (status == Status.ERROR) {
 				fErrorCount--;
 			} else if (status == Status.FAILURE) {
