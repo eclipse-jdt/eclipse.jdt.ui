@@ -2324,7 +2324,6 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private static void createMissingDefaultProposal(IInvocationContext context, ASTNode parent, Image image, Collection<ICommandAccess> proposals) {
 		List<Statement> statements;
 		Expression expression;
@@ -2352,6 +2351,7 @@ public class LocalCorrectionsSubProcessor {
 
 		SwitchCase newSwitchCase= ast.newSwitchCase();
 		listRewrite.insertLast(newSwitchCase, null);
+		boolean offerSwitchLabel= false;
 
 		if (ASTHelper.isSwitchCaseExpressionsSupportedInAST(ast)) {
 			boolean isArrow= false;
@@ -2367,13 +2367,25 @@ public class LocalCorrectionsSubProcessor {
 				proposal.addLinkedPosition(astRewrite.track(newThrowStatement), true, null);
 			} else {
 				listRewrite.insertLast(ast.newBreakStatement(), null);
+				offerSwitchLabel= statements.size() == 0;
 			}
 		} else {
-			newSwitchCase.setExpression(null);
 			listRewrite.insertLast(ast.newBreakStatement(), null);
 		}
 
 		proposals.add(proposal);
+
+		if (offerSwitchLabel) {
+			ASTRewrite astRewrite2= ASTRewrite.create(ast);
+			ListRewrite listRewrite2= astRewrite2.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+			String label2= CorrectionMessages.LocalCorrectionsSubProcessor_add_default_case_label_description;
+			LinkedCorrectionProposal proposal2= new LinkedCorrectionProposal(label2, context.getCompilationUnit(), astRewrite2, IProposalRelevance.ADD_MISSING_DEFAULT_CASE, image);
+			SwitchCase newSwitchCase2= ast.newSwitchCase();
+			listRewrite2.insertLast(newSwitchCase2, null);
+			newSwitchCase2.setSwitchLabeledRule(true);
+			listRewrite2.insertLast(astRewrite2.createStringPlaceholder("{}", ASTNode.BLOCK), null); //$NON-NLS-1$
+			proposals.add(proposal2);
+		}
 	}
 
 	private static ThrowStatement getThrowForUnexpectedDefault(Expression switchExpression, AST ast, ASTRewrite astRewrite) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -62,7 +62,7 @@ public class QuickFixTest14 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -88,7 +88,7 @@ public class QuickFixTest14 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -118,7 +118,7 @@ public class QuickFixTest14 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -145,7 +145,7 @@ public class QuickFixTest14 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -173,7 +173,7 @@ public class QuickFixTest14 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -182,7 +182,7 @@ public class QuickFixTest14 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 7);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
@@ -198,13 +198,31 @@ public class QuickFixTest14 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
+		String expected2= """
+				package test;
+				public class Cls {
+				    public static void foo(Day day) {
+				        switch (day) {
+							default -> {}
+				        }
+				    }
+				}
+
+				enum Day {
+				    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
+				}
+				""";
+		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(2);
+		String preview2= getPreviewContent(proposal2);
+		assertEqualStringsIgnoreOrder(new String[] { preview2 }, new String[] { expected2 });
+
 	}
 
 	@Test
@@ -522,7 +540,7 @@ public class QuickFixTest14 extends QuickFixTest {
 					};
 					return t;
 				}
-			
+
 				public static void main(String[] args) {
 					System.out.println(process(1));
 					System.out.println(process(0));
@@ -550,7 +568,7 @@ public class QuickFixTest14 extends QuickFixTest {
 					};
 					return t;
 				}
-			
+
 				public static void main(String[] args) {
 					System.out.println(process(1));
 					System.out.println(process(0));
@@ -578,7 +596,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		String test= """
 			package test;
 			public class Cls {
-			
+
 				public static int process(int i) {
 					var t = switch (i) {
 				        case 0:
@@ -608,7 +626,7 @@ public class QuickFixTest14 extends QuickFixTest {
 		String expected= """
 			package test;
 			public class Cls {
-			
+
 				public static int process(int i) {
 					var t = switch (i) {
 				        case 0:
