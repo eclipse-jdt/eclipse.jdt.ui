@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -452,6 +453,29 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 			}
 		}
 		return problems[0];
+	}
+
+	public List<SimpleName> findFieldReferencesForType(AbstractTypeDeclaration type) {
+		final List<SimpleName> fieldList= new ArrayList<>();
+		ASTNode[] selectedNodes= getSelectedNodes();
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (typeBinding != null) {
+			for (ASTNode astNode : selectedNodes) {
+				astNode.accept(new ASTVisitor() {
+					@Override
+					public boolean visit(SimpleName node) {
+						IBinding binding= node.resolveBinding();
+						if (binding instanceof IVariableBinding varBinding && varBinding.isField()) {
+							if (typeBinding.isEqualTo(varBinding.getDeclaringClass())) {
+								fieldList.add(node);
+							}
+						}
+						return true;
+					}
+				});
+			}
+		}
+		return fieldList;
 	}
 
 	private String canHandleBranches() {
