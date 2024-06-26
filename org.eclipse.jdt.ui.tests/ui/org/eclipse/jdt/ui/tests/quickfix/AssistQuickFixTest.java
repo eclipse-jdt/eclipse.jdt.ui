@@ -8410,9 +8410,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[3];
+		String[] expected= new String[4];
 		expected[0]= """
 			package p;
 
@@ -8467,6 +8467,23 @@ public class AssistQuickFixTest extends QuickFixTest {
 			    }
 			}
 			""";
+
+		expected[3]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X1, X2, X3
+				    }
+				   \s
+				    public void foo(MyEnum x) {
+				        switch (x) {
+				            default -> {}
+				       \s
+				        }
+				    }
+				}
+				""";
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
