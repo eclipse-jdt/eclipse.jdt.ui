@@ -35,6 +35,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
@@ -53,6 +55,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
@@ -66,6 +69,17 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 
 	protected IJavaProject fJProject1;
+
+	// to be called from setUp/tearDown:
+	protected void setDefaultClassFileEditor(boolean set) {
+		@SuppressWarnings("restriction")
+		IPreferenceStore preferenceStore= org.eclipse.ui.internal.WorkbenchPlugin.getDefault().getPreferenceStore();
+		if (set) {
+			preferenceStore.setValue("defaultEditorForContentType_org.eclipse.jdt.core.javaClass", JavaUI.ID_CF_EDITOR);
+		} else {
+			preferenceStore.setToDefault("defaultEditorForContentType_org.eclipse.jdt.core.javaClass");
+		}
+	}
 
 	protected void ensureExists(IContainer parent) throws CoreException {
 		if (parent.exists()) return;
