@@ -153,11 +153,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		fJProject1= projectSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		setDefaultClassFileEditor(true);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
+		setDefaultClassFileEditor(false);
 	}
 
 	/**
