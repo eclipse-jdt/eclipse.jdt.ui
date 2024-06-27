@@ -180,6 +180,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private LinkedProposalModelCore fLinkedProposalModel;
 	private Map<String,String> fFormatterOptions;
 	private boolean fHasYield;
+	private List<SimpleName> fFieldAccesses= new ArrayList<>();
+	private String fPassedTypeName;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
 
@@ -1048,6 +1050,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 
 		List<Expression> arguments= invocation.arguments();
+		if (!fFieldAccesses.isEmpty()) {
+			arguments.add(fAST.newThisExpression());
+		}
 		for (ParameterInfo parameter : fParameterInfos) {
 			arguments.add(ASTNodeFactory.newName(fAST, getMappedName(duplicate, parameter)));
 		}
@@ -1221,7 +1226,22 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(enclosingBodyDeclaration, fImportRewriter);
 
+		ASTNode enclosingType= ASTNodes.getFirstAncestorOrNull(enclosingBodyDeclaration, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
+		if (enclosingType != fDestination && enclosingType instanceof AbstractTypeDeclaration typeDeclaration) {
+			fFieldAccesses= fAnalyzer.findFieldReferencesForType(typeDeclaration);
+		}
+
 		List<SingleVariableDeclaration> parameters= result.parameters();
+		if (!fFieldAccesses.isEmpty()) {
+			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
+			ITypeBinding typeBinding= ((AbstractTypeDeclaration)enclosingType).resolveBinding();
+			parameter.setType(fImportRewriter.addImport(typeBinding, fAST));
+			fImportRewriter.removeImport(typeBinding.getQualifiedName());
+			fPassedTypeName= "passed" + ((AbstractTypeDeclaration)enclosingType).getName().getFullyQualifiedName(); //$NON-NLS-1$
+			parameter.setName(fAST.newSimpleName(fPassedTypeName));
+			parameters.add(parameter);
+		}
+
 		for (ParameterInfo info : fParameterInfos) {
 			VariableDeclaration infoDecl= getVariableDeclaration(info);
 			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
@@ -1310,6 +1330,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				}
 			}
 		}
+
 		for (ParameterInfo parameter : fParameterInfos) {
 			if (parameter.isRenamed()) {
 				for (ASTNode selectedNode : selectedNodes) {
@@ -1318,6 +1339,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 					}
 				}
 			}
+		}
+
+		// Replace all old field accesses with new ones referencing passed in type variable
+		for (SimpleName fieldAccess : fFieldAccesses) {
+			FieldAccess newFieldAccess= fAST.newFieldAccess();
+			newFieldAccess.setExpression(fAST.newSimpleName(fPassedTypeName));
+			newFieldAccess.setName((SimpleName)fRewriter.createCopyTarget(fieldAccess));
+			fRewriter.replace(fieldAccess, newFieldAccess, null);
 		}
 
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
