@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAss
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 
+@SuppressWarnings("deprecation") // Preferences
 public class AssistQuickFixTest extends QuickFixTest {
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();

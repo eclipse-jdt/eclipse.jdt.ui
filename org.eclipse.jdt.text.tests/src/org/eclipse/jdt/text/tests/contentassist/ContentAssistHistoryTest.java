@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 /**
  * @since 3.2
  */
+@SuppressWarnings("deprecation") // Preferences
 public class ContentAssistHistoryTest {
 	private static final String LINKED_LIST= "java.util.LinkedList";
 	private static final String ARRAY_LIST= "java.util.ArrayList";
@@ -233,7 +234,6 @@ public class ContentAssistHistoryTest {
 
 		history.remember(fgListT, fgArrayListT);
 		history.remember(fgCharSequenceT, fgStringT);
-
 
 		Preferences prefs= new Preferences();
 		String key= "myKey";

@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
+@SuppressWarnings("deprecation") // Preferences
 public abstract class CleanUpTestCase extends QuickFixTest {
 	protected static final String FIELD_COMMENT= "/* Test */";
 

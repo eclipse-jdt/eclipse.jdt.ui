@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
+@SuppressWarnings("deprecation") // Preferences
 public class AdvancedQuickAssistTest extends QuickFixTest {
 	@Rule
     public ProjectTestSetup projectSetup= new ProjectTestSetup();
