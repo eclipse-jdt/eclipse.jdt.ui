@@ -55,10 +55,14 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		super(JavadocStylingMessages.JavadocStyling_enabledTooltip, IAction.AS_DROP_DOWN_MENU);
 		Objects.requireNonNull(parent);
 		setImageDescriptor(JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT);
+		// SignatureStylingColorSubMenuItem requires top level shell to display native color picker
+		// JavadocView passes to level shell but JavadocHover passes hover's shell
+		// (Display.getActiveShell() would not work since JavadocView is created when active shell is startup splash screen shell)
+		Shell topLevelShell = (parent.getParent() instanceof Shell parentShell) ? parentShell : parent;
 		enabledActions= new Action[] {
 				new ToggleSignatureTypeParametersColoringAction(),
 				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
-				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier)};
+				new SignatureStylingColorSubMenuItem(topLevelShell, javadocContentSupplier)};
 		actions= noStylingActions;
 		setMenuCreator(this);
 		this.parent= parent;
@@ -134,6 +138,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	private void presentEnhancementsState() {
 		setImageDescriptor(enhancementsEnabled ? JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT : JavaPluginImages.DESC_DTOOL_JDOC_HOVER_EDIT);
 		setToolTipText(enhancementsEnabled ? JavadocStylingMessages.JavadocStyling_enabledTooltip : JavadocStylingMessages.JavadocStyling_disabledTooltip);
+		noStylingActions[0].setText(enhancementsEnabled ? JavadocStylingMessages.JavadocStyling_noEnhancements : JavadocStylingMessages.JavadocStyling_enhancementsDisabled);
 	}
 
 	@Override
@@ -163,7 +168,6 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 
 	private class NoStylingEnhancementsAction extends Action {
 		public NoStylingEnhancementsAction() {
-			super(JavadocStylingMessages.JavadocStyling_noEnhancements);
 			setEnabled(false);
 		}
 	}
