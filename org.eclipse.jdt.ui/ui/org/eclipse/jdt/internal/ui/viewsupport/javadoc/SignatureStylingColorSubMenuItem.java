@@ -13,12 +13,9 @@
 *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -31,12 +28,11 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
 
 /**
- * Menu item action for building & presenting color preferences sub-menu of javadoc styling menu.
+ * Menu item action for building &amp; presenting color preferences sub-menu of javadoc styling menu.
  */
-class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, IMenuVisibilityMenuItemAction {
+class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator {
 	private final Shell parentShell;
 	private final Supplier<String> javadocContentSupplier;
 
@@ -51,25 +47,28 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 
 	@Override
 	public Menu getMenu(Menu parent) {
+		// we keep it simple here and just re-create new menu with correct items
+		dispose();
 		var content= javadocContentSupplier.get();
-		if (menu == null && content != null) {
+		if (content != null) {
 			menu= new Menu(parent);
 
 			new ActionContributionItem(new ResetSignatureStylingColorsPreferencesMenuItem()).fill(menu, -1);
 			new Separator().fill(menu, -1);
 
 			int typeParamsReferencesCount= JavaElementLinks.getNumberOfTypeParamsReferences(content);
-			for (int i= 1; i <= typeParamsReferencesCount; i++) {
-				var item= new ActionContributionItem(new SignatureStylingColorPreferenceMenuItem(
-						parentShell,
-						JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameter,
-						i,
-						JavaElementLinks::getColorPreferenceForTypeParamsReference,
-						JavaElementLinks::setColorPreferenceForTypeParamsReference));
-				item.fill(menu, -1);
-			}
 			if (typeParamsReferencesCount == 0) {
 				new ActionContributionItem(new NoSignatureStylingTypeParametersMenuItem()).fill(menu, -1);
+			} else {
+				for (int i= 1; i <= typeParamsReferencesCount; i++) {
+					var item= new ActionContributionItem(new SignatureStylingColorPreferenceMenuItem(
+							parentShell,
+							JavadocStylingMessages.JavadocStyling_colorPreferences_typeParameter,
+							i,
+							JavaElementLinks::getColorPreferenceForTypeParamsReference,
+							JavaElementLinks::setColorPreferenceForTypeParamsReference));
+					item.fill(menu, -1);
+				}
 			}
 
 			var typeParamsReferenceIndices= JavaElementLinks.getColorPreferencesIndicesForTypeParamsReference();
@@ -99,26 +98,6 @@ class SignatureStylingColorSubMenuItem extends Action implements IMenuCreator, I
 		if (menu != null) {
 			menu.dispose();
 			menu= null;
-		}
-	}
-
-	@Override
-	public void menuShown(MenuEvent e) {
-		if (menu != null) {
-			var parentMenu= ((Menu) e.widget);
-			// jface creates & displays proxies for sub-menus so just modifying items in sub-menu we return won't work, but we have to remove whole sub-menu item from menu
-			var menuItem= Stream.of(parentMenu.getItems())
-					.filter(mi -> mi.getData() instanceof ActionContributionItem aci && aci.getAction() == this)
-					.findFirst().orElseThrow(() -> new NoSuchElementException(
-							"This " + //$NON-NLS-1$
-							SignatureStylingColorSubMenuItem.class.getSimpleName()
-							+ " instance not found inside menu being shown")); //$NON-NLS-1$
-			// can't be done in menuHidden() since SWT.Selection is fired after SWT.Hide, thus run() action would not be executed since item would be disposed
-			menuItem.dispose();
-
-			// re-add the sub-mebu as new menu item
-			var item= new ActionContributionItem(this);
-			item.fill(parentMenu, -1);
 		}
 	}
 
