@@ -12,9 +12,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +28,11 @@ import org.junit.Test;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.resources.ProjectScope;
@@ -38,21 +43,29 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.intro.IIntroManager;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.ChainCompletionProposalComputer;
 
 public class ChainCompletionTest {
@@ -134,12 +147,12 @@ public class ChainCompletionTest {
 			 \s
 			  public class Baz {
 			  }
-			
+
 			  public static void mainMethod () {
 			    Foo f = new Foo();
 			    Baz b = f.$
 			  }
-			
+
 			}""");
 
 		int completionIndex= getCompletionIndex(buf);
@@ -183,10 +196,10 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.util.Iterator;
 			import java.util.List;
-			
+
 			public class Foo {
 			  public void method(final List list){
 			    Iterator it = $
@@ -213,9 +226,9 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.io.File;
-			
+
 			public class AvoidRecursiveCallsToMember {
 			  public File findMe = new AtomicBoolean();
 			  public AvoidRecursiveCallsToMember getSubElement() {
@@ -241,14 +254,14 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.lang.Boolean;
 			import java.lang.Integer;
-			
+
 			public class CompletionOnArrayMemberAccessInMethod {
 			  public Integer findUs[] = { new Integer(1), new Integer(2) };
 			  public Boolean findUs1[][][] = new Boolean[1][1][1];
-			
+
 			  public static void method1() {
 			    final CompletionOnArrayMemberAccessInMethod obj = new CompletionOnArrayMemberAccessInMethod();
 			    final Integer c = $
@@ -269,14 +282,14 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.lang.Integer;
 			import java.lang.Number;
-			
+
 			public class CompletionOnArrayWithCastsSupertype {
 			  public Integer[][][] findme;
 			  public int i;
-			
+
 			  public static void method1() {
 			    final CompletionOnArrayWithCastsSupertype obj = new CompletionOnArrayWithCastsSupertype();
 			    final Number c = $
@@ -297,13 +310,13 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class CompletionOnGenericTypeInMethod {
 			  public List<String> findMe = new ArrayList<String>();
-			
+
 			  public static void test_exactGenericType() {
 			    final CompletionOnGenericTypeInMethod variable = new CompletionOnGenericTypeInMethod();
 			    final List<String> c = $
@@ -324,9 +337,9 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.io.File;
-			
+
 			public class A {
 			  public B b = new B();
 			  public class B {
@@ -358,17 +371,17 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.io.File;
-			
+
 			public class CompletionOnMemberInMethodWithPrefix {
-			
+
 			  public File findMe;
-			
+
 			  public CompletionOnMemberInMethodWithPrefix getSubElement() {
 			    return new CompletionOnMemberInMethodWithPrefix();
 			  }
-			
+
 			  public static void method2() {
 			    final CompletionOnMemberInMethodWithPrefix useMe = new CompletionOnMemberInMethodWithPrefix();
 			    final File c = useMe.get$
@@ -389,12 +402,12 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.io.File;
 			import java.util.Iterator;
 			import java.util.LinkedList;
 			import java.util.List;
-			
+
 			public class Foo {
 			  public void method() {
 			    final Iterator<File> c = $
@@ -425,12 +438,12 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			public class CompletionOnNonPublicMemberInMethod {
 			  protected Boolean findMe1 = new Boolean();
 			  Integer findMe2 = new Integer();
 			  private final Long findMe3 = new Long();
-			
+
 			  public static void test_protected() {
 			    final CompletionOnNonPublicMemberInMethod useMe = new CompletionOnNonPublicMemberInMethod();
 			    final Boolean c = $
@@ -451,13 +464,13 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.InputStream;
-			
+
 			public class CompletionOnSupertypeInMethod {
 			  public ByteArrayInputStream findMe = new ByteArrayInputStream(new byte[] { 0, 1, 2, 3 });
-			
+
 			  public static void method() {
 			    final CompletionOnSupertypeInMethod useMe = new CompletionOnSupertypeInMethod();
 			    final InputStream c = $
@@ -478,14 +491,14 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			public class CompletionOnSupertypeMemberInMethod {
-			
+
 			  public static class Subtype extends CompletionOnSupertypeMemberInMethod {
 			  }
-			
+
 			  public Boolean findMe = new Boolean();
-			
+
 			  public static void test_onAttribute() {
 			    final Subtype useMe = new Subtype();
 			    final Boolean c = $
@@ -506,16 +519,16 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			public class CompletionOnSupertypeMemberInMethod {
-			
+
 			  public static class Subtype extends CompletionOnSupertypeMemberInMethod {
 			  }
-			
+
 			  public Boolean findMe() {
 			    return Boolean.TRUE;
 			  }
-			
+
 			  public static void test_onAttribute() {
 			    final Subtype useMe = new Subtype();
 			    final Boolean c = $
@@ -538,9 +551,9 @@ public class ChainCompletionTest {
 			import java.util.Collection;
 			import java.util.HashMap;
 			import java.util.Map;
-			
+
 			package test;
-			
+
 			public class TestCompletionOnThisAndLocal {
 			  public void method() {
 			    final Map map = new HashMap();
@@ -566,22 +579,22 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			public class TestCompletionOnType {
 			  public class S {
-			
+
 			    private static S INSTANCE = new S();
 			    private S () {}
-			
+
 			    public Integer findMe() {
 			      return 0;
 			    }
-			
+
 			    public static S getInstance() {
 			      return INSTANCE;
 			    }
 			  }
-			
+
 			  public void __test() {
 			    Integer i = S.$
 			  }\s
@@ -680,10 +693,10 @@ public class ChainCompletionTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("""
 			package test;
-			
+
 			import java.util.Iterator;
 			import java.util.List;
-			
+
 			public class NoTriggerCompletionInvocation {
 			  public void method(){
 			    List longVariableName, longVariableName2;
@@ -704,10 +717,10 @@ public class ChainCompletionTest {
 		applyProposal(proposal, doc, cu, completionIndex);
 		String expectedContent = """
 			package test;
-			
+
 			import java.util.Iterator;
 			import java.util.List;
-			
+
 			public class NoTriggerCompletionInvocation {
 			  public void method(){
 			    List longVariableName, longVariableName2;
@@ -718,6 +731,41 @@ public class ChainCompletionTest {
 		assertEquals(expectedContent,doc.get());
 	}
 
+	@Test
+	public void testGh1443ShowTooltipDescription() throws Exception {
+		IIntroManager introManager= PlatformUI.getWorkbench().getIntroManager();
+		introManager.closeIntro(introManager.getIntro());
+		StringBuffer buf= new StringBuffer();
+		buf.append("""
+				package test;
+				public class ShowTooltipDescription {
+					public static void main(String[] args) {
+						my1Object = new Object();
+					}
+				}""");
+
+		ICompilationUnit cu= getCompilationUnit(pkg, buf, "ShowTooltipDescription.java");
+		final IStatus[] resultingStatus= new IStatus[1];
+		ILogListener logListener= (status, plugin) -> {
+			resultingStatus[0]= status;
+		};
+		ILog log= JavaPlugin.getDefault().getLog();
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(cu);
+		JavaSourceViewer viewer= (JavaSourceViewer) javaEditor.getViewer();
+		Display display= viewer.getControl().getDisplay();
+		try {
+			JavaUI.revealInEditor(javaEditor, (IJavaElement) cu);
+			while (display.readAndDispatch()) {	}
+			assertTrue(viewer.getTextWidget().isVisible());
+			viewer.setSelectedRange(buf.toString().indexOf("1"), 1);
+			log.addLogListener(logListener);
+			viewer.doOperation(ISourceViewer.INFORMATION);
+			assertNull(resultingStatus[0]);
+		} finally {
+			log.removeLogListener(logListener);
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
 	private ICompilationUnit getCompilationUnit(IPackageFragment pack, StringBuffer buf, String name) throws JavaModelException {
 		return pack.createCompilationUnit(name, buf.toString().replace("$", ""), false, null);
 	}
