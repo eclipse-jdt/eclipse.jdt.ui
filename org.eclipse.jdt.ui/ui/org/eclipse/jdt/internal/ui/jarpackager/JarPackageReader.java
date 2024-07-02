@@ -19,6 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -196,7 +197,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 				service.connect();
 				value= element.getAttribute("refactoring" + count); //$NON-NLS-1$
 				while (value != null && !"".equals(value)) { //$NON-NLS-1$
-					final ByteArrayInputStream stream= new ByteArrayInputStream(value.getBytes("UTF-8")); //$NON-NLS-1$
+					final ByteArrayInputStream stream= new ByteArrayInputStream(value.getBytes(StandardCharsets.UTF_8));
 					try {
 						final RefactoringHistory history= service.readRefactoringHistory(stream, RefactoringDescriptor.NONE);
 						if (history != null) {

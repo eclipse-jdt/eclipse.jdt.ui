@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 import org.objectweb.asm.util.Printer;
@@ -108,7 +109,7 @@ public class HelpUtils {
 		URL helpResource = toUrl(SPECS_HTML);
 		StringBuilder sb = new StringBuilder();
 		boolean foundContentStart = false;
-		try (BufferedReader in = new BufferedReader(new InputStreamReader(helpResource.openStream(), "UTF-8"))) { //$NON-NLS-1$
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(helpResource.openStream(), StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = in.readLine()) != null) {
 				if (!foundContentStart) {
