@@ -11,16 +11,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring.typeconstraints;
-
+package org.eclipse.jdt.ui.tests.refactoring.extensions;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	TypeConstraintTests.class,
-	TypeEnvironmentTests.class
+	ExtensionPointTests.class
 })
-public class AllTests {
+public class AllRefactoringExtensionsTests {
 }
