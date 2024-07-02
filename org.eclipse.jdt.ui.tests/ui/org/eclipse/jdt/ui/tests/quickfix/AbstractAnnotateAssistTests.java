@@ -41,6 +41,8 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
@@ -59,6 +62,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
@@ -87,6 +91,17 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 			ensureExists(parent.getParent());
 		if (parent instanceof IFolder)
 			((IFolder)parent).create(true, true, null);
+	}
+
+	static JavaEditor openInClassfileEditor(IJavaElement element, boolean activate, boolean reveal) throws PartInitException {
+		if (!(element instanceof ISourceReference)) {
+			return null;
+		}
+		IEditorPart part= EditorUtility.openInSpecificEditor(element, JavaUI.ID_CF_EDITOR, activate);
+		if (reveal && part != null) {
+			EditorUtility.revealInEditor(part, element);
+		}
+		return (JavaEditor) part;
 	}
 
 	public List<ICompletionProposal> collectAnnotateProposals(JavaEditor javaEditor, int offset) throws CoreException {

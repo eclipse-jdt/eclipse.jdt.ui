@@ -166,6 +166,10 @@ public class EditorUtility {
 	 */
 	public static IEditorPart openInEditor(Object inputElement, boolean activate) throws PartInitException {
 
+		return openInSpecificEditor(inputElement, null, activate);
+	}
+
+	public static IEditorPart openInSpecificEditor(Object inputElement, String editorID, boolean activate) throws PartInitException {
 		if (inputElement instanceof IFile) {
 			IFile file= (IFile) inputElement;
 			if (!isClassFile(file))
@@ -174,14 +178,17 @@ public class EditorUtility {
 		}
 
 		IEditorPart editor= findEditor(inputElement, activate);
-		if (editor != null)
+		if (editor != null && (editorID == null || editorID.equals(editor.getEditorSite().getId())))
 			return editor;
 
 		IEditorInput input= getEditorInput(inputElement);
 		if (input == null)
 			throw new PartInitException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_NO_EDITOR_INPUT, JavaEditorMessages.EditorUtility_no_editorInput, null));
 
-		return openInEditor(input, getEditorID(input), activate);
+		if (editorID == null) {
+			editorID = getEditorID(input);
+		}
+		return openInEditor(input, editorID, activate);
 	}
 
 	/**
