@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.junit.runtime
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.junit.runtime;singleton:=true
-Bundle-Version: 3.7.400.qualifier
+Bundle-Version: 3.7.500.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Export-Package: 
