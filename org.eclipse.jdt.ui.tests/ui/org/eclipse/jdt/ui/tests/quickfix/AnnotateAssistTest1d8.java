@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -193,7 +194,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([IL1java/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -306,7 +307,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([Ljava/lang/Object;L1java/util/List<+1Ljava/lang/Number;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -383,7 +384,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 				"class pack/age/X\n" +
 				"test\n";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -464,7 +465,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -545,7 +546,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -626,7 +627,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([[1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -705,7 +706,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ()[Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -784,7 +785,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ()[Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -863,7 +864,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -944,7 +945,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[[1I)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
@@ -1023,7 +1024,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[Ljava/lang/String;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);

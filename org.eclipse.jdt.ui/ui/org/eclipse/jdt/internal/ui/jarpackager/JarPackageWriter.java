@@ -19,7 +19,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -173,11 +173,9 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 					try {
 						final ByteArrayOutputStream stream= new ByteArrayOutputStream();
 						service.writeRefactoringDescriptors(new RefactoringDescriptorProxy[] { proxies[index]}, stream, RefactoringDescriptor.NONE, true, null);
-						refactoring.setAttribute("refactoring" + count, stream.toString("UTF-8")); //$NON-NLS-1$ //$NON-NLS-2$
+						refactoring.setAttribute("refactoring" + count, stream.toString(StandardCharsets.UTF_8)); //$NON-NLS-1$
 					} catch (CoreException exception) {
 						JavaPlugin.log(exception);
-					} catch (UnsupportedEncodingException exception) {
-						Assert.isTrue(false);
 					}
 				}
 			} finally {

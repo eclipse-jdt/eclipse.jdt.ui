@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +88,7 @@ public class HTMLTidyTest {
 		fworkspacePathLength= workspacePath.length();
 		File chkpiiResults= new File(hostWorkspace, "chkpiiResults");
 		File tidy= new File(chkpiiResults, "tidy.txt");
-		fTidyResults= new OutputStreamWriter(new FileOutputStream(tidy), "UTF-8");
+		fTidyResults= new OutputStreamWriter(new FileOutputStream(tidy), StandardCharsets.UTF_8);
 		String startTime= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 		fTidyResults.write(getClass().getName() + " started at " + startTime + "\n");
 		fIgnores= getIgnores();
