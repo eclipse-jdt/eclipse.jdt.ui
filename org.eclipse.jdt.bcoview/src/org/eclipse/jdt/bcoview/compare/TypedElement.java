@@ -15,7 +15,7 @@ package org.eclipse.jdt.bcoview.compare;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
 import org.eclipse.jdt.bcoview.asm.DecompiledClass;
@@ -111,7 +111,7 @@ public class TypedElement extends BufferedContent implements ITypedElement, IStr
 					+ " is not supported by current JVM", //$NON-NLS-1$
 					e));
 		}
-		final byte[] bytes = decompiledClass.getText().getBytes(Charset.forName("UTF-8")); //$NON-NLS-1$
+		final byte[] bytes = decompiledClass.getText().getBytes(StandardCharsets.UTF_8);
 		// use internal buffering to prevent multiple calls to this method
 		Display.getDefault().syncExec(() -> setContent(bytes));
 

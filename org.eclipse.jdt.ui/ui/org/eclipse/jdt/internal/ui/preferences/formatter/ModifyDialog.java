@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -950,7 +951,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		protected void saveState() {
 			try (ByteArrayOutputStream out= new ByteArrayOutputStream()) {
 				writeExpansionState(fRoot, out);
-				fDialogSettings.put(fKeyPreferenceTreeExpansion, out.toString("UTF-8")); //$NON-NLS-1$
+				fDialogSettings.put(fKeyPreferenceTreeExpansion, out.toString(StandardCharsets.UTF_8));
 			} catch (IOException e) {
 				throw new AssertionError(e);
 			}
@@ -973,7 +974,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			String treeState= fDialogSettings.get(fKeyPreferenceTreeExpansion);
 			if (treeState == null)
 				return;
-			try (ByteArrayInputStream in= new ByteArrayInputStream(treeState.getBytes("UTF-8"))) { //$NON-NLS-1$
+			try (ByteArrayInputStream in= new ByteArrayInputStream(treeState.getBytes(StandardCharsets.UTF_8))) {
 				fScrolledPageContent.setReflow(false);
 				readExpansionState(fRoot, in);
 				fScrolledPageContent.setReflow(true);
@@ -1617,7 +1618,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 	protected void loadPreviews(String previewFile) {
 		String resource= "/preview/" + previewFile; //$NON-NLS-1$
-		try (Scanner s= new Scanner(getClass().getResourceAsStream(resource), "UTF-8")) { //$NON-NLS-1$
+		try (Scanner s= new Scanner(getClass().getResourceAsStream(resource), StandardCharsets.UTF_8)) {
 			fPreviewSources= s.useDelimiter("\\A").next(); //$NON-NLS-1$
 		}
 	}
