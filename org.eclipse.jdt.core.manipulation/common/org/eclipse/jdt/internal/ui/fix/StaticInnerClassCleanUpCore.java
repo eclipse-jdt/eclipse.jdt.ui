@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Fabrice TIERCELIN - initial API and implementation
+ *     Red Hat Inc. - refactored from StaticInnerClassCleanUp
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -53,8 +54,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -70,15 +71,15 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * <li>The top level class should not be inheritable or the inner class must be <code>private</code></li>
  * </ul>
  */
-public class StaticInnerClassCleanUp extends AbstractMultiFix {
+public class StaticInnerClassCleanUpCore extends AbstractMultiFix {
 
 	private static final String JUPITER_NESTED= "org.junit.jupiter.api.Nested"; //$NON-NLS-1$
 
-	public StaticInnerClassCleanUp() {
+	public StaticInnerClassCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public StaticInnerClassCleanUp(final Map<String, String> options) {
+	public StaticInnerClassCleanUpCore(final Map<String, String> options) {
 		super(options);
 	}
 
@@ -341,7 +342,7 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.StaticInnerClassCleanUp_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.StaticInnerClassCleanUp_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
 	}
 
@@ -365,7 +366,7 @@ public class StaticInnerClassCleanUp extends AbstractMultiFix {
 		}
 
 		@Override
-		public void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
+		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			ListRewrite listRewrite= rewrite.getListRewrite(visited, TypeDeclaration.MODIFIERS2_PROPERTY);
 			AST ast= cuRewrite.getRoot().getAST();

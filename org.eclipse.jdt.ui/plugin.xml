@@ -7177,7 +7177,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.single_used_field">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.static_inner_class"
             runAfter="org.eclipse.jdt.ui.cleanup.break_loop">
       </cleanUp>

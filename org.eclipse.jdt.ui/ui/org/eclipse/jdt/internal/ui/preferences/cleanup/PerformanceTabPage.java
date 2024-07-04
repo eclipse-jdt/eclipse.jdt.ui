@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 IBM Corporation and others.
+ * Copyright (c) 2020, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.fix.PrimitiveParsingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveRatherThanWrapperCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PrimitiveSerializationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SingleUsedFieldCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringBufferToStringBuilderCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringBuilderCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UseStringIsBlankCleanUp;
@@ -46,7 +46,7 @@ public final class PerformanceTabPage extends AbstractCleanUpTabPage {
 		return new AbstractCleanUp[] {
 				new SingleUsedFieldCleanUp(values),
 				new BreakLoopCleanUp(values),
-				new StaticInnerClassCleanUp(values),
+				new StaticInnerClassCleanUpCore(values),
 				new StringBuilderCleanUp(values),
 				new PlainReplacementCleanUpCore(values),
 				new UseStringIsBlankCleanUp(values),
