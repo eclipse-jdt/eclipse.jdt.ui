@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
@@ -73,7 +73,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new OverriddenAssignmentCleanUpCore(values),
 				new RedundantModifiersCleanUp(values),
 				new EmbeddedIfCleanUp(values),
-				new RedundantSemicolonsCleanUp(values),
+				new RedundantSemicolonsCleanUpCore(values),
 				new RedundantComparatorCleanUpCore(values),
 				new UnnecessaryArrayCreationCleanUpCore(values),
 				new ArrayWithCurlyCleanUpCore(values),

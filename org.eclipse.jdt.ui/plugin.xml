@@ -7282,7 +7282,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons"
             runAfter="org.eclipse.jdt.ui.cleanup.embedded_if">
       </cleanUp>

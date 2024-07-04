@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 itemis AG (http://www.itemis.eu) and others.
+ * Copyright (c) 2024 itemis AG (http://www.itemis.eu) and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Karsten Thoms (itemis) - initial API and implementation
  *     Red Hat Inc. - copied and modified to replace extraneous semicolons
+ *     Red Hat Inc. - moved to jdt.core.manipulation and renamed
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -56,18 +57,18 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * empty statements belonging to loops (e.g. empty for-loop) nor semicolons used
  * in a for-loop statement itself (e.g. for(;;)).
  */
-public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICleanUpFix {
+public class RedundantSemicolonsCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
 
 	private TextEditGroup[] fEditGroups;
 	private String fName;
 	private ICompilationUnit fCompilationUnit;
 	final static Pattern pattern= Pattern.compile("^((\\s*;)+)"); //$NON-NLS-1$
 
-	public RedundantSemicolonsCleanUp() {
+	public RedundantSemicolonsCleanUpCore() {
 		this(Collections.emptyMap());
 	}
 
-	public RedundantSemicolonsCleanUp(Map<String, String> options) {
+	public RedundantSemicolonsCleanUpCore(Map<String, String> options) {
 		super(options);
 	}
 
@@ -192,7 +193,7 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 		});
 
 		if (textedits.size() > 0) {
-			return new RedundantSemicolonsCleanUp(label, unit, textedits.toArray(new TextEditGroup[0]));
+			return new RedundantSemicolonsCleanUpCore(label, unit, textedits.toArray(new TextEditGroup[0]));
 		}
 		return null;
 	}
@@ -206,7 +207,7 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 		return -1;
 	}
 
-	private RedundantSemicolonsCleanUp(String name, CompilationUnit compilationUnit, TextEditGroup[] groups) {
+	private RedundantSemicolonsCleanUpCore(String name, CompilationUnit compilationUnit, TextEditGroup[] groups) {
 		fName= name;
 		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
 		fEditGroups= groups;
