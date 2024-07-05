@@ -196,7 +196,8 @@ public class CoreJavaDocSnippetStringEvaluator {
 	}
 
 	private String getString(String str, List<ActionElement> actionElements) {
-		String modifiedStr= str;
+		String modifiedStr= str.replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$
+		modifiedStr= modifiedStr.replaceAll("<", "&lt;"); //$NON-NLS-1$ //$NON-NLS-2$
 		List<StringItem> items= new ArrayList<>();
 		for (ActionElement actElem : actionElements) {
 			StringItem startItem= new StringItem(actElem.start, actElem.startTag);
