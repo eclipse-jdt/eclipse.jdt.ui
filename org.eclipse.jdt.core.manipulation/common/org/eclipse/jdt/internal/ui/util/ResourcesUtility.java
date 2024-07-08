@@ -120,7 +120,7 @@ public class ResourcesUtility {
 	 */
 	public static IResource getResource(IJavaElement element){
 		if (element.getElementType() == IJavaElement.COMPILATION_UNIT)
-			return ((ICompilationUnit) element).getResource();
+			return element.getResource();
 		else if (element instanceof IOpenable)
 			return element.getResource();
 		else

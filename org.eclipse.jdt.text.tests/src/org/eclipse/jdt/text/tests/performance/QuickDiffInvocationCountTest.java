@@ -21,7 +21,6 @@ import org.eclipse.jface.text.DocumentRewriteSession;
 import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.internal.texteditor.quickdiff.QuickDiffRangeDifference;
@@ -66,7 +65,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 		DocumentRewriteSession rewriteSession= null;
 		try {
 			if (viewer != null)
-				((ITextViewerExtension) viewer).getRewriteTarget().beginCompoundChange();
+				viewer.getRewriteTarget().beginCompoundChange();
 			if (document instanceof IDocumentExtension4)
 				rewriteSession= ((IDocumentExtension4) document).startRewriteSession(DocumentRewriteSessionType.STRICTLY_SEQUENTIAL);
 			for (int i= 0; i < document.getNumberOfLines(); i += 2) {
@@ -76,7 +75,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 			if (document instanceof IDocumentExtension4)
 				((IDocumentExtension4) document).stopRewriteSession(rewriteSession);
 			if (viewer != null)
-				((ITextViewerExtension) viewer).getRewriteTarget().endCompoundChange();
+				viewer.getRewriteTarget().endCompoundChange();
 		}
 		EditorTestHelper.joinBackgroundActivities(fEditor);
 	}

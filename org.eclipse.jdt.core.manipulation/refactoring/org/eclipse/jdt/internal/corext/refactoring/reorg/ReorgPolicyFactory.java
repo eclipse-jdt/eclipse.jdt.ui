@@ -820,7 +820,7 @@ public final class ReorgPolicyFactory {
 			if (resDest instanceof IContainer)
 				return (IContainer) resDest;
 			if (resDest instanceof IFile)
-				return ((IFile) resDest).getParent();
+				return resDest.getParent();
 			return null;
 		}
 

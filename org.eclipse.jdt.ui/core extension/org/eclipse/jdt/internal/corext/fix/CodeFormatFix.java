@@ -174,7 +174,7 @@ public class CodeFormatFix implements ICleanUpFix {
 						CategorizedTextEditGroup group= new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
 
 						if (edit instanceof MultiTextEdit) {
-							for (TextEdit child : ((MultiTextEdit)edit).getChildren()) {
+							for (TextEdit child : edit.getChildren()) {
 								edit.removeChild(child);
 								if (!TextEditUtil.overlaps(formatEdit, child) && !TextEditUtil.overlaps(otherEdit, child)) {
 									otherEdit.addChild(child);

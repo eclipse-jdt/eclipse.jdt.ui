@@ -7177,7 +7177,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.single_used_field">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.StaticInnerClassCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.static_inner_class"
             runAfter="org.eclipse.jdt.ui.cleanup.break_loop">
       </cleanUp>
@@ -7282,7 +7282,7 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp"
+            class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons"
             runAfter="org.eclipse.jdt.ui.cleanup.embedded_if">
       </cleanUp>

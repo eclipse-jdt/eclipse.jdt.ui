@@ -16,6 +16,7 @@
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -37,5 +38,10 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
 				new TypeChangeCorrectionProposalCore(targetCU, binding, astRoot, newType, isNewTypeVar, offerSuperTypeProposals, relevance));
+	}
+
+	public TypeChangeCorrectionProposal(ICompilationUnit targetCU, ASTNode nodeToChange, CompilationUnit astRoot, ITypeBinding variableTypeBinding, int relevance) {
+		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), //$NON-NLS-1$
+				new TypeChangeCorrectionProposalCore(targetCU, nodeToChange, astRoot, variableTypeBinding, relevance));
 	}
 }

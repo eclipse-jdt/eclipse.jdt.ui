@@ -47,7 +47,7 @@ public final class CaptureType extends AbstractTypeVariable {
 
 	@Override
 	public boolean doEquals(TType type) {
-		return getBindingKey().equals(((CaptureType)type).getBindingKey())
+		return getBindingKey().equals(type.getBindingKey())
 				&& fJavaProject.equals(((CaptureType)type).fJavaProject);
 	}
 

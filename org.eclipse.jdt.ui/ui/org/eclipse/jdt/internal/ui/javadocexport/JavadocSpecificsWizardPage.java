@@ -18,7 +18,6 @@ import static org.eclipse.jdt.internal.ui.javadocexport.JavadocSpecificsWizardPa
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -154,8 +153,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fSourceCombo= createCombo(inner, SWT.NONE, fStore.getSource(), createGridData(1));
 		List<String> versions= new ArrayList<>();
 		versions.add("-"); //$NON-NLS-1$
-		versions.addAll(JavaCore.getAllVersions());
-		versions.removeAll(Arrays.asList(JavaCore.VERSION_CLDC_1_1, JavaCore.VERSION_1_1, JavaCore.VERSION_1_2));
+		versions.addAll(JavaCore.getAllJavaSourceVersionsSupportedByCompiler());
 		fSourceCombo.setItems(versions.toArray(new String[versions.size()]));
 
 		fSourceCombo.setText(fStore.getSource());

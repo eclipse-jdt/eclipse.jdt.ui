@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,39 @@ public class MoveInnerToNewTests16 extends GenericRefactoringTest {
 
 	@Test
 	public void moveInnerRecord() throws Exception{
+		ParticipantTesting.reset();
+		final String p1Name= "p1";
+		final String inDir= "/in/";
+		final String outDir= "/out/";
+
+		IPackageFragment packP1= createPackage(p1Name);
+		ICompilationUnit p1Foo= createCu(packP1, getName() + inDir + p1Name + "/Foo.java", "Foo.java");
+		IType fooType= p1Foo.getTypes()[0];
+		IType barType= fooType.getTypes()[0];
+
+		assertTrue("should be enabled", RefactoringAvailabilityTester.isMoveInnerAvailable(barType));
+		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(barType)) ? new MoveInnerToTopRefactoring(barType, JavaPreferencesSettings.getCodeGenerationSettings(barType.getJavaProject())) : null);
+		assertNotNull("MoveInnerToTopRefactoring should not be null", ref);
+		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
+
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+		assertFalse("precondition was supposed to pass", checkInputResult.hasError());
+		performChange(ref, false);
+
+		assertEquals("p1 files", 2, packP1.getChildren().length);
+
+		String expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p1Name + "/Foo.java");
+		assertEqualLines("incorrect update of Foo", expectedSource, packP1.getCompilationUnit("Foo.java").getSource());
+
+		expectedSource= getFileContents(getRefactoringPath() + getName() + outDir + p1Name + "/Bar.java");
+		assertEqualLines("incorrect creation of Bar", expectedSource, packP1.getCompilationUnit("Bar.java").getSource());
+
+	}
+
+	@Test
+	public void moveInnerRecord2() throws Exception{
 		ParticipantTesting.reset();
 		final String p1Name= "p1";
 		final String inDir= "/in/";

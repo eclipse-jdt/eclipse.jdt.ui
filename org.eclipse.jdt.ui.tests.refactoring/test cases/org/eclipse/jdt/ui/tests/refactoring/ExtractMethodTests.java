@@ -181,6 +181,11 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 		performTest(fgTestSetup.getNestedPackage(), "A", COMPARE_WITH_OUTPUT, "nested_out");
 	}
 
+	protected void nestedTest1() throws Exception {
+		performTest(fgTestSetup.getNestedPackage(), "A", COMPARE_WITH_OUTPUT, "nested_out", null, null, 1);
+
+	}
+
 	protected void returnTest() throws Exception {
 		performTest(fgTestSetup.getReturnPackage(), "A", COMPARE_WITH_OUTPUT, "return_out");
 	}
@@ -1837,6 +1842,11 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	@Test
 	public void test654() throws Exception {
 		nestedTest();
+	}
+
+	@Test
+	public void test655() throws Exception {
+		nestedTest1();
 	}
 
 	//---- Extracting method containing a return statement.

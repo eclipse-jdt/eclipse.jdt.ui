@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
@@ -262,7 +261,7 @@ public class RedundantNullnessTypeAnnotationsFilter {
 				extendsMods= ((SingleVariableDeclaration) astNode).modifiers();
 				break;
 			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
-				final ASTNode parent= ((VariableDeclarationFragment) astNode).getParent();
+				final ASTNode parent= astNode.getParent();
 				if (parent instanceof BodyDeclaration)
 					extendsMods= ((BodyDeclaration) parent).modifiers();
 				break;

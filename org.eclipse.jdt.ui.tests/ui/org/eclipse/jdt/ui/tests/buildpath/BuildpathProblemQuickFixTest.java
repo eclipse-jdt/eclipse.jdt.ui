@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import org.junit.After;
@@ -65,7 +66,7 @@ public class BuildpathProblemQuickFixTest {
 
 	public IPath addFile(IPath root, String fileName, String contents) throws CoreException, IOException {
 		IPath filePath= root.append(fileName);
-		createFile(filePath, contents.getBytes("UTF8")); //$NON-NLS-1$
+		createFile(filePath, contents.getBytes(StandardCharsets.UTF_8));
 		return filePath;
 	}
 

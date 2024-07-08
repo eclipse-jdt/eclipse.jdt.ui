@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2020 GK Software AG and others.
+ * Copyright (c) 2012, 2024 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -938,9 +938,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			public class E2 extends E {
 			    void foo(@Nullable Exception e1) {
 			        e1.printStackTrace();
@@ -988,9 +988,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class E2 extends E {
 			    void foo(@NonNull Exception e1) {
 			        e1.printStackTrace();
@@ -1105,9 +1105,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class E2 {
 			    void test(E e, @NonNull Object in) {
 			        e.foo(in);
@@ -1245,9 +1245,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			public class E {
 			    void foo(@Nullable Object o) {
 			        if (o == null) System.out.print("NOK");
@@ -1460,9 +1460,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class E2 extends E {
 			    @NonNull
 			    Object foo() {
@@ -1522,9 +1522,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String str3= """
 				package test1;
-				
+
 				import org.eclipse.jdt.annotation.Nullable;
-				
+
 				public class E2 extends E implements IE {
 				    public @Nullable Object foo() {
 				        return this;
@@ -1541,9 +1541,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String str4= """
 				package test1;
-				
+
 				import org.eclipse.jdt.annotation.NonNull;
-				
+
 				public class E2 extends E implements IE {
 				    public @NonNull Object foo() {
 				        return this;
@@ -1675,9 +1675,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			String str3= """
 				package test1;
-				
+
 				import org.eclipse.jdt.annotation.Nullable;
-				
+
 				public class E2 {
 				    public @Nullable Object foo(E e) {
 				        return e.bar();
@@ -1754,9 +1754,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			public class E2 {
 			    public @Nullable Object foo(E e) {
 			        return e.bar();
@@ -2085,9 +2085,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			public class E {
 			    public <T extends Number> double foo(boolean b) {
 			        @NonNull
@@ -2534,6 +2534,148 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 				JavaProjectHelper.delete(proj2);
 			}
 		}
+	}
+	@Test
+	public void testBug513423a() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.NonNullByDefault;
+
+			@NonNullByDefault
+			public class E extends RuntimeException {
+				private static final long serialVersionUID = 1L;
+
+				public void printStackTrace(
+					// Illegal redefinition of parameter s, inherited method from Throwable
+					// does not constrain this parameter
+					java.io.PrintStream s) {
+						if (s != null) {
+							synchronized (s) {
+								s.print(getClass().getName() + ": ");
+								s.print(getStackTrace());
+							}
+						}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 2); // ignore 2nd ("add @SW")
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 's' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.NonNullByDefault;
+			import org.eclipse.jdt.annotation.Nullable;
+
+			@NonNullByDefault
+			public class E extends RuntimeException {
+				private static final long serialVersionUID = 1L;
+
+				public void printStackTrace(
+					// Illegal redefinition of parameter s, inherited method from Throwable
+					// does not constrain this parameter
+					java.io.@Nullable PrintStream s) {
+						if (s != null) {
+							synchronized (s) {
+								s.print(getClass().getName() + ": ");
+								s.print(getStackTrace());
+							}
+						}
+				}
+			}
+			""";
+		assertEqualString(preview, str1);
+
+	}
+	@Test
+	public void testBug513423b() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str0= """
+			package test1;
+
+			import static java.lang.annotation.ElementType.TYPE_USE;
+
+			import java.lang.annotation.Documented;
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Retention;
+			import java.lang.annotation.RetentinPolicy;
+			import java.lang.annotation.Target;
+
+			@Documented
+			@Retention(RetentionPolicy.CLASS)
+			@Target({ TYPE_USE })
+			public @interface SomeAnnotation {
+				// marker annotation with no members
+			}
+			""";
+		pack1.createCompilationUnit("SomeAnnotation.java", str0, false, null);
+
+		String str= """
+			package test1;
+			import org.eclipse.jdt.annotation.NonNullByDefault;
+
+			@NonNullByDefault
+			public class E extends RuntimeException {
+				private static final long serialVersionUID = 1L;
+
+				public void printStackTrace(
+					// Illegal redefinition of parameter s, inherited method from Throwable
+					// does not constrain this parameter
+					java.io.@SomeAnnotation PrintStream s) {
+						if (s != null) {
+							synchronized (s) {
+								s.print(getClass().getName() + ": ");
+								s.print(getStackTrace());
+							}
+						}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 2); // ignore 2nd ("add @SW")
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 's' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.NonNullByDefault;
+			import org.eclipse.jdt.annotation.Nullable;
+
+			@NonNullByDefault
+			public class E extends RuntimeException {
+				private static final long serialVersionUID = 1L;
+
+				public void printStackTrace(
+					// Illegal redefinition of parameter s, inherited method from Throwable
+					// does not constrain this parameter
+					java.io.@SomeAnnotation @Nullable PrintStream s) {
+						if (s != null) {
+							synchronized (s) {
+								s.print(getClass().getName() + ": ");
+								s.print(getStackTrace());
+							}
+						}
+				}
+			}
+			""";
+		assertEqualString(preview, str1);
+
 	}
 	@Test
 	public void testGH1294() throws Exception {

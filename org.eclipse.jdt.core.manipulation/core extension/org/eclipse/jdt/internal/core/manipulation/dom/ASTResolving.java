@@ -307,7 +307,7 @@ public class ASTResolving {
 				}
 			}
 			if (creationType instanceof ArrayType) {
-				ITypeBinding creationTypeBinding= ((ArrayType) creationType).resolveBinding();
+				ITypeBinding creationTypeBinding= creationType.resolveBinding();
 				if (creationTypeBinding != null) {
 					return Bindings.getComponentType(creationTypeBinding, dim);
 				}
@@ -883,7 +883,7 @@ public class ASTResolving {
 			}
 			return Modifier.isStatic(decl.getModifiers());
 		} else if (decl instanceof Initializer) {
-			return Modifier.isStatic(((Initializer)decl).getModifiers());
+			return Modifier.isStatic(decl.getModifiers());
 		} else if (decl instanceof FieldDeclaration) {
 			return JdtFlags.isStatic(decl);
 		}

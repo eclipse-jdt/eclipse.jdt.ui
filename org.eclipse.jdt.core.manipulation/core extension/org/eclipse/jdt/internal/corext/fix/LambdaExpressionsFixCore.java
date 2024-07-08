@@ -258,7 +258,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 
 		private void checkForUninitializedFinalReference(IBinding binding) {
 			if (binding instanceof IVariableBinding) {
-				int modifiers= ((IVariableBinding)binding).getModifiers();
+				int modifiers= binding.getModifiers();
 				if ((modifiers & IModifierConstants.ACC_FINAL) == IModifierConstants.ACC_FINAL) {
 					if (((IVariableBinding) binding).isField()) {
 						ASTNode decl= ((CompilationUnit)fMethodDeclaration.getRoot()).findDeclaringNode(binding);

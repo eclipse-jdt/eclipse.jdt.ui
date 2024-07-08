@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -177,7 +176,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	// Simple member parser to see if we are not in matched parentheses and thus might be in a parameter list
 	private boolean areParenthesesMatched(ICompilationUnit cu, IMember element) throws JavaModelException {
 		String source= cu.getSource();
-		ISourceRange sourceRange= ((ISourceReference)element).getSourceRange();
+		ISourceRange sourceRange= element.getSourceRange();
 		int cnt= 0;
 		State state= State.NORMAL;
 		for (int i= sourceRange.getOffset(); i < getReplacementOffset(); ++i) {

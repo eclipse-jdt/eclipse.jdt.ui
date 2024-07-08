@@ -171,7 +171,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		if (!(node instanceof QualifiedName))
 			return false;
 
-		ASTNode parent= ((QualifiedName)node).getParent();
+		ASTNode parent= node.getParent();
 		return parent instanceof ImportDeclaration && ((ImportDeclaration) parent).isStatic();
 	}
 

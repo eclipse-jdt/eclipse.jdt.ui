@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -153,11 +154,13 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		fJProject1= projectSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		setDefaultClassFileEditor(true);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
+		setDefaultClassFileEditor(false);
 	}
 
 	/**
@@ -191,10 +194,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([IL1java/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("String> list");
@@ -259,7 +262,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("int[]");
@@ -304,10 +307,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([Ljava/lang/Object;L1java/util/List<+1Ljava/lang/Number;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("Number> list");
@@ -381,10 +384,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 				"class pack/age/X\n" +
 				"test\n";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[] ints");
@@ -462,10 +465,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[] ints");
@@ -543,10 +546,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[],");
@@ -624,10 +627,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ([[1[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[][][],");
@@ -703,10 +706,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ()[Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[] test");
@@ -782,10 +785,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 ()[Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[];");
@@ -861,10 +864,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("...");
@@ -942,10 +945,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[[1I)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("...");
@@ -1021,10 +1024,10 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[Ljava/lang/String;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("String ...");
@@ -1092,7 +1095,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("T extends");
@@ -1199,7 +1202,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("T extends");
@@ -1302,7 +1305,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 				};
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
-		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 		try {
 			int offset= pathAndContents[1].indexOf("[]> value");
@@ -1475,7 +1478,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 
 			//  START of actual assist test:
 			IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
-			JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+			JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 
 			try {
 				int offset= pathAndContents[1].indexOf("V get");

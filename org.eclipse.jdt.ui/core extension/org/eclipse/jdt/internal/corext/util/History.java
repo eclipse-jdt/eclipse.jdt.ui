@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -168,7 +169,7 @@ public abstract class History<K, V> {
 		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(fFileName);
 		File file= stateLocation.toFile();
 		if (file.exists()) {
-			try (InputStreamReader reader= new InputStreamReader(new FileInputStream(file), "utf-8")) {//$NON-NLS-1$
+			try (InputStreamReader reader= new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
 				load(new InputSource(reader));
 			} catch (IOException | CoreException e) {
 				JavaPlugin.log(e);

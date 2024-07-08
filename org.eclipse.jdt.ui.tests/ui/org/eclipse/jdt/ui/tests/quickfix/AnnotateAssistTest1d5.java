@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.After;
@@ -64,11 +65,13 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 		fJProject1= projectSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
 		fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		setDefaultClassFileEditor(true);
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, projectSetup.getDefaultClasspath());
+		setDefaultClassFileEditor(false);
 	}
 
 	// === Tests ===
@@ -247,7 +250,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			 (TK;)T0V;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -323,7 +326,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			 ([[ILjava/util/List<Ljava/lang/String;>;)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
@@ -402,7 +405,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			 (Ljava/util/List<Ljava/lang/String;>;[I)Ljava/lang/String;
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
@@ -479,7 +482,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 			 (Ljava/lang/String;)V
 			""";
 		ensureExists(annotationFile.getParent());
-		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes(StandardCharsets.UTF_8)), 0, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);

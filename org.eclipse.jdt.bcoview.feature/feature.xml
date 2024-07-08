@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.bcoview.feature"
       label="Bytecode Outline View"
-      version="1.2.400.qualifier"
+      version="1.2.500.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

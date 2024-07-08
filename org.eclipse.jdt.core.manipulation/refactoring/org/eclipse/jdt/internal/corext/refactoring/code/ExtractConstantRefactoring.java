@@ -655,9 +655,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 			int modifiers;
 			if (decl instanceof FieldDeclaration)
-				modifiers= ((FieldDeclaration) decl).getModifiers();
+				modifiers= decl.getModifiers();
 			else if (decl instanceof Initializer)
-				modifiers= ((Initializer) decl).getModifiers();
+				modifiers= decl.getModifiers();
 			else {
 				continue; /* this declaration is not a field declaration
 				              or initializer, so the placement of the constant
@@ -727,9 +727,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 		int modifiers;
 		if(node instanceof FieldDeclaration) {
-			modifiers = ((FieldDeclaration) node).getModifiers();
+			modifiers = node.getModifiers();
 		} else if(node instanceof Initializer) {
-			modifiers = ((Initializer) node).getModifiers();
+			modifiers = node.getModifiers();
 		} else {
 			Assert.isTrue(false);
 			return false;

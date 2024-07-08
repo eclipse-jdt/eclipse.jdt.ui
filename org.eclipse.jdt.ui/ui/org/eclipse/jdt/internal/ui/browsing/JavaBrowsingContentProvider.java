@@ -410,7 +410,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 				Object[] newElements= getNewElements(elements);
 				if (fViewer instanceof AbstractTreeViewer) {
 					if (fViewer.testFindItem(parent) == null) {
-						Object root= ((AbstractTreeViewer)fViewer).getInput();
+						Object root= fViewer.getInput();
 						if (root != null)
 							((AbstractTreeViewer)fViewer).add(root, newElements);
 					}

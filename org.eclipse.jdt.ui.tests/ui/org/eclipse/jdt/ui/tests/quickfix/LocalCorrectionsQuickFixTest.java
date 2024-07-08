@@ -384,7 +384,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    public static int fCount;
-			
+
 			    public void foo() {
 			        this.fCount= 1;
 			    }
@@ -404,7 +404,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    public static int fCount;
-			
+
 			    public void foo() {
 			        E.fCount= 1;
 			    }
@@ -418,7 +418,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    public int fCount;
-			
+
 			    public void foo() {
 			        this.fCount= 1;
 			    }
@@ -1264,16 +1264,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    public void test1() {
 			        test2();
 			    }
-			
+
 			    public void test2() throws de.muenchen.test.Exception {
 			        throw new de.muenchen.test.Exception();
 			    }
-			
+
 			    public void test3() {
 			        try {
 			            java.io.File.createTempFile("", ".tmp");
 			        } catch (Exception ex) {
-			
+
 			        }
 			    }
 			}
@@ -1283,7 +1283,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("de.muenchen.test", false, null);
 		String str1= """
 			package de.muenchen.test;
-			
+
 			public class Exception extends java.lang.Throwable {
 			}
 			""";
@@ -1307,16 +1307,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			        } catch (de.muenchen.test.Exception e) {
 			        }
 			    }
-			
+
 			    public void test2() throws de.muenchen.test.Exception {
 			        throw new de.muenchen.test.Exception();
 			    }
-			
+
 			    public void test3() {
 			        try {
 			            java.io.File.createTempFile("", ".tmp");
 			        } catch (Exception ex) {
-			
+
 			        }
 			    }
 			}
@@ -1331,16 +1331,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    public void test1() throws de.muenchen.test.Exception {
 			        test2();
 			    }
-			
+
 			    public void test2() throws de.muenchen.test.Exception {
 			        throw new de.muenchen.test.Exception();
 			    }
-			
+
 			    public void test3() {
 			        try {
 			            java.io.File.createTempFile("", ".tmp");
 			        } catch (Exception ex) {
-			
+
 			        }
 			    }
 			}
@@ -3055,10 +3055,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			import java.io.IOException;
-			
+
 			import test2.Inter;
 			public class E implements Inter{
-			
+
 			    public int getCount(Object[] o) throws IOException {
 			        return 0;
 			    }
@@ -3121,14 +3121,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			import java.io.IOException;
-			
+
 			import test2.InterImpl;
 			public class E extends InterImpl {
-			
+
 			    public int getCount(Object[] o) throws IOException {
 			        return 0;
 			    }
-			
+
 			    @Override
 			    protected int[] getMusic() throws IOException {
 			        return null;
@@ -3182,7 +3182,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import test2.A;
 			import test2.Inter;
 			public class E extends A implements Inter {
-			
+
 			    public int foo() {
 			        return 0;
 			    }
@@ -3235,7 +3235,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test2;
 			public class A implements F {
 			    public void c() throws Exception, RuntimeException { }
-			
+
 			    public void e() {
 			    }
 			}
@@ -3290,14 +3290,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test2;
-			
+
 			import java.util.Properties;
-			
+
 			public class A implements F {
-			
+
 			    public void b(Properties p) {
 			    }
-			
+
 			    public void g(test2.Properties p) {
 			    }
 			}
@@ -3350,7 +3350,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test2;
 			public class A implements IT {
-			
+
 			    public void foo(java.lang.Class clazz) {
 			    }
 			}
@@ -3406,11 +3406,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Collection;
-			
+
 			public class E implements Inter<String> {
-			
+
 			    public String doT(Collection<String> in) {
 			        return null;
 			    }
@@ -3458,7 +3458,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class E implements Inter<String> {
-			
+
 			    public String doT(String in) {
 			        return null;
 			    }
@@ -3510,15 +3510,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Collection;
-			
+
 			public class E implements Inter {
-			
+
 			    public <T> T doX(Collection<T> in) {
 			        return null;
 			    }
-			
+
 			    public <T extends Exception> T getException() {
 			        return null;
 			    }
@@ -3581,7 +3581,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    public <T> List<T> findPerspectiveElements(Class<T> clazz, List<String> tagsToMatch) {
 			        return null;
 			    }
-			
+
 			    public <T> List<T> findElements(Class<T> clazz, List<String> tagsToMatch) {
 			        return null;
 			    }
@@ -3615,7 +3615,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package p;
 			public enum E {
 			    E(1, "E");
-			
+
 			    E(int i, String string) {
 			    }
 			}
@@ -3648,7 +3648,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package pack;
 			enum TestEnum implements IA {
 			    test1,test2;
-			
+
 			    public void foo() {
 			    }
 			}
@@ -3693,7 +3693,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			        public boolean foo() {
 			            return false;
 			        }
-			
+
 			        @Override
 			        public void bar() {
 			        }
@@ -3731,12 +3731,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test;
 			enum TestEnum {
 			    A {
-			
+
 			        @Override
 			        public boolean foo() {
 			            return false;
 			        }
-			
+
 			        @Override
 			        public void bar() {
 			        }
@@ -3796,15 +3796,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String str= """
 			package test;
-			
+
 			import java.lang.annotation.Retention;
 			import java.lang.annotation.RetentionPolicy;
-			
+
 			@Retention(RetentionPolicy.CLASS)
 			@interface NonNull {}
 			@Retention(RetentionPolicy.CLASS)
 			@interface Nullable {}
-			
+
 			@Retention(RetentionPolicy.RUNTIME)
 			@interface Sour {
 			    byte[] value();
@@ -3814,7 +3814,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    RetentionPolicy policy() default RetentionPolicy.SOURCE;
 			    Deprecated d() default @Deprecated;
 			}
-			
+
 			abstract class A {
 			    @SuppressWarnings("unused")
 			    @Sour(value={- 42, 13}, c= Integer[][].class, name="\\u0040hi", policy=RetentionPolicy.CLASS, d=@Deprecated())
@@ -3836,15 +3836,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test;
-			
+
 			import java.lang.annotation.Retention;
 			import java.lang.annotation.RetentionPolicy;
-			
+
 			@Retention(RetentionPolicy.CLASS)
 			@interface NonNull {}
 			@Retention(RetentionPolicy.CLASS)
 			@interface Nullable {}
-			
+
 			@Retention(RetentionPolicy.RUNTIME)
 			@interface Sour {
 			    byte[] value();
@@ -3854,7 +3854,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    RetentionPolicy policy() default RetentionPolicy.SOURCE;
 			    Deprecated d() default @Deprecated;
 			}
-			
+
 			abstract class A {
 			    @SuppressWarnings("unused")
 			    @Sour(value={- 42, 13}, c= Integer[][].class, name="\\u0040hi", policy=RetentionPolicy.CLASS, d=@Deprecated())
@@ -3863,7 +3863,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			            @Sour(value={Sour.CONST}) @Nullable(unresolved) Object input);
 			}
 			class B extends A {
-			
+
 			    @Override
 			    public @NonNull Object foo(@Nullable Object input) {
 			        return null;
@@ -3898,7 +3898,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test;
 			public class A implements I {
-			
+
 			    public void foo() {
 			    }
 			}
@@ -3922,7 +3922,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("annots", false, null);
 		String str= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface NonNull {}
 			""";
@@ -3930,7 +3930,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface Nullable {}
 			""";
@@ -3938,7 +3938,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface NonNullByDefault {}
 			""";
@@ -3953,9 +3953,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str4= """
 			package test;
-			
+
 			import annots.*;
-			
+
 			abstract class A {
 			    @SuppressWarnings("unused")
 			    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);
@@ -3974,15 +3974,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test;
-			
+
 			import annots.*;
-			
+
 			abstract class A {
 			    @SuppressWarnings("unused")
 			    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);
 			}
 			class B extends A {
-			
+
 			    @Override
 			    public Object foo(@Nullable Object i1, Object i2) {
 			        return null;
@@ -4006,7 +4006,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("annots", false, null);
 		String str= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface NonNull {}
 			""";
@@ -4014,7 +4014,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface Nullable {}
 			""";
@@ -4022,7 +4022,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface NonNullByDefault { boolean value(); }
 			""";
@@ -4037,9 +4037,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str4= """
 			package test;
-			
+
 			import annots.*;
-			
+
 			abstract class A {
 			    @SuppressWarnings({"unused", "null"})
 			    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);
@@ -4059,16 +4059,16 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test;
-			
+
 			import annots.*;
-			
+
 			abstract class A {
 			    @SuppressWarnings({"unused", "null"})
 			    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);
 			}
 			@NonNullByDefault(false)
 			class B extends A {
-			
+
 			    @Override
 			    public @NonNull Object foo(@Nullable Object i1, @NonNull Object i2) {
 			        return null;
@@ -4092,7 +4092,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("annots", false, null);
 		String str= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface NonNull {}
 			""";
@@ -4100,7 +4100,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface Nullable {}
 			""";
@@ -4108,7 +4108,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package annots;
-			
+
 			@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 			public @interface NonNullByDefault { boolean value() default true; }
 			""";
@@ -4119,9 +4119,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str3= """
 			package test;
-			
+
 			import annots.*;
-			
+
 			abstract class A {
 			    @SuppressWarnings("unused")
 			    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);
@@ -4143,9 +4143,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test;
-			
+
 			import annots.*;
-			
+
 			abstract class A {
 			    @SuppressWarnings("unused")
 			    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);
@@ -4153,7 +4153,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			class B {
 			    @NonNullByDefault
 			    A f = new A() {
-			
+
 			        @Override
 			        public Object foo(@Nullable Object i1, Object i2) {
 			            return null;
@@ -4193,7 +4193,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    interface Interface1 { Object getX(); }
 			    interface Interface2 { Integer getX(); }
 			    class Cls implements Interface1, Interface2 {
-			
+
 			        public Integer getX() {
 			            return null;
 			        }
@@ -4221,12 +4221,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface C<T extends BigInteger> { Object m(Class<T> c); }
 			interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}
-			
+
 			//Add unimplemented methods
 			class M implements D<BigInteger,BigInteger> {
 			}
@@ -4243,15 +4243,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface C<T extends BigInteger> { Object m(Class<T> c); }
 			interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}
-			
+
 			//Add unimplemented methods
 			class M implements D<BigInteger,BigInteger> {
-			
+
 			    public Object m(Class c) {
 			        return null;
 			    }
@@ -4268,11 +4268,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface D<S,T> extends A, B<BigInteger> {}
-			
+
 			class M implements D<BigInteger,BigInteger> {
 			}
 			""";
@@ -4288,13 +4288,13 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface D<S,T> extends A, B<BigInteger> {}
-			
+
 			class M implements D<BigInteger,BigInteger> {
-			
+
 			    public Object m(Class c) {
 			        return null;
 			    }
@@ -4311,11 +4311,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface D<S,T> extends B<BigInteger>, A {}
-			
+
 			class M implements D<BigInteger,BigInteger> {
 			}
 			""";
@@ -4331,13 +4331,13 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test;
 			import java.math.BigInteger;
-			
+
 			interface A { Object m(Class c); }
 			interface B<S extends Number> { Object m(Class<S> c); }
 			interface D<S,T> extends B<BigInteger>, A {}
-			
+
 			class M implements D<BigInteger,BigInteger> {
-			
+
 			    public Object m(Class c) {
 			        return null;
 			    }
@@ -4419,7 +4419,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test1;
 			public class E extends F {
-			
+
 			    public E(Runnable runnable) {
 			        super(runnable);
 			    }
@@ -4437,7 +4437,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			public class F {
 			    public F(Runnable runnable) throws IOException {
 			    }
-			
+
 			    public F(int i, Runnable runnable) {
 			    }
 			}
@@ -4462,7 +4462,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class E extends F {
-			
+
 			    public E(int i, Runnable runnable) {
 			        super(i, runnable);
 			    }
@@ -4474,11 +4474,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public class E extends F {
-			
+
 			    public E(Runnable runnable) throws IOException {
 			        super(runnable);
 			    }
@@ -4518,7 +4518,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test1;
 			public class E extends F<Runnable> {
-			
+
 			    public E(Runnable runnable) {
 			        super(runnable);
 			    }
@@ -4564,7 +4564,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test1;
 			public class E extends F {
-			
+
 			    public E(
 			            Runnable runnable,
 			            boolean isGreen,
@@ -4616,7 +4616,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    public class SubE extends F.SubF {
-			
+
 			        public SubE(F f, int i) {
 			            f.super(i);
 			        }
@@ -4661,7 +4661,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    public class SubE extends F.SubF {
-			
+
 			        public SubE(int i) {
 			            super(i);
 			        }
@@ -4703,7 +4703,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test1;
 			public class E extends F<String>.SubF<String> {
-			
+
 			    public E(F<String> f, String s, String t) {
 			        f.super(s, t);
 			    }
@@ -4743,7 +4743,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			        public SubF(int i) {
 			        }
 			        public class SubF2 extends SubF {
-			
+
 			            public SubF2(int i) {
 			                super(i);
 			            }
@@ -4786,7 +4786,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test1;
 			public class E extends F {
-			
+
 			    public E(Runnable runnable) {
 			        super(runnable);
 			    }
@@ -4825,11 +4825,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public class E extends F {
-			
+
 			    public E() throws IOException {
 			        super();
 			    }
@@ -4870,11 +4870,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int count;
-			
+
 			    public int getCount() {
 			        return count;
 			    }
-			
+
 			    public void setCount(int count) {
 			        this.count = count;
 			    }
@@ -4917,11 +4917,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    private int count, color= count;
-			
+
 			    public int getColor() {
 			        return color;
 			    }
-			
+
 			    public void setColor(int color) {
 			        this.color = color;
 			    }
@@ -5337,7 +5337,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package pack;
 			public class B {
 			    private final String c="Test";
-			
+
 			    public String getC() {
 			        return c;
 			    }
@@ -5461,12 +5461,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    public void foo() {
 			        E x = (E) bar();
 			    }
-			
+
 			    private Object bar() {
 			        throw null;
 			    }
@@ -5483,12 +5483,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    public void foo() {
 			        bar();
 			    }
-			
+
 			    private Object bar() {
 			        throw null;
 			    }
@@ -5497,11 +5497,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    public void foo() {
 			    }
-			
+
 			    private Object bar() {
 			        throw null;
 			    }
@@ -5903,7 +5903,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    void foo() {
 			        int h= super.hashCode();
@@ -5921,7 +5921,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    void foo() {
 			    }
@@ -5930,7 +5930,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    void foo() {
 			        super.hashCode();
@@ -5951,7 +5951,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    void foo(int a) {
 			        int f= 1 + a-- + (int) Math.ceil(a);
@@ -5973,7 +5973,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    void foo(int a) {
 			    }
@@ -5982,7 +5982,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    void foo(int a) {
 			        a--;
@@ -6006,7 +6006,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    int f;
 			    void foo() {
@@ -6026,7 +6026,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    int f;
 			    void foo() {
@@ -6038,7 +6038,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    int f;
 			    void foo() {
@@ -6064,7 +6064,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    int f;
 			    void foo() {
@@ -6084,7 +6084,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    int f;
 			    void foo() {
@@ -6096,7 +6096,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    int f;
 			    void foo() {
@@ -6744,9 +6744,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import other.A;
-			
+
 			public class E {
 			    public int foo() {
 			        return A.foo();
@@ -7048,7 +7048,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(String b) {
 			        if  (b != null) {
@@ -8097,7 +8097,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    boolean foo(int i) {
 			        if (i < 100)
@@ -8120,7 +8120,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    boolean foo(int i) {
 			        if (i < 100) {
@@ -8145,7 +8145,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    boolean foo(int i) {
 			        switch (i) {
@@ -8170,7 +8170,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    boolean foo(int i) {
 			        switch (i) {
@@ -9928,7 +9928,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    public Object foo() {
 			        if (Boolean.TRUE) {
@@ -9949,7 +9949,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[5];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    public Object foo() {
 			        if (Boolean.TRUE) {
@@ -9962,7 +9962,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			public class E {
 			    public Object foo() {
 			        if (Boolean.TRUE) {
@@ -9974,7 +9974,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package test1;
-			
+
 			public class E {
 			    @SuppressWarnings("unused")
 			    public Object foo() {
@@ -9988,7 +9988,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[3]= """
 			package test1;
-			
+
 			public class E {
 			    public Object foo() {
 			        if (Boolean.TRUE) {
@@ -10001,10 +10001,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[4]= """
 			package test1;
-			
+
 			public class E {
 			    private Object object;
-			
+
 			    public Object foo() {
 			        if (Boolean.TRUE) {
 			            /*a*/object = new Object()/*b*/;/*c*/
@@ -10026,7 +10026,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        /*a*/new Exception()/*b*/;/*c*/
@@ -10044,7 +10044,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[6];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        /*a*/throw new Exception()/*b*/;/*c*/
@@ -10054,7 +10054,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			    }
@@ -10063,7 +10063,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[2]= """
 			package test1;
-			
+
 			public class E {
 			    @SuppressWarnings("unused")
 			    public void foo() {
@@ -10074,7 +10074,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[3]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        /*a*/return new Exception()/*b*/;/*c*/
@@ -10084,7 +10084,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[4]= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        /*a*/Exception exception = new Exception()/*b*/;/*c*/
@@ -10094,10 +10094,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[5]= """
 			package test1;
-			
+
 			public class E {
 			    private Exception exception;
-			
+
 			    public void foo() {
 			        /*a*/exception = new Exception()/*b*/;/*c*/
 			    }
@@ -10116,7 +10116,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    private Object name;
 			    public E() {
@@ -10135,7 +10135,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    private Object name;
 			    public E() {
@@ -10157,7 +10157,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    String e = "abc";
 			}
@@ -10172,7 +10172,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    String e = "abc"; //$NON-NLS-1$
 			}
@@ -10190,7 +10190,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    String e;    //$NON-NLS-1$
 			}
@@ -10206,7 +10206,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    String e;
 			}
@@ -10214,7 +10214,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			@SuppressWarnings("nls")
 			public class E {
 			    String e;    //$NON-NLS-1$
@@ -10233,7 +10233,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    String e; //   //$NON-NLS-1$
 			}
@@ -10249,7 +10249,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    String e; //
 			}
@@ -10257,7 +10257,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			@SuppressWarnings("nls")
 			public class E {
 			    String e; //   //$NON-NLS-1$
@@ -10457,7 +10457,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    int count;
 			    public void foo(int count) {
@@ -10476,7 +10476,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    int count;
 			    public void foo(int count) {
@@ -10487,7 +10487,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			public class E {
 			    int count;
 			    public void foo(int count) {
@@ -10504,7 +10504,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    static int count;
 			    public void foo(int count) {
@@ -10523,7 +10523,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			public class E {
 			    static int count;
 			    public void foo(int count) {
@@ -10534,7 +10534,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			public class E {
 			    static int count;
 			    public void foo(int count) {
@@ -11362,7 +11362,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.util.List;
-			
+
 			public class E1 {
 			    public void foo(List<List> list) {
 			    }
@@ -11380,7 +11380,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;
 			import java.util.List;
-			
+
 			public class E1 {
 			    public void foo(@SuppressWarnings("rawtypes") List<List> list) {
 			    }
@@ -11390,7 +11390,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[1]= """
 			package test1;
 			import java.util.List;
-			
+
 			public class E1 {
 			    @SuppressWarnings("rawtypes")
 			    public void foo(List<List> list) {
@@ -11761,10 +11761,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("b112441", false, null);
 		String str= """
 			package b112441;
-			
+
 			import java.util.Collections;
 			import java.util.Map;
-			
+
 			public class CollectionsTest {
 			    Map<String,String> m=Collections.EMPTY_MAP;
 			}
@@ -11780,10 +11780,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package b112441;
-			
+
 			import java.util.Collections;
 			import java.util.Map;
-			
+
 			public class CollectionsTest {
 			    Map<String,String> m=Collections.emptyMap();
 			}
@@ -11803,10 +11803,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.util.Collections;
 			import java.util.Map;
-			
+
 			public class CollectionsTest {
 			    public void foo(Map<Object, Integer> map) { };
 			    {
@@ -11825,10 +11825,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			import java.util.Collections;
 			import java.util.Map;
-			
+
 			public class CollectionsTest {
 			    public void foo(Map<Object, Integer> map) { };
 			    {
@@ -11851,9 +11851,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.util.*;
-			
+
 			public class CollectionsTest {
 			    public void foo(Map<Date, Integer> map) { };
 			    {
@@ -11872,9 +11872,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			import java.util.*;
-			
+
 			public class CollectionsTest {
 			    public void foo(Map<Date, Integer> map) { };
 			    {
@@ -11897,7 +11897,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -11916,12 +11916,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -11938,8 +11938,25 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			""";
 
 		expected[1]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X1, X2, X3
+				    }
+				   \s
+				    public void foo(MyEnum x) {
+				        switch (x) {
+				            default -> {}
+				       \s
+				        }
+				    }
+				}
+				""";
+
+		expected[2]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -11974,7 +11991,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -11999,7 +12016,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12018,7 +12035,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12054,7 +12071,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12083,7 +12100,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12119,7 +12136,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12141,12 +12158,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
-		String[] expected= new String[2];
+		String[] expected= new String[3];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12166,8 +12183,28 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			""";
 
 		expected[1]= """
+				package p;
+
+				public class E {
+				    enum MyEnum {
+				        X1, X2, X3
+				    }
+				   \s
+				    public void foo() {
+				        switch (bar()) {
+				            default -> {}
+				       \s
+				        }
+				    }
+				    public MyEnum bar() {
+				        return null;
+				    }
+				}
+				""";
+
+		expected[2]= """
 			package p;
-			
+
 			public class E {
 			    enum MyEnum {
 			        X1, X2, X3
@@ -12200,10 +12237,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    private int fField;
-			
+
 			    public boolean equals(Object o) {
 			        return true;
 			    }
@@ -12220,14 +12257,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    private int fField;
-			
+
 			    public boolean equals(Object o) {
 			        return true;
 			    }
-			
+
 			    @Override
 			    public int hashCode() {
 			        return super.hashCode();
@@ -12243,7 +12280,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E extends java.io.File{
 			    private static final long serialVersionUID= 1L;
 			    public E() { super("x"); }
@@ -12585,12 +12622,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class E {
-			
+
 			    private void foo() {
 			        List<String> al1 = new ArrayList<>();
-			
+
 			    }
 			}
 			""";
@@ -12606,12 +12643,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class E {
-			
+
 			    private void foo() {
 			        List<String> al1 = new ArrayList<String>();
-			
+
 			    }
 			}
 			""";
@@ -12676,7 +12713,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class Lambda {
 			    Runnable r= () -> { System.out.println(Lambda.this.r); };
 			}
@@ -12692,7 +12729,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package p;
-			
+
 			public class Lambda {
 			    Runnable r= new Runnable() {
 			        public void run() { System.out.println(Lambda.this.r); }

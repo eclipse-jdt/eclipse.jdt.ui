@@ -31,7 +31,6 @@ import org.eclipse.debug.core.model.IBreakpoint;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -67,7 +66,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 			if (fTouchedFiles == null) {
 				fTouchedFiles= new HashSet<>();
 			}
-			fTouchedFiles.add(((ICompilationUnit)compilationUnit.getJavaElement()).getResource());
+			fTouchedFiles.add(compilationUnit.getJavaElement().getResource());
 		}
 		return fix;
 	}

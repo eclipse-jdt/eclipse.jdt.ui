@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestLoader;
@@ -386,7 +387,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readPackageNames(String pkgNameFile) throws IOException {
-		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), "UTF-8"))) { //$NON-NLS-1$
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), StandardCharsets.UTF_8))) {
 			String line;
 			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
@@ -403,7 +404,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readTestNames(String testNameFile) throws IOException {
-		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8"))) { //$NON-NLS-1$
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), StandardCharsets.UTF_8))) {
 			String line;
 			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
@@ -420,7 +421,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readFailureNames(String testFailureFile) throws IOException {
-		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), "UTF-8"))) { //$NON-NLS-1$
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), StandardCharsets.UTF_8))) {
 			String line;
 			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
@@ -649,12 +650,12 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			try{
 				fClientSocket= new Socket(fHost, fPort);
 				try {
-				    fWriter= new PrintWriter(new BufferedWriter(new OutputStreamWriter(fClientSocket.getOutputStream(), "UTF-8")), false/*true*/); //$NON-NLS-1$
+				    fWriter= new PrintWriter(new BufferedWriter(new OutputStreamWriter(fClientSocket.getOutputStream(), StandardCharsets.UTF_8)), false/*true*/);
 	            } catch (UnsupportedEncodingException e1) {
 	                fWriter= new PrintWriter(new BufferedWriter(new OutputStreamWriter(fClientSocket.getOutputStream())), false/*true*/);
 	            }
 				try {
-				    fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream(), "UTF-8")); //$NON-NLS-1$
+				    fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream(), StandardCharsets.UTF_8));
                 } catch (UnsupportedEncodingException e1) {
                     fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
                 }

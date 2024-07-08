@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 GK Software AG and others.
+ * Copyright (c) 2011, 2024 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,8 +51,11 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
@@ -286,19 +289,43 @@ public class NullAnnotationsRewriteOperations {
 		@Override
 		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
-			ListRewrite listRewrite= getAnnotationListRewrite(fArgument.getType(), cuRewrite, fArgument, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+			Type argType= fArgument.getType();
 			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
-			if (!checkExisting(listRewrite, group))
-				return;
-			if (!fRequireExplicitAnnotation) {
-				if (hasNonNullDefault(fArgument, fArgument.resolveBinding(), fParameterRank, DefaultLocation.PARAMETER))
-					return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
+			if (argType instanceof SimpleType simpleType && simpleType.getName().isQualifiedName()) {
+				Name name2= simpleType.getName();
+				QualifiedName qualifiedName= (QualifiedName) name2;
+				ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+				Name qualifier= (Name) astRewrite.createMoveTarget(qualifiedName.getQualifier());
+				SimpleName name= (SimpleName) astRewrite.createMoveTarget(qualifiedName.getName());
+				NameQualifiedType nameQualifiedType= astRewrite.getAST().newNameQualifiedType(qualifier, name);
+				Annotation newAnnotation= ast.newMarkerAnnotation();
+				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+				String resolvableName= importRewrite.addImport(fAnnotationToAdd);
+				newAnnotation.setTypeName(ast.newName(resolvableName));
+				nameQualifiedType.annotations().add(newAnnotation);
+				astRewrite.replace(simpleType, nameQualifiedType, group);
+			} else if (argType instanceof NameQualifiedType nameQualifiedType) {
+				ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+				ListRewrite listRewrite= astRewrite.getListRewrite(nameQualifiedType, NameQualifiedType.ANNOTATIONS_PROPERTY);
+				Annotation newAnnotation= ast.newMarkerAnnotation();
+				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+				String resolvableName= importRewrite.addImport(fAnnotationToAdd);
+				newAnnotation.setTypeName(ast.newName(resolvableName));
+				listRewrite.insertLast(newAnnotation, group);
+			} else {
+				ListRewrite listRewrite= getAnnotationListRewrite(fArgument.getType(), cuRewrite, fArgument, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+				if (!checkExisting(listRewrite, group))
+					return;
+				if (!fRequireExplicitAnnotation) {
+					if (hasNonNullDefault(fArgument, fArgument.resolveBinding(), fParameterRank, DefaultLocation.PARAMETER))
+						return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
+				}
+				Annotation newAnnotation= ast.newMarkerAnnotation();
+				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+				String resolvableName= importRewrite.addImport(fAnnotationToAdd);
+				newAnnotation.setTypeName(ast.newName(resolvableName));
+				listRewrite.insertLast(newAnnotation, group); // null annotation is last modifier, directly preceding the type
 			}
-			Annotation newAnnotation= ast.newMarkerAnnotation();
-			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-			String resolvableName= importRewrite.addImport(fAnnotationToAdd);
-			newAnnotation.setTypeName(ast.newName(resolvableName));
-			listRewrite.insertLast(newAnnotation, group); // null annotation is last modifier, directly preceding the type
 		}
 	}
 

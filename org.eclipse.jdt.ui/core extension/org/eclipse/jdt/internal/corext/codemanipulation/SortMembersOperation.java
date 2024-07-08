@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -92,7 +91,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 				case ASTNode.INITIALIZER :
 					{
-						int flags= ((Initializer) bodyDeclaration).getModifiers();
+						int flags= bodyDeclaration.getModifiers();
 						if (Modifier.isStatic(flags))
 							return MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX;
 						else
