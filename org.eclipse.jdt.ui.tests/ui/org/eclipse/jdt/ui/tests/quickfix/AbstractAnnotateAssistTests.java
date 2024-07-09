@@ -15,6 +15,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.eclipse.jdt.core.IClasspathAttribute.EXTERNAL_ANNOTATION_PATH;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -97,6 +98,7 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 		if (!(element instanceof ISourceReference)) {
 			return null;
 		}
+		assertNotNull("Should be child of a classfile: "+element, element.getAncestor(IJavaElement.CLASS_FILE));
 		IEditorPart part= EditorUtility.openInSpecificEditor(element, JavaUI.ID_CF_EDITOR, activate);
 		if (reveal && part != null) {
 			EditorUtility.revealInEditor(part, element);
