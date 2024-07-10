@@ -366,9 +366,9 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 			if (lambda.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 				MethodInvocation parent= (MethodInvocation) lambda.getParent();
 				List<Expression> args= parent.arguments();
-				IMethodBinding parentBinding= parent.resolveMethodBinding();
+				IMethodBinding parentBinding= parent.resolveMethodBinding().getMethodDeclaration();
 				if (parentBinding != null) {
-					ITypeBinding parentTypeBinding= parentBinding.getDeclaringClass();
+					ITypeBinding parentTypeBinding= parentBinding.getDeclaringClass().getErasure();
 					while (parentTypeBinding != null) {
 						IMethodBinding[] parentTypeMethods= parentTypeBinding.getDeclaredMethods();
 						for (IMethodBinding parentTypeMethod : parentTypeMethods) {

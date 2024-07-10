@@ -439,23 +439,23 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			public class C1 {
 			    interface IOverwriteQuery {
 			        String ALL = "ALL";
-			
+
 			        String queryOverwrite(String pathString);
 			    }
-			
+
 			    class ImportOperation {
 			        public ImportOperation(IOverwriteQuery query) {
 			        }
 			    }
-			
+
 			    public C1() {
 			        ImportOperation io = new ImportOperation(new IOverwriteQuery() {
-			
+
 			            @Override
 			            public String queryOverwrite(String pathString) {
 			                return ALL;
 			            }
-			
+
 			        });
 			    }
 			}
@@ -471,15 +471,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			public class C1 {
 			    interface IOverwriteQuery {
 			        String ALL = "ALL";
-			
+
 			        String queryOverwrite(String pathString);
 			    }
-			
+
 			    class ImportOperation {
 			        public ImportOperation(IOverwriteQuery query) {
 			        }
 			    }
-			
+
 			    public C1() {
 			        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);
 			    }
@@ -495,13 +495,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			public class E {
 			    @FunctionalInterface
 			    interface FI1 extends Runnable {
 			        int CONSTANT_VALUE = 123;
 			    }
-			
+
 			    void foo() {
 			        Runnable r = new FI1() {
 			            @Override
@@ -519,13 +519,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			public class E {
 			    @FunctionalInterface
 			    interface FI1 extends Runnable {
 			        int CONSTANT_VALUE = 123;
 			    }
-			
+
 			    void foo() {
 			        Runnable r = () -> System.out.println(FI1.CONSTANT_VALUE);
 			    };
@@ -591,25 +591,25 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			interface ISuper {
 			    void foo(FI1 fi1);
 			}
-			
+
 			interface ISub extends ISuper {
 			    void foo(FI2 fi2);
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    void abc();
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void xyz();
 			}
-			
+
 			class Test1 {
 			    private void test1() {
 			        f1().foo(new FI1() {
@@ -618,14 +618,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                System.out.println();
 			            }
 			        });
-			
+
 			    }
 			   \s
 			    private ISub f1() {
 			        return null;
 			    }
 			}
-			
+
 			abstract class Test2 implements ISub {
 			    private void test2() {
 			        foo(new FI1() {
@@ -636,7 +636,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        });
 			    }
 			}
-			
+
 			class Test3 {
 			    void foo(FI1 fi1) {}
 			    void foo(FI2 fi2) {}
@@ -649,7 +649,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        });
 			    }
 			}
-			
+
 			class Outer {
 			    class Test4 {
 			        {
@@ -672,42 +672,42 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			interface ISuper {
 			    void foo(FI1 fi1);
 			}
-			
+
 			interface ISub extends ISuper {
 			    void foo(FI2 fi2);
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    void abc();
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void xyz();
 			}
-			
+
 			class Test1 {
 			    private void test1() {
 			        f1().foo((FI1) () -> System.out.println());
-			
+
 			    }
 			   \s
 			    private ISub f1() {
 			        return null;
 			    }
 			}
-			
+
 			abstract class Test2 implements ISub {
 			    private void test2() {
 			        foo((FI1) () -> System.out.println());
 			    }
 			}
-			
+
 			class Test3 {
 			    void foo(FI1 fi1) {}
 			    void foo(FI2 fi2) {}
@@ -715,7 +715,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        foo((FI1) () -> System.out.println());
 			    }
 			}
-			
+
 			class Outer {
 			    class Test4 {
 			        {
@@ -743,17 +743,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    void abc();
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void xyz();
 			}
-			
+
 			class Outer {
 			    void outer(FI1 fi1) {}
 			}
@@ -792,7 +792,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			    void outer(FI1 fi1) {}
 			    void outer(FI2 fi2) {}
 			}
-			
+
 			class OuterSub2 extends OuterSub {
 			    OuterSub2() {
 			        super.outer(new FI1() {
@@ -834,17 +834,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    void abc();
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void xyz();
 			}
-			
+
 			class Outer {
 			    void outer(FI1 fi1) {}
 			}
@@ -863,7 +863,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			    void outer(FI1 fi1) {}
 			    void outer(FI2 fi2) {}
 			}
-			
+
 			class OuterSub2 extends OuterSub {
 			    OuterSub2() {
 			        super.outer((FI1) () -> System.out.println());
@@ -908,17 +908,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        });
 			    }
-			
+
 			    void bar(int i, FI fi);
 			    void bar(int i, FV fv);
-			
+
 			    void baz(int i, ZI zi);
 			    void baz(int i, ZV zv);
 			}
-			
+
 			@FunctionalInterface interface FI { int  foo(int a); }
 			@FunctionalInterface interface FV { void foo(int a); }
-			
+
 			@FunctionalInterface interface ZI { int  zoo(); }
 			@FunctionalInterface interface ZV { void zoo(); }
 			""";
@@ -935,17 +935,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        bar(0, (FI) x -> x++);
 			        baz(0, () -> 1);
 			    }
-			
+
 			    void bar(int i, FI fi);
 			    void bar(int i, FV fv);
-			
+
 			    void baz(int i, ZI zi);
 			    void baz(int i, ZV zv);
 			}
-			
+
 			@FunctionalInterface interface FI { int  foo(int a); }
 			@FunctionalInterface interface FV { void foo(int a); }
-			
+
 			@FunctionalInterface interface ZI { int  zoo(); }
 			@FunctionalInterface interface ZV { void zoo(); }
 			""";
@@ -964,11 +964,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test1;
-			
+
 			interface FI {
 			    void run(int x);
 			}
-			
+
 			public class Test {
 			    {
 			        int e;
@@ -994,7 +994,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                            }
 			                        });
 			                    }
-			
+
 			                    void init2() {
 			                        m(new FI() {
 			                            @Override
@@ -1017,7 +1017,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			    }
-			
+
 			    void m(FI fi) {
 			    };
 			}
@@ -1030,11 +1030,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			interface FI {
 			    void run(int x);
 			}
-			
+
 			public class Test {
 			    {
 			        int e;
@@ -1049,7 +1049,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                        };
 			                    });
 			                }
-			
+
 			                void init2() {
 			                    m(e2 -> new FI() {
 			                        @Override
@@ -1063,7 +1063,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			    }
-			
+
 			    void m(FI fi) {
 			    };
 			}
@@ -1078,7 +1078,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		String original= """
 			package test;
-			
+
 			interface FI {
 			    void doIt(String p);
 			}
@@ -1102,7 +1102,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String fixed= """
 			package test;
-			
+
 			interface FI {
 			    void doIt(String p);
 			}
@@ -1305,11 +1305,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			interface I<M> {
 			    M run(M x);
 			}
-			
+
 			class Test {
 			    I<?> li = s -> null;
 			}
@@ -1322,11 +1322,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			interface I<M> {
 			    M run(M x);
 			}
-			
+
 			class Test {
 			    I<?> li = new I<Object>() {
 			        @Override
@@ -1352,7 +1352,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			interface Foo<T, N extends Number> {
 			    void m(T t);
 			    void m(N n);
@@ -1370,7 +1370,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			interface Foo<T, N extends Number> {
 			    void m(T t);
 			    void m(N n);
@@ -1399,7 +1399,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			public class Snippet {
 			    void test(Interface context) {
 			        context.set("bar", new Runnable() {
@@ -1409,7 +1409,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			       \s
 			    }   \s
 			}
-			
+
 			interface Interface {
 			    public void set(String name, Object value);
 			}
@@ -1422,14 +1422,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			public class Snippet {
 			    void test(Interface context) {
 			        context.set("bar", (Runnable) () -> {});
 			       \s
 			    }   \s
 			}
-			
+
 			interface Interface {
 			    public void set(String name, Object value);
 			}
@@ -1477,17 +1477,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			public class C1 {
 			    final String s;
-			
+
 			    Runnable run1 = new Runnable() {
 			        @Override
 			        public void run() {
 			            System.out.println(s);
 			        }
 			    };
-			
+
 			    public C1() {
 			        s = "abc";
 			    };
@@ -1537,17 +1537,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			public class C1 {
 			    static final String previousField = "abc";
-			
+
 			    Runnable run1 = new Runnable() {
 			        @Override
 			        public void run() {
 			            System.out.println(previousField + instanceField + classField + getString());
 			        }
 			    };
-			
+
 			    static final String classField = "abc";
 			    final String instanceField = "abc";
 			    public String getString() {
@@ -1562,12 +1562,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			package test;
-			
+
 			public class C1 {
 			    static final String previousField = "abc";
-			
+
 			    Runnable run1 = () -> System.out.println(previousField + this.instanceField + C1.classField + getString());
-			
+
 			    static final String classField = "abc";
 			    final String instanceField = "abc";
 			    public String getString() {
@@ -1583,17 +1583,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			public class C1 {
 			    static final String previousField = "abc";
-			
+
 			    Runnable run1 = new Runnable() {
 			        @Override
 			        public void run() {
 			            System.out.println(C1.previousField + C1.this.instanceField + C1.classField + C1.this.getString());
 			        }
 			    };
-			
+
 			    static final String classField = "def";
 			    final String instanceField = "abc";
 			    public String getString() {
@@ -1608,12 +1608,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			package test;
-			
+
 			public class C1 {
 			    static final String previousField = "abc";
-			
+
 			    Runnable run1 = () -> System.out.println(C1.previousField + this.instanceField + C1.classField + this.getString());
-			
+
 			    static final String classField = "def";
 			    final String instanceField = "abc";
 			    public String getString() {
@@ -1630,10 +1630,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			import static java.util.Calendar.getInstance;
 			import static java.util.Calendar.getAvailableLocales;
-			
+
 			import java.time.Instant;
 			import java.util.ArrayList;
 			import java.util.Calendar;
@@ -1643,91 +1643,91 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import java.util.function.BiFunction;
 			import java.util.function.Function;
 			import java.util.function.Supplier;
-			
+
 			public class E extends Date {
 			    public String changeableText = "foo";
-			
+
 			    public Function<String, String> removeParentheses() {
 			        return (someString) -> someString.trim().toLowerCase();
 			    }
-			
+
 			    public Function<String, String> removeReturnAndBrackets() {
 			        return someString -> {return someString.trim().toLowerCase();};
 			    }
-			
+
 			    public Function<String, String> removeReturnAndBracketsWithParentheses() {
 			        return (someString) -> {return someString.trim().toLowerCase() + "bar";};
 			    }
-			
+
 			    public Supplier<ArrayList<String>> useCreationReference() {
 			        return () -> { return new ArrayList<>(); };
 			    }
-			
+
 			    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameter() {
 			        return (capacity) -> new ArrayList<>(capacity);
 			    }
-			
+
 			    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameterAndType() {
 			        // TODO this can be refactored like useCreationReferenceWithParameter
 			        return (Integer capacity) -> new ArrayList<>(capacity);
 			    }
-			
+
 			    public BiFunction<Integer, Integer, Vector<String>> useCreationReferenceWithParameters() {
 			        return (initialCapacity, capacityIncrement) -> new Vector<>(initialCapacity, capacityIncrement);
 			    }
-			
+
 			    public Function<Date, Long> useMethodReference() {
 			        return date -> date.getTime();
 			    }
-			
+
 			    public BiFunction<Date, Date, Integer> useMethodReferenceWithParameter() {
 			        return (date, anotherDate) -> date.compareTo(anotherDate);
 			    }
-			
+
 			    public static Function<String, Long> useTypeReference() {
 			        return (numberInText) -> { return Long.getLong(numberInText); };
 			    }
-			
+
 			    public static Function<Locale, Calendar> useTypeReferenceOnImportedMethod() {
 			        return locale -> Calendar.getInstance(locale);
 			    }
-			
+
 			    public static Supplier<Locale[]> useTypeReferenceAsSupplier() {
 			        return () -> Calendar.getAvailableLocales();
 			    }
-			
+
 			    public Function<String, Integer> useExpressionMethodReferenceOnLiteral() {
 			        return textToSearch -> "AutoRefactor".indexOf(textToSearch);
 			    }
-			
+
 			    public Function<Date, Integer> useThisMethodReference() {
 			        return anotherDate -> compareTo(anotherDate);
 			    }
-			
+
 			    public Function<Date, Integer> useThisMethodReferenceAddThis() {
 			        return anotherDate -> this.compareTo(anotherDate);
 			    }
-			
+
 			    public Function<Date, Integer> useSuperMethodReference() {
 			        return anotherDate -> super.compareTo(anotherDate);
 			    }
-			
+
 			    public static Integer dummy(String arg) {
 			        return 0;
 			    }
-			
+
 			    public static Function<String, Integer> useTypeReferenceQualifyingLocalType() {
 			        return numberInText -> E.dummy(numberInText);
 			    }
-			
+
 			    public static Function<String, Integer> useTypeReferenceFullyQualifyingLocalType() {
 			        return numberInText -> test1.E.dummy(numberInText);
 			    }
-			
+
 			    public static Function<String, Integer> useTypeReferenceOnLocalType() {
 			        return numberInText -> dummy(numberInText);
 			    }
-			
+
 			    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {
 			        return instant -> java.sql.Date.from(instant);
 			    }
@@ -1736,10 +1736,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import static java.util.Calendar.getInstance;
 			import static java.util.Calendar.getAvailableLocales;
-			
+
 			import java.time.Instant;
 			import java.util.ArrayList;
 			import java.util.Calendar;
@@ -1749,91 +1749,91 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import java.util.function.BiFunction;
 			import java.util.function.Function;
 			import java.util.function.Supplier;
-			
+
 			public class E extends Date {
 			    public String changeableText = "foo";
-			
+
 			    public Function<String, String> removeParentheses() {
 			        return someString -> someString.trim().toLowerCase();
 			    }
-			
+
 			    public Function<String, String> removeReturnAndBrackets() {
 			        return someString -> someString.trim().toLowerCase();
 			    }
-			
+
 			    public Function<String, String> removeReturnAndBracketsWithParentheses() {
 			        return someString -> (someString.trim().toLowerCase() + "bar");
 			    }
-			
+
 			    public Supplier<ArrayList<String>> useCreationReference() {
 			        return ArrayList::new;
 			    }
-			
+
 			    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameter() {
 			        return ArrayList::new;
 			    }
-			
+
 			    public Function<Integer, ArrayList<String>> useCreationReferenceWithParameterAndType() {
 			        // TODO this can be refactored like useCreationReferenceWithParameter
 			        return (Integer capacity) -> new ArrayList<>(capacity);
 			    }
-			
+
 			    public BiFunction<Integer, Integer, Vector<String>> useCreationReferenceWithParameters() {
 			        return Vector::new;
 			    }
-			
+
 			    public Function<Date, Long> useMethodReference() {
 			        return Date::getTime;
 			    }
-			
+
 			    public BiFunction<Date, Date, Integer> useMethodReferenceWithParameter() {
 			        return Date::compareTo;
 			    }
-			
+
 			    public static Function<String, Long> useTypeReference() {
 			        return Long::getLong;
 			    }
-			
+
 			    public static Function<Locale, Calendar> useTypeReferenceOnImportedMethod() {
 			        return Calendar::getInstance;
 			    }
-			
+
 			    public static Supplier<Locale[]> useTypeReferenceAsSupplier() {
 			        return Calendar::getAvailableLocales;
 			    }
-			
+
 			    public Function<String, Integer> useExpressionMethodReferenceOnLiteral() {
 			        return "AutoRefactor"::indexOf;
 			    }
-			
+
 			    public Function<Date, Integer> useThisMethodReference() {
 			        return this::compareTo;
 			    }
-			
+
 			    public Function<Date, Integer> useThisMethodReferenceAddThis() {
 			        return this::compareTo;
 			    }
-			
+
 			    public Function<Date, Integer> useSuperMethodReference() {
 			        return super::compareTo;
 			    }
-			
+
 			    public static Integer dummy(String arg) {
 			        return 0;
 			    }
-			
+
 			    public static Function<String, Integer> useTypeReferenceQualifyingLocalType() {
 			        return E::dummy;
 			    }
-			
+
 			    public static Function<String, Integer> useTypeReferenceFullyQualifyingLocalType() {
 			        return E::dummy;
 			    }
-			
+
 			    public static Function<String, Integer> useTypeReferenceOnLocalType() {
 			        return E::dummy;
 			    }
-			
+
 			    public static Function<Instant, java.sql.Date> useTypeReferenceQualifyingInheritedType() {
 			        return java.sql.Date::from;
 			    }
@@ -1851,21 +1851,72 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testIssue1498() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+				package test1;
+
+				import java.util.stream.Stream;
+
+				public class E {
+
+					public interface IInterface {
+						public String getId();
+					}
+
+					public void foo() {
+						Stream<IInterface> ees = Stream.empty();
+						ees.map(ee -> ee.getId());
+					}
+
+				}
+				""";
+
+		String expected= """
+				package test1;
+
+				import java.util.stream.Stream;
+
+				public class E {
+
+					public interface IInterface {
+						public String getId();
+					}
+
+					public void foo() {
+						Stream<IInterface> ees = Stream.empty();
+						ees.map(IInterface::getId);
+					}
+
+				}
+				""";
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
 	public void testDoNotSimplifyLambdaExpression() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.Date;
 			import java.util.Vector;
 			import java.util.function.BiFunction;
 			import java.util.function.Function;
 			import java.util.function.Supplier;
-			
+
 			public class E extends Date {
 			    public String changeableText = "foo";
-			
+
 			    public Supplier<Date> doNotRefactorWithAnonymousBody() {
 			        return () -> new Date() {
 			            @Override
@@ -1874,46 +1925,46 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			    }
-			
+
 			    public Function<String, String> doNotRemoveParenthesesWithSingleVariableDeclaration() {
 			        return (String someString) -> someString.trim().toLowerCase();
 			    }
-			
+
 			    public BiFunction<String, String, Integer> doNotRemoveParenthesesWithTwoParameters() {
 			        return (someString, anotherString) -> someString.trim().compareTo(anotherString.trim());
 			    }
-			
+
 			    public Supplier<Boolean> doNotRemoveParenthesesWithNoParameter() {
 			        return () -> {System.out.println("foo");return true;};
 			    }
-			
+
 			    public Function<String, String> doNotRemoveReturnWithSeveralStatements() {
 			        return someString -> {String trimmed = someString.trim();
 			        return trimmed.toLowerCase();};
 			    }
-			
+
 			    public Function<Integer, ArrayList<String>> doNotRefactorWithExpressions() {
 			        return capacity -> new ArrayList<>(capacity + 1);
 			    }
-			
+
 			    public BiFunction<Integer, Integer, Vector<String>> doNotRefactorShuffledParams() {
 			        return (initialCapacity, capacityIncrement) -> new Vector<>(capacityIncrement, initialCapacity);
 			    }
-			
+
 			    public Function<String, Integer> doNotUseExpressionMethodReferenceOnVariable() {
 			        return textToSearch -> this.changeableText.indexOf(textToSearch);
 			    }
-			
+
 			    public class InnerClass {
 			        public Function<Date, Integer> doNotUseThisMethodReferenceOnTopLevelClassMethod() {
 			            return anotherDate -> compareTo(anotherDate);
 			        }
 			    }
-			
+
 			    public Function<Integer, String> doNotUseConflictingMethodReference() {
 			        return numberToPrint -> numberToPrint.toString();
 			    }
-			
+
 			    public Function<Integer, String> doNotUseConflictingStaticMethodReference() {
 			        return numberToPrint -> Integer.toString(numberToPrint);
 			    }
@@ -1932,17 +1983,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			import java.util.function.Supplier;
-			
+
 			public class E {
-			
+
 			    void func( String ... args) {
-			
+
 			    }
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void called( Supplier<Object> r ) {
-			
+
 			    }
 			    void test() {
 			        called(() -> func());
@@ -1952,17 +2003,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			import java.util.function.Supplier;
-			
+
 			public class E {
-			
+
 			    void func( String ... args) {
-			
+
 			    }
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void called( Supplier<Object> r ) {
-			
+
 			    }
 			    void test() {
 			        called((Runnable) this::func);
@@ -1985,11 +2036,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given1= """
 			import java.util.function.Supplier;
-			
+
 			public class E1 {
-			
+
 			    void called( Supplier<Object> r ) {
-			
+
 			    }
 			}
 			"""; //
@@ -1997,14 +2048,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String given= """
 			import java.util.function.Supplier;
-			
+
 			public class E extends E1 {
-			
+
 			    void func( String ... args) {
-			
+
 			    }
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void test() {
 			        called(() -> func());
@@ -2014,14 +2065,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			import java.util.function.Supplier;
-			
+
 			public class E extends E1 {
-			
+
 			    void func( String ... args) {
-			
+
 			    }
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void test() {
 			        called((Runnable) this::func);
@@ -2044,14 +2095,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given1= """
 			import java.util.function.Supplier;
-			
+
 			public class E1 {
-			
+
 			    void func( String ... args) {
-			
+
 			    }
 			    void called( Supplier<Object> r ) {
-			
+
 			    }
 			}
 			"""; //
@@ -2059,11 +2110,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String given= """
 			import java.util.function.Supplier;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void test() {
 			        called(() -> super.func());
@@ -2073,11 +2124,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			import java.util.function.Supplier;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void test() {
 			        called((Runnable) super::func);
@@ -2100,14 +2151,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given1= """
 			import java.util.function.Supplier;
-			
+
 			public class E1 {
-			
+
 			    static void func( String ... args) {
-			
+
 			    }
 			    void called( Supplier<Object> r ) {
-			
+
 			    }
 			}
 			"""; //
@@ -2115,11 +2166,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String given= """
 			import java.util.function.Supplier;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void test() {
 			        called(() -> E1.func());
@@ -2129,11 +2180,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			import java.util.function.Supplier;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
-			
+
 			    }
 			    void test() {
 			        called((Runnable) E1::func);
@@ -2156,7 +2207,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			import java.util.stream.Stream;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        new A() {
@@ -2164,7 +2215,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        get();
 			        System.out.println("done");
 			    }
-			
+
 			    public static A get(B<?>... sources) {
 			        return Stream.of(sources)
 			                .map(B::getT)
@@ -2172,11 +2223,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                .findFirst()
 			                .orElse(null);
 			    }
-			
+
 			    public interface B<T extends A> extends A {
 			        T getT();
 			    }
-			
+
 			    public interface A {
 			        default boolean exists_testOpen() {
 			            return true;
@@ -2187,7 +2238,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			import java.util.stream.Stream;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        new A() {
@@ -2195,7 +2246,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        get();
 			        System.out.println("done");
 			    }
-			
+
 			    public static A get(B<?>... sources) {
 			        return Stream.of(sources)
 			                .map(B::getT)
@@ -2203,11 +2254,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                .findFirst()
 			                .orElse(null);
 			    }
-			
+
 			    public interface B<T extends A> extends A {
 			        T getT();
 			    }
-			
+
 			    public interface A {
 			        default boolean exists_testOpen() {
 			            return true;
@@ -2231,15 +2282,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			import java.util.function.Function;
-			
+
 			public class C1 {
-			
+
 			    public interface I1 {
 			        public int add(int a);
 			    }
-			
+
 			    I1 k = new I1() {
 			        @Override
 			        public int add(int a) {
@@ -2249,7 +2300,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            return a + 7;
 			        }
 			    };
-			
+
 			    public static I1 j = new I1() {
 			        @Override
 			        public int add(int a) {
@@ -2268,22 +2319,22 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected= """
 			package test;
-			
+
 			import java.util.function.Function;
-			
+
 			public class C1 {
-			
+
 			    public interface I1 {
 			        public int add(int a);
 			    }
-			
+
 			    I1 k = a -> {
 			        if (a == 2) {
 			            return this.k.add(3);
 			        }
 			        return a + 7;
 			    };
-			
+
 			    public static I1 j = a -> {
 			        if (a == 2) {
 			            return C1.j.add(4);
@@ -2300,15 +2351,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class C2 {
-			
+
 			    public interface I1 {
 			        public int add(int a);
 			    }
-			
+
 			    public int foo() {
 			        I1 doNotConvert = new I1() {
 			            @Override
@@ -2335,16 +2386,16 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class C2 {
-			
+
 			    public interface IInteractionContext {
 			    }
-			
+
 			    public interface IAdaptable {
 			        public <T> T getAdapter(Class<T> adapter);
 			    }
-			
+
 			    @SuppressWarnings("unchecked")
 			    public IAdaptable asAdaptable(final IInteractionContext result) {
 			        return new IAdaptable() {
@@ -2372,7 +2423,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			import java.io.File;
 			import java.util.Collections;
 			import java.util.Comparator;
@@ -2382,7 +2433,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import java.util.TreeSet;
 			import java.util.Map.Entry;
 			import java.util.stream.Stream;
-			
+
 			public class E {
 			    private Comparator<Date> refactorField = new Comparator<Date>() {
 			        @Override
@@ -2390,155 +2441,155 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            return o1.toString().compareTo(o2.toString());
 			        }
 			    };
-			
+
 			    public List<Date> useMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                return o1.toString().compareTo(o2.toString());
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useReversedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                return o2.toString().compareTo(o1.toString());
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useNegatedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                return -o1.toString().compareTo(o2.toString());
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> useTypedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = new Comparator<File>() {
-			
+
 			            @Override
 			            public int compare(File f1, File f2) {
 			                return f1.separator.compareTo(f2.separator);
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> useUntypedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator comparator = new Comparator<File>() {
-			
+
 			            @Override
 			            public int compare(File f1, File f2) {
 			                return f1.separator.compareTo(f2.separator);
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> useReversedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = new Comparator<File>() {
-			
+
 			            @Override
 			            public int compare(File f1, File f2) {
 			                return f2.separator.compareTo(f1.separator);
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> o1.toString().compareTo(o2.toString());
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByReversedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> o2.toString().compareTo(o1.toString());
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByNegatedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> -o1.toString().compareTo(o2.toString());
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> replaceLambdaByTypedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = (f1, f2) -> f1.separator.compareTo(f2.separator);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> replaceLambdaByReversedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = (f1, f2) -> f2.separator.compareTo(f1.separator);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaUsingRightType(List<Date> initialPackagesToDelete) {
 			        // Keep this comment
 			        Collections.sort(initialPackagesToDelete, (Date one, Date two) -> one.toString().compareTo(two.toString()));
-			
+
 			        return initialPackagesToDelete;
 			    }
-			
+
 			    public List<Date> useMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                if (o1 != null) {
 			                    if (o2 != null) {
 			                        return o1.toString().compareTo(o2.toString());
 			                    }
-			
+
 			                    return 1;
 			                } else if (o2 != null) {
 			                    return -1;
@@ -2546,17 +2597,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    return 0;
 			                }
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                if (o1 != null) {
@@ -2569,17 +2620,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    return (o2 == null) ? 0 : 20;
 			                }
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useReversedMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                if (o1 != null)
@@ -2587,20 +2638,20 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                        return 123;
 			                     else
 			                        return o2.toString().compareTo(o1.toString());
-			
+
 			                return (o2 == null) ? 0 : -123;
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useReversedMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Collections.sort(listToSort, new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                if (o1 != null) {
@@ -2610,15 +2661,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                        return Long.compare(o2.getTime(), o1.getTime());
 			                    }
 			                }
-			
+
 			                return (o2 == null) ? 0 : 20;
 			            }
-			
+
 			        });
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useMethodRefWithNegation(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
@@ -2634,27 +2685,27 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    if (o2 != null) {
 			                        return -o1.toString().compareTo(o2.toString());
 			                    }
-			
+
 			                    return 1;
 			                }
 			            }
 			        };
 			        listToSort.sort(comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useMethodRefUnorderedCondition(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                if (o2 != null) {
 			                    if (o1 != null) {
 			                        return o1.toString().compareTo(o2.toString());
 			                    }
-			
+
 			                    return -1;
 			                } else if (o1 != null) {
 			                    return 1;
@@ -2662,13 +2713,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    return 0;
 			                }
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> {
@@ -2676,7 +2727,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                if (o2 != null) {
 			                    return o1.toString().compareTo(o2.toString());
 			                }
-			
+
 			                return 1;
 			            } else if (o2 != null) {
 			                return -1;
@@ -2685,10 +2736,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> {
@@ -2703,10 +2754,10 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByReversedMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> {
@@ -2715,14 +2766,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    return 123;
 			                 else
 			                    return o2.toString().compareTo(o1.toString());
-			
+
 			            return (o2 == null) ? 0 : -123;
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByReversedMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator= (o1, o2) -> {
@@ -2733,14 +2784,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    return Long.compare(o2.getTime(), o1.getTime());
 			                }
 			            }
-			
+
 			            return (o2 == null) ? 0 : 20;
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefWithNegation(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> {
@@ -2754,15 +2805,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                if (o2 != null) {
 			                    return -o1.toString().compareTo(o2.toString());
 			                }
-			
+
 			                return 1;
 			            }
 			        };
 			        listToSort.sort(comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefUnorderedCondition(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = (o1, o2) -> {
@@ -2770,7 +2821,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                if (o1 != null) {
 			                    return o1.toString().compareTo(o2.toString());
 			                }
-			
+
 			                return -1;
 			            } else if (o1 != null) {
 			                return 1;
@@ -2779,26 +2830,26 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    void wildcardMethod() {
 			        Stream.<Entry<String, String>>of().sorted((entry1, entry2) -> entry1.getKey().compareTo(entry2.getKey()));
 			    }
-			
+
 			    public class FooBar {
 			        public String value;
 			    }
-			
+
 			    private final TreeSet<FooBar> foo = new TreeSet<>((a,b) -> b.value.compareTo(a.value));
-			
+
 			}
 			""";
 
 		String expected= """
 			package test1;
-			
+
 			import java.io.File;
 			import java.util.Collections;
 			import java.util.Comparator;
@@ -2808,210 +2859,210 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import java.util.TreeSet;
 			import java.util.Map.Entry;
 			import java.util.stream.Stream;
-			
+
 			public class E {
 			    private Comparator<Date> refactorField = Comparator.comparing(Date::toString);
-			
+
 			    public List<Date> useMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.comparing(Date::toString);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useReversedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useNegatedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> useTypedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = Comparator.comparing(f1 -> f1.separator);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> useUntypedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator comparator = Comparator.comparing((File f1) -> f1.separator);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> useReversedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = Comparator.comparing((File f1) -> f1.separator).reversed();
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.comparing(Date::toString);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByReversedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByNegatedMethodRef(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.comparing(Date::toString).reversed();
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> replaceLambdaByTypedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = Comparator.comparing(f1 -> f1.separator);
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<File> replaceLambdaByReversedLambdaExpression(List<File> listToSort) {
 			        // Keep this comment
 			        Comparator<File> comparator = Comparator.comparing((File f1) -> f1.separator).reversed();
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaUsingRightType(List<Date> initialPackagesToDelete) {
 			        // Keep this comment
 			        Collections.sort(initialPackagesToDelete, Comparator.comparing(Date::toString));
-			
+
 			        return initialPackagesToDelete;
 			    }
-			
+
 			    public List<Date> useMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsLast(Comparator.comparing(Date::toString));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useReversedMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString).reversed());
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useReversedMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Collections.sort(listToSort, Comparator.nullsLast(Comparator.comparing(Date::getTime)));
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useMethodRefWithNegation(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString).reversed());
 			        listToSort.sort(comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> useMethodRefUnorderedCondition(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsLast(Comparator.comparing(Date::toString));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByReversedMethodRefNullFirst(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString).reversed());
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByReversedMethodRefNullLast(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator= Comparator.nullsLast(Comparator.comparing(Date::getTime));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefWithNegation(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString).reversed());
 			        listToSort.sort(comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<Date> replaceLambdaByMethodRefUnorderedCondition(List<Date> listToSort) {
 			        // Keep this comment
 			        Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    void wildcardMethod() {
 			        Stream.<Entry<String, String>>of().sorted(Comparator.comparing(Entry<String, String>::getKey));
 			    }
-			
+
 			    public class FooBar {
 			        public String value;
 			    }
-			
+
 			    private final TreeSet<FooBar> foo = new TreeSet<>(Comparator.comparing((FooBar a) -> a.value).reversed());
-			
+
 			}
 			""";
 
@@ -3030,17 +3081,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Collections;
 			import java.util.Comparator;
 			import java.util.Date;
 			import java.util.List;
 			import java.util.Locale;
-			
+
 			public class E {
 			    public List<Date> doNotUseMethodRefWithWeirdBehavior(List<Date> listToSort) {
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                if (o1 != null) {
@@ -3055,13 +3106,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                    return 100;
 			                }
 			            }
-			
+
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<String> doNotUseMethodRef(List<String> listToSort) {
 			        Comparator<String> comparator = new Comparator<String>() {
 			            @Override
@@ -3070,54 +3121,54 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public Comparator<Date> doNotRefactorComparisonWithoutCompareToMethod(List<Date> listToSort) {
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                return (int) (o1.getTime() - o2.getTime());
 			            }
 			        };
-			
+
 			        return comparator;
 			    }
-			
+
 			    public int compareTo(E anc) {
 			        return 0;
 			    }
-			
+
 			    public E getNewInstance() {
 			        return new E();
 			    }
-			
+
 			    private Comparator<E> doNotRefactorNotComparableObjects = new Comparator<E>() {
 			        @Override
 			        public int compare(E o1, E o2) {
 			            return o1.getNewInstance().compareTo(o2.getNewInstance());
 			        }
 			    };
-			
+
 			    public Comparator<Date> doNotRemoveSecondaryMethod(List<Date> listToSort) {
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                return o1.toString().compareTo(o2.toString());
 			            }
-			
+
 			            @Override
 			            public String toString() {
 			                return "Compare formatted dates";
 			            }
 			        };
-			
+
 			        return comparator;
 			    }
-			
+
 			    public List<Date> doNotReplaceLambdaByUseMethodRefWithWeirdBehavior(List<Date> listToSort) {
 			        Comparator<Date> comparator = (o1, o2) -> {
 			            if (o1 != null) {
@@ -3133,37 +3184,37 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			        };
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public List<String> doNotReplaceLambdaByUseMethodRef(List<String> listToSort) {
 			        Comparator<String> comparator = (o1, o2) -> o1.toLowerCase(Locale.ENGLISH).compareTo(o2.toLowerCase(Locale.ENGLISH));
 			        Collections.sort(listToSort, comparator);
-			
+
 			        return listToSort;
 			    }
-			
+
 			    public Comparator<Date> doNotReplaceLambdaByRefactorComparisonWithoutCompareToMethod(List<Date> listToSort) {
 			        Comparator<Date> comparator = (o1, o2) -> (int) (o1.getTime() - o2.getTime());
-			
+
 			        return comparator;
 			    }
-			
+
 			    public Comparator<Date> doNotReplaceLambdaByRemoveSecondaryMethod(List<Date> listToSort) {
 			        Comparator<Date> comparator = new Comparator<Date>() {
-			
+
 			            @Override
 			            public int compare(Date o1, Date o2) {
 			                return o1.toString().compareTo(o2.toString());
 			            }
-			
+
 			            @Override
 			            public String toString() {
 			                return "Compare formatted dates";
 			            }
 			        };
-			
+
 			        return comparator;
 			    }
 			}
@@ -3180,14 +3231,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= """
 			package test1;
-			
+
 			public class E {
 			    public String refactorConcatenation(String[] texts) {
 			        // Keep this comment
 			        boolean isFirst = true;
 			        // Keep this comment too
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment also
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
@@ -3197,14 +3248,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorReassignment(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String text : texts) {
 			            if (isFirst) {
@@ -3214,14 +3265,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation = concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public Runnable refactorFinalConcatenation(String[] names) {
 			        boolean isFirst = true;
 			        final StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < names.length; i++) {
 			            if (isFirst) {
@@ -3231,7 +3282,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(names[i]);
 			        }
-			
+
 			        Runnable supplier= new Runnable() {
 			            @Override
 			            public void run() {
@@ -3240,11 +3291,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        };
 			        return supplier;
 			    }
-			
+
 			    public String refactorConcatenationWithChar(String[] titles) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String title : titles) {
 			            if (isFirst) {
@@ -3254,14 +3305,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(title);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithCharVariable(String[] titles, char delimiter) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String title : titles) {
 			            if (isFirst) {
@@ -3271,14 +3322,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(title);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithCharacterWrapper(String[] titles, Character delimiter) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String title : titles) {
 			            if (isFirst) {
@@ -3288,14 +3339,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(title);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithEscapedChar(String[] titles) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String title : titles) {
 			            if (isFirst) {
@@ -3305,14 +3356,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(title);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithInt(String[] titles) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String title : titles) {
 			            if (isFirst) {
@@ -3322,14 +3373,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(title);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithHardCodedDelimiter(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
@@ -3339,14 +3390,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithBuilderFirst(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
 			        boolean isFirst = true;
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
@@ -3356,14 +3407,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithStringBuffer(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuffer concatenation = new StringBuffer();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
@@ -3373,14 +3424,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithBooleanObject(String[] texts) {
 			        Boolean isFirst = Boolean.TRUE;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
@@ -3390,14 +3441,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation = concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithNegatedBoolean(String[] texts) {
 			        Boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (!isFirst) {
@@ -3407,14 +3458,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithReversedBoolean(String[] texts) {
 			        boolean isVisited = Boolean.FALSE;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isVisited) {
@@ -3424,14 +3475,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithLotsOfMethods(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
@@ -3441,7 +3492,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        System.out.println(concatenation.charAt(0));
 			        System.out.println(concatenation.chars());
 			        System.out.println(concatenation.codePoints());
@@ -3452,11 +3503,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        System.out.println(concatenation.subSequence(0, 0));
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationOnForeach(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
 			        boolean isFirst = true;
-			
+
 			        // Keep this comment
 			        for (String text : texts) {
 			            if (isFirst) {
@@ -3466,13 +3517,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithConditionOnIndex(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (i > 0) {
@@ -3480,13 +3531,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithInequalityOnIndex(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (i != 0) {
@@ -3494,13 +3545,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithReversedConditionOnIndex(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (0 < i) {
@@ -3508,13 +3559,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithGreaterOrEqualsOnIndex(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (i >= 1) {
@@ -3522,13 +3573,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithDelimiterAtTheEnd(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            concatenation.append(texts[i]);
@@ -3536,13 +3587,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                concatenation.append(", ");
 			            }
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithMirroredCondition(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            concatenation.append(texts[i]);
@@ -3550,13 +3601,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                concatenation.append(", ");
 			            }
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithNotEqualsCondition(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            concatenation.append(texts[i]);
@@ -3564,13 +3615,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                concatenation.append(", ");
 			            }
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationWithLessOrEqualsCondition(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            concatenation.append(texts[i]);
@@ -3578,13 +3629,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                concatenation.append(", ");
 			            }
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationTestingLength(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (concatenation.length() > 0) {
@@ -3592,13 +3643,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationTestingNotEmpty(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (concatenation.length() != 0) {
@@ -3606,13 +3657,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationTestingGreaterOrEqualsOne(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (concatenation.length() >= 1) {
@@ -3620,13 +3671,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationTestingLengthMirrored(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (0 < concatenation.length()) {
@@ -3634,13 +3685,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationTestingNotEmptyMirrored(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (0 != concatenation.length()) {
@@ -3648,13 +3699,13 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConcatenationTestingGreaterOrEqualsOneMirrored(String[] texts) {
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (int i = 0; i < texts.length; i++) {
 			            if (1 <= concatenation.length()) {
@@ -3662,14 +3713,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorConstantBooleanShift(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String text : texts) {
 			            if (!isFirst) {
@@ -3678,14 +3729,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            isFirst = false;
 			            concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorWithBooleanShiftAtTheEnd(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String text : texts) {
 			            if (!isFirst) {
@@ -3694,14 +3745,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            concatenation.append(text);
 			            isFirst = false;
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String refactorWithReversedBooleanShift(String[] texts) {
 			        boolean isNotFirst = false;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        // Keep this comment
 			        for (String text : texts) {
 			            if (isNotFirst) {
@@ -3710,7 +3761,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            concatenation.append(text);
 			            isNotFirst = true;
 			        }
-			
+
 			        return concatenation.toString();
 			    }
 			}
@@ -3721,35 +3772,35 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String output= """
 			package test1;
-			
+
 			public class E {
 			    public String refactorConcatenation(String[] texts) {
 			        // Keep this comment
 			       \s
 			        // Keep this comment too
 			       \s
-			
+
 			        // Keep this comment also
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorReassignment(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public Runnable refactorFinalConcatenation(String[] names) {
 			       \s
-			
+
 			        // Keep this comment
 			        final String concatenation = String.join(", ", names);
-			
+
 			        Runnable supplier= new Runnable() {
 			            @Override
 			            public void run() {
@@ -3758,112 +3809,112 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        };
 			        return supplier;
 			    }
-			
+
 			    public String refactorConcatenationWithChar(String[] titles) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(",", titles);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithCharVariable(String[] titles, char delimiter) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(String.valueOf(delimiter), titles);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithCharacterWrapper(String[] titles, Character delimiter) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(String.valueOf(delimiter), titles);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithEscapedChar(String[] titles) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join("\\n", titles);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithInt(String[] titles) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(String.valueOf(123), titles);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithHardCodedDelimiter(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(" " + 1, texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithBuilderFirst(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithStringBuffer(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithBooleanObject(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithNegatedBoolean(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithReversedBoolean(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithLotsOfMethods(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        System.out.println(concatenation.charAt(0));
 			        System.out.println(concatenation.chars());
 			        System.out.println(concatenation.codePoints());
@@ -3874,166 +3925,166 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        System.out.println(concatenation.subSequence(0, 0));
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationOnForeach(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithConditionOnIndex(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithInequalityOnIndex(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithReversedConditionOnIndex(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithGreaterOrEqualsOnIndex(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithDelimiterAtTheEnd(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithMirroredCondition(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithNotEqualsCondition(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationWithLessOrEqualsCondition(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationTestingLength(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationTestingNotEmpty(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationTestingGreaterOrEqualsOne(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationTestingLengthMirrored(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationTestingNotEmptyMirrored(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConcatenationTestingGreaterOrEqualsOneMirrored(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorConstantBooleanShift(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorWithBooleanShiftAtTheEnd(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
-			
+
 			    public String refactorWithReversedBooleanShift(String[] texts) {
 			       \s
-			
+
 			        // Keep this comment
 			        String concatenation = String.join(", ", texts);
-			
+
 			        return concatenation;
 			    }
 			}
@@ -4049,12 +4100,12 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public boolean doNotRefactorUsedBoolean(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4063,15 +4114,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        System.out.println(concatenation.toString());
 			        return isFirst;
 			    }
-			
+
 			    public String doNotRefactorUnhandledMethod(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4080,7 +4131,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        System.out.println(concatenation.codePointAt(0));
 			        System.out.println(concatenation.codePointBefore(0));
 			        System.out.println(concatenation.codePointCount(0, 0));
@@ -4092,11 +4143,11 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        System.out.println(concatenation.capacity());
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorPartialConcatenation(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 1; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4105,14 +4156,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorUnfinishedConcatenation(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length - 1; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4121,14 +4172,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorReversedConcatenation(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = texts.length - 1; i >= 0; i--) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4137,14 +4188,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithOppositeBoolean(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 1; i < texts.length; i++) {
 			            if (isFirst) {
 			                concatenation.append(", ");
@@ -4153,14 +4204,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorOnObjects(Object[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4169,14 +4220,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithOtherAppending(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4185,16 +4236,16 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        concatenation.append("foo");
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithInitialization(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder("foo");
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4203,14 +4254,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithWrongIndex(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4219,14 +4270,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[0]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithWrongBoolean(String[] texts, boolean isSecond) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isSecond) {
 			                isFirst = false;
@@ -4235,15 +4286,15 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithWrongBoolean(String[] texts) {
 			        boolean isSecond = false;
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isSecond = false;
@@ -4252,14 +4303,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithWrongArray(String[] texts, String[] names) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4268,14 +4319,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(names[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithWrongBuilder(String[] texts, StringBuilder otherBuilder) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4284,14 +4335,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            otherBuilder.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithAnotherBuilder(String[] texts, StringBuilder otherBuilder) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4300,14 +4351,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i]);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithAdditionalStatement(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4317,14 +4368,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            concatenation.append(texts[i]);
 			            System.out.println("Hi!");
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithWrongMethod(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (int i = 0; i < texts.length; i++) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4333,14 +4384,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(texts[i], 0, 2);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWrongVariable(String[] texts, String test) {
 			        StringBuilder concatenation = new StringBuilder();
 			        boolean isFirst = true;
-			
+
 			        for (String text : texts) {
 			            if (isFirst) {
 			                isFirst = false;
@@ -4349,14 +4400,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(test);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithBooleanShiftFirst(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            isFirst = false;
 			            if (!isFirst) {
@@ -4364,14 +4415,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithAppendingFirst(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            concatenation.append(text);
 			            if (!isFirst) {
@@ -4379,14 +4430,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            }
 			            isFirst = false;
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithConditionAtTheEnd(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            concatenation.append(text);
 			            isFirst = false;
@@ -4394,14 +4445,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                concatenation.append(", ");
 			            }
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWithNonsense(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            isFirst = false;
 			            concatenation.append(text);
@@ -4409,14 +4460,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			                concatenation.append(", ");
 			            }
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorUnshiftedBoolean(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            if (!isFirst) {
 			                concatenation.append(", ");
@@ -4424,14 +4475,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            isFirst = true;
 			            concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWrongCondition(String[] texts) {
 			        boolean isFirst = true;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            if (isFirst) {
 			                concatenation.append(", ");
@@ -4439,14 +4490,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            isFirst = false;
 			            concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
-			
+
 			    public String doNotRefactorWrongInit(String[] texts) {
 			        boolean isFirst = false;
 			        StringBuilder concatenation = new StringBuilder();
-			
+
 			        for (String text : texts) {
 			            if (!isFirst) {
 			                concatenation.append(", ");
@@ -4454,7 +4505,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            isFirst = false;
 			            concatenation.append(text);
 			        }
-			
+
 			        return concatenation.toString();
 			    }
 			}
@@ -4471,7 +4522,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuffer field0;
 			    public void method0(StringBuffer parm) {
@@ -4482,7 +4533,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4504,7 +4555,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4529,7 +4580,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuffer field0;
 			    public void method0(StringBuffer parm) {
@@ -4540,9 +4591,9 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			import java.io.StringWriter;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4609,7 +4660,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuffer field0;
 			    public void method0(StringBuffer parm) {
@@ -4621,7 +4672,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample= """
 			package test1;
 			import java.io.StringWriter;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4675,7 +4726,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String expected0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuilder field0;
 			    public void method0(StringBuilder parm) {
@@ -4686,7 +4737,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			import java.io.StringWriter;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuilder field1;
 			    StringBuilder field2;
@@ -5293,24 +5344,24 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test;
 			import java.util.HashSet;
 			import java.util.Iterator;
-			
+
 			public class Test {
 			   \s
 			    public class Element {
 			    }
-			
+
 			    public class ElementOccurrenceResult {
 			    }
-			
+
 			    public void foo(Element element, HashSet<ElementOccurrenceResult> hashSet) {
 			        Iterator<ElementOccurrenceResult> minIterator= hashSet.iterator();
 			        while (minIterator.hasNext()) {
 			            reportProblem(element, minIterator.next(), null);
 			        }
 			    }
-			
+
 			    private void reportProblem(Element element, ElementOccurrenceResult next, Object object) {}
-			
+
 			}
 			"""; //
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", sample, false, null);
@@ -5320,23 +5371,23 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String expected= """
 			package test;
 			import java.util.HashSet;
-			
+
 			public class Test {
 			   \s
 			    public class Element {
 			    }
-			
+
 			    public class ElementOccurrenceResult {
 			    }
-			
+
 			    public void foo(Element element, HashSet<ElementOccurrenceResult> hashSet) {
 			        for (ElementOccurrenceResult element2 : hashSet) {
 			            reportProblem(element, element2, null);
 			        }
 			    }
-			
+
 			    private void reportProblem(Element element, ElementOccurrenceResult next, Object object) {}
-			
+
 			}
 			"""; //
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -5356,9 +5407,9 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import java.io.File;
 			import java.util.Iterator;
 			import java.util.List;
-			
+
 			public class Test {
-			
+
 			    public int foo(String x, List<? extends File> files) {
 			        Iterator<? extends File> iter= files.iterator();
 			        while(iter.hasNext()){
@@ -5374,7 +5425,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        }
 			        return 0;
 			    }
-			
+
 			    public static void dumpIMethodList(List<?> l){
 			        Iterator<?> iter= l.iterator();
 			        while(iter.hasNext()){
@@ -5384,7 +5435,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            dumpIMethod((String)i.next());
 			        }
 			    }
-			
+
 			    private static void dumpIMethod(String next) {
 			        System.out.println(next);
 			    }
@@ -5400,9 +5451,9 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import java.io.File;
 			import java.util.Iterator;
 			import java.util.List;
-			
+
 			public class Test {
-			
+
 			    public int foo(String x, List<? extends File> files) {
 			        for (File file : files) {
 			            dumpIMethod((String)file.getAbsolutePath());
@@ -5416,7 +5467,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        }
 			        return 0;
 			    }
-			
+
 			    public static void dumpIMethodList(List<?> l){
 			        for (Object element : l) {
 			            dumpIMethod((String)element);
@@ -5425,7 +5476,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			            dumpIMethod((String)name);
 			        }
 			    }
-			
+
 			    private static void dumpIMethod(String next) {
 			        System.out.println(next);
 			    }
@@ -6077,7 +6128,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test;
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class E {
 			   \s
 			    public interface I1 {
@@ -6109,7 +6160,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test;
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class E {
 			   \s
 			    public interface I1 {
@@ -6158,9 +6209,9 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        x.run( //
 			        System.out.println(f //
 			    }
-			
+
 			}
-			
+
 			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
 
@@ -6188,9 +6239,9 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        x.run( //
 			        System.out.println(f //
 			    }
-			
+
 			}
-			
+
 			""";
 		String expected1= sample;
 
@@ -6204,18 +6255,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample= """
 			package test;
 			public class E1 {
-			
+
 			    String blah = "blah";
 			   \s
 			    class Blah {
 			        public static String blah2 = "blah2";
 			    }
-			
+
 			    public int foo(String a, String b) {
 			        System.out.println(a + b);
 			        return a.length() + b.length();
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(String, String)}
 			     * @param a
@@ -6228,7 +6279,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k = a.toLowerCase() + Blah.blah2;
 			        return foo(k, b);
 			    }
-			
+
 			}
 			"""; //
 		pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -6236,7 +6287,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		sample= """
 			package test;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6248,14 +6299,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(a, b, c);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        k.foo(x, y, z);
 			        { E1 e = new E1();
 			        e.foo(x, y, z); }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -6264,7 +6315,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		sample= """
 			package test;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6279,7 +6330,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(k, b);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        String k1_1 = x.toLowerCase() + Blah.blah2;
@@ -6288,7 +6339,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k1 = x.toLowerCase() + Blah.blah2;
 			        e.foo(k1, y); }
 			    }
-			
+
 			}
 			""";
 		String expected1= sample;
@@ -6303,18 +6354,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample1= """
 			package test;
 			public class E1 {
-			
+
 			    String blah = "blah";
 			   \s
 			    public class Blah {
 			        public static String blah2 = "blah2";
 			    }
-			
+
 			    public int foo(String a, String b) {
 			        System.out.println(a + b);
 			        return a.length() + b.length();
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(String, String)}
 			     * @param a
@@ -6327,7 +6378,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k = a.toLowerCase() + Blah.blah2;
 			        return foo(k, b);
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
@@ -6337,7 +6388,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test2;
 			import test.E1;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6349,14 +6400,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(a, b, c);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        k.foo(x, y, z);
 			        { E1 e = new E1();
 			        e.foo(x, y, z); }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
@@ -6367,7 +6418,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			import test.E1;
 			import test.E1.Blah;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6382,7 +6433,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(k, b);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        String k1_1 = x.toLowerCase() + Blah.blah2;
@@ -6391,7 +6442,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k1 = x.toLowerCase() + Blah.blah2;
 			        e.foo(k1, y); }
 			    }
-			
+
 			}
 			""";
 		String expected1= sample;
@@ -6406,18 +6457,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample= """
 			package test;
 			public class E1 {
-			
+
 			    String blah = "blah";
 			   \s
 			    private static class Blah {
 			        public static String blah2 = "blah2";
 			    }
-			
+
 			    public int foo(String a, String b) {
 			        System.out.println(a + b);
 			        return a.length() + b.length();
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(String, String)}
 			     * @param a
@@ -6430,7 +6481,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k = a.toLowerCase() + Blah.blah2;
 			        return foo(k, b);
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
@@ -6438,7 +6489,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		sample= """
 			package test;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6450,14 +6501,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(a, b, c);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        k.foo(x, y, z);
 			        { E1 e = new E1();
 			        e.foo(x, y, z); }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -6472,18 +6523,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample1= """
 			package test;
 			public class E1 {
-			
+
 			    String blah = "blah";
 			   \s
 			    protected static class Blah {
 			        public static String blah2 = "blah2";
 			    }
-			
+
 			    public int foo(String a, String b) {
 			        System.out.println(a + b);
 			        return a.length() + b.length();
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(String, String)}
 			     * @param a
@@ -6496,7 +6547,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k = a.toLowerCase() + Blah.blah2;
 			        return foo(k, b);
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
@@ -6506,7 +6557,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test2;
 			import test.E1;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6518,14 +6569,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(a, b, c);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        k.foo(x, y, z);
 			        { E1 e = new E1();
 			        e.foo(x, y, z); }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
@@ -6540,18 +6591,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample1= """
 			package test;
 			public class E1 {
-			
+
 			    String blah = "blah";
 			   \s
 			    static class Blah {
 			        public static String blah2 = "blah2";
 			    }
-			
+
 			    public int foo(String a, String b) {
 			        System.out.println(a + b);
 			        return a.length() + b.length();
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(String, String)}
 			     * @param a
@@ -6564,7 +6615,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k = a.toLowerCase() + Blah.blah2;
 			        return foo(k, b);
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
@@ -6574,7 +6625,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test2;
 			import test.E1;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6586,14 +6637,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(a, b, c);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        k.foo(x, y, z);
 			        { E1 e = new E1();
 			        e.foo(x, y, z); }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
@@ -6608,18 +6659,18 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		String sample1= """
 			package test;
 			public class E1 {
-			
+
 			    String blah = "blah";
 			   \s
 			    static class Blah {
 			        public static String blah2 = "blah2";
 			    }
-			
+
 			    public int foo(String a, String b) {
 			        System.out.println(a + b);
 			        return a.length() + b.length();
 			    }
-			
+
 			    /**
 			     * @deprecated use {@link #foo(String, String)}
 			     * @param a
@@ -6632,7 +6683,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        String k = a.toLowerCase() + this.blah;
 			        return foo(k, b);
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
@@ -6642,7 +6693,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			package test2;
 			import test.E1;
 			public class E {
-			
+
 			    public static void depfunc(String a, String b, Object c) {
 			        E1 d = new E1();
 			        int k1= 8;
@@ -6654,14 +6705,14 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			        int v = e.foo(a, b, c);
 			        System.out.println(v);
 			    }
-			
+
 			    public static void depfunc2(String x, String y, Object z) {
 			        E1 k = new E1();
 			        k.foo(x, y, z);
 			        { E1 e = new E1();
 			        e.foo(x, y, z); }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack2.createCompilationUnit("E.java", sample, false, null);
@@ -6676,17 +6727,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public interface PropertyChangeListener {
 			        void propertyChange(Object evt);
-			
+
 			    }
-			
+
 			    private final PropertyChangeListener listener = evt -> {
 			        this.clientCache.get();
 			    };
-			
+
 			    public void x() {
 			        PropertyChangeListener listener = evt -> {
 			            this.clientCache.get();
@@ -6696,7 +6747,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			    interface Cache<V> {
 			        V get();
 			    }
-			
+
 			    final Cache<String> clientCache = new Cache<>() {
 			        @Override
 			        public String get() {
@@ -6713,17 +6764,17 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class A {
 			    public interface PropertyChangeListener {
 			        void propertyChange(Object evt);
-			
+
 			    }
-			
+
 			    private final PropertyChangeListener listener = evt -> {
 			        this.clientCache.get();
 			    };
-			
+
 			    public void x() {
 			        PropertyChangeListener listener = evt -> {
 			            clientCache.get();
@@ -6733,7 +6784,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 			    interface Cache<V> {
 			        V get();
 			    }
-			
+
 			    final Cache<String> clientCache = new Cache<>() {
 			        @Override
 			        public String get() {
