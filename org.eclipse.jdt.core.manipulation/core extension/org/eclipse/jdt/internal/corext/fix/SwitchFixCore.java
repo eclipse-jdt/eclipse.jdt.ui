@@ -29,7 +29,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -46,7 +45,6 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -365,10 +363,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			for (int i= 0; i < ifStatements.size() - 1; i++) {
 				ASTNodes.removeButKeepComment(rewrite, ifStatements.get(i), group);
 			}
-
-			IfStatement ifStatement= ifStatements.get(ifStatements.size() - 1);
-			ASTNode parent= ifStatement.getParent();
-			ListRewrite listRewrite= rewrite.getListRewrite(parent, (ChildListPropertyDescriptor) ifStatement.getLocationInParent());
 
 			ASTNodes.replaceButKeepComment(rewrite, ifStatements.get(ifStatements.size() - 1), switchStatement, group);
 		}
