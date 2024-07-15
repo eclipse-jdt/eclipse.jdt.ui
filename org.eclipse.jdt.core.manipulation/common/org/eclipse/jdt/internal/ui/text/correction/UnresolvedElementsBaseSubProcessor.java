@@ -88,6 +88,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -669,6 +670,10 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			return;
 		}
 
+		while (selectedNode instanceof ParenthesizedExpression parenthesizedExp) {
+			selectedNode= parenthesizedExp.getExpression();
+		}
+
 		IJavaProject javaProject= cu.getJavaProject();
 		int kind= evauateTypeKind(selectedNode, javaProject);
 
@@ -677,6 +682,14 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			if (s != null && Character.isLowerCase(s.getFullyQualifiedName().charAt(0))) {
 				return;
 			}
+		}
+
+		if (selectedNode instanceof CastExpression castExp) {
+			selectedNode= castExp.getType();
+		}
+
+		if (selectedNode instanceof ParameterizedType parameterizedType) {
+			selectedNode= parameterizedType.getType();
 		}
 
 		while (selectedNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
