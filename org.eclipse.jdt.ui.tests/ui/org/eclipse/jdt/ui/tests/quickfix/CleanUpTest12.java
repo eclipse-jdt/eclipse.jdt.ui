@@ -1181,23 +1181,23 @@ public class E {
 
 			    public void bug1(String i1) {
 			        int i = 0;
-			        if (i1 == E.VALUE0) {
+			        if (i1.equals(E.VALUE0)) {
 			            int integer1 = 0;
 			            i = integer1;
-			        } else if (i1 == E.VALUE1) {
+			        } else if (i1.equals(E.VALUE1)) {
 			            char integer1 = 'a';
 			            i = integer1;
-			        } else if (i1 == E.VALUE2) {
+			        } else if (i1.equals(E.VALUE2)) {
 			            char integer1 = 'b';
 			            i = integer1;
-			        } else if (computeit(i1) || i1 == E.VALUE3) {
+			        } else if (computeit(i1) || i1.equals(E.VALUE3)) {
 			        //
 			        //
 			        }
 			    }
 
 			    private boolean computeit(String i) {
-				    return i=="4" || i=="5";
+				    return i.equals("4") || i.equals("5");
 			    }
 			}
 			""";
@@ -1234,7 +1234,7 @@ public class E {
                 break;
             }
             default :
-                if (computeit(i1) || i1 == E.VALUE3) {
+                if (computeit(i1) || i1.equals(E.VALUE3)) {
                 //
                 //
                 }
@@ -1243,7 +1243,7 @@ public class E {
     }
 
     private boolean computeit(String i) {
-	    return i=="4" || i=="5";
+	    return i.equals("4") || i.equals("5");
     }
 }
 			""";

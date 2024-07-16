@@ -35,8 +35,10 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -263,9 +265,26 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 				if (infixExpression != null) {
 					return extractVariableAndValuesFromInfixExpression(infixExpression);
+				} else if (expression instanceof MethodInvocation) {
+					MethodInvocation method= (MethodInvocation)expression;
+					if(!"equals".equals(method.getName().getIdentifier())) return null; //$NON-NLS-1$
+					List<?> arguments= method.arguments();
+					if(arguments.size()!=1) return null;
+					if (method != null && method.resolveMethodBinding() != null) {
+						IMethodBinding methodBinding= method.resolveMethodBinding();
+						String qualifiedName= methodBinding.getDeclaringClass().getQualifiedName();
+						if ("java.lang.String".equals(qualifiedName)) { //$NON-NLS-1$
+							return extractVariableAndValuesFromEqualsExpression(method.getExpression(),(Expression)(arguments.get(0)));
+						}
+					}
 				}
 
 				return null;
+			}
+
+			private Variable extractVariableAndValuesFromEqualsExpression(final Expression leftOperand,final Expression rightOperand) {
+					Variable variable= extractVariableWithConstantStringValue(leftOperand, rightOperand);
+					return variable != null ? variable : extractVariableWithConstantStringValue(rightOperand, leftOperand);
 			}
 
 			private Variable extractVariableAndValuesFromInfixExpression(final InfixExpression infixExpression) {
@@ -307,10 +326,20 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				if ((variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess)
 						&& ASTNodes.hasType(variable, char.class.getCanonicalName(),
 								byte.class.getCanonicalName(), short.class.getCanonicalName(),
-								int.class.getCanonicalName(),
-								String.class.getCanonicalName())
+								int.class.getCanonicalName())
 						&& constant.resolveTypeBinding() != null
-//						&& constant.resolveTypeBinding().isPrimitive()
+						&& constant.resolveTypeBinding().isPrimitive()
+						&& constant.resolveConstantExpressionValue() != null) {
+					return new Variable(variable, Arrays.asList(constant));
+				}
+
+				return null;
+			}
+
+			private Variable extractVariableWithConstantStringValue(final Expression variable, final Expression constant) {
+				if ((variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess)
+						&& ASTNodes.hasType(variable, String.class.getCanonicalName())
+						&& constant.resolveTypeBinding() != null
 						&& constant.resolveConstantExpressionValue() != null) {
 					return new Variable(variable, Arrays.asList(constant));
 				}
