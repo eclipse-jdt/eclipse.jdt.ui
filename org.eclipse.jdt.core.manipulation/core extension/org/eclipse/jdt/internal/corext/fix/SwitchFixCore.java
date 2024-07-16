@@ -305,9 +305,12 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 			private Variable extractVariableWithConstantValue(final Expression variable, final Expression constant) {
 				if ((variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess)
-						&& ASTNodes.hasType(variable, char.class.getCanonicalName(), byte.class.getCanonicalName(), short.class.getCanonicalName(), int.class.getCanonicalName())
+						&& ASTNodes.hasType(variable, char.class.getCanonicalName(),
+								byte.class.getCanonicalName(), short.class.getCanonicalName(),
+								int.class.getCanonicalName(),
+								String.class.getCanonicalName())
 						&& constant.resolveTypeBinding() != null
-						&& constant.resolveTypeBinding().isPrimitive()
+//						&& constant.resolveTypeBinding().isPrimitive()
 						&& constant.resolveConstantExpressionValue() != null) {
 					return new Variable(variable, Arrays.asList(constant));
 				}
