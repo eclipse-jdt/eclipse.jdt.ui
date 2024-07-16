@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -354,6 +354,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			}
 
 			if (remainingStatement != null) {
+				remainingStatement.setProperty(UNTOUCH_COMMENT_PROPERTY, Boolean.TRUE);
 				addCaseWithStatements(rewrite, ast, switchStatement, null, ASTNodes.asList(remainingStatement));
 			} else {
 				addCaseWithStatements(rewrite, ast, switchStatement, null, Collections.emptyList());
@@ -393,7 +394,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			// Add the statement(s) for this case(s)
 			if (!innerStatements.isEmpty()) {
 				for (Statement statement : innerStatements) {
-					statementsList.add(ASTNodes.createMoveTarget(rewrite, statement));
+					statementsList.add((Statement) rewrite.createCopyTarget(statement));
 				}
 
 				isBreakNeeded= !ASTNodes.fallsThrough(innerStatements.get(innerStatements.size() - 1));
