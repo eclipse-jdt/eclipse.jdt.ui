@@ -266,13 +266,11 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				if (infixExpression != null) {
 					return extractVariableAndValuesFromInfixExpression(infixExpression);
 				} else if (expression instanceof MethodInvocation) {
-//					if (!JavaModelUtil.is1d7OrHigher((IJavaProject)null))
-//						return null;
 					MethodInvocation method= (MethodInvocation)expression;
 					if (method.resolveMethodBinding() != null) {
-						if(!"equals".equals(method.getName().getIdentifier())) return null; //$NON-NLS-1$
+						if (!"equals".equals(method.getName().getIdentifier())) return null; //$NON-NLS-1$
 						List<?> arguments= method.arguments();
-						if(arguments.size()!=1) return null;
+						if (arguments.size() != 1) return null;
 						IMethodBinding methodBinding= method.resolveMethodBinding();
 						String qualifiedName= methodBinding.getDeclaringClass().getQualifiedName();
 						if ("java.lang.String".equals(qualifiedName)) { //$NON-NLS-1$
