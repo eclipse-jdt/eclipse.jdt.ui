@@ -1489,7 +1489,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 				ASTRewrite astRewrite= ASTRewrite.create(ast);
 
 				String label;
-				String qualifiedTypeName= Signature.getQualifier(curr);
+				String qualifiedTypeName= Signature.getQualifier(Signature.getTypeErasure(curr));
 				String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
 
 				String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
