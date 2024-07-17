@@ -1078,6 +1078,93 @@ public class CleanUpTest12 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSwitchString() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+
+				public static final String VALUE0 = "0";
+				public static final String VALUE1 = "1";
+				public static final String VALUE2 = "2";
+				public static final String VALUE3 = "3";
+
+			    public void bug1(String i1) {
+			        int i = 0;
+			        if (i1.equals(E.VALUE0)) {
+			            int integer1 = 0;
+			            i = integer1;
+			        } else if (i1.equals(E.VALUE1)) {
+			            char integer1 = 'a';
+			            i = integer1;
+			        } else if (i1.equals(E.VALUE2)) {
+			            char integer1 = 'b';
+			            i = integer1;
+			        } else if (computeit(i1) || i1.equals(E.VALUE3)) {
+			        //
+			        //
+			        }
+			    }
+
+			    private boolean computeit(String i) {
+				    return i.equals("4") || i.equals("5");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.USE_SWITCH);
+
+		String expected= """
+package test1;
+
+public class E {
+
+	public static final String VALUE0 = "0";
+	public static final String VALUE1 = "1";
+	public static final String VALUE2 = "2";
+	public static final String VALUE3 = "3";
+
+    public void bug1(String i1) {
+        int i = 0;
+        switch (i1) {
+            case E.VALUE0 : {
+                int integer1 = 0;
+                i = integer1;
+                break;
+            }
+            case E.VALUE1 : {
+                char integer1 = 'a';
+                i = integer1;
+                break;
+            }
+            case E.VALUE2 : {
+                char integer1 = 'b';
+                i = integer1;
+                break;
+            }
+            default :
+                if (computeit(i1) || i1.equals(E.VALUE3)) {
+                //
+                //
+                }
+                break;
+        }
+    }
+
+    private boolean computeit(String i) {
+	    return i.equals("4") || i.equals("5");
+    }
+}
+			""";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Switch_description)));
+	}
+
+	@Test
 	public void testDoNotUseSwitch() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
