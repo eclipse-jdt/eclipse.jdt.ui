@@ -343,10 +343,11 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 						int.class.getCanonicalName()) || isVariableEnum;
 
 				ITypeBinding constanttypeBinding= constant.resolveTypeBinding();
+				boolean isConstantEnum= constanttypeBinding != null && constanttypeBinding.isEnum();
 				if (hasType
 						&& constanttypeBinding != null
-						&& (constanttypeBinding.isPrimitive() || isVariableEnum)
-						&& (constant.resolveConstantExpressionValue() != null || isVariableEnum)) {
+						&& (constanttypeBinding.isPrimitive() || isConstantEnum)
+						&& (constant.resolveConstantExpressionValue() != null || isConstantEnum)) {
 					return new Variable(variable, Arrays.asList(constant));
 				}
 
