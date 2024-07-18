@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -237,6 +238,9 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 					for (Expression expression : sourceCase.literalExpressions) {
 						Object constantValue= expression.resolveConstantExpressionValue();
+						if(constantValue == null && expression.resolveTypeBinding().isEnum()) {
+							constantValue= expression;
+						}
 
 						if (alreadyProccessedValues.add(constantValue)) {
 							// This is a new value (never seen before)
@@ -325,14 +329,17 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			private Variable extractVariableWithConstantValue(final Expression variable, final Expression constant) {
 				if (!(variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess))return null;
 
-				variable.resolveTypeBinding();
+				ITypeBinding variabletypeBinding= variable.resolveTypeBinding();
+				boolean isVariableEnum= variabletypeBinding.isEnum();
 				boolean hasType= ASTNodes.hasType(variable, char.class.getCanonicalName(),
 						byte.class.getCanonicalName(), short.class.getCanonicalName(),
-						int.class.getCanonicalName(), Enum.class.getCanonicalName());
+						int.class.getCanonicalName()) || isVariableEnum;
+
+				ITypeBinding constanttypeBinding= constant.resolveTypeBinding();
 				if (hasType
-						&& constant.resolveTypeBinding() != null
-						&& (constant.resolveTypeBinding().isPrimitive() || ASTNodes.hasType(constant, Enum.class.getCanonicalName()))
-						&& (constant.resolveConstantExpressionValue() != null|| ASTNodes.hasType(constant, Enum.class.getCanonicalName()))) {
+						&& constanttypeBinding != null
+						&& (constanttypeBinding.isPrimitive() || isVariableEnum)
+						&& (constant.resolveConstantExpressionValue() != null|| isVariableEnum)) {
 					return new Variable(variable, Arrays.asList(constant));
 				}
 

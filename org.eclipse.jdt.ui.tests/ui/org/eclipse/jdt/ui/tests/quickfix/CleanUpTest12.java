@@ -1169,7 +1169,7 @@ public class E {
 	public void testSwitchEnum() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
-			package test1;
+package test1;
 
 public class E {
 
@@ -1206,41 +1206,38 @@ package test1;
 
 public class E {
 
-	public static final String VALUE0 = "0";
-	public static final String VALUE1 = "1";
-	public static final String VALUE2 = "2";
-	public static final String VALUE3 = "3";
+	public enum MYENUM { VALUE0,VALUE1,VALUE2,VALUE3,VALUE4,VALUE5}
 
-    public void bug1(String i1) {
-        int i = 0;
-        switch (i1) {
-            case E.VALUE0 : {
+	public void bug1(MYENUM i1) {
+		int i = 0;
+		switch (i1) {
+            case MYENUM.VALUE0 : {
                 int integer1 = 0;
                 i = integer1;
                 break;
             }
-            case E.VALUE1 : {
+            case MYENUM.VALUE1 : {
                 char integer1 = 'a';
                 i = integer1;
                 break;
             }
-            case E.VALUE2 : {
+            case MYENUM.VALUE2 : {
                 char integer1 = 'b';
                 i = integer1;
                 break;
             }
             default :
-                if (computeit(i1) || i1.equals(E.VALUE3)) {
-                //
-                //
+                if (computeit(i1) || i1 == MYENUM.VALUE3) {
+                	//
+                	//
                 }
                 break;
         }
-    }
+	}
 
-    private boolean computeit(String i) {
-	    return i.equals("4") || i.equals("5");
-    }
+	private boolean computeit(MYENUM i) {
+		return i.equals(MYENUM.VALUE4) || i == MYENUM.VALUE5;
+	}
 }
 			""";
 
