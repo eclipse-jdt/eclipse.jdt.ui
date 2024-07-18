@@ -1164,6 +1164,88 @@ public class E {
 				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Switch_description)));
 	}
 
+
+	@Test
+	public void testSwitchEnum() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+package test1;
+
+public class E {
+
+	public enum MYENUM { VALUE0,VALUE1,VALUE2,VALUE3,VALUE4,VALUE5}
+
+	public void bug1(MYENUM i1) {
+		int i = 0;
+		if (i1 == MYENUM.VALUE0) {
+			int integer1 = 0;
+			i = integer1;
+		} else if (i1 == MYENUM.VALUE1) {
+			char integer1 = 'a';
+			i = integer1;
+		} else if (i1 == MYENUM.VALUE2) {
+			char integer1 = 'b';
+			i = integer1;
+		} else if (computeit(i1) || i1 == MYENUM.VALUE3) {
+			//
+			//
+		}
+	}
+
+	private boolean computeit(MYENUM i) {
+		return i.equals(MYENUM.VALUE4) || i == MYENUM.VALUE5;
+	}
+}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.USE_SWITCH);
+
+		String expected= """
+package test1;
+
+public class E {
+
+	public enum MYENUM { VALUE0,VALUE1,VALUE2,VALUE3,VALUE4,VALUE5}
+
+	public void bug1(MYENUM i1) {
+		int i = 0;
+		switch (i1) {
+            case MYENUM.VALUE0 : {
+                int integer1 = 0;
+                i = integer1;
+                break;
+            }
+            case MYENUM.VALUE1 : {
+                char integer1 = 'a';
+                i = integer1;
+                break;
+            }
+            case MYENUM.VALUE2 : {
+                char integer1 = 'b';
+                i = integer1;
+                break;
+            }
+            default :
+                if (computeit(i1) || i1 == MYENUM.VALUE3) {
+                	//
+                	//
+                }
+                break;
+        }
+	}
+
+	private boolean computeit(MYENUM i) {
+		return i.equals(MYENUM.VALUE4) || i == MYENUM.VALUE5;
+	}
+}
+			""";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Switch_description)));
+	}
+
 	@Test
 	public void testDoNotUseSwitch() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);

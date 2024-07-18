@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -237,6 +238,10 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 					for (Expression expression : sourceCase.literalExpressions) {
 						Object constantValue= expression.resolveConstantExpressionValue();
+						ITypeBinding expressiontypeBinding= expression.resolveTypeBinding();
+						if(constantValue == null && expressiontypeBinding != null && expressiontypeBinding.isEnum()) {
+							constantValue= expression;
+						}
 
 						if (alreadyProccessedValues.add(constantValue)) {
 							// This is a new value (never seen before)
@@ -268,9 +273,13 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				} else if (expression instanceof MethodInvocation) {
 					MethodInvocation method= (MethodInvocation)expression;
 					if (method.resolveMethodBinding() != null) {
-						if (!"equals".equals(method.getName().getIdentifier())) return null; //$NON-NLS-1$
+						if (!"equals".equals(method.getName().getIdentifier())) { //$NON-NLS-1$
+							return null;
+						}
 						List<?> arguments= method.arguments();
-						if (arguments.size() != 1) return null;
+						if (arguments.size() != 1) {
+							return null;
+						}
 						IMethodBinding methodBinding= method.resolveMethodBinding();
 						String qualifiedName= methodBinding.getDeclaringClass().getQualifiedName();
 						if ("java.lang.String".equals(qualifiedName)) { //$NON-NLS-1$
@@ -323,13 +332,22 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			}
 
 			private Variable extractVariableWithConstantValue(final Expression variable, final Expression constant) {
-				if ((variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess)
-						&& ASTNodes.hasType(variable, char.class.getCanonicalName(),
-								byte.class.getCanonicalName(), short.class.getCanonicalName(),
-								int.class.getCanonicalName())
-						&& constant.resolveTypeBinding() != null
-						&& constant.resolveTypeBinding().isPrimitive()
-						&& constant.resolveConstantExpressionValue() != null) {
+				if (!(variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess)) {
+					return null;
+				}
+
+				ITypeBinding variabletypeBinding= variable.resolveTypeBinding();
+				boolean isVariableEnum= variabletypeBinding != null && variabletypeBinding.isEnum();
+				boolean hasType= ASTNodes.hasType(variable, char.class.getCanonicalName(),
+						byte.class.getCanonicalName(), short.class.getCanonicalName(),
+						int.class.getCanonicalName()) || isVariableEnum;
+
+				ITypeBinding constanttypeBinding= constant.resolveTypeBinding();
+				boolean isConstantEnum= constanttypeBinding != null && constanttypeBinding.isEnum();
+				if (hasType
+						&& constanttypeBinding != null
+						&& (constanttypeBinding.isPrimitive() || isConstantEnum)
+						&& (constant.resolveConstantExpressionValue() != null || isConstantEnum)) {
 					return new Variable(variable, Arrays.asList(constant));
 				}
 
