@@ -238,7 +238,8 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 					for (Expression expression : sourceCase.literalExpressions) {
 						Object constantValue= expression.resolveConstantExpressionValue();
-						if(constantValue == null && expression.resolveTypeBinding().isEnum()) {
+						ITypeBinding expressiontypeBinding= expression.resolveTypeBinding();
+						if(constantValue == null && expressiontypeBinding != null && expressiontypeBinding.isEnum()) {
 							constantValue= expression;
 						}
 
@@ -272,9 +273,13 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				} else if (expression instanceof MethodInvocation) {
 					MethodInvocation method= (MethodInvocation)expression;
 					if (method.resolveMethodBinding() != null) {
-						if (!"equals".equals(method.getName().getIdentifier())) return null; //$NON-NLS-1$
+						if (!"equals".equals(method.getName().getIdentifier())) { //$NON-NLS-1$
+							return null;
+						}
 						List<?> arguments= method.arguments();
-						if (arguments.size() != 1) return null;
+						if (arguments.size() != 1) {
+							return null;
+						}
 						IMethodBinding methodBinding= method.resolveMethodBinding();
 						String qualifiedName= methodBinding.getDeclaringClass().getQualifiedName();
 						if ("java.lang.String".equals(qualifiedName)) { //$NON-NLS-1$
@@ -327,10 +332,12 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			}
 
 			private Variable extractVariableWithConstantValue(final Expression variable, final Expression constant) {
-				if (!(variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess))return null;
+				if (!(variable instanceof Name || variable instanceof FieldAccess || variable instanceof SuperFieldAccess)) {
+					return null;
+				}
 
 				ITypeBinding variabletypeBinding= variable.resolveTypeBinding();
-				boolean isVariableEnum= variabletypeBinding.isEnum();
+				boolean isVariableEnum= variabletypeBinding != null && variabletypeBinding.isEnum();
 				boolean hasType= ASTNodes.hasType(variable, char.class.getCanonicalName(),
 						byte.class.getCanonicalName(), short.class.getCanonicalName(),
 						int.class.getCanonicalName()) || isVariableEnum;
@@ -339,7 +346,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				if (hasType
 						&& constanttypeBinding != null
 						&& (constanttypeBinding.isPrimitive() || isVariableEnum)
-						&& (constant.resolveConstantExpressionValue() != null|| isVariableEnum)) {
+						&& (constant.resolveConstantExpressionValue() != null || isVariableEnum)) {
 					return new Variable(variable, Arrays.asList(constant));
 				}
 
