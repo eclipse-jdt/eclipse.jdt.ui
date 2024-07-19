@@ -5203,6 +5203,10 @@
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.buildpath"
         priority="100"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.compliance"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.compliance"
+        priority="100"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.fatal"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.fatal"
@@ -5259,6 +5263,7 @@
         <markerAttributeMapping value="130" markerGroupingEntry="org.eclipse.jdt.ui.category.generictypes"/>
         <markerAttributeMapping value="140" markerGroupingEntry="org.eclipse.jdt.ui.category.nls"/>
         <markerAttributeMapping value="150" markerGroupingEntry="org.eclipse.jdt.ui.category.restrictedAPI"/>
+        <markerAttributeMapping value="170" markerGroupingEntry="org.eclipse.jdt.ui.category.compliance"/>
      </markerAttributeGrouping>
      <markerAttributeGrouping markerType="org.eclipse.jdt.core.buildpath_problem"
         defaultGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
