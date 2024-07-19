@@ -648,4 +648,8 @@ public class RenameTempTests extends GenericRefactoringTest{
 		helper2("j");
 	}
 
+	@Test
+	public void testIssue_1508() throws Exception{
+		helper2("newField");
+	}
 }

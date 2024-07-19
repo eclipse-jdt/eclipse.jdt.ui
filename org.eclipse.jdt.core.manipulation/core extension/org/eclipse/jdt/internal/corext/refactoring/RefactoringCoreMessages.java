@@ -1913,6 +1913,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameTempRefactoring_changeName;
 
+	public static String RenameTempRefactoring_field_collision;
+
 	public static String RenameTempRefactoring_lowercase;
 
 	public static String RenameTempRefactoring_lowercase2;
