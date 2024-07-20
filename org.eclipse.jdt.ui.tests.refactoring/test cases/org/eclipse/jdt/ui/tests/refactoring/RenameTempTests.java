@@ -176,7 +176,7 @@ public class RenameTempTests extends GenericRefactoringTest{
 
 	@Test
 	public void test4() throws Exception{
-		helper1("k");
+		helper2("k"); // this test now issues a warning
 	}
 
 	@Test
@@ -278,12 +278,12 @@ public class RenameTempTests extends GenericRefactoringTest{
 
 	@Test
 	public void test25() throws Exception{
-		helper1("j");
+		helper2("j"); // this test now issues a warning
 	}
 
 	@Test
 	public void test26() throws Exception{
-		helper1("j");
+		helper2("j"); // this test now issues a warning
 	}
 
 //  deleted - incorrect. see testFail26
@@ -323,7 +323,7 @@ public class RenameTempTests extends GenericRefactoringTest{
 
 	@Test
 	public void test34() throws Exception{
-		helper1("j");
+		helper2("j"); // this test now issues a warning
 	}
 
 	@Test

@@ -324,7 +324,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				public boolean visit(SimpleName node) {
 					if (node.getFullyQualifiedName().equals(tempBinding.getName())) {
 						IBinding binding= node.resolveBinding();
-						if (binding.isEqualTo(tempBinding)) {
+						if (tempBinding.isEqualTo(binding)) {
 							ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(node, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
 							if (ancestor instanceof AbstractTypeDeclaration typeDecl) {
 								ITypeBinding typeDeclBinding= typeDecl.resolveBinding();
@@ -333,7 +333,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 									for (IVariableBinding field : fields) {
 										if (field.getName().equals(fNewName)) {
 											try {
-												result.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, typeDeclBinding.getName() + "." + field.getName()), //$NON-NLS-1$
+												result.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, typeDeclBinding.getName() + "." + field.getName()), //$NON-NLS-1$
 														new JavaStringStatusContext(fCu.getSource(),
 																SourceRangeFactory.create(node))));
 											} catch (JavaModelException e) {
@@ -350,7 +350,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 									for (IVariableBinding field : fields) {
 										if (field.getName().equals(fNewName)) {
 											try {
-												result.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, "ANONYMOUS." + field.getName()), //$NON-NLS-1$
+												result.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, "ANONYMOUS." + field.getName()), //$NON-NLS-1$
 														new JavaStringStatusContext(fCu.getSource(),
 																SourceRangeFactory.create(node))));
 											} catch (JavaModelException e) {
