@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,12 @@ public class JavadocLookup {
 	public static final IJavadocContentFactory DEFAULT_FACTORY= new IJavadocContentFactory() {
 		@Override
 		public IJavadocAccess createJavadocAccess(IJavaElement element, Javadoc javadoc, String source, JavadocLookup lookup) {
+			if (source.startsWith("///")) { //$NON-NLS-1$
+				if (lookup == null)
+					return new CoreMarkdownAccessImpl(element, javadoc, source);
+				else
+					return new CoreMarkdownAccessImpl(element, javadoc, source, lookup);
+			}
 			if (lookup == null)
 				return new CoreJavadocAccessImpl(element, javadoc, source);
 			else
