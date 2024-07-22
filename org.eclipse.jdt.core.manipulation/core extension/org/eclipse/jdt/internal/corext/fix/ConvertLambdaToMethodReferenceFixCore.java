@@ -269,7 +269,7 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 					typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 					ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(superMethodInvocation, methodBinding, superQualifier);
-					typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding.getTypeDeclaration(), ast));
+					typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding.getTypeDeclaration().getErasure(), ast));
 					typeMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
 					replacement= castMethodRefIfNeeded(cuRewrite, ast, typeMethodReference);
 				} else {
@@ -288,7 +288,7 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 				TypeLiteral typeLiteral= ast.newTypeLiteral();
 				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 				ITypeBinding instanceofTypeBinding= instanceofExpression.getRightOperand().resolveBinding();
-				typeLiteral.setType(importRewrite.addImport(instanceofTypeBinding.getTypeDeclaration(), ast));
+				typeLiteral.setType(importRewrite.addImport(instanceofTypeBinding.getTypeDeclaration().getErasure(), ast));
 				expMethodReference.setName(ast.newSimpleName("isInstance")); //$NON-NLS-1$
 				expMethodReference.setExpression(typeLiteral);
 				replacement= castMethodRefIfNeeded(cuRewrite, ast, expMethodReference);
@@ -308,7 +308,7 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 					ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationQualifier);
 					invocationTypeBinding= StubUtility2Core.replaceWildcardsAndCaptures(invocationTypeBinding);
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(lambda, importRewrite);
-					typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast, importRewriteContext, TypeLocation.OTHER));
+					typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding.getErasure(), ast, importRewriteContext, TypeLocation.OTHER));
 					typeMethodReference.typeArguments().addAll(QuickAssistProcessorUtil.getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
 					replacement= castMethodRefIfNeeded(cuRewrite, ast, typeMethodReference);
 				} else {
