@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -322,7 +324,8 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			ASTVisitor checkCollistionVisitor= new ASTVisitor() {
 				@Override
 				public boolean visit(SimpleName node) {
-					if (node.getFullyQualifiedName().equals(tempBinding.getName())) {
+					if (node.getFullyQualifiedName().equals(tempBinding.getName()) && !(node.getParent() instanceof FieldAccess) &&
+							!(node.getParent() instanceof QualifiedName) && !(node.getParent() instanceof VariableDeclaration)) {
 						IBinding binding= node.resolveBinding();
 						if (tempBinding.isEqualTo(binding)) {
 							ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(node, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
@@ -333,7 +336,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 									for (IVariableBinding field : fields) {
 										if (field.getName().equals(fNewName)) {
 											try {
-												result.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, typeDeclBinding.getName() + "." + field.getName()), //$NON-NLS-1$
+												result.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, typeDeclBinding.getName() + "." + field.getName()), //$NON-NLS-1$
 														new JavaStringStatusContext(fCu.getSource(),
 																SourceRangeFactory.create(node))));
 											} catch (JavaModelException e) {
@@ -350,7 +353,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 									for (IVariableBinding field : fields) {
 										if (field.getName().equals(fNewName)) {
 											try {
-												result.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, "ANONYMOUS." + field.getName()), //$NON-NLS-1$
+												result.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, "ANONYMOUS." + field.getName()), //$NON-NLS-1$
 														new JavaStringStatusContext(fCu.getSource(),
 																SourceRangeFactory.create(node))));
 											} catch (JavaModelException e) {
