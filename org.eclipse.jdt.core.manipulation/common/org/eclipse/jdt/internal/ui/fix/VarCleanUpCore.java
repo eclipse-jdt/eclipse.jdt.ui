@@ -100,16 +100,18 @@ public class VarCleanUpCore extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_VAR)) {
-			return "" //$NON-NLS-1$
-					+ "var number = 0;\n" //$NON-NLS-1$
-					+ "var list = new ArrayList<String>();\n" //$NON-NLS-1$
-					+ "var map = new HashMap<Integer, String>();\n"; //$NON-NLS-1$
+			return """
+				var number = 0;
+				var list = new ArrayList<String>();
+				var map = new HashMap<Integer, String>();
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "int number = 0;\n" //$NON-NLS-1$
-				+ "ArrayList<String> list = new ArrayList<String>();\n" //$NON-NLS-1$
-				+ "HashMap<Integer, String> map = new HashMap<>();\n"; //$NON-NLS-1$
+		return """
+			int number = 0;
+			ArrayList<String> list = new ArrayList<String>();
+			HashMap<Integer, String> map = new HashMap<>();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

@@ -115,18 +115,20 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.STRINGBUILDER)) {
-			return "" //$NON-NLS-1$
-					+ "StringBuilder variable = new StringBuilder();\n" //$NON-NLS-1$
-					+ "variable.append(\"foo\");\n" //$NON-NLS-1$
-					+ "variable.append(\"bar\");\n" //$NON-NLS-1$
-					+ "System.out.println(variable.toString());\n"; //$NON-NLS-1$
+			return """
+				StringBuilder variable = new StringBuilder();
+				variable.append("foo");
+				variable.append("bar");
+				System.out.println(variable.toString());
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "String variable = \"\";\n" //$NON-NLS-1$
-				+ "variable = variable + \"foo\";\n" //$NON-NLS-1$
-				+ "variable += \"bar\";\n" //$NON-NLS-1$
-				+ "System.out.println(variable);\n"; //$NON-NLS-1$
+		return """
+			String variable = "";
+			variable = variable + "foo";
+			variable += "bar";
+			System.out.println(variable);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

@@ -93,9 +93,10 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PULL_UP_ASSIGNMENT)) {
-			return "" //$NON-NLS-1$
-					+ "isRemoved = list.remove(o);\n" //$NON-NLS-1$
-					+ "if (isRemoved) {}\n"; //$NON-NLS-1$
+			return """
+				isRemoved = list.remove(o);
+				if (isRemoved) {}
+				"""; //$NON-NLS-1$
 		}
 
 		return "" //$NON-NLS-1$

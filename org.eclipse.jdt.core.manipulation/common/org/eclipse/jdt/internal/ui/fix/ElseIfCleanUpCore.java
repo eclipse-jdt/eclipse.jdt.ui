@@ -61,22 +61,26 @@ public class ElseIfCleanUpCore extends AbstractMultiFix implements ICleanUpFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.ELSE_IF)) {
-			return "" //$NON-NLS-1$
-					+ "if (isValid) {\n" //$NON-NLS-1$
-					+ "  System.out.println(isValid);\n" //$NON-NLS-1$
-					+ "} else if (isEnabled) {\n" //$NON-NLS-1$
-					+ "  System.out.println(isEnabled);\n" //$NON-NLS-1$
-					+ "}\n\n\n"; //$NON-NLS-1$
+			return """
+				if (isValid) {
+				  System.out.println(isValid);
+				} else if (isEnabled) {
+				  System.out.println(isEnabled);
+				}
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (isValid) {\n" //$NON-NLS-1$
-				+ "  System.out.println(isValid);\n" //$NON-NLS-1$
-				+ "} else {\n" //$NON-NLS-1$
-				+ "  if (isEnabled) {\n" //$NON-NLS-1$
-				+ "    System.out.println(isEnabled);\n" //$NON-NLS-1$
-				+ "  }\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (isValid) {
+			  System.out.println(isValid);
+			} else {
+			  if (isEnabled) {
+			    System.out.println(isEnabled);
+			  }
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

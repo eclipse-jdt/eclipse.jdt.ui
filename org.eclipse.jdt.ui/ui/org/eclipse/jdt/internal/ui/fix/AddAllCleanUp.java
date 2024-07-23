@@ -99,10 +99,11 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return "outputList.addAll(inputList);\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "for (int i = 0; i < inputList.size(); i++) {\n" //$NON-NLS-1$
-				+ "    outputList.add(inputList.get(i));\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			for (int i = 0; i < inputList.size(); i++) {
+			    outputList.add(inputList.get(i));
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

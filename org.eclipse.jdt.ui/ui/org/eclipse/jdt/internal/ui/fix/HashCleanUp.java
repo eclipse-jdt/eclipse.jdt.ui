@@ -118,11 +118,12 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				+ "return Objects.hash(aShort);\n\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-			+ "final int prime = 31;\n" //$NON-NLS-1$
-			+ "int result = 1;\n" //$NON-NLS-1$
-			+ "result = prime * result + aShort;\n" //$NON-NLS-1$
-			+ "return result;\n"; //$NON-NLS-1$
+		return """
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + aShort;
+			return result;
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
