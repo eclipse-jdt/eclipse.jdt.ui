@@ -4783,7 +4783,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
 
-			    Function<E3<Integer>, String> p1 = E3<Integer>::<Float>method2;
+			    Function<E3<Integer>, String> p1 = E3::<Float>method2;
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
 
 			    <V> String method2() { return "m2";    }
@@ -5070,6 +5070,55 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return x.isCorrect(this);
 			    }
 
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testIssue1520() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.Optional;
+			import java.util.function.Supplier;
+			public class E6 {
+
+				public static void main(String[] args) {
+					create("Hello").map(c -> c.get()).map(s -> s.concat("World"));
+				}
+
+				public static <X> Optional<Supplier<X>> create(X value) {
+					if (value == null) {
+						return Optional.empty();
+					}
+					return Optional.of(() -> value);
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", str, false, null);
+
+		int offset= str.indexOf("c ->");
+		AssistContext context= getCorrectionContext(cu, offset, 4);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		String expected1= """
+			package test1;
+			import java.util.Optional;
+			import java.util.function.Supplier;
+			public class E6 {
+
+				public static void main(String[] args) {
+					create("Hello").map(Supplier::get).map(s -> s.concat("World"));
+				}
+
+				public static <X> Optional<Supplier<X>> create(X value) {
+					if (value == null) {
+						return Optional.empty();
+					}
+					return Optional.of(() -> value);
+				}
 			}
 			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
@@ -5794,7 +5843,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 				}
 
 				void f(Source<?> source) {
-					source.sendTo(ArrayList<Number>::size);
+					source.sendTo(ArrayList::size);
 				}
 			}
 			""";
