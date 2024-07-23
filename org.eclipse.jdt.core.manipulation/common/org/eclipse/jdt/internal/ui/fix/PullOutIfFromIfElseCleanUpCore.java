@@ -66,25 +66,29 @@ public class PullOutIfFromIfElseCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PULL_OUT_IF_FROM_IF_ELSE)) {
-			return "" //$NON-NLS-1$
-					+ "if (isActive) {\n" //$NON-NLS-1$
-					+ "    if (isFound) {\n" //$NON-NLS-1$
-					+ "        System.out.println(\"foo\");\n" //$NON-NLS-1$
-					+ "    } else {\n" //$NON-NLS-1$
-					+ "        System.out.println(\"bar\");\n" //$NON-NLS-1$
-					+ "    }\n" //$NON-NLS-1$
-					+ "}\n\n\n"; //$NON-NLS-1$
+			return """
+				if (isActive) {
+				    if (isFound) {
+				        System.out.println("foo");
+				    } else {
+				        System.out.println("bar");
+				    }
+				}
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (isFound) {\n" //$NON-NLS-1$
-				+ "    if (isActive) {\n" //$NON-NLS-1$
-				+ "        System.out.println(\"foo\");\n" //$NON-NLS-1$
-				+ "    }\n" //$NON-NLS-1$
-				+ "} else {\n" //$NON-NLS-1$
-				+ "    if (isActive) {\n" //$NON-NLS-1$
-				+ "        System.out.println(\"bar\");\n" //$NON-NLS-1$
-				+ "    }\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (isFound) {
+			    if (isActive) {
+			        System.out.println("foo");
+			    }
+			} else {
+			    if (isActive) {
+			        System.out.println("bar");
+			    }
+			}
+			"""; //$NON-NLS-1$
 	}
 }

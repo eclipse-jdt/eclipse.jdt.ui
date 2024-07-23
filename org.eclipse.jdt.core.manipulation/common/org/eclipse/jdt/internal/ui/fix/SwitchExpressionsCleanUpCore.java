@@ -71,27 +71,37 @@ public class SwitchExpressionsCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS)) {
-			return "" //$NON-NLS-1$
-					+ "int i = switch(j) {\n" //$NON-NLS-1$
-					+ "    case 1 -> 3;\n" //$NON-NLS-1$
-					+ "    case 2 -> 4;\n" //$NON-NLS-1$
-					+ "    default -> 0;\n" //$NON-NLS-1$
-					+ "};\n\n\n\n\n\n\n\n\n"; //$NON-NLS-1$
+			return """
+				int i = switch(j) {
+				    case 1 -> 3;
+				    case 2 -> 4;
+				    default -> 0;
+				};
+				
+				
+				
+				
+				
+				
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "int i;\n" //$NON-NLS-1$
-				+ "switch(j) {\n" //$NON-NLS-1$
-				+ "    case 1:\n" //$NON-NLS-1$
-				+ "        i = 3;\n" //$NON-NLS-1$
-				+ "        break;\n" //$NON-NLS-1$
-				+ "    case 2:\n" //$NON-NLS-1$
-				+ "        i = 4;\n" //$NON-NLS-1$
-				+ "        break;\n" //$NON-NLS-1$
-				+ "    default:\n" //$NON-NLS-1$
-				+ "        i = 0;\n" //$NON-NLS-1$
-				+ "        break;\n" //$NON-NLS-1$
-				+ "}\n" //$NON-NLS-1$
-				+ "\n"; //$NON-NLS-1$
+		return """
+			int i;
+			switch(j) {
+			    case 1:
+			        i = 3;
+			        break;
+			    case 2:
+			        i = 4;
+			        break;
+			    default:
+			        i = 0;
+			        break;
+			}
+			
+			"""; //$NON-NLS-1$
 	}
 }

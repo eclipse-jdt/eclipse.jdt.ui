@@ -87,14 +87,16 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_AUTOBOXING)) {
-			return "" //$NON-NLS-1$
-					+ "Integer i = 0;\n" //$NON-NLS-1$
-					+ "Character c = '*';\n"; //$NON-NLS-1$
+			return """
+				Integer i = 0;
+				Character c = '*';
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "Integer i = Integer.valueOf(0);\n" //$NON-NLS-1$
-				+ "Character c = Character.valueOf('*');\n"; //$NON-NLS-1$
+		return """
+			Integer i = Integer.valueOf(0);
+			Character c = Character.valueOf('*');
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

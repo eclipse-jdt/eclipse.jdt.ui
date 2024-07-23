@@ -75,18 +75,22 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.RAISE_EMBEDDED_IF)) {
-			return "" //$NON-NLS-1$
-					+ "if (isActive && isValid) {\n" //$NON-NLS-1$
-					+ "  int i = 0;\n" //$NON-NLS-1$
-					+ "}\n\n\n"; //$NON-NLS-1$
+			return """
+				if (isActive && isValid) {
+				  int i = 0;
+				}
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (isActive) {\n" //$NON-NLS-1$
-				+ "  if (isValid) {\n" //$NON-NLS-1$
-				+ "    int i = 0;\n" //$NON-NLS-1$
-				+ "  }\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (isActive) {
+			  if (isValid) {
+			    int i = 0;
+			  }
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

@@ -73,16 +73,19 @@ public class PatternMatchingForInstanceofCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF)) {
-			return "" //$NON-NLS-1$
-					+ "if (object instanceof Integer i) {\n" //$NON-NLS-1$
-					+ "    return i.intValue();\n" //$NON-NLS-1$
-					+ "}\n\n"; //$NON-NLS-1$
+			return """
+				if (object instanceof Integer i) {
+				    return i.intValue();
+				}
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (object instanceof Integer) {\n" //$NON-NLS-1$
-				+ "    Integer i = (Integer) object;\n" //$NON-NLS-1$
-				+ "    return i.intValue();\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (object instanceof Integer) {
+			    Integer i = (Integer) object;
+			    return i.intValue();
+			}
+			"""; //$NON-NLS-1$
 	}
 }

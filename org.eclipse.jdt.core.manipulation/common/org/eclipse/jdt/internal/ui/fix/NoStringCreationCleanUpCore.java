@@ -82,16 +82,18 @@ public class NoStringCreationCleanUpCore extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.NO_STRING_CREATION)) {
-			return "" //$NON-NLS-1$
-					+ "String bar = \"foo\";\n" //$NON-NLS-1$
-					+ "String newBar = bar.concat(\"abc\");\n" //$NON-NLS-1$
-					+ "String cantChange = new String(possibleNullObject)\n"; //$NON-NLS-1$
+			return """
+				String bar = "foo";
+				String newBar = bar.concat("abc");
+				String cantChange = new String(possibleNullObject)
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "String bar = new String(\"foo\");\n" //$NON-NLS-1$
-				+ "String newBar = (new String(bar)).concat(\"abc\");\n" //$NON-NLS-1$
-				+ "String cantChange = new String(possibleNullObject)\n"; //$NON-NLS-1$
+		return """
+			String bar = new String("foo");
+			String newBar = (new String(bar)).concat("abc");
+			String cantChange = new String(possibleNullObject)
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

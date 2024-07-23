@@ -83,14 +83,16 @@ public class PrimitiveSerializationCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PRIMITIVE_SERIALIZATION)) {
-			return "" //$NON-NLS-1$
-					+ "String text1 = Integer.toString(number);\n" //$NON-NLS-1$
-					+ "String text2 = Character.toString(letter);\n"; //$NON-NLS-1$
+			return """
+				String text1 = Integer.toString(number);
+				String text2 = Character.toString(letter);
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "String text1 = Integer.valueOf(number).toString();\n" //$NON-NLS-1$
-				+ "String text2 = Character.valueOf(letter).toString();\n"; //$NON-NLS-1$
+		return """
+			String text1 = Integer.valueOf(number).toString();
+			String text2 = Character.valueOf(letter).toString();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

@@ -66,17 +66,19 @@ public class BooleanValueRatherThanComparisonCleanUpCore extends AbstractCleanUp
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.BOOLEAN_VALUE_RATHER_THAN_COMPARISON)) {
-			return "" //$NON-NLS-1$
-					+ "boolean booleanValue = isValid;\n" //$NON-NLS-1$
-					+ "boolean booleanValue2 = !isValid;\n" //$NON-NLS-1$
-					+ "boolean booleanValue3 = i <= 0;\n" //$NON-NLS-1$
-					+ "boolean booleanValue4 = !booleanObject;\n"; //$NON-NLS-1$
+			return """
+				boolean booleanValue = isValid;
+				boolean booleanValue2 = !isValid;
+				boolean booleanValue3 = i <= 0;
+				boolean booleanValue4 = !booleanObject;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean booleanValue = isValid == true;\n" //$NON-NLS-1$
-				+ "boolean booleanValue2 = isValid == false;\n" //$NON-NLS-1$
-				+ "boolean booleanValue3 = Boolean.FALSE.equals(i > 0);\n" //$NON-NLS-1$
-				+ "boolean booleanValue4 = booleanObject.equals(Boolean.FALSE);\n"; //$NON-NLS-1$
+		return """
+			boolean booleanValue = isValid == true;
+			boolean booleanValue2 = isValid == false;
+			boolean booleanValue3 = Boolean.FALSE.equals(i > 0);
+			boolean booleanValue4 = booleanObject.equals(Boolean.FALSE);
+			"""; //$NON-NLS-1$
 	}
 }

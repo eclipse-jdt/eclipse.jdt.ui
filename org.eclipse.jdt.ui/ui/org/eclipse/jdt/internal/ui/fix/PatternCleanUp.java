@@ -113,20 +113,22 @@ public class PatternCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PRECOMPILE_REGEX)) {
-			return "" //$NON-NLS-1$
-					+ "Pattern dateCheck= Pattern.compile(\"\\\\d{4}-\\\\d{2}-\\\\d{2}\");\n" //$NON-NLS-1$
-					+ "dateCheck.matcher(\"2020-03-17\").matches();\n" //$NON-NLS-1$
-					+ "dateCheck.matcher(\"2020-03-17\").dateCheckplaceFirst(\"0000-00-00\");\n" //$NON-NLS-1$
-					+ "dateCheck.matcher(\"2020-03-17\").replaceAll(\"0000-00-00\");\n" //$NON-NLS-1$
-					+ "dateCheck.split(\"A2020-03-17B\");\n"; //$NON-NLS-1$
+			return """
+				Pattern dateCheck= Pattern.compile("\\\\d{4}-\\\\d{2}-\\\\d{2}");
+				dateCheck.matcher("2020-03-17").matches();
+				dateCheck.matcher("2020-03-17").dateCheckplaceFirst("0000-00-00");
+				dateCheck.matcher("2020-03-17").replaceAll("0000-00-00");
+				dateCheck.split("A2020-03-17B");
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "String dateCheck= \"\\\\d{4}-\\\\d{2}-\\\\d{2}\";\n" //$NON-NLS-1$
-				+ "\"2020-03-17\".matches(dateCheck);\n" //$NON-NLS-1$
-				+ "\"2020-03-17\".replaceFirst(dateCheck, \"0000-00-00\");\n" //$NON-NLS-1$
-				+ "\"2020-03-17\".replaceAll(dateCheck, \"0000-00-00\");\n" //$NON-NLS-1$
-				+ "\"A2020-03-17B\".split(dateCheck);\n"; //$NON-NLS-1$
+		return """
+			String dateCheck= "\\\\d{4}-\\\\d{2}-\\\\d{2}";
+			"2020-03-17".matches(dateCheck);
+			"2020-03-17".replaceFirst(dateCheck, "0000-00-00");
+			"2020-03-17".replaceAll(dateCheck, "0000-00-00");
+			"A2020-03-17B".split(dateCheck);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

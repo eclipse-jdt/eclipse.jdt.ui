@@ -89,20 +89,26 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_OBJECTS_EQUALS)) {
-			return "" //$NON-NLS-1$
-					+ "if (!Objects.equals(aText, other.aText)) {\n" //$NON-NLS-1$
-					+ "	return false;\n" //$NON-NLS-1$
-					+ "}\n\n\n\n\n"; //$NON-NLS-1$
+			return """
+				if (!Objects.equals(aText, other.aText)) {
+					return false;
+				}
+				
+				
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (aText == null) {\n" //$NON-NLS-1$
-				+ "  if (other.aText != null) {\n" //$NON-NLS-1$
-				+ "    return false;\n" //$NON-NLS-1$
-				+ "  }\n" //$NON-NLS-1$
-				+ "} else if (!aText.equals(other.aText)) {\n" //$NON-NLS-1$
-				+ "	return false;\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (aText == null) {
+			  if (other.aText != null) {
+			    return false;
+			  }
+			} else if (!aText.equals(other.aText)) {
+				return false;
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
