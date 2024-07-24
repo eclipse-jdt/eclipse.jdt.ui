@@ -72,9 +72,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -84,6 +86,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -100,6 +103,7 @@ import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -126,8 +130,11 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.MoveMethodDescriptor;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
@@ -141,6 +148,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -1457,6 +1465,131 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	}
 
+	private class CheckOuterMethodConflictVisitor extends ASTVisitor {
+		private final IMethod fMethodMoved;
+		private final TypeDeclaration fInnerType;
+
+		public CheckOuterMethodConflictVisitor(IMethod iMethod, TypeDeclaration innerType) {
+			this.fMethodMoved= iMethod;
+			this.fInnerType= innerType;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			if (node.getName().getFullyQualifiedName().equals(fMethodMoved.getElementName())) {
+				IMethodBinding binding= node.resolveMethodBinding();
+				if (binding != null) {
+					if (fInnerType != null) {
+						String declaringClassName= binding.getDeclaringClass().getQualifiedName();
+						ITypeBinding innerTypeBinding= fInnerType.resolveBinding();
+						if (innerTypeBinding == null) {
+							return true;
+						}
+						while (innerTypeBinding != null) {
+							if (innerTypeBinding.getQualifiedName().equals(declaringClassName)) {
+								return true;
+							}
+							innerTypeBinding= innerTypeBinding.getSuperclass();
+						}
+					}
+					ITypeBinding[] parameterBindings= binding.getParameterTypes();
+					if (parameterBindings.length == fMethodMoved.getNumberOfParameters()) {
+						String[] methodParameterTypes= fMethodMoved.getParameterTypes();
+						boolean matches= true;
+						for (int i= 0; i < parameterBindings.length; ++i) {
+							String methodParameterType= new String(Signature.toCharArray(methodParameterTypes[i].toCharArray()));
+							if (!parameterBindings[i].getQualifiedName().equals(methodParameterType)) {
+								matches= false;
+								break;
+							}
+						}
+						if (matches) {
+							throw new AbortSearchException();
+						}
+					}
+				}
+			}
+			return true;
+		}
+	}
+	protected void checkOverrideOuterMethod(final IProgressMonitor monitor, final RefactoringStatus status) {
+		Assert.isNotNull(monitor);
+		Assert.isNotNull(status);
+
+		String typeName= fTargetType.getFullyQualifiedName();
+		SearchPattern pattern = SearchPattern.createPattern(typeName, IJavaSearchConstants.TYPE, IJavaSearchConstants.IMPLEMENTORS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		TypeExtendsSearchRequestor requestor= new TypeExtendsSearchRequestor();
+		try {
+			search(pattern, SearchEngine.createJavaSearchScope(new IJavaElement[] {fMethod.getJavaProject()}), requestor);
+		} catch (CoreException e) {
+			return;
+		}
+		List<SearchMatch> results= requestor.getResults();
+		for (SearchMatch result : results) {
+			Object obj= result.getElement();
+			if (obj instanceof IType resultType) {
+				try {
+					ASTNode typeDecl= null;
+					if (resultType.isLocal() || resultType.isAnonymous()) {
+						ICompilationUnit icu= resultType.getCompilationUnit();
+						typeDecl= getTypeDeclaration(resultType, icu);
+					}
+					if (typeDecl != null) {
+						CheckOuterMethodConflictVisitor visitor= new CheckOuterMethodConflictVisitor(fMethod, typeDecl instanceof TypeDeclaration ? (TypeDeclaration)typeDecl : null);
+						try {
+							typeDecl.accept(visitor);
+						} catch (AbortSearchException e) {
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_will_override_call_in_inner_subclass, resultType.getFullyQualifiedName('.')), JavaStatusContext.create(fMethod)));
+						}
+					}
+				} catch (JavaModelException e) {
+					// do nothing
+				}
+			}
+		}
+	}
+
+	private ASTNode getTypeDeclaration(IType iType, ICompilationUnit icu) throws JavaModelException {
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(icu);
+		parser.setResolveBindings(true);
+		CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+		ASTNode perform= NodeFinder.perform(compilationUnit, iType.getSourceRange());
+		if (perform instanceof TypeDeclaration && ((TypeDeclaration) perform).resolveBinding() != null) {
+			return perform;
+		} else if (perform instanceof AnonymousClassDeclaration && ((AnonymousClassDeclaration) perform).resolveBinding() != null) {
+			return perform;
+		}
+		return null;
+	}
+
+	private class TypeExtendsSearchRequestor extends SearchRequestor {
+
+		public List<SearchMatch> results= new ArrayList<>();
+
+		public List<SearchMatch> getResults() {
+			return results;
+		}
+
+		@Override
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+				results.add(match);
+			}
+		}
+
+	}
+
+	private void search(SearchPattern searchPattern, IJavaSearchScope scope, SearchRequestor requestor) throws CoreException {
+		new SearchEngine().search(
+			searchPattern,
+			new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()},
+			scope,
+			requestor,
+			null);
+	}
+
 	/**
 	 * Checks whether a method with the proposed name already exists in the
 	 * target type.
@@ -1470,9 +1603,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *             retrieved
 	 */
 	protected void checkConflictingMethod(final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
-		Assert.isNotNull(monitor);
-		Assert.isNotNull(status);
-		final IMethod[] methods= fTargetType.getMethods();
+ 		final IMethod[] methods= fTargetType.getMethods();
 		int newParamCount= fMethod.getParameterTypes().length;
 		if (!fTarget.isField())
 			newParamCount--; // moving to a parameter
@@ -1539,7 +1670,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final RefactoringStatus status= new RefactoringStatus();
 		fChangeManager= new TextChangeManager();
 		try {
-			monitor.beginTask("", 4); //$NON-NLS-1$
+			monitor.beginTask("", 5); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			status.merge(Checks.checkIfCuBroken(fMethod));
 			if (!status.hasError()) {
@@ -1556,6 +1687,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 									status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_binary, JavaStatusContext.create(fMethod)));
 								checkConflictingTarget(Progress.subMonitor(monitor, 1), status);
 								checkConflictingMethod(Progress.subMonitor(monitor, 1), status);
+								checkOverrideOuterMethod(Progress.subMonitor(monitor, 1), status);
 								checkFinalMethod(status);
 
 								Checks.addModifiedFilesToChecker(computeModifiedFiles(fMethod.getCompilationUnit(), type.getCompilationUnit()), context);
