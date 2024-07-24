@@ -402,7 +402,11 @@ public class VarCleanUpCore extends AbstractMultiFix {
 
 			SimpleType replacement= ast.newSimpleType(ast.newSimpleName("var")); //$NON-NLS-1$
 			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group);
-			remover.registerRemovedNode(node);
+			if (classInstanceCreation != null) {
+				remover.registerRemovedNode(classInstanceCreation);
+			} else {
+				remover.registerRemovedNode(node);
+			}
 		}
 	}
 }
