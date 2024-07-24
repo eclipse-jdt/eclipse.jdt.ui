@@ -40,13 +40,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class TypeAnnotationRewriteOperations {
-	static class MoveTypeAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
+	static class MoveTypeAnnotationRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private IProblemLocation fProblem;
 

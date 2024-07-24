@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -117,7 +117,7 @@ public class RedundantFallingThroughBlockEndCleanUp extends AbstractMultiFix imp
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -279,7 +279,7 @@ public class RedundantFallingThroughBlockEndCleanUp extends AbstractMultiFix imp
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.RedundantFallingThroughBlockEndCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -297,7 +297,7 @@ public class RedundantFallingThroughBlockEndCleanUp extends AbstractMultiFix imp
 		return null;
 	}
 
-	private static class RedundantFallingThroughBlockEndOperation extends CompilationUnitRewriteOperation {
+	private static class RedundantFallingThroughBlockEndOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Statement redundantStatement;
 		private final List<Statement> stmtsToCompare;
 		private final Statement lastStatement;

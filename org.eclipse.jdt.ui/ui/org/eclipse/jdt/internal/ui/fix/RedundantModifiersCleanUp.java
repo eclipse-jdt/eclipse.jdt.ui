@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -132,7 +132,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		if (!isEnabled(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS)) {
 			return null;
 		}
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -200,7 +200,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 			return null;
 		}
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.RedundantModifiersCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[rewriteOperations.size()]));
 	}
 
 	@Override
@@ -213,7 +213,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class RemoveModifiersOperation extends CompilationUnitRewriteOperation {
+	private static class RemoveModifiersOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final ASTNode node;
 
 		private final int excludedModifiers;

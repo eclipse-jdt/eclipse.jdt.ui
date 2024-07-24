@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.ControlWorkflowMatcher;
@@ -73,7 +73,6 @@ import org.eclipse.jdt.internal.corext.util.NodeMatcher;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
@@ -168,7 +167,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -479,7 +478,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.ComparingOnCriteriaCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -492,7 +491,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class ComparingOnCriteriaOperation extends CompilationUnitRewriteOperation {
+	private static class ComparingOnCriteriaOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Expression visited;
 		private final ITypeBinding typeArgument;
 		private final SimpleName name1;

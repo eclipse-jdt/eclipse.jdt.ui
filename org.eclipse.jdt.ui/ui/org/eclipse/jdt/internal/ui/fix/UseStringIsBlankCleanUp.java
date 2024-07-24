@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -103,7 +103,7 @@ public class UseStringIsBlankCleanUp extends AbstractCleanUp {
 			return null;
 		}
 
-		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[0]);
+		CompilationUnitRewriteOperationWithSourceRange[] ops= operations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]);
 		return new CompilationUnitRewriteOperationsFixCore(FixMessages.UseStringIsBlankCleanUp_description, compilationUnit, ops);
 	}
 
@@ -203,7 +203,7 @@ public class UseStringIsBlankCleanUp extends AbstractCleanUp {
 		}
 	}
 
-	private static class UseStringIsBlankFixOperation extends CompilationUnitRewriteOperation {
+	private static class UseStringIsBlankFixOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Expression visited;
 		private final Expression trim;
 		private final boolean isPositive;
@@ -215,7 +215,7 @@ public class UseStringIsBlankCleanUp extends AbstractCleanUp {
 		}
 
 		@Override
-		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
+		public void rewriteASTInternal(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(FixMessages.UseStringIsBlankCleanUp_description, cuRewrite);

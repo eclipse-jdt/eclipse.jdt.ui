@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -98,7 +98,7 @@ public class EvaluateNullableCleanUp extends AbstractMultiFix implements ICleanU
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -166,7 +166,7 @@ public class EvaluateNullableCleanUp extends AbstractMultiFix implements ICleanU
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.EvaluateNullableCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class EvaluateNullableCleanUp extends AbstractMultiFix implements ICleanU
 		return null;
 	}
 
-	private static class EvaluateNullableOperation extends CompilationUnitRewriteOperation {
+	private static class EvaluateNullableOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final InfixExpression visited;
 		private final List<Expression> operands;
 
