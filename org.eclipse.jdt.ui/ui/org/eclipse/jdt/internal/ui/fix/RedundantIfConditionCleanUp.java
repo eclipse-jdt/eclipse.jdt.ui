@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -97,7 +97,7 @@ public class RedundantIfConditionCleanUp extends AbstractMultiFix implements ICl
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -122,7 +122,7 @@ public class RedundantIfConditionCleanUp extends AbstractMultiFix implements ICl
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.RedundantIfConditionCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class RedundantIfConditionCleanUp extends AbstractMultiFix implements ICl
 		return null;
 	}
 
-	private static class RedundantIfConditionOperation extends CompilationUnitRewriteOperation {
+	private static class RedundantIfConditionOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement secondIf;
 
 		public RedundantIfConditionOperation(final IfStatement secondIf) {

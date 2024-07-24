@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -96,7 +96,7 @@ public class DoubleNegationCleanUp extends AbstractMultiFix implements ICleanUpF
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -133,7 +133,7 @@ public class DoubleNegationCleanUp extends AbstractMultiFix implements ICleanUpF
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.DoubleNegationCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class DoubleNegationCleanUp extends AbstractMultiFix implements ICleanUpF
 		return null;
 	}
 
-	private static class DoubleNegationOperation extends CompilationUnitRewriteOperation {
+	private static class DoubleNegationOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final InfixExpression visited;
 		private final Expression leftExpression;
 		private final Expression rightExpression;
