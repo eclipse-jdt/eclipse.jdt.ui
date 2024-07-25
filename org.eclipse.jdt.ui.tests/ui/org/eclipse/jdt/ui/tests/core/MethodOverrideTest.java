@@ -144,10 +144,10 @@ public class MethodOverrideTest extends CoreTests {
 			    @Override public void o1_foo4(S... t) {}
 			    @Override public void o1_foo5(A<S> s) {}
 			    @Override public void o1_foo6(A<? super S> s) {}
-			    @Override public void o1_foo7(S[] t) {}
-			    @Override public void o1_xoo1(S[][] t) {}
-			    @Override public void o1_xoo2(A<Object> s) {}
-			    @Override public void o1_xoo3(A<? super S> s) {}
+			    @Override public void o1_foo7(S... t) {}
+			    @Override public void o1_xoo1(S[] t) {}
+			    @Override public void o1_xoo2(A<?> s) {}
+			    @Override public void o1_xoo3(A<? extends S> s) {}
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
@@ -172,7 +172,7 @@ public class MethodOverrideTest extends CoreTests {
 			class B<V, W> extends A<W, V> {
 			    public B() {}
 			    @Override public void o2_foo1(Map<W, V> t) {}
-			    @Override public void o2_xoo1(List<? extends W> t) {}
+			    @Override public void o2_xoo1(List<? extends V> t) {}
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
@@ -196,7 +196,7 @@ public class MethodOverrideTest extends CoreTests {
 			class B extends A {
 			    public B() {}
 			    @Override public void o3_foo1(List t) {}
-			    @Override public void o3_xoo1(List<Object> t) {}
+			    @Override public void o3_xoo1(List t) {}
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
@@ -224,7 +224,7 @@ public class MethodOverrideTest extends CoreTests {
 			    @Override public void o4_foo1(List<String>[] t) {}
 			    @Override public void o4_foo2(List<String> t) {}
 			    @Override public void o4_foo3(List t) {}
-			    @Override public void o4_xoo1(List<?> t) {}
+			    @Override public void o4_xoo1(List<String> t) {}
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
@@ -261,10 +261,10 @@ public class MethodOverrideTest extends CoreTests {
 			    @Override public <V, W> void tp1_foo3(V x, W y) {}
 			    @Override public <X extends Number> void tp1_foo4(X x) {}
 			    @Override public <X> void tp1_foo5(X x) {}
-			    @Override public <X> void tp1_xoo1(String s, X x, Object y) {}
-			    @Override public <X> void tp1_xoo2() {}
-			    @Override public <W, V> void tp1_xoo3(V x, W y) {}
-			    @Override public <X> void tp1_xoo5(Number x) {}
+			    @Override public <X, Y> void tp1_xoo1(String s, X x, Y y) {}
+			    @Override public void tp1_xoo2() {}
+			    @Override public <W, V> void tp1_xoo3(W x, V y) {}
+			    @Override public <X extends Number> void tp1_xoo5(X x) {}
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
