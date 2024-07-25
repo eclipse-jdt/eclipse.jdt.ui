@@ -2990,7 +2990,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, str1.indexOf(str), 0);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -7374,7 +7374,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 1);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		String str1= """
@@ -7790,48 +7790,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertToStringBufferJava14() throws Exception {
-
-		Map<String, String> oldOptions= fJProject1.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>(oldOptions);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-		fJProject1.setOptions(newOptions);
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String str= """
-				package test1;
-				public class A {
-				    public void foo() {
-				        System.out.println("foo"+"bar");
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
-
-			AssistContext context= getCorrectionContext(cu, str.indexOf("\"+\""), 0);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertCorrectLabels(proposals);
-
-			String str1= """
-				package test1;
-				public class A {
-				    public void foo() {
-				        StringBuffer stringBuffer = new StringBuffer();
-				        stringBuffer.append("foo");
-				        stringBuffer.append("bar");
-				        System.out.println(stringBuffer.toString());
-				    }
-				}
-				""";
-			assertProposalPreviewEquals(str1, NLS.bind(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, "StringBuffer"), proposals);
-		} finally {
-			fJProject1.setOptions(oldOptions);
-		}
-	}
-
-	@Test
 	public void testConvertToStringBufferExisting1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
@@ -7928,7 +7886,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 				public class A {
 				    public void foo(Object o1, Object o2) {
-				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", new Object[]{o1, o2}));
+				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", o1, o2));
 				    }
 				}
 				""";
@@ -7991,7 +7949,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 				public class A {
 				    public void foo(Object o1, Object o2) {
-				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" ", new Object[]{new Integer(1)}));
+				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" ", 1));
 				    }
 				}
 				""";
@@ -9435,7 +9393,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.List;
 				public class E {
 				    void foo() {
-				        for (Iterable<? super Number> iterable : getIterable()) {
+				        for (Comparable comparable : getIterable()) {
 				           \s
 				        }
 				    }
@@ -9451,9 +9409,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 				import java.util.List;
 				public class E {
 				    void foo() {
-				        for (Iterator<? extends Iterable<? super Number>> iterator = getIterable()
-				                .iterator(); iterator.hasNext();) {
-				            Iterable<? super Number> iterable = iterator.next();
+				        for (Iterator<Comparable> iterator = getIterable().iterator(); iterator
+				                .hasNext();) {
+				            Comparable comparable = iterator.next();
 				           \s
 				        }
 				    }
@@ -9755,59 +9713,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testGenerateForLowVersion() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			import java.util.Collection;
-			public class E {
-			    void foo(Collection collection) {
-			        collection
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		Map<String, String> saveOptions= fJProject1.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
-		try {
-			fJProject1.setOptions(newOptions);
-
-			String selection= "collection";
-			AssistContext context= getCorrectionContext(cu, str.lastIndexOf(selection) + selection.length(), 0);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertNumberOfProposals(proposals, 5);
-			assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
-			assertCorrectLabels(proposals);
-
-			String[] expected= new String[1];
-
-			// no generics should be added to iterator since the version is too low
-			String str1= """
-				package test1;
-				import java.util.Collection;
-				import java.util.Iterator;
-				public class E {
-				    void foo(Collection collection) {
-				        for (Iterator iterator = collection.iterator(); iterator.hasNext();) {
-				            Object object = iterator.next();
-				           \s
-				        }
-				    }
-				}
-				""";
-			expected[0]= str1;
-
-			assertExpectedExistInProposals(proposals, expected);
-		} finally {
-			fJProject1.setOptions(saveOptions);
-		}
-	}
-
-	@Test
 	public void testGenerateForArray() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
@@ -10005,7 +9910,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
@@ -10103,7 +10008,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
@@ -10175,7 +10080,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
