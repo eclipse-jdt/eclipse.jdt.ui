@@ -167,7 +167,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
 		expectImport("java.util.List");
-		assertMethodBodyProposal("List<String> list= new A|", "ArrayList()", "List<String> list= new ArrayList<String>()|");
+		assertMethodBodyProposal("List<String> list= new A|", "ArrayList()", "List<String> list= new ArrayList<>()|");
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
 		expectImport("java.util.List");
-		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList()", "List<? extends Number> list= new ArrayList<Number>()|");
+		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList()", "List<? extends Number> list= new ArrayList<>()|");
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
 		expectImport("java.util.List");
-		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList()", "List<? super Number> list= new ArrayList<E>()|");
+		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList()", "List<? super Number> list= new ArrayList<>()|");
 	}
 
 	@Test
@@ -191,7 +191,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		addImport("java.util.Map");
 		expectImport("java.util.HashMap");
 		expectImport("java.util.Map");
-		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap()", "Map<String, ? extends Number> list= new HashMap<String, Number>()|");
+		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap()", "Map<String, ? extends Number> list= new HashMap<>()|");
 	}
 
 	@Test
