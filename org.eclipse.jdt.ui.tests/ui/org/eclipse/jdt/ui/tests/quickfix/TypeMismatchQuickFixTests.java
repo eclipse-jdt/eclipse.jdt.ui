@@ -17,7 +17,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -410,9 +410,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container {
 			    public static PrimaryContainer getContainer() {
 			        return null;
@@ -425,9 +425,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected4= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container implements PrimaryContainer {
 			    public static Container getContainer() {
 			        return null;
@@ -496,9 +496,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container {
 			    public static PrimaryContainer getContainer() {
 			        return null;
@@ -511,9 +511,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container implements PrimaryContainer {
 			    public static Container getContainer() {
 			        return null;
@@ -526,9 +526,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected4= """
 			package test0;
-			
+
 			import test1.Container;
-			
+
 			public interface PrimaryContainer {
 			    PrimaryContainer duplicate(Container container);
 			}
@@ -539,12 +539,12 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected5= """
 			package test0;
-			
+
 			import test1.Container;
-			
+
 			public interface PrimaryContainer {
 			    PrimaryContainer duplicate(PrimaryContainer container);
-			
+
 			    void duplicate(Container container);
 			}
 			""";
@@ -621,9 +621,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container<A> {
 			    public PrimaryContainer<String> getContainer() {
 			        return null;
@@ -636,9 +636,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected4= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container<A> implements PrimaryContainer<String> {
 			    public Container<A> getContainer() {
 			        return null;
@@ -722,9 +722,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container<A> {
 			    public PrimaryContainer<?> getContainer() {
 			        return null;
@@ -1351,9 +1351,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			public class E implements IBase {
 			    public List getCollection() {
 			        return null;
@@ -1550,12 +1550,11 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 			String expected1= """
 				package test1;
-				import java.lang.annotation.Annotation;
 				import java.lang.reflect.AccessibleObject;
 				public class E {
 				    void m() {
 				        new AccessibleObject() {
-				            public Annotation getAnnotation(Class annotationClass) {
+				            public T getAnnotation(Class annotationClass) {
 				            }
 				        };
 				    }
@@ -1740,9 +1739,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public interface IBase {
 			    String[] getValues() throws IOException;
 			}
@@ -1753,7 +1752,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class E implements IBase {
 			    public String[] getValues() {
 			        return null;
@@ -1946,9 +1945,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public interface IBase<T> {
 			    T[] getValues() throws IOException;
 			}
@@ -1959,7 +1958,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class E implements IBase<String> {
 			    public String[] getValues() {
 			        return null;
@@ -2261,9 +2260,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<String> l= null;   \s
@@ -2283,9 +2282,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<String> l= null;   \s
@@ -2303,9 +2302,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? extends String> l= null;   \s
@@ -2325,9 +2324,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? extends String> l= null;   \s
@@ -2345,9 +2344,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? super String> l= null;   \s
@@ -2367,9 +2366,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? super String> l= null;   \s
@@ -2387,9 +2386,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        String[] l= null;
@@ -2409,9 +2408,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        String[] l= null;
@@ -2429,7 +2428,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    public void foo(String[] strings) {
 			        for (s: strings) {
@@ -2448,7 +2447,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    public void foo(String[] strings) {
 			        for (String s: strings) {
@@ -2465,14 +2464,14 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    public static void main(String arg) {
 			        while (arg) {
 			        }
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
@@ -2485,26 +2484,26 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    public static void main(boolean arg) {
 			        while (arg) {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    public static void main(String arg) {
 			        while (arg != null) {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
@@ -2516,8 +2515,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        Object o= new Object();
@@ -2534,25 +2533,25 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		ICompletionProposal proposal= proposals.get(0);
-		assertNotEquals(-1, proposal.getDisplayString().indexOf("Integer"));
+		assertNotEquals(-1, proposal.getDisplayString().indexOf("int"));
 
 		String[] expected= new String[3];
 		expected[0]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        Object o= new Object();
-			        int i= (Integer) o;
+			        int i= (int) o;
 			    }
 			}
 			""";
 
 		expected[1]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        int o= new Object();
@@ -2563,8 +2562,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		expected[2]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        Object o= new Object();
@@ -2581,8 +2580,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(long o) {
 			        int i= o;
@@ -2609,8 +2608,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[3];
 		expected[0]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(long o) {
 			        int i= (int) o;
@@ -2620,8 +2619,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(int o) {
 			        int i= o;
@@ -2631,8 +2630,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		expected[2]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(long o) {
 			        long i= o;

@@ -111,7 +111,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
-			
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -149,7 +149,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        for (int i= 0, j= goo(3); i < 0; i++) {
 			        }
 			    }
-			
+
 			    private int goo(int i) {
 			        return 0;
 			    }
@@ -185,7 +185,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    private boolean foo() {
 			        return f(1) || f(2);
 			    }
-			
+
 			    private boolean f(int i) {
 			        return false;
 			    }
@@ -221,7 +221,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    private boolean foo() {
 			        return f(1) == f(2);
 			    }
-			
+
 			    private Object f(int i) {
 			        return null;
 			    }
@@ -237,7 +237,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
 			    void foo(Vector vec) {
@@ -259,7 +259,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
 			    void foo(Vector vec) {
@@ -280,10 +280,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
@@ -303,14 +303,14 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
-			
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -326,7 +326,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
 			   \s
@@ -350,7 +350,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
 			   \s
@@ -358,8 +358,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
-			
-			
+
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -375,12 +375,12 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			//comment
-			
+
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
@@ -400,16 +400,16 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			//comment
-			
+
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
-			
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -425,10 +425,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			    /**
 			     * javadoc
 			     */
@@ -451,17 +451,17 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			    /**
 			     * javadoc
 			     */
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
-			
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -477,10 +477,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			    /*
 			     * non javadoc
 			     */
@@ -503,17 +503,17 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			import java.util.Vector;
 			public class E {
-			
+
 			    void fred() {
 			    }
-			
+
 			    /*
 			     * non javadoc
 			     */
 			    void foo(Vector vec) {
 			        int i= goo(vec, true);
 			    }
-			
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -551,7 +551,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void foo(Vector vec) {
 			        int i= this.goo(vec, true);
 			    }
-			
+
 			    private int goo(Vector vec, boolean b) {
 			        return 0;
 			    }
@@ -601,7 +601,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class X {
-			
+
 			    public boolean goo(int i, double d) {
 			        return false;
 			    }
@@ -637,7 +637,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        help.help(this);
 			    }
 			}
-			
+
 			class Help {
 			}
 			""";
@@ -659,9 +659,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        help.help(this);
 			    }
 			}
-			
+
 			class Help {
-			
+
 			    public void help(Bork<T> bork) {
 			    }
 			}
@@ -700,7 +700,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            public void run() {}
 			        });
 			    }
-			
+
 			    private void foo(Runnable runnable) {
 			    }
 			}
@@ -750,7 +750,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class X<A> {
-			
+
 			    public boolean goo(X<String> x) {
 			        return false;
 			    }
@@ -798,7 +798,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void foo(Vector<? extends Number> vec) {
 			        vec.add(goo());
 			    }
-			
+
 			    private Object goo() {
 			        return null;
 			    }
@@ -833,7 +833,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void foo(Vector<? super Number> vec) {
 			        vec.add(goo());
 			    }
-			
+
 			    private Number goo() {
 			        return null;
 			    }
@@ -868,7 +868,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void foo(Vector<? super Number> vec) {
 			        goo(vec.get(0));
 			    }
-			
+
 			    private void goo(Object object) {
 			    }
 			}
@@ -888,7 +888,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void testMethod(Vector<? extends Number> vec) {
 			        goo(vec.get(0));
 			    }
-			
+
 			    private void goo(int i) {
 			    }
 			}
@@ -906,10 +906,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void testMethod(Vector<? extends Number> vec) {
 			        goo(vec.get(0));
 			    }
-			
+
 			    private void goo(Number number) {
 			    }
-			
+
 			    private void goo(int i) {
 			    }
 			}
@@ -922,7 +922,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void testMethod(Vector<? extends Number> vec) {
 			        goo(vec.get(0));
 			    }
-			
+
 			    private void goo(Number number) {
 			    }
 			}
@@ -1001,7 +1001,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    void testMethod(T t) {
 			        t.goo();
 			    }
-			
+
 			    private void goo() {
 			    }
 			}
@@ -1047,7 +1047,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E {
 			    public class X<A> {
-			
+
 			        public int goo(X<String> x) {
 			            return 0;
 			        }
@@ -1118,7 +1118,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class X<A> {
-			
+
 			    public boolean goo(X x) {
 			        return false;
 			    }
@@ -1177,7 +1177,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            public void run() {
 			                xoo();
 			            }
-			
+
 			            private void xoo() {
 			            }
 			        };
@@ -1198,7 +1198,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    protected void xoo() {
 			    }
 			}
@@ -1263,7 +1263,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package other;
 			public class A {
-			
+
 			    public static void xoo() {
 			    }
 			}
@@ -1306,7 +1306,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            public void run() {
 			                xoo();
 			            }
-			
+
 			            private void xoo() {
 			            }
 			        };
@@ -1327,7 +1327,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    protected static void xoo() {
 			    }
 			}
@@ -1390,7 +1390,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    protected void foobar() {
 			    }
 			}
@@ -1449,7 +1449,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            public int compareTo(String s) {
 			                xoo();
 			            }
-			
+
 			            private void xoo() {
 			            }
 			        };
@@ -1470,7 +1470,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    protected void xoo() {
 			    }
 			}
@@ -1589,7 +1589,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            public void run() {
 			                run(1);
 			            }
-			
+
 			            private void run(int i) {
 			            }
 			        };
@@ -1692,7 +1692,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			            public void run() {
 			                run(1);
 			            }
-			
+
 			            private void run(int i) {
 			            }
 			        };
@@ -1786,7 +1786,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        public void run() {
 			            run(1);
 			        }
-			
+
 			        private void run(int i) {
 			        }
 			    }
@@ -1831,7 +1831,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        public void run() {
 			            run(1);
 			        }
-			
+
 			        private void run(int i) {
 			        }
 			    }
@@ -1907,7 +1907,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public interface X {
-			
+
 			    boolean goo(Class<? extends E> class1);
 			}
 			""";
@@ -1933,7 +1933,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			public class E {
 			    void foo() {
 			        int i = bar()[0];
@@ -1951,12 +1951,12 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
 			    void foo() {
 			        int i = bar()[0];
 			    }
-			
+
 			    private int[] bar() {
 			        return null;
 			    }
@@ -2011,7 +2011,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        long x= 0;
 			        foo(x + 1);
 			    }
-			
+
 			    private void foo(long l) {
 			    }
 			}
@@ -2084,7 +2084,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class X {
 			    public static void xoo(int i, Object o) {
 			    }
-			
+
 			    public static void xoo(float x, E o) {
 			    }
 			}
@@ -2145,7 +2145,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public void foo(Integer i) {
 			        foo(1.0);
 			    }
-			
+
 			    private void foo(double d) {
 			    }
 			}
@@ -2290,9 +2290,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class E<T> {
 			    public void foo(A<Number> a, Vector<Number> x) {
 			        a.goo(x);
@@ -2309,7 +2309,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A<T> {
 			    public void goo(Vector<T> v) {
 			    }
-			
+
 			    public void goo(long x) {
 			    }
 			}
@@ -2324,9 +2324,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.util.Collections;
-			
+
 			class E {
 			    void foo(@Deprecated final String map){}
 			    {foo(Collections.EMPTY_MAP);}
@@ -2343,10 +2343,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			import java.util.Collections;
 			import java.util.Map;
-			
+
 			class E {
 			    void foo(@Deprecated final Map emptyMap){}
 			    {foo(Collections.EMPTY_MAP);}
@@ -2355,10 +2355,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			import java.util.Collections;
 			import java.util.Map;
-			
+
 			class E {
 			    void foo(@Deprecated final String map){}
 			    {foo(Collections.EMPTY_MAP);}
@@ -2484,9 +2484,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X<A> {
 			    Vector<String> count= 0;
 			}
@@ -2784,7 +2784,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        int x= 0;
 			        foo(x);
 			    }
-			
+
 			    private void foo(int x) {
 			    }
 			}
@@ -2856,7 +2856,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class X {
 			    public static void xoo(int i, Object o) {
 			    }
-			
+
 			    public static void xoo(Object object) {
 			    }
 			}
@@ -2936,7 +2936,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			     */
 			    public static void xoo(int i, Object o) {
 			    }
-			
+
 			    public static void xoo(int i) {
 			    }
 			}
@@ -3011,7 +3011,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        int x= 0;
 			        e.foo(x);
 			    }
-			
+
 			    private void foo(int x) {
 			    }
 			}
@@ -3037,7 +3037,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        int x= 0;
 			        e.foo(x);
 			    }
-			
+
 			    protected abstract void foo(int x);
 			}
 			""";
@@ -3073,7 +3073,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			      void test () {
 			        foo ();
 			      }
-			
+
 			    private void foo() {
 			    }
 			    }
@@ -3088,7 +3088,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 			    }
-			
+
 			    public void foo() {
 			    }
 			}
@@ -3102,7 +3102,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 			    }
-			
+
 			    protected abstract void foo();
 			}
 			""";
@@ -3146,7 +3146,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			      void test () {
 			        foo ();
 			      }
-			
+
 			    private void foo() {
 			    }
 			    }
@@ -3161,7 +3161,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 			    }
-			
+
 			    public void foo() {
 			    }
 			}
@@ -3175,7 +3175,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 			    }
-			
+
 			    protected abstract void foo();
 			}
 			""";
@@ -3187,7 +3187,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			      void test () {
 			        foo ();
 			      }
-			
+
 			    protected abstract void foo();
 			    }
 			}
@@ -3253,13 +3253,13 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X {
 			    public X(Object o, int i) {
 			    }
-			
+
 			    public X(Vector vector) {
 			    }
 			}
@@ -3555,7 +3555,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class X {
 			    public void xoo(int i, String o) {
 			    }
-			
+
 			    public void xoo(int i, int j, String string) {
 			    }
 			}
@@ -3608,7 +3608,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        int x= 0;
 			        foo(s, x);
 			    }
-			
+
 			    private void foo(String s, int x) {
 			    }
 			}
@@ -3682,9 +3682,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Set;
-			
+
 			public class X {
 			    /**
 			     * @param emptySet\s
@@ -3702,9 +3702,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.util.Set;
-			
+
 			public class X {
 			    /**
 			     * @param i The int value
@@ -3712,7 +3712,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public void xoo(int i) {
 			       int j= 0;
 			    }
-			
+
 			    public void xoo(Set emptySet, int i, int j) {
 			    }
 			}
@@ -3766,7 +3766,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        Object[] o= null;
 			        foo(o.length);
 			    }
-			
+
 			    private void foo(int length) {
 			    }
 			}
@@ -3842,7 +3842,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			     */
 			    public void xoo(String s) {
 			    }
-			
+
 			    public void xoo(String string, X<T> x, int i) {
 			    }
 			}
@@ -3899,13 +3899,13 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X {
 			    public X() {
 			    }
-			
+
 			    public X(Vector vector) {
 			    }
 			}
@@ -3916,9 +3916,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X {
 			    public X(Vector vector) {
 			    }
@@ -4130,7 +4130,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public void foo(int i, String[] o) {
 			        foo(new String[] { }, i - 1);
 			    }
-			
+
 			    private void foo(String[] strings, int i) {
 			    }
 			}
@@ -4199,7 +4199,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A<T> {
 			    public void b(int i, T[] t) {
 			    }
-			
+
 			    public void b(String[] strings, int i) {
 			    }
 			}
@@ -4452,7 +4452,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public void foo(int i, Object o, boolean b) {
 			        foo(false, o, i - 1);
 			    }
-			
+
 			    private void foo(boolean b, Object o, int i) {
 			    }
 			}
@@ -4510,7 +4510,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class A {
-			
+
 			    public A(int i) {
 			    }
 			}
@@ -4564,7 +4564,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class A {
-			
+
 			    public A(int i) {
 			    }
 			}
@@ -4615,7 +4615,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        A a= new A("test");
 			    }
 			    class A {
-			
+
 			        public A(String string) {
 			        }
 			    }
@@ -4671,7 +4671,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class A<T> {
-			
+
 			    public A(int i) {
 			    }
 			}
@@ -4751,7 +4751,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A {
 			    public A(int i) {
 			    }
-			
+
 			    public A(int i, String valueOf, boolean b) {
 			    }
 			}
@@ -4818,7 +4818,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A {
 			    public A(boolean b, String ... strings) {
 			    }
-			
+
 			    public A(int i, boolean b) {
 			    }
 			}
@@ -4887,7 +4887,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A<T> {
 			    public A(int i) {
 			    }
-			
+
 			    public A(int i, String valueOf, boolean b) {
 			    }
 			}
@@ -4954,7 +4954,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A {
 			    public A(int i, String s) {
 			    }
-			
+
 			    public A() {
 			    }
 			}
@@ -5023,7 +5023,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A<T> {
 			    public A(int i, String s) {
 			    }
-			
+
 			    public A() {
 			    }
 			}
@@ -5060,7 +5060,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public E(int i) {
 			        this(i, true);
 			    }
-			
+
 			    public E(int i, boolean b) {
 			    }
 			}
@@ -5097,7 +5097,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public E(int i) {
 			        this(i, true);
 			    }
-			
+
 			    public E(int i, boolean b) {
 			    }
 			}
@@ -5137,7 +5137,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		String str2= """
 			package test1;
 			public class A {
-			
+
 			    public void foo(int i) {
 			    }
 			}
@@ -5204,7 +5204,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class A {
 			    public A(boolean b, String ... strings) {
 			    }
-			
+
 			    public A(int i, boolean b) {
 			    }
 			}
@@ -5262,9 +5262,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X {
 			    public int foo(Vector vector) {
 			        return 0;
@@ -5277,14 +5277,14 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X {
 			    public int foo() {
 			        return 0;
 			    }
-			
+
 			    public void foo(Vector vector) {
 			    }
 			}
@@ -5355,14 +5355,14 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class X {
 			    public int foo(Object o, boolean b) {
 			        return 0;
 			    }
-			
+
 			    public void foo(Vector vector) {
 			    }
 			}
@@ -5567,7 +5567,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			    public void foo(Object[] array) {
 			        throw RuntimeException();
 			    }
-			
+
 			    private Exception RuntimeException() {
 			        return null;
 			    }
@@ -5586,7 +5586,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class E {
 			    public @interface Annot {
 			    }
-			
+
 			    @Annot(count= 1)
 			    public void foo() {
 			    }
@@ -5605,10 +5605,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package pack;
 			public class E {
 			    public @interface Annot {
-			
+
 			        int count();
 			    }
-			
+
 			    @Annot(count= 1)
 			    public void foo() {
 			    }
@@ -5626,7 +5626,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class E {
 			    public @interface Annot {
 			    }
-			
+
 			    @Annot(1)
 			    public void foo() {
 			    }
@@ -5645,10 +5645,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package pack;
 			public class E {
 			    public @interface Annot {
-			
+
 			        int value();
 			    }
-			
+
 			    @Annot(1)
 			    public void foo() {
 			    }
@@ -5666,7 +5666,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 			String str= """
 				package pack;
-				
+
 				public class E {
 				    private int foo() {
 				        return max(1, 2);
@@ -5683,9 +5683,9 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			String[] expected= new String[1];
 			expected[0]= """
 				package pack;
-				
+
 				import static java.lang.Math.max;
-				
+
 				public class E {
 				    private int foo() {
 				        return max(1, 2);
@@ -5707,7 +5707,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 			String str= """
 				package pack;
-				
+
 				public class E {
 				    private int max() {
 				        return max(1, 2);
@@ -5724,7 +5724,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			String[] expected= new String[1];
 			expected[0]= """
 				package pack;
-				
+
 				public class E {
 				    private int max() {
 				        return Math.max(1, 2);
@@ -5807,7 +5807,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 0);
+		assertNumberOfProposals(proposals, 1);
 	}
 
 	@Test
@@ -5826,7 +5826,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 0);
+		assertNumberOfProposals(proposals, 1);
 	}
 
 	@Test
@@ -5844,7 +5844,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -5854,10 +5854,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			public class XX {
 			    interface I {
 			        int i= n();
-			    }
-			
-			    protected static int n() {
-			        return 0;
+
+			        static int n() {
+			            return 0;
+			        }
 			    }
 			}
 			""";
@@ -5877,7 +5877,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 0);
+		assertNumberOfProposals(proposals, 1);
 	}
 
 	@Test
@@ -5907,7 +5907,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			package test1;
 			interface Snippet {
 			    abstract String name();
-			
+
 			    abstract int[] values();
 			}
 			class Ref {
