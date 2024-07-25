@@ -249,6 +249,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			    public void foo() {
 			        Runnable run= new Runnable() {
 			           \s
+			            @Override
 			            public void run() {
 			                //TODO
 			               \s
@@ -299,6 +300,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			    public void foo() {
 			        Runnable run= new Runnable() {
 			           \s
+			            @Override
 			            public void run() {
 			                //TODO
 			               \s
@@ -355,6 +357,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			    public void foo() {
 			        Inner inner= new Inner() {
 			           \s
+			            @Override
 			            public void doIt() {
 			                //TODO
 			               \s
@@ -573,6 +576,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				+
 				") {\n" +
 				"            \n" +
+				"            @Override\n" +
 				"            public Object test(@Nullable Object i1, Object i2) {\n" +
 				"                //TODO\n" +
 				"                return null;\n" +
@@ -641,6 +645,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				+
 				") {\n" +
 				"            \n" +
+				"            @Override\n" +
 				"            public Object test(@Nullable Object i1, Object i2) {\n" +
 				"                //TODO\n" +
 				"                return null;\n" +
@@ -702,6 +707,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				+
 				") {\n" +
 				"        \n" +
+				"        @Override\n" +
 				"        public Object test(@Nullable Object i1, Object i2) {\n" +
 				"            //TODO\n" +
 				"            return null;\n" +
@@ -726,6 +732,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			package test1;
 			import annots.*;
 			public interface Ifc {
+			    @Override
 			    @NonNull Object test(@Nullable Object i1, @NonNull Object i2);
 			}
 			""";
@@ -765,6 +772,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				+
 				") {\n" +
 				"            \n" +
+				"            @Override\n" +
 				"            public Object test(@Nullable Object i1, Object i2) {\n" +
 				"                //TODO\n" +
 				"                return null;\n" +
@@ -813,6 +821,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			    Object m() {
 			        return new Runnable() {
 			           \s
+			            @Override
 			            public void run() {
 			                //TODO
 			               \s
@@ -863,6 +872,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			    Object m() {
 			        take(new Runnable() {
 			           \s
+			            @Override
 			            public void run() {
 			                //TODO
 			               \s
@@ -913,6 +923,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			    Object m() {
 			        take(new Runnable() {
 			           \s
+			            @Override
 			            public void run() {
 			                //TODO
 			               \s
@@ -990,9 +1001,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.BufferedWriter;
-			
+
 			public class MyClass {
 			    private BufferedWriter writer;
 			    //here
@@ -1026,9 +1037,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.io.BufferedWriter;
-				
+
 				public class MyClass {
 				    private BufferedWriter writer;
 				    /**
@@ -1036,7 +1047,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				     */
 				    public MyClass() {
 				        //TODO
-				
+
 				    }//here
 				}
 				""";
@@ -1053,13 +1064,13 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			enum Natural {
 				ONE,
 				TWO,
 				THREE
 			}
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1092,13 +1103,13 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String result= """
 			package test1;
-			
+
 			enum Natural {
 				ONE,
 				TWO,
 				THREE
 			}
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1129,9 +1140,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.BufferedWriter;
-			
+
 			public class A {
 			    private BufferedWriter fWriter;
 			    get//here
@@ -1165,9 +1176,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.io.BufferedWriter;
-				
+
 				public class A {
 				    private BufferedWriter fWriter;
 				    /**
@@ -1191,9 +1202,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.BufferedWriter;
-			
+
 			public class A {
 			    private BufferedWriter writer;
 			    foo//here
@@ -1227,9 +1238,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.io.BufferedWriter;
-				
+
 				public class A {
 				    private BufferedWriter writer;
 				    /**
@@ -1237,7 +1248,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				     */
 				    private void foo() {
 				        //TODO
-				
+
 				    }//here
 				}
 				""";
@@ -1254,7 +1265,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1306,7 +1317,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1359,7 +1370,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1412,7 +1423,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1445,7 +1456,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String result= """
 			package test1;
-			
+
 			public class Completion {
 			   \s
 			    void foomethod() {
@@ -1464,9 +1475,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.Writer;
-			
+
 			public class A extends Writer {
 			    public void foo() {
 			    }
@@ -1501,9 +1512,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.io.Writer;
-			
+
 			public class A extends Writer {
 			    public void foo() {
 			    }
@@ -1527,9 +1538,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.Writer;
-			
+
 			public class A extends Writer {
 			    public void foo() {
 			    }
@@ -1563,10 +1574,10 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.io.IOException;
 			import java.io.Writer;
-			
+
 			public class A extends Writer {
 			    public void foo() {
 			    }
@@ -1589,9 +1600,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.BufferedWriter;
-			
+
 			public class A extends BufferedWriter {
 			    public void foo() {
 			    }
@@ -1626,10 +1637,10 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.io.BufferedWriter;
 			import java.io.IOException;
-			
+
 			public class A extends BufferedWriter {
 			    public void foo() {
 			    }
@@ -1653,7 +1664,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public class A {
 			    public void foo() {
 			    }
@@ -1663,7 +1674,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface Inter {
 			    public void foo();
 			}
@@ -1672,7 +1683,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str3= """
 			package test1;
-			
+
 			public class B extends A implements Inter {
 			    foo//here
 			}
@@ -1706,7 +1717,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str4= """
 			package test1;
-			
+
 			public class B extends A implements Inter {
 			    /* (non-Javadoc)
 			     * @see test1.A#foo()
@@ -1730,7 +1741,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			public class A {
 			    public void foo() {
 			        new Runnable() {
@@ -1767,7 +1778,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			public class A {
 			    public void foo() {
 			        new Runnable() {
@@ -1776,7 +1787,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			             */
 			            public void run() {
 			                //TODO
-			
+
 			            }//here
 			        }
 			    }
@@ -1792,7 +1803,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public class A {
 			    public class Sub { }
 			    public void foo(Sub sub) {
@@ -1803,7 +1814,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public class B extends A {
 			    foo//here
 			}
@@ -1837,7 +1848,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str3= """
 			package test1;
-			
+
 			public class B extends A {
 			    /* (non-Javadoc)
 			     * @see test1.A#foo(test1.A.Sub)
@@ -1860,9 +1871,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			interface Z<T> {}
-			
+
 			class A {
 			    void foo(Z<?>... zs) {
 			    }
@@ -1899,9 +1910,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			interface Z<T> {}
-			
+
 			class A {
 			    void foo(Z<?>... zs) {
 			    }
@@ -1928,9 +1939,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			interface Z<T> {}
-			
+
 			class A {
 			    void foo(Z<?>[] zs) {
 			    }
@@ -1967,9 +1978,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			interface Z<T> {}
-			
+
 			class A {
 			    void foo(Z<?>[] zs) {
 			    }
@@ -1996,11 +2007,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			interface Z<T, U> {}
-			
+
 			class A {
 			    void foo(Z<String, List<String>> zs) {
 			    }
@@ -2037,11 +2048,11 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			interface Z<T, U> {}
-			
+
 			class A {
 			    void foo(Z<String, List<String>> zs) {
 			    }
@@ -2185,9 +2196,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.io.BufferedWriter;
-			
+
 			public class A {
 			    private BufferedWriter writer;
 			    se//here
@@ -2221,9 +2232,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.io.BufferedWriter;
-				
+
 				public class A {
 				    private BufferedWriter writer;
 				    /**
@@ -2250,7 +2261,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public class A {
 			    public static void foo() {
 			    }
@@ -2260,7 +2271,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		String contents= """
 			package test1;
-			
+
 			public class B {
 			    public void bar() {
 			        f//here
@@ -2298,9 +2309,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str2= """
 				package test1;
-				
+
 				import static test1.A.foo;
-				
+
 				public class B {
 				    public void bar() {
 				        foo();//here
@@ -2325,7 +2336,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public class A {
 			    public static void foo() {
 			    }
@@ -2336,7 +2347,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
 		String contents= """
 			package test2;
-			
+
 			public class B {
 			    public void bar() {
 			        f//here
@@ -2378,9 +2389,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str2= """
 				package test2;
-				
+
 				import test1.A;
-				
+
 				public class B {
 				    public void bar() {
 				        A.foo();//here
@@ -2603,7 +2614,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			   }                                                        \s
 			   public static void main(String[] args) throws Exception {\s
 			       InvokerIF test = new Invoker();                      \s
-			       test.invoke(new ArgImpl<C>())                             \s
+			       test.invoke(new ArgImpl<>())                             \s
 			   }                                                        \s
 			}                                                            \s
 			""";
@@ -2616,7 +2627,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
 		String str1= """
 			package p;
-			
+
 			public class C {
 			    void foo() {
 			        try {
@@ -2656,17 +2667,17 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			String str= """
 				package annots;
-				
+
 				public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }
 				""";
 			pack0.createCompilationUnit("DefaultLocation.java", str, false, null);
 
 			String str1= """
 				package annots;
-				
+
 				import java.lang.annotation.*;
 				import static annots.DefaultLocation.*;
-				
+
 				@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)
 				@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.LOCAL_VARIABLE })
 				public @interface NonNullByDefault { DefaultLocation[] value() default {PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT}; }
@@ -2710,7 +2721,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			String expected= """
 				@annots.NonNullByDefault({ARRAY_CONTENTS})
 				package test1;
-				
+
 				import static annots.DefaultLocation.ARRAY_CONTENTS;
 				""";
 			assertEquals(expected, doc.get());
@@ -2807,7 +2818,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"""
 			package pack;
 			class A  {
-			
+
 				public static void main(String[] argv
 						new Member().f
 						;
@@ -2831,7 +2842,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"""
 			package pack;
 			class A  {
-			
+
 				public static void main(String[] argvStrings
 						new Member().f
 						;
