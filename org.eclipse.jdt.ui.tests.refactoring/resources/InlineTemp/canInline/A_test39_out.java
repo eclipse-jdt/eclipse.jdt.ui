@@ -2,7 +2,7 @@ package p;
 
 class A<E> extends Super {
 	String x() {
-		return super.<String>bar();
+		return super.bar();
 	}
 
 	<T> T bar() {

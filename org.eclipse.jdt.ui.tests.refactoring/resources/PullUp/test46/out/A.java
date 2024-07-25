@@ -7,6 +7,7 @@ interface A{
 }
 class B implements A {
 
+	@Override
 	public int getConst() {
 		return CONST;
 	}
