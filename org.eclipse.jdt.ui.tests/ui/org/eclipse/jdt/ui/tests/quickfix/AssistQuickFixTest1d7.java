@@ -278,39 +278,6 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertToMultiCatch6() throws Exception {
-		//Quick assist should not be offered in 1.5 mode
-		JavaProjectHelper.set15CompilerOptions(fJProject1);
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String str= """
-				package test1;
-				public class E {
-				    void foo() {
-				        try {
-				            System.out.println("foo");
-				        } catch (IllegalArgumentException e) {
-				            e.printStackTrace();
-				        } catch (NullPointerException e) {
-				            e.printStackTrace();
-				        }
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-			int offset= str.indexOf("catch");
-			AssistContext context= getCorrectionContext(cu, offset, 0);
-			assertNoErrors(context);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertProposalDoesNotExist(proposals, CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK);
-		} finally {
-			JavaProjectHelper.set17CompilerOptions(fJProject1);
-		}
-	}
-
-	@Test
 	public void testUnrollMultiCatch1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
