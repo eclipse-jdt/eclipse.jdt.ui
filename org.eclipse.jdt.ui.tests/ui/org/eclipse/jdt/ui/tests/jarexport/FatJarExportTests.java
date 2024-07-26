@@ -29,7 +29,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -79,7 +78,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.junit.util.XmlProcessorFactoryJdtJunit;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -125,12 +123,6 @@ public class FatJarExportTests {
 	@Before
 	public void setUp() throws Exception {
 		fProject= pts.getProject();
-
-		Map<String, String> options= fProject.getOptions(false);
-		String compliance= JavaCore.VERSION_1_4;
-		JavaModelUtil.setComplianceOptions(options, compliance);
-		JavaModelUtil.setDefaultClassfileOptions(options, compliance); // complete compliance options
-		fProject.setOptions(options);
 
 		fMainRoot= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
 		IPackageFragment fragment= fMainRoot.createPackageFragment("org.eclipse.jdt.ui.test", true, null); //$NON-NLS-1$

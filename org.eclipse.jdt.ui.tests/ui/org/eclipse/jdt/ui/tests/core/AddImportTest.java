@@ -69,7 +69,7 @@ public class AddImportTest extends CoreTests {
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= pts.getProject();
-		JavaProjectHelper.set15CompilerOptions(fJProject1);
+		JavaProjectHelper.set18CompilerOptions(fJProject1);
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -1377,7 +1377,7 @@ public class AddImportTest extends CoreTests {
 
 	@Test
 	public void testAddImportActionStaticWith14() throws Exception {
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set18CompilerOptions(fJProject1);
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

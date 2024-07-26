@@ -7857,43 +7857,34 @@ public class AssistQuickFixTest extends QuickFixTest {
 	@Test
 	public void testConvertToMessageFormat14() throws Exception {
 
-		Map<String, String> oldOptions= fJProject1.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>(oldOptions);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-		fJProject1.setOptions(newOptions);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public class A {
+			    public void foo(Object o1, Object o2) {
+			        System.out.println("foo" + o1 + " \\"bar\\" " + o2);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String str= """
-				package test1;
-				public class A {
-				    public void foo(Object o1, Object o2) {
-				        System.out.println("foo" + o1 + " \\"bar\\" " + o2);
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+		AssistContext context= getCorrectionContext(cu, str.indexOf("\" + o1 + \""), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-			AssistContext context= getCorrectionContext(cu, str.indexOf("\" + o1 + \""), 0);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
 
-			assertCorrectLabels(proposals);
+		String str1= """
+			package test1;
 
-			String str1= """
-				package test1;
+			import java.text.MessageFormat;
 
-				import java.text.MessageFormat;
-
-				public class A {
-				    public void foo(Object o1, Object o2) {
-				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", o1, o2));
-				    }
-				}
-				""";
-			assertProposalPreviewEquals(str1, CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
-		} finally {
-			fJProject1.setOptions(oldOptions);
-		}
+			public class A {
+			    public void foo(Object o1, Object o2) {
+			        System.out.println(MessageFormat.format("foo{0} \\"bar\\" {1}", o1, o2));
+			    }
+			}
+			""";
+		assertProposalPreviewEquals(str1, CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 	}
 
 	@Test
@@ -7920,43 +7911,34 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testConvertToMessageFormatStringBoxing14() throws Exception {
-		Map<String, String> oldOptions= fJProject1.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>(oldOptions);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-		fJProject1.setOptions(newOptions);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public class A {
+			    public void foo(Object o1, Object o2) {
+			        System.out.println("foo" + 1 + " \\"bar\\" ");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String str= """
-				package test1;
-				public class A {
-				    public void foo(Object o1, Object o2) {
-				        System.out.println("foo" + 1 + " \\"bar\\" ");
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+		AssistContext context= getCorrectionContext(cu, str.indexOf("1 + \""), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-			AssistContext context= getCorrectionContext(cu, str.indexOf("1 + \""), 0);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
 
-			assertCorrectLabels(proposals);
+		String str1= """
+			package test1;
 
-			String str1= """
-				package test1;
+			import java.text.MessageFormat;
 
-				import java.text.MessageFormat;
-
-				public class A {
-				    public void foo(Object o1, Object o2) {
-				        System.out.println(MessageFormat.format("foo{0} \\"bar\\" ", 1));
-				    }
-				}
-				""";
-			assertProposalPreviewEquals(str1, CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
-		} finally {
-			fJProject1.setOptions(oldOptions);
-		}
+			public class A {
+			    public void foo(Object o1, Object o2) {
+			        System.out.println(MessageFormat.format("foo{0} \\"bar\\" ", 1));
+			    }
+			}
+			""";
+		assertProposalPreviewEquals(str1, CorrectionMessages.QuickAssistProcessor_convert_to_message_format, proposals);
 	}
 
 	@Test
@@ -8091,33 +8073,23 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testConvertToStringFormat14() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public class A {
+			    public void foo(Object o1, Object o2) {
+			        System.out.println("foo" + o1 + " \\"bar\\" " + o2);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
-		Map<String, String> oldOptions= fJProject1.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>(oldOptions);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-		fJProject1.setOptions(newOptions);
+		AssistContext context= getCorrectionContext(cu, str.indexOf('+'), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String str= """
-				package test1;
-				public class A {
-				    public void foo(Object o1, Object o2) {
-				        System.out.println("foo" + o1 + " \\"bar\\" " + o2);
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
+		assertCorrectLabels(proposals);
 
-			AssistContext context= getCorrectionContext(cu, str.indexOf('+'), 0);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertCorrectLabels(proposals);
-
-			assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_FORMAT_ID);
-		} finally {
-			fJProject1.setOptions(oldOptions);
-		}
+		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_FORMAT_ID);
 	}
 
 	@Test
@@ -9910,7 +9882,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
@@ -10008,7 +9979,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
@@ -10080,7 +10050,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);

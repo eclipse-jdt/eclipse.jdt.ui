@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	private static final String REMOVE_CATCH_CLAUSE= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
 	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;

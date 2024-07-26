@@ -357,47 +357,6 @@ public class JavaProjectHelper {
 	}
 
 	/**
-	 * Sets the compiler options to 1.7 for the given project.
-	 * @param project the java project
-	 */
-	public static void set17CompilerOptions(IJavaProject project) {
-		Map<String, String> options= project.getOptions(false);
-		JavaProjectHelper.set17CompilerOptions(options);
-		project.setOptions(options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.6 for the given project.
-	 * @param project the java project
-	 */
-	public static void set16CompilerOptions(IJavaProject project) {
-		Map<String, String> options= project.getOptions(false);
-		JavaProjectHelper.set16CompilerOptions(options);
-		project.setOptions(options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.5 for the given project.
-	 * @param project the java project
-	 */
-	public static void set15CompilerOptions(IJavaProject project) {
-		Map<String, String> options= project.getOptions(false);
-		JavaProjectHelper.set15CompilerOptions(options);
-		project.setOptions(options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.4 for the given project.
-	 * @param project the java project
-	 */
-	public static void set14CompilerOptions(IJavaProject project) {
-		Map<String, String> options= project.getOptions(false);
-		JavaProjectHelper.set14CompilerOptions(options);
-		project.setOptions(options);
-	}
-
-
-	/**
 	 * Sets the compiler options to 9.
 	 *
 	 * @param options the compiler options to configure
@@ -506,46 +465,6 @@ public class JavaProjectHelper {
 		Map<String, String> options= project.getOptions(false);
 		setLatestCompilerOptions(options);
 		project.setOptions(options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.7
-	 * @param options The compiler options to configure
-	 */
-	public static void set17CompilerOptions(Map<String, String> options) {
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.6
-	 * @param options The compiler options to configure
-	 */
-	public static void set16CompilerOptions(Map<String, String> options) {
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.5
-	 * @param options The compiler options to configure
-	 */
-	public static void set15CompilerOptions(Map<String, String> options) {
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.4
-	 * @param options The compiler options to configure
-	 */
-	public static void set14CompilerOptions(Map<String, String> options) {
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, options);
-	}
-
-	/**
-	 * Sets the compiler options to 1.3
-	 * @param options The compiler options to configure
-	 */
-	public static void set13CompilerOptions(Map<String, String> options) {
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_3, options);
 	}
 
 	/**
@@ -931,7 +850,7 @@ public class JavaProjectHelper {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_13);
 
 		Map<String, String> options= jproject.getOptions(false);
-		JavaProjectHelper.set13CompilerOptions(options);
+		JavaProjectHelper.set18CompilerOptions(options);
 		jproject.setOptions(options);
 
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
@@ -939,19 +858,19 @@ public class JavaProjectHelper {
 
 	public static IPackageFragmentRoot addRTJar15(IJavaProject jproject) throws CoreException, JavaModelException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_15);
-		set15CompilerOptions(jproject);
+		set18CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 
 	public static IPackageFragmentRoot addRTJar16(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_16);
-		set16CompilerOptions(jproject);
+		set18CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 
 	public static IPackageFragmentRoot addRTJar17(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_17);
-		set17CompilerOptions(jproject);
+		set18CompilerOptions(jproject);
 		return addLibrary(jproject, rtJarPath[0], rtJarPath[1], rtJarPath[2]);
 	}
 

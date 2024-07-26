@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGen
  */
 public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java1d5ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {

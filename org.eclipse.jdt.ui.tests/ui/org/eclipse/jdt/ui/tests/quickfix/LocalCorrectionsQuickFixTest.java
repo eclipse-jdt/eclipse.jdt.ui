@@ -12607,7 +12607,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);

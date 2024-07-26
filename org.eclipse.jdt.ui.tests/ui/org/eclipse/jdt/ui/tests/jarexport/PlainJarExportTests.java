@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -50,9 +49,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
@@ -79,12 +75,6 @@ public class PlainJarExportTests {
 	@Before
 	public void setUp() throws Exception {
 		fProject= pts.getProject();
-
-		Map<String, String> options= fProject.getOptions(false);
-		String compliance= JavaCore.VERSION_1_4;
-		JavaModelUtil.setComplianceOptions(options, compliance);
-		JavaModelUtil.setDefaultClassfileOptions(options, compliance);
-		fProject.setOptions(options);
 
 		fMainRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 		IPackageFragment fragment= fMainRoot.createPackageFragment("org.eclipse.jdt.ui.test", true, null);
