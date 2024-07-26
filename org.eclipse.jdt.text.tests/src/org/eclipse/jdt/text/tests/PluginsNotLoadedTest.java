@@ -224,6 +224,7 @@ public class PluginsNotLoadedTest {
 
 	@Before
 	public void setUp() throws Exception {
+		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
