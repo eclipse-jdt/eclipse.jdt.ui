@@ -187,7 +187,7 @@ public class SmokeViewsTest {
 			JavaProjectHelper.setLatestCompilerOptions(project);
 		} else {
 			// Smallest version available for tests on Jenkins/jipp
-			JavaProjectHelper.set17CompilerOptions(project);
+			JavaProjectHelper.set18CompilerOptions(project);
 		}
 
 		Path bootModPath = new Path(javaHome + "/lib/jrt-fs.jar");

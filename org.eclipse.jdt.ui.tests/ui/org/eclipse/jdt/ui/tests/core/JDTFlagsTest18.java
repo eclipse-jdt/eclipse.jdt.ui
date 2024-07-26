@@ -130,7 +130,7 @@ public class JDTFlagsTest18 {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			enum Snippet {
 			    A;
 			    enum E {
@@ -157,7 +157,7 @@ public class JDTFlagsTest18 {
 			                return "B";
 			            }
 			        }, OVERWHELMING {
-			
+
 			            public String getLidCode() {
 			                return "A";
 			            }
@@ -478,7 +478,7 @@ public class JDTFlagsTest18 {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public @interface Snippet {
 			    int i= 0;
 			    public String name();

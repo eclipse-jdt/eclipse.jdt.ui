@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.manipulation.CUCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -1519,52 +1518,44 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 	@Test
 	public void testMismatchingReturnTypeOnGenericMethod14() throws Exception {
-		Map<String, String> options= fJProject1.getOptions(false);
-		try {
-			Map<String, String> options14= new HashMap<>(options);
-			JavaModelUtil.setComplianceOptions(options14, JavaCore.VERSION_1_4);
-			fJProject1.setOptions(options14);
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-			String str= """
-				package test1;
-				import java.lang.reflect.AccessibleObject;
-				public class E {
-				    void m() {
-				        new AccessibleObject() {
-				            public void getAnnotation(Class annotationClass) {
-				            }
-				        };
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+		String str= """
+			package test1;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public void getAnnotation(Class annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 1);
-			assertCorrectLabels(proposals);
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
 
-			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-			String preview1= getPreviewContent(proposal);
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
 
-			String expected1= """
-				package test1;
-				import java.lang.reflect.AccessibleObject;
-				public class E {
-				    void m() {
-				        new AccessibleObject() {
-				            public T getAnnotation(Class annotationClass) {
-				            }
-				        };
-				    }
-				}
-				""";
+		String expected1= """
+			package test1;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public T getAnnotation(Class annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
 
-			assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
-		} finally {
-			fJProject1.setOptions(options);
-		}
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 
 	@Test

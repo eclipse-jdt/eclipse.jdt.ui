@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -92,11 +92,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.InterruptedIOException;
 			import java.text.ParseException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -121,11 +121,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.InterruptedIOException;
 			import java.text.ParseException;
-			
+
 			public class E {
 			    void foo(int a) throws ParseException {
 			        try {
@@ -144,11 +144,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.InterruptedIOException;
 			import java.text.ParseException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -168,11 +168,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.InterruptedIOException;
 			import java.text.ParseException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -197,10 +197,10 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -223,10 +223,10 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			public class E {
 			    void foo(int a) throws IOException {
 			        try {
@@ -244,10 +244,10 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -266,10 +266,10 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -293,11 +293,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InterruptedIOException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -322,11 +322,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InterruptedIOException;
-			
+
 			public class E {
 			    void foo(int a) throws IOException {
 			        try {
@@ -346,11 +346,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InterruptedIOException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -371,11 +371,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InterruptedIOException;
-			
+
 			public class E {
 			    void foo(int a) {
 			        try {
@@ -910,11 +910,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.IOException;
 			import java.io.InputStream;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
@@ -922,7 +922,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			class ByteStreams {
 			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
 			        return null;
@@ -941,12 +941,12 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.io.UnsupportedEncodingException;
-			
+
 			public class E {
 			    public static void main(String[] args) throws UnsupportedEncodingException, ArithmeticException, IOException {
 			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
@@ -954,7 +954,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			class ByteStreams {
 			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
 			        return null;
@@ -967,12 +967,12 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.io.UnsupportedEncodingException;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
@@ -983,7 +983,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			class ByteStreams {
 			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
 			        return null;
@@ -996,11 +996,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.IOException;
 			import java.io.InputStream;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
@@ -1009,7 +1009,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			class ByteStreams {
 			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
 			        return null;
@@ -1022,11 +1022,11 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected4= """
 			package test1;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.IOException;
 			import java.io.InputStream;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
@@ -1037,7 +1037,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			class ByteStreams {
 			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
 			        return null;
@@ -1050,12 +1050,12 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 		String expected5= """
 			package test1;
-			
+
 			import java.io.ByteArrayInputStream;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.io.UnsupportedEncodingException;
-			
+
 			public class E {
 			    public static void main(String[] args) {
 			        try (InputStream foo = new ByteArrayInputStream("foo".getBytes("UTF-8"))) {
@@ -1068,7 +1068,7 @@ public class LocalCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			class ByteStreams {
 			    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {
 			        return null;

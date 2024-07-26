@@ -3335,7 +3335,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	@Test
 	public void testReplaceReturnIfWithCondition2() throws Exception {
 		try {
-			JavaProjectHelper.set14CompilerOptions(fJProject1);
+			JavaProjectHelper.set18CompilerOptions(fJProject1);
 
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			String str= """
@@ -3370,7 +3370,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 			assertExpectedExistInProposals(proposals, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set18CompilerOptions(fJProject1);
 		}
 	}
 

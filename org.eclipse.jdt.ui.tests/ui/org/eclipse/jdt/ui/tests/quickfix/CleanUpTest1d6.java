@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UpdateProperty;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java1d6ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
@@ -42,7 +42,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  */
 public class CleanUpTest1d6 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java1d6ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
