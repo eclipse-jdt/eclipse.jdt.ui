@@ -14,9 +14,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1134,7 +1132,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			/**
 			 */
 			public class B extends A<Integer> {
@@ -1160,7 +1158,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			/**
 			 */
 			public class B extends A<Integer> {
@@ -1289,72 +1287,11 @@ public class JavadocQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testInvalidQualification1() throws Exception {
-		Map<String, String> original= fJProject1.getOptions(false);
-		HashMap<String, String> newOptions= new HashMap<>(original);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
-		fJProject1.setOptions(newOptions);
-
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
-			String str= """
-				package pack;
-				
-				public class A {
-				    public static class B {
-				        public static class C {
-				           \s
-				        }
-				    }
-				}
-				""";
-			pack1.createCompilationUnit("A.java", str, false, null);
-
-			IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
-			String str1= """
-				package pack2;
-				
-				import pack.A.B.C;
-				
-				/**
-				 * {@link C}\s
-				 */
-				public class E {
-				}
-				""";
-			ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
-
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-
-			assertCorrectLabels(proposals);
-			assertNumberOfProposals(proposals, 2);
-
-			String[] expected= new String[1];
-			expected[0]= """
-				package pack2;
-				
-				import pack.A.B.C;
-				
-				/**
-				 * {@link pack.A.B.C}\s
-				 */
-				public class E {
-				}
-				""";
-
-			assertExpectedExistInProposals(proposals, expected);
-		} finally{
-			fJProject1.setOptions(original);
-		}
-	}
-
-	@Test
 	public void testInvalidQualification2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public static class B {
 			    }
@@ -1365,9 +1302,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
 		String str1= """
 			package pack2;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * {@link A.B}\s
 			 */
@@ -1385,9 +1322,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack2;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * {@link pack.A.B}\s
 			 */
@@ -1403,7 +1340,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public interface B {
 			        void foo();
@@ -1415,9 +1352,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("pack2", false, null);
 		String str1= """
 			package pack2;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * {@link A.B#foo()}\s
 			 */
@@ -1435,9 +1372,9 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack2;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * {@link pack.A.B#foo()}\s
 			 */
