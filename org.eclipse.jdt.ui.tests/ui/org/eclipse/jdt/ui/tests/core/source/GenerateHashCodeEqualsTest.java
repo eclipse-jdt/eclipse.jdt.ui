@@ -1883,46 +1883,17 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 					"\r\n" +
 					"public class A extends B {\r\n" +
 					"\r\n" +
-					"	/**\r\n" +
-					"	 * Returns a hash code value for the array\r\n" +
-					"	 * @param array the array to create a hash code value for\r\n" +
-					"	 * @return a hash code value for the array\r\n" +
-					"	 */\r\n" +
-					"	private static int hashCode(double[] array) {\r\n" +
-					"		int prime = 31;\r\n" +
-					"		if (array == null)\r\n" +
-					"			return 0;\r\n" +
-					"		int result = 1;\r\n" +
-					"		for (int index = 0; index < array.length; index++) {\r\n" +
-					"			long temp = Double.doubleToLongBits(array[index]);\r\n" +
-					"			result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-					"		}\r\n" +
-					"		return result;\r\n" +
-					"	}\r\n" +
-					"	/**\r\n" +
-					"	 * Returns a hash code value for the array\r\n" +
-					"	 * @param array the array to create a hash code value for\r\n" +
-					"	 * @return a hash code value for the array\r\n" +
-					"	 */\r\n" +
-					"	private static int hashCode(Object[] array) {\r\n" +
-					"		int prime = 31;\r\n" +
-					"		if (array == null)\r\n" +
-					"			return 0;\r\n" +
-					"		int result = 1;\r\n" +
-					"		for (int index = 0; index < array.length; index++) {\r\n" +
-					"			result = prime * result + (array[index] == null ? 0 : array[index].hashCode());\r\n" +
-					"		}\r\n" +
-					"		return result;\r\n" +
-					"	}\r\n" +
 					"	A[] anArray;\r\n" +
 					"	double[] anDArray;\r\n" +
+					"	@Override\r\n" +
 					"	public int hashCode() {\r\n" +
 					"		final int prime = 31;\r\n" +
 					"		int result = super.hashCode();\r\n" +
-					"		result = prime * result + A.hashCode(anArray);\r\n" +
-					"		result = prime * result + A.hashCode(anDArray);\r\n" +
+					"		result = prime * result + Arrays.hashCode(anArray);\r\n" +
+					"		result = prime * result + Arrays.hashCode(anDArray);\r\n" +
 					"		return result;\r\n" +
 					"	}\r\n" +
+					"	@Override\r\n" +
 					"	public boolean equals(Object obj) {\r\n" +
 					"		if (this == obj)\r\n" +
 					"			return true;\r\n" +
@@ -2110,7 +2081,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	public void insertAt() throws Exception {
 		String originalContent= """
 			package p;
-			
+
 			public class A  {
 				Runnable x;
 			\t

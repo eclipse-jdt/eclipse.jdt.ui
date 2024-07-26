@@ -140,38 +140,4 @@ public class TypeParameterMismatchTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
-	@Test
-	public void testInferDiamondArguments() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
-		String str= """
-			import java.util.*;
-			public class A {
-			    void foo() {
-			        List<String> a= new ArrayList<>();
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-
-		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
-
-		String[] expected= new String[1];
-		expected[0]= """
-			import java.util.*;
-			public class A {
-			    void foo() {
-			        List<String> a= new ArrayList<String>();
-			    }
-			}
-			""";
-
-		assertExpectedExistInProposals(proposals, expected);
-	}
-
-
-
 }

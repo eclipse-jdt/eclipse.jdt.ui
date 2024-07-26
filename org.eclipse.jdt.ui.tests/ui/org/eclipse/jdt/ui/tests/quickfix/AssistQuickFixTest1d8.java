@@ -315,43 +315,6 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertToLambda5() throws Exception {
-		//Quick assist should not be offered in 1.7 mode
-		JavaProjectHelper.set17CompilerOptions(fJProject1);
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		try {
-			String str= """
-				package test1;
-				interface I {
-				    void method();
-				}
-				public class E {
-				    void bar(I i) {
-				    }
-				    void foo() {
-				        bar(new I() {
-				            public void method() {
-				                System.out.println();
-				            }
-				        });
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-			int offset= str.indexOf("I()");
-			AssistContext context= getCorrectionContext(cu, offset, 0);
-			assertNoErrors(context);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertNumberOfProposals(proposals, 1);
-			assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
-		} finally {
-			JavaProjectHelper.set18CompilerOptions(fJProject1);
-		}
-	}
-
-	@Test
 	public void testConvertToLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
