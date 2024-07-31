@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -502,6 +503,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			private int lastStatementEnd;
 			private IBinding varBinding;
 			private List<MethodInvocation> toStringList= new ArrayList<>();
+			private List<SimpleName> argList= new ArrayList<>();
 
 			public CheckValidityVisitor(int lastStatementEnd, IBinding varBinding) {
 				this.lastStatementEnd= lastStatementEnd;
@@ -518,6 +520,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			public List<MethodInvocation> getToStringList() {
 				return toStringList;
+			}
+
+			public List<SimpleName> getArgList() {
+				return argList;
 			}
 
 			@Override
@@ -543,6 +549,28 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 								return true;
 							} else {
 								valid= false;
+							}
+						} else if (name.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+							MethodInvocation invocation= (MethodInvocation) name.getParent();
+							IMethodBinding methodBinding= invocation.resolveMethodBinding();
+							if (methodBinding != null) {
+								List<Expression> args= invocation.arguments();
+								int index= -1;
+								for (int i= 0; i < args.size(); ++i) {
+									if (args.get(i) == name) {
+										index= i;
+										break;
+									}
+								}
+								ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
+								ITypeBinding paramType= paramTypes[index];
+								if (paramType.getQualifiedName().equals("java.lang.String") || //$NON-NLS-1$
+										paramType.getQualifiedName().equals("java.lang.CharSequence")) { //$NON-NLS-1$
+									argList.add(name);
+									valid= true;
+								} else {
+									valid= false;
+								}
 							}
 						} else {
 							valid= false;
@@ -689,18 +717,19 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			} catch (AbortSearchException e) {
 				// do nothing
 			}
-			if (!checkValidityVisitor.isValid() || checkValidityVisitor.getToStringList().size() == 0) {
+			if (!checkValidityVisitor.isValid() || (checkValidityVisitor.getToStringList().isEmpty() && checkValidityVisitor.getArgList().isEmpty())) {
 				return failure();
 			}
 			ExpressionStatement assignmentToConvert= checkValidityVisitor.getNextAssignment();
 			List<Statement> statements= new ArrayList<>(statementList);
 			List<StringLiteral> literals= new ArrayList<>(fLiterals);
 			List<MethodInvocation> toStringList= new ArrayList<>(checkValidityVisitor.getToStringList());
+			List<SimpleName> argList= new ArrayList<>(checkValidityVisitor.getArgList());
 			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(node, BodyDeclaration.class);
 			if (statements.get(0) instanceof VariableDeclarationStatement) {
 				fRemovedDeclarations.add(originalVarName.resolveBinding());
 			}
-			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, statements, literals,
+			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, argList, statements, literals,
 					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, nonNLS);
 			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
@@ -835,6 +864,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 	public static class ChangeStringBufferToTextBlock extends CompilationUnitRewriteOperation {
 
 		private final List<MethodInvocation> fToStringList;
+		private final List<SimpleName> fArgList;
 		private final List<Statement> fStatements;
 		private final List<StringLiteral> fLiterals;
 		private String fIndent;
@@ -843,9 +873,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final boolean fNonNLS;
 		private ExpressionStatement fAssignmentToConvert;
 
-		public ChangeStringBufferToTextBlock(final List<MethodInvocation> toStringList, List<Statement> statements,
+		public ChangeStringBufferToTextBlock(final List<MethodInvocation> toStringList, final List<SimpleName> argList, List<Statement> statements,
 				List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, BodyDeclaration lastBodyDecl, boolean nonNLS) {
 			this.fToStringList= toStringList;
+			this.fArgList= argList;
 			this.fStatements= statements;
 			this.fLiterals= literals;
 			this.fAssignmentToConvert= assignmentToConvert;
@@ -866,7 +897,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			String DEFAULT_NAME= "str"; //$NON-NLS-1$
-			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(fToStringList.get(0), BodyDeclaration.class);
+			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(fToStringList.isEmpty() ? fArgList.get(0) : fToStringList.get(0), BodyDeclaration.class);
 			if (bodyDecl != null && bodyDecl != fLastBodyDecl) {
 				fExcludedNames.clear();
 			}
@@ -943,17 +974,16 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 			}
 			buf.append("\"\"\""); //$NON-NLS-1$
-			MethodInvocation firstToStringCall= fToStringList.get(0);
-			AST ast= firstToStringCall.getAST();
+			AST ast= fStatements.get(0).getAST();
 			if (fToStringList.size() == 1 &&
 					!fNonNLS &&
 					ASTNodes.getLeadingComments(fStatements.get(0)).size() == 0 &&
-					(firstToStringCall.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY ||
-					firstToStringCall.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
+					(fToStringList.get(0).getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY ||
+					fToStringList.get(0).getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY)) {
 				// if we only have one use of buffer.toString() and it is assigned to another string variable,
 				// put the text block in place of the buffer.toString() call and delete the whole StringBuffer/StringBuilder
 				TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
-				rewrite.replace(firstToStringCall, textBlock, group);
+				rewrite.replace(fToStringList.get(0), textBlock, group);
 				for (Statement statement : fStatements) {
 					rewrite.remove(statement, group);
 				}
@@ -961,41 +991,42 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				// otherwise, create a new text block variable and use the variable name in every place the buffer.toString()
 				// call is found before the variable is reused to form a new StringBuilder/StringBuffer
 				ImportRewrite importRewriter= cuRewrite.getImportRewrite();
-				ITypeBinding binding= firstToStringCall.resolveTypeBinding();
-				if (binding != null) {
-					Set<String> excludedNames= new HashSet<>(ASTNodes.getAllLocalVariablesInBlock(fStatements.get(0)));
-					excludedNames.addAll(fExcludedNames);
-					String newVarName= DEFAULT_NAME;
-					if (excludedNames.contains(DEFAULT_NAME)) {
-						newVarName= createName(DEFAULT_NAME, excludedNames);
-					}
-					fExcludedNames.add(newVarName);
-					Type t= importRewriter.addImport(binding, ast);
-					if (!fNonNLS || hasNLSMarker(fStatements.get(0), cuRewrite.getCu())) {
-						TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
-						VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
-						newFragment.setName(ast.newSimpleName(newVarName));
-						newFragment.setInitializer(textBlock);
-						VariableDeclarationStatement newStmt= ast.newVariableDeclarationStatement(newFragment);
-						newStmt.setType(t);
-						ASTNodes.replaceButKeepComment(rewrite, fStatements.get(0), newStmt, group);
-					} else {
-						StringBuilder builder= new StringBuilder();
-						builder.append("String "); //$NON-NLS-1$
-						builder.append(newVarName);
-						builder.append(" = "); //$NON-NLS-1$
-						builder.append(buf.toString());
-						builder.append("; //$NON-NLS-1$"); //$NON-NLS-1$
-						VariableDeclarationStatement newStmt= (VariableDeclarationStatement) rewrite.createStringPlaceholder(builder.toString(), ASTNode.VARIABLE_DECLARATION_STATEMENT);
-						ASTNodes.replaceButKeepComment(rewrite, fStatements.get(0), newStmt, group);
-					}
-					for (int i= 1; i < fStatements.size(); ++i) {
-						rewrite.remove(fStatements.get(i), group);
-					}
-					for (MethodInvocation toStringCall : fToStringList) {
-						SimpleName name= ast.newSimpleName(newVarName);
-						rewrite.replace(toStringCall, name, group);
-					}
+				Set<String> excludedNames= new HashSet<>(ASTNodes.getAllLocalVariablesInBlock(fStatements.get(0)));
+				excludedNames.addAll(fExcludedNames);
+				String newVarName= DEFAULT_NAME;
+				if (excludedNames.contains(DEFAULT_NAME)) {
+					newVarName= createName(DEFAULT_NAME, excludedNames);
+				}
+				fExcludedNames.add(newVarName);
+				Type t= importRewriter.addImportFromSignature("QString;", ast); //$NON-NLS-1$
+				if (!fNonNLS || hasNLSMarker(fStatements.get(0), cuRewrite.getCu())) {
+					TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
+					VariableDeclarationFragment newFragment= ast.newVariableDeclarationFragment();
+					newFragment.setName(ast.newSimpleName(newVarName));
+					newFragment.setInitializer(textBlock);
+					VariableDeclarationStatement newStmt= ast.newVariableDeclarationStatement(newFragment);
+					newStmt.setType(t);
+					ASTNodes.replaceButKeepComment(rewrite, fStatements.get(0), newStmt, group);
+				} else {
+					StringBuilder builder= new StringBuilder();
+					builder.append("String "); //$NON-NLS-1$
+					builder.append(newVarName);
+					builder.append(" = "); //$NON-NLS-1$
+					builder.append(buf.toString());
+					builder.append("; //$NON-NLS-1$"); //$NON-NLS-1$
+					VariableDeclarationStatement newStmt= (VariableDeclarationStatement) rewrite.createStringPlaceholder(builder.toString(), ASTNode.VARIABLE_DECLARATION_STATEMENT);
+					ASTNodes.replaceButKeepComment(rewrite, fStatements.get(0), newStmt, group);
+				}
+				for (int i= 1; i < fStatements.size(); ++i) {
+					rewrite.remove(fStatements.get(i), group);
+				}
+				for (MethodInvocation toStringCall : fToStringList) {
+					SimpleName name= ast.newSimpleName(newVarName);
+					rewrite.replace(toStringCall, name, group);
+				}
+				for (SimpleName arg : fArgList) {
+					SimpleName name= ast.newSimpleName(newVarName);
+					rewrite.replace(arg, name, group);
 				}
 			}
 			// convert any reuse of the StringBuffer/StringBuilder variable that assigns a new StringBuffer/StringBuilder so
