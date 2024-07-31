@@ -53,7 +53,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			/**
 			 * Performs:
 			 * <pre>{@code
@@ -75,12 +75,12 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            "       System.out.println(\\"abc\\");\\n" + //$NON-NLS-1$
 			            "   }\\n" + //$NON-NLS-1$
 			            "}"; //$NON-NLS-1$
-			
+
 			    private static final String CU_POSTFIX= " {\\n" +
 			            "	\\n" +
 			            "}\\n" +
 			            "}\\n";
-			
+
 			    public void testSimple() {
 			        // comment 1
 			        String x = "" + //$NON-NLS-1$
@@ -88,21 +88,21 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            "    System.out.println(\\"abc\\");\\n" + //$NON-NLS-1$
 			            "}\\n"; //$NON-NLS-1$ // comment 2
 			    }
-			
+
 			    public void testTrailingSpacesAndInnerNewlines() {
 			        String x = "" +
 			            "public \\nvoid foo() {  \\n" +
 			            "    System.out.println\\\\(\\"abc\\");\\n" +
 			            "}\\n";
 			    }
-			
+
 			    public void testLineContinuationAndTripleQuotes() {
 			        String x = "" +
 			            "abcdef" +
 			            "ghijkl\\"\\"\\"\\"123\\"\\"\\"" +
 			            "mnop\\\\";
 			    }
-			
+
 			    public void testNoChange() {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n");
@@ -175,7 +175,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 
 		String expected1= """
 			package test1;
-			
+
 			/**
 			 * Performs:
 			 * <pre>{@code
@@ -198,14 +198,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			               System.out.println("abc");
 			           }
 			        }\"""; //$NON-NLS-1$
-			
+
 			    private static final String CU_POSTFIX= \"""
 			         {
 			        \\t
 			        }
 			        }
 			        \""";
-			
+
 			    public void testSimple() {
 			        // comment 1
 			        String x = \"""
@@ -214,7 +214,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            }
 			            \"""; //$NON-NLS-1$ // comment 2
 			    }
-			
+
 			    public void testTrailingSpacesAndInnerNewlines() {
 			        String x = \"""
 			            public\\s
@@ -223,14 +223,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            }
 			            \""";
 			    }
-			
+
 			    public void testLineContinuationAndTripleQuotes() {
 			        String x = \"""
 			            abcdef\\
 			            ghijkl\\\"""\\"123\\\"""\\
 			            mnop\\\\\""";
 			    }
-			
+
 			    public void testNoChange() {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n");
@@ -312,7 +312,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        // comment 1
@@ -347,7 +347,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        k = buf3.toString();
 			        buf3= new StringBuilder();
 			        buf3.append(4);
-			
+
 			        String x = "abc\\n" +
 			            "def\\n" +
 			            "ghi\\n";
@@ -396,6 +396,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        StringBuilder buf9 = new StringBuilder("abc\\n").append("def\\n").append("ghi");
 			        buf9.append("jkl\\n").append("mno");
 			        System.out.println(buf9.toString());
+			        StringBuilder buf10= new StringBuilder();
+			        buf10.append("    /** bar\\n");
+			        buf10.append("     * foo\\n");
+			        buf10.append("     */");
+			        write(buf10);
+			    }
+			    private void write(CharSequence c) {
+			        System.out.println(c);
 			    }
 			}""";
 
@@ -407,7 +415,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 
 		String expected1= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        // comment 1
@@ -447,7 +455,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            \""";
 			        StringBuilder buf3 = new StringBuilder();
 			        buf3.append(4);
-			
+
 			        String x = \"""
 			            abc
 			            def
@@ -508,6 +516,15 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            jkl
 			            mno\""";
 			        System.out.println(str7);
+			        String str8 = \"""
+			                /** bar
+			                 * foo
+			                 */\\
+			            \""";
+			        write(str8);
+			    }
+			    private void write(CharSequence c) {
+			        System.out.println(c);
 			    }
 			}""";
 
@@ -521,28 +538,28 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import static java.lang.annotation.ElementType.TYPE;
 			import static java.lang.annotation.RetentionPolicy.RUNTIME;
-			
+
 			import java.lang.annotation.Retention;
 			import java.lang.annotation.Target;
-			
+
 			@Target({TYPE})\s
 			@Retention(RUNTIME)
 			public @interface SampleAnnotation {\s
-			
+
 			    String name();
-			
+
 			    String query();
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("SampleAnnotation.java", sample, false, null);
 
 		String sample2= """
 			package test1;
-			
+
 			@SampleAnnotation(name = "testQuery",
 			 query = "select * " +
 			 "from test_entities " + \s
@@ -563,7 +580,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 
 		String expected1= """
 			package test1;
-			
+
 			@SampleAnnotation(name = "testQuery",
 			 query = \"""
 			    select * \\
@@ -591,26 +608,26 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import static java.lang.annotation.ElementType.TYPE;
 			import static java.lang.annotation.RetentionPolicy.RUNTIME;
-			
+
 			import java.lang.annotation.Retention;
 			import java.lang.annotation.Target;
-			
+
 			@Target({TYPE})\s
 			@Retention(RUNTIME)
 			public @interface SampleAnnotation {\s
-			
+
 			    String[] value ();
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("SampleAnnotation.java", sample, false, null);
 
 		String sample2= """
 			package test1;
-			
+
 			@SampleAnnotation({
 			"select * " +
 			 "from test_entities " + \s
@@ -631,7 +648,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 
 		String expected1= """
 			package test1;
-			
+
 			@SampleAnnotation({
 			\"""
 			    select * \\
@@ -657,14 +674,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void testNotThreeStrings() {
 			        String x =\s
 			            "abcdef" +
 			            "ghijkl";\
 			    }
-			
+
 			    public void testNotAllLiterals() {
 			        String x = "" +
 			            "abcdef" +
@@ -672,7 +689,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            String.valueOf(true)
 			;\
 			    }
-			
+
 			    public void testNotAllLiterals2(String a) {
 			        String x = "" +
 			            "abcdef" +
@@ -680,7 +697,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            a
 			;\
 			    }
-			
+
 			    public void testNotAllStrings() {
 			        String x = "" +
 			            "abcdef" +
@@ -688,28 +705,28 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            3;
 			;\
 			    }
-			
+
 			    public void testInconsistentNLS() {
 			        String x = "" +
 			            "abcdef" +
 			            "ghijkl" + //$NON-NLS-1$
 			            "mnop";
 			    }
-			
+
 			    public void testArrayInitializer() {
 			        String[] x = { "" +
 			            "abcdef" +
 			            "ghijkl" + //$NON-NLS-1$
 			            "mnop"};
 			    }
-			
+
 			    public void testCommentsThatWillBeLost() {
 			        String x = "" +
 			            "abcdef" +
 			            "ghijkl" + // a comment
 			            "mnop";
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -724,7 +741,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void testNoToString() {
 			        StringBuffer buf = new StringBuffer();
@@ -732,7 +749,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf.append("123456\\n");
 			        buf.append("ghijkl\\n");
 			    }
-			
+
 			    public void testExtraCallsAfter() {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n");
@@ -741,7 +758,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        String x = buf.toString();
 			        buf.append("abcdef\\n");
 			    }
-			
+
 			    public void testExtraCallsBetween(String a) {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n");
@@ -749,7 +766,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf.append("ghijkl\\n");
 			        String x = buf.toString();
 			    }
-			
+
 			    public void testSerialNLSCallsNotSupported() {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n"); //$NON-NLS-1$
@@ -757,7 +774,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf.append("ghijkl\\n").append("mnopqrst\\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			        String x = buf.toString();
 			    }
-			
+
 			    public void testAppendingNonString() {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n");
@@ -766,7 +783,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf.append(3);
 			        String x = buf.toString();
 			    }
-			
+
 			    public void testInconsistentNLS() {
 			        StringBuffer buf = new StringBuffer();
 			        buf.append("abcdef\\n");
