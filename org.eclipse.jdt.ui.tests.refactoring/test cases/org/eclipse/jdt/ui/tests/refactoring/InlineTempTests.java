@@ -290,7 +290,6 @@ public class InlineTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
-	@Ignore("https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1552")
 	public void test31() throws Exception{
 		helper1(8, 30, 8, 30);
 	}
