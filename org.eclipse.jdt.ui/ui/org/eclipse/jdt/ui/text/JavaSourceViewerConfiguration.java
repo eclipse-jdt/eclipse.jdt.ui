@@ -462,7 +462,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			assistant.setContentAssistProcessor(javadocProcessor, IJavaPartitions.JAVA_DOC);
 
 			ContentAssistProcessor markdownProcessor= new JavadocCompletionProcessor(getEditor(), assistant);
-			assistant.setContentAssistProcessor(javadocProcessor, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
+			assistant.setContentAssistProcessor(markdownProcessor, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
 
 			ContentAssistProcessor multiLineStringProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_MULTI_LINE_STRING);
 			assistant.setContentAssistProcessor(multiLineStringProcessor, IJavaPartitions.JAVA_MULTI_LINE_STRING);
