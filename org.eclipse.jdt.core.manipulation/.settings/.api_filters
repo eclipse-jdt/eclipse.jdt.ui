@@ -31,4 +31,12 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="proposals/org/eclipse/jdt/ui/text/IJavaPartitions.java" type="org.eclipse.jdt.ui.text.IJavaPartitions">
+        <filter id="403767336">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.text.IJavaPartitions"/>
+                <message_argument value="JAVA_MARKDOWN_COMMENT"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>
