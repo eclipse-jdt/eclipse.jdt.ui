@@ -414,6 +414,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return copy;
 	}
 
+	@SuppressWarnings("unused")
 	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference, TextEditGroup groupDesc) throws JavaModelException {
 		VariableDeclaration varDecl= getVariableDeclaration();
 		Expression initializer= varDecl.getInitializer();
@@ -704,6 +705,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return ast.newName(qualifiedName.toString());
 	}
 
+	@SuppressWarnings("unused")
 	private String createParameterizedInvocation(Expression invocation, ITypeBinding[] typeArguments, CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
 		ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
