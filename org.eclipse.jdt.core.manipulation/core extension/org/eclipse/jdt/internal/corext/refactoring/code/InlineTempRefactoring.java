@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -82,13 +81,11 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -417,6 +414,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return copy;
 	}
 
+	@SuppressWarnings("unused")
 	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference, TextEditGroup groupDesc) throws JavaModelException {
 		VariableDeclaration varDecl= getVariableDeclaration();
 		Expression initializer= varDecl.getInitializer();
@@ -427,18 +425,19 @@ public class InlineTempRefactoring extends Refactoring {
 				return replaceClashingNames(rewrite, groupDesc, initializer, replacements);
 			}
 		}
-		ASTNode referenceContext= reference.getParent();
-		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
-			if (!(referenceContext instanceof VariableDeclarationFragment)
-					&& !(referenceContext instanceof SingleVariableDeclaration)
-					&& !(referenceContext instanceof Assignment)) {
-				ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(initializer);
-				if (typeArguments != null) {
-					String newSource= createParameterizedInvocation(initializer, typeArguments, rewrite);
-					return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
-				}
-			}
-		}
+// TODO: rework casting logic to mark the location and do casting after testing new source for failure
+//		ASTNode referenceContext= reference.getParent();
+//		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
+//			if (!(referenceContext instanceof VariableDeclarationFragment)
+//					&& !(referenceContext instanceof SingleVariableDeclaration)
+//					&& !(referenceContext instanceof Assignment)) {
+//				ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(initializer);
+//				if (typeArguments != null) {
+//					String newSource= createParameterizedInvocation(initializer, typeArguments, rewrite);
+//					return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
+//				}
+//			}
+//		}
 
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
 		AST ast= rewrite.getAST();
@@ -706,6 +705,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return ast.newName(qualifiedName.toString());
 	}
 
+	@SuppressWarnings("unused")
 	private String createParameterizedInvocation(Expression invocation, ITypeBinding[] typeArguments, CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
 		ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
