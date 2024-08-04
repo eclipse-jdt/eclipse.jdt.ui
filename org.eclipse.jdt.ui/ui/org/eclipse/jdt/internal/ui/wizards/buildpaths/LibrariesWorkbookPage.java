@@ -782,63 +782,71 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				canEditEncoding= !attribute.isNonModifiable() && !attribute.isNotSupported();
 			}
 		}
-		if (CPListElement.SOURCEATTACHMENT.equals(key)) {
-			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry(), canEditEncoding);
-			if (result != null) {
-				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
-				selElement.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, SourceAttachmentBlock.getSourceAttachmentEncoding(result));
-				String[] changedAttributes= { CPListElement.SOURCEATTACHMENT, CPListElement.SOURCE_ATTACHMENT_ENCODING };
-				attributeUpdated(selElement, changedAttributes);
-				fLibrariesList.refresh(elem);
-				fLibrariesList.update(selElement); // image
-				fClassPathList.refresh(); // images
-				updateEnabledState();
-			}
-		} else if (CPListElement.ACCESSRULES.equals(key)) {
-			AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, fCurrJProject, fPageContainer != null);
-			int res= dialog.open();
-			if (res == Window.OK || res == AccessRulesDialog.SWITCH_PAGE) {
-				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
-				String[] changedAttributes= { CPListElement.ACCESSRULES };
-				attributeUpdated(selElement, changedAttributes);
-
-				fLibrariesList.refresh(elem);
-				fClassPathList.dialogFieldChanged(); // validate
-				updateEnabledState();
-
-				if (res == AccessRulesDialog.SWITCH_PAGE) { // switch after updates and validation
-					dialog.performPageSwitch(fPageContainer);
+		switch (key) {
+			case CPListElement.SOURCEATTACHMENT: {
+				IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry(), canEditEncoding);
+				if (result != null) {
+					selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
+					selElement.setAttribute(CPListElement.SOURCE_ATTACHMENT_ENCODING, SourceAttachmentBlock.getSourceAttachmentEncoding(result));
+					String[] changedAttributes= { CPListElement.SOURCEATTACHMENT, CPListElement.SOURCE_ATTACHMENT_ENCODING };
+					attributeUpdated(selElement, changedAttributes);
+					fLibrariesList.refresh(elem);
+					fLibrariesList.update(selElement); // image
+					fClassPathList.refresh(); // images
+					updateEnabledState();
 				}
+				break;
 			}
-		} else if (CPListElement.MODULE.equals(key)) {
-			boolean wasModular= selElement.getAttribute(CPListElement.MODULE) != null;
-			if (showModuleDialog(getShell(), elem)) {
-				String[] changedAttributes= { CPListElement.MODULE };
-				attributeUpdated(selElement, changedAttributes);
-				if (hasRootNodes()) {
-					boolean isModular= selElement.getAttribute(CPListElement.MODULE) != null;
-					RootNodeChange direction= RootNodeChange.fromOldAndNew(wasModular, isModular);
-					if (direction != RootNodeChange.NoChange) {
-						moveCPElementAcrossNode(fLibrariesList, selElement, direction);
+			case CPListElement.ACCESSRULES: {
+				AccessRulesDialog dialog= new AccessRulesDialog(getShell(), selElement, fCurrJProject, fPageContainer != null);
+				int res= dialog.open();
+				if (res == Window.OK || res == AccessRulesDialog.SWITCH_PAGE) {
+					selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
+					String[] changedAttributes= { CPListElement.ACCESSRULES };
+					attributeUpdated(selElement, changedAttributes);
+
+					fLibrariesList.refresh(elem);
+					fClassPathList.dialogFieldChanged(); // validate
+					updateEnabledState();
+
+					if (res == AccessRulesDialog.SWITCH_PAGE) { // switch after updates and validation
+						dialog.performPageSwitch(fPageContainer);
 					}
 				}
-				fLibrariesList.refresh(elem);
-				fClassPathList.dialogFieldChanged(); // validate
-				updateEnabledState();
+				break;
 			}
-		} else {
-			if (editCustomAttribute(getShell(), elem)) {
-				String[] changedAttributes= { key };
-				attributeUpdated(selElement, changedAttributes);
-				if(CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
-					fLibrariesList.refresh(elem.getParent());
-				} else {
+			case CPListElement.MODULE: {
+				boolean wasModular= selElement.getAttribute(CPListElement.MODULE) != null;
+				if (showModuleDialog(getShell(), elem)) {
+					String[] changedAttributes= { CPListElement.MODULE };
+					attributeUpdated(selElement, changedAttributes);
+					if (hasRootNodes()) {
+						boolean isModular= selElement.getAttribute(CPListElement.MODULE) != null;
+						RootNodeChange direction= RootNodeChange.fromOldAndNew(wasModular, isModular);
+						if (direction != RootNodeChange.NoChange) {
+							moveCPElementAcrossNode(fLibrariesList, selElement, direction);
+						}
+					}
 					fLibrariesList.refresh(elem);
+					fClassPathList.dialogFieldChanged(); // validate
+					updateEnabledState();
 				}
-				fClassPathList.dialogFieldChanged(); // validate
-				updateEnabledState();
-				checkAttributeEffect(key, fCurrJProject);
+				break;
 			}
+			default:
+				if (editCustomAttribute(getShell(), elem)) {
+					String[] changedAttributes= { key };
+					attributeUpdated(selElement, changedAttributes);
+					if(CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
+						fLibrariesList.refresh(elem.getParent());
+					} else {
+						fLibrariesList.refresh(elem);
+					}
+					fClassPathList.dialogFieldChanged(); // validate
+					updateEnabledState();
+					checkAttributeEffect(key, fCurrJProject);
+				}
+				break;
 		}
 	}
 

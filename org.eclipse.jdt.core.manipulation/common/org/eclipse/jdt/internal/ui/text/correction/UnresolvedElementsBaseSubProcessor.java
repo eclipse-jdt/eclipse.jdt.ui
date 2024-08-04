@@ -2214,27 +2214,35 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		IMethodBinding recursiveConstructor= null;
 
 		int type= selectedNode.getNodeType();
-		if (type == ASTNode.CLASS_INSTANCE_CREATION) {
-			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
-
-			ITypeBinding binding= creation.getType().resolveBinding();
-			if (binding != null) {
-				targetBinding= binding;
-				arguments= creation.arguments();
+		switch (type) {
+			case ASTNode.CLASS_INSTANCE_CREATION: {
+				ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
+				ITypeBinding binding= creation.getType().resolveBinding();
+				if (binding != null) {
+					targetBinding= binding;
+					arguments= creation.arguments();
+				}
+				break;
 			}
-		} else if (type == ASTNode.SUPER_CONSTRUCTOR_INVOCATION) {
-			ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
-			if (typeBinding != null && !typeBinding.isAnonymous()) {
-				targetBinding= typeBinding.getSuperclass();
-				arguments= ((SuperConstructorInvocation) selectedNode).arguments();
+			case ASTNode.SUPER_CONSTRUCTOR_INVOCATION: {
+				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+				if (typeBinding != null && !typeBinding.isAnonymous()) {
+					targetBinding= typeBinding.getSuperclass();
+					arguments= ((SuperConstructorInvocation) selectedNode).arguments();
+				}
+				break;
 			}
-		} else if (type == ASTNode.CONSTRUCTOR_INVOCATION) {
-			ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
-			if (typeBinding != null && !typeBinding.isAnonymous()) {
-				targetBinding= typeBinding;
-				arguments= ((ConstructorInvocation) selectedNode).arguments();
-				recursiveConstructor= ASTResolving.findParentMethodDeclaration(selectedNode).resolveBinding();
+			case ASTNode.CONSTRUCTOR_INVOCATION: {
+				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+				if (typeBinding != null && !typeBinding.isAnonymous()) {
+					targetBinding= typeBinding;
+					arguments= ((ConstructorInvocation) selectedNode).arguments();
+					recursiveConstructor= ASTResolving.findParentMethodDeclaration(selectedNode).resolveBinding();
+				}
+				break;
 			}
+			default:
+				break;
 		}
 
 		if (selectedNode.getParent() instanceof EnumConstantDeclaration enumNode) {

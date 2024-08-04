@@ -887,20 +887,28 @@ public class TypeInfoViewer {
 		fTable.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.keyCode == SWT.DEL) {
-					deleteHistoryEntry();
-				} else if (e.keyCode == SWT.ARROW_DOWN) {
-					int index= fTable.getSelectionIndex();
-					if (index == fDashLineIndex - 1) {
-						e.doit= false;
-						setTableSelection(index + 2);
+				switch (e.keyCode) {
+					case SWT.DEL:
+						deleteHistoryEntry();
+						break;
+					case SWT.ARROW_DOWN: {
+						int index= fTable.getSelectionIndex();
+						if (index == fDashLineIndex - 1) {
+							e.doit= false;
+							setTableSelection(index + 2);
+						}
+						break;
 					}
-				} else if (e.keyCode == SWT.ARROW_UP) {
-					int index= fTable.getSelectionIndex();
-					if (fDashLineIndex != -1 && index == fDashLineIndex + 1) {
-						e.doit= false;
-						setTableSelection(index - 2);
+					case SWT.ARROW_UP: {
+						int index= fTable.getSelectionIndex();
+						if (fDashLineIndex != -1 && index == fDashLineIndex + 1) {
+							e.doit= false;
+							setTableSelection(index - 2);
+						}
+						break;
 					}
+					default:
+						break;
 				}
 			}
 		});

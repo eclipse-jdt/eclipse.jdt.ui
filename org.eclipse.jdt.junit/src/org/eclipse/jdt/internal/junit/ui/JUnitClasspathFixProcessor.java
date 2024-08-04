@@ -162,13 +162,24 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			res= JUNIT4;
 		} else if ("TestCase".equals(s) || "TestSuite".equals(s) || s.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			res= JUNIT3;
-		} else if ("Test".equals(s)) { //$NON-NLS-1$
-			res= JUNIT3 | JUNIT4 | JUNIT5;
-		} else if ("TestFactory".equals(s) || "Testable".equals(s) || "TestTemplate".equals(s) || "ParameterizedTest".equals(s) || "RepeatedTest".equals(s)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			res= JUNIT5;
-		} else if ("RunWith".equals(s)) { //$NON-NLS-1$
-			res= JUNIT4;
-		}
+		} else
+			switch (s) {
+				case "Test": //$NON-NLS-1$
+					res= JUNIT3 | JUNIT4 | JUNIT5;
+					break;
+				case "TestFactory": //$NON-NLS-1$
+				case "Testable": //$NON-NLS-1$
+				case "TestTemplate": //$NON-NLS-1$
+				case "ParameterizedTest": //$NON-NLS-1$
+				case "RepeatedTest": //$NON-NLS-1$
+					res= JUNIT5;
+					break;
+				case "RunWith": //$NON-NLS-1$
+					res= JUNIT4;
+					break;
+				default:
+					break;
+			}
 		if (res != 0) {
 			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<>();
 			if ((res & JUNIT5) != 0 && JUnitStubUtility.is18OrHigher(project)) {

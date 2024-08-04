@@ -893,62 +893,72 @@ public class CallInliner {
 
 		ASTNode container= parentStatement.getParent();
 		int type= container.getNodeType();
-		if (type == ASTNode.BLOCK) {
-			Block block= (Block)container;
-			fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
-		} else if (type == ASTNode.SWITCH_STATEMENT) {
-			SwitchStatement switchStatement= (SwitchStatement)container;
-			fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
-			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
-		} else if (type == ASTNode.SWITCH_EXPRESSION) {
-			SwitchExpression switchExpression= (SwitchExpression)container;
-			fListRewrite= fRewrite.getListRewrite(switchExpression, SwitchExpression.STATEMENTS_PROPERTY);
-			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
-		} else if (isControlStatement(container) || type == ASTNode.LABELED_STATEMENT) {
-			fNeedsStatement= true;
-			if (nos > 1 || needsBlockAroundDanglingIf()) {
-				Block block= fInvocation.getAST().newBlock();
-				fInsertionIndex= 0;
-				Statement currentStatement= null;
-				switch(type) {
-					case ASTNode.LABELED_STATEMENT:
-						currentStatement= ((LabeledStatement)container).getBody();
-						break;
-					case ASTNode.FOR_STATEMENT:
-						currentStatement= ((ForStatement)container).getBody();
-						break;
-					case ASTNode.ENHANCED_FOR_STATEMENT:
-						currentStatement= ((EnhancedForStatement)container).getBody();
-						break;
-					case ASTNode.WHILE_STATEMENT:
-						currentStatement= ((WhileStatement)container).getBody();
-						break;
-					case ASTNode.DO_STATEMENT:
-						currentStatement= ((DoStatement)container).getBody();
-						break;
-					case ASTNode.IF_STATEMENT:
-						IfStatement node= (IfStatement)container;
-						Statement thenPart= node.getThenStatement();
-						if (fTargetNode == thenPart || ASTNodes.isParent(fTargetNode, thenPart)) {
-							currentStatement= thenPart;
-						} else {
-							currentStatement= node.getElseStatement();
-						}
-						break;
-				}
-				Assert.isNotNull(currentStatement);
-				fRewrite.replace(currentStatement, block, null);
+		switch (type) {
+			case ASTNode.BLOCK: {
+				Block block= (Block)container;
 				fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				// The method to be inlined is not the body of the control statement.
-				if (currentStatement != fTargetNode) {
-					fListRewrite.insertLast(fRewrite.createCopyTarget(currentStatement), null);
-				} else {
-					// We can't replace a copy with something else. So we
-					// have to insert all statements to be inlined.
-					fTargetNode= null;
-				}
+				fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
+				break;
 			}
+			case ASTNode.SWITCH_STATEMENT: {
+				SwitchStatement switchStatement= (SwitchStatement)container;
+				fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+				fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
+				break;
+			}
+			case ASTNode.SWITCH_EXPRESSION: {
+				SwitchExpression switchExpression= (SwitchExpression)container;
+				fListRewrite= fRewrite.getListRewrite(switchExpression, SwitchExpression.STATEMENTS_PROPERTY);
+				fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
+				break;
+			}
+			default:
+				if (isControlStatement(container) || type == ASTNode.LABELED_STATEMENT) {
+					fNeedsStatement= true;
+					if (nos > 1 || needsBlockAroundDanglingIf()) {
+						Block block= fInvocation.getAST().newBlock();
+						fInsertionIndex= 0;
+						Statement currentStatement= null;
+						switch(type) {
+							case ASTNode.LABELED_STATEMENT:
+								currentStatement= ((LabeledStatement)container).getBody();
+								break;
+							case ASTNode.FOR_STATEMENT:
+								currentStatement= ((ForStatement)container).getBody();
+								break;
+							case ASTNode.ENHANCED_FOR_STATEMENT:
+								currentStatement= ((EnhancedForStatement)container).getBody();
+								break;
+							case ASTNode.WHILE_STATEMENT:
+								currentStatement= ((WhileStatement)container).getBody();
+								break;
+							case ASTNode.DO_STATEMENT:
+								currentStatement= ((DoStatement)container).getBody();
+								break;
+							case ASTNode.IF_STATEMENT:
+								IfStatement node= (IfStatement)container;
+								Statement thenPart= node.getThenStatement();
+								if (fTargetNode == thenPart || ASTNodes.isParent(fTargetNode, thenPart)) {
+									currentStatement= thenPart;
+								} else {
+									currentStatement= node.getElseStatement();
+								}
+								break;
+						}
+						Assert.isNotNull(currentStatement);
+						fRewrite.replace(currentStatement, block, null);
+						fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+						// The method to be inlined is not the body of the control statement.
+						if (currentStatement != fTargetNode) {
+							fListRewrite.insertLast(fRewrite.createCopyTarget(currentStatement), null);
+						} else {
+							// We can't replace a copy with something else. So we
+							// have to insert all statements to be inlined.
+							fTargetNode= null;
+						}
+					}
+				}
+				break;
 		}
 		// We only insert one new statement or we delete the existing call.
 		// So there is no need to have an insertion index.

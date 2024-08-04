@@ -1137,58 +1137,66 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 				CharSequence inherited= fJavadocLookup.getInheritedMainDescription(fMethod);
 				return handleInherited(inherited);
 
-			} else if (TagElement.TAG_PARAM.equals(blockTagName)) {
-				List<? extends ASTNode> fragments= blockTag.fragments();
-				int size= fragments.size();
-				if (size > 0) {
-					Object first= fragments.get(0);
-					if (first instanceof SimpleName) {
-						String name= ((SimpleName) first).getIdentifier();
-						String[] parameterNames= fMethod.getParameterNames();
-						for (int i= 0; i < parameterNames.length; i++) {
-							if (name.equals(parameterNames[i])) {
-								CharSequence inherited= fJavadocLookup.getInheritedParamDescription(fMethod, i);
-								return handleInherited(inherited);
-							}
-						}
-					} else if (size > 2 && first instanceof TextElement) {
-						String firstText= ((TextElement) first).getText();
-						if ("<".equals(firstText)) { //$NON-NLS-1$
-							Object second= fragments.get(1);
-							Object third= fragments.get(2);
-							if (second instanceof SimpleName && third instanceof TextElement) {
-								String thirdText= ((TextElement) third).getText();
-								if (">".equals(thirdText)) { //$NON-NLS-1$
-									String name= ((SimpleName) second).getIdentifier();
-									ITypeParameter[] typeParameters= fMethod.getTypeParameters();
-									for (int i= 0; i < typeParameters.length; i++) {
-										ITypeParameter typeParameter= typeParameters[i];
-										if (name.equals(typeParameter.getElementName())) {
-											CharSequence inherited= getInheritedTypeParamDescription(i);
-											return handleInherited(inherited);
+			} else
+				switch (blockTagName) {
+					case TagElement.TAG_PARAM: {
+						List<? extends ASTNode> fragments= blockTag.fragments();
+						int size= fragments.size();
+						if (size > 0) {
+							Object first= fragments.get(0);
+							if (first instanceof SimpleName) {
+								String name= ((SimpleName) first).getIdentifier();
+								String[] parameterNames= fMethod.getParameterNames();
+								for (int i= 0; i < parameterNames.length; i++) {
+									if (name.equals(parameterNames[i])) {
+										CharSequence inherited= fJavadocLookup.getInheritedParamDescription(fMethod, i);
+										return handleInherited(inherited);
+									}
+								}
+							} else if (size > 2 && first instanceof TextElement) {
+								String firstText= ((TextElement) first).getText();
+								if ("<".equals(firstText)) { //$NON-NLS-1$
+									Object second= fragments.get(1);
+									Object third= fragments.get(2);
+									if (second instanceof SimpleName && third instanceof TextElement) {
+										String thirdText= ((TextElement) third).getText();
+										if (">".equals(thirdText)) { //$NON-NLS-1$
+											String name= ((SimpleName) second).getIdentifier();
+											ITypeParameter[] typeParameters= fMethod.getTypeParameters();
+											for (int i= 0; i < typeParameters.length; i++) {
+												ITypeParameter typeParameter= typeParameters[i];
+												if (name.equals(typeParameter.getElementName())) {
+													CharSequence inherited= getInheritedTypeParamDescription(i);
+													return handleInherited(inherited);
+												}
+											}
 										}
 									}
 								}
 							}
 						}
+						break;
 					}
-				}
-
-			} else if (TagElement.TAG_RETURN.equals(blockTagName)) {
-				CharSequence inherited= fJavadocLookup.getInheritedReturnDescription(fMethod);
-				return handleInherited(inherited);
-
-			} else if (TagElement.TAG_THROWS.equals(blockTagName) || TagElement.TAG_EXCEPTION.equals(blockTagName)) {
-				List<? extends ASTNode> fragments= blockTag.fragments();
-				if (fragments.size() > 0) {
-					Object first= fragments.get(0);
-					if (first instanceof Name) {
-						String name= ASTNodes.getSimpleNameIdentifier((Name) first);
-						CharSequence inherited= fJavadocLookup.getInheritedExceptionDescription(fMethod, name);
+					case TagElement.TAG_RETURN: {
+						CharSequence inherited= fJavadocLookup.getInheritedReturnDescription(fMethod);
 						return handleInherited(inherited);
 					}
+					case TagElement.TAG_THROWS:
+					case TagElement.TAG_EXCEPTION: {
+						List<? extends ASTNode> fragments= blockTag.fragments();
+						if (fragments.size() > 0) {
+							Object first= fragments.get(0);
+							if (first instanceof Name) {
+								String name= ASTNodes.getSimpleNameIdentifier((Name) first);
+								CharSequence inherited= fJavadocLookup.getInheritedExceptionDescription(fMethod, name);
+								return handleInherited(inherited);
+							}
+						}
+						break;
+					}
+					default:
+						break;
 				}
-			}
 		} catch (JavaModelException e) {
 			JavaManipulationPlugin.log(e);
 		}

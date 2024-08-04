@@ -63,31 +63,39 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater2 {
 		private boolean processJavaDelta(IJavaElementDelta delta) {
 			IJavaElement jElement= delta.getElement();
 			int type= jElement.getElementType();
-			if (type == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-				int kind= delta.getKind();
-				if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED) {
-					// this can happen without "classpath changed" event, if the directory corresponding to an optional source folder is created.
-					triggerUpdate();
-					return true;
-				}
-				// do not traverse into children
-			} else if (type == IJavaElement.JAVA_PROJECT) {
-				int kind= delta.getKind();
-				int flags= delta.getFlags();
-				if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED
-						|| (flags & (IJavaElementDelta.F_OPENED | IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_CLASSPATH_CHANGED)) != 0) {
-					triggerUpdate();
-					return true;
-				}
-				for (IJavaElementDelta element : delta.getAffectedChildren()) {
-					if (processJavaDelta(element))
+			switch (type) {
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
+					int kind= delta.getKind();
+					if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED) {
+						// this can happen without "classpath changed" event, if the directory corresponding to an optional source folder is created.
+						triggerUpdate();
 						return true;
+					}
+					// do not traverse into children
+					break;
 				}
-			} else if (type == IJavaElement.JAVA_MODEL) {
-				for (IJavaElementDelta element : delta.getAffectedChildren()) {
-					if (processJavaDelta(element))
+				case IJavaElement.JAVA_PROJECT: {
+					int kind= delta.getKind();
+					int flags= delta.getFlags();
+					if (kind == IJavaElementDelta.ADDED || kind == IJavaElementDelta.REMOVED
+							|| (flags & (IJavaElementDelta.F_OPENED | IJavaElementDelta.F_CLOSED | IJavaElementDelta.F_CLASSPATH_CHANGED)) != 0) {
+						triggerUpdate();
 						return true;
+					}
+					for (IJavaElementDelta element : delta.getAffectedChildren()) {
+						if (processJavaDelta(element))
+							return true;
+					}
+					break;
 				}
+				case IJavaElement.JAVA_MODEL:
+					for (IJavaElementDelta element : delta.getAffectedChildren()) {
+						if (processJavaDelta(element))
+							return true;
+					}
+					break;
+				default:
+					break;
 			}
 			return false;
 		}
