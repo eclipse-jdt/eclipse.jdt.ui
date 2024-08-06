@@ -1155,7 +1155,7 @@ public final class JavaModelUtil {
 				if(JavaCore.isJavaSourceVersionSupportedByCompiler(compliance)) {
 					return compliance;
 				}
-				return JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+				return JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
 			}
 		}
 
@@ -1192,7 +1192,7 @@ public final class JavaModelUtil {
 		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;
 		}
-		return JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+		return JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
 	}
 
 	/**
