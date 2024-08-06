@@ -442,7 +442,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fJRE50InfoText= new Link(infoComposite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
 		// set a text: not the real one, just for layouting
-		String versionLabel= getVersionLabel(JavaCore.getFirstJavaSourceVersionSupportedByCompiler());
+		String versionLabel= getVersionLabel(JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first());
 		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { versionLabel, versionLabel }));
 		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
@@ -1170,8 +1170,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					reportPreview= WARNING;
 					assertAsId= ERROR;
 					enumAsId= ERROR;
-					source= JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
-					target= JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+					source= JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
+					target= JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
 				}
 			}
 		} else {
