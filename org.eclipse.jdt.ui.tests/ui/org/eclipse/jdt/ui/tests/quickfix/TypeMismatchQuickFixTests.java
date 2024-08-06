@@ -1493,13 +1493,29 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
 		String expected1= """
+			package test1;
+			import java.lang.annotation.Annotation;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public <T extends Annotation> Annotation getAnnotation(Class<T> annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
 			package test1;
 			import java.lang.annotation.Annotation;
 			import java.lang.reflect.AccessibleObject;
@@ -1513,7 +1529,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 			}
 			""";
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	@Test
@@ -1536,7 +1552,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1544,18 +1560,370 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
+			import java.lang.annotation.Annotation;
 			import java.lang.reflect.AccessibleObject;
 			public class E {
 			    void m() {
 			        new AccessibleObject() {
-			            public T getAnnotation(Class annotationClass) {
+			            public Annotation getAnnotation(Class annotationClass) {
 			            }
 			        };
 			    }
 			}
 			""";
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.lang.annotation.Annotation;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> T myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Class asdf) {
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> T myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					List myMethod(Class asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> T myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<T extends List<Class<String>>> T myMethod(Class<T> asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview3= getPreviewContent((CUCorrectionProposal)proposals.get(2));
+
+		String expected3= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> void myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Class asdf) {
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2 , expected3});
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Interfacable asdf) {
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					List myMethod(Interfacable asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview3= getPreviewContent((CUCorrectionProposal)proposals.get(2));
+
+		String expected3= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> void myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Interfacable asdf) {
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2 , expected3 });
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T extends List<String>> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U, T extends List<String>> void myMethod(Class<U> clazz) {
+
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent((CUCorrectionProposal)proposals.get(0));
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T extends List<String>> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U, T extends List<String>> T myMethod(Class<U> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T extends List<String>> void myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U, T extends List<String>> void myMethod(Class<U> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> void myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent((CUCorrectionProposal)proposals.get(0));
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> Object myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> M myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		String preview3= getPreviewContent((CUCorrectionProposal)proposals.get(2));
+
+		String expected3= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> void myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> void myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 
 	@Test
