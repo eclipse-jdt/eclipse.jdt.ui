@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,6 +49,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -63,6 +64,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -81,13 +83,16 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -111,6 +116,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComme
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
@@ -134,6 +140,9 @@ public class InlineTempRefactoring extends Refactoring {
 	private SimpleName[] fReferences;
 	private CompilationUnit fASTRoot;
 	private boolean fCheckResultForCompileProblems;
+	private Set<SimpleName> fReferencesNeedingParams= new HashSet<>();
+	private Map<SimpleName, ITrackedNodePosition> fTrackedReferences= new HashMap<>();
+	private Map<SimpleName, ISourceRange> fResolvedTrackedReferences= new HashMap<>();
 	private CompilationUnitChange fChange;
 
 	/**
@@ -331,9 +340,67 @@ public class InlineTempRefactoring extends Refactoring {
 			inlineTemp(cuRewrite);
 			removeTemp(cuRewrite);
 
+			// If we have some tracked references, it means there were implied type parameters
+			// in the in-line source and we might have to add these when we in-line, but don't
+			// know.  To tell, we will have to compile the new source and look for type mismatch
+			// errors and then line them up with our tracked positions.  To get the tracked
+			// positions, we need to do this ahead of the createChange() call below which
+			// will not allow us to do so after.
+			IDocument doc= null;
+			if (!fTrackedReferences.isEmpty()) {
+				doc = new Document(fCu.getSource());
+				try {
+					cuRewrite.getASTRewrite().rewriteAST().apply(doc);
+					for (Entry<SimpleName, ITrackedNodePosition> entry : fTrackedReferences.entrySet()) {
+						SimpleName name= entry.getKey();
+						ITrackedNodePosition position= entry.getValue();
+						int start= position.getStartPosition();
+						int length= position.getLength();
+						ISourceRange range= new SourceRange(start, length);
+						fResolvedTrackedReferences.put(name, range);
+					}
+				} catch (MalformedTreeException | BadLocationException e) {
+					// do nothing
+				}
+			}
+
 			fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, Progress.subMonitor(pm, 1));
 
-			return fCheckResultForCompileProblems ? RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fASTRoot, pm) : new RefactoringStatus();
+			if (fCheckResultForCompileProblems) {
+				RefactoringStatus result= doc == null ? RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fASTRoot, pm)
+						: RefactoringAnalyzeUtil.checkNewSource(doc, fCu, fASTRoot, pm);
+				if (!result.isOK()) {
+					for (RefactoringStatusEntry entry : result.getEntries()) {
+						JavaStringStatusContext context= (JavaStringStatusContext) entry.getContext();
+						if (entry.getMessage().startsWith("Type mismatch:")) { //$NON-NLS-1$
+							ISourceRange range= context.getSourceRange();
+							int rangeEnd= range.getOffset() + range.getLength();
+							try {
+								for (Entry<SimpleName, ISourceRange> trackedEntry : fResolvedTrackedReferences.entrySet()) {
+									int trackedEntryEnd= trackedEntry.getValue().getOffset() + trackedEntry.getValue().getLength();
+									if (trackedEntry.getValue().getOffset() >= range.getOffset() &&
+											trackedEntryEnd <= rangeEnd) {
+										fReferencesNeedingParams.add(trackedEntry.getKey());
+									}
+								}
+							} catch (MalformedTreeException e) {
+								// do nothing
+							}
+						}
+					}
+					// if we found candidates to add type parameters, redo the refactoring and this
+					// time add the type parameters
+					if (!fReferencesNeedingParams.isEmpty()) {
+						cuRewrite.clearASTRewrite();
+						inlineTemp(cuRewrite);
+						removeTemp(cuRewrite);
+						fChange= cuRewrite.createChange(RefactoringCoreMessages.InlineTempRefactoring_inline, false, Progress.subMonitor(pm, 1));
+						result= RefactoringAnalyzeUtil.checkNewSource(fChange, fCu, fASTRoot, pm);
+					}
+					return result;
+				}
+			}
+			return new RefactoringStatus();
 		} finally {
 			pm.done();
 		}
@@ -414,7 +481,6 @@ public class InlineTempRefactoring extends Refactoring {
 		return copy;
 	}
 
-	@SuppressWarnings("unused")
 	private Expression getModifiedInitializerSource(CompilationUnitRewrite rewrite, SimpleName reference, TextEditGroup groupDesc) throws JavaModelException {
 		VariableDeclaration varDecl= getVariableDeclaration();
 		Expression initializer= varDecl.getInitializer();
@@ -425,21 +491,29 @@ public class InlineTempRefactoring extends Refactoring {
 				return replaceClashingNames(rewrite, groupDesc, initializer, replacements);
 			}
 		}
-// TODO: rework casting logic to mark the location and do casting after testing new source for failure
-//		ASTNode referenceContext= reference.getParent();
-//		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
-//			if (!(referenceContext instanceof VariableDeclarationFragment)
-//					&& !(referenceContext instanceof SingleVariableDeclaration)
-//					&& !(referenceContext instanceof Assignment)) {
-//				ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(initializer);
-//				if (typeArguments != null) {
-//					String newSource= createParameterizedInvocation(initializer, typeArguments, rewrite);
-//					return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
-//				}
-//			}
-//		}
+		ASTNode referenceContext= reference.getParent();
+		boolean trackExpression= false;
+		if (Invocations.isResolvedTypeInferredFromExpectedType(initializer)) {
+			if (!(referenceContext instanceof VariableDeclarationFragment)
+					&& !(referenceContext instanceof SingleVariableDeclaration)
+					&& !(referenceContext instanceof Assignment)) {
+				ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(initializer);
+				if (typeArguments != null) {
+					fCheckResultForCompileProblems= true;
+					if (fReferencesNeedingParams.contains(reference)) {
+						String newSource= createParameterizedInvocation(initializer, typeArguments, rewrite);
+						return (Expression) rewrite.getASTRewrite().createStringPlaceholder(newSource, initializer.getNodeType());
+					} else {
+						trackExpression= true;
+					}
+				}
+			}
+		}
 
 		Expression copy= (Expression) rewrite.getASTRewrite().createCopyTarget(initializer);
+		if (trackExpression) {
+			fTrackedReferences.put(reference, rewrite.getASTRewrite().track(reference.getParent()));
+		}
 		AST ast= rewrite.getAST();
 		if (NecessaryParenthesesChecker.needsParentheses(initializer, reference.getParent(), reference.getLocationInParent())) {
 			ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
@@ -705,7 +779,6 @@ public class InlineTempRefactoring extends Refactoring {
 		return ast.newName(qualifiedName.toString());
 	}
 
-	@SuppressWarnings("unused")
 	private String createParameterizedInvocation(Expression invocation, ITypeBinding[] typeArguments, CompilationUnitRewrite cuRewrite) throws JavaModelException {
 		ASTRewrite rewrite= ASTRewrite.create(invocation.getAST());
 		ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);

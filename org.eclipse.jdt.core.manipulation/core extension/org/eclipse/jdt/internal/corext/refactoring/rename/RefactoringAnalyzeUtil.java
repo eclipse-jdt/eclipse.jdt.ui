@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -132,6 +133,18 @@ public class RefactoringAnalyzeUtil {
 	public static RefactoringStatus checkNewSource(CompilationUnitChange change, ICompilationUnit originalCu, CompilationUnit oldCuNode, IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
+		CompilationUnit newCuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(newCuSource, originalCu, true, true, pm);
+		IProblem[] newProblems= getIntroducedCompileProblems(newCuNode, oldCuNode);
+		for (IProblem problem : newProblems) {
+			if (problem.isError())
+				result.addEntry(new RefactoringStatusEntry(RefactoringStatus.ERROR, problem.getMessage(), new JavaStringStatusContext(newCuSource, SourceRangeFactory.create(problem))));
+		}
+		return result;
+	}
+
+	public static RefactoringStatus checkNewSource(IDocument change, ICompilationUnit originalCu, CompilationUnit oldCuNode, IProgressMonitor pm) {
+		RefactoringStatus result= new RefactoringStatus();
+		String newCuSource= change.get();
 		CompilationUnit newCuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(newCuSource, originalCu, true, true, pm);
 		IProblem[] newProblems= getIntroducedCompileProblems(newCuNode, oldCuNode);
 		for (IProblem problem : newProblems) {
