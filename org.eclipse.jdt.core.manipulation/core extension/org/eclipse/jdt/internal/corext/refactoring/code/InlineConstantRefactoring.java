@@ -61,7 +61,6 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -81,7 +80,6 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.Type;
@@ -92,7 +90,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -284,32 +281,33 @@ public class InlineConstantRefactoring extends Refactoring {
 				addExplicitTypeArgumentsIfNecessary(initializer);
 			}
 
-			private void addExplicitTypeArgumentsIfNecessary(Expression invocation) {
-				if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
-					ASTNode referenceContext= fNewLocation.getParent();
-					if (!(referenceContext instanceof VariableDeclarationFragment)
-							&& !(referenceContext instanceof SingleVariableDeclaration)
-							&& !(referenceContext instanceof Assignment)) {
-						ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(fInitializerRewrite, invocation);
-						for (ITypeBinding typeArgument2 : Invocations.getInferredTypeArguments(invocation)) {
-							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArgument2, fNewLocationCuRewrite.getAST(), fNewLocationContext, TypeLocation.TYPE_ARGUMENT);
-							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
-							typeArgsRewrite.insertLast(typeArgument, null);
-						}
-
-						if (invocation instanceof MethodInvocation) {
-							MethodInvocation methodInvocation= (MethodInvocation) invocation;
-							Expression expression= methodInvocation.getExpression();
-							if (expression == null) {
-								IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-								if (methodBinding != null) {
-									expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), fNewLocationContext));
-									fInitializerRewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
-								}
-							}
-						}
-					}
-				}
+			private void addExplicitTypeArgumentsIfNecessary(@SuppressWarnings("unused") Expression invocation) {
+// TODO: this requires additional logic, for example, mark these locations and recompile new source
+//				if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
+//					ASTNode referenceContext= fNewLocation.getParent();
+//					if (!(referenceContext instanceof VariableDeclarationFragment)
+//							&& !(referenceContext instanceof SingleVariableDeclaration)
+//							&& !(referenceContext instanceof Assignment)) {
+//						ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(fInitializerRewrite, invocation);
+//						for (ITypeBinding typeArgument2 : Invocations.getInferredTypeArguments(invocation)) {
+//							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArgument2, fNewLocationCuRewrite.getAST(), fNewLocationContext, TypeLocation.TYPE_ARGUMENT);
+//							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
+//							typeArgsRewrite.insertLast(typeArgument, null);
+//						}
+//
+//						if (invocation instanceof MethodInvocation) {
+//							MethodInvocation methodInvocation= (MethodInvocation) invocation;
+//							Expression expression= methodInvocation.getExpression();
+//							if (expression == null) {
+//								IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+//								if (methodBinding != null) {
+//									expression= fNewLocationCuRewrite.getAST().newName(fNewLocationCuRewrite.getImportRewrite().addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), fNewLocationContext));
+//									fInitializerRewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+//								}
+//							}
+//						}
+//					}
+//				}
 			}
 
 			@Override

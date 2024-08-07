@@ -17,12 +17,15 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -54,13 +57,17 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -273,9 +280,49 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				Type origReturnType= methodDecl.getReturnType2();
+
+				if (fNewType.isTypeVariable()) {
+					IMethodBinding realMethodBinding= fNewType.getDeclaringMethod();
+					ITypeBinding[] typeParameters= realMethodBinding.getTypeParameters();
+
+					if (!methodDecl.typeParameters().isEmpty()) {
+						Map<String, String> typeParamNameMap= new HashMap<>();
+						for (int i = 0; i < methodDecl.typeParameters().size(); i++) {
+							typeParamNameMap.put(typeParameters[i].getName(), ((List<TypeParameter>) methodDecl.typeParameters()).get(i).getName().toString());
+						}
+						String existingTypeVarIdent= typeParamNameMap.get(fNewType.getName());
+						type= ast.newSimpleType(ast.newSimpleName(existingTypeVarIdent));
+					} else {
+						// add type parameters as they appear in the parent method
+						// notably, if you add the type variables, you must add ALL of them.
+						// eg. if you have <T, U> T myMethod(Class<U> clazz)
+						// you cannot override it with <T> T myMethod(Class<String> clazz)
+						ListRewrite typeParameterRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.TYPE_PARAMETERS_PROPERTY);
+						for (ITypeBinding parameter : typeParameters) {
+							TypeParameter newTypeParameter= ast.newTypeParameter();
+							SimpleName newTypeParameterName= ast.newSimpleName(parameter.getName());
+							newTypeParameter.setName(newTypeParameterName);
+							Stream.of(parameter.getTypeBounds()) //
+								.forEach(bound -> {
+									newTypeParameter.typeBounds().add(getTypeNodeFromBinding(bound, ast, imports, context));
+								});
+							typeParameterRewrite.insertLast(newTypeParameter, null);
+						}
+
+						// Update the parameter types to match that of the resolved method.
+						// Some of the existing parameter types may be raw instead of containing the expected type parameters.
+						// Without inserting the type parameters in these cases, the signature will no longer match the overridden type.
+						for (int i = 0 ; i < methodDecl.parameters().size(); i++) {
+							SingleVariableDeclaration svd= (SingleVariableDeclaration)methodDecl.parameters().get(i);
+							rewrite.set(svd, SingleVariableDeclaration.TYPE_PROPERTY, getTypeNodeFromBinding(realMethodBinding.getParameterTypes()[i], ast, imports, context), null);
+						}
+					}
+				}
+
 				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
 				DimensionRewrite.removeAllChildren(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 				TypeAnnotationRewrite.removePureTypeAnnotations(methodDecl, MethodDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
+
 				// add javadoc tag
 				Javadoc javadoc= methodDecl.getJavadoc();
 				if (javadoc != null && origReturnType != null && origReturnType.isPrimitiveType()
@@ -524,6 +571,45 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 				argumentsRewrite.insertLast(argumentNode, null);
 			}
 		}
+	}
+
+	private Type getTypeNodeFromBinding(ITypeBinding typeBinding, AST ast, ImportRewrite importRewrite, ImportRewriteContext context) {
+
+		if (typeBinding.isWildcardType()) {
+			WildcardType wildcardType = ast.newWildcardType();
+			ITypeBinding bound = typeBinding.getBound();
+			if (bound != null) {
+				Type boundNode = getTypeNodeFromBinding(bound, ast, importRewrite, context);
+				wildcardType.setBound(boundNode);
+				wildcardType.setUpperBound(typeBinding.isUpperbound());
+			}
+			return wildcardType;
+		}
+
+		if (typeBinding.isArray()) {
+			Type elementTypeNode = getTypeNodeFromBinding(typeBinding.getElementType(), ast, importRewrite, context);
+			return ast.newArrayType(elementTypeNode, typeBinding.getDimensions());
+		}
+
+		if (typeBinding.isTypeVariable()) {
+			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
+		}
+
+		// import the simple/parameterized type if needed
+		importRewrite.addImport(typeBinding, ast, context, fTypeLocation);
+
+		// create the simple/parameterized
+		SimpleName simpleName = ast.newSimpleName(typeBinding.getErasure().getName());
+		SimpleType simpleType = ast.newSimpleType(simpleName);
+		if (typeBinding.isParameterizedType()) {
+			ParameterizedType parameterizedType = ast.newParameterizedType(simpleType);
+			for (ITypeBinding argument : typeBinding.getTypeArguments()) {
+				Type typeArgument = getTypeNodeFromBinding(argument, ast, importRewrite, context);
+				parameterizedType.typeArguments().add(typeArgument);
+			}
+			return parameterizedType;
+		}
+		return simpleType;
 	}
 
 }
