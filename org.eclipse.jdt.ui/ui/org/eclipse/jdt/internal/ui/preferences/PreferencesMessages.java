@@ -554,6 +554,9 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_compliance_follows_EE_with_EE_label;
 	public static String ComplianceConfigurationBlock_compliance_group_label;
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
+	public static String ComplianceConfigurationBlock_unsupported_compliance;
+	public static String ComplianceConfigurationBlock_unsupported_source;
+	public static String ComplianceConfigurationBlock_unsupported_target;
 	public static String CodeStylePreferencePage_title;
 	public static String CodeTemplatesPreferencePage_title;
 	public static String NameConventionConfigurationBlock_field_label;

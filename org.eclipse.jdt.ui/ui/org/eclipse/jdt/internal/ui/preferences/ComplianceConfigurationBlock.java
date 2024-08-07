@@ -804,6 +804,27 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		String source= getValue(PREF_SOURCE_COMPATIBILITY);
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 
+		String firstSupported = JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
+
+		// compliance must be supported
+		if (JavaModelUtil.isVersionLessThan(compliance, firstSupported)) {
+			String warning = Messages.format(PreferencesMessages.ComplianceConfigurationBlock_unsupported_compliance, new String[] { firstSupported });
+			setValue(PREF_COMPLIANCE, firstSupported);
+			status.setWarning(warning);
+		}
+		// source must be supported
+		if (JavaModelUtil.isVersionLessThan(source, firstSupported)) {
+			String warning = Messages.format(PreferencesMessages.ComplianceConfigurationBlock_unsupported_source, new String[] { firstSupported });
+			setValue(PREF_SOURCE_COMPATIBILITY, firstSupported);
+			status.setWarning(warning);
+		}
+		// target must be supported
+		if (JavaModelUtil.isVersionLessThan(target, firstSupported)) {
+			String warning = Messages.format(PreferencesMessages.ComplianceConfigurationBlock_unsupported_target, new String[] { firstSupported });
+			setValue(PREF_CODEGEN_TARGET_PLATFORM, firstSupported);
+			status.setWarning(warning);
+		}
+
 		// compliance must not be smaller than source or target
 		if (JavaModelUtil.isVersionLessThan(compliance, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_src_greater_compliance);
@@ -1158,7 +1179,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (options == null)
 			return DISABLED;
 		String complianceOption= options.get(JavaCore.COMPILER_COMPLIANCE);
-		if (JavaCore.compareJavaVersions(complianceOption, JavaCore.VERSION_10) > 0) {
+		if (JavaCore.compareJavaVersions(complianceOption, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first()) < 0) {
+			return DISABLED;
+		} else if (JavaCore.compareJavaVersions(complianceOption, JavaCore.VERSION_10) > 0) {
 			return checkDefaults(PREFS_COMPLIANCE_11_OR_HIGHER, options);
 		} else {
 			return checkDefaults(PREFS_COMPLIANCE, options);
