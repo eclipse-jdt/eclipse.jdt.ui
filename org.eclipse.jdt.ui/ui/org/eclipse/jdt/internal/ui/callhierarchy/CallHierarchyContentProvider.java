@@ -46,6 +46,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/**
+ * Content provider for call hierarchy.
+ */
 public class CallHierarchyContentProvider implements ITreeContentProvider {
 
 	/**
@@ -58,10 +61,11 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * </p>
 	 * @since 3.5
 	 */
-	public static final String OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS = "CallHierarchy.defaultExpandWithConstructors"; //$NON-NLS-1$
+	public static final String OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS
+		= "CallHierarchy.defaultExpandWithConstructors"; //$NON-NLS-1$
 
 	/** Empty object array. */
-	private final static Object[] EMPTY_ARRAY = new Object[0];
+	private static final Object[] EMPTY_ARRAY = new Object[0];
 	/** Tree content manager. */
 	private DeferredTreeContentManager fManager;
 	/** View part. */
@@ -85,6 +89,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		}
 
 		/**
+		 * {@inheritDoc}
 		 * @see org.eclipse.jface.operation.IRunnableWithProgress#run(IProgressMonitor)
 		 */
 		@Override
@@ -111,13 +116,15 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
 	 */
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof TreeRoot tr) {
 			return tr.getRoots();
-		} else if (parentElement instanceof RealCallers rc) {
+		}
+		if (parentElement instanceof RealCallers rc) {
 			MethodWrapper parentWrapper = rc.getParent();
 			if (fManager != null) {
 				Object[] children = fManager.getChildren(new DeferredMethodWrapper(this, rc));
@@ -126,52 +133,54 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 				}
 			}
 			return fetchChildren(parentWrapper);
-
-		} else if (parentElement instanceof MethodWrapper mw) {
+		}
+		if (parentElement instanceof MethodWrapper mw) {
 			if (shouldStopTraversion(mw)) {
 				return EMPTY_ARRAY;
-			} else {
-				if (parentElement instanceof CallerMethodWrapper caller) {
-					ensureDefaultExpandWithConstructors(caller);
-					if (caller.getExpandWithConstructors()) {
-						IType type = caller.getMember().getDeclaringType();
-						try {
-							if (type.isAnonymous()) {
-								MethodCall anonymousConstructor = new MethodCall(type);
-								CallerMethodWrapper anonymousWrapper = (CallerMethodWrapper) caller.createMethodWrapper(anonymousConstructor);
-								return new Object[] { anonymousWrapper, new RealCallers(mw, caller.getMethodCall()) };
-							} if (type.isLambda()) {
-								IJavaElement definingMethod = type.getParent();
-								if (definingMethod instanceof IMember mb) {
-									MethodWrapper wrapper = caller.createMethodWrapper(new MethodCall(mb));
-									return new Object [] { wrapper, new RealCallers(mw, caller.getMethodCall()) };
-								}
-							} else {
-								IMember[] constructors = JavaElementUtil.getAllConstructors(type);
-								if (constructors.length == 0) {
-									constructors = new IType[] { type }; // type stands for the default constructor
-								}
-								Object children[] = new Object[constructors.length + 1];
-								for (int j = 0; j < constructors.length; j++) {
-									MethodCall constructor = new MethodCall(constructors[j]);
-									children[j] = caller.createMethodWrapper(constructor);
-								}
-								children[constructors.length] = new RealCallers(mw, caller.getMethodCall());
-								return children;
-							}
-						} catch (JavaModelException e) {
-							JavaPlugin.log(e);
-							return null;
+			}
+			if (parentElement instanceof CallerMethodWrapper caller) {
+				ensureDefaultExpandWithConstructors(caller);
+				if (caller.getExpandWithConstructors()) {
+					IType type = caller.getMember().getDeclaringType();
+					try {
+						if (type.isAnonymous()) {
+							MethodCall anonConstructor = new MethodCall(type);
+							CallerMethodWrapper anonWrapper
+								= (CallerMethodWrapper) caller.createMethodWrapper(anonConstructor);
+							return new Object[] { anonWrapper, new RealCallers(mw, caller.getMethodCall()) };
 						}
+						if (type.isLambda()) {
+							IJavaElement definingMethod = type.getParent();
+							if (definingMethod instanceof IMember mb) {
+								MethodWrapper wrapper = caller.createMethodWrapper(new MethodCall(mb));
+								return new Object [] { wrapper, new RealCallers(mw, caller.getMethodCall()) };
+							}
+						} else {
+							IMember[] constructors = JavaElementUtil.getAllConstructors(type);
+							if (constructors.length == 0) {
+								constructors = new IType[] { type }; // type stands for the default constructor
+							}
+							Object[] children = new Object[constructors.length + 1];
+							for (int j = 0; j < constructors.length; j++) {
+								MethodCall constructor = new MethodCall(constructors[j]);
+								children[j] = caller.createMethodWrapper(constructor);
+							}
+							children[constructors.length] = new RealCallers(mw, caller.getMethodCall());
+							return children;
+						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
+						return null;
 					}
 				}
-				if (fManager != null) {
-					Object[] children = fManager.getChildren(new DeferredMethodWrapper(this, mw));
-					if (children != null)
-						return children;
-				}
-				return fetchChildren(mw);
 			}
+			if (fManager != null) {
+				Object[] children = fManager.getChildren(new DeferredMethodWrapper(this, mw));
+				if (children != null) {
+					return children;
+				}
+			}
+			return fetchChildren(mw);
 		}
 		return EMPTY_ARRAY;
 	}
@@ -189,7 +198,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 			try {
 				boolean withConstructors = false;
 				if (type != null) {
-					boolean anonymousPref = PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS);
+					final String key = PreferenceConstants.PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS;
+					boolean anonymousPref = PreferenceConstants.getPreferenceStore().getBoolean(key);
 					if ((anonymousPref && (type.isAnonymous() || type.isLambda()))
 							|| isInTheDefaultExpandWithConstructorList(method)) {
 						withConstructors = true;
@@ -227,7 +237,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * @since 3.5
 	 */
 	static boolean isInTheDefaultExpandWithConstructorList(IMethod method) {
-		String serializedMembers = PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS);
+		final String key = PreferenceConstants.PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS;
+		String serializedMembers = PreferenceConstants.getPreferenceStore().getString(key);
 		if (serializedMembers.isEmpty()) {
 			return false;
 		}
@@ -299,7 +310,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		try {
 			JavaPlugin.getActiveWorkbenchWindow().run(true, true, runnable);
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, CallHierarchyMessages.CallHierarchyContentProvider_searchError_title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);
+			final String title = CallHierarchyMessages.CallHierarchyContentProvider_searchError_title;
+			ExceptionHandler.handle(e, title, CallHierarchyMessages.CallHierarchyContentProvider_searchError_message);
 			return EMPTY_ARRAY;
 		} catch (InterruptedException e) {
 			final CallerMethodWrapper element = (CallerMethodWrapper) methodWrapper;
@@ -309,7 +321,6 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 		}
 		return runnable.getCalls();
 	}
-
 
 	/**
 	 * Returns whether the given element is an "Expand witch Constructors" node.
@@ -370,6 +381,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
 	@Override
@@ -378,6 +390,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
 	 */
 	@Override
@@ -386,6 +399,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
 	@Override
@@ -394,6 +408,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 	 */
 	@Override
@@ -416,6 +431,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
 	 * java.lang.Object, java.lang.Object)
 	 */
