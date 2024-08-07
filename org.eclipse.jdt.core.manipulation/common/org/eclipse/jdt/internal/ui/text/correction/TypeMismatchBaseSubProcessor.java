@@ -17,6 +17,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -381,12 +382,20 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IMethodBinding methodDecl= methodDeclBinding.getMethodDeclaration();
 		ITypeBinding overriddenReturnType= overridden.getReturnType();
-		if (! JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
-			overriddenReturnType= overriddenReturnType.getErasure();
+		// propose erasure
+		if (decl.typeParameters().isEmpty() || overriddenReturnType.getTypeBounds().length == 0 || Stream.of(overriddenReturnType.getTypeBounds()).allMatch(bound -> bound.getTypeArguments().length == 0)) {
+			T p1= createChangeIncompatibleReturnTypeProposal(cu, methodDecl, astRoot, overriddenReturnType.getErasure(), false, IProposalRelevance.CHANGE_RETURN_TYPE);
+			if (p1 != null)
+				proposals.add(p1);
 		}
-		T p1= createChangeIncompatibleReturnTypeProposal(cu, methodDecl, astRoot, overriddenReturnType, false, IProposalRelevance.CHANGE_RETURN_TYPE);
-		if (p1 != null)
-			proposals.add(p1);
+
+		// propose using (and potentially introducing) the type variable
+		if (overriddenReturnType.isTypeVariable()) {
+			T p2 = createChangeIncompatibleReturnTypeProposal(cu, methodDecl, astRoot, overriddenReturnType, false, IProposalRelevance.CHANGE_RETURN_TYPE);
+			if (p2 != null) {
+				proposals.add(p2);
+			}
+		}
 
 		ICompilationUnit targetCu= cu;
 
