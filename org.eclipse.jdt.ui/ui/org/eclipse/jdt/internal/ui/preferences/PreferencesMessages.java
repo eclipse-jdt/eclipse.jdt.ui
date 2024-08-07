@@ -543,7 +543,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_line_number_attr_label;
 	public static String ComplianceConfigurationBlock_source_file_attr_label;
 	public static String ComplianceConfigurationBlock_codegen_unused_local_label;
-	public static String ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label;
 	public static String ComplianceConfigurationBlock_codegen_method_parameters_attr;
 	public static String ComplianceConfigurationBlock_compiler_compliance_label;
 	public static String ComplianceConfigurationBlock_default_settings_label;
@@ -551,8 +550,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_enable_preview_severity_label;
 	public static String ComplianceConfigurationBlock_source_compatibility_label;
 	public static String ComplianceConfigurationBlock_codegen_targetplatform_label;
-	public static String ComplianceConfigurationBlock_pb_assert_as_identifier_label;
-	public static String ComplianceConfigurationBlock_pb_enum_as_identifier_label;
 	public static String ComplianceConfigurationBlock_compliance_follows_EE_label;
 	public static String ComplianceConfigurationBlock_compliance_follows_EE_with_EE_label;
 	public static String ComplianceConfigurationBlock_compliance_group_label;

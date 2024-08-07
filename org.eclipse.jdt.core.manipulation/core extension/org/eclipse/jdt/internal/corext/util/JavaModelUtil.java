@@ -770,8 +770,10 @@ public final class JavaModelUtil {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
 
+	/**
+	 * @param compliance currently unused
+	 */
 	public static void setDefaultClassfileOptions(Map<String, String> map, String compliance) {
-		map.put(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE, is50OrHigher(compliance) ? JavaCore.ENABLED : JavaCore.DISABLED);
 		map.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_LINE_NUMBER_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_SOURCE_FILE_ATTR, JavaCore.GENERATE);
