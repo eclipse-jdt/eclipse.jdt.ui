@@ -581,6 +581,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_leftHandSideOfAssignment;
 
+	public static String ExtractMethodAnalyzer_method_will_override_call_in_subclass;
+
 	public static String ExtractMethodAnalyzer_no_valid_destination_type;
 
 	public static String ExtractMethodAnalyzer_invalid_selection;
