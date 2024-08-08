@@ -5,11 +5,11 @@ import java.util.Map;
 
 class A extends Sup<String> {
 	public A(Map<String, Integer> map) {
-		method(Collections.<String, Integer>emptyMap(/*nada*/));
-		method2(Collections.<String, Integer>emptyMap(/*nada*/));
-		method3(Collections.<String, Integer>emptyMap(/*nada*/));
-		new A(Collections.<String, Integer>emptyMap(/*nada*/));
-		super.sup(Collections.<String, Integer>emptyMap(/*nada*/));
+		method(Collections.emptyMap(/*nada*/));
+		method2(Collections.emptyMap(/*nada*/));
+		method3(Collections.emptyMap(/*nada*/));
+		new A(Collections.emptyMap(/*nada*/));
+		super.sup(Collections.emptyMap(/*nada*/));
 		
 		Map<String, Integer> emptyMap2= Collections.emptyMap(/*nada*/);
 		emptyMap2= Collections.emptyMap(/*nada*/);
