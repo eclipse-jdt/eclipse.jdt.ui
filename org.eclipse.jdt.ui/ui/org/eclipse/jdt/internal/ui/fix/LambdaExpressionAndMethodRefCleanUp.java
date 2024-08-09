@@ -65,20 +65,22 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF)) {
-			return "" //$NON-NLS-1$
-					+ "someString -> someString.trim().toLowerCase();\n" //$NON-NLS-1$
-					+ "someString -> someString.trim().toLowerCase();\n" //$NON-NLS-1$
-					+ "someString -> (someString.trim().toLowerCase() + \"bar\");\n" //$NON-NLS-1$
-					+ "ArrayList::new;\n" //$NON-NLS-1$
-					+ "Date::getTime;\n"; //$NON-NLS-1$
+			return """
+				someString -> someString.trim().toLowerCase();
+				someString -> someString.trim().toLowerCase();
+				someString -> (someString.trim().toLowerCase() + "bar");
+				ArrayList::new;
+				Date::getTime;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "(someString) -> someString.trim().toLowerCase();\n" //$NON-NLS-1$
-				+ "someString -> {return someString.trim().toLowerCase();};\n" //$NON-NLS-1$
-				+ "someString -> {return someString.trim().toLowerCase() + \"bar\";};\n" //$NON-NLS-1$
-				+ "() -> new ArrayList<>();\n" //$NON-NLS-1$
-				+ "date -> date.getTime();\n"; //$NON-NLS-1$
+		return """
+			(someString) -> someString.trim().toLowerCase();
+			someString -> {return someString.trim().toLowerCase();};
+			someString -> {return someString.trim().toLowerCase() + "bar";};
+			() -> new ArrayList<>();
+			date -> date.getTime();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

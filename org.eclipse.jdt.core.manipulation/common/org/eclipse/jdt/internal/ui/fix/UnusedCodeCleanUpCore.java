@@ -170,23 +170,27 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS)) {
-			String code= "    public void zoz() {\n" //$NON-NLS-1$
-					+ "        zozo();\n" //$NON-NLS-1$
-					+ "    }\n" //$NON-NLS-1$
-					+ "\n" //$NON-NLS-1$
-					+ "    private void zozo() {\n" //$NON-NLS-1$
-					+ "        System.out.println(\"\");\n" //$NON-NLS-1$
-					+ "    };\n"; //$NON-NLS-1$
+			String code= """
+				    public void zoz() {
+				        zozo();
+				    }
+				
+				    private void zozo() {
+				        System.out.println("");
+				    };
+				"""; //$NON-NLS-1$
 
 			buf.append(code);
 		} else {
-			String code= "    public void zoz() {\n" //$NON-NLS-1$
-					+ "        zozo(34);\n" //$NON-NLS-1$
-					+ "    }\n" //$NON-NLS-1$
-					+ "\n" //$NON-NLS-1$
-					+ "    private void zozo(int k) {\n" //$NON-NLS-1$
-					+ "        System.out.println(\"\");\n" //$NON-NLS-1$
-					+ "    };\n"; //$NON-NLS-1$
+			String code= """
+				    public void zoz() {
+				        zozo(34);
+				    }
+				
+				    private void zozo(int k) {
+				        System.out.println("");
+				    };
+				"""; //$NON-NLS-1$
 			buf.append(code);
 		}
 

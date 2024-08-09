@@ -70,17 +70,19 @@ public class InvertEqualsCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.INVERT_EQUALS)) {
-			return "" //$NON-NLS-1$
-					+ "boolean result = \"foo\".equals(text);\n" //$NON-NLS-1$
-					+ "boolean result2 = (text1 + text2).equals(text);\n" //$NON-NLS-1$
-					+ "boolean result3 = DayOfWeek.MONDAY.equals(object);\n" //$NON-NLS-1$
-					+ "boolean result4 = \"foo\".equalsIgnoreCase(text);\n"; //$NON-NLS-1$
+			return """
+				boolean result = "foo".equals(text);
+				boolean result2 = (text1 + text2).equals(text);
+				boolean result3 = DayOfWeek.MONDAY.equals(object);
+				boolean result4 = "foo".equalsIgnoreCase(text);
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean result = text.equals(\"foo\");\n" //$NON-NLS-1$
-				+ "boolean result2 = text.equals(text1 + text2);\n" //$NON-NLS-1$
-				+ "boolean result3 = object.equals(DayOfWeek.MONDAY);\n" //$NON-NLS-1$
-				+ "boolean result4 = text.equalsIgnoreCase(\"foo\");\n"; //$NON-NLS-1$
+		return """
+			boolean result = text.equals("foo");
+			boolean result2 = text.equals(text1 + text2);
+			boolean result3 = object.equals(DayOfWeek.MONDAY);
+			boolean result4 = text.equalsIgnoreCase("foo");
+			"""; //$NON-NLS-1$
 	}
 }

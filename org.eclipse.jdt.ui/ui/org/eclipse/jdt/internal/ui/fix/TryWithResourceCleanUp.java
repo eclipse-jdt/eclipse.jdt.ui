@@ -61,20 +61,24 @@ public class TryWithResourceCleanUp extends AbstractMultiFix implements ICleanUp
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.TRY_WITH_RESOURCE)) {
-			return "" //$NON-NLS-1$
-					+ "final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //$NON-NLS-1$
-					+ "try (inputStream) {\n" //$NON-NLS-1$
-					+ "    System.out.println(inputStream.read());\n" //$NON-NLS-1$
-					+ "}\n\n\n"; //$NON-NLS-1$
+			return """
+				final FileInputStream inputStream = new FileInputStream("out.txt");
+				try (inputStream) {
+				    System.out.println(inputStream.read());
+				}
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "final FileInputStream inputStream = new FileInputStream(\"out.txt\");\n" //$NON-NLS-1$
-				+ "try {\n" //$NON-NLS-1$
-				+ "    System.out.println(inputStream.read());\n" //$NON-NLS-1$
-				+ "} finally {\n" //$NON-NLS-1$
-				+ "    inputStream.close();\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			final FileInputStream inputStream = new FileInputStream("out.txt");
+			try {
+			    System.out.println(inputStream.read());
+			} finally {
+			    inputStream.close();
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

@@ -100,9 +100,10 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 			return "List<Integer> output = new ArrayList<>(collection);\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "List<Integer> output = new ArrayList<>();\n" //$NON-NLS-1$
-				+ "output.addAll(collection);\n"; //$NON-NLS-1$
+		return """
+			List<Integer> output = new ArrayList<>();
+			output.addAll(collection);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

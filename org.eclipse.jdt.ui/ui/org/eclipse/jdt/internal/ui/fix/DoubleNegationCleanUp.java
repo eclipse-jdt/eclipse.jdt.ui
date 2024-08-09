@@ -78,16 +78,18 @@ public class DoubleNegationCleanUp extends AbstractMultiFix implements ICleanUpF
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.DOUBLE_NEGATION)) {
-			return "" //$NON-NLS-1$
-					+ "boolean b1 = isValid == isEnabled;\n" //$NON-NLS-1$
-					+ "boolean b2 = isValid ^ isEnabled;\n" //$NON-NLS-1$
-					+ "boolean b3 = isValid == isEnabled;\n"; //$NON-NLS-1$
+			return """
+				boolean b1 = isValid == isEnabled;
+				boolean b2 = isValid ^ isEnabled;
+				boolean b3 = isValid == isEnabled;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean b1 = !isValid == !isEnabled;\n" //$NON-NLS-1$
-				+ "boolean b2 = !isValid != !isEnabled;\n" //$NON-NLS-1$
-				+ "boolean b3 = !isValid ^ isEnabled;\n"; //$NON-NLS-1$
+		return """
+			boolean b1 = !isValid == !isEnabled;
+			boolean b2 = !isValid != !isEnabled;
+			boolean b3 = !isValid ^ isEnabled;
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

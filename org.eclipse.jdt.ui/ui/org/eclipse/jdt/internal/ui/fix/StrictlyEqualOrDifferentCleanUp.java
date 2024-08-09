@@ -84,18 +84,20 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT)) {
-			return "" //$NON-NLS-1$
-					+ "boolean newBoolean1 = isValid == (i > 0);\n" //$NON-NLS-1$
-					+ "boolean newBoolean2 = isValid ^ isEnabled;\n" //$NON-NLS-1$
-					+ "boolean newBoolean3 = isActive == (0 <= i);\n" //$NON-NLS-1$
-					+ "boolean newBoolean4 = isActive ^ isEnabled;\n"; //$NON-NLS-1$
+			return """
+				boolean newBoolean1 = isValid == (i > 0);
+				boolean newBoolean2 = isValid ^ isEnabled;
+				boolean newBoolean3 = isActive == (0 <= i);
+				boolean newBoolean4 = isActive ^ isEnabled;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean newBoolean1 = isValid && (i > 0) || !isValid && (i <= 0);\n" //$NON-NLS-1$
-				+ "boolean newBoolean2 = !isValid && isEnabled || isValid && !isEnabled;\n" //$NON-NLS-1$
-				+ "boolean newBoolean3 = isActive ? (0 <= i) : (i < 0);\n" //$NON-NLS-1$
-				+ "boolean newBoolean4 = !isActive ? isEnabled : !isEnabled;\n"; //$NON-NLS-1$
+		return """
+			boolean newBoolean1 = isValid && (i > 0) || !isValid && (i <= 0);
+			boolean newBoolean2 = !isValid && isEnabled || isValid && !isEnabled;
+			boolean newBoolean3 = isActive ? (0 <= i) : (i < 0);
+			boolean newBoolean4 = !isActive ? isEnabled : !isEnabled;
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
