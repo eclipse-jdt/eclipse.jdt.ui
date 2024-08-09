@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesQuickAssistProcessor;
 
+@SuppressWarnings("deprecation") // Preferences
 public class PropertiesFileQuickAssistTest {
 
 	@Rule
