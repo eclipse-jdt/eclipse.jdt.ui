@@ -11,21 +11,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring.ccp;
+package org.eclipse.jdt.ui.tests.refactoring.typeconstraints;
+
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	DeleteTest.class,
-	CopyToClipboardActionTest.class,
-	PasteActionTest.class,
-	CopyTest.class,
-	MoveTest.class,
-	MultiMoveTest.class,
-	//------old reorg tests
-	CopyResourcesToClipboardActionTest.class
+	TypeConstraintTests.class,
+	TypeEnvironmentTests.class
 })
-public class AllTests {
+public class AllRefactoringTypeConstraintsTests {
 }
