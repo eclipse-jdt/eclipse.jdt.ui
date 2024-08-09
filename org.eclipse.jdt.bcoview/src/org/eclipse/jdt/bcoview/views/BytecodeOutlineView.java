@@ -1634,15 +1634,21 @@ public class BytecodeOutlineView extends ViewPart implements IBytecodePart {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 
 			String symbolicName = BytecodeOutlinePlugin.getDefault().getBundle().getSymbolicName();
-			if (orientation == VIEW_ORIENTATION_HORIZONTAL) {
-				setText(Messages.BytecodeOutlineView_toggle_horizontal_label);
-				setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_horizontal.gif")); //$NON-NLS-1$
-			} else if (orientation == VIEW_ORIENTATION_VERTICAL) {
-				setText(Messages.BytecodeOutlineView_toggle_vertical_label);
-				setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_vertical.gif")); //$NON-NLS-1$
-			} else if (orientation == VIEW_ORIENTATION_AUTOMATIC) {
-				setText(Messages.BytecodeOutlineView_toggle_automatic_label);
-				setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_automatic.gif")); //$NON-NLS-1$
+			switch (orientation) {
+				case VIEW_ORIENTATION_HORIZONTAL:
+					setText(Messages.BytecodeOutlineView_toggle_horizontal_label);
+					setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_horizontal.gif")); //$NON-NLS-1$
+					break;
+				case VIEW_ORIENTATION_VERTICAL:
+					setText(Messages.BytecodeOutlineView_toggle_vertical_label);
+					setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_vertical.gif")); //$NON-NLS-1$
+					break;
+				case VIEW_ORIENTATION_AUTOMATIC:
+					setText(Messages.BytecodeOutlineView_toggle_automatic_label);
+					setImageDescriptor(AbstractUIPlugin.imageDescriptorFromPlugin(symbolicName, "icons/th_automatic.gif")); //$NON-NLS-1$
+					break;
+				default:
+					break;
 			}
 			actionOrientation = orientation;
 		}

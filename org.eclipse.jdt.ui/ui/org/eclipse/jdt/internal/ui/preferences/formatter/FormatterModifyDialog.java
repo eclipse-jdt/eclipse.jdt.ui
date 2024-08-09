@@ -808,32 +808,37 @@ public class FormatterModifyDialog extends ModifyDialog {
 				 * visual tab size to the value piggy backed in the INDENTATION_SIZE
 				 * preference. See also CodeFormatterUtil.
 				 */
-				if (DefaultCodeFormatterConstants.MIXED.equals(tabPolicy)) {
-					if (JavaCore.SPACE.equals(fOldTabChar) || JavaCore.TAB.equals(fOldTabChar))
-						swapTabValues();
-					tabSizePref.setEnabled(true);
-					tabSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-					indentSizePref.setEnabled(true);
-					indentSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
-					onlyForLeadingPref.setEnabled(true);
-				} else if (JavaCore.SPACE.equals(tabPolicy)) {
-					if (DefaultCodeFormatterConstants.MIXED.equals(fOldTabChar))
-						swapTabValues();
-					tabSizePref.setEnabled(true);
-					tabSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
-					indentSizePref.setEnabled(true);
-					indentSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-					onlyForLeadingPref.setEnabled(false);
-				} else if (JavaCore.TAB.equals(tabPolicy)) {
-					if (DefaultCodeFormatterConstants.MIXED.equals(fOldTabChar))
-						swapTabValues();
-					tabSizePref.setEnabled(true);
-					tabSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-					indentSizePref.setEnabled(false);
-					indentSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
-					onlyForLeadingPref.setEnabled(true);
-				} else {
-					Assert.isTrue(false);
+				switch (tabPolicy) {
+					case DefaultCodeFormatterConstants.MIXED:
+						if (JavaCore.SPACE.equals(fOldTabChar) || JavaCore.TAB.equals(fOldTabChar))
+							swapTabValues();
+						tabSizePref.setEnabled(true);
+						tabSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+						indentSizePref.setEnabled(true);
+						indentSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
+						onlyForLeadingPref.setEnabled(true);
+						break;
+					case JavaCore.SPACE:
+						if (DefaultCodeFormatterConstants.MIXED.equals(fOldTabChar))
+							swapTabValues();
+						tabSizePref.setEnabled(true);
+						tabSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
+						indentSizePref.setEnabled(true);
+						indentSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+						onlyForLeadingPref.setEnabled(false);
+						break;
+					case JavaCore.TAB:
+						if (DefaultCodeFormatterConstants.MIXED.equals(fOldTabChar))
+							swapTabValues();
+						tabSizePref.setEnabled(true);
+						tabSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+						indentSizePref.setEnabled(false);
+						indentSizePref.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+						onlyForLeadingPref.setEnabled(true);
+						break;
+					default:
+						Assert.isTrue(false);
+						break;
 				}
 				fOldTabChar= tabPolicy;
 			}

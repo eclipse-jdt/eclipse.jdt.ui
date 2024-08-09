@@ -622,26 +622,35 @@ public class WorkingSetModel {
 		if (!isAffected(event))
 			return;
 
-		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
-			IAdaptable[] elements= fElementMapper.refresh(workingSet);
-			if (elements != null) {
-				fireEvent(event);
+		switch (property) {
+			case IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE: {
+				IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
+				IAdaptable[] elements= fElementMapper.refresh(workingSet);
+				if (elements != null) {
+					fireEvent(event);
+				}
+				break;
 			}
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_REMOVE.equals(property)) {
-			IWorkingSet workingSet= (IWorkingSet)event.getOldValue();
-			List<IWorkingSet> elements= new ArrayList<>(fActiveWorkingSets);
-			elements.remove(workingSet);
-			List<IWorkingSet> allElements= new ArrayList<>(Arrays.asList(getAllWorkingSets()));
-			allElements.remove(workingSet);
-			setWorkingSets(allElements.toArray(new IWorkingSet[allElements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {
-			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
-			if (isSortingEnabled() && Arrays.asList(getAllWorkingSets()).contains(workingSet)) {
-				setWorkingSets(getAllWorkingSets(), isSortingEnabled(), fActiveWorkingSets.toArray(new IWorkingSet[fActiveWorkingSets.size()]));
-			} else {
-				fireEvent(event);
+			case IWorkingSetManager.CHANGE_WORKING_SET_REMOVE: {
+				IWorkingSet workingSet= (IWorkingSet)event.getOldValue();
+				List<IWorkingSet> elements= new ArrayList<>(fActiveWorkingSets);
+				elements.remove(workingSet);
+				List<IWorkingSet> allElements= new ArrayList<>(Arrays.asList(getAllWorkingSets()));
+				allElements.remove(workingSet);
+				setWorkingSets(allElements.toArray(new IWorkingSet[allElements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
+				break;
 			}
+			case IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE: {
+				IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
+				if (isSortingEnabled() && Arrays.asList(getAllWorkingSets()).contains(workingSet)) {
+					setWorkingSets(getAllWorkingSets(), isSortingEnabled(), fActiveWorkingSets.toArray(new IWorkingSet[fActiveWorkingSets.size()]));
+				} else {
+					fireEvent(event);
+				}
+				break;
+			}
+			default:
+				break;
 		}
 
 	}

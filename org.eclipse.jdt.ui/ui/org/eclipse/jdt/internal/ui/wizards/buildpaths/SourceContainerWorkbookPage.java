@@ -410,37 +410,50 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
-		if (CPListElement.OUTPUT.equals(key)) {
-			CPListElement selElement=  elem.getParent();
-			OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement, fClassPathList.getElements(), new Path(fOutputLocationField.getText()).makeAbsolute(), true);
-			if (dialog.open() == Window.OK) {
-				selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
-				fFoldersList.refresh();
-				fClassPathList.dialogFieldChanged(); // validate
+		switch (key) {
+			case CPListElement.OUTPUT: {
+				CPListElement selElement=  elem.getParent();
+				OutputLocationDialog dialog= new OutputLocationDialog(getShell(), selElement, fClassPathList.getElements(), new Path(fOutputLocationField.getText()).makeAbsolute(), true);
+				if (dialog.open() == Window.OK) {
+					selElement.setAttribute(CPListElement.OUTPUT, dialog.getOutputLocation());
+					fFoldersList.refresh();
+					fClassPathList.dialogFieldChanged(); // validate
+				}
+				break;
 			}
-		} else if (CPListElement.EXCLUSION.equals(key) || CPListElement.INCLUSION.equals(key)) {
-			EditFilterWizard wizard= newEditFilterWizard(elem.getParent(), fFoldersList.getElements(), fOutputLocationField.getText());
-			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
-			action.run();
-		} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(key)) {
-			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
-			elem.setValue(newValue);
-			fFoldersList.refresh(elem);
-		} else if (CPListElement.TEST.equals(key)) {
-			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
-			elem.setValue(newValue);
-			fFoldersList.refresh(elem.getParent());
-			fClassPathList.dialogFieldChanged(); // validate
-		} else if (CPListElement.WITHOUT_TEST_CODE.equals(key)) {
-			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
-			elem.setValue(newValue);
-			fFoldersList.refresh(elem.getParent());
-		} else {
-			if (editCustomAttribute(getShell(), elem)) {
-				fFoldersList.refresh();
-				fClassPathList.dialogFieldChanged(); // validate
-				checkAttributeEffect(key, fCurrJProject);
+			case CPListElement.EXCLUSION:
+			case CPListElement.INCLUSION: {
+				EditFilterWizard wizard= newEditFilterWizard(elem.getParent(), fFoldersList.getElements(), fOutputLocationField.getText());
+				OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
+				action.run();
+				break;
 			}
+			case CPListElement.IGNORE_OPTIONAL_PROBLEMS: {
+				String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
+				elem.setValue(newValue);
+				fFoldersList.refresh(elem);
+				break;
+			}
+			case CPListElement.TEST: {
+				String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
+				elem.setValue(newValue);
+				fFoldersList.refresh(elem.getParent());
+				fClassPathList.dialogFieldChanged(); // validate
+				break;
+			}
+			case CPListElement.WITHOUT_TEST_CODE: {
+				String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
+				elem.setValue(newValue);
+				fFoldersList.refresh(elem.getParent());
+				break;
+			}
+			default:
+				if (editCustomAttribute(getShell(), elem)) {
+					fFoldersList.refresh();
+					fClassPathList.dialogFieldChanged(); // validate
+					checkAttributeEffect(key, fCurrJProject);
+				}
+				break;
 		}
 	}
 

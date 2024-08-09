@@ -221,32 +221,51 @@ public class ContentAssistPreference {
 
 		String p= event.getProperty();
 
-		if (AUTOACTIVATION.equals(p)) {
-			boolean enabled= store.getBoolean(AUTOACTIVATION);
-			assistant.enableAutoActivation(enabled);
-		} else if (AUTOACTIVATION_DELAY.equals(p)) {
-			int delay= store.getInt(AUTOACTIVATION_DELAY);
-			assistant.setAutoActivationDelay(delay);
-		} else if (PARAMETERS_FOREGROUND.equals(p)) {
-			Color c= getColor(store, PARAMETERS_FOREGROUND);
-			assistant.setContextInformationPopupForeground(c);
-			assistant.setContextSelectorForeground(c);
-		} else if (PARAMETERS_BACKGROUND.equals(p)) {
-			Color c= getColor(store, PARAMETERS_BACKGROUND);
-			assistant.setContextInformationPopupBackground(c);
-			assistant.setContextSelectorBackground(c);
-		} else if (AUTOINSERT.equals(p)) {
-			boolean enabled= store.getBoolean(AUTOINSERT);
-			assistant.enableAutoInsert(enabled);
-		} else if (PREFIX_COMPLETION.equals(p)) {
-			boolean enabled= store.getBoolean(PREFIX_COMPLETION);
-			assistant.enablePrefixCompletion(enabled);
-		} else if (USE_COLORED_LABELS.equals(p)) {
-			boolean enabled= store.getBoolean(USE_COLORED_LABELS);
-			assistant.enableColoredLabels(enabled);
-		} else if (DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS.equals(p)) {
-			boolean disabled = store.getBoolean(DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS);
-			assistant.enableCompletionProposalTriggerChars(!disabled);
+		switch (p) {
+			case AUTOACTIVATION: {
+				boolean enabled= store.getBoolean(AUTOACTIVATION);
+				assistant.enableAutoActivation(enabled);
+				break;
+			}
+			case AUTOACTIVATION_DELAY: {
+				int delay= store.getInt(AUTOACTIVATION_DELAY);
+				assistant.setAutoActivationDelay(delay);
+				break;
+			}
+			case PARAMETERS_FOREGROUND: {
+				Color c= getColor(store, PARAMETERS_FOREGROUND);
+				assistant.setContextInformationPopupForeground(c);
+				assistant.setContextSelectorForeground(c);
+				break;
+			}
+			case PARAMETERS_BACKGROUND: {
+				Color c= getColor(store, PARAMETERS_BACKGROUND);
+				assistant.setContextInformationPopupBackground(c);
+				assistant.setContextSelectorBackground(c);
+				break;
+			}
+			case AUTOINSERT: {
+				boolean enabled= store.getBoolean(AUTOINSERT);
+				assistant.enableAutoInsert(enabled);
+				break;
+			}
+			case PREFIX_COMPLETION: {
+				boolean enabled= store.getBoolean(PREFIX_COMPLETION);
+				assistant.enablePrefixCompletion(enabled);
+				break;
+			}
+			case USE_COLORED_LABELS: {
+				boolean enabled= store.getBoolean(USE_COLORED_LABELS);
+				assistant.enableColoredLabels(enabled);
+				break;
+			}
+			case DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS: {
+				boolean disabled = store.getBoolean(DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS);
+				assistant.enableCompletionProposalTriggerChars(!disabled);
+				break;
+			}
+			default:
+				break;
 		}
 
 		changeJavaProcessor(assistant, store, p);
