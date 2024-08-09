@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -476,7 +477,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			IRegion preRegion;
 			if (firstLine < captionLine) {
-//				preRegion= new Region(offset + prefixEnd, contentStart - prefixEnd);
 				int preOffset= document.getLineOffset(firstLine);
 				IRegion preEndLineInfo= document.getLineInformation(captionLine);
 				int preEnd= preEndLineInfo.getOffset();
@@ -519,33 +519,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 			return 0;
 		}
-
-//		/**
-//		 * Finds the offset of the first identifier part within <code>content</code>.
-//		 * Returns 0 if none is found.
-//		 *
-//		 * @param content the content to search
-//		 * @return the first index of a unicode identifier part, or zero if none can
-//		 *         be found
-//		 */
-//		private int findPrefixEnd(final CharSequence content) {
-//			// return the index after the leading '/*' or '/**'
-//			int len= content.length();
-//			int i= 0;
-//			while (i < len && isWhiteSpace(content.charAt(i)))
-//				i++;
-//			if (len >= i + 2 && content.charAt(i) == '/' && content.charAt(i + 1) == '*')
-//				if (len >= i + 3 && content.charAt(i + 2) == '*')
-//					return i + 3;
-//				else
-//					return i + 2;
-//			else
-//				return i;
-//		}
-//
-//		private boolean isWhiteSpace(char c) {
-//			return c == ' ' || c == '\t';
-//		}
 
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
@@ -979,8 +952,52 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			ctx.getScanner().setSource(source.toCharArray());
 			computeFoldingStructure(parent.getChildren(), ctx);
+			computeFoldingStructureOfControlStatements(source, ctx);
 		} catch (JavaModelException x) {
 		}
+	}
+
+	private void computeFoldingStructureOfControlStatements(String source, FoldingStructureComputationContext ctx) {
+	    IScanner scanner = ctx.getScanner();
+	    scanner.setSource(source.toCharArray());
+
+	    int token;
+	    Stack<Integer> blockStarts = new Stack<>();
+
+	    try {
+	        while ((token = scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+	            switch (token) {
+	                case ITerminalSymbols.TokenNameif:
+	                case ITerminalSymbols.TokenNamewhile:
+	                case ITerminalSymbols.TokenNamefor:
+	                case ITerminalSymbols.TokenNameswitch:
+	                case ITerminalSymbols.TokenNamedo:
+	                    blockStarts.push(scanner.getCurrentTokenStartPosition());
+	                    break;
+	                case ITerminalSymbols.TokenNameLBRACE:
+	                    if (!blockStarts.isEmpty()) {
+	                        blockStarts.push(scanner.getCurrentTokenStartPosition());
+	                    }
+	                    break;
+	                case ITerminalSymbols.TokenNameRBRACE:
+	                    if (!blockStarts.isEmpty()) {
+	                        int start = blockStarts.pop();
+	                        if (!blockStarts.isEmpty() && source.charAt(start) == '{') {
+	                            IRegion region = new Region(start + 1, scanner.getCurrentTokenEndPosition() - start);
+	                            IRegion normalized = alignRegion(region, ctx);
+	                            if (normalized != null) {
+	                                Position position = createCommentPosition(normalized);
+	                                if (position != null) {
+	                                    ctx.addProjectionRange(new JavaProjectionAnnotation(false, null, false), position);
+	                                }
+	                            }
+	                        }
+	                    }
+	                    break;
+	            }
+	        }
+	    } catch (InvalidInputException e) {
+	    }
 	}
 
 	private void computeFoldingStructure(IJavaElement[] elements, FoldingStructureComputationContext ctx) throws JavaModelException {
