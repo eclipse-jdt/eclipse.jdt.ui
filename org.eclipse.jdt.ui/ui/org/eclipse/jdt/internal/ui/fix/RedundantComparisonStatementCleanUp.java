@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -101,7 +101,7 @@ public class RedundantComparisonStatementCleanUp extends AbstractMultiFix implem
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -211,7 +211,7 @@ public class RedundantComparisonStatementCleanUp extends AbstractMultiFix implem
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.RedundantComparisonStatementCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public class RedundantComparisonStatementCleanUp extends AbstractMultiFix implem
 		return null;
 	}
 
-	private static class RedundantComparisonStatementOperation extends CompilationUnitRewriteOperation {
+	private static class RedundantComparisonStatementOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement node;
 		private final Statement toMove;
 		private final ReturnStatement toRemove;

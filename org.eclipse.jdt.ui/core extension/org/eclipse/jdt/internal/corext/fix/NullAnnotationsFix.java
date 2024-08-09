@@ -53,7 +53,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 
 	private CompilationUnit cu;
 
-	public NullAnnotationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
+	public NullAnnotationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange[] operations) {
 		super(name, compilationUnit, operations);
 		cu= compilationUnit;
 	}
@@ -170,7 +170,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
+		List<CompilationUnitRewriteOperationWithSourceRange> operations= new ArrayList<>();
 		if (locations == null) {
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();
 			locations= new IProblemLocation[problems.length];
@@ -190,11 +190,11 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		}
 		if (operations.isEmpty())
 			return null;
-		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperationWithSourceRange[] operationsArray= operations.toArray(new CompilationUnitRewriteOperationWithSourceRange[operations.size()]);
 		return new NullAnnotationsFix(message, compilationUnit, operationsArray);
 	}
 
-	private static boolean createMoveTypeAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> operations) {
+	private static boolean createMoveTypeAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperationWithSourceRange> operations) {
 		boolean isMove= false;
 		for (IProblemLocation location: locations) {
 			if (location == null)
@@ -206,7 +206,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		return isMove;
 	}
 
-	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
+	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperationWithSourceRange> result) {
 		String nullableAnnotationName= getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 
@@ -262,7 +262,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static void createRemoveRedundantNullAnnotationsOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
+	private static void createRemoveRedundantNullAnnotationsOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperationWithSourceRange> result) {
 		for (IProblemLocation problem : locations) {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()

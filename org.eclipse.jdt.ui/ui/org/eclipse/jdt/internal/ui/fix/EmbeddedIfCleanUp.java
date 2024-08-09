@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -95,7 +95,7 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -127,7 +127,7 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.EmbeddedIfCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class EmbeddedIfCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		return null;
 	}
 
-	private static class EmbeddedIfOperation extends CompilationUnitRewriteOperation {
+	private static class EmbeddedIfOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement visited;
 		private final IfStatement innerIf;
 

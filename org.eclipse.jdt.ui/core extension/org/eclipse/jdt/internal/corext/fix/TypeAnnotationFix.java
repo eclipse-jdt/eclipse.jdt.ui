@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.fix.TypeAnnotationRewriteOperations.MoveT
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class TypeAnnotationFix extends CompilationUnitRewriteOperationsFix {
-	public TypeAnnotationFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
+	public TypeAnnotationFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange operation) {
 		super(name, compilationUnit, operation);
 	}
 

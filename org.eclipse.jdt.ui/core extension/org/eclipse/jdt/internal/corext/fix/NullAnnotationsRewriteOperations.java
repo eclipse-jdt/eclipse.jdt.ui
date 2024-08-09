@@ -70,7 +70,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.RedundantNullnessTypeAnnotationsFilter;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -96,7 +96,7 @@ public class NullAnnotationsRewriteOperations {
 		TARGET		// change the target method of a method call
 	}
 
-	static abstract class SignatureAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
+	static abstract class SignatureAnnotationRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		// initialized from the Builder:
 		protected CompilationUnit fUnit;
 		protected String fAnnotationToAdd;
@@ -329,7 +329,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 	}
 
-	static class RemoveRedundantAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
+	static class RemoveRedundantAnnotationRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private IProblemLocation fProblem;
 		private CompilationUnit fCompilationUnit;
@@ -385,7 +385,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 	}
 
-	static class AddMissingDefaultNullnessRewriteOperation extends CompilationUnitRewriteOperation {
+	static class AddMissingDefaultNullnessRewriteOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private IProblemLocation fProblem;
 		private CompilationUnit fCompilationUnit;
