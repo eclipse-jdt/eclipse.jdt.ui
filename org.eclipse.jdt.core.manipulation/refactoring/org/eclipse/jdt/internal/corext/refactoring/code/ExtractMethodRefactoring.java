@@ -549,6 +549,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		String typeName= type.getQualifiedName();
 		SearchPattern pattern = SearchPattern.createPattern(typeName, IJavaSearchConstants.TYPE, IJavaSearchConstants.IMPLEMENTORS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		if (pattern == null) {
+			return status;
+		}
 		TypeExtendsSearchRequestor requestor= new TypeExtendsSearchRequestor();
 		try {
 			search(pattern, SearchEngine.createJavaSearchScope(new IJavaElement[] {type.getJavaElement().getJavaProject()}), requestor);
