@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 /**
  * Setup the tests related to Java 6 (i.e. Mustang).
  */
+@Deprecated
 public class Java1d6ProjectTestSetup extends ProjectTestSetup {
 
 	public Java1d6ProjectTestSetup() {
@@ -35,7 +36,7 @@ public class Java1d6ProjectTestSetup extends ProjectTestSetup {
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= super.createAndInitializeProject();
-		JavaProjectHelper.set16CompilerOptions(javaProject);
+		JavaProjectHelper.set18CompilerOptions(javaProject);
 		return javaProject;
 	}
 }

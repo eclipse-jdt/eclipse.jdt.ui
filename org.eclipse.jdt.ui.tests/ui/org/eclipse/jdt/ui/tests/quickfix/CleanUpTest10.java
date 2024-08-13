@@ -14,16 +14,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import org.junit.Rule;
+import org.junit.Test;
+
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+
 import org.eclipse.jdt.ui.tests.core.rules.Java10ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-import org.junit.Rule;
-import org.junit.Test;
 
 /**
  * Tests the cleanup features related to Java 10.
@@ -47,7 +51,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        int number = 0;
@@ -60,7 +64,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var number = 0;
@@ -76,7 +80,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        long number = 0;
@@ -89,7 +93,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var number = 0L;
@@ -105,7 +109,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        float number = 0;
@@ -118,7 +122,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var number = 0F;
@@ -134,7 +138,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        double number = 0;
@@ -147,7 +151,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var number = 0D;
@@ -163,7 +167,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        long number = 0x0;
@@ -176,7 +180,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var number = 0x0L;
@@ -192,9 +196,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E {
 			    public void foo() {
 			        ArrayList<String> parameterizedType = new ArrayList<String>();
@@ -207,9 +211,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E {
 			    public void foo() {
 			        var parameterizedType = new ArrayList<String>();
@@ -225,9 +229,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo() {
 			        HashMap<Integer, String> parameterizedTypeWithDiamond = new HashMap<>();
@@ -240,12 +244,47 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo() {
 			        var parameterizedTypeWithDiamond = new HashMap<Integer, String>();
+			    }
+			}
+			""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+	}
+
+	@Test
+	public void testUseLocalVariableTypeInferenceParameterizedTypeWithDiamond2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			import java.util.ArrayList;
+			import java.io.File;
+
+			public class E {
+			    public void foo() {
+			        ArrayList<File> parameterizedType = new ArrayList<>();
+			    }
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		String expected= """
+			package test1;
+
+			import java.util.ArrayList;
+			import java.io.File;
+
+			public class E {
+			    public void foo() {
+			        var parameterizedType = new ArrayList<File>();
 			    }
 			}
 			""";
@@ -258,9 +297,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Date;
-			
+
 			public class E {
 			    public void foo() {
 			        Date x = E2.value;
@@ -271,9 +310,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String sample2= """
 			package test1;
-			
+
 			import java.util.Date;
-			
+
 			public class E2 {
 			    public static Date value = null;
 			}
@@ -284,7 +323,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var x = E2.value;
@@ -300,7 +339,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public void foo(int doNotRefactorParameter) {
 			        int doNotRefactorUninitializedVariable;
@@ -320,7 +359,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    private interface I1 {
 			        public void run(String s, int i, Boolean b);
@@ -342,10 +381,10 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    private int doNotRefactorField = 0;
-			
+
 			    public void foo(int doNotRefactorParameter) {
 			        short doNotRefactorNarrowingType = 0;
 			    }
@@ -363,10 +402,10 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.HashMap;
 			import java.util.Map;
-			
+
 			public class E1 {
 			    public void foo() {
 			        Map<Integer, String> doNotRefactorDifferentTypes = new HashMap<Integer, String>();
@@ -385,7 +424,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public void foo() {
 			        int doNotRefactorArray[] = new int[]{0};
@@ -404,9 +443,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E1 {
 			    public void foo() {
 			        ArrayList<? extends Integer> doNotRefactorDifferentTypeArguments = new ArrayList<Integer>();
@@ -425,7 +464,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public void foo() {
 			        double doNot = 0, refactor = .0, multiDeclarations = 1D;
@@ -444,14 +483,14 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E1 {
 			    public void foo() {
 			        ArrayList<Integer> doNotRefactorGenericMethod = newInstance();
 			    }
-			
+
 			    public <D> ArrayList<D> newInstance() {
 			        return new ArrayList<D>();
 			    }
@@ -469,14 +508,14 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E1 {
 			    public void foo() {
 			        ArrayList<Integer> list = newParameterizedInstance();
 			    }
-			
+
 			    public ArrayList<Integer> newParameterizedInstance() {
 			        return new ArrayList<Integer>();
 			    }
@@ -488,14 +527,14 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class E1 {
 			    public void foo() {
 			        var list = newParameterizedInstance();
 			    }
-			
+
 			    public ArrayList<Integer> newParameterizedInstance() {
 			        return new ArrayList<Integer>();
 			    }
@@ -510,10 +549,10 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Collections;
 			import java.util.List;
-			
+
 			public class E1 {
 			    public void foo() {
 			        List<Integer> doNotRefactorInferedMethod = Collections.emptyList();
@@ -532,9 +571,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo(Object o) {
 			        HashMap<Integer, String> parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;
@@ -547,9 +586,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo(Object o) {
 			        var parameterizedTypeFromCastExpression = (HashMap<Integer, String>) o;
@@ -565,10 +604,10 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Collection;
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo(HashMap<Integer, String> m) {
 			        Collection<String> parameterizedTypeFromMethod = m.values();
@@ -581,9 +620,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo(HashMap<Integer, String> m) {
 			        var parameterizedTypeFromMethod = m.values();
@@ -599,10 +638,10 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Collection;
 			import java.util.HashMap;
-			
+
 			public class E extends HashMap<Integer, String> {
 			    public void foo() {
 			        Collection<String> parameterizedTypeFromMethod = super.values();
@@ -615,9 +654,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E extends HashMap<Integer, String> {
 			    public void foo() {
 			        var parameterizedTypeFromMethod = super.values();
@@ -633,9 +672,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo(HashMap<Integer, String> m) {
 			        HashMap<Integer, String> parameterizedTypeFromVariable = m;
@@ -648,9 +687,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.HashMap;
-			
+
 			public class E {
 			    public void foo(HashMap<Integer, String> m) {
 			        var parameterizedTypeFromVariable = m;
@@ -666,7 +705,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(String[] array) {
 			        for (int i= 0; i < array.length; i++) {
@@ -681,7 +720,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(String[] array) {
 			        for (var i= 0; i < array.length; i++) {
@@ -699,9 +738,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    public void foo() {
 			        Function<Integer, String> doNotUseVarOnFromLambdaExpression = i -> String.valueOf(i);
@@ -720,9 +759,9 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    Function<String, Integer> field = String::length;
 			    public void foo() {
@@ -742,7 +781,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(String[] array) {
 			        String[] a = array;
@@ -757,7 +796,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(String[] array) {
 			        var a = array;
@@ -775,7 +814,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        String[] a = {"a", "b", "c"};
@@ -795,7 +834,7 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void foo() {
 			        var a = new String[0];

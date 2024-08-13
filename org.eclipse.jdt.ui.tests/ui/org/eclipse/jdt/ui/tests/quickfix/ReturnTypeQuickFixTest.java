@@ -670,9 +670,9 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.util.Properties;
-				
+
 				public class E {
 				    public Properties E() {
 				        return System.getProperties();
@@ -844,9 +844,9 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			public class E {
 			    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> map) {
 			        Map<K2, V> map2 = map.get(key1);
@@ -866,13 +866,13 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			public class E {
 			    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> map) {
 			        Map<K2, V> map2 = map.get(key1);
-			        return (V) (map2 == null ? null : map2.entrySet());
+			        return map2 == null ? null : (V) map2.entrySet();
 			    }
 			}
 			"""; //
@@ -882,11 +882,11 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Map;
 			import java.util.Map.Entry;
 			import java.util.Set;
-			
+
 			public class E {
 			    <K1, K2, V> Set<Entry<K2, V>> foo(K1 key1, Map<K1, Map<K2, V>> map) {
 			        Map<K2, V> map2 = map.get(key1);
@@ -904,9 +904,9 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		String input= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			public class E {
 			    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> aMap) {
 			        Map<K2, V> newMap = aMap.get(key1);
@@ -926,13 +926,13 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			public class E {
 			    <K1, K2, V> V foo(K1 key1, Map<K1, Map<K2, V>> aMap) {
 			        Map<K2, V> newMap = aMap.get(key1);
-			        return (V) (newMap == null ? null : aMap == null ? null : newMap.entrySet());
+			        return newMap == null ? null : aMap == null ? null : (V) newMap.entrySet();
 			    }
 			}
 			"""; //
@@ -942,11 +942,11 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.Map;
 			import java.util.Map.Entry;
 			import java.util.Set;
-			
+
 			public class E {
 			    <K1, K2, V> Set<Entry<K2, V>> foo(K1 key1, Map<K1, Map<K2, V>> aMap) {
 			        Map<K2, V> newMap = aMap.get(key1);

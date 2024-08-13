@@ -56,8 +56,9 @@ public class BindingsNameTest {
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		IPackageFragment pack0= fSourceFolder.createPackageFragment("", false, null);
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("x", false, null);
 		String str= """
+			package x;
 			public class X {
 			}
 			""";
@@ -66,7 +67,7 @@ public class BindingsNameTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
 		String str1= """
 			package test1.ae;
-			import X;
+			import x.X;
 			public class E {
 			    public class Inner {
 			        public class InnerInner {
@@ -108,8 +109,8 @@ public class BindingsNameTest {
 		assertEquals("java.lang.Object[]", fullNames[3]);
 		assertEquals("test1.ae.E.Inner.InnerInner", fullNames[4]);
 		assertEquals("test1.ae.E.Inner.InnerInner[][]", fullNames[5]);
-		assertEquals("X", fullNames[6]);
-		assertEquals("X[][][]", fullNames[7]);
+		assertEquals("x.X", fullNames[6]);
+		assertEquals("x.X[][][]", fullNames[7]);
 	}
 
 	@Test
@@ -164,8 +165,8 @@ public class BindingsNameTest {
 		assertEqualArray(new String[] { "java", "lang", "Object[]" }, fullNames[3]);
 		assertEqualArray(new String[] { "test1", "ae", "E", "Inner", "InnerInner" }, fullNames[4]);
 		assertEqualArray(new String[] { "test1", "ae", "E", "Inner", "InnerInner[][]" }, fullNames[5]);
-		assertEqualArray(new String[] { "X" }, fullNames[6]);
-		assertEqualArray(new String[] { "X[][][]" }, fullNames[7]);
+		assertEqualArray(new String[] { "x", "X" }, fullNames[6]);
+		assertEqualArray(new String[] { "x", "X[][][]" }, fullNames[7]);
 	}
 
 	@Test

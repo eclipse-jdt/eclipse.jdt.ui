@@ -1303,7 +1303,7 @@ public class AnnotateAssistTest1d8 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
 		JavaEditor javaEditor= openInClassfileEditor(type, true, true);
 

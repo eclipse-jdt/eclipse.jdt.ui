@@ -395,6 +395,7 @@ public class SourceProvider {
 		makeNamesUnique(rewriter, context.scope);
 		updateTypeReferences(rewriter, context);
 		updateStaticReferences(rewriter, context);
+		updateInnerStaticReferences(rewriter, context);
 		updateTypeVariables(rewriter, context);
 		updateMethodTypeVariable(rewriter, context);
 		updateReturnStatements(rewriter, context);
@@ -600,6 +601,116 @@ public class SourceProvider {
 			}
 		}
 
+	}
+
+	private class UpdateStaticQualifierVisitor extends ASTVisitor {
+		private final List<IVariableBinding> fTargetStaticFields;
+		private final List<IMethodBinding> fTargetStaticMethods;
+		private final ASTRewrite fRewriter;
+		private final String fQualifierNeeded;
+
+		public UpdateStaticQualifierVisitor(ASTRewrite rewriter, List<IVariableBinding> targetStaticFields, List<IMethodBinding> targetStaticMethods, String qualifierNeeded) {
+			this.fTargetStaticFields= targetStaticFields;
+			this.fTargetStaticMethods= targetStaticMethods;
+			this.fRewriter= rewriter;
+			this.fQualifierNeeded= qualifierNeeded;
+		}
+
+		@Override
+		public boolean visit(SimpleName name) {
+			if (name.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
+				MethodInvocation node= (MethodInvocation) name.getParent();
+				if (node.getExpression() == null) {
+					IMethodBinding binding= node.resolveMethodBinding();
+					if (Modifier.isStatic(binding.getModifiers())) {
+						for (IMethodBinding staticMethodBinding : fTargetStaticMethods) {
+							if (staticMethodBinding.getName().equals(binding.getName())) {
+								AST ast= fRewriter.getAST();
+								Name newName= ast.newName(fQualifierNeeded + "." + name.getFullyQualifiedName()); //$NON-NLS-1$
+								fRewriter.replace(name, newName, null);
+							}
+						}
+					}
+				}
+			} else {
+				IBinding binding= name.resolveBinding();
+				if (binding instanceof IVariableBinding varBinding && varBinding.isField()) {
+					for (IVariableBinding staticFieldBinding : fTargetStaticFields) {
+						if (staticFieldBinding.getName().equals(varBinding.getName())) {
+							AST ast= fRewriter.getAST();
+							Name newName= ast.newName(fQualifierNeeded + "." + name.getFullyQualifiedName()); //$NON-NLS-1$
+							fRewriter.replace(name, newName, null);
+						}
+					}
+				}
+			}
+			return false;
+		}
+	}
+	private void updateInnerStaticReferences(ASTRewrite rewriter, CallContext context) {
+		if (context.invocation instanceof MethodInvocation invocation) {
+			AbstractTypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(invocation, AbstractTypeDeclaration.class);
+			AbstractTypeDeclaration sourceTypeDecl= ASTNodes.getFirstAncestorOrNull(fDeclaration, AbstractTypeDeclaration.class);
+			if (typeDecl != null && !typeDecl.isPackageMemberTypeDeclaration() && typeDecl != sourceTypeDecl) {
+				ITypeBinding typeDeclBinding= typeDecl.resolveBinding();
+				List<IVariableBinding> targetStaticFields= new ArrayList<>();
+				List<IMethodBinding> targetStaticMethods= new ArrayList<>();
+				if (typeDeclBinding != null) {
+					IVariableBinding[] fields= typeDeclBinding.getDeclaredFields();
+					IMethodBinding[] methods= typeDeclBinding.getDeclaredMethods();
+					for (IVariableBinding field : fields) {
+						if (Modifier.isStatic(field.getModifiers())) {
+							targetStaticFields.add(field);
+						}
+					}
+					for (IMethodBinding method : methods) {
+						if (Modifier.isStatic(method.getModifiers())) {
+							targetStaticMethods.add(method);
+						}
+					}
+					getAccessibleStaticFieldsAndMethods(typeDeclBinding.getSuperclass(), targetStaticFields, targetStaticMethods);
+					ITypeBinding[] typeInterfaces= typeDeclBinding.getInterfaces();
+					for (ITypeBinding typeInterface : typeInterfaces) {
+						getAccessibleStaticFieldsAndMethods(typeInterface, targetStaticFields, targetStaticMethods);
+					}
+					if (!targetStaticFields.isEmpty() || !targetStaticMethods.isEmpty()) {
+						ITypeBinding sourceTypeBinding= sourceTypeDecl.resolveBinding();
+						if (sourceTypeBinding != null) {
+							String qualifiedName= sourceTypeBinding.getQualifiedName();
+							String packageName= sourceTypeBinding.getPackage().getName();
+							String qualifierNeeded= qualifiedName.substring(packageName.length() + 1);
+							UpdateStaticQualifierVisitor visitor= new UpdateStaticQualifierVisitor(rewriter, targetStaticFields, targetStaticMethods, qualifierNeeded);
+							fDeclaration.accept(visitor);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void getAccessibleStaticFieldsAndMethods(ITypeBinding typeBinding, List<IVariableBinding> fieldList, List<IMethodBinding> methodList) {
+		if (typeBinding == null) {
+			return;
+		}
+		IVariableBinding[] fields= typeBinding.getDeclaredFields();
+		IMethodBinding[] methods= typeBinding.getDeclaredMethods();
+		for (IVariableBinding field : fields) {
+			int fieldModifiers= field.getModifiers();
+			if (Modifier.isStatic(fieldModifiers) && !Modifier.isPrivate(fieldModifiers)) {
+				fieldList.add(field);
+			}
+		}
+		for (IMethodBinding method : methods) {
+			int methodModifiers= method.getModifiers();
+			if (Modifier.isStatic(methodModifiers) && !Modifier.isPrivate(methodModifiers)) {
+				methodList.add(method);
+			}
+		}
+		getAccessibleStaticFieldsAndMethods(typeBinding.getSuperclass(), fieldList, methodList);
+		ITypeBinding[] typeInterfaces= typeBinding.getInterfaces();
+		for (ITypeBinding typeInterface : typeInterfaces) {
+			getAccessibleStaticFieldsAndMethods(typeInterface, fieldList, methodList);
+		}
 	}
 
 	private Expression createReceiver(ASTRewrite rewriter, CallContext context, IMethodBinding method, ImportRewriteContext importRewriteContext) {

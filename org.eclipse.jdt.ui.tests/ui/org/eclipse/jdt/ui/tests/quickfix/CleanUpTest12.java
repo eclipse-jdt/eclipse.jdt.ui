@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,13 +57,13 @@ public class CleanUpTest12 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public static final int CONSTANT_1 = 0;
 			    public static final int CONSTANT_2 = 1;
-			
+
 			    public int i2 = 0;
-			
+
 			    public void replaceIfWithSwitchOnParameter(int i1) {
 			        int i = 0;
 			        // Keep this comment
@@ -95,8 +95,9 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        } else if (i2 == 2) {
 			            i = 150;
 			        }
+			        // extra comment
 			    }
-			
+
 			    public void replaceIfWithSwitchUsingConstants(int date) {
 			        int i = 0;
 			        // Keep this comment
@@ -114,7 +115,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 150;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSwitchOnLocalVariable() {
 			        int i1 = 0;
 			        int i = 0;
@@ -138,7 +139,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 50;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSwitchOnField() {
 			        int i = 0;
 			        // Keep this comment
@@ -152,7 +153,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 20;
 			        }
 			    }
-			
+
 			    public void replaceWithSwitchOnField() {
 			        int i = 0;
 			        // Keep this comment
@@ -166,7 +167,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 20;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSwitchOnCharacter(char character) {
 			        int i = 0;
 			        // Keep this comment
@@ -183,7 +184,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        } else
 			            i = 40;
 			    }
-			
+
 			    public void replaceIfRemoveDuplicateConditions(char aCharacter) {
 			        int i = 0;
 			        if (aCharacter == 'a') {
@@ -202,7 +203,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 60;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSeveralConditions(char myCharacter) {
 			        int i = 0;
 			        if (myCharacter == 'a') {
@@ -217,7 +218,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 60;
 			        }
 			    }
-			
+
 			    public void replaceIfKeepExistingControlFlowBreaks(byte i1) {
 			        byte j = 0;
 			        loop: for (byte i = 0; i < 10; i++) {
@@ -251,7 +252,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public void replaceWithInnerLoopBreak(short i1) {
 			        short j = 0;
 			        if (i1 == 0) {
@@ -301,7 +302,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public void replaceIfWhenNoVariableNameConflictExists(int i1) {
 			        int i = 0;
 			        if (i1 == 0) {
@@ -315,7 +316,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = newVariable3;
 			        }
 			    }
-			
+
 			    public void replaceWhenOutOfScopeVariableNameConflicts(int i1) {
 			        int i = 0;
 			        if (i1 == 0) {
@@ -331,7 +332,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = i2;
 			        }
 			    }
-			
+
 			    public int replaceIfSuite(int i1) {
 			        // Keep this comment
 			        if (i1 == 0) {
@@ -370,7 +371,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        }
 			        return 155;
 			    }
-			
+
 			    public int replaceSuiteThatDoNotFallThrough(int i1) {
 			        if (i1 == 0) {
 			            if (i2 == 1) {
@@ -411,7 +412,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        }
 			        return 155;
 			    }
-			
+
 			    public int replaceSuiteIgnoring(int i1) {
 			        if (i1 == 0) {
 			            return 0;
@@ -452,7 +453,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        }
 			        return 155;
 			    }
-			
+
 			    public void replaceWhenVariableTypesConflict(int i1) {
 			        int i = 0;
 			        if (i1 == 0) {
@@ -469,7 +470,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = c;
 			        }
 			    }
-			
+
 			    public int replaceMeltCases(int i1) {
 			        // Keep this comment
 			        if (i1 == 0) {
@@ -513,13 +514,13 @@ public class CleanUpTest12 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public static final int CONSTANT_1 = 0;
 			    public static final int CONSTANT_2 = 1;
-			
+
 			    public int i2 = 0;
-			
+
 			    public void replaceIfWithSwitchOnParameter(int i1) {
 			        int i = 0;
 			        // Keep this comment
@@ -570,8 +571,9 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                }
 			                break;
 			        }
+			        // extra comment
 			    }
-			
+
 			    public void replaceIfWithSwitchUsingConstants(int date) {
 			        int i = 0;
 			        // Keep this comment
@@ -595,7 +597,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSwitchOnLocalVariable() {
 			        int i1 = 0;
 			        int i = 0;
@@ -626,7 +628,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSwitchOnField() {
 			        int i = 0;
 			        // Keep this comment
@@ -646,7 +648,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceWithSwitchOnField() {
 			        int i = 0;
 			        // Keep this comment
@@ -666,7 +668,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSwitchOnCharacter(char character) {
 			        int i = 0;
 			        // Keep this comment
@@ -690,7 +692,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfRemoveDuplicateConditions(char aCharacter) {
 			        int i = 0;
 			        switch (aCharacter) {
@@ -711,7 +713,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfWithSeveralConditions(char myCharacter) {
 			        int i = 0;
 			        switch (myCharacter) {
@@ -732,7 +734,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfKeepExistingControlFlowBreaks(byte i1) {
 			        byte j = 0;
 			        loop: for (byte i = 0; i < 10; i++) {
@@ -771,7 +773,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public void replaceWithInnerLoopBreak(short i1) {
 			        short j = 0;
 			        switch (i1) {
@@ -832,7 +834,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceIfWhenNoVariableNameConflictExists(int i1) {
 			        int i = 0;
 			        switch (i1) {
@@ -855,7 +857,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public void replaceWhenOutOfScopeVariableNameConflicts(int i1) {
 			        int i = 0;
 			        switch (i1) {
@@ -879,7 +881,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			                break;
 			        }
 			    }
-			
+
 			    public int replaceIfSuite(int i1) {
 			        // Keep this comment
 			        switch (i1) {
@@ -918,7 +920,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        }
 			        return 155;
 			    }
-			
+
 			    public int replaceSuiteThatDoNotFallThrough(int i1) {
 			        if (i1 == 0) {
 			            if (i2 == 1) {
@@ -960,7 +962,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        }
 			        return 155;
 			    }
-			
+
 			    public int replaceSuiteIgnoring(int i1) {
 			        if (i1 == 0) {
 			            return 0;
@@ -1002,7 +1004,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        }
 			        return 155;
 			    }
-			
+
 			    public void replaceWhenVariableTypesConflict(int i1) {
 			        int i = 0;
 			        switch (i1) {
@@ -1028,7 +1030,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public int replaceMeltCases(int i1) {
 			        // Keep this comment
 			        switch (i1) {
@@ -1076,11 +1078,180 @@ public class CleanUpTest12 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testSwitchString() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+
+				public static final String VALUE0 = "0";
+				public static final String VALUE1 = "1";
+				public static final String VALUE2 = "2";
+				public static final String VALUE3 = "3";
+
+			    public void bug1(String i1) {
+			        int i = 0;
+			        if (i1.equals(E.VALUE0)) {
+			            int integer1 = 0;
+			            i = integer1;
+			        } else if (i1.equals(E.VALUE1)) {
+			            char integer1 = 'a';
+			            i = integer1;
+			        } else if (i1.equals(E.VALUE2)) {
+			            char integer1 = 'b';
+			            i = integer1;
+			        } else if (computeit(i1) || i1.equals(E.VALUE3)) {
+			        //
+			        //
+			        }
+			    }
+
+			    private boolean computeit(String i) {
+				    return i.equals("4") || i.equals("5");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.USE_SWITCH);
+
+		String expected= """
+package test1;
+
+public class E {
+
+	public static final String VALUE0 = "0";
+	public static final String VALUE1 = "1";
+	public static final String VALUE2 = "2";
+	public static final String VALUE3 = "3";
+
+    public void bug1(String i1) {
+        int i = 0;
+        switch (i1) {
+            case E.VALUE0 : {
+                int integer1 = 0;
+                i = integer1;
+                break;
+            }
+            case E.VALUE1 : {
+                char integer1 = 'a';
+                i = integer1;
+                break;
+            }
+            case E.VALUE2 : {
+                char integer1 = 'b';
+                i = integer1;
+                break;
+            }
+            default :
+                if (computeit(i1) || i1.equals(E.VALUE3)) {
+                //
+                //
+                }
+                break;
+        }
+    }
+
+    private boolean computeit(String i) {
+	    return i.equals("4") || i.equals("5");
+    }
+}
+			""";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Switch_description)));
+	}
+
+
+	@Test
+	public void testSwitchEnum() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+package test1;
+
+public class E {
+
+	public enum MYENUM { VALUE0,VALUE1,VALUE2,VALUE3,VALUE4,VALUE5}
+
+	public void bug1(MYENUM i1) {
+		int i = 0;
+		if (i1 == MYENUM.VALUE0) {
+			int integer1 = 0;
+			i = integer1;
+		} else if (i1 == MYENUM.VALUE1) {
+			char integer1 = 'a';
+			i = integer1;
+		} else if (i1 == MYENUM.VALUE2) {
+			char integer1 = 'b';
+			i = integer1;
+		} else if (computeit(i1) || i1 == MYENUM.VALUE3) {
+			//
+			//
+		}
+	}
+
+	private boolean computeit(MYENUM i) {
+		return i.equals(MYENUM.VALUE4) || i == MYENUM.VALUE5;
+	}
+}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.USE_SWITCH);
+
+		String expected= """
+package test1;
+
+public class E {
+
+	public enum MYENUM { VALUE0,VALUE1,VALUE2,VALUE3,VALUE4,VALUE5}
+
+	public void bug1(MYENUM i1) {
+		int i = 0;
+		switch (i1) {
+            case MYENUM.VALUE0 : {
+                int integer1 = 0;
+                i = integer1;
+                break;
+            }
+            case MYENUM.VALUE1 : {
+                char integer1 = 'a';
+                i = integer1;
+                break;
+            }
+            case MYENUM.VALUE2 : {
+                char integer1 = 'b';
+                i = integer1;
+                break;
+            }
+            default :
+                if (computeit(i1) || i1 == MYENUM.VALUE3) {
+                	//
+                	//
+                }
+                break;
+        }
+	}
+
+	private boolean computeit(MYENUM i) {
+		return i.equals(MYENUM.VALUE4) || i == MYENUM.VALUE5;
+	}
+}
+			""";
+
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_Switch_description)));
+	}
+
+	@Test
 	public void testDoNotUseSwitch() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public void doNotReplaceWithOuterLoopBreak(int i1) {
 			        int j = 0;
@@ -1102,7 +1273,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public void doNotReplaceIfWithoutElseIf(int i1) {
 			        int i = 0;
 			        if (i1 == 0) {
@@ -1111,14 +1282,14 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 10;
 			        }
 			    }
-			
+
 			    public void doNotReplaceIfWithoutElse(int i1) {
 			        int i = 0;
 			        if (i1 == 0) {
 			            i = 10;
 			        }
 			    }
-			
+
 			    public void doNotReplaceWithSwitchOnPrimitiveWrapper(Integer i1) {
 			        int i = 0;
 			        if (i1 == 0) {
@@ -1131,7 +1302,7 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			            i = 30;
 			        }
 			    }
-			
+
 			    public void doNotRefactorLongVar(long l1) {
 			        int i = 0;
 			        if (l1 == 0) {

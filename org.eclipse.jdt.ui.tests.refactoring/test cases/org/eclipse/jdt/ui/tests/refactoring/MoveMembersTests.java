@@ -674,9 +674,7 @@ public class MoveMembersTests extends GenericRefactoringTest {
 
 	@Test
 	public void testFail19() throws Exception{
-		fieldMethodTypeHelper_failing(new String[0],
-				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-				RefactoringStatus.ERROR, "p.B");
+		// no longer failure due to min JDK 1.8...move static to interface tested in MoveMemberTest1d8
 	}
 
 	@Test
@@ -686,9 +684,7 @@ public class MoveMembersTests extends GenericRefactoringTest {
 
 	@Test
 	public void testFail21() throws Exception{
-		fieldMethodTypeHelper_failing(new String[0],
-				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
-				RefactoringStatus.FATAL, "p.B");
+		// no longer failure due to min JDK 1.8...move static to interface tested in MoveMemberTest1d8
 	}
 
 	// Issue 1299

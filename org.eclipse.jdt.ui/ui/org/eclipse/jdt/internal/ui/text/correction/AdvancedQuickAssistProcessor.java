@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
@@ -73,7 +72,6 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -115,7 +113,6 @@ import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -1950,40 +1947,42 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	@SuppressWarnings("unused")
 	private static void addExplicitTypeArgumentsIfNecessary(ASTRewrite rewrite, ASTRewriteCorrectionProposal proposal, Expression invocation) {
-		if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
-			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
-			if (typeArguments == null)
-				return;
-
-			ImportRewrite importRewrite= proposal.getImportRewrite();
-			if (importRewrite == null) {
-				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
-			}
-			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
-
-			AST ast= invocation.getAST();
-			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
-
-			for (ITypeBinding typeArgument : typeArguments) {
-				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
-				typeArgsRewrite.insertLast(typeArgumentNode, null);
-			}
-
-			if (invocation instanceof MethodInvocation) {
-				MethodInvocation methodInvocation= (MethodInvocation) invocation;
-				Expression expression= methodInvocation.getExpression();
-				if (expression == null) {
-					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-					if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
-						expression= ast.newName(importRewrite.addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), importRewriteContext));
-					} else {
-						expression= ast.newThisExpression();
-					}
-					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
-				}
-			}
-		}
+// TODO: figure out if cast is needed with more than flag below (e.g. recompiling without and adding back for error lines)
+//		if (Invocations.isResolvedTypeInferredFromExpectedType(invocation)) {
+//			ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
+//			if (typeArguments == null)
+//				return;
+//
+//			ImportRewrite importRewrite= proposal.getImportRewrite();
+//			if (importRewrite == null) {
+//				importRewrite= proposal.createImportRewrite((CompilationUnit) invocation.getRoot());
+//			}
+//			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(invocation, importRewrite);
+//
+//			AST ast= invocation.getAST();
+//			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
+//
+//			for (ITypeBinding typeArgument : typeArguments) {
+//				Type typeArgumentNode= importRewrite.addImport(typeArgument, ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
+//				typeArgsRewrite.insertLast(typeArgumentNode, null);
+//			}
+//
+//			if (invocation instanceof MethodInvocation) {
+//				MethodInvocation methodInvocation= (MethodInvocation) invocation;
+//				Expression expression= methodInvocation.getExpression();
+//				if (expression == null) {
+//					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+//					if (methodBinding != null && Modifier.isStatic(methodBinding.getModifiers())) {
+//						expression= ast.newName(importRewrite.addImport(methodBinding.getDeclaringClass().getTypeDeclaration(), importRewriteContext));
+//					} else {
+//						expression= ast.newThisExpression();
+//					}
+//					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, expression, null);
+//				}
+//			}
+//		}
 	}
 
 	private static ReturnStatement createReturnExpression(ASTRewrite rewrite, Expression expression) {

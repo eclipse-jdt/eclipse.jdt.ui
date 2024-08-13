@@ -60,7 +60,7 @@ public class TestOptions {
 
 	public static void initializeProjectOptions(IJavaProject project) {
 		Map<String, String> options= new HashMap<>();
-		JavaProjectHelper.set15CompilerOptions(options);
+		JavaProjectHelper.set18CompilerOptions(options);
 		project.setOptions(options);
 	}
 

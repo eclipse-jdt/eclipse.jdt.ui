@@ -9,7 +9,7 @@ class C<T> {
         field1 = param;
     }
     public static void main(String[] args) {
-        C.testFunction(new C<String>(null).getField());
+        C.testFunction(new C<>(null).getField());
     }
     public static void testFunction(String param){
         System.out.println("S " + param);

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UpdateProperty;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java1d6ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
@@ -42,7 +42,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  */
 public class CleanUpTest1d6 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java1d6ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -119,16 +119,16 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			interface I {
 			    void m();
 			    boolean equals(Object obj);
 			}
-			
+
 			interface J extends I {
 			    void m(); // @Override error in 1.5, not in 1.6
 			}
-			
+
 			class X implements J {
 			    public void m() {} // @Override error in 1.5, not in 1.6
 			    public int hashCode() { return 0; }
@@ -142,18 +142,18 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			interface I {
 			    void m();
 			    @Override
 			    boolean equals(Object obj);
 			}
-			
+
 			interface J extends I {
 			    @Override
 			    void m(); // @Override error in 1.5, not in 1.6
 			}
-			
+
 			class X implements J {
 			    @Override
 			    public void m() {} // @Override error in 1.5, not in 1.6
@@ -171,16 +171,16 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			interface I {
 			    void m();
 			    boolean equals(Object obj);
 			}
-			
+
 			interface J extends I {
 			    void m(); // @Override error in 1.5, not in 1.6
 			}
-			
+
 			class X implements J {
 			    public void m() {} // @Override error in 1.5, not in 1.6
 			    public int hashCode() { return 0; }
@@ -193,16 +193,16 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			interface I {
 			    void m();
 			    boolean equals(Object obj);
 			}
-			
+
 			interface J extends I {
 			    void m(); // @Override error in 1.5, not in 1.6
 			}
-			
+
 			class X implements J {
 			    public void m() {} // @Override error in 1.5, not in 1.6
 			    @Override
@@ -239,19 +239,21 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.io.File;
-			
+			import java.nio.charset.Charset;
+			import java.nio.file.FileSystems;
+
 			public class E {
 			    public void simpleCase() {
 			        // Keep this comment
-			        String fs = File.separator;
+			        String fs = FileSystems.getDefault().getSeparator();
 			        System.out.println("out:"+fs);//$NON-NLS-1$
 			        String ps = File.pathSeparator;
 			        System.out.println("out:"+ps);//$NON-NLS-1$
-			        String cdn = System.getProperty("file.encoding"); //$NON-NLS-1$
+			        String cdn = Charset.defaultCharset().displayName();
 			        System.out.println("out:"+cdn);//$NON-NLS-1$
-			        String lsp = System.getProperty("line.separator"); //$NON-NLS-1$
+			        String lsp = System.lineSeparator();
 			        System.out.println("out:"+lsp);//$NON-NLS-1$
 			        Boolean value = Boolean.getBoolean("arbitrarykey"); //$NON-NLS-1$
 			        System.out.println("out:"+value);//$NON-NLS-1$

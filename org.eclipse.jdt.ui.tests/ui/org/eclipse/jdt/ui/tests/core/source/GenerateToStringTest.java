@@ -116,10 +116,10 @@ public class GenerateToStringTest extends SourceTestCase {
 			jp.setRawClasspath(newCP.toArray(new IClasspathEntry[newCP.size()]), null);
 		}
 		if (is60orHigher) {
-			JavaProjectHelper.addRTJar16(jp);
+			JavaProjectHelper.addRTJar18(jp);
 		}
 		if (!is50orHigher) {
-			JavaProjectHelper.addRTJar13(jp);
+			JavaProjectHelper.addRTJar18(jp);
 		}
 	}
 
@@ -511,6 +511,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	HashMap hashMap;\r\n"
 				+ "	Collection wildCollection;\r\n"
 				+ "	Collection integerCollection;\r\n"
+				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n"
 				+ "		return \"A [AArray=\" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + \", intArray=\" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + \", list=\" + (list != null ? toString(list, maxLen) : null) + \", object=\" + object + \", stringArray=\" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + \", charArrayMethod()=\" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + \", floatArrayMethod()=\"\r\n"
@@ -571,6 +572,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	Object len;\r\n"
 				+ "	Object collection;\r\n"
 				+ "	Object array;\r\n"
+				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen2 = 10;\r\n"
 				+ "		return \"A [aBool=\" + aBool + \", intArray=\" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null) + \", stringArray=\" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null) + \", AArray=\" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null) + \", list=\" + (list != null ? toString(list, maxLen2) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen2) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen2) : null) + \", builder=\" + builder + \", buffer=\" + buffer + \", maxLen=\" + maxLen + \", len=\" + len + \", collection=\" + collection + \", array=\" + array + \"]\";\r\n"
@@ -1351,7 +1353,9 @@ public class GenerateToStringTest extends SourceTestCase {
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
 				+ "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n"
 				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n"
-				+ "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	public String toString() {\r\n"
+				+ "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n"
+				+ "	@Override\r\n"
+				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		buffer.append(\"A [AArray=\");\r\n"
 				+ "		buffer.append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null);\r\n" + "		buffer.append(\", aBool=\");\r\n" + "		buffer.append(aBool);\r\n"
 				+ "		buffer.append(\", anA=\");\r\n" + "		buffer.append(anA);\r\n" + "		buffer.append(\", floatArray=\");\r\n"
@@ -1403,7 +1407,9 @@ public class GenerateToStringTest extends SourceTestCase {
 		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
 				+ "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n"
 				+ "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n" + "	Object len;\r\n"
-				+ "	Object collection;\r\n" + "	Object array;\r\n" + "	public String toString() {\r\n" + "		final int maxLen2 = 10;\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n"
+				+ "	Object collection;\r\n" + "	Object array;\r\n"
+				+ "	@Override\r\n"
+				+ "	public String toString() {\r\n" + "		final int maxLen2 = 10;\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n"
 				+ "		buffer2.append(\"A [aBool=\");\r\n" + "		buffer2.append(aBool);\r\n" + "		buffer2.append(\", intArray=\");\r\n"
 				+ "		buffer2.append(intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null);\r\n" + "		buffer2.append(\", stringArray=\");\r\n"
 				+ "		buffer2.append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null);\r\n" + "		buffer2.append(\", AArray=\");\r\n"
@@ -1883,6 +1889,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	HashMap hashMap;\r\n"
 				+ "	Collection wildCollection;\r\n"
 				+ "	Collection integerCollection;\r\n"
+				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n"
 				+ "		StringBuffer buffer = new StringBuffer();\r\n"
@@ -2452,6 +2459,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	HashMap<Integer, String> hashMap;\r\n"
 				+ "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n"
+				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int maxLen = 10;\r\n"
 				+ "		return MessageFormat.format(\"A [AArray={0}, aBool={1}, anA={2}, floatArray={3}, hashMap={4}, intArray={5}, integerCollection={6}, list={7}, object={8}, stringArray={9}, wildCollection={10}, charArrayMethod()={11}, floatArrayMethod()={12}]\", new Object[]{AArray, new Boolean(aBool), anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod()});\r\n"
@@ -3418,6 +3426,7 @@ public class GenerateToStringTest extends SourceTestCase {
 				+ "	HashMap<Integer, String> hashMap;\r\n"
 				+ "	Collection<?> wildCollection;\r\n"
 				+ "	Collection<Integer> integerCollection;\r\n"
+				+ "	@Override\r\n"
 				+ "	public String toString() {\r\n"
 				+ "		final int l_maxLen_l = 10;\r\n"
 				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"

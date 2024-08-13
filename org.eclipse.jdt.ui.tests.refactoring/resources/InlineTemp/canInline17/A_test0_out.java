@@ -5,7 +5,7 @@ class A<T> {
         field1 = param;
     }
     public static void main(String[] args) {
-        A.testFunction(new A<String>(null).getField());
+        A.testFunction(new A<>(null).getField());
     }
     public static void testFunction(String param){
         System.out.println("S " + param);

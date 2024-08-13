@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup= new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 
@@ -430,37 +430,6 @@ public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
-	}
-
-	@Test
-	public void testAddSafeVarargsToDeclaration5() throws Exception {
-		JavaProjectHelper.set15CompilerOptions(fJProject1);
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-			String str= """
-				package p;
-				import java.util.List;
-				public class E {
-				    void foo() {
-				        Y.asList(Y.asList("Hello", " World"));
-				    }
-				}
-				class Y {
-				    public static <T> List<T> asList(T... a) {
-				        return null;
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 2);
-
-			assertProposalDoesNotExist(proposals, "Add @SafeVarargs to 'asList(..)'");
-		} finally {
-			JavaProjectHelper.set17CompilerOptions(fJProject1);
-		}
 	}
 
 	@Test

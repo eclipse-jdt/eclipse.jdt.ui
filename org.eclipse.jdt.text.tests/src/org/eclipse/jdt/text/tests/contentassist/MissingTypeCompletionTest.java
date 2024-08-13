@@ -75,7 +75,7 @@ public class MissingTypeCompletionTest extends AbstractCompletionTest {
 	public void testGenericType_constructor() throws Exception {
 		createMissingType("public class MissingType<T> {\n" +
 				"}\n");
-		assertMethodBodyProposal("new MissingType", "MissingType", "new MissingType<T>()");
+		assertMethodBodyProposal("new MissingType", "MissingType", "new MissingType<>()");
 	}
 
 }

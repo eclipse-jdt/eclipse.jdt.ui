@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
  */
 public class AdvancedQuickAssistTest1d5 extends QuickFixTest {
 	@Rule
-    public ProjectTestSetup projectSetup= new Java1d5ProjectTestSetup();
+    public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	private IJavaProject fJProject1;
 

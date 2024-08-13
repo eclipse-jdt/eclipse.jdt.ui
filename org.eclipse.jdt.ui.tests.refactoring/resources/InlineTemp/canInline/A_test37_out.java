@@ -2,7 +2,7 @@ package p;
 
 class A<E> {
 	String x() {
-		return A.<String>bar();
+		return bar();
 	}
 
 	static <T> T bar() {

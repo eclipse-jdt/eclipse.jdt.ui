@@ -581,6 +581,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_leftHandSideOfAssignment;
 
+	public static String ExtractMethodAnalyzer_method_will_override_call_in_subclass;
+
 	public static String ExtractMethodAnalyzer_no_valid_destination_type;
 
 	public static String ExtractMethodAnalyzer_invalid_selection;
@@ -1353,6 +1355,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_method_type_clash;
 
+	public static String MoveInstanceMethodProcessor_method_will_override_call_in_inner_subclass;
+
 	public static String MoveInstanceMethodProcessor_moved_element_pattern;
 
 	public static String MoveInstanceMethodProcessor_name;
@@ -1912,6 +1916,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameSourceFolderRefactoring_rename;
 
 	public static String RenameTempRefactoring_changeName;
+
+	public static String RenameTempRefactoring_field_collision;
 
 	public static String RenameTempRefactoring_lowercase;
 

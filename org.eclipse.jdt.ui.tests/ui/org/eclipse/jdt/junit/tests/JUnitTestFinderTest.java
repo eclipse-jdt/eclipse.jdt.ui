@@ -68,7 +68,7 @@ public class JUnitTestFinderTest {
 
 	@Parameters(name = "{0}")
 	public static Collection<TestScenario> getTestScenarios() {
-		return List.of(new TestScenario("JUnit4", JUnitCore.JUNIT4_CONTAINER_PATH, JavaProjectHelper::set15CompilerOptions, TestKindRegistry.JUNIT4_TEST_KIND_ID), //
+		return List.of(new TestScenario("JUnit4", JUnitCore.JUNIT4_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT4_TEST_KIND_ID), //
 				new TestScenario("JUnit5", JUnitCore.JUNIT5_CONTAINER_PATH, JavaProjectHelper::set18CompilerOptions, TestKindRegistry.JUNIT5_TEST_KIND_ID));
 	}
 
@@ -102,7 +102,7 @@ public class JUnitTestFinderTest {
 		String str= """
 			package p;
 			import junit.framework.TestCase;
-			
+
 			public class MyTest extends TestCase {
 			        public void testFoo() {
 			        }
@@ -116,7 +116,7 @@ public class JUnitTestFinderTest {
 		String str1= """
 			package p;
 			import junit.framework.TestCase;
-			
+
 			public class MySuperTest extends MyTest {
 			        public void testFoo() {
 			        }
@@ -130,7 +130,7 @@ public class JUnitTestFinderTest {
 		String str2= """
 			package p;
 			import junit.framework.TestCase;
-			
+
 			class InvisibleTest extends TestCase {
 			        public void testFoo() {
 			        }
@@ -145,7 +145,7 @@ public class JUnitTestFinderTest {
 		String str3= """
 			package p;
 			import junit.framework.TestCase;
-			
+
 			public class Outer {
 			    public static class InnerTest extends TestCase {
 			        public void testFoo() {
@@ -188,7 +188,7 @@ public class JUnitTestFinderTest {
 		String str4= """
 			package p;
 			import junit.framework.TestCase;
-			
+
 			public abstract class AbstractTest extends TestCase {
 			        public void testFoo() {
 			        }
@@ -202,7 +202,7 @@ public class JUnitTestFinderTest {
 		String str5= """
 			package p;
 			import java.util.Vector;
-			
+
 			public class NoTest extends Vector {
 			        public void testFoo() {
 			        }
@@ -226,7 +226,7 @@ public class JUnitTestFinderTest {
 		String str= """
 			package p;
 			import junit.framework.Test;
-			
+
 			public class SuiteClass {
 			    public static Test suite() {
 			        return null;
@@ -249,9 +249,9 @@ public class JUnitTestFinderTest {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
-			
+
 			import org.junit.Test;
-			
+
 			public class Test1 {
 			        @Test public void testFoo() {
 			        }
@@ -261,11 +261,11 @@ public class JUnitTestFinderTest {
 
 		String str1= """
 			package p;
-			
+
 			import org.junit.runner.RunWith;
 			import org.junit.runners.Suite;
 			import org.junit.runners.Suite.SuiteClasses;
-			
+
 			@RunWith(Suite.class)
 			@SuiteClasses(Test1.class)
 			public class Test2 {
@@ -279,7 +279,7 @@ public class JUnitTestFinderTest {
 
 		String str2= """
 			package p;
-			
+
 			public class Test3 extends Test2 {
 			   \s
 			}
@@ -291,11 +291,11 @@ public class JUnitTestFinderTest {
 
 		String str3= """
 			package p;
-			
+
 			import org.junit.runner.RunWith;
 			import org.junit.runners.Suite;
 			import org.junit.runners.Suite.SuiteClasses;
-			
+
 			@RunWith(Suite.class)
 			@SuiteClasses(Test1.class)
 			public interface Test4 {
@@ -309,11 +309,11 @@ public class JUnitTestFinderTest {
 
 		String str4= """
 			package p;
-			
+
 			import org.junit.runner.RunWith;
 			import org.junit.runners.Suite;
 			import org.junit.runners.Suite.SuiteClasses;
-			
+
 			@RunWith(Suite.class)
 			@SuiteClasses(Test1.class)
 			class Test5 {
@@ -327,9 +327,9 @@ public class JUnitTestFinderTest {
 
 		String str5= """
 			package p;
-			
+
 			import org.junit.runner.RunWith;
-			
+
 			@SuiteClasses(Test1.class)
 			public class Test6 {
 			    RunWith aRunWith;
@@ -343,11 +343,11 @@ public class JUnitTestFinderTest {
 		String str6= """
 			import java.util.Arrays;
 			import java.util.Collection;
-			
+
 			import org.junit.runners.Parameterized.Parameters;
-			
+
 			public class Test7 extends StackTest {
-			
+
 				public Test7(int num) {
 					super(num);
 				}
@@ -383,9 +383,9 @@ public class JUnitTestFinderTest {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
-			
+
 			import org.junit.Test;
-			
+
 			public class Test1 {
 			        @Test public void testFoo() {
 			        }
@@ -399,7 +399,7 @@ public class JUnitTestFinderTest {
 
 		String str1= """
 			package p;
-			
+
 			public class Test2 extends Test1 {
 			        public void testBar() {
 			        }
@@ -413,9 +413,9 @@ public class JUnitTestFinderTest {
 
 		String str2= """
 			package p;
-			
+
 			import org.junit.Test;
-			
+
 			public class Test3 {
 			        @Test void testFoo() {
 			        }
@@ -429,9 +429,9 @@ public class JUnitTestFinderTest {
 
 		String str3= """
 			package p;
-			
+
 			import org.junit.Test;
-			
+
 			public abstract class AbstractTest {
 			        @Test public void testBar() {
 			        }
@@ -455,9 +455,9 @@ public class JUnitTestFinderTest {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
-			
+
 			import org.junit.Test;
-			
+
 			public class Test1 {
 			        Test testFoo1() {
 			            return null;
@@ -479,9 +479,9 @@ public class JUnitTestFinderTest {
 		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
 		String str= """
 			package p;
-			
+
 			import org.junit.Test;
-			
+
 			@RunWith(Suite.class)
 			@SuiteClasses(Test1.class)
 			public class Test1 {

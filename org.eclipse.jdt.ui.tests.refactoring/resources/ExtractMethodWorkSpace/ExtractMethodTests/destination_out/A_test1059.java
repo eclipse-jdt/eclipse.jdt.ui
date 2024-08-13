@@ -4,10 +4,10 @@ public class A_test1059 {
 	interface B {
 		@interface C {
 			int i= /*[*/extracted();/*]*/
-		}		
-	}
+		}
 
-	protected static int extracted() {
-		return 0;
+		static int extracted() {
+			return 0;
+		}		
 	}
 }

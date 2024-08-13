@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.spelling;
 
+import java.text.BreakIterator;
 import java.util.LinkedList;
 import java.util.Locale;
-
-import java.text.BreakIterator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -78,6 +77,9 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 	/** The word iterator */
 	private final BreakIterator fWordIterator;
+
+	/** Whether last Javadoc tag is inlined or not */
+	private boolean fInlinedTag;
 
 	private boolean fIsIgnoringSingleLetters;
 
@@ -338,11 +340,11 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 			if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == IJavaDocTagConstants.JAVADOC_TAG_PREFIX) {
 
-				int oldNextValue= fNext;
 				nextBreak();
 				if (Character.isLetter(fContent.charAt(fPrevious + 1))) {
 					update= true;
-					token= fContent.substring(fPrevious, oldNextValue);
+					token= fContent.substring(fPrevious, fNext);
+					fInlinedTag= fPrevious > 0 ? fContent.charAt(fPrevious - 1) == '{' : false;
 				} else
 					fPredecessor= fNext;
 
@@ -378,9 +380,13 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 
 				if (isUrlToken(fPrevious))
 					skipTokens(fPrevious, WHITE_SPACE_TOKEN);
-				else if (isToken(IJavaDocTagConstants.JAVADOC_PARAM_TAGS))
+				else if (isToken(IJavaDocTagConstants.JAVADOC_PARAM_TAGS)) {
 					fLastToken= null;
-				else if (isToken(IJavaDocTagConstants.JAVADOC_REFERENCE_TAGS)) {
+				} else if (isToken(IJavaDocTagConstants.JAVADOC_INLINE_EXAMPLE_TAGS) && fInlinedTag) {
+					fLastToken= null;
+					fInlinedTag= false;
+					skipPaired(fPrevious, '{' , '}');
+				} else if (isToken(IJavaDocTagConstants.JAVADOC_REFERENCE_TAGS)) {
 					fLastToken= null;
 					skipTokens(fPrevious, fDelimiter.charAt(0));
 				} else if (fNext - fPrevious > 1 || isSingleLetter(fPrevious) && !fIsIgnoringSingleLetters)
@@ -424,6 +430,35 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 			char ch= fContent.charAt(end);
 			if (ch == stop || isStoppingOnWhiteSpace && Character.isWhitespace(ch))
 				break;
+			end++;
+		}
+
+		if (end < fContent.length()) {
+
+			fNext= end;
+			fPredecessor= fNext;
+
+			fSuccessor= fWordIterator.following(fNext);
+		} else
+			fSuccessor= BreakIterator.DONE;
+	}
+
+	/**
+	 * Skip the tokens until the close character is reached to match all opening character.
+	 *
+	 * @param begin the begin index
+	 * @param open the opening character
+	 * @param close the closing character
+	 */
+	protected final void skipPaired(final int begin, final int open, final int close) {
+		int end= begin;
+		int openCount= 0;
+		while (end < fContent.length()) {
+			char ch= fContent.charAt(end);
+			if (ch == close && openCount == 0)
+				break;
+			else if (ch == open)
+				++openCount;
 			end++;
 		}
 

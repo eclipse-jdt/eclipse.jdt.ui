@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 /**
  * Setups the tests related to Java 5 (i.e. Tiger).
  */
+@Deprecated
 public class Java1d5ProjectTestSetup extends ProjectTestSetup {
 
 	public Java1d5ProjectTestSetup() {
@@ -35,7 +36,7 @@ public class Java1d5ProjectTestSetup extends ProjectTestSetup {
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= super.createAndInitializeProject();
-		JavaProjectHelper.set15CompilerOptions(javaProject);
+		JavaProjectHelper.set18CompilerOptions(javaProject);
 		return javaProject;
 	}
 }

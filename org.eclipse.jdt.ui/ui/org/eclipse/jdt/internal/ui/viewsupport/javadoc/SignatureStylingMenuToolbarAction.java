@@ -17,11 +17,9 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 
@@ -33,8 +31,6 @@ import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.IStylingConfigurationListener;
-import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer;
-import org.eclipse.jdt.internal.ui.viewsupport.MenuVisibilityMenuItemsConfigurer.IMenuVisibilityMenuItemAction;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor.IBrowserContentChangeListener;
 
@@ -55,11 +51,14 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		super(JavadocStylingMessages.JavadocStyling_enabledTooltip, IAction.AS_DROP_DOWN_MENU);
 		Objects.requireNonNull(parent);
 		setImageDescriptor(JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT);
+		// SignatureStylingColorSubMenuItem requires top level shell to display native color picker
+		// JavadocView passes to level shell but JavadocHover passes hover's shell
+		// (Display.getActiveShell() would not work since JavadocView is created when active shell is startup splash screen shell)
+		Shell topLevelShell = (parent.getParent() instanceof Shell parentShell) ? parentShell : parent;
 		enabledActions= new Action[] {
 				new ToggleSignatureTypeParametersColoringAction(),
-				// widget for following action is being removed and re-added repeatedly, see SignatureStylingColorSubMenuItem.menuShown()
-				new SignatureStylingColorSubMenuItem(parent, javadocContentSupplier)};
-		actions= enabledActions;
+				new SignatureStylingColorSubMenuItem(topLevelShell, javadocContentSupplier)};
+		actions= noStylingActions;
 		setMenuCreator(this);
 		this.parent= parent;
 		this.enhancementsReconfiguredTask= enhancementsReconfiguredTask;
@@ -76,30 +75,19 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 			return;
 		}
 		var content= contentAccessor.get();
-		if (content != null && !content.isBlank() && content.contains(JavaElementLinks.CHECKBOX_ID_FORMATTIG)) {
-			reAddActionItems(enabledActions);
+		if (content != null && !content.isBlank() && JavaElementLinks.isStylingPresent(content)) {
+			actions= enabledActions;
 		} else {
-			reAddActionItems(noStylingActions);
-		}
-	}
-
-	private void reAddActionItems(Action[] newActions) {
-		if (actions != newActions) {
-			actions= newActions;
-			if (menu != null) {
-				Stream.of(menu.getItems()).forEach(MenuItem::dispose);
-				addMenuItems();
-			}
+			actions= noStylingActions;
 		}
 	}
 
 	@Override
 	public Menu getMenu(Control p) {
-		if (menu == null) {
-			menu= new Menu(parent);
-			addMenuItems();
-			MenuVisibilityMenuItemsConfigurer.registerForMenu(menu);
-		}
+		// we keep it simple here and just re-create new menu with correct items
+		dispose();
+		menu= new Menu(parent);
+		Stream.of(actions).forEach(action -> new ActionContributionItem(action).fill(menu, -1));
 		return menu;
 	}
 
@@ -108,14 +96,11 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		return null;
 	}
 
-	private void addMenuItems() {
-		Stream.of(actions).forEach(action -> new ActionContributionItem(action).fill(menu, -1));
-	}
-
 	@Override
 	public void dispose() {
 		if (menu != null) {
 			menu.dispose();
+			menu= null;
 		}
 	}
 
@@ -134,6 +119,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	private void presentEnhancementsState() {
 		setImageDescriptor(enhancementsEnabled ? JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT : JavaPluginImages.DESC_DTOOL_JDOC_HOVER_EDIT);
 		setToolTipText(enhancementsEnabled ? JavadocStylingMessages.JavadocStyling_enabledTooltip : JavadocStylingMessages.JavadocStyling_disabledTooltip);
+		noStylingActions[0].setText(enhancementsEnabled ? JavadocStylingMessages.JavadocStyling_noEnhancements : JavadocStylingMessages.JavadocStyling_enhancementsDisabled);
 	}
 
 	@Override
@@ -141,13 +127,18 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		parent.getDisplay().execute(() -> {
 			enhancementsEnabled= isEnabled;
 			presentEnhancementsState();
+			// even if enhancements switched from off to on, only browserContentChanged() sets enabledActions
+			actions= noStylingActions;
 			runEnhancementsReconfiguredTask();
 		});
 	}
 
 	@Override
 	public void parametersColoringStateChanged(boolean isEnabled) {
-		runEnhancementsReconfiguredTask();
+		parent.getDisplay().execute(() -> {
+			enabledActions[0].setChecked(isEnabled);
+			runEnhancementsReconfiguredTask();
+		});
 	}
 
 	@Override
@@ -161,26 +152,16 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 
 	private class NoStylingEnhancementsAction extends Action {
 		public NoStylingEnhancementsAction() {
-			super(JavadocStylingMessages.JavadocStyling_noEnhancements);
 			setEnabled(false);
 		}
 	}
 
-	private static class ToggleSignatureTypeParametersColoringAction extends Action implements IMenuVisibilityMenuItemAction {
+	private static class ToggleSignatureTypeParametersColoringAction extends Action {
 
 		public ToggleSignatureTypeParametersColoringAction() {
 			super(JavadocStylingMessages.JavadocStyling_typeParamsColoring, IAction.AS_CHECK_BOX);
 			setId(ToggleSignatureTypeParametersColoringAction.class.getSimpleName());
-			showCurentPreference();
-		}
-
-		private void showCurentPreference() {
 			setChecked(JavaElementLinks.getPreferenceForTypeParamsColoring());
-		}
-
-		@Override
-		public void menuShown(MenuEvent e) {
-			showCurentPreference();
 		}
 
 		@Override

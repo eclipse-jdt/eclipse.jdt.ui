@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.Occu
 import org.eclipse.jdt.internal.core.manipulation.search.MethodExitsFinder;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class MarkOccurrenceTest1d7 {
 	@Rule
-	public Java1d7ProjectTestSetup j7s= new Java1d7ProjectTestSetup();
+	public Java1d8ProjectTestSetup j7s= new Java1d8ProjectTestSetup();
 
 	private ASTParser fParser;
 

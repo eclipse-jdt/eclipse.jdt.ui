@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -56,9 +56,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Predicate
-			
+
 			public class E {
 			    public void foo() {
 			        Predicate<String> cc = (String s) -> { return s.length() > 0; };
@@ -71,9 +71,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.function.Predicate
-			
+
 			public class E {
 			    public void foo() {
 			        Predicate<String> cc = (var s) -> { return s.length() > 0; };
@@ -89,7 +89,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    private interface I1 {
 			        public void run(String s, int i, Boolean b);
@@ -105,7 +105,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E1 {
 			    private interface I1 {
 			        public void run(String s, int i, Boolean b);
@@ -125,14 +125,14 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    public void foo() {
 			        debug((String a) -> a.length());
 			    }
-			
+
 			    private void debug(Function<String, Object> function) {
 			        System.out.println(function);
 			    }
@@ -144,14 +144,14 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    public void foo() {
 			        debug((var a) -> a.length());
 			    }
-			
+
 			    private void debug(Function<String, Object> function) {
 			        System.out.println(function);
 			    }
@@ -167,14 +167,14 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    public void foo() {
 			        debug((String a) -> a.length());
 			    }
-			
+
 			    private void debug(Function<?, ?> function) {
 			        System.out.println(function);
 			    }
@@ -193,14 +193,14 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    public static void main(String[] args) {
 			        new E1((String a) -> a.length());
 			    }
-			
+
 			    public E1(Function<?, ?> function) {
 			        System.out.println(function);
 			    }
@@ -219,36 +219,36 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E1 {
 			    public E1(Function<?, ?> function) {
 			        System.out.println(function);
 			    }
-			
+
 			    public void method(Function<?, ?> function) {
 			        System.out.println(function);
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
 
 		String sample2= """
 			package test1;
-			
+
 			import java.util.function.Function;
-			
+
 			public class E2 extends E1 {
 			    public E2(Function<?, ?> function) {
 			        super((String a) -> a.length());
 			    }
-			
+
 			    public void method(Function<?, ?> function) {
 			        super.method((String a) -> a.length());
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", sample2, false, null);
@@ -264,9 +264,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Predicate;
-			
+
 			public class E1 {
 			    public void foo() {
 			        Predicate<String> cc = (String s) -> (s.length() > 0);
@@ -279,9 +279,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.function.Predicate;
-			
+
 			public class E1 {
 			    public void foo() {
 			        Predicate<String> cc = (var s) -> (s.length() > 0);
@@ -298,9 +298,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Predicate;
-			
+
 			public class E1 {
 			    public void foo() {
 			        Predicate<?> cc = (String s) -> (s.length() > 0);
@@ -320,9 +320,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Predicate;
-			
+
 			public class E1 {
 			    public Predicate<String> cc = (String s) -> (s.length() > 0);
 			}
@@ -333,9 +333,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.function.Predicate;
-			
+
 			public class E1 {
 			    public Predicate<String> cc = (var s) -> (s.length() > 0);
 			}
@@ -350,9 +350,9 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.function.Predicate;
-			
+
 			public class E1 {
 			    public Predicate<?> cc = (String s) -> (s.length() > 0);
 			}
@@ -364,6 +364,34 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
+	@Test
+	public void testDoNotUseLocalVariableTypeInferenceWithMethodRef() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=570058
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			interface MyIntf {
+				void bla(Object... o);
+			}
+
+			public class E1 {
+
+				private void bla(Object... o) {
+				}
+
+				private void foo() {
+					MyIntf myin = this::bla;
+				}
+
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_VAR);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
 
 	@Test
 	public void testUseStringIsBlank() throws Exception {
@@ -371,14 +399,14 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    private static final int ZERO = 0;
 			    private static final int THREE = 3;
 			    private static final String EMPTY_STRING = "";
-			
+
 			    void isBlank(String text) {
 			        if (text.strip().isEmpty()) {
 			            System.err.println("Text must not be blank");
@@ -418,7 +446,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 			            System.err.println("Text must not be blank");
 			        }
 			    }
-			
+
 			    void isNotBlank(String text, StringBuilder builder) {
 			        if (!text.strip().isEmpty()) {
 			            System.out.println(text)
@@ -443,7 +471,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 			            System.out.println(text)
 			        }
 			    }
-			
+
 			    void printList(List<String> list) {
 			        list.stream().filter(s -> !s.strip().isEmpty()).map(String::strip);
 			        list.stream().filter(s -> s.strip().length() != 0).map(String::strip);
@@ -453,14 +481,14 @@ public class CleanUpTest11 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    private static final int ZERO = 0;
 			    private static final int THREE = 3;
 			    private static final String EMPTY_STRING = "";
-			
+
 			    void isBlank(String text) {
 			        if (text.isBlank()) {
 			            System.err.println("Text must not be blank");
@@ -500,7 +528,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 			            System.err.println("Text must not be blank");
 			        }
 			    }
-			
+
 			    void isNotBlank(String text, StringBuilder builder) {
 			        if (!text.isBlank()) {
 			            System.out.println(text)
@@ -525,7 +553,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 			            System.out.println(text)
 			        }
 			    }
-			
+
 			    void printList(List<String> list) {
 			        list.stream().filter(s -> !s.isBlank()).map(String::strip);
 			        list.stream().filter(s -> !s.isBlank()).map(String::strip);
@@ -547,37 +575,37 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class NotAString {
 			    int mostlyZero= 0;
 			    private static int NON_FINAL_ZERO = 0;
-			
+
 			    public String strip() {
 			        return "";
 			    }
-			
+
 			    void doNotUseStringIsBlank(NotAString noString, String text) {
 			        if (noString.strip().length() == 0) {
 			            System.err.println("Text must not be blank");
 			        }
-			
+
 			        if (text.strip().length() == mostlyZero) {
 			            System.err.println("Text must not be blank");
 			        } else if (text.strip().length() <= NON_FINAL_ZERO) {
 			            System.err.println("Text must not be blank");
 			        }
 			    }
-			
+
 			    void doNotUseStringIsBlankWithUnknownString(String text, String emptyString) {
 			        if (text.strip().equals(emptyString)) {
 			            System.err.println("Text must not be blank");
 			        }
-			
+
 			        if (emptyString.equals(text.strip())) {
 			            System.err.println("Text must not be blank");
 			        }
 			    }
-			
+
 			    void bug_573831(String text) {
 			        if (equals(text.strip())) {
 			            System.err.println("Applying the cleanup should not cause NPE");

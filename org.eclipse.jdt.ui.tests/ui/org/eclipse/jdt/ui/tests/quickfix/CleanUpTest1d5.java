@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d5ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGen
  */
 public class CleanUpTest1d5 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java1d5ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -104,12 +104,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			package test1;
 			interface I {
 			    void m();
+			    @Override
 			    boolean equals(Object obj);
 			}
 			interface J extends I {
+			    @Override
 			    void m(); // @Override error in 1.5, not in 1.6
 			}
 			class X implements J {
+			    @Override
 			    public void m() {} // @Override error in 1.5, not in 1.6
 			    @Override
 			    public int hashCode() { return 0; }
@@ -125,19 +128,19 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.Collection;
 			import java.util.Iterator;
 			import java.util.List;
 			import java.util.Map;
 			import java.util.Set;
-			
+
 			public class E1 extends ArrayList<java.util.Date> {
 			    private java.util.Date[] innerArray = new java.util.Date[10];
-			
+
 			    private List<java.util.Date> innerList = new ArrayList<java.util.Date>();
-			
+
 			    public Collection<? super java.util.Date> replaceAddWithForLoopByCollectionsAddAll(
 			            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
@@ -147,10 +150,10 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        for (int i = 0; i < elems2.length; i++) {
 			            output.add(elems2[i]);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> replaceUsingVariableForEnd(
 			            List<? super java.util.Date> output, java.util.Date[] elements1, java.sql.Date[] elements2) {
 			        // Keep this comment
@@ -160,10 +163,10 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        for (int i = 0, len = elements2.length; i < len; i++) {
 			            output.add(elements2[i]);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> replaceStartingWithVariableForEnd(
 			            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
@@ -173,10 +176,10 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        for (int len = elems2.length, i = 0; i < len; i++) {
 			            output.add(elems2[i]);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(
 			            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
@@ -186,52 +189,52 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        for (int i = elems2.length - 1; 0 <= i; i--) {
 			            output.add(elems2[i]);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public void replaceAddWithNotEqualOperator(Collection<? super java.util.Date> output, java.util.Date[] dates) {
 			        // Keep this comment
 			        for (int i = 0; i != dates.length; i++) {
 			            output.add(dates[i]);
 			        }
 			    }
-			
+
 			    public void replaceAddWithForLoopByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {
 			        // Keep this comment
 			        for (int i = 0; i < dates.length; i++) {
 			            output.add(dates[i]);
 			        }
 			    }
-			
+
 			    public void replaceLoopWithFieldArray(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        for (int i = 0; i < innerArray.length; i++) {
 			            output.add(innerArray[i]);
 			        }
 			    }
-			
+
 			    public void replaceForeachWithFieldArray(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        for (java.util.Date d : this.innerArray) {
 			            output.add(d);
 			        }
 			    }
-			
+
 			    public void replaceLoopWithFieldList(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        for (int i = 0; i < this.innerList.size(); i++) {
 			            output.add(this.innerList.get(i));
 			        }
 			    }
-			
+
 			    public void replaceForeachWithFieldList(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        for (java.util.Date d : innerList) {
 			            output.add(d);
 			        }
 			    }
-			
+
 			    public Collection replaceAddWithForEachByCollectionsAddAll(
 			            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
@@ -241,75 +244,75 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        for (java.sql.Date d : elems2) {
 			            output.add(d);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public void replaceAddWithForEachByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {
 			        // Keep this comment
 			        for (java.util.Date date : dates) {
 			            output.add(date);
 			        }
 			    }
-			
+
 			    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithArray(
 			            Map<String, List<String>> mapToFill, String[] inputList) {
 			        // Keep this comment
 			        for (String input : inputList) {
 			            mapToFill.get("foo").add(input);
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Collection replaceLoopOnRawCollectionWithArray(
 			            List colToFill, String[] inputList) {
 			        // Keep this comment
 			        for (String input : inputList) {
 			            colToFill.add(input);
 			        }
-			
+
 			        return colToFill;
 			    }
-			
+
 			    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithList(
 			            Map<String, List<String>> mapToFill, List<String> inputList) {
 			        // Keep this comment
 			        for (String input : inputList) {
 			            mapToFill.get("foo").add(input);
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Collection replaceLoopOnRawCollectionWithList(
 			            List colToFill, List<String> inputList) {
 			        // Keep this comment
 			        for (String input : inputList) {
 			            colToFill.add(input);
 			        }
-			
+
 			        return colToFill;
 			    }
-			
+
 			    public Collection<String> replaceAddWithForLoopByAddAll(List<String> col, List<String> output) {
 			        // Keep this comment
 			        for (int i = 0; i < col.size(); i++) {
 			            output.add(col.get(i));
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<String> replaceAddWithForEachByAddAll(Collection<String> col, List<String> output) {
 			        // Keep this comment
 			        for (String s : col) {
 			            output.add(s);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    private String doSomething(String s) {
 			        return null;
 			    }
@@ -321,7 +324,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.Arrays;
 			import java.util.Collection;
@@ -330,138 +333,138 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			import java.util.List;
 			import java.util.Map;
 			import java.util.Set;
-			
+
 			public class E1 extends ArrayList<java.util.Date> {
 			    private java.util.Date[] innerArray = new java.util.Date[10];
-			
+
 			    private List<java.util.Date> innerList = new ArrayList<java.util.Date>();
-			
+
 			    public Collection<? super java.util.Date> replaceAddWithForLoopByCollectionsAddAll(
 			            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
 			        Collections.addAll(output, elems1);
 			        Collections.addAll(output, elems2);
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> replaceUsingVariableForEnd(
 			            List<? super java.util.Date> output, java.util.Date[] elements1, java.sql.Date[] elements2) {
 			        // Keep this comment
 			        Collections.addAll(output, elements1);
 			        Collections.addAll(output, elements2);
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> replaceStartingWithVariableForEnd(
 			            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
 			        Collections.addAll(output, elems1);
 			        Collections.addAll(output, elems2);
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> replaceBackwardLoopOnSet(
 			            Set<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
 			        Collections.addAll(output, elems1);
 			        Collections.addAll(output, elems2);
-			
+
 			        return output;
 			    }
-			
+
 			    public void replaceAddWithNotEqualOperator(Collection<? super java.util.Date> output, java.util.Date[] dates) {
 			        // Keep this comment
 			        Collections.addAll(output, dates);
 			    }
-			
+
 			    public void replaceAddWithForLoopByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {
 			        // Keep this comment
 			        Collections.addAll(output, dates);
 			    }
-			
+
 			    public void replaceLoopWithFieldArray(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        Collections.addAll(output, innerArray);
 			    }
-			
+
 			    public void replaceForeachWithFieldArray(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        Collections.addAll(output, this.innerArray);
 			    }
-			
+
 			    public void replaceLoopWithFieldList(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        output.addAll(this.innerList);
 			    }
-			
+
 			    public void replaceForeachWithFieldList(Collection<? super java.util.Date> output) {
 			        // Keep this comment
 			        output.addAll(innerList);
 			    }
-			
+
 			    public Collection replaceAddWithForEachByCollectionsAddAll(
 			            List<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        // Keep this comment
 			        Collections.addAll(output, elems1);
 			        Collections.addAll(output, elems2);
-			
+
 			        return output;
 			    }
-			
+
 			    public void replaceAddWithForEachByCollectionsAddAll(Collection<? super java.util.Date> output, java.util.Date[] dates) {
 			        // Keep this comment
 			        Collections.addAll(output, dates);
 			    }
-			
+
 			    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithArray(
 			            Map<String, List<String>> mapToFill, String[] inputList) {
 			        // Keep this comment
 			        Collections.addAll(mapToFill.get("foo"), inputList);
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Collection replaceLoopOnRawCollectionWithArray(
 			            List colToFill, String[] inputList) {
 			        // Keep this comment
 			        colToFill.addAll(Arrays.asList(inputList));
-			
+
 			        return colToFill;
 			    }
-			
+
 			    public Map<String, List<String>> replaceLoopOnCollectionAsExpressionWithList(
 			            Map<String, List<String>> mapToFill, List<String> inputList) {
 			        // Keep this comment
 			        mapToFill.get("foo").addAll(inputList);
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Collection replaceLoopOnRawCollectionWithList(
 			            List colToFill, List<String> inputList) {
 			        // Keep this comment
 			        colToFill.addAll(inputList);
-			
+
 			        return colToFill;
 			    }
-			
+
 			    public Collection<String> replaceAddWithForLoopByAddAll(List<String> col, List<String> output) {
 			        // Keep this comment
 			        output.addAll(col);
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<String> replaceAddWithForEachByAddAll(Collection<String> col, List<String> output) {
 			        // Keep this comment
 			        output.addAll(col);
-			
+
 			        return output;
 			    }
-			
+
 			    private String doSomething(String s) {
 			        return null;
 			    }
@@ -478,17 +481,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.Collection;
 			import java.util.Iterator;
 			import java.util.List;
 			import java.util.Map;
 			import java.util.Set;
-			
+
 			public class E1 extends ArrayList<java.util.Date> {
 			    private List<java.util.Date> innerList = new ArrayList<java.util.Date>();
-			
+
 			    @Override
 			    public boolean addAll(Collection<? extends java.util.Date> doNotRefactorWithCyclicCalls) {
 			        for (java.util.Date doNotRefactorWithCyclicCall : doNotRefactorWithCyclicCalls) {
@@ -496,16 +499,16 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        }
 			        return true;
 			    }
-			
+
 			    public List<? super java.util.Date>[] doNotReplaceWithUsesVariableForEnd(
 			            List<? super java.util.Date>[] output, java.util.Date[] elems1, java.util.Date[] elems2) {
 			        for (int i = 0, len = elems1.length; i < len; i++) {
 			            output[len].add(elems1[i]);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<? super java.util.Date> doNotReplaceBackwardLoopOnCollection(
 			            Collection<? super java.util.Date> output, java.util.Date[] elems1, java.sql.Date[] elems2) {
 			        for (int i = elems1.length - 1; i >= 0; i--) {
@@ -514,107 +517,107 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        for (int i = elems2.length - 1; 0 <= i; i--) {
 			            output.add(elems2[i]);
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public boolean doNotRefactorInsideImplementation(Collection<? extends java.util.Date> dates) {
 			        for (java.util.Date date : dates) {
 			            this.add(date);
 			        }
 			        return true;
 			    }
-			
+
 			    public void doNotReplaceLoopWithFieldList(Collection<? super java.util.Date> output, List<java.util.Date> input) {
 			        for (int i = 0; i < input.size(); i++) {
 			            output.add(innerList.get(i));
 			        }
 			    }
-			
+
 			    public Map<String, List<String>> doNotRefactorForEachWithListUsingLoopVariable(
 			            Map<String, List<String>> mapToFill, List<String> inputList) {
 			        for (String input : inputList) {
 			            mapToFill.get(input).add(input);
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Map<String, List<String>> doNotRefactorForLoopWithListUsingLoopIndex(
 			            Map<String, List<String>> mapToFill, List<String> inputList) {
 			        for (int i = 0; i < inputList.size(); i++) {
 			            mapToFill.get(inputList.get(i)).add(inputList.get(i));
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Map<String, List<String>> doNotRefactorForLoopWithListUsingLoopIterator(
 			            Map<String, List<String>> mapToFill, List<String> inputList) {
 			        String input = null;
 			        for (Iterator<String> it = inputList.iterator(); it.hasNext(); input = it.next()) {
 			            mapToFill.get(input).add(input);
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public void doNotRefactorForLoopWithListUsingLoopIterator(List<String> col) {
 			        for (Iterator<String> it = col.iterator(); it.hasNext();) {
 			            System.out.println(it.next());
 			        }
 			    }
-			
+
 			    public Map<String, List<String>> doNotRefactorForEachWithArrayUsingLoopVariable(
 			            Map<String, List<String>> mapToFill, String[] inputArray) {
 			        for (String input : inputArray) {
 			            mapToFill.get(input).add(input);
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Map<String, List<String>> doNotRefactorForLoopWithArrayUsingLoopIndex(
 			            Map<String, List<String>> mapToFill, String[] inputArray) {
 			        for (int i = 0; i < inputArray.length; i++) {
 			            mapToFill.get(inputArray[i]).add(inputArray[i]);
 			        }
-			
+
 			        return mapToFill;
 			    }
-			
+
 			    public Collection<String> doNotRefactorForLoopAddMethodResult(List<String> output, String[] elems) {
 			        for (int i = 0; i < elems.length; i++) {
 			            output.add(doSomething(elems[i]));
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<String> doNotRefactorForEachAddMethodResult(List<String> output, String[] elems) {
 			        for (String s : elems) {
 			            output.add(doSomething(s));
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<String> doNotRefactorForLoopAddMethodResult(List<String> output, List<String> col) {
 			        for (int i = 0; i < col.size(); i++) {
 			            output.add(doSomething(col.get(i)));
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    public Collection<String> doNotRefactorForEachAddMethodResult(List<String> output, List<String> col) {
 			        for (String s : col) {
 			            output.add(doSomething(s));
 			        }
-			
+
 			        return output;
 			    }
-			
+
 			    private String doSomething(String s) {
 			        return null;
 			    }
@@ -1296,9 +1299,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			package test1;
 			import java.util.Iterator;
 			import java.util.Map;
-			
+
 			public class E1 {
-			
+
 			    public void foo(Map<String, String> extensionMap) {
 				       for (Iterator<String> iterator = extensionMap.keySet().iterator(); iterator.hasNext();) {
 				   	       try {
@@ -1330,9 +1333,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		sample= """
 			package test1;
 			import java.util.Map;
-			
+
 			public class E1 {
-			
+
 			    public void foo(Map<String, String> extensionMap) {
 				       for (String expression : extensionMap.keySet()) {
 				   	       try {
@@ -1709,7 +1712,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			            System.out.println(it.next());
 			        }
 			    }
-			
+
 			    private void bar() {}
 			}
 			""";
@@ -1736,7 +1739,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			            System.out.println(it.next());
 			        }
 			    }
-			
+
 			    private void bar() {}
 			}
 			""";
@@ -2052,7 +2055,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			            if (output.length() == 1) {
 			                output = output + "-XXX";
 			            }
-			
+
 			            String s = "path=" + args[i] + ",output=" + output;
 			        }
 			       \s
@@ -2062,7 +2065,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			            if (output1.length() == 1) {
 			                output1 = output1 + "-XXX";
 			            }
-			
+
 			            String s = "path=" + args[i] + ",output=" + output1;
 			        }
 			    }
@@ -2081,7 +2084,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			            if (output.length() == 1) {
 			                output = output + "-XXX";
 			            }
-			
+
 			            String s = "path=" + arg + ",output=" + output;
 			        }
 			       \s
@@ -2090,7 +2093,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			            if (output1.length() == 1) {
 			                output1 = output1 + "-XXX";
 			            }
-			
+
 			            String s = "path=" + output + ",output=" + output1;
 			        }
 			    }
@@ -2206,7 +2209,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public static void bar() {
 			        // Keep this comment
@@ -2220,7 +2223,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Float f = Float.valueOf(42.42F);
 			        Double d = Double.valueOf(42.42);
 			    }
-			
+
 			    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {
 			        char c = Character.valueOf('*');
 			        byte by = Byte.valueOf((byte) 0);
@@ -2232,11 +2235,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        float f = Float.valueOf(42.42F);
 			        double d = Double.valueOf(42.42);
 			    }
-			
+
 			    public static void directlyReturnWrapperParameter(Character c, Byte by, Boolean bo, Integer i, Long l, Short s,
 			            Float f, Double d) {
 			        Object myObject = null;
-			
+
 			        // Keep this comment
 			        myObject = Character.valueOf(c);
 			        myObject = Byte.valueOf(by);
@@ -2247,7 +2250,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        myObject = Float.valueOf(f);
 			        myObject = Double.valueOf(d);
 			    }
-			
+
 			    public static void useAutoboxingOnAssignment() {
 			        // Keep this comment
 			        Character c;
@@ -2269,7 +2272,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Double d;
 			        d = Double.valueOf(42.42);
 			    }
-			
+
 			    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {
 			        // Keep this comment
 			        char c;
@@ -2291,87 +2294,87 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        double d;
 			        d = Double.valueOf(42.42);
 			    }
-			
+
 			    public static Character removeUnnecessaryValueOfCallsInCharacterWrapper() {
 			        // Keep this comment
 			        return Character.valueOf('*');
 			    }
-			
+
 			    public static Byte removeUnnecessaryValueOfCallsInByteWrapper() {
 			        // Keep this comment
 			        return Byte.valueOf((byte) 0);
 			    }
-			
+
 			    public static Boolean removeUnnecessaryValueOfCallsInBooleanWrapper() {
 			        // Keep this comment
 			        return Boolean.valueOf(true);
 			    }
-			
+
 			    public static Integer removeUnnecessaryValueOfCallsInIntegerWrapper() {
 			        // Keep this comment
 			        return Integer.valueOf(42);
 			    }
-			
+
 			    public static Long removeUnnecessaryValueOfCallsInLongWrapper() {
 			        // Keep this comment
 			        return Long.valueOf(42L);
 			    }
-			
+
 			    public static Short removeUnnecessaryValueOfCallsInShortWrapper() {
 			        // Keep this comment
 			        return Short.valueOf((short) 42);
 			    }
-			
+
 			    public static Float removeUnnecessaryValueOfCallsInFloatWrapper() {
 			        // Keep this comment
 			        return Float.valueOf(42.42F);
 			    }
-			
+
 			    public static Double removeUnnecessaryValueOfCallsInDoubleWrapper() {
 			        // Keep this comment
 			        return Double.valueOf(42.42);
 			    }
-			
+
 			    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {
 			        // Keep this comment
 			        return Character.valueOf('*');
 			    }
-			
+
 			    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {
 			        // Keep this comment
 			        return Byte.valueOf((byte) 0);
 			    }
-			
+
 			    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {
 			        // Keep this comment
 			        return Boolean.valueOf(true);
 			    }
-			
+
 			    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {
 			        // Keep this comment
 			        return Integer.valueOf(42);
 			    }
-			
+
 			    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {
 			        // Keep this comment
 			        return Long.valueOf(42L);
 			    }
-			
+
 			    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {
 			        // Keep this comment
 			        return Short.valueOf((short) 42);
 			    }
-			
+
 			    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {
 			        // Keep this comment
 			        return Float.valueOf(42.42F);
 			    }
-			
+
 			    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {
 			        // Keep this comment
 			        return Double.valueOf(42.42);
 			    }
-			
+
 			    public static Object doNotUseAutoboxingReturningObject() {
 			        return Character.valueOf('a');
 			    }
@@ -2380,7 +2383,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public static void bar() {
 			        // Keep this comment
@@ -2394,7 +2397,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Float f = 42.42F;
 			        Double d = 42.42;
 			    }
-			
+
 			    public static void removeUnnecessaryValueOfCallsInPrimitiveDeclaration() {
 			        char c = '*';
 			        byte by = (byte) 0;
@@ -2406,11 +2409,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        float f = 42.42F;
 			        double d = 42.42;
 			    }
-			
+
 			    public static void directlyReturnWrapperParameter(Character c, Byte by, Boolean bo, Integer i, Long l, Short s,
 			            Float f, Double d) {
 			        Object myObject = null;
-			
+
 			        // Keep this comment
 			        myObject = c;
 			        myObject = by;
@@ -2421,7 +2424,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        myObject = f;
 			        myObject = d;
 			    }
-			
+
 			    public static void useAutoboxingOnAssignment() {
 			        // Keep this comment
 			        Character c;
@@ -2443,7 +2446,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Double d;
 			        d = 42.42;
 			    }
-			
+
 			    public static void removeUnnecessaryValueOfCallsInPrimitiveAssignment() {
 			        // Keep this comment
 			        char c;
@@ -2465,87 +2468,87 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        double d;
 			        d = 42.42;
 			    }
-			
+
 			    public static Character removeUnnecessaryValueOfCallsInCharacterWrapper() {
 			        // Keep this comment
 			        return '*';
 			    }
-			
+
 			    public static Byte removeUnnecessaryValueOfCallsInByteWrapper() {
 			        // Keep this comment
 			        return (byte) 0;
 			    }
-			
+
 			    public static Boolean removeUnnecessaryValueOfCallsInBooleanWrapper() {
 			        // Keep this comment
 			        return true;
 			    }
-			
+
 			    public static Integer removeUnnecessaryValueOfCallsInIntegerWrapper() {
 			        // Keep this comment
 			        return 42;
 			    }
-			
+
 			    public static Long removeUnnecessaryValueOfCallsInLongWrapper() {
 			        // Keep this comment
 			        return 42L;
 			    }
-			
+
 			    public static Short removeUnnecessaryValueOfCallsInShortWrapper() {
 			        // Keep this comment
 			        return (short) 42;
 			    }
-			
+
 			    public static Float removeUnnecessaryValueOfCallsInFloatWrapper() {
 			        // Keep this comment
 			        return 42.42F;
 			    }
-			
+
 			    public static Double removeUnnecessaryValueOfCallsInDoubleWrapper() {
 			        // Keep this comment
 			        return 42.42;
 			    }
-			
+
 			    public static char removeUnnecessaryValueOfCallsInCharacterPrimitive() {
 			        // Keep this comment
 			        return '*';
 			    }
-			
+
 			    public static byte removeUnnecessaryValueOfCallsInBytePrimitive() {
 			        // Keep this comment
 			        return (byte) 0;
 			    }
-			
+
 			    public static boolean removeUnnecessaryValueOfCallsInBooleanPrimitive() {
 			        // Keep this comment
 			        return true;
 			    }
-			
+
 			    public static int removeUnnecessaryValueOfCallsInIntegerPrimitive() {
 			        // Keep this comment
 			        return 42;
 			    }
-			
+
 			    public static long removeUnnecessaryValueOfCallsInLongPrimitive() {
 			        // Keep this comment
 			        return 42L;
 			    }
-			
+
 			    public static short removeUnnecessaryValueOfCallsInShortPrimitive() {
 			        // Keep this comment
 			        return (short) 42;
 			    }
-			
+
 			    public static float removeUnnecessaryValueOfCallsInFloatPrimitive() {
 			        // Keep this comment
 			        return 42.42F;
 			    }
-			
+
 			    public static double removeUnnecessaryValueOfCallsInDoublePrimitive() {
 			        // Keep this comment
 			        return 42.42;
 			    }
-			
+
 			    public static Object doNotUseAutoboxingReturningObject() {
 			        return Character.valueOf('a');
 			    }
@@ -2567,26 +2570,26 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			public class E1 {
 			    public static int dummyMethod(Byte byObject) {
 			        return 1;
 			    }
-			
+
 			    public static int dummyMethod(byte byPrimitive) {
 			        return 2;
 			    }
-			
+
 			    public static void doNotCleanupOnConflictingMethod(byte byPrimitive) {
 			        dummyMethod(Byte.valueOf(byPrimitive));
 			    }
-			
+
 			    public static void doNotCleanupOnOverloadedMethod(List<Integer> integers, int notAnIndex) {
 			        integers.remove(Integer.valueOf(notAnIndex));
 			    }
-			
+
 			    public static void doNotUseAutoboxingOnString() {
 			        Integer i = Integer.valueOf("1");
 			        Long l = Long.valueOf("1");
@@ -2594,7 +2597,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Float f = Float.valueOf("1");
 			        Double d = Double.valueOf("1");
 			    }
-			
+
 			    public static void doNotUseAutoboxingWithObjectDeclaration() {
 			        Object c = Character.valueOf('*');
 			        Object by = Byte.valueOf((byte) 0);
@@ -2606,7 +2609,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Object f = Float.valueOf(42.42F);
 			        Object d = Double.valueOf(42.42);
 			    }
-			
+
 			    public static void doNotUseAutoboxingWithObjectAssignment() {
 			        Object c;
 			        c = Character.valueOf('*');
@@ -2642,7 +2645,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
@@ -2656,7 +2659,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        float f = fObject.floatValue();
 			        double d = dObject.doubleValue();
 			    }
-			
+
 			    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
 			        // Keep this comment
@@ -2669,7 +2672,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Float f = fObject.floatValue();
 			        Double d = dObject.doubleValue();
 			    }
-			
+
 			    public static void useUnboxingOnPrimitiveAssignment(Character cObject, Byte byObject, Boolean boObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
 			        // Keep this comment
@@ -2690,47 +2693,47 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        double d;
 			        d = dObject.doubleValue();
 			    }
-			
+
 			    public static char useUnboxingOnPrimitiveReturn(Character cObject) {
 			        // Keep this comment
 			        return cObject.charValue();
 			    }
-			
+
 			    public static byte useUnboxingOnPrimitiveReturn(Byte byObject) {
 			        // Keep this comment
 			        return byObject.byteValue();
 			    }
-			
+
 			    public static boolean useUnboxingOnPrimitiveReturn(Boolean boObject) {
 			        // Keep this comment
 			        return boObject.booleanValue();
 			    }
-			
+
 			    public static int useUnboxingOnPrimitiveReturn(Integer iObject) {
 			        // Keep this comment
 			        return iObject.intValue();
 			    }
-			
+
 			    public static short useUnboxingOnPrimitiveReturn(Short sObject) {
 			        // Keep this comment
 			        return sObject.shortValue();
 			    }
-			
+
 			    public static long useUnboxingOnPrimitiveReturn(Long lObject) {
 			        // Keep this comment
 			        return lObject.longValue();
 			    }
-			
+
 			    public static float useUnboxingOnPrimitiveReturn(Float fObject) {
 			        // Keep this comment
 			        return fObject.floatValue();
 			    }
-			
+
 			    public static double useUnboxingOnPrimitiveReturn(Double dObject) {
 			        // Keep this comment
 			        return dObject.doubleValue();
 			    }
-			
+
 			    public static String useUnboxingOnArrayAccess(String[] strings, Integer i) {
 			        // Keep this comment
 			        return strings[i.intValue()];
@@ -2740,7 +2743,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public static void useUnboxingOnPrimitiveDeclaration(Character cObject, Byte byObject, Boolean boObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
@@ -2754,7 +2757,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        float f = fObject;
 			        double d = dObject;
 			    }
-			
+
 			    public static void reuseWrapper(Character cObject, Byte byObject, Boolean boObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
 			        // Keep this comment
@@ -2767,7 +2770,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        Float f = fObject;
 			        Double d = dObject;
 			    }
-			
+
 			    public static void useUnboxingOnPrimitiveAssignment(Character cObject, Byte byObject, Boolean boObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
 			        // Keep this comment
@@ -2788,47 +2791,47 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        double d;
 			        d = dObject;
 			    }
-			
+
 			    public static char useUnboxingOnPrimitiveReturn(Character cObject) {
 			        // Keep this comment
 			        return cObject;
 			    }
-			
+
 			    public static byte useUnboxingOnPrimitiveReturn(Byte byObject) {
 			        // Keep this comment
 			        return byObject;
 			    }
-			
+
 			    public static boolean useUnboxingOnPrimitiveReturn(Boolean boObject) {
 			        // Keep this comment
 			        return boObject;
 			    }
-			
+
 			    public static int useUnboxingOnPrimitiveReturn(Integer iObject) {
 			        // Keep this comment
 			        return iObject;
 			    }
-			
+
 			    public static short useUnboxingOnPrimitiveReturn(Short sObject) {
 			        // Keep this comment
 			        return sObject;
 			    }
-			
+
 			    public static long useUnboxingOnPrimitiveReturn(Long lObject) {
 			        // Keep this comment
 			        return lObject;
 			    }
-			
+
 			    public static float useUnboxingOnPrimitiveReturn(Float fObject) {
 			        // Keep this comment
 			        return fObject;
 			    }
-			
+
 			    public static double useUnboxingOnPrimitiveReturn(Double dObject) {
 			        // Keep this comment
 			        return dObject;
 			    }
-			
+
 			    public static String useUnboxingOnArrayAccess(String[] strings, Integer i) {
 			        // Keep this comment
 			        return strings[i];
@@ -2851,24 +2854,24 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public static int dummyMethod(Byte byObject) {
 			        return 1;
 			    }
-			
+
 			    public static int dummyMethod(byte byPrimitive) {
 			        return 2;
 			    }
-			
+
 			    public static void doNotCleanupOnConflictingMethod(Byte byObject) {
 			        dummyMethod(byObject.byteValue());
 			    }
-			
+
 			    public static void doNotCleanupOnOverloadedMethod(StringBuilder builder, Character optimizedObject) {
 			        builder.append(optimizedObject.charValue());
 			    }
-			
+
 			    public static void doNotUseUnboxingOnNarrowingType(Character cObject, Byte byObject,
 			            Integer iObject, Short sObject, Float fObject) {
 			        int c = cObject.charValue();
@@ -2877,7 +2880,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        int s = sObject.shortValue();
 			        double f = fObject.floatValue();
 			    }
-			
+
 			    public static void doNotUseUnboxingOnCastCalls(Character cObject, Byte byObject,
 			            Integer iObject, Short sObject, Float fObject, Object unknown) {
 			        int c = (int)cObject.charValue();
@@ -2887,7 +2890,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        double f = (double)fObject.floatValue();
 			        byte b = (byte)((Integer)unknown).intValue();
 			    }
-			
+
 			    public static void doNotUseUnboxingWhenTypesDontMatch(Byte byObject,
 			            Integer iObject, Short sObject, Long lObject, Float fObject, Double dObject) {
 			        short by = byObject.shortValue();
@@ -2911,7 +2914,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String input= """
 			package test1;
-			
+
 			public class E {
 			    public static boolean replaceUselessUnboxing() {
 			        // Keep this comment
@@ -2931,7 +2934,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String output= """
 			package test1;
-			
+
 			public class E {
 			    public static boolean replaceUselessUnboxing() {
 			        // Keep this comment
@@ -2954,7 +2957,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public static boolean doNotCreateUselessAutoboxing() {
 			        Boolean bo = Boolean.TRUE;
@@ -2975,7 +2978,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
 			package test;
-			
+
 			public class X {
 			  public int foo(String x, String ...y) { return y.length + 1; }
 			  public int bar() {
@@ -2995,7 +2998,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			public class X {
 			  public int foo(String x, String ...y) { return y.length + 1; }
 			  public int bar() {
@@ -3015,9 +3018,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			import java.util.Arrays;
-			
+
 			public final class X2 {
 			  public static class Y {
 			      public int foo(String x, String ...y) { return y.length + 1; }
@@ -3036,9 +3039,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test;
-			
+
 			import java.util.Arrays;
-			
+
 			public final class X2 {
 			  public static class Y {
 			      public int foo(String x, String ...y) { return y.length + 1; }
@@ -3064,7 +3067,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public void foo(Object... elementsOrTreePaths) {
 			        return;
@@ -3086,7 +3089,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public class B {
 			        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {
@@ -3112,7 +3115,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class A {
 			    public class B {
 			        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {
@@ -3150,12 +3153,12 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				            return;
 				        }
 				    }
-				
+
 				    public class C extends B {
 				        public void foo(Object... elementsOrTreePaths) {
 				            return;
 				        }
-				
+
 				        public void foo(Object elementsOrTreePaths, Integer obj) {
 				            foo(new Object[] {elementsOrTreePaths, obj});
 				            foo(new Object[] {elementsOrTreePaths, elementsOrTreePaths});
@@ -3173,12 +3176,12 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 				            return;
 				        }
 				    }
-				
+
 				    public class C extends B {
 				        public void foo(Object... elementsOrTreePaths) {
 				            return;
 				        }
-				
+
 				        public void foo(Object elementsOrTreePaths, Integer obj) {
 				            foo(new Object[] {elementsOrTreePaths, obj});
 				            foo(elementsOrTreePaths, elementsOrTreePaths);
@@ -3213,7 +3216,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			String given= """
 				import java.util.Arrays;
 				import java.util.List;
-				
+
 				public class NLS {
 				    private static final List<String> WHITELISTED_IDS = Arrays
 				            .asList(new String[] { "org.eclipse.search.text.FileSearchResultPage", //$NON-NLS-1$
@@ -3226,7 +3229,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			String expected= """
 				import java.util.Arrays;
 				import java.util.List;
-				
+
 				public class NLS {
 				    private static final List<String> WHITELISTED_IDS = Arrays
 				                .asList("org.eclipse.search.text.FileSearchResultPage", //$NON-NLS-1$
@@ -3258,12 +3261,12 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void foo(Object... elementsOrTreePaths) {
 			        return;
 			    }
-			
+
 			    public static void bar() {
 			        foo(new Object[] {});
 			        foo(new Object[0]);
@@ -3278,12 +3281,12 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void foo(Object... elementsOrTreePaths) {
 			        return;
 			    }
-			
+
 			    public static void bar() {
 			        foo();
 			        foo();
@@ -3304,20 +3307,20 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class A {
 			    public static void foo(int i, String text, String... elementsOrTreePaths) {
 			        return;
 			    }
-			
+
 			    public static void foo(String i, int text) {
 			        return;
 			    }
-			
+
 			    public static void foo(String i, int text, String anotherParameter) {
 			        return;
 			    }
-			
+
 			    public static void bar() {
 			        foo(0, "bar", new String[0]);
 			        foo(0, "bar", new String[] {"bar"});
@@ -3327,20 +3330,20 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class A {
 			    public static void foo(int i, String text, String... elementsOrTreePaths) {
 			        return;
 			    }
-			
+
 			    public static void foo(String i, int text) {
 			        return;
 			    }
-			
+
 			    public static void foo(String i, int text, String anotherParameter) {
 			        return;
 			    }
-			
+
 			    public static void bar() {
 			        foo(0, "bar");
 			        foo(0, "bar", "bar");
@@ -3363,11 +3366,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public A(Object... elements) {
 			    }
-			
+
 			    public static A foo() {
 			        return new A(new Object[] {"a", "b"});
 			    }
@@ -3379,11 +3382,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class A {
 			    public A(Object... elements) {
 			    }
-			
+
 			    public static A foo() {
 			        return new A("a", "b");
 			    }
@@ -3400,7 +3403,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public class B {
 			        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {
@@ -3426,7 +3429,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class A {
 			    public class B {
 			        public void foo(Object elementsOrTreePaths, Integer obj, Integer obj2) {
@@ -3456,7 +3459,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void main(String[] args) {
 			        someMethod(new byte[]{42});
@@ -3476,17 +3479,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Date;
-			
+
 			public class A {
 			    public static void doNotRefactorOnNotCompilingMethod() {
 			        bar(undeclaredVariable, new String[] {"b"});
 			    }
-			
+
 			    public static void bar(Object boss, String... elements) {
 			    }
-			
+
 			    public static void bar(Integer boss, String parameter) {
 			    }
 			}
@@ -3503,15 +3506,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void doNotRefactorOnNotCompilingMethod() {
 			        bar(undeclaredVariable, new String[] {"c"});
 			    }
-			
+
 			    public static void bar(Object parameter, String... elements) {
 			    }
-			
+
 			    public static void bar(Integer parameter, String text) {
 			    }
 			}
@@ -3528,15 +3531,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static A doNotChangeConstructorDispatch() {
 			        return new A(new Object[] {"d"});
 			    }
-			
+
 			    public A(Object... elements) {
 			    }
-			
+
 			    public A(Object element) {
 			    }
 			}
@@ -3553,15 +3556,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void doNotChangeMethodDispatch() {
 			        bar(new Object[] {"e"});
 			    }
-			
+
 			    public static void bar(Object... elements) {
 			    }
-			
+
 			    public static void bar(Object element) {
 			    }
 			}
@@ -3578,12 +3581,12 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void doNotChangeToSelfMethod(Object element) {
 			        doNotChangeToSelfMethod(new Object[] {"f"});
 			    }
-			
+
 			    public static void doNotChangeToSelfMethod(Object... elements) {
 			    }
 			}
@@ -3600,14 +3603,14 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import static java.util.Date.parse;
-			
+
 			public class A {
 			    public void doNotCallAnotherMethod(String text) {
 			        parse(new String[]{text});
 			    }
-			
+
 			    public void parse(String... texts) {
 			    }
 			}
@@ -3624,17 +3627,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public class ChildClass extends A {
 			        public void overloadedMethod(int number) {
 			        }
-			
+
 			        public void doNotCallAnotherMethod(int number) {
 			            overloadedMethod(new int[]{number});
 			        }
 			    }
-			
+
 			    public void overloadedMethod(int... numbers) {
 			    }
 			}
@@ -3651,17 +3654,17 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    private void overloadedMethod(int number) {
 			    }
 			    public class ChildClass {
-			
+
 			        public void doNotCallAnotherMethod(int number) {
 			            overloadedMethod(new int[]{number});
 			        }
 			    }
-			
+
 			    public void overloadedMethod(int... numbers) {
 			    }
 			}
@@ -3679,15 +3682,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class A extends C {
 			    @SuppressWarnings("unused")
 			    private void func(Object a) {
 			    }
-			
+
 			    protected void func(Object ...objs) {
 			    }
-			
+
 			    public void foo() {
 			        new B().func(new Object[] {this});
 			        new B().func(new Object[] {this, this});
@@ -3708,11 +3711,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample2= """
 			package test1;
-			
+
 			public class B {
 			    public void func(Object ...objs) {
 			    }
-			
+
 			    protected void func(Object a, Object b) {
 			    }
 			}
@@ -3721,11 +3724,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample3= """
 			package test1;
-			
+
 			public class C {
 			    protected void func(Object ...objs) {
 			    }
-			
+
 			    protected void func(Object a, Object b, Object c) {
 			    }
 			}
@@ -3736,15 +3739,15 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class A extends C {
 			    @SuppressWarnings("unused")
 			    private void func(Object a) {
 			    }
-			
+
 			    protected void func(Object ...objs) {
 			    }
-			
+
 			    public void foo() {
 			        new B().func(this);
 			        new B().func(new Object[] {this, this});
@@ -3773,7 +3776,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		String sample= """
 			package test1;
 			import static test1.B.func;
-			
+
 			public class A {
 			    public void foo() {
 			        func(new Object[] {this, this});
@@ -3785,11 +3788,11 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample2= """
 			package test1;
-			
+
 			public class B {
 			    public static void func(Object ...objects) {
 			    }
-			
+
 			    public static void func(Object a) {
 			    }
 			}
@@ -3801,7 +3804,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		sample= """
 			package test1;
 			import static test1.B.func;
-			
+
 			public class A {
 			    public void foo() {
 			        func(this, this);
@@ -3818,7 +3821,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    public static void main(String[] args) {
 			        someMethod(new byte[]{42});
@@ -3842,7 +3845,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class A {
 			    void doError(String a, Object b) {}
 			    private void doError(String a, Object b, Object c) {}
@@ -3867,7 +3870,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			private class B {
 			    void doError(String a, Object b) {}
 			    private void doError(String a, Object b, Object c) {}
@@ -3888,7 +3891,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			private class B {
 			    void doError(String a, Object b) {}
 			    private void doError(String a, Object b, Object c) {}
@@ -3914,9 +3917,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.lang.reflect.Method;
-			
+
 			public class A {
 			  public void foo() throws Throwable {
 			    Method method= A.class.getMethod("bah", A.class);
@@ -3936,9 +3939,9 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.lang.reflect.Method;
-			
+
 			public class A {
 			  public void foo() throws Throwable {
 			    Method method= A.class.getMethod("bah", A.class);
@@ -4021,7 +4024,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuffer field0;
 			    public void method0(StringBuffer parm) {
@@ -4032,7 +4035,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4099,7 +4102,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4169,7 +4172,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuffer field0;
 			    public void method0(StringBuffer parm) {
@@ -4180,7 +4183,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
 			    StringBuffer field2;
@@ -4256,7 +4259,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup {
 			    private TestStringBuilderCleanup(){
 			    }
@@ -4274,7 +4277,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuffer field0;
 			    private SuperClass(StringBuffer a) {
@@ -4288,7 +4291,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			import java.util.Map;
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuffer field1;
@@ -4361,7 +4364,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public StringBuilder field0;
 			    private SuperClass(StringBuilder a) {
@@ -4374,7 +4377,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Map;
 			public class TestStringBuilderCleanup extends SuperClass {
 			    StringBuilder field1;
@@ -4522,7 +4525,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class A<K> {
 			    private int val;
 			    public A(int val) {
@@ -4540,7 +4543,7 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class A<K> {
 			    private int val;
 			    public A(int val) {

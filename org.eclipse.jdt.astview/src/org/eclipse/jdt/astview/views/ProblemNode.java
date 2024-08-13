@@ -180,6 +180,9 @@ public class ProblemNode extends ASTAttribute {
 			case CategorizedProblem.CAT_MODULE:
 				buf.append("Module");
 				break;
+			case CategorizedProblem.CAT_COMPLIANCE:
+				buf.append("Compliance");
+				break;
 			default:
 				buf.append("<UNKNOWN CATEGORY>");
 				break;

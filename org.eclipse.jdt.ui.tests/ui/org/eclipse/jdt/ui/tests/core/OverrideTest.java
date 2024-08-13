@@ -111,17 +111,17 @@ public class OverrideTest {
 			public interface ITop {
 			    void m(Integer i);
 			}
-			
+
 			class Middle1 implements ITop {
 			    public void m(Integer arg) {}
 			}
-			
+
 			abstract class Middle2 implements ITop {
 			}
 			class Sub1 extends Middle1 {
 			    public void m(Integer arg) {}
 			}
-			
+
 			class Sub2 extends Middle2 {
 			    public void m(Integer arg) {}
 			}
@@ -162,7 +162,7 @@ public class OverrideTest {
 			    System.out.println("g2 base: " + t);
 			  }
 			}
-			
+
 			public class B extends A<java.util.List<Number>> {
 			  void g1 (java.util.List<?> t) {
 			    System.out.println("g1 derived: " + t);
@@ -382,7 +382,7 @@ public class OverrideTest {
 			class A<E extends Number, F> {
 			    void take(E e, F f) {}
 			}
-			
+
 			class B<S extends Number, T> extends A<S, T> {
 			    void take(S e, T f) {}
 			    void take(T f, S e) {}
@@ -432,7 +432,7 @@ public class OverrideTest {
 			    @Override
 			    void m(Integer t) { System.out.println("D#m(Integer): " + t); }
 			}
-			
+
 			""";
 		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", str, false, null);
 
@@ -473,7 +473,7 @@ public class OverrideTest {
 			class A {
 			    <E extends Number, F> void take(E e, F f) {}
 			}
-			
+
 			class B extends A {
 			    <S extends Number, T> void take(S e, T f) {}
 			    <S extends Number, T> void take(T f, S e) {}
@@ -506,7 +506,7 @@ public class OverrideTest {
 			class A {
 			    <E extends Number, F> void take(E e, F f) {}
 			}
-			
+
 			class B extends A {
 			    <S extends Number, T extends Object> void take(S e, T f) {}
 			    <S extends Integer, T> void take(S e, T f) {}
@@ -660,9 +660,10 @@ public class OverrideTest {
 
 		CompilationUnit astRoot= createAST(cu);
 		IProblem[] problems= astRoot.getProblems();
-		assertEquals(2, problems.length);
-		assertEquals(IProblem.VarargsConflict, problems[0].getID());
+		assertEquals(3, problems.length);
+		assertEquals(IProblem.PotentialHeapPollutionFromVararg, problems[0].getID());
 		assertEquals(IProblem.VarargsConflict, problems[1].getID());
+		assertEquals(IProblem.VarargsConflict, problems[2].getID());
 
 		TypeDeclaration top= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding topAdd= top.getMethods()[0].resolveBinding();
@@ -760,21 +761,21 @@ public class OverrideTest {
 		String str= """
 			package override.test;
 			import java.io.Serializable;
-			
+
 			class A {
 			    <S extends Number & Serializable & Runnable > void foo2(S s) { }
 			}
-			
+
 			class B extends A {
 			    @Override // should error
 			    <S extends Number & Runnable> void foo2(S s) { }
 			}
-			
+
 			class C extends A {
 			    @Override // should error
 			    <S extends Number & Runnable & Cloneable> void foo2(S s) { }
 			}
-			
+
 			class D extends A {
 			    @Override // correct
 			    <S extends Number & Runnable & Serializable> void foo2(S s) { }

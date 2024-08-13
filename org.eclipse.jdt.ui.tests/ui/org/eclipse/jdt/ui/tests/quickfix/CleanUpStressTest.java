@@ -95,7 +95,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests= new Hashtable<>();
         String str= """
 			package junit.runner;
-			
+
 			import java.io.BufferedReader;
 			import java.io.File;
 			import java.io.FileInputStream;
@@ -110,19 +110,19 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import java.lang.reflect.Modifier;
 			import java.text.NumberFormat;
 			import java.util.Properties;
-			
+
 			import junit.framework.AssertionFailedError;
 			import junit.framework.Test;
 			import junit.framework.TestListener;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * Base class for all test runners. This class was born live on stage in
 			 * Sardinia during XP2000.
 			 */
 			public abstract class BaseTestRunner implements TestListener {
 			    static boolean fgFilterStack = true;
-			
+
 			    static int fgMaxMessageLength = 500;
 			    private static Properties fPreferences;
 			    public static final String SUITE_METHODNAME = "suite"; //$NON-NLS-1$
@@ -130,7 +130,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        BaseTestRunner.fgMaxMessageLength = BaseTestRunner
 			                .getPreference("maxmessage", BaseTestRunner.fgMaxMessageLength); //$NON-NLS-1$
 			    }
-			
+
 			    static boolean filterLine(final String line) {
 			        final String[] patterns = new String[]{"junit.framework.TestCase", //$NON-NLS-1$
 			                "junit.framework.TestResult", //$NON-NLS-1$
@@ -149,7 +149,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return false;
 			    }
-			
+
 			    /**
 			     * Filters stack frames from internal JUnit classes
 			     */
@@ -157,12 +157,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        if (BaseTestRunner.showStackRaw()) {
 			            return stack;
 			        }
-			
+
 			        final StringWriter sw = new StringWriter();
 			        final PrintWriter pw = new PrintWriter(sw);
 			        final StringReader sr = new StringReader(stack);
 			        final BufferedReader br = new BufferedReader(sr);
-			
+
 			        String line;
 			        try {
 			            while ((line = br.readLine()) != null) {
@@ -175,7 +175,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return sw.toString();
 			    }
-			
+
 			    /**
 			     * Returns a filtered stack trace
 			     */
@@ -187,11 +187,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        final String trace = buffer.toString();
 			        return BaseTestRunner.getFilteredTrace(trace);
 			    }
-			
+
 			    public static String getPreference(final String key) {
 			        return BaseTestRunner.getPreferences().getProperty(key);
 			    }
-			
+
 			    public static int getPreference(final String key, final int dflt) {
 			        final String value = BaseTestRunner.getPreference(key);
 			        int intValue = dflt;
@@ -204,7 +204,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return intValue;
 			    }
-			
+
 			    protected static Properties getPreferences() {
 			        if (BaseTestRunner.fPreferences == null) {
 			            BaseTestRunner.fPreferences = new Properties();
@@ -214,12 +214,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return BaseTestRunner.fPreferences;
 			    }
-			
+
 			    private static File getPreferencesFile() {
 			        final String home = System.getProperty("user.home"); //$NON-NLS-1$
 			        return new File(home, "junit.properties"); //$NON-NLS-1$
 			    }
-			
+
 			    public static boolean inVAJava() {
 			        try {
 			            Class.forName("com.ibm.uvm.tools.DebugSupport"); //$NON-NLS-1$
@@ -228,9 +228,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return true;
 			    }
-			
+
 			    // TestRunListener implementation
-			
+
 			    private static void readPreferences() {
 			        InputStream is = null;
 			        try {
@@ -247,7 +247,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public static void savePreferences() throws IOException {
 			        final FileOutputStream fos = new FileOutputStream(
 			                BaseTestRunner.getPreferencesFile());
@@ -257,16 +257,16 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            fos.close();
 			        }
 			    }
-			
+
 			    protected static void setPreferences(final Properties preferences) {
 			        BaseTestRunner.fPreferences = preferences;
 			    }
-			
+
 			    protected static boolean showStackRaw() {
 			        return !BaseTestRunner.getPreference("filterstack").equals("true") //$NON-NLS-1$ //$NON-NLS-2$
 			                || (BaseTestRunner.fgFilterStack == false);
 			    }
-			
+
 			    /**
 			     * Truncates a String to the maximum length.
 			     */
@@ -277,34 +277,37 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return s;
 			    }
-			
+
 			    boolean fLoading = true;
-			
+
+			    @Override
 			    public synchronized void addError(final Test test, final Throwable t) {
 			        this.testFailed(TestRunListener.STATUS_ERROR, test, t);
 			    }
+			    @Override
 			    public synchronized void addFailure(final Test test,
 			            final AssertionFailedError t) {
 			        this.testFailed(TestRunListener.STATUS_FAILURE, test, t);
 			    }
-			
+
 			    /**
 			     * Clears the status message.
 			     */
 			    protected void clearStatus() { // Belongs in the GUI TestRunner class
 			    }
-			
+
 			    /**
 			     * Returns the formatted string of the elapsed time.
 			     */
 			    public String elapsedTimeAsString(final long runTime) {
 			        return NumberFormat.getInstance().format((double) runTime / 1000);
 			    }
-			
+
+			    @Override
 			    public synchronized void endTest(final Test test) {
 			        this.testEnded(test.toString());
 			    }
-			
+
 			    /**
 			     * Extract the class name from a String in VA/Java style
 			     */
@@ -314,7 +317,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return className;
 			    }
-			
+
 			    /**
 			     * Returns the loader to be used.
 			     */
@@ -324,7 +327,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return new StandardTestSuiteLoader();
 			    }
-			
+
 			    /**
 			     * Returns the Test corresponding to the given suite. This is a template
 			     * method, subclasses override runFailed(), clearStatus().
@@ -376,11 +379,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            this.runFailed("Failed to invoke suite():" + e.toString()); //$NON-NLS-1$
 			            return null;
 			        }
-			
+
 			        this.clearStatus();
 			        return test;
 			    }
-			
+
 			    /**
 			     * Returns the loaded Class for a suite name.
 			     */
@@ -388,7 +391,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            throws ClassNotFoundException {
 			        return this.getLoader().load(suiteClassName);
 			    }
-			
+
 			    /**
 			     * Processes the command line arguments and returns the name of the suite
 			     * class to run or null
@@ -413,51 +416,52 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return suiteName;
 			    }
-			
+
 			    /**
 			     * Override to define how to handle a failed loading of a test suite.
 			     */
 			    protected abstract void runFailed(String message);
-			
+
 			    /**
 			     * Sets the loading behaviour of the test runner
 			     */
 			    public void setLoading(final boolean enable) {
 			        this.fLoading = enable;
 			    }
-			
+
 			    public void setPreference(final String key, final String value) {
 			        BaseTestRunner.getPreferences().setProperty(key, value);
 			    }
-			
+
 			    /*
 			     * Implementation of TestListener
 			     */
+			    @Override
 			    public synchronized void startTest(final Test test) {
 			        this.testStarted(test.toString());
 			    }
-			
+
 			    public abstract void testEnded(String testName);
-			
+
 			    public abstract void testFailed(int status, Test test, Throwable t);
-			
+
 			    public abstract void testStarted(String testName);
-			
+
 			    protected boolean useReloadingTestSuiteLoader() {
 			        return BaseTestRunner.getPreference("loading").equals("true") //$NON-NLS-1$ //$NON-NLS-2$
 			                && !BaseTestRunner.inVAJava() && this.fLoading;
 			    }
-			
+
 			}""";
         fExpectedChangesAllTests.put("junit.runner.BaseTestRunner.java", str);
         String str1= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
 			import junit.framework.TestCase;
-			
+
 			public class NotVoidTestCase extends TestCase {
 			    public int testNotVoid() {
 			        return 1;
@@ -468,18 +472,18 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.NotVoidTestCase.java", str1);
         String str2= """
 			package junit.tests.runner;
-			
+
 			import java.io.PrintWriter;
 			import java.io.StringWriter;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
 			import junit.runner.BaseTestRunner;
-			
+
 			public class StackFilterTest extends TestCase {
 			    String fFiltered;
 			    String fUnfiltered;
-			
+
 			    @Override
 			    protected void setUp() {
 			        final StringWriter swin = new StringWriter();
@@ -509,7 +513,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        pwin.println(
 			                "    at junit.swingui.TestRunner$17.run(TestRunner.java:669)"); //$NON-NLS-1$
 			        this.fUnfiltered = swin.toString();
-			
+
 			        final StringWriter swout = new StringWriter();
 			        final PrintWriter pwout = new PrintWriter(swout);
 			        pwout.println("junit.framework.AssertionFailedError"); //$NON-NLS-1$
@@ -517,7 +521,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        pwout.println("    at MyTest.testStackTrace(MyTest.java:8)"); //$NON-NLS-1$
 			        this.fFiltered = swout.toString();
 			    }
-			
+
 			    public void testFilter() {
 			        Assert.assertEquals(this.fFiltered,
 			                BaseTestRunner.getFilteredTrace(this.fUnfiltered));
@@ -526,13 +530,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.runner.StackFilterTest.java", str2);
         String str3= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.AssertionFailedError;
 			import junit.framework.TestCase;
-			
+
 			public class DoublePrecisionAssertTest extends TestCase {
-			
+
 			    /**
 			     * Test for the special Double.NaN value.
 			     */
@@ -544,7 +548,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNaNEqualsFails() {
 			        try {
 			            Assert.assertEquals(Double.NaN, 1.234, 0.0);
@@ -553,7 +557,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNaNEqualsNaNFails() {
 			        try {
 			            Assert.assertEquals(Double.NaN, Double.NaN, 0.0);
@@ -562,17 +566,17 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNegInfinityEqualsInfinity() {
 			        Assert.assertEquals(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
 			                0.0);
 			    }
-			
+
 			    public void testAssertPosInfinityEqualsInfinity() {
 			        Assert.assertEquals(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
 			                0.0);
 			    }
-			
+
 			    public void testAssertPosInfinityNotEquals() {
 			        try {
 			            Assert.assertEquals(Double.POSITIVE_INFINITY, 1.23, 0.0);
@@ -581,7 +585,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertPosInfinityNotEqualsNegInfinity() {
 			        try {
 			            Assert.assertEquals(Double.POSITIVE_INFINITY,
@@ -591,20 +595,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			}
 			""";
         fExpectedChangesAllTests.put("junit.tests.framework.DoublePrecisionAssertTest.java", str3);
         String str4= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.AssertionFailedError;
 			import junit.framework.ComparisonFailure;
 			import junit.framework.TestCase;
-			
+
 			public class AssertTest extends TestCase {
-			
+
 			    public void testAssertEquals() {
 			        final Object o = new Object();
 			        Assert.assertEquals(o, o);
@@ -615,11 +619,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertEqualsNull() {
 			        Assert.assertEquals(null, null);
 			    }
-			
+
 			    public void testAssertFalse() {
 			        Assert.assertFalse(false);
 			        try {
@@ -629,7 +633,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNotNull() {
 			        Assert.assertNotNull(new Object());
 			        try {
@@ -639,7 +643,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNotSame() {
 			        Assert.assertNotSame(new Integer(1), null);
 			        Assert.assertNotSame(null, new Integer(1));
@@ -652,7 +656,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNotSameFailsNull() {
 			        try {
 			            Assert.assertNotSame(null, null);
@@ -661,7 +665,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNull() {
 			        Assert.assertNull(null);
 			        try {
@@ -671,7 +675,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNullNotEqualsNull() {
 			        try {
 			            Assert.assertEquals(null, new Object());
@@ -681,7 +685,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertNullNotEqualsString() {
 			        try {
 			            Assert.assertEquals(null, "foo"); //$NON-NLS-1$
@@ -689,7 +693,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        } catch (final ComparisonFailure e) {
 			        }
 			    }
-			
+
 			    public void testAssertSame() {
 			        final Object o = new Object();
 			        Assert.assertSame(o, o);
@@ -700,11 +704,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    public void testAssertStringEquals() {
 			        Assert.assertEquals("a", "a"); //$NON-NLS-1$ //$NON-NLS-2$
 			    }
-			
+
 			    public void testAssertStringNotEqualsNull() {
 			        try {
 			            Assert.assertEquals("foo", null); //$NON-NLS-1$
@@ -713,7 +717,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            e.getMessage(); // why no assertion?
 			        }
 			    }
-			
+
 			    public void testAssertTrue() {
 			        Assert.assertTrue(true);
 			        try {
@@ -723,7 +727,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail();
 			    }
-			
+
 			    /*
 			     * In the tests that follow, we can't use standard formatting for exception
 			     * tests: try { somethingThatShouldThrow(); fail(); catch
@@ -743,16 +747,16 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.AssertTest.java", str4);
         String str5= """
 			package junit.samples;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * TestSuite that runs all the sample tests
 			 *
 			 */
 			public class AllTests {
-			
+
 			    public static void main(final String[] args) {
 			        junit.textui.TestRunner.run(AllTests.suite());
 			    }
@@ -767,13 +771,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.samples.AllTests.java", str5);
         String str6= """
 			package junit.tests.extensions;
-			
+
 			import junit.extensions.ExceptionTestCase;
 			import junit.framework.Assert;
 			import junit.framework.TestResult;
-			
+
 			public class ExceptionTestCaseTest extends junit.framework.TestCase {
-			
+
 			    static public class ThrowExceptionTestCase extends ExceptionTestCase {
 			        public ThrowExceptionTestCase(final String name,
 			                final Class exception) {
@@ -783,7 +787,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            throw new IndexOutOfBoundsException();
 			        }
 			    }
-			
+
 			    static public class ThrowNoExceptionTestCase extends ExceptionTestCase {
 			        public ThrowNoExceptionTestCase(final String name,
 			                final Class exception) {
@@ -792,7 +796,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        public void test() {
 			        }
 			    }
-			
+
 			    static public class ThrowRuntimeExceptionTestCase
 			            extends
 			                ExceptionTestCase {
@@ -804,7 +808,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            throw new RuntimeException();
 			        }
 			    }
-			
+
 			    public void testExceptionSubclass() {
 			        final ExceptionTestCase test = new ThrowExceptionTestCase("test", //$NON-NLS-1$
 			                IndexOutOfBoundsException.class);
@@ -844,7 +848,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.extensions.ExceptionTestCaseTest.java", str6);
         String str7= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
@@ -854,20 +858,23 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import junit.framework.TestCase;
 			import junit.framework.TestListener;
 			import junit.framework.TestResult;
-			
+
 			public class TestListenerTest extends TestCase implements TestListener {
 			    private int fEndCount;
 			    private int fErrorCount;
 			    private int fFailureCount;
 			    private TestResult fResult;
 			    private int fStartCount;
-			
+
+			    @Override
 			    public void addError(final Test test, final Throwable t) {
 			        this.fErrorCount++;
 			    }
+			    @Override
 			    public void addFailure(final Test test, final AssertionFailedError t) {
 			        this.fFailureCount++;
 			    }
+			    @Override
 			    public void endTest(final Test test) {
 			        this.fEndCount++;
 			    }
@@ -875,11 +882,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    protected void setUp() {
 			        this.fResult = new TestResult();
 			        this.fResult.addListener(this);
-			
+
 			        this.fStartCount = 0;
 			        this.fEndCount = 0;
 			        this.fFailureCount = 0;
 			    }
+			    @Override
 			    public void startTest(final Test test) {
 			        this.fStartCount++;
 			    }
@@ -919,23 +927,24 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.TestListenerTest.java", str7);
         String str8= """
 			package junit.tests.runner;
-			
+
 			import java.util.Vector;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
 			import junit.runner.Sorter;
-			
+
 			public class SorterTest extends TestCase {
-			
+
 			    static class Swapper implements Sorter.Swapper {
+			        @Override
 			        public void swap(final Vector values, final int left, final int right) {
 			            final Object tmp = values.elementAt(left);
 			            values.setElementAt(values.elementAt(right), left);
 			            values.setElementAt(tmp, right);
 			        }
 			    }
-			
+
 			    public void testSort() throws Exception {
 			        final Vector v = new Vector();
 			        v.addElement("c"); //$NON-NLS-1$
@@ -950,12 +959,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.runner.SorterTest.java", str8);
         String str9= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
 			import junit.framework.TestCase;
-			
+
 			public class OneTestCase extends TestCase {
 			    public void noTestCase() {
 			    }
@@ -967,31 +976,34 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.OneTestCase.java", str9);
         String str10= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.Protectable;
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.framework.TestResult;
-			
+
 			/**
 			 * Test an implementor of junit.framework.Test other than TestCase or TestSuite
 			 */
 			public class TestImplementorTest extends TestCase {
 			    public static class DoubleTestCase implements Test {
 			        private final TestCase fTestCase;
-			
+
 			        public DoubleTestCase(final TestCase testCase) {
 			            this.fTestCase = testCase;
 			        }
-			
+
+			        @Override
 			        public int countTestCases() {
 			            return 2;
 			        }
-			
+
+			        @Override
 			        public void run(final TestResult result) {
 			            result.startTest(this);
 			            final Protectable p = new Protectable() {
+			                @Override
 			                public void protect() throws Throwable {
 			                    DoubleTestCase.this.fTestCase.runBare();
 			                    DoubleTestCase.this.fTestCase.runBare();
@@ -1001,9 +1013,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            result.endTest(this);
 			        }
 			    }
-			
+
 			    private final DoubleTestCase fTest;
-			
+
 			    public TestImplementorTest() {
 			        final TestCase testCase = new TestCase() {
 			            @Override
@@ -1012,7 +1024,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        };
 			        this.fTest = new DoubleTestCase(testCase);
 			    }
-			
+
 			    public void testSuccessfulRun() {
 			        final TestResult result = new TestResult();
 			        this.fTest.run(result);
@@ -1025,11 +1037,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.TestImplementorTest.java", str10);
         String str11= """
 			package junit.extensions;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.Test;
 			import junit.framework.TestResult;
-			
+
 			/**
 			 * A Decorator for Tests. Use TestDecorator as the base class for defining new
 			 * test decorators. Test decorator subclasses can be introduced to add behaviour
@@ -1038,7 +1050,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 */
 			public class TestDecorator extends Assert implements Test {
 			    protected Test fTest;
-			
+
 			    public TestDecorator(final Test test) {
 			        this.fTest = test;
 			    }
@@ -1048,17 +1060,19 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public void basicRun(final TestResult result) {
 			        this.fTest.run(result);
 			    }
+			    @Override
 			    public int countTestCases() {
 			        return this.fTest.countTestCases();
 			    }
 			    public Test getTest() {
 			        return this.fTest;
 			    }
-			
+
+			    @Override
 			    public void run(final TestResult result) {
 			        this.basicRun(result);
 			    }
-			
+
 			    @Override
 			    public String toString() {
 			        return this.fTest.toString();
@@ -1067,7 +1081,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.extensions.TestDecorator.java", str11);
         String str12= """
 			package junit.runner;
-			
+
 			/**
 			 * An interface to define how a test suite should be loaded.
 			 */
@@ -1078,10 +1092,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.TestSuiteLoader.java", str12);
         String str13= """
 			package junit.framework;
-			
+
 			import java.util.Enumeration;
 			import java.util.Vector;
-			
+
 			/**
 			 * A <code>TestResult</code> collects the results of executing a test case. It
 			 * is an instance of the Collecting Parameter pattern. The test framework
@@ -1097,7 +1111,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    protected Vector fListeners;
 			    protected int fRunTests;
 			    private boolean fStop;
-			
+
 			    public TestResult() {
 			        this.fFailures = new Vector();
 			        this.fErrors = new Vector();
@@ -1182,12 +1196,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    protected void run(final TestCase test) {
 			        this.startTest(test);
 			        final Protectable p = new Protectable() {
+			            @Override
 			            public void protect() throws Throwable {
 			                test.runBare();
 			            }
 			        };
 			        this.runProtected(test, p);
-			
+
 			        this.endTest(test);
 			    }
 			    /**
@@ -1244,12 +1259,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.TestResult.java", str13);
         String str14= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
 			import junit.framework.TestCase;
-			
+
 			public class NotPublicTestCase extends TestCase {
 			    protected void testNotPublic() {
 			    }
@@ -1259,11 +1274,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.NotPublicTestCase.java", str14);
         String str15= """
 			package junit.extensions;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * A TestSuite for active Tests. It runs each test in a separate thread and
 			 * waits until all threads have terminated. -- Aarhus Radisson Scandinavian
@@ -1271,34 +1286,34 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 */
 			public class ActiveTestSuite extends TestSuite {
 			    private volatile int fActiveTestDeathCount;
-			
+
 			    public ActiveTestSuite() {
 			    }
-			
+
 			    public ActiveTestSuite(final Class theClass) {
 			        super(theClass);
 			    }
-			
+
 			    public ActiveTestSuite(final Class theClass, final String name) {
 			        super(theClass, name);
 			    }
-			
+
 			    public ActiveTestSuite(final String name) {
 			        super(name);
 			    }
-			
+
 			    @Override
 			    public void run(final TestResult result) {
 			        this.fActiveTestDeathCount = 0;
 			        super.run(result);
 			        this.waitUntilFinished();
 			    }
-			
+
 			    synchronized public void runFinished(final Test test) {
 			        this.fActiveTestDeathCount++;
 			        this.notifyAll();
 			    }
-			
+
 			    @Override
 			    public void runTest(final Test test, final TestResult result) {
 			        final Thread t = new Thread() {
@@ -1315,7 +1330,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        };
 			        t.start();
 			    }
-			
+
 			    synchronized void waitUntilFinished() {
 			        while (this.fActiveTestDeathCount < this.testCount()) {
 			            try {
@@ -1329,13 +1344,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.extensions.ActiveTestSuite.java", str15);
         String str16= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * A fixture for testing the "auto" test suite feature.
 			 *
@@ -1354,7 +1369,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        suite.addTest(new SuiteTest("testInheritedTests")); //$NON-NLS-1$
 			        suite.addTest(new SuiteTest("testShadowedTests")); //$NON-NLS-1$
 			        suite.addTest(new SuiteTest("testAddTestSuite")); //$NON-NLS-1$
-			
+
 			        return suite;
 			    }
 			    protected TestResult fResult;
@@ -1423,7 +1438,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.SuiteTest.java", str16);
         String str17= """
 			package junit.runner;
-			
+
 			/**
 			 * An implementation of a TestCollector that considers a class to be a test
 			 * class when it contains the pattern "Test" in its name
@@ -1431,10 +1446,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 * @see TestCollector
 			 */
 			public class SimpleTestCollector extends ClassPathTestCollector {
-			
+
 			    public SimpleTestCollector() {
 			    }
-			
+
 			    @Override
 			    protected boolean isTestClass(final String classFileName) {
 			        return classFileName.endsWith(".class") && //$NON-NLS-1$
@@ -1446,7 +1461,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.SimpleTestCollector.java", str17);
         String str18= """
 			package junit.framework;
-			
+
 			/**
 			 * A <em>Test</em> can be run and collect its results.
 			 *
@@ -1465,11 +1480,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.Test.java", str18);
         String str19= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
-			
+
 			public class NoTestCaseClass extends Object {
 			    public void testSuccess() {
 			    }
@@ -1477,31 +1492,31 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.NoTestCaseClass.java", str19);
         String str20= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.TestCase;
-			
+
 			/**
 			 * A test case testing the testing framework.
 			 *
 			 */
 			public class Success extends TestCase {
-			
+
 			    @Override
 			    public void runTest() {
 			    }
-			
+
 			    public void testSuccess() {
 			    }
 			}""";
         fExpectedChangesAllTests.put("junit.tests.framework.Success.java", str20);
         String str21= """
 			package junit.runner;
-			
+
 			import java.lang.reflect.Modifier;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * An implementation of a TestCollector that loads all classes on the class path
 			 * and tests whether it is assignable from Test or provides a static suite
@@ -1510,13 +1525,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 * @see TestCollector
 			 */
 			public class LoadingTestCollector extends ClassPathTestCollector {
-			
+
 			    TestCaseClassLoader fLoader;
-			
+
 			    public LoadingTestCollector() {
 			        this.fLoader = new TestCaseClassLoader();
 			    }
-			
+
 			    Class classFromFile(final String classFileName)
 			            throws ClassNotFoundException {
 			        final String className = this.classNameFromFile(classFileName);
@@ -1525,7 +1540,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return null;
 			    }
-			
+
 			    boolean hasPublicConstructor(final Class testClass) {
 			        try {
 			            TestSuite.getTestConstructor(testClass);
@@ -1534,7 +1549,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return true;
 			    }
-			
+
 			    boolean hasSuiteMethod(final Class testClass) {
 			        try {
 			            testClass.getMethod(BaseTestRunner.SUITE_METHODNAME, new Class[0]);
@@ -1543,7 +1558,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return true;
 			    }
-			
+
 			    boolean isTestClass(final Class testClass) {
 			        if (this.hasSuiteMethod(testClass)) {
 			            return true;
@@ -1555,7 +1570,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return false;
 			    }
-			
+
 			    @Override
 			    protected boolean isTestClass(final String classFileName) {
 			        try {
@@ -1573,7 +1588,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.LoadingTestCollector.java", str21);
         String str22= """
 			package junit.runner;
-			
+
 			import java.io.ByteArrayOutputStream;
 			import java.io.File;
 			import java.io.FileInputStream;
@@ -1586,7 +1601,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import java.util.Vector;
 			import java.util.zip.ZipEntry;
 			import java.util.zip.ZipFile;
-			
+
 			/**
 			 * A custom class loader which enables the reloading of classes for each test
 			 * run. The class loader can be configured with a list of package paths that
@@ -1600,7 +1615,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 * <b>Known limitation:</b> the TestCaseClassLoader cannot load classes from jar
 			 * files.
 			 */
-			
+
 			public class TestCaseClassLoader extends ClassLoader {
 			    /** name of excluded properties file */
 			    static final String EXCLUDED_FILE = "excluded.properties"; //$NON-NLS-1$
@@ -1613,7 +1628,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    private Vector fExcluded;
 			    /** scanned class path */
 			    private Vector fPathItems;
-			
+
 			    /**
 			     * Constructs a TestCaseLoader. It scans the class path and the excluded
 			     * package paths
@@ -1621,7 +1636,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public TestCaseClassLoader() {
 			        this(System.getProperty("java.class.path")); //$NON-NLS-1$
 			    }
-			
+
 			    /**
 			     * Constructs a TestCaseLoader. It scans the class path and the excluded
 			     * package paths
@@ -1630,7 +1645,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.scanPath(classPath);
 			        this.readExcludedPackages();
 			    }
-			
+
 			    private byte[] getClassData(final File f) {
 			        try {
 			            final FileInputStream stream = new FileInputStream(f);
@@ -1643,22 +1658,22 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            stream.close();
 			            out.close();
 			            return out.toByteArray();
-			
+
 			        } catch (final IOException e) {
 			        }
 			        return null;
 			    }
-			
+
 			    @Override
 			    public URL getResource(final String name) {
 			        return ClassLoader.getSystemResource(name);
 			    }
-			
+
 			    @Override
 			    public InputStream getResourceAsStream(final String name) {
 			        return ClassLoader.getSystemResourceAsStream(name);
 			    }
-			
+
 			    public boolean isExcluded(final String name) {
 			        for (int i = 0; i < this.fExcluded.size(); i++) {
 			            if (name.startsWith((String) this.fExcluded.elementAt(i))) {
@@ -1667,15 +1682,15 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return false;
 			    }
-			
+
 			    boolean isJar(final String pathEntry) {
 			        return pathEntry.endsWith(".jar") || pathEntry.endsWith(".zip"); //$NON-NLS-1$ //$NON-NLS-2$
 			    }
-			
+
 			    @Override
 			    public synchronized Class loadClass(final String name,
 			            final boolean resolve) throws ClassNotFoundException {
-			
+
 			        Class c = this.findLoadedClass(name);
 			        if (c != null) {
 			            return c;
@@ -1704,7 +1719,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return c;
 			    }
-			
+
 			    private byte[] loadFileData(final String path, final String fileName) {
 			        final File file = new File(path, fileName);
 			        if (file.exists()) {
@@ -1712,7 +1727,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return null;
 			    }
-			
+
 			    private byte[] loadJarData(final String path, final String fileName) {
 			        ZipFile zipFile = null;
 			        InputStream stream = null;
@@ -1751,7 +1766,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return null;
 			    }
-			
+
 			    private byte[] lookupClassData(final String className)
 			            throws ClassNotFoundException {
 			        byte[] data = null;
@@ -1769,13 +1784,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        throw new ClassNotFoundException(className);
 			    }
-			
+
 			    private void readExcludedPackages() {
 			        this.fExcluded = new Vector(10);
 			        for (final String defaultExclusion : this.defaultExclusions) {
 			            this.fExcluded.addElement(defaultExclusion);
 			        }
-			
+
 			        final InputStream is = this.getClass()
 			                .getResourceAsStream(TestCaseClassLoader.EXCLUDED_FILE);
 			        if (is == null) {
@@ -1806,7 +1821,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    private void scanPath(final String classPath) {
 			        final String separator = System.getProperty("path.separator"); //$NON-NLS-1$
 			        this.fPathItems = new Vector(10);
@@ -1819,12 +1834,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.TestCaseClassLoader.java", str22);
         String str23= """
 			package junit.framework;
-			
+
 			/**
 			 * Thrown when an assertion failed.
 			 */
 			public class AssertionFailedError extends Error {
-			
+
 			    /* Test */
 			    private static final long serialVersionUID = 1L;
 			    public AssertionFailedError() {
@@ -1836,7 +1851,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.AssertionFailedError.java", str23);
         String str24= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
@@ -1847,12 +1862,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.InheritedTestCase.java", str24);
         String str25= """
 			package junit.samples;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * Some simple tests.
 			 *
@@ -1862,7 +1877,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        junit.textui.TestRunner.run(SimpleTest.suite());
 			    }
 			    public static Test suite() {
-			
+
 			        /*
 			         * the type safe way
 			         *
@@ -1872,13 +1887,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			         * suite.addTest( new SimpleTest("testDivideByZero") { protected void
 			         * runTest() { testDivideByZero(); } } ); return suite;
 			         */
-			
+
 			        /*
 			         * the dynamic way
 			         */
 			        return new TestSuite(SimpleTest.class);
 			    }
-			
+
 			    protected int fValue1;
 			    protected int fValue2;
 			    @Override
@@ -1898,7 +1913,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertEquals(12, 12);
 			        Assert.assertEquals(12L, 12L);
 			        Assert.assertEquals(new Long(12), new Long(12));
-			
+
 			        Assert.assertEquals("Size", 12, 13); //$NON-NLS-1$
 			        Assert.assertEquals("Capacity", 12.0, 11.99, 0.0); //$NON-NLS-1$
 			    }
@@ -1906,7 +1921,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.samples.SimpleTest.java", str25);
         String str26= """
 			package junit.runner;
-			
+
 			/**
 			 * This class defines the current version of JUnit
 			 */
@@ -1914,7 +1929,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public static String id() {
 			        return "3.8.1"; //$NON-NLS-1$
 			    }
-			
+
 			    private Version() {
 			        // don't instantiate
 			    }
@@ -1922,40 +1937,40 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			""";
         fExpectedChangesAllTests.put("junit.runner.Version.java", str26);
         String str27= """
-			
+
 			package junit.tests.runner;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.runner.BaseTestRunner;
-			
+
 			public class BaseTestRunnerTest extends TestCase {
-			
+
 			    public class MockRunner extends BaseTestRunner {
 			        @Override
 			        protected void runFailed(final String message) {
 			        }
-			
+
 			        @Override
 			        public void testEnded(final String testName) {
 			        }
-			
+
 			        @Override
 			        public void testFailed(final int status, final Test test,
 			                final Throwable t) {
 			        }
-			
+
 			        @Override
 			        public void testStarted(final String testName) {
 			        }
 			    }
-			
+
 			    public static class NonStatic {
 			        public Test suite() {
 			            return null;
 			        }
 			    }
-			
+
 			    public void testInvokeNonStaticSuite() {
 			        final BaseTestRunner runner = new MockRunner();
 			        runner.getTest("junit.tests.runner.BaseTestRunnerTest$NonStatic"); // Used //$NON-NLS-1$
@@ -1968,9 +1983,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.runner.BaseTestRunnerTest.java", str27);
         String str28= """
 			package junit.tests;
-			
+
 			import junit.framework.TestCase;
-			
+
 			/**
 			 * A helper test case for testing whether the testing method is run.
 			 */
@@ -1984,7 +1999,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.WasRun.java", str28);
         String str29= """
 			package junit.framework;
-			
+
 			import java.io.PrintWriter;
 			import java.io.StringWriter;
 			import java.lang.reflect.Constructor;
@@ -1993,7 +2008,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import java.lang.reflect.Modifier;
 			import java.util.Enumeration;
 			import java.util.Vector;
-			
+
 			/**
 			 * A <code>TestSuite</code> is a <code>Composite</code> of Tests. It runs a
 			 * collection of test cases. Here is an example using the dynamic test
@@ -2018,7 +2033,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 * @see Test
 			 */
 			public class TestSuite implements Test {
-			
+
 			    /**
 			     * ...as the moon sets over the early morning Merlin, Oregon mountains, our
 			     * intrepid adventurers type...
@@ -2062,9 +2077,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        final PrintWriter writer = new PrintWriter(stringWriter);
 			        t.printStackTrace(writer);
 			        return stringWriter.toString();
-			
+
 			    }
-			
+
 			    /**
 			     * Gets a constructor which takes a single String as its argument or a no
 			     * arg constructor.
@@ -2079,7 +2094,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return theClass.getConstructor(new Class[0]);
 			    }
-			
+
 			    /**
 			     * Returns a test which will fail and log a warning message.
 			     */
@@ -2091,17 +2106,17 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        };
 			    }
-			
+
 			    private String fName;
-			
+
 			    private final Vector fTests = new Vector(10);
-			
+
 			    /**
 			     * Constructs an empty TestSuite.
 			     */
 			    public TestSuite() {
 			    }
-			
+
 			    /**
 			     * Constructs a TestSuite from the given class. Adds all the methods
 			     * starting with "test" as test cases to the suite. Parts of this method was
@@ -2117,13 +2132,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                    + " has no public constructor TestCase(String name) or TestCase()")); //$NON-NLS-1$
 			            return;
 			        }
-			
+
 			        if (!Modifier.isPublic(theClass.getModifiers())) {
 			            this.addTest(TestSuite
 			                    .warning("Class " + theClass.getName() + " is not public")); //$NON-NLS-1$ //$NON-NLS-2$
 			            return;
 			        }
-			
+
 			        Class superClass = theClass;
 			        final Vector names = new Vector();
 			        while (Test.class.isAssignableFrom(superClass)) {
@@ -2138,7 +2153,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                    .warning("No tests found in " + theClass.getName())); //$NON-NLS-1$
 			        }
 			    }
-			
+
 			    /**
 			     * Constructs a TestSuite from the given class with the given name.
 			     *\s
@@ -2148,21 +2163,21 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this(theClass);
 			        this.setName(name);
 			    }
-			
+
 			    /**
 			     * Constructs an empty TestSuite.
 			     */
 			    public TestSuite(final String name) {
 			        this.setName(name);
 			    }
-			
+
 			    /**
 			     * Adds a test to the suite.
 			     */
 			    public void addTest(final Test test) {
 			        this.fTests.addElement(test);
 			    }
-			
+
 			    private void addTestMethod(final Method m, final Vector names,
 			            final Class theClass) {
 			        final String name = m.getName();
@@ -2179,17 +2194,18 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        names.addElement(name);
 			        this.addTest(TestSuite.createTest(theClass, name));
 			    }
-			
+
 			    /**
 			     * Adds the tests from the given class to the suite
 			     */
 			    public void addTestSuite(final Class testClass) {
 			        this.addTest(new TestSuite(testClass));
 			    }
-			
+
 			    /**
 			     * Counts the number of test cases that will be run by this test.
 			     */
+			    @Override
 			    public int countTestCases() {
 			        int count = 0;
 			        for (final Enumeration e = this.tests(); e.hasMoreElements();) {
@@ -2198,7 +2214,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return count;
 			    }
-			
+
 			    /**
 			     * Returns the name of the suite. Not all test suites have a name and this
 			     * method can return null.
@@ -2206,11 +2222,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public String getName() {
 			        return this.fName;
 			    }
-			
+
 			    private boolean isPublicTestMethod(final Method m) {
 			        return this.isTestMethod(m) && Modifier.isPublic(m.getModifiers());
 			    }
-			
+
 			    private boolean isTestMethod(final Method m) {
 			        final String name = m.getName();
 			        final Class[] parameters = m.getParameterTypes();
@@ -2218,10 +2234,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        return (parameters.length == 0) && name.startsWith("test") //$NON-NLS-1$
 			                && returnType.equals(Void.TYPE);
 			    }
-			
+
 			    /**
 			     * Runs the tests and collects their result in a TestResult.
 			     */
+			    @Override
 			    public void run(final TestResult result) {
 			        for (final Enumeration e = this.tests(); e.hasMoreElements();) {
 			            if (result.shouldStop()) {
@@ -2231,11 +2248,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            this.runTest(test, result);
 			        }
 			    }
-			
+
 			    public void runTest(final Test test, final TestResult result) {
 			        test.run(result);
 			    }
-			
+
 			    /**
 			     * Sets the name of the suite.
 			     *\s
@@ -2244,28 +2261,28 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public void setName(final String name) {
 			        this.fName = name;
 			    }
-			
+
 			    /**
 			     * Returns the test at the given index
 			     */
 			    public Test testAt(final int index) {
 			        return (Test) this.fTests.elementAt(index);
 			    }
-			
+
 			    /**
 			     * Returns the number of tests in this suite
 			     */
 			    public int testCount() {
 			        return this.fTests.size();
 			    }
-			
+
 			    /**
 			     * Returns the tests as an enumeration
 			     */
 			    public Enumeration tests() {
 			        return this.fTests.elements();
 			    }
-			
+
 			    /**
 			     */
 			    @Override
@@ -2279,10 +2296,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.TestSuite.java", str29);
         String str30= """
 			package junit.extensions;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
-			
+
 			/**
 			 * A TestCase that expects an Exception of class fExpected to be thrown. The
 			 * other way to check that an expected exception is thrown is:
@@ -2304,7 +2321,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 */
 			public class ExceptionTestCase extends TestCase {
 			    Class fExpected;
-			
+
 			    public ExceptionTestCase(final String name, final Class exception) {
 			        super(name);
 			        this.fExpected = exception;
@@ -2330,11 +2347,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.extensions.ExceptionTestCase.java", str30);
         String str31= """
 			package junit.framework;
-			
+
 			/**
 			 * A set of assert methods. Messages are only displayed when an assert fails.
 			 */
-			
+
 			public class Assert {
 			    /**
 			     * Asserts that two booleans are equal.
@@ -2343,7 +2360,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            final boolean actual) {
 			        Assert.assertEquals(null, expected, actual);
 			    }
-			
+
 			    /**
 			     * Asserts that two bytes are equal.
 			     */
@@ -2637,7 +2654,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            final Object expected, final Object actual) {
 			        Assert.fail(Assert.format(message, expected, actual));
 			    }
-			
+
 			    static private void failNotSame(final String message, final Object expected,
 			            final Object actual) {
 			        String formatted = ""; //$NON-NLS-1$
@@ -2647,7 +2664,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.fail(formatted + "expected same:<" + expected + "> was not:<" //$NON-NLS-1$ //$NON-NLS-2$
 			                + actual + ">"); //$NON-NLS-1$
 			    }
-			
+
 			    static private void failSame(final String message) {
 			        String formatted = ""; //$NON-NLS-1$
 			        if (message != null) {
@@ -2655,7 +2672,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail(formatted + "expected not same"); //$NON-NLS-1$
 			    }
-			
+
 			    static String format(final String message, final Object expected,
 			            final Object actual) {
 			        String formatted = ""; //$NON-NLS-1$
@@ -2665,7 +2682,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        return formatted + "expected:<" + expected + "> but was:<" + actual //$NON-NLS-1$ //$NON-NLS-2$
 			                + ">"; //$NON-NLS-1$
 			    }
-			
+
 			    /**
 			     * Protect constructor since it is a static only class
 			     */
@@ -2675,13 +2692,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.Assert.java", str31);
         String str32= """
 			package junit.runner;
-			
+
 			import java.io.File;
 			import java.util.Enumeration;
 			import java.util.Hashtable;
 			import java.util.StringTokenizer;
 			import java.util.Vector;
-			
+
 			/**
 			 * An implementation of a TestCollector that consults the class path. It
 			 * considers all classes on the class path excluding classes in JARs. It leaves
@@ -2690,12 +2707,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 * @see TestCollector
 			 */
 			public abstract class ClassPathTestCollector implements TestCollector {
-			
+
 			    static final int SUFFIX_LENGTH = ".class".length(); //$NON-NLS-1$
-			
+
 			    public ClassPathTestCollector() {
 			    }
-			
+
 			    protected String classNameFromFile(final String classFileName) {
 			        // convert /a/b.class to a.b
 			        final String s = classFileName.substring(0,
@@ -2706,13 +2723,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return s2;
 			    }
-			
+
 			    public Hashtable collectFilesInPath(final String classPath) {
 			        final Hashtable result = this
 			                .collectFilesInRoots(this.splitClassPath(classPath));
 			        return result;
 			    }
-			
+
 			    Hashtable collectFilesInRoots(final Vector roots) {
 			        final Hashtable result = new Hashtable(100);
 			        final Enumeration e = roots.elements();
@@ -2721,13 +2738,14 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return result;
 			    }
-			
+
+			    @Override
 			    public Enumeration collectTests() {
 			        final String classPath = System.getProperty("java.class.path"); //$NON-NLS-1$
 			        final Hashtable result = this.collectFilesInPath(classPath);
 			        return result.elements();
 			    }
-			
+
 			    void gatherFiles(final File classRoot, final String classFileName,
 			            final Hashtable result) {
 			        final File thisRoot = new File(classRoot, classFileName);
@@ -2746,13 +2764,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    protected boolean isTestClass(final String classFileName) {
 			        return classFileName.endsWith(".class") && //$NON-NLS-1$
 			                (classFileName.indexOf('$') < 0)
 			                && (classFileName.indexOf("Test") > 0); //$NON-NLS-1$
 			    }
-			
+
 			    Vector splitClassPath(final String classPath) {
 			        final Vector result = new Vector();
 			        final String separator = System.getProperty("path.separator"); //$NON-NLS-1$
@@ -2768,7 +2786,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.ClassPathTestCollector.java", str32);
         String str33= """
 			package junit.framework;
-			
+
 			/**
 			 * A Listener for test progress
 			 */
@@ -2793,26 +2811,26 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.TestListener.java", str33);
         String str34= """
 			package junit.tests.extensions;
-			
+
 			import junit.extensions.ActiveTestSuite;
 			import junit.extensions.RepeatedTest;
 			import junit.framework.Assert;
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.framework.TestResult;
-			
+
 			/**
 			 * Testing the ActiveTest support
 			 */
-			
+
 			public class ActiveTestTest extends TestCase {
-			
+
 			    public static class SuccessTest extends TestCase {
 			        @Override
 			        public void runTest() {
 			        }
 			    }
-			
+
 			    ActiveTestSuite createActiveTestSuite() {
 			        final ActiveTestSuite suite = new ActiveTestSuite();
 			        for (int i = 0; i < 100; i++) {
@@ -2820,7 +2838,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return suite;
 			    }
-			
+
 			    public void testActiveRepeatedTest() {
 			        final Test test = new RepeatedTest(this.createActiveTestSuite(), 5);
 			        final TestResult result = new TestResult();
@@ -2829,7 +2847,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertEquals(0, result.failureCount());
 			        Assert.assertEquals(0, result.errorCount());
 			    }
-			
+
 			    public void testActiveRepeatedTest0() {
 			        final Test test = new RepeatedTest(this.createActiveTestSuite(), 0);
 			        final TestResult result = new TestResult();
@@ -2838,7 +2856,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertEquals(0, result.failureCount());
 			        Assert.assertEquals(0, result.errorCount());
 			    }
-			
+
 			    public void testActiveRepeatedTest1() {
 			        final Test test = new RepeatedTest(this.createActiveTestSuite(), 1);
 			        final TestResult result = new TestResult();
@@ -2847,7 +2865,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertEquals(0, result.failureCount());
 			        Assert.assertEquals(0, result.errorCount());
 			    }
-			
+
 			    public void testActiveTest() {
 			        final Test test = this.createActiveTestSuite();
 			        final TestResult result = new TestResult();
@@ -2856,19 +2874,19 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertEquals(0, result.failureCount());
 			        Assert.assertEquals(0, result.errorCount());
 			    }
-			
+
 			}""";
         fExpectedChangesAllTests.put("junit.tests.extensions.ActiveTestTest.java", str34);
         String str35= """
 			package junit.framework;
-			
+
 			/**
 			 * A <em>Protectable</em> can be run and can throw a Throwable.
 			 *
 			 * @see TestResult
 			 */
 			public interface Protectable {
-			
+
 			    /**
 			     * Run the the following method protected.
 			     */
@@ -2877,7 +2895,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.Protectable.java", str35);
         String str36= """
 			package junit.samples.money;
-			
+
 			/**
 			 * The common interface for simple Monies and MoneyBags
 			 *
@@ -2921,9 +2939,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.samples.money.IMoney.java", str36);
         String str37= """
 			package junit.textui;
-			
+
 			import java.io.PrintStream;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
@@ -2931,7 +2949,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import junit.runner.StandardTestSuiteLoader;
 			import junit.runner.TestSuiteLoader;
 			import junit.runner.Version;
-			
+
 			/**
 			 * A command line based tool to run tests.
 			 *\s
@@ -2952,7 +2970,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 */
 			public class TestRunner extends BaseTestRunner {
 			    public static final int EXCEPTION_EXIT = 2;
-			
+
 			    public static final int FAILURE_EXIT = 1;
 			    public static final int SUCCESS_EXIT = 0;
 			    public static void main(final String args[]) {
@@ -2968,14 +2986,14 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            System.exit(TestRunner.EXCEPTION_EXIT);
 			        }
 			    }
-			
+
 			    /**
 			     * Runs a suite extracted from a TestCase subclass.
 			     */
 			    static public void run(final Class testClass) {
 			        TestRunner.run(new TestSuite(testClass));
 			    }
-			
+
 			    /**
 			     * Runs a single test and collects its results. This method can be used to
 			     * start a test run from your program.
@@ -2990,7 +3008,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        final TestRunner runner = new TestRunner();
 			        return runner.doRun(test);
 			    }
-			
+
 			    /**
 			     * Runs a single test and waits until the user types RETURN.
 			     */
@@ -2998,41 +3016,41 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        final TestRunner aTestRunner = new TestRunner();
 			        aTestRunner.doRun(suite, true);
 			    }
-			
+
 			    private ResultPrinter fPrinter;
-			
+
 			    /**
 			     * Constructs a TestRunner.
 			     */
 			    public TestRunner() {
 			        this(System.out);
 			    }
-			
+
 			    /**
 			     * Constructs a TestRunner using the given stream for all the output
 			     */
 			    public TestRunner(final PrintStream writer) {
 			        this(new ResultPrinter(writer));
 			    }
-			
+
 			    /**
 			     * Constructs a TestRunner using the given ResultPrinter all the output
 			     */
 			    public TestRunner(final ResultPrinter printer) {
 			        this.fPrinter = printer;
 			    }
-			
+
 			    /**
 			     * Creates the TestResult to be used for the test run.
 			     */
 			    protected TestResult createTestResult() {
 			        return new TestResult();
 			    }
-			
+
 			    public TestResult doRun(final Test test) {
 			        return this.doRun(test, false);
 			    }
-			
+
 			    public TestResult doRun(final Test suite, final boolean wait) {
 			        final TestResult result = this.createTestResult();
 			        result.addListener(this.fPrinter);
@@ -3041,11 +3059,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        final long endTime = System.currentTimeMillis();
 			        final long runTime = endTime - startTime;
 			        this.fPrinter.print(result, runTime);
-			
+
 			        this.pause(wait);
 			        return result;
 			    }
-			
+
 			    /**
 			     * Always use the StandardTestSuiteLoader. Overridden from BaseTestRunner.
 			     */
@@ -3053,7 +3071,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public TestSuiteLoader getLoader() {
 			        return new StandardTestSuiteLoader();
 			    }
-			
+
 			    protected void pause(final boolean wait) {
 			        if (!wait) {
 			            return;
@@ -3064,17 +3082,17 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        } catch (final Exception e) {
 			        }
 			    }
-			
+
 			    @Override
 			    protected void runFailed(final String message) {
 			        System.err.println(message);
 			        System.exit(TestRunner.FAILURE_EXIT);
 			    }
-			
+
 			    public void setPrinter(final ResultPrinter printer) {
 			        this.fPrinter = printer;
 			    }
-			
+
 			    /**
 			     * Starts a test run. Analyzes the command line arguments and runs the given
 			     * test suite.
@@ -3082,7 +3100,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    protected TestResult start(final String args[]) throws Exception {
 			        String testCase = ""; //$NON-NLS-1$
 			        boolean wait = false;
-			
+
 			        for (int i = 0; i < args.length; i++) {
 			            if (args[i].equals("-wait")) { //$NON-NLS-1$
 			                wait = true;
@@ -3095,12 +3113,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                testCase = args[i];
 			            }
 			        }
-			
+
 			        if (testCase.equals("")) { // $NON-NLS-1$
 			            throw new Exception(
 			                    "Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class"); //$NON-NLS-1$
 			        }
-			
+
 			        try {
 			            final Test suite = this.getTest(testCase);
 			            return this.doRun(suite, wait);
@@ -3108,31 +3126,31 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            throw new Exception("Could not create and run test suite: " + e); //$NON-NLS-1$
 			        }
 			    }
-			
+
 			    @Override
 			    public void testEnded(final String testName) {
 			    }
-			
+
 			    @Override
 			    public void testFailed(final int status, final Test test,
 			            final Throwable t) {
 			    }
-			
+
 			    @Override
 			    public void testStarted(final String testName) {
 			    }
-			
+
 			}""";
         fExpectedChangesAllTests.put("junit.textui.TestRunner.java", str37);
         String str38= """
 			package junit.tests.runner;
-			
+
 			/**
 			 * Test class used in TestTestCaseClassLoader
 			 */
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
-			
+
 			public class ClassLoaderTest extends Assert {
 			    public ClassLoaderTest() {
 			    }
@@ -3167,7 +3185,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /* test status constants */
 			    int STATUS_ERROR = 1;
 			    int STATUS_FAILURE = 2;
-			
+
 			    void testEnded(String testName);
 			    void testFailed(int status, String testName, String trace);
 			    void testRunEnded(long elapsedTime);
@@ -3178,13 +3196,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			""";
         fExpectedChangesAllTests.put("junit.runner.TestRunListener.java", str39);
         String str40= """
-			
+
 			package junit.tests.runner;
-			
+
 			import java.io.ByteArrayOutputStream;
 			import java.io.OutputStream;
 			import java.io.PrintStream;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.AssertionFailedError;
 			import junit.framework.TestCase;
@@ -3192,13 +3210,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import junit.framework.TestSuite;
 			import junit.textui.ResultPrinter;
 			import junit.textui.TestRunner;
-			
+
 			public class TextFeedbackTest extends TestCase {
 			    class TestResultPrinter extends ResultPrinter {
 			        TestResultPrinter(final PrintStream writer) {
 			            super(writer);
 			        }
-			
+
 			        /*
 			         * Spoof printing time so the tests are deterministic
 			         */
@@ -3210,11 +3228,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public static void main(final String[] args) {
 			        TestRunner.run(TextFeedbackTest.class);
 			    }
-			
+
 			    OutputStream output;
-			
+
 			    TestRunner runner;
-			
+
 			    private String expected(final String[] lines) {
 			        final OutputStream expected = new ByteArrayOutputStream();
 			        final PrintStream expectedWriter = new PrintStream(expected);
@@ -3223,21 +3241,21 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return expected.toString();
 			    }
-			
+
 			    @Override
 			    public void setUp() {
 			        this.output = new ByteArrayOutputStream();
 			        this.runner = new TestRunner(
 			                new TestResultPrinter(new PrintStream(this.output)));
 			    }
-			
+
 			    public void testEmptySuite() {
 			        final String expected = this
 			                .expected(new String[]{"", "Time: 0", "", "OK (0 tests)", ""}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			        this.runner.doRun(new TestSuite());
 			        Assert.assertEquals(expected.toString(), this.output.toString());
 			    }
-			
+
 			    public void testError() {
 			        final String expected = this.expected(
 			                new String[]{".E", "Time: 0", "Errors here", "", "FAILURES!!!", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -3260,7 +3278,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.runner.doRun(suite);
 			        Assert.assertEquals(expected.toString(), this.output.toString());
 			    }
-			
+
 			    public void testFailure() {
 			        final String expected = this.expected(new String[]{".F", "Time: 0", //$NON-NLS-1$ //$NON-NLS-2$
 			                "Failures here", "", "FAILURES!!!", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -3283,7 +3301,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.runner.doRun(suite);
 			        Assert.assertEquals(expected.toString(), this.output.toString());
 			    }
-			
+
 			    public void testOneTest() {
 			        final String expected = this
 			                .expected(new String[]{".", "Time: 0", "", "OK (1 test)", ""}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -3296,7 +3314,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.runner.doRun(suite);
 			        Assert.assertEquals(expected.toString(), this.output.toString());
 			    }
-			
+
 			    public void testTwoTests() {
 			        final String expected = this.expected(
 			                new String[]{"..", "Time: 0", "", "OK (2 tests)", ""}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
@@ -3314,13 +3332,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.runner.doRun(suite);
 			        Assert.assertEquals(expected.toString(), this.output.toString());
 			    }
-			
+
 			}
 			""";
         fExpectedChangesAllTests.put("junit.tests.runner.TextFeedbackTest.java", str40);
         String str41= """
 			package junit.tests.extensions;
-			
+
 			import junit.extensions.TestSetup;
 			import junit.framework.Assert;
 			import junit.framework.Test;
@@ -3328,7 +3346,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
 			import junit.tests.WasRun;
-			
+
 			/**
 			 * A test case testing the extensions to the testing framework.
 			 *
@@ -3336,7 +3354,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			public class ExtensionTest extends TestCase {
 			    static class TornDown extends TestSetup {
 			        boolean fTornDown = false;
-			
+
 			        TornDown(final Test test) {
 			            super(test);
 			        }
@@ -3352,9 +3370,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                Assert.fail();
 			            }
 			        };
-			
+
 			        final TestSetup wrapper = new TestSetup(test);
-			
+
 			        final TestResult result = new TestResult();
 			        wrapper.run(result);
 			        Assert.assertTrue(!result.wasSuccessful());
@@ -3366,54 +3384,54 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                Assert.fail();
 			            }
 			        };
-			
+
 			        final TestCase error = new TestCase("error") { //$NON-NLS-1$
 			            @Override
 			            public void runTest() {
 			                throw new Error();
 			            }
 			        };
-			
+
 			        final TestSuite suite = new TestSuite();
 			        suite.addTest(failure);
 			        suite.addTest(error);
-			
+
 			        final TestSetup wrapper = new TestSetup(suite);
-			
+
 			        final TestResult result = new TestResult();
 			        wrapper.run(result);
-			
+
 			        Assert.assertEquals(1, result.failureCount());
 			        Assert.assertEquals(1, result.errorCount());
 			    }
 			    public void testSetupErrorDontTearDown() {
 			        final WasRun test = new WasRun();
-			
+
 			        final TornDown wrapper = new TornDown(test) {
 			            @Override
 			            public void setUp() {
 			                Assert.fail();
 			            }
 			        };
-			
+
 			        final TestResult result = new TestResult();
 			        wrapper.run(result);
-			
+
 			        Assert.assertTrue(!wrapper.fTornDown);
 			    }
 			    public void testSetupErrorInTestSetup() {
 			        final WasRun test = new WasRun();
-			
+
 			        final TestSetup wrapper = new TestSetup(test) {
 			            @Override
 			            public void setUp() {
 			                Assert.fail();
 			            }
 			        };
-			
+
 			        final TestResult result = new TestResult();
 			        wrapper.run(result);
-			
+
 			        Assert.assertTrue(!test.fWasRun);
 			        Assert.assertTrue(!result.wasSuccessful());
 			    }
@@ -3421,20 +3439,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.extensions.ExtensionTest.java", str41);
         String str42= """
 			package junit.tests;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * TestSuite that runs all the JUnit tests
 			 *
 			 */
 			public class AllTests {
-			
+
 			    public static void main(final String[] args) {
 			        junit.textui.TestRunner.run(AllTests.suite());
 			    }
-			
+
 			    public static Test suite() {
 			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
 			        suite.addTest(junit.tests.framework.AllTests.suite());
@@ -3446,12 +3464,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.AllTests.java", str42);
         String str43= """
 			package junit.tests.runner;
-			
+
 			/**
 			 * Test class used in TestTestCaseClassLoader
 			 */
 			import junit.framework.Assert;
-			
+
 			public class LoadedFromJar extends Assert {
 			    private boolean isTestCaseClassLoader(final ClassLoader cl) {
 			        return ((cl != null) && cl.getClass().getName()
@@ -3468,80 +3486,80 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.runner.LoadedFromJar.java", str43);
         String str44= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.ComparisonFailure;
 			import junit.framework.TestCase;
-			
+
 			public class ComparisonFailureTest extends TestCase {
-			
+
 			    public void testComparisonErrorEndSame() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
 			                "cb"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<a...> but was:<c...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorEndSameComplete() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "bc", //$NON-NLS-1$
 			                "abc"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<...> but was:<a...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorMessage() {
 			        final ComparisonFailure failure = new ComparisonFailure("a", "b", "c"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			        Assert.assertEquals("a expected:<b> but was:<c>", failure.getMessage()); //$NON-NLS-1$
 			    }
-			
+
 			    public void testComparisonErrorOverlapingMatches() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", //$NON-NLS-1$
 			                "abbc"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<......> but was:<...b...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorOverlapingMatches2() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "abcdde", //$NON-NLS-1$
 			                "abcde"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<...d...> but was:<......>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorSame() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
 			                "ab"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<ab> but was:<ab>", failure.getMessage()); //$NON-NLS-1$
 			    }
-			
+
 			    public void testComparisonErrorStartAndEndSame() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "abc", //$NON-NLS-1$
 			                "adc"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<...b...> but was:<...d...>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorStartSame() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "ba", //$NON-NLS-1$
 			                "bc"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<...a> but was:<...c>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorStartSameComplete() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "ab", //$NON-NLS-1$
 			                "abc"); //$NON-NLS-1$
 			        Assert.assertEquals("expected:<...> but was:<...c>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorWithActualNull() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, "a", //$NON-NLS-1$
 			                null);
 			        Assert.assertEquals("expected:<a> but was:<null>", //$NON-NLS-1$
 			                failure.getMessage());
 			    }
-			
+
 			    public void testComparisonErrorWithExpectedNull() {
 			        final ComparisonFailure failure = new ComparisonFailure(null, null,
 			                "a"); //$NON-NLS-1$
@@ -3552,50 +3570,52 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			""";
         fExpectedChangesAllTests.put("junit.tests.framework.ComparisonFailureTest.java", str44);
         String str45= """
-			
+
 			package junit.textui;
-			
+
 			import java.io.PrintStream;
 			import java.text.NumberFormat;
 			import java.util.Enumeration;
-			
+
 			import junit.framework.AssertionFailedError;
 			import junit.framework.Test;
 			import junit.framework.TestFailure;
 			import junit.framework.TestListener;
 			import junit.framework.TestResult;
 			import junit.runner.BaseTestRunner;
-			
+
 			public class ResultPrinter implements TestListener {
 			    int fColumn = 0;
 			    PrintStream fWriter;
-			
+
 			    public ResultPrinter(final PrintStream writer) {
 			        this.fWriter = writer;
 			    }
-			
+
 			    /*
 			     * API for use by textui.TestRunner
 			     */
-			
+
 			    /**
 			     * @see junit.framework.TestListener#addError(Test, Throwable)
 			     */
+			    @Override
 			    public void addError(final Test test, final Throwable t) {
 			        this.getWriter().print("E"); //$NON-NLS-1$
 			    }
-			
+
 			    /**
 			     * @see junit.framework.TestListener#addFailure(Test, AssertionFailedError)
 			     */
+			    @Override
 			    public void addFailure(final Test test, final AssertionFailedError t) {
 			        this.getWriter().print("F"); //$NON-NLS-1$
 			    }
-			
+
 			    /*
 			     * Internal methods
 			     */
-			
+
 			    /**
 			     * Returns the formatted string of the elapsed time. Duplicated from
 			     * BaseTestRunner. Fix it.
@@ -3603,24 +3623,25 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    protected String elapsedTimeAsString(final long runTime) {
 			        return NumberFormat.getInstance().format((double) runTime / 1000);
 			    }
-			
+
 			    /**
 			     * @see junit.framework.TestListener#endTest(Test)
 			     */
+			    @Override
 			    public void endTest(final Test test) {
 			    }
-			
+
 			    public PrintStream getWriter() {
 			        return this.fWriter;
 			    }
-			
+
 			    synchronized void print(final TestResult result, final long runTime) {
 			        this.printHeader(runTime);
 			        this.printErrors(result);
 			        this.printFailures(result);
 			        this.printFooter(result);
 			    }
-			
+
 			    public void printDefect(final TestFailure booBoo, final int count) { // only
 			                                                                         // public
 			                                                                         // for
@@ -3629,7 +3650,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.printDefectHeader(booBoo, count);
 			        this.printDefectTrace(booBoo);
 			    }
-			
+
 			    protected void printDefectHeader(final TestFailure booBoo,
 			            final int count) {
 			        // I feel like making this a println, then adding a line giving the
@@ -3637,7 +3658,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        // before we get to the stack trace.
 			        this.getWriter().print(count + ") " + booBoo.failedTest()); //$NON-NLS-1$
 			    }
-			
+
 			    protected void printDefects(final Enumeration booBoos, final int count,
 			            final String type) {
 			        if (count == 0) {
@@ -3652,15 +3673,15 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            this.printDefect((TestFailure) booBoos.nextElement(), i);
 			        }
 			    }
-			
+
 			    protected void printDefectTrace(final TestFailure booBoo) {
 			        this.getWriter().print(BaseTestRunner.getFilteredTrace(booBoo.trace()));
 			    }
-			
+
 			    protected void printErrors(final TestResult result) {
 			        this.printDefects(result.errors(), result.errorCount(), "error"); //$NON-NLS-1$
 			    }
-			
+
 			    protected void printFailures(final TestResult result) {
 			        this.printDefects(result.failures(), result.failureCount(), "failure"); //$NON-NLS-1$
 			    }
@@ -3670,7 +3691,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            this.getWriter().print("OK"); //$NON-NLS-1$
 			            this.getWriter().println(" (" + result.runCount() + " test" //$NON-NLS-1$ //$NON-NLS-2$
 			                    + (result.runCount() == 1 ? "" : "s") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			
+
 			        } else {
 			            this.getWriter().println();
 			            this.getWriter().println("FAILURES!!!"); //$NON-NLS-1$
@@ -3680,20 +3701,21 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        this.getWriter().println();
 			    }
-			
+
 			    protected void printHeader(final long runTime) {
 			        this.getWriter().println();
 			        this.getWriter().println("Time: " + this.elapsedTimeAsString(runTime)); //$NON-NLS-1$
 			    }
-			
+
 			    void printWaitPrompt() {
 			        this.getWriter().println();
 			        this.getWriter().println("<RETURN> to continue"); //$NON-NLS-1$
 			    }
-			
+
 			    /**
 			     * @see junit.framework.TestListener#startTest(Test)
 			     */
+			    @Override
 			    public void startTest(final Test test) {
 			        this.getWriter().print("."); //$NON-NLS-1$
 			        if (this.fColumn++ >= 40) {
@@ -3701,20 +3723,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            this.fColumn = 0;
 			        }
 			    }
-			
+
 			}
 			""";
         fExpectedChangesAllTests.put("junit.textui.ResultPrinter.java", str45);
         String str46= """
 			package junit.samples;
-			
+
 			import java.util.Vector;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * A sample test case, testing <code>java.util.Vector</code>.
 			 *
@@ -3726,7 +3748,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public static Test suite() {
 			        return new TestSuite(VectorTest.class);
 			    }
-			
+
 			    protected Vector fEmpty;
 			    protected Vector fFull;
 			    @Override
@@ -3756,7 +3778,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public void testElementAt() {
 			        final Integer i = (Integer) this.fFull.elementAt(0);
 			        Assert.assertTrue(i.intValue() == 1);
-			
+
 			        try {
 			            this.fFull.elementAt(this.fFull.size());
 			        } catch (final ArrayIndexOutOfBoundsException e) {
@@ -3778,7 +3800,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.samples.VectorTest.java", str46);
         String str47= """
 			package junit.framework;
-			
+
 			/**
 			 * Thrown when an assert equals for Strings failed.
 			 *\s
@@ -3789,7 +3811,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    private static final long serialVersionUID = 1L;
 			    private final String fActual;
 			    private final String fExpected;
-			
+
 			    /**
 			     * Constructs a comparison failure.
 			     *\s
@@ -3803,7 +3825,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.fExpected = expected;
 			        this.fActual = actual;
 			    }
-			
+
 			    /**
 			     * Returns "..." in place of common prefix and "..." in place of common
 			     * suffix between expected and actual.
@@ -3816,10 +3838,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            return Assert.format(super.getMessage(), this.fExpected,
 			                    this.fActual);
 			        }
-			
+
 			        final int end = Math.min(this.fExpected.length(),
 			                this.fActual.length());
-			
+
 			        int i = 0;
 			        for (; i < end; i++) {
 			            if (this.fExpected.charAt(i) != this.fActual.charAt(i)) {
@@ -3834,7 +3856,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }
 			        String actual, expected;
-			
+
 			        // equal strings
 			        if ((j < i) && (k < i)) {
 			            expected = this.fExpected;
@@ -3846,7 +3868,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                expected = "..." + expected; //$NON-NLS-1$
 			                actual = "..." + actual; //$NON-NLS-1$
 			            }
-			
+
 			            if (j < (this.fExpected.length() - 1)) {
 			                expected = expected + "..."; //$NON-NLS-1$
 			            }
@@ -3860,7 +3882,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.ComparisonFailure.java", str47);
         String str48= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.AssertionFailedError;
 			import junit.framework.Test;
@@ -3869,16 +3891,16 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
 			import junit.tests.WasRun;
-			
+
 			/**
 			 * A test case testing the testing framework.
 			 *
 			 */
 			public class TestCaseTest extends TestCase {
-			
+
 			    static class TornDown extends TestCase {
 			        boolean fTornDown = false;
-			
+
 			        @Override
 			        protected void runTest() {
 			            throw new Error();
@@ -3888,7 +3910,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            this.fTornDown = true;
 			        }
 			    }
-			
+
 			    public void testCaseToString() {
 			        // This test wins the award for twisted snake tail eating while
 			        // writing self tests. And you thought those weird anonymous
@@ -3947,7 +3969,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        Assert.assertTrue(result.failureCount() == 0);
 			        Assert.assertTrue(result.errorCount() == 0);
 			    }
-			
+
 			    public void testRunAndTearDownFails() {
 			        final TornDown fails = new TornDown() {
 			            @Override
@@ -3963,7 +3985,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.verifyError(fails);
 			        Assert.assertTrue(fails.fTornDown);
 			    }
-			
+
 			    public void testSetupFails() {
 			        final TestCase fails = new TestCase("success") { //$NON-NLS-1$
 			            @Override
@@ -4001,7 +4023,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        };
 			        this.verifyError(fails);
 			    }
-			
+
 			    public void testTearDownSetupFails() {
 			        final TornDown fails = new TornDown() {
 			            @Override
@@ -4012,13 +4034,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.verifyError(fails);
 			        Assert.assertTrue(!fails.fTornDown);
 			    }
-			
+
 			    public void testWasRun() {
 			        final WasRun test = new WasRun();
 			        test.run();
 			        Assert.assertTrue(test.fWasRun);
 			    }
-			
+
 			    void verifyError(final TestCase test) {
 			        final TestResult result = test.run();
 			        Assert.assertTrue(result.runCount() == 1);
@@ -4041,10 +4063,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.TestCaseTest.java", str48);
         String str49= """
 			package junit.framework;
-			
+
 			import java.io.PrintWriter;
 			import java.io.StringWriter;
-			
+
 			/**
 			 * A <code>TestFailure</code> collects a failed test together with the caught
 			 * exception.
@@ -4054,7 +4076,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			public class TestFailure extends Object {
 			    protected Test fFailedTest;
 			    protected Throwable fThrownException;
-			
+
 			    /**
 			     * Constructs a TestFailure with the given test and exception.
 			     */
@@ -4101,21 +4123,23 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.TestFailure.java", str49);
         String str50= """
 			package junit.runner;
-			
+
 			/**
 			 * A TestSuite loader that can reload classes.
 			 */
 			public class ReloadingTestSuiteLoader implements TestSuiteLoader {
-			
+
 			    protected TestCaseClassLoader createLoader() {
 			        return new TestCaseClassLoader();
 			    }
-			
+
+			    @Override
 			    public Class load(final String suiteClassName)
 			            throws ClassNotFoundException {
 			        return this.createLoader().loadClass(suiteClassName, true);
 			    }
-			
+
+			    @Override
 			    public Class reload(final Class aClass) throws ClassNotFoundException {
 			        return this.createLoader().loadClass(aClass.getName(), true);
 			    }
@@ -4123,7 +4147,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.ReloadingTestSuiteLoader.java", str50);
         String str51= """
 			package junit.runner;
-			
+
 			/**
 			 * The standard test suite loader. It can only load the same class once.
 			 */
@@ -4131,6 +4155,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Uses the system class loader to load the test class
 			     */
+			    @Override
 			    public Class load(final String suiteClassName)
 			            throws ClassNotFoundException {
 			        return Class.forName(suiteClassName);
@@ -4138,6 +4163,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Uses the system class loader to load the test class
 			     */
+			    @Override
 			    public Class reload(final Class aClass) throws ClassNotFoundException {
 			        return aClass;
 			    }
@@ -4145,24 +4171,25 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.StandardTestSuiteLoader.java", str51);
         String str52= """
 			package junit.extensions;
-			
+
 			import junit.framework.Protectable;
 			import junit.framework.Test;
 			import junit.framework.TestResult;
-			
+
 			/**
 			 * A Decorator to set up and tear down additional fixture state. Subclass
 			 * TestSetup and insert it into your tests when you want to set up additional
 			 * state once before the tests are run.
 			 */
 			public class TestSetup extends TestDecorator {
-			
+
 			    public TestSetup(final Test test) {
 			        super(test);
 			    }
 			    @Override
 			    public void run(final TestResult result) {
 			        final Protectable p = new Protectable() {
+			            @Override
 			            public void protect() throws Exception {
 			                TestSetup.this.setUp();
 			                TestSetup.this.basicRun(result);
@@ -4186,20 +4213,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.extensions.TestSetup.java", str52);
         String str53= """
 			package junit.tests.runner;
-			
+
 			import java.io.File;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.io.OutputStream;
 			import java.io.PrintStream;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
-			
+
 			public class TextRunnerTest extends TestCase {
-			
+
 			    void execTest(final String testClass, final boolean success)
 			            throws Exception {
 			        final String java = System.getProperty("java.home") + File.separator //$NON-NLS-1$
@@ -4222,15 +4249,15 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                    p.exitValue());
 			        }
 			    }
-			
+
 			    public void testError() throws Exception {
 			        this.execTest("junit.tests.BogusDude", false); //$NON-NLS-1$
 			    }
-			
+
 			    public void testFailure() throws Exception {
 			        this.execTest("junit.tests.framework.Failure", false); //$NON-NLS-1$
 			    }
-			
+
 			    public void testRunReturnsResult() {
 			        final PrintStream oldOut = System.out;
 			        System.setOut(new PrintStream(new OutputStream() {
@@ -4246,19 +4273,19 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            System.setOut(oldOut);
 			        }
 			    }
-			
+
 			    public void testSuccess() throws Exception {
 			        this.execTest("junit.tests.framework.Success", true); //$NON-NLS-1$
 			    }
-			
+
 			}""";
         fExpectedChangesAllTests.put("junit.tests.runner.TextRunnerTest.java", str53);
         String str54= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
-			
+
 			/**
 			 * A test case testing the testing framework.
 			 *
@@ -4272,7 +4299,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.Failure.java", str54);
         String str55= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
@@ -4284,17 +4311,17 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.OverrideTestCase.java", str55);
         String str56= """
 			package junit.extensions;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestResult;
-			
+
 			/**
 			 * A Decorator that runs a test repeatedly.
 			 *
 			 */
 			public class RepeatedTest extends TestDecorator {
 			    private final int fTimesRepeat;
-			
+
 			    public RepeatedTest(final Test test, final int repeat) {
 			        super(test);
 			        if (repeat < 0) {
@@ -4322,11 +4349,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			}""";
         fExpectedChangesAllTests.put("junit.extensions.RepeatedTest.java", str56);
         String str57= """
-			
+
 			package junit.tests.framework;
-			
+
 			import junit.framework.TestCase;
-			
+
 			public class NoArgTestCaseTest extends TestCase {
 			    public void testNothing() { // If this compiles, the no arg ctor is there
 			    }
@@ -4335,9 +4362,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.NoArgTestCaseTest.java", str57);
         String str58= """
 			package junit.runner;
-			
+
 			import java.util.Vector;
-			
+
 			/**
 			 * A custom quick sort with support to customize the swap behaviour. NOTICE: We
 			 * can't use the the sorting support from the JDK 1.2 collection classes because
@@ -4347,7 +4374,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public interface Swapper {
 			        void swap(Vector values, int left, int right);
 			    }
-			
+
 			    public static void sortStrings(final Vector values, int left, int right,
 			            final Swapper swapper) {
 			        final int oleft = left;
@@ -4366,7 +4393,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                right--;
 			            }
 			        } while (left <= right);
-			
+
 			        if (oleft < right) {
 			            Sorter.sortStrings(values, oleft, right, swapper);
 			        }
@@ -4378,20 +4405,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.Sorter.java", str58);
         String str59= """
 			package junit.tests.framework;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * TestSuite that runs all the sample tests
 			 *
 			 */
 			public class AllTests {
-			
+
 			    public static void main(final String[] args) {
 			        junit.textui.TestRunner.run(AllTests.suite());
 			    }
-			
+
 			    public static Test suite() {
 			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
 			        suite.addTestSuite(TestCaseTest.class);
@@ -4405,40 +4432,40 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        suite.addTestSuite(DoublePrecisionAssertTest.class);
 			        return suite;
 			    }
-			
+
 			}""";
         fExpectedChangesAllTests.put("junit.tests.framework.AllTests.java", str59);
         String str60= """
 			package junit.tests.extensions;
-			
+
 			import junit.extensions.RepeatedTest;
 			import junit.framework.Assert;
 			import junit.framework.Test;
 			import junit.framework.TestCase;
 			import junit.framework.TestResult;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * Testing the RepeatedTest support.
 			 */
-			
+
 			public class RepeatedTestTest extends TestCase {
 			    public static class SuccessTest extends TestCase {
-			
+
 			        @Override
 			        public void runTest() {
 			        }
 			    }
-			
+
 			    private final TestSuite fSuite;
-			
+
 			    public RepeatedTestTest(final String name) {
 			        super(name);
 			        this.fSuite = new TestSuite();
 			        this.fSuite.addTest(new SuccessTest());
 			        this.fSuite.addTest(new SuccessTest());
 			    }
-			
+
 			    public void testRepeatedMoreThanOnce() {
 			        final Test test = new RepeatedTest(this.fSuite, 3);
 			        Assert.assertEquals(6, test.countTestCases());
@@ -4446,7 +4473,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        test.run(result);
 			        Assert.assertEquals(6, result.runCount());
 			    }
-			
+
 			    public void testRepeatedNegative() {
 			        try {
 			            new RepeatedTest(this.fSuite, -1);
@@ -4455,7 +4482,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        Assert.fail("Should throw an IllegalArgumentException"); //$NON-NLS-1$
 			    }
-			
+
 			    public void testRepeatedOnce() {
 			        final Test test = new RepeatedTest(this.fSuite, 1);
 			        Assert.assertEquals(2, test.countTestCases());
@@ -4463,7 +4490,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        test.run(result);
 			        Assert.assertEquals(2, result.runCount());
 			    }
-			
+
 			    public void testRepeatedZero() {
 			        final Test test = new RepeatedTest(this.fSuite, 0);
 			        Assert.assertEquals(0, test.countTestCases());
@@ -4475,26 +4502,26 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.extensions.RepeatedTestTest.java", str60);
         String str61= """
 			package junit.tests.runner;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestSuite;
 			import junit.runner.BaseTestRunner;
-			
+
 			/**
 			 * TestSuite that runs all the sample tests
 			 *
 			 */
 			public class AllTests {
-			
+
 			    static boolean isJDK11() {
 			        final String version = System.getProperty("java.version"); //$NON-NLS-1$
 			        return version.startsWith("1.1"); //$NON-NLS-1$
 			    }
-			
+
 			    public static void main(final String[] args) {
 			        junit.textui.TestRunner.run(AllTests.suite());
 			    }
-			
+
 			    public static Test suite() { // Collect tests manually because we have to
 			                                 // test class collection code
 			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
@@ -4515,9 +4542,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.runner.AllTests.java", str61);
         String str62= """
 			package junit.runner;
-			
+
 			import java.util.Enumeration;
-			
+
 			/**
 			 * Collects Test class names to be presented by the TestSelector.
 			 *\s
@@ -4533,9 +4560,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.runner.TestCollector.java", str62);
         String str63= """
 			package junit.samples.money;
-			
+
 			import java.util.Vector;
-			
+
 			/**
 			 * A MoneyBag defers exchange rate conversions. For example adding 12 Swiss
 			 * Francs to 14 US Dollars is represented as a bag containing the two Monies 12
@@ -4553,14 +4580,17 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        m2.appendTo(result);
 			        return result.simplify();
 			    }
-			
+
 			    private final Vector fMonies = new Vector(5);
+			    @Override
 			    public IMoney add(final IMoney m) {
 			        return m.addMoneyBag(this);
 			    }
+			    @Override
 			    public IMoney addMoney(final Money m) {
 			        return MoneyBag.create(m, this);
 			    }
+			    @Override
 			    public IMoney addMoneyBag(final MoneyBag s) {
 			        return MoneyBag.create(s, this);
 			    }
@@ -4585,6 +4615,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        this.fMonies.addElement(sum);
 			    }
+			    @Override
 			    public void appendTo(final MoneyBag m) {
 			        m.appendBag(this);
 			    }
@@ -4602,13 +4633,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                return ((IMoney) anObject).isZero();
 			            }
 			        }
-			
+
 			        if (anObject instanceof MoneyBag) {
 			            final MoneyBag aMoneyBag = (MoneyBag) anObject;
 			            if (aMoneyBag.fMonies.size() != this.fMonies.size()) {
 			                return false;
 			            }
-			
+
 			            for (final Object element : this.fMonies) {
 			                final Money m = (Money) element;
 			                if (!aMoneyBag.contains(m)) {
@@ -4636,9 +4667,11 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return hash;
 			    }
+			    @Override
 			    public boolean isZero() {
 			        return this.fMonies.size() == 0;
 			    }
+			    @Override
 			    public IMoney multiply(final int factor) {
 			        final MoneyBag result = new MoneyBag();
 			        if (factor != 0) {
@@ -4649,6 +4682,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return result;
 			    }
+			    @Override
 			    public IMoney negate() {
 			        final MoneyBag result = new MoneyBag();
 			        for (final Object element : this.fMonies) {
@@ -4663,6 +4697,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        }
 			        return this;
 			    }
+			    @Override
 			    public IMoney subtract(final IMoney m) {
 			        return this.add(m.negate());
 			    }
@@ -4680,29 +4715,29 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.samples.money.MoneyBag.java", str63);
         String str64= """
 			package junit.tests.runner;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
 			import junit.runner.SimpleTestCollector;
-			
+
 			public class SimpleTestCollectorTest extends TestCase {
-			
+
 			    public void testMissingDirectory() {
 			        final SimpleTestCollector collector = new SimpleTestCollector();
 			        Assert.assertFalse(collector.collectFilesInPath("foobar").elements() //$NON-NLS-1$
 			                .hasMoreElements());
 			    }
-			
+
 			}
 			""";
         fExpectedChangesAllTests.put("junit.tests.runner.SimpleTestCollectorTest.java", str64);
         String str65= """
 			package junit.framework;
-			
+
 			import java.lang.reflect.InvocationTargetException;
 			import java.lang.reflect.Method;
 			import java.lang.reflect.Modifier;
-			
+
 			/**
 			 * A test case defines the fixture to run multiple tests. To define a test
 			 * case<br>
@@ -4776,13 +4811,13 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			 * @see TestResult
 			 * @see TestSuite
 			 */
-			
+
 			public abstract class TestCase extends Assert implements Test {
 			    /**
 			     * the name of the test case
 			     */
 			    private String fName;
-			
+
 			    /**
 			     * No-arg constructor to enable serialization. This method is not intended
 			     * to be used by mere mortals without calling setName().
@@ -4799,6 +4834,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Counts the number of test cases executed by run(TestResult result).
 			     */
+			    @Override
 			    public int countTestCases() {
 			        return 1;
 			    }
@@ -4832,6 +4868,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Runs the test case and collects the results in TestResult.
 			     */
+			    @Override
 			    public void run(final TestResult result) {
 			        result.run(this);
 			    }
@@ -4868,7 +4905,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        if (!Modifier.isPublic(runMethod.getModifiers())) {
 			            Assert.fail("Method \\"" + this.fName + "\\" should be public"); //$NON-NLS-1$ //$NON-NLS-2$
 			        }
-			
+
 			        try {
 			            runMethod.invoke(this, new Class[0]);
 			        } catch (final InvocationTargetException e) {
@@ -4910,10 +4947,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.framework.TestCase.java", str65);
         String str66= """
 			package junit.samples.money;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
-			
+
 			public class MoneyTest extends TestCase {
 			    public static void main(final String args[]) {
 			        junit.textui.TestRunner.run(MoneyTest.class);
@@ -4921,10 +4958,10 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    private Money f12CHF;
 			    private Money f14CHF;
 			    private Money f21USD;
-			
+
 			    private Money f7USD;
 			    private IMoney fMB1;
-			
+
 			    private IMoney fMB2;
 			    @Override
 			    protected void setUp() {
@@ -4932,7 +4969,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			        this.f14CHF = new Money(14, "CHF"); //$NON-NLS-1$
 			        this.f7USD = new Money(7, "USD"); //$NON-NLS-1$
 			        this.f21USD = new Money(21, "USD"); //$NON-NLS-1$
-			
+
 			        this.fMB1 = MoneyBag.create(this.f12CHF, this.f7USD);
 			        this.fMB2 = MoneyBag.create(this.f14CHF, this.f21USD);
 			    }
@@ -4984,7 +5021,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    }
 			    public void testMoneyBagEquals() {
 			        Assert.assertTrue(!this.fMB1.equals(null));
-			
+
 			        Assert.assertEquals(this.fMB1, this.fMB1);
 			        final IMoney equal = MoneyBag.create(new Money(12, "CHF"), //$NON-NLS-1$
 			                new Money(7, "USD")); //$NON-NLS-1$
@@ -5068,20 +5105,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.samples.money.MoneyTest.java", str66);
         String str67= """
 			package junit.tests.extensions;
-			
+
 			import junit.framework.Test;
 			import junit.framework.TestSuite;
-			
+
 			/**
 			 * TestSuite that runs all the extension tests
 			 *
 			 */
 			public class AllTests {
-			
+
 			    public static void main(final String[] args) {
 			        junit.textui.TestRunner.run(AllTests.suite());
 			    }
-			
+
 			    public static Test suite() { // Collect tests manually because we have to
 			                                 // test class collection code
 			        final TestSuite suite = new TestSuite("Framework Tests"); //$NON-NLS-1$
@@ -5095,12 +5132,12 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.extensions.AllTests.java", str67);
         String str68= """
 			package junit.tests.framework;
-			
+
 			/**
 			 * Test class used in SuiteTest
 			 */
 			import junit.framework.TestCase;
-			
+
 			public class NoTestCases extends TestCase {
 			    public void noTestCase() {
 			    }
@@ -5108,20 +5145,20 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.framework.NoTestCases.java", str68);
         String str69= """
 			package junit.tests.runner;
-			
+
 			import java.lang.reflect.Method;
 			import java.net.URL;
-			
+
 			import junit.framework.Assert;
 			import junit.framework.TestCase;
 			import junit.runner.TestCaseClassLoader;
-			
+
 			/**
 			 * A TestCase for testing the TestCaseClassLoader
 			 *
 			 */
 			public class TestCaseClassLoaderTest extends TestCase {
-			
+
 			    public void testClassLoading() throws Exception {
 			        final TestCaseClassLoader loader = new TestCaseClassLoader();
 			        final Class loadedClass = loader
@@ -5137,7 +5174,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			                new Class[0]);
 			        method.invoke(o, new Class[0]);
 			    }
-			
+
 			    public void testJarClassLoading() throws Exception {
 			        final URL url = this.getClass().getResource("test.jar"); //$NON-NLS-1$
 			        Assert.assertNotNull("Cannot find test.jar", url); //$NON-NLS-1$
@@ -5160,16 +5197,16 @@ public class CleanUpStressTest extends CleanUpTestCase {
         fExpectedChangesAllTests.put("junit.tests.runner.TestCaseClassLoaderTest.java", str69);
         String str70= """
 			package junit.samples.money;
-			
+
 			/**
 			 * A simple Money.
 			 *
 			 */
 			public class Money implements IMoney {
-			
+
 			    private final int fAmount;
 			    private final String fCurrency;
-			
+
 			    /**
 			     * Constructs a money from the given amount and currency.
 			     */
@@ -5180,21 +5217,25 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    /**
 			     * Adds a money to this money. Forwards the request to the addMoney helper.
 			     */
+			    @Override
 			    public IMoney add(final IMoney m) {
 			        return m.addMoney(this);
 			    }
+			    @Override
 			    public IMoney addMoney(final Money m) {
 			        if (m.currency().equals(this.currency())) {
 			            return new Money(this.amount() + m.amount(), this.currency());
 			        }
 			        return MoneyBag.create(this, m);
 			    }
+			    @Override
 			    public IMoney addMoneyBag(final MoneyBag s) {
 			        return s.addMoney(this);
 			    }
 			    public int amount() {
 			        return this.fAmount;
 			    }
+			    @Override
 			    public /* this makes no sense */ void appendTo(final MoneyBag m) {
 			        m.appendMoney(this);
 			    }
@@ -5219,15 +5260,19 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			    public int hashCode() {
 			        return this.fCurrency.hashCode() + this.fAmount;
 			    }
+			    @Override
 			    public boolean isZero() {
 			        return this.amount() == 0;
 			    }
+			    @Override
 			    public IMoney multiply(final int factor) {
 			        return new Money(this.amount() * factor, this.currency());
 			    }
+			    @Override
 			    public IMoney negate() {
 			        return new Money(-this.amount(), this.currency());
 			    }
+			    @Override
 			    public IMoney subtract(final IMoney m) {
 			        return this.add(m.negate());
 			    }

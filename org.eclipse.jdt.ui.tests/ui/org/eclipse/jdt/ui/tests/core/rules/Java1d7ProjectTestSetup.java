@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaProject;
 
+@Deprecated
 public class Java1d7ProjectTestSetup extends ProjectTestSetup {
 
 	public Java1d7ProjectTestSetup() {
@@ -32,7 +33,7 @@ public class Java1d7ProjectTestSetup extends ProjectTestSetup {
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= super.createAndInitializeProject();
-		JavaProjectHelper.set17CompilerOptions(javaProject);
+		JavaProjectHelper.set18CompilerOptions(javaProject);
 		return javaProject;
 	}
 

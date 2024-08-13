@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -148,6 +149,9 @@ public class VarCleanUpCore extends AbstractMultiFix {
 			}
 
 			private boolean maybeUseVar(final Type type, final Expression initializer, final int extraDimensions) {
+				if (initializer instanceof ExpressionMethodReference) {
+					return false;
+				}
 				if (type.isVar()
 						|| initializer == null
 						|| initializer.resolveTypeBinding() == null
@@ -398,7 +402,11 @@ public class VarCleanUpCore extends AbstractMultiFix {
 
 			SimpleType replacement= ast.newSimpleType(ast.newSimpleName("var")); //$NON-NLS-1$
 			ASTNodes.replaceButKeepComment(rewrite, node, replacement, group);
-			remover.registerRemovedNode(node);
+			if (classInstanceCreation != null) {
+				remover.registerRemovedNode(classInstanceCreation);
+			} else {
+				remover.registerRemovedNode(node);
+			}
 		}
 	}
 }

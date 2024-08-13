@@ -54,9 +54,11 @@ import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -85,6 +87,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -112,6 +115,13 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.core.manipulation.BindingLabelProviderCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
@@ -122,6 +132,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -480,6 +491,114 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return fUsedNames;
 	}
 
+	private class TypeExtendsSearchRequestor extends SearchRequestor {
+
+		public List<SearchMatch> results= new ArrayList<>();
+
+		public List<SearchMatch> getResults() {
+			return results;
+		}
+
+		@Override
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+				results.add(match);
+			}
+		}
+
+	}
+
+	private void search(SearchPattern searchPattern, IJavaSearchScope scope, SearchRequestor requestor) throws CoreException {
+		new SearchEngine().search(
+			searchPattern,
+			new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()},
+			scope,
+			requestor,
+			null);
+	}
+
+	private class CheckMethodConflictVisitor extends ASTVisitor {
+		private final String fMethodNameToCheck;
+
+		public CheckMethodConflictVisitor(String methodName) {
+			this.fMethodNameToCheck= methodName;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			if (node.getName().getFullyQualifiedName().equals(fMethodNameToCheck) && node.getExpression() == null) {
+				throw new AbortSearchException();
+			}
+			return true;
+		}
+	}
+
+	protected RefactoringStatus checkForMethodOverride() {
+
+		RefactoringStatus status= new RefactoringStatus();
+		ITypeBinding type= null;
+		if (fDestination instanceof AbstractTypeDeclaration) {
+			final AbstractTypeDeclaration decl= (AbstractTypeDeclaration) fDestination;
+			type= decl.resolveBinding();
+		} else if (fDestination instanceof AnonymousClassDeclaration) {
+			final AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fDestination;
+			type= decl.resolveBinding();
+		}
+		if (type == null) {
+			return status;
+		}
+		String typeName= type.getQualifiedName();
+		SearchPattern pattern = SearchPattern.createPattern(typeName, IJavaSearchConstants.TYPE, IJavaSearchConstants.IMPLEMENTORS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		if (pattern == null) {
+			return status;
+		}
+		TypeExtendsSearchRequestor requestor= new TypeExtendsSearchRequestor();
+		try {
+			search(pattern, SearchEngine.createJavaSearchScope(new IJavaElement[] {type.getJavaElement().getJavaProject()}), requestor);
+		} catch (CoreException e) {
+			return status;
+		}
+		List<SearchMatch> results= requestor.getResults();
+		for (SearchMatch result : results) {
+			Object obj= result.getElement();
+			if (obj instanceof IType resultType) {
+				try {
+					ASTNode typeDecl= null;
+					if (resultType.isLocal() || resultType.isAnonymous()) {
+						ICompilationUnit icu= resultType.getCompilationUnit();
+						typeDecl= getTypeDeclaration(resultType, icu);
+					}
+					if (typeDecl != null) {
+						CheckMethodConflictVisitor visitor= new CheckMethodConflictVisitor(fMethodName);
+						try {
+							typeDecl.accept(visitor);
+						} catch (AbortSearchException e) {
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.ExtractMethodAnalyzer_method_will_override_call_in_subclass, resultType.getFullyQualifiedName('.'))));
+						}
+					}
+				} catch (JavaModelException e) {
+					// do nothing
+				}
+			}
+		}
+		return status;
+	}
+
+	private ASTNode getTypeDeclaration(IType iType, ICompilationUnit icu) throws JavaModelException {
+		ASTParser parser= ASTParser.newParser(AST.getJLSLatest());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setSource(icu);
+		parser.setResolveBindings(true);
+		CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+		ASTNode perform= NodeFinder.perform(compilationUnit, iType.getSourceRange());
+		if (perform instanceof TypeDeclaration && ((TypeDeclaration) perform).resolveBinding() != null) {
+			return perform;
+		} else if (perform instanceof AnonymousClassDeclaration && ((AnonymousClassDeclaration) perform).resolveBinding() != null) {
+			return perform;
+		}
+		return null;
+	}
+
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ExtractMethodRefactoring_checking_new_name, 2);
@@ -488,6 +607,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		RefactoringStatus result= checkMethodName();
 		result.merge(checkParameterNames());
 		result.merge(checkVarargOrder());
+		result.merge(checkForMethodOverride());
 		pm.worked(1);
 		if (pm.isCanceled())
 			throw new OperationCanceledException();

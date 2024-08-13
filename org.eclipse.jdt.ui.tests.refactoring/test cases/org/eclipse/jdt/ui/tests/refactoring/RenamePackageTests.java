@@ -508,14 +508,14 @@ public class RenamePackageTests extends GenericRefactoringTest {
 			assertNotNull(JavaProjectHelper.addRTJar(projectPrg));
 			IPackageFragmentRoot srcPrg= JavaProjectHelper.addSourceContainer(projectPrg, "srcPrg");
 			Map<String, String> optionsPrg= projectPrg.getOptions(false);
-			JavaProjectHelper.set15CompilerOptions(optionsPrg);
+			JavaProjectHelper.set18CompilerOptions(optionsPrg);
 			projectPrg.setOptions(optionsPrg);
 
 			projectTest= JavaProjectHelper.createJavaProject("RenamePack2", "bin");
 			assertNotNull(JavaProjectHelper.addRTJar(projectTest));
 			IPackageFragmentRoot srcTest= JavaProjectHelper.addSourceContainer(projectTest, "srcTest");
 			Map<String, String> optionsTest= projectTest.getOptions(false);
-			JavaProjectHelper.set15CompilerOptions(optionsTest);
+			JavaProjectHelper.set18CompilerOptions(optionsTest);
 			projectTest.setOptions(optionsTest);
 
 			JavaProjectHelper.addRequiredProject(projectTest, projectPrg);

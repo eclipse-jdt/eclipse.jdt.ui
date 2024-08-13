@@ -904,7 +904,7 @@ public class JavaElementLabelComposerCore {
 				if (i > 0) {
 					fBuffer.append(JavaElementLabelsCore.COMMA_STRING);
 				}
-				appendTypeParameteSignatureLabel(Signature.getTypeVariable(typeParamSigs[i]));
+				appendTypeParameterSignatureLabel(Signature.getTypeVariable(typeParamSigs[i]));
 			}
 			appendGT();
 		}
@@ -915,7 +915,7 @@ public class JavaElementLabelComposerCore {
 	 *
 	 * @param typeVariableName the type variable name
 	 */
-	protected void appendTypeParameteSignatureLabel(String typeVariableName) {
+	protected void appendTypeParameterSignatureLabel(String typeVariableName) {
 		fBuffer.append(typeVariableName);
 	}
 
