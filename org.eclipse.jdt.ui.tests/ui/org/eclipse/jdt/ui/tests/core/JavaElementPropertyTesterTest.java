@@ -71,7 +71,7 @@ public class JavaElementPropertyTesterTest {
 
 		fJProject1= JavaProjectHelper.createJavaProject("Test", "bin");
 
-		fJDK= JavaProjectHelper.addRTJar(fJProject1);
+		fJDK= JavaProjectHelper.addRTJar_17(fJProject1, false);
 		assertNotNull("jdk not found", fJDK);
 		assertTrue(fJDK.exists());
 
@@ -149,12 +149,12 @@ public class JavaElementPropertyTesterTest {
 			assertEquals(allElements[i].getElementName(), expectedResult4[i], actual);
 		}
 
-		Object[] args= { JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5 };
+		Object[] args= { JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_17 };
 		assertEquals(true, tester.test(fJProject1, JavaElementPropertyTester.PROJECT_OPTION, args , null));
 		assertEquals(false, tester.test(fOtherProject, JavaElementPropertyTester.PROJECT_OPTION, args , null));
 		assertEquals(false, tester.test(fOtherClosedProject, JavaElementPropertyTester.PROJECT_OPTION, args , null));
 
-		fJProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
+		fJProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_11);
 
 		assertEquals(false, tester.test(fJProject1, JavaElementPropertyTester.PROJECT_OPTION, args, null));
 

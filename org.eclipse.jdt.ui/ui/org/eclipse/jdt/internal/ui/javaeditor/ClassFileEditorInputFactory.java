@@ -48,11 +48,6 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 		if (identifier == null) {
 			return null;
 		}
-		return JavaCore.callReadOnly(() -> createElementCached(identifier));
-	}
-
-	private IAdaptable createElementCached(String identifier) {
-
 		IJavaElement element= JavaCore.create(identifier);
 		try {
 			if (!element.exists() && element instanceof IOrdinaryClassFile) {

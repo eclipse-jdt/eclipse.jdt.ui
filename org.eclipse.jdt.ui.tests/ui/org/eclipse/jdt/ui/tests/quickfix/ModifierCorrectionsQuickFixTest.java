@@ -502,7 +502,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class C {
 			    protected class Inner{
-			
+
 			        public Inner() {
 			        }
 			    }
@@ -633,7 +633,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E extends C {
 			    private int fXoo;
-			
+
 			    public void foo() {
 			         fXoo= 1;
 			    }
@@ -996,7 +996,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			enum E {
 			    A {
 			        public void foo() {}
@@ -1015,7 +1015,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package test1;
-			
+
 			enum E {
 			    A {
 			        public void foo() {}
@@ -1123,181 +1123,6 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
-
-	@Test
-	public void testOuterLocalMustBeFinal() throws Exception {
-
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			public class E {
-			    public void foo() {
-			        int i= 9;
-			        Runnable run= new Runnable() {
-			            public void run() {
-			                int x= i;
-			            }
-			        };
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			public class E {
-			    public void foo() {
-			        final int i= 9;
-			        Runnable run= new Runnable() {
-			            public void run() {
-			                int x= i;
-			            }
-			        };
-			    }
-			}
-			""";
-		assertEqualString(preview, str1);
-	}
-
-	@Test
-	public void testOuterLocalMustBeFinal2() throws Exception {
-
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			import java.util.List;
-			public class E {
-			    public void foo() {
-			        List<String> i= null, j= null;
-			        Runnable run= new Runnable() {
-			            public void run() {
-			                Object x= i;
-			            }
-			        };
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			import java.util.List;
-			public class E {
-			    public void foo() {
-			        final List<String> i= null;
-			        List<String> j= null;
-			        Runnable run= new Runnable() {
-			            public void run() {
-			                Object x= i;
-			            }
-			        };
-			    }
-			}
-			""";
-		assertEqualString(preview, str1);
-	}
-
-
-	@Test
-	public void testOuterParameterMustBeFinal() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			public class E {
-			    public void foo(int i) {
-			        Runnable run= new Runnable() {
-			            public void run() {
-			                int x= i;
-			            }
-			        };
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			public class E {
-			    public void foo(final int i) {
-			        Runnable run= new Runnable() {
-			            public void run() {
-			                int x= i;
-			            }
-			        };
-			    }
-			}
-			""";
-		assertEqualString(preview, str1);
-	}
-
-	@Test
-	public void testOuterForParamMustBeFinal() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			public class E {
-			    public void foo() {
-			        for (int i= 1; true;) {
-			            Runnable run= new Runnable() {
-			                public void run() {
-			                    int x= i;
-			                }
-			            };
-			        }
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			public class E {
-			    public void foo() {
-			        for (final int i= 1; true;) {
-			            Runnable run= new Runnable() {
-			                public void run() {
-			                    int x= i;
-			                }
-			            };
-			        }
-			    }
-			}
-			""";
-		assertEqualString(preview, str1);
-	}
-
 
 	@Test
 	public void testMethodRequiresBody() throws Exception {
@@ -2235,20 +2060,8 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			public interface E  {
-			    void foo();
-			}
-			""";
-		assertEqualString(preview, str1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 0);
 	}
 
 	@Test
@@ -2412,7 +2225,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class Bug {
 			    public static Bug() {
 			    }
@@ -2429,7 +2242,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			public class Bug {
 			    public Bug() {
 			    }
@@ -3034,7 +2847,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			public class A {
 			    public void foo(ArrayList<String> c) {
 			        new ArrayList(c);
@@ -3053,7 +2866,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			public class A {
 			    @SuppressWarnings("unchecked")
 			    public void foo(ArrayList<String> c) {
@@ -3076,7 +2889,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			public class A {
 			    public void foo() {
 			         @SuppressWarnings("unused")
@@ -3095,7 +2908,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			public class A {
 			    public void foo() {
 			         @SuppressWarnings({"unused", "rawtypes"})
@@ -3107,7 +2920,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[1]= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			public class A {
 			    @SuppressWarnings("rawtypes")
 			    public void foo() {
@@ -3130,7 +2943,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    List<String> myList = new ArrayList();
 			}
@@ -3147,7 +2960,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    @SuppressWarnings("unchecked")
 			    List<String> myList = new ArrayList();
@@ -3168,7 +2981,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			class A {
 			    @SuppressWarnings("rawtypes")
 			    ArrayList array;
@@ -3187,7 +3000,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.ArrayList;
-			
+
 			class A {
 			    @SuppressWarnings("rawtypes")
 			    ArrayList array;
@@ -3210,7 +3023,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    public int foo(int param1, List param2) {
 			         return param1;
@@ -3228,7 +3041,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    public int foo(int param1, @SuppressWarnings("rawtypes") List param2) {
 			         return param1;
@@ -3239,7 +3052,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[1]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    @SuppressWarnings("rawtypes")
 			    public int foo(int param1, List param2) {
@@ -3263,7 +3076,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    public void foo() {
 			        @SuppressWarnings("unused")
@@ -3290,7 +3103,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    public void foo() {
 			        @SuppressWarnings("unused")
@@ -3310,7 +3123,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[1]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    public void foo() {
 			        @SuppressWarnings({"unused", "rawtypes"})
@@ -3329,7 +3142,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[1]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    @SuppressWarnings("rawtypes")
 			    public void foo() {
@@ -3359,7 +3172,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String str= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    final Runnable r= new Runnable() {
 			        public void run() {
@@ -3384,7 +3197,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			package test1;\s
 			import java.util.*;
-			
+
 			public class A {
 			    final Runnable r= new Runnable() {
 			        @SuppressWarnings("unchecked")
@@ -3407,7 +3220,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("a", false, null);
 		String str= """
 			package a;
-			
+
 			public class A {
 			    @SuppressWarnings("unusd")
 			    public static void main(String[] args) {
@@ -3425,7 +3238,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package a;
-			
+
 			public class A {
 			    @SuppressWarnings("unused")
 			    public static void main(String[] args) {
@@ -3435,7 +3248,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package a;
-			
+
 			public class A {
 			    public static void main(String[] args) {
 			    }
@@ -3451,7 +3264,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment other= fSourceFolder.createPackageFragment("other", false, null);
 		String str= """
 			package other;\s
-			
+
 			public @interface SuppressWarnings {
 			    String value();
 			}
@@ -3462,7 +3275,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package a.b;
-			
+
 			public class E {
 			    @Deprecated()
 			    public void foo() {
@@ -3473,9 +3286,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str2= """
 			package a.b;
-			
+
 			import other.SuppressWarnings;
-			
+
 			public class Test {
 			    @SuppressWarnings("BC")
 			    public void foo() {
@@ -3494,9 +3307,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package a.b;
-			
+
 			import other.SuppressWarnings;
-			
+
 			public class Test {
 			    @java.lang.SuppressWarnings("deprecation")
 			    @SuppressWarnings("BC")
@@ -3514,9 +3327,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.util.Vector;
-			
+
 			public class A {
 			}
 			""";
@@ -3531,9 +3344,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[0]= """
 			package p;
-			
+
 			import java.util.Vector;
-			
+
 			@SuppressWarnings("unused")
 			public class A {
 			}
@@ -3552,10 +3365,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			@SuppressWarnings(value="unused")
 			public class E {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
@@ -3569,9 +3382,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
-			
+
 			}
 			""";
 
@@ -3587,10 +3400,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			@SuppressWarnings("unused")
 			public class E {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
@@ -3604,9 +3417,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			public class E {
-			
+
 			}
 			""";
 
@@ -3622,10 +3435,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			@SuppressWarnings({ "unused", "X" })
 			public class E {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
@@ -3639,63 +3452,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package p;
-			
+
 			@SuppressWarnings({ "X" })
 			public class E {
-			
+
 			}
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
-	}
-
-
-	@Test
-	public void testMakeFinalBug129165() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			import java.io.Serializable;
-			public class E {
-			    @SuppressWarnings("serial")
-			    public void foo() {
-			        int i= 1, j= i + 1, h= j + 1;
-			        Serializable ser= new Serializable() {
-			            public void bar() {
-			                System.out.println(j);
-			            }
-			        };
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			import java.io.Serializable;
-			public class E {
-			    @SuppressWarnings("serial")
-			    public void foo() {
-			        int i= 1;
-			        final int j= i + 1;
-			        int h= j + 1;
-			        Serializable ser= new Serializable() {
-			            public void bar() {
-			                System.out.println(j);
-			            }
-			        };
-			    }
-			}
-			""";
-		assertEqualString(preview, str1);
 	}
 
 	@Test
@@ -3703,7 +3467,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        static int x;
@@ -3721,7 +3485,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        int x;
@@ -3731,7 +3495,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    static class F {
 			        static int x;
@@ -3747,7 +3511,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        static int foo() {
@@ -3766,7 +3530,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        int foo() {
@@ -3777,7 +3541,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    static class F {
 			        static int foo() {
@@ -3794,7 +3558,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        volatile final int x;
@@ -3812,7 +3576,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        final int x;
@@ -3822,7 +3586,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    class F {
 			        volatile int x;
@@ -3840,7 +3604,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str= """
 			package pack;
-			
+
 			public class OtherMachine {
 			}
 			""";
@@ -3848,9 +3612,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package pack;
-			
+
 			import java.io.IOException;
-			
+
 			public class Machine extends OtherMachine {
 			    @Override
 			    public boolean isAlive(OtherMachine m) throws IOException {
@@ -3869,9 +3633,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			import java.io.IOException;
-			
+
 			public class Machine extends OtherMachine {
 			    public boolean isAlive(OtherMachine m) throws IOException {
 			        return true;
@@ -3881,11 +3645,11 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
+
 			import java.io.IOException;
-			
+
 			public class OtherMachine {
-			
+
 			    public boolean isAlive(OtherMachine m) throws IOException {
 			        return false;
 			    }
@@ -3901,7 +3665,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str= """
 			package pack;
-			
+
 			public abstract class OtherMachine {
 			}
 			""";
@@ -3909,7 +3673,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package pack;
-			
+
 			public abstract class Machine extends OtherMachine {
 			    @Override
 			    public abstract void m1();
@@ -3926,16 +3690,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public abstract class OtherMachine {
-			
+
 			    public abstract void m1();
 			}
 			""";
 
 		expected[1]= """
 			package pack;
-			
+
 			public abstract class Machine extends OtherMachine {
 			    public abstract void m1();
 			}
@@ -3958,12 +3722,12 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}   \s
-			
+
 			class F extends E {
 			    public void foo() {
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
@@ -3981,13 +3745,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}   \s
-			
+
 			class F extends E {
 			    @Deprecated
 			    public void foo() {
 			    }
 			}
-			
+
 			""";
 
 		expected[1]= """
@@ -3997,13 +3761,13 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}   \s
-			
+
 			class F extends E {
 			    @SuppressWarnings("deprecation")
 			    public void foo() {
 			    }
 			}
-			
+
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
@@ -4023,14 +3787,14 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}   \s
-			
+
 			class F extends E {
 			    /**
 			     */
 			    public void foo() {
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
@@ -4048,7 +3812,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}   \s
-			
+
 			class F extends E {
 			    /**
 			     * @deprecated
@@ -4057,7 +3821,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}
-			
+
 			""";
 
 		expected[1]= """
@@ -4067,7 +3831,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}   \s
-			
+
 			class F extends E {
 			    /**
 			     */
@@ -4075,7 +3839,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			    }
 			}
-			
+
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
@@ -4086,7 +3850,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			enum E {
 			    ;
 			    public abstract boolean foo();
@@ -4103,7 +3867,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			enum E {
 			    ;
 			    public boolean foo() {
@@ -4120,7 +3884,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			private final strictfp enum E {
 			}
 			""";
@@ -4135,7 +3899,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			strictfp enum E {
 			}
 			""";
@@ -4148,7 +3912,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			public abstract enum E {
 			}
 			""";
@@ -4163,7 +3927,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			public enum E {
 			}
 			""";
@@ -4176,7 +3940,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			enum E {
 				private final WHITE;
 			}
@@ -4192,7 +3956,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			enum E {
 				WHITE;
 			}
@@ -4206,10 +3970,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			enum E {
 				WHITE(1);
-			
+
 				public final E(int foo) {
 				}
 			}
@@ -4225,10 +3989,10 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			enum E {
 				WHITE(1);
-			
+
 				E(int foo) {
 				}
 			}
@@ -4242,7 +4006,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			class E {
 				final enum A {
 				}
@@ -4259,7 +4023,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			class E {
 				enum A {
 				}
@@ -4274,7 +4038,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("r", false, null);
 		String str= """
 			package r;
-			
+
 			public class A {
 				protected synchronized void foo() {
 				}
@@ -4284,7 +4048,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package r;
-			
+
 			class B extends A {
 				protected void foo() {
 				}
@@ -4301,7 +4065,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package r;
-			
+
 			class B extends A {
 				protected synchronized void foo() {
 				}
@@ -4498,7 +4262,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String sample= """
 			package test1;
-			
+
 			public interface Interface1 {
 			  String getName();
 			}
@@ -4507,7 +4271,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test2;
-			
+
 			public class AbsImpl implements test1.Interface1 {
 			  String getName() {
 			    return "name";
@@ -4536,7 +4300,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String sample= """
 			package test;
-			
+
 			public interface Interface1 {
 			  String getName();
 			}
@@ -4545,7 +4309,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test;
-			
+
 			protected interface Interface2 {
 			  protected String getName();
 			}
@@ -4554,7 +4318,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test;
-			
+
 			public class AbsImpl implements Interface1, Interface2 {
 			  String getName() {
 			    return "name";
@@ -4585,7 +4349,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String sample= """
 			package test1;
-			
+
 			public interface Interface1 {
 			  String getName();
 			}
@@ -4594,7 +4358,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test2;
-			
+
 			public interface Interface2 {
 			  String getName();
 			}
@@ -4603,7 +4367,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test3;
-			
+
 			public class AbsImpl implements test1.Interface1, test2.Interface2 {
 			  String getName() {
 			    return "name";
@@ -4634,7 +4398,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		String sample= """
 			package test1;
-			
+
 			public interface Interface1 {
 			  String getName();
 			}
@@ -4643,7 +4407,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test2;
-			
+
 			public interface Interface2 extends test1.Interface1 {
 			}
 			""";
@@ -4651,7 +4415,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		sample= """
 			package test3;
-			
+
 			public class AbsImpl implements test2.Interface2 {
 			  String getName() {
 			    return "name";

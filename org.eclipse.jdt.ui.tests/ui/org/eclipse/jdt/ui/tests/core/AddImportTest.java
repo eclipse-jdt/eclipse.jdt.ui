@@ -69,7 +69,7 @@ public class AddImportTest extends CoreTests {
 	@Before
 	public void setUp() throws Exception {
 		fJProject1= pts.getProject();
-		JavaProjectHelper.set15CompilerOptions(fJProject1);
+		JavaProjectHelper.set18CompilerOptions(fJProject1);
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -88,14 +88,14 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.util.Map;
 			import java.util.Set;
 			import java.util.Vector;
-			
+
 			import pack.List;
 			import pack.List2;
-			
+
 			public class C {
 			}
 			""";
@@ -112,19 +112,19 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.net.Socket;
 			import java.util.Map;
 			import java.util.Set;
 			import java.util.Vector;
-			
+
 			import com.something.Foo;
-			
+
 			import pack.List;
 			import pack.List2;
-			
+
 			import p.A;
-			
+
 			public class C {
 			}
 			""";
@@ -138,10 +138,10 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.util.Set;
 			import java.util.Vector;
-			
+
 			public class C {
 			}
 			""";
@@ -156,12 +156,12 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.x.Socket;
-			
+
 			import java.util.Set;
 			import java.util.Vector;
-			
+
 			public class C {
 			}
 			""";
@@ -175,9 +175,9 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.util.Set; // comment
-			
+
 			public class C {
 			}
 			""";
@@ -192,10 +192,10 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.util.Set; // comment
 			import java.util.Vector;
-			
+
 			public class C {
 			}
 			""";
@@ -209,14 +209,14 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.util.Set;
 			import java.util.Vector;
 			import java.util.Map;
-			
+
 			import pack.List;
 			import pack.List2;
-			
+
 			public class C {
 			}
 			""";
@@ -232,11 +232,11 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.util.*;
-			
+
 			import pack.List2;
-			
+
 			public class C {
 			}
 			""";
@@ -250,10 +250,10 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.util.Set;
 			import java.util.Vector; // comment
-			
+
 			public class C {
 			}
 			""";
@@ -268,9 +268,9 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.util.Set;
-			
+
 			public class C {
 			}
 			""";
@@ -284,7 +284,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack= sourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public class Inner {
 			    }
@@ -295,14 +295,14 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment test1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			import pack.A;
 			import pack.A.Inner;
 			import pack.A.NotThere;
 			import pack.B;
 			import pack.B.Inner;
 			import pack.B.NotThere;
-			
+
 			public class T {
 			}
 			""";
@@ -325,10 +325,10 @@ public class AddImportTest extends CoreTests {
 
 		String str2= """
 			package test1;
-			
+
 			import pack.A;
 			import pack.B;
-			
+
 			public class T {
 			}
 			""";
@@ -342,9 +342,9 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import p.A.*;
-			
+
 			public class C {
 			}
 			""";
@@ -359,10 +359,10 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import p.Inner;
 			import p.A.*;
-			
+
 			public class C {
 			}
 			""";
@@ -376,11 +376,11 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.awt.Panel;
-			
+
 			import java.math.BigInteger;
-			
+
 			public class C {
 			}
 			""";
@@ -395,12 +395,12 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.awt.Panel;
-			
+
 			import java.applet.Applet;
 			import java.math.BigInteger;
-			
+
 			public class C {
 			}
 			""";
@@ -414,9 +414,9 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
-			
+
 			public class C {
 			}
 			""";
@@ -431,10 +431,10 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import java.io.Exception;
 			import java.lang.System;
-			
+
 			public class C {
 			}
 			""";
@@ -448,9 +448,9 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
-			
+
 			public class C {
 			}
 			""";
@@ -467,12 +467,12 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import static java.lang.Math.max;
 			import static java.lang.Math.min;
-			
+
 			import java.lang.System;
-			
+
 			public class C {
 			}
 			""";
@@ -486,9 +486,9 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
-			
+
 			public class C {
 			}
 			""";
@@ -505,14 +505,14 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import static xx.MyConstants.SIZE;
 			import static xy.MyConstants.*;
-			
+
 			import java.lang.System;
-			
+
 			import xy.MyConstants;
-			
+
 			public class C {
 			}
 			""";
@@ -559,9 +559,9 @@ public class AddImportTest extends CoreTests {
 
 		String str2= """
 			package test2;
-			
+
 			import static test1.T.foo;
-			
+
 			import test1.TSub;
 			public class S {
 			    public S() {
@@ -635,14 +635,14 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			import java.io.IOException;
-			
+
 			import java.net.SocketAddress;
 			import java.net.URL;
-			
+
 			public class B {
 			}
 			""";
@@ -810,12 +810,12 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package test1;
-			
+
 			import java.util.Map;
 			import java.util.Set;
-			
+
 			import java.net.ServerSocket;
-			
+
 			public class B {
 			}
 			""";
@@ -831,9 +831,9 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		String str= """
 			package pack1;
-			
+
 			import java.util.Vector;
-			
+
 			public class C {
 			    public final static int CONST= 9;
 			}
@@ -880,13 +880,13 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import static java.lang.Math.max;
 			import static java.lang.Math.min;
 			import static pack1.C.CONST;
-			
+
 			import java.util.Vector;
-			
+
 			public class C {
 			    public final static int CONST= 9;
 			}
@@ -923,10 +923,10 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
 			import java.util.Vector;
-			
+
 			public class C {
 			    Vector c= null;
 			}
@@ -956,10 +956,10 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
 			import java.util.Vector;
-			
+
 			public class C {
 			    Vector c= null;
 			}
@@ -989,10 +989,10 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
 			import java.util.Vector;
-			
+
 			public class C {
 			    Vector c= null
 			}
@@ -1022,10 +1022,10 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.System;
 			import java.util.Vector;
-			
+
 			public class C {
 			    Vector c= null
 			}
@@ -1084,12 +1084,12 @@ public class AddImportTest extends CoreTests {
 		String input =
 				"""
 			package p;
-			
+
 			class A {
 				static void foo() {
 					A.bar();
 				}
-			
+
 				private static void bar() {
 				}
 			}""";
@@ -1103,12 +1103,12 @@ public class AddImportTest extends CoreTests {
 		String expected =
 				"""
 			package p;
-			
+
 			class A {
 				static void foo() {
 					bar();
 				}
-			
+
 				private static void bar() {
 				}
 			}""";
@@ -1123,12 +1123,12 @@ public class AddImportTest extends CoreTests {
 		String input =
 				"""
 			package p;
-			
+
 			class A {
 				static void foo() {
 					A.bar();
 				}
-			
+
 				public static void bar() {
 				}
 			}""";
@@ -1142,12 +1142,12 @@ public class AddImportTest extends CoreTests {
 		String expected =
 				"""
 			package p;
-			
+
 			class A {
 				static void foo() {
 					bar();
 				}
-			
+
 				public static void bar() {
 				}
 			}""";
@@ -1221,14 +1221,14 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package p;
-			
+
 			import static p.SnippetY.Test.bar;
-			
+
 			class SnippetY {
 			    static class Test {
 			        static void bar() {}
 			    }
-			
+
 			    void foo() {
 			        bar();
 			    }
@@ -1272,7 +1272,7 @@ public class AddImportTest extends CoreTests {
 		String inputA=
 				"""
 			package q;
-			
+
 			public class A {
 				protected static void bar() {
 				}
@@ -1363,11 +1363,11 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import static java.io.File.separator;
-			
+
 			import java.lang.System;
-			
+
 			public class C {
 			    String str= separator;
 			}
@@ -1377,7 +1377,7 @@ public class AddImportTest extends CoreTests {
 
 	@Test
 	public void testAddImportActionStaticWith14() throws Exception {
-		JavaProjectHelper.set14CompilerOptions(fJProject1);
+		JavaProjectHelper.set18CompilerOptions(fJProject1);
 
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -1399,11 +1399,13 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
+			import static java.io.File.separator;
+
 			import java.lang.System;
-			
+
 			public class C {
-			    String str= java.io.File.separator;
+			    String str= separator;
 			}
 			""";
 		assertEqualString(cu.getSource(), str);
@@ -1429,7 +1431,7 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			public class C {
 			    Thread.State s;
 			}
@@ -1457,9 +1459,9 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.Thread.State;
-			
+
 			public class C {
 			    State s;
 			}
@@ -1487,9 +1489,9 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.util.Map;
-			
+
 			public class C {
 			    Map<String, Integer> m;
 			}
@@ -1517,9 +1519,9 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.util.Map.Entry;
-			
+
 			public class C {
 			    Entry e;
 			}
@@ -1547,9 +1549,9 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.util.Map;
-			
+
 			public class C {
 			    Map.Entry<String, Object> e;
 			}
@@ -1577,9 +1579,9 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.util.Map.Entry;
-			
+
 			public class C {
 			    Entry<String, Object> e;
 			}
@@ -1594,7 +1596,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
 		String str= """
 			package pack2;
-			
+
 			public class Outer {
 			    public class Middle<M> {
 			        public class Inner<I> {
@@ -1620,9 +1622,9 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			import pack2.Outer.Middle;
-			
+
 			public class C {
 			    Middle<String>.Inner<Integer> i;
 			}
@@ -1638,7 +1640,7 @@ public class AddImportTest extends CoreTests {
 		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
 		String str= """
 			package pack2;
-			
+
 			public class Outer {
 			    public class Middle<M> {
 			        public class Inner<I> {
@@ -1664,7 +1666,7 @@ public class AddImportTest extends CoreTests {
 
 		String str1= """
 			package pack1;
-			
+
 			public class C {
 			    pack2.Outer.Middle<String>.Inner<Integer> i;
 			}
@@ -1696,11 +1698,11 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
 			import java.text.Format;
-			
+
 			public class C {
 			    @A Format.@A Field f;
 			}
@@ -1734,10 +1736,10 @@ public class AddImportTest extends CoreTests {
 
 		String str= """
 			package pack1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			public class C {
 			    java.text.@A Format.@A Field f;
 			}

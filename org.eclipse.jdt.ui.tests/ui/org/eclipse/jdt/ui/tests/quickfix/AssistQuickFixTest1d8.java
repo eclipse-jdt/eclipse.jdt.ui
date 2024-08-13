@@ -315,43 +315,6 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertToLambda5() throws Exception {
-		//Quick assist should not be offered in 1.7 mode
-		JavaProjectHelper.set17CompilerOptions(fJProject1);
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		try {
-			String str= """
-				package test1;
-				interface I {
-				    void method();
-				}
-				public class E {
-				    void bar(I i) {
-				    }
-				    void foo() {
-				        bar(new I() {
-				            public void method() {
-				                System.out.println();
-				            }
-				        });
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-			int offset= str.indexOf("I()");
-			AssistContext context= getCorrectionContext(cu, offset, 0);
-			assertNoErrors(context);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertNumberOfProposals(proposals, 1);
-			assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
-		} finally {
-			JavaProjectHelper.set18CompilerOptions(fJProject1);
-		}
-	}
-
-	@Test
 	public void testConvertToLambda6() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
@@ -515,16 +478,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			    int foo(String s);
 			}
-			
+
 			interface J {
 			    Integer foo(String s);
 			}
-			
+
 			public class X {
 			    static void goo(I i) { }
-			
+
 			    static void goo(J j) { }
-			
+
 			    public static void main(String[] args) {
 			        goo(new I() {
 			            @Override
@@ -550,16 +513,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			    int foo(String s);
 			}
-			
+
 			interface J {
 			    Integer foo(String s);
 			}
-			
+
 			public class X {
 			    static void goo(I i) { }
-			
+
 			    static void goo(J j) { }
-			
+
 			    public static void main(String[] args) {
 			        goo((I) s -> 0);
 			    }
@@ -577,11 +540,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			    int foo(String s);
 			}
-			
+
 			interface J {
 			    Integer foo(String s);
 			}
-			
+
 			public class X extends Y {
 			    static void goo(I i) { }
 			    public static void main(String[] args) {
@@ -593,7 +556,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        });
 			    }
 			}
-			
+
 			class Y {
 			    private static void goo(J j) { }   \s
 			}
@@ -613,18 +576,18 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			    int foo(String s);
 			}
-			
+
 			interface J {
 			    Integer foo(String s);
 			}
-			
+
 			public class X extends Y {
 			    static void goo(I i) { }
 			    public static void main(String[] args) {
 			        goo(s -> 0);
 			    }
 			}
-			
+
 			class Y {
 			    private static void goo(J j) { }   \s
 			}
@@ -641,11 +604,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			    int foo(String s);
 			}
-			
+
 			interface J {
 			    Integer foo(String s);
 			}
-			
+
 			public class X extends Y {
 			    static void goo(I i) { }
 			    public static void main(String[] args) {
@@ -657,7 +620,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        });
 			    }
 			}
-			
+
 			class Y {
 			    static void goo(J j) { }   \s
 			}
@@ -677,18 +640,18 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface I {
 			    int foo(String s);
 			}
-			
+
 			interface J {
 			    Integer foo(String s);
 			}
-			
+
 			public class X extends Y {
 			    static void goo(I i) { }
 			    public static void main(String[] args) {
 			        goo((I) s -> 0);
 			    }
 			}
-			
+
 			class Y {
 			    static void goo(J j) { }   \s
 			}
@@ -705,7 +668,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface J {
 			    <M> J run(M x);
 			}
-			
+
 			class Test {
 			    J j = new J() {
 			        @Override
@@ -735,7 +698,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FI {
 			    int foo(int x, int y, int z);
 			}
-			
+
 			class C {
 			    int i;
 			    private void test(int x) {
@@ -765,7 +728,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FI {
 			    int foo(int x, int y, int z);
 			}
-			
+
 			class C {
 			    int i;
 			    private void test(int x) {
@@ -787,7 +750,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FI {
 			    int foo(int x, int y, int z);
 			}
-			
+
 			class C {
 			    int i;
 			    private void test(int x, int y, int z) {
@@ -817,7 +780,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FI {
 			    int foo(int x, int y, int z);
 			}
-			
+
 			class C {
 			    int i;
 			    private void test(int x, int y, int z) {
@@ -840,7 +803,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FI {
 			    void foo();
 			}
-			
+
 			class C1 {
 			    void fun1() {
 			        int c = 0; // [1]
@@ -869,7 +832,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FI {
 			    void foo();
 			}
-			
+
 			class C1 {
 			    void fun1() {
 			        int c = 0; // [1]
@@ -892,7 +855,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface X {
 			    void foo();
 			}
-			
+
 			public class CX {
 			    private void fun(int a) {
 			        X x= new X() {
@@ -920,7 +883,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface X {
 			    void foo();
 			}
-			
+
 			public class CX {
 			    private void fun(int a) {
 			        X x= () -> {
@@ -942,7 +905,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FIOther {
 			    void run(int x);
 			}
-			
+
 			public class TestOther {
 			    void init() {
 			        String x;
@@ -955,7 +918,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			            };
 			        });
 			    }
-			
+
 			    void m(FIOther fi) {
 			    };
 			}
@@ -975,7 +938,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface FIOther {
 			    void run(int x);
 			}
-			
+
 			public class TestOther {
 			    void init() {
 			        String x;
@@ -985,7 +948,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			            };
 			        });
 			    }
-			
+
 			    void m(FIOther fi) {
 			    };
 			}
@@ -1111,10 +1074,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String str= """
 			package test;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			public class C1 {
 			    FI fi= new  FI() {
 			        @Override
@@ -1140,10 +1103,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected= """
 			package test;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			public class C1 {
 			    FI fi= (@A String... strs) -> {
 			    };
@@ -1503,12 +1466,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			interface FI {
 			    int e= 0;
 			    void run(int x);
 			}
-			
+
 			class Test {
 			    {
 			        FI fi = new FI() {
@@ -1537,12 +1500,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			interface FI {
 			    int e= 0;
 			    void run(int x);
 			}
-			
+
 			class Test {
 			    {
 			        FI fi = new FI() {
@@ -1639,23 +1602,23 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			public class C1 {
 			    interface IOverwriteQuery {
 			        String ALL = "ALL";
-			
+
 			        String queryOverwrite(String pathString);
 			    }
-			
+
 			    class ImportOperation {
 			        public ImportOperation(IOverwriteQuery query) {
 			        }
 			    }
-			
+
 			    public C1() {
 			        ImportOperation io = new ImportOperation(new IOverwriteQuery() {
-			
+
 			            @Override
 			            public String queryOverwrite(String pathString) {
 			                return ALL;
 			            }
-			
+
 			        });
 			    }
 			}
@@ -1674,15 +1637,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			public class C1 {
 			    interface IOverwriteQuery {
 			        String ALL = "ALL";
-			
+
 			        String queryOverwrite(String pathString);
 			    }
-			
+
 			    class ImportOperation {
 			        public ImportOperation(IOverwriteQuery query) {
 			        }
 			    }
-			
+
 			    public C1() {
 			        ImportOperation io = new ImportOperation(pathString -> IOverwriteQuery.ALL);
 			    }
@@ -1698,7 +1661,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.util.ArrayList;
 			import java.util.function.Predicate;
-			
+
 			public class Test {
 			    void foo(ArrayList<String> list) {
 			        list.removeIf(new Predicate<String>() {
@@ -1723,7 +1686,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			import java.util.ArrayList;
-			
+
 			public class Test {
 			    void foo(ArrayList<String> list) {
 			        list.removeIf(String::isEmpty);
@@ -1943,10 +1906,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    default int defaultMethod(String x) {
 			        return -1;
 			    }
-			
+
 			    int foo(int x);
 			}
-			
+
 			class TestX {
 			    FX fxx = x -> {
 			        return (new FX() {
@@ -1974,10 +1937,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    default int defaultMethod(String x) {
 			        return -1;
 			    }
-			
+
 			    int foo(int x);
 			}
-			
+
 			class TestX {
 			    FX fxx = new FX() {
 			        @Override
@@ -2002,7 +1965,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.util.function.UnaryOperator;
-			
+
 			public class Snippet {
 			    UnaryOperator<String> fi3 = x -> {
 			        return x.toString();
@@ -2022,7 +1985,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			import java.util.function.UnaryOperator;
-			
+
 			public class Snippet {
 			    UnaryOperator<String> fi3 = new UnaryOperator<String>() {
 			        @Override
@@ -2045,7 +2008,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface J<S> { S m(Class<?> c); }
 			interface K<T> { T m(Class<?> c); }
 			interface Functional<S,T> extends I, J<S>, K<T> {}
-			
+
 			class C {
 			    Functional<?, ?> fun= (c) -> { return null;};
 			}
@@ -2066,7 +2029,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			interface J<S> { S m(Class<?> c); }
 			interface K<T> { T m(Class<?> c); }
 			interface Functional<S,T> extends I, J<S>, K<T> {}
-			
+
 			class C {
 			    Functional<?, ?> fun= new Functional<Object, Object>() {
 			        @Override
@@ -2096,12 +2059,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			            return this.m();
 			        };
 			    }
-			
+
 			    public int m() {
 			        return 7;
 			    }
 			}
-			
+
 			class C {
 			    int varC;
 			    public void o() {}
@@ -2133,12 +2096,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			            }
 			        };
 			    }
-			
+
 			    public int m() {
 			        return 7;
 			    }
 			}
-			
+
 			class C {
 			    int varC;
 			    public void o() {}
@@ -2176,7 +2139,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    public int n() {
 			        return 7;
 			    }
-			
+
 			    @FunctionalInterface
 			    public interface F<T> {
 			        void run();
@@ -2196,7 +2159,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			import java.util.function.IntSupplier;
-			
+
 			import test1.D.F;
 			public class D {
 			    D() {
@@ -2223,7 +2186,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    public int n() {
 			        return 7;
 			    }
-			
+
 			    @FunctionalInterface
 			    public interface F<T> {
 			        void run();
@@ -2278,7 +2241,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			class E {
 			    FI1 fi1a= x -> -1;
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    int foo(int x);
@@ -2301,7 +2264,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return -1;
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    int foo(int x);
@@ -2320,7 +2283,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    FI1 fi1b= x -> m1();
 			    int m1(){ return 0; }
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    int foo(int x);
@@ -2344,7 +2307,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    };
 			    int m1(){ return 0; }
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    int foo(int x);
@@ -2363,7 +2326,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    FI2 fi2b= x -> m1();
 			    int m1() { return 0; }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2387,7 +2350,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    };
 			    int m1() { return 0; }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2405,7 +2368,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			class E {
 			    FI2 fi2a= x -> System.out.println();
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2428,7 +2391,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        System.out.println();
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2448,7 +2411,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return x=0;
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    int foo(int x);
@@ -2469,7 +2432,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			class E {
 			    FI1 fi1= x -> x=0;
 			}
-			
+
 			@FunctionalInterface
 			interface FI1 {
 			    int foo(int x);
@@ -2492,7 +2455,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        };
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2516,7 +2479,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2535,7 +2498,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    FI2 fi2= x -> { m1(); };
 			    int m1(){ return 0; }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2557,7 +2520,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    FI2 fi2= x -> m1();
 			    int m1(){ return 0; }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2577,7 +2540,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        super.toString();
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2597,7 +2560,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			class E {
 			    FI2 fi2= x -> super.toString();
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2617,7 +2580,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        --x;
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2637,7 +2600,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			class E {
 			    FI2 fi2= x -> --x;
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2655,7 +2618,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			class E {
 			    FI2 fi2z= x -> { };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2682,7 +2645,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return;
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2709,7 +2672,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        int n= 0;
 			    };
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    void foo(int x);
@@ -2743,7 +2706,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					k.foo(3);
 				}
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2764,7 +2727,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					FI2 k = (e) -> extracted(a, e);
 					k.foo(3);
 				}
-			
+
 			    private int extracted(int a, int e) {
 			        int x = e + 3;
 			        if (x > 3) {
@@ -2773,7 +2736,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return x;
 			    }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2800,7 +2763,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					k.foo(3);
 				}
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2820,7 +2783,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					FI2 k = (e) -> extracted(a, e);
 					k.foo(3);
 				}
-			
+
 			    private int extracted(int a, int e) {
 			        int x = e + 3;
 			        if (x > 3) {
@@ -2829,7 +2792,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return x;
 			    }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2849,12 +2812,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					};
 					k.foo(3);
 				}
-			
+
 			    private int extracted(int e) {
 			        return e + 3;
 			    }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2881,7 +2844,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					k.foo(3);
 				}
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2901,7 +2864,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 					FI2 k = (e) -> extracted(a, e);
 					k.foo(3);
 				}
-			
+
 			    private int extracted(int a, int e) {
 			        int x = e + 3;
 			        System.out.println("help");
@@ -2911,7 +2874,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return x;
 			    }
 			}
-			
+
 			@FunctionalInterface
 			interface FI2 {
 			    int foo(int x);
@@ -2926,7 +2889,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			class E {
 			    private void foo() {
 			        for (String str : new String[1]) {
@@ -2945,7 +2908,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			class E {
 			    private void foo() {
 			        String[] strings = new String[1];
@@ -3805,10 +3768,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.lang.annotation.*;
 			import java.util.function.*;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface Great {}
-			
+
 			public class E10 {
 			    LongSupplier foo() {
 			        return @Great System::currentTimeMillis;
@@ -3828,10 +3791,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			package test1;
 			import java.lang.annotation.*;
 			import java.util.function.*;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface Great {}
-			
+
 			public class E10 {
 			    LongSupplier foo() {
 			        return () -> System.currentTimeMillis();
@@ -3852,15 +3815,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -3874,13 +3837,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -3904,15 +3867,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = () -> /*[1]*/method1();
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -3926,13 +3889,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -3957,15 +3920,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = () -> this.<Number>method1();
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -3979,13 +3942,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -4010,15 +3973,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = () -> /*[3]*/method2();
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -4032,13 +3995,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -4063,15 +4026,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = () -> /*[4]*/method2a();
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -4085,13 +4048,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -4116,15 +4079,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = () -> /*[5]*/method3();
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -4138,13 +4101,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -4169,15 +4132,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = () -> E10.<Number>method2a();
-			
+
 			        Supplier<String> a1 = E10a::/*[7]*/method4;
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -4191,13 +4154,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -4222,15 +4185,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    {
 			        Supplier<String> v1 = this::/*[1]*/method1;
 			        Supplier<String> v2 = this::/*[2]*/<Number>method1;
-			
+
 			        Supplier<String> n1 = E10::/*[3]*/method2;
 			        Supplier<String> n2 = E10::/*[4]*/method2a;
 			        Supplier<String> n3 = E10::/*[5]*/method3;
 			        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;
-			
+
 			        Supplier<String> a1 = () -> E10a./*[7]*/method4();
 			    }
-			
+
 			    <T> String method1() {
 			        return "1";
 			    }
@@ -4244,13 +4207,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        return "4";
 			    }
 			}
-			
+
 			class Sup {
 			    static String method3() {
 			        return "3";
 			    }
 			}
-			
+
 			class E10a {
 			    static String method4() {
 			        return "4";
@@ -4279,7 +4242,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Consumer<String> a2= s ->/*[2]*/ {
 			        return;
 			    };
-			
+
 			    Supplier<E1.In> a3= () ->/*[3]*/ (new E1()).new In();
 			    Supplier<E1> a4= () ->/*[4]*/ new E1() {
 			        void test() {
@@ -4287,11 +4250,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    };
 			    Function<String, Integer> a5= s ->/*[5]*/ Integer.valueOf(s+1);
-			
+
 			    BiFunction<Integer, Integer, int[][][]> a6 = (a, b) ->/*[6]*/ new int[a][b][];
 			    IntFunction<Integer[][][]> a61 = value ->/*[61]*/ new Integer[][][] {{{7, 8}}};
 			    Function<Integer, int[]> a7 = t ->/*[7]*/ new int[100];
-			
+
 			    BiFunction<Character, Integer, String> a8 = (c, i) ->/*[8]*/ super.method1();
 			    BiFunction<Character, Integer, String> a9 = (c, i) ->/*[9]*/ method1();
 			   \s
@@ -4478,17 +4441,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4511,17 +4474,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = super::method1;
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4544,17 +4507,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = E3.super::method1;
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4577,17 +4540,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = SuperE3::<Float>staticMethod1;
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4610,17 +4573,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = E3::staticMethod1;
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4643,17 +4606,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = E3::staticMethod1;
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4676,17 +4639,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = this::method1;
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4709,17 +4672,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = this::method1;
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4742,17 +4705,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = (new SuperE3<String>())::method1;
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4775,17 +4738,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
-			    Function<E3<Integer>, String> p1 = E3<Integer>::<Float>method2;
+
+			    Function<E3<Integer>, String> p1 = E3::<Float>method2;
 			    Function<E3, String> p2 = t -> /*[10]*/t.method2();
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -4809,17 +4772,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);
 			    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);
 			    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);
-			
+
 			    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);
 			    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);
-			
+
 			    Function<Integer, String> b1 = t -> /*[6]*/method1(t);
 			    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);
 			    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);
-			
+
 			    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();
 			    Function<E3, String> p2 = E3::method2;
-			
+
 			    <V> String method2() { return "m2";    }
 			}
 			class SuperE3<S> {
@@ -5038,16 +5001,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			public class E6 {
-			
+
 			    private interface I6 {
 			        public boolean isCorrect(Object z);
 			    }
-			
+
 			    public boolean foo() {
 			        I6 x = z -> z instanceof String;
 			        return x.isCorrect(this);
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", str, false, null);
@@ -5060,18 +5023,116 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			public class E6 {
-			
+
 			    private interface I6 {
 			        public boolean isCorrect(Object z);
 			    }
-			
+
 			    public boolean foo() {
 			        I6 x = String.class::isInstance;
 			        return x.isCorrect(this);
 			    }
-			
+
 			}
 			""";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testIssue1520() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.Optional;
+			import java.util.function.Supplier;
+			public class E6 {
+
+				public static void main(String[] args) {
+					create("Hello").map(c -> c.get()).map(s -> s.concat("World"));
+				}
+
+				public static <X> Optional<Supplier<X>> create(X value) {
+					if (value == null) {
+						return Optional.empty();
+					}
+					return Optional.of(() -> value);
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", str, false, null);
+
+		int offset= str.indexOf("c ->");
+		AssistContext context= getCorrectionContext(cu, offset, 4);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		String expected1= """
+			package test1;
+			import java.util.Optional;
+			import java.util.function.Supplier;
+			public class E6 {
+
+				public static void main(String[] args) {
+					create("Hello").map(Supplier::get).map(s -> s.concat("World"));
+				}
+
+				public static <X> Optional<Supplier<X>> create(X value) {
+					if (value == null) {
+						return Optional.empty();
+					}
+					return Optional.of(() -> value);
+				}
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testIssue1498() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+				package test1;
+
+				import java.util.stream.Stream;
+
+				public class E7 {
+
+					public interface IInterface {
+						public String getId();
+					}
+
+					public void foo() {
+						Stream<IInterface> ees = Stream.empty();
+						ees.map(ee -> ee.getId());
+					}
+
+				}
+				""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E7.java", str, false, null);
+
+		int offset= str.indexOf("ee ->");
+		AssistContext context= getCorrectionContext(cu, offset, 5);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		String expected1= """
+				package test1;
+
+				import java.util.stream.Stream;
+
+				public class E7 {
+
+					public interface IInterface {
+						public String getId();
+					}
+
+					public void foo() {
+						Stream<IInterface> ees = Stream.empty();
+						ees.map(IInterface::getId);
+					}
+
+				}
+				""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
@@ -5081,17 +5142,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.util.function.Supplier;
-			
+
 			public class E {
 			    void func( String ... args) {
 			    }
-			
+
 			    private void called( Supplier<Object> r ) {
 			    }
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called(() -> func());
 			    }
@@ -5108,17 +5169,17 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected1= """
 			package test1;
 			import java.util.function.Supplier;
-			
+
 			public class E {
 			    void func( String ... args) {
 			    }
-			
+
 			    private void called( Supplier<Object> r ) {
 			    }
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called((Runnable) this::func);
 			    }
@@ -5133,25 +5194,25 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.util.function.Supplier;
-			
+
 			public class E1 {
 			    private void called( Supplier<Object> r ) {
 			    }
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("E1.java", str, false, null);
 
 		String str1= """
 			package test1;
-			
+
 			public class E extends E1 {
 			    void func( String ... args) {
 			    }
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called(() -> func());
 			    }
@@ -5166,14 +5227,14 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		String expected1= """
 			package test1;
-			
+
 			public class E extends E1 {
 			    void func( String ... args) {
 			    }
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called((Runnable) this::func);
 			    }
@@ -5188,25 +5249,25 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.util.function.Supplier;
-			
+
 			public class E1 {
 			    void func( String ... args) {
 			    }
 			    private void called( Supplier<Object> r ) {
 			    }
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("E1.java", str, false, null);
 
 		String str1= """
 			package test1;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called(() -> super.func());
 			    }
@@ -5221,12 +5282,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		String expected1= """
 			package test1;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called((Runnable) super::func);
 			    }
@@ -5241,25 +5302,25 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			package test1;
 			import java.util.function.Supplier;
-			
+
 			public class E1 {
 			    public static void func( String ... args) {
 			    }
 			    private void called( Supplier<Object> r ) {
 			    }
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("E1.java", str, false, null);
 
 		String str1= """
 			package test1;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called(() -> E1.func());
 			    }
@@ -5274,12 +5335,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		String expected1= """
 			package test1;
-			
+
 			public class E extends E1 {
-			
+
 			    void called( Runnable r ) {
 			    }
-			
+
 			    void test() {
 			        called((Runnable) E1::func);
 			    }
@@ -5425,10 +5486,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.util.Comparator;
 			import java.util.List;
-			
+
 			public class Lambda1 {
 				Comparator<List<?>> c = (l1, l2) -> Integer.compare(l1.size(), l2.size());
 			}
@@ -5442,10 +5503,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.util.Comparator;
 			import java.util.List;
-			
+
 			public class Lambda1 {
 				Comparator<List<?>> c = (List<?> l1, List<?> l2) -> Integer.compare(l1.size(), l2.size());
 			}
@@ -5454,10 +5515,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.util.Comparator;
 			import java.util.List;
-			
+
 			public class Lambda1 {
 				Comparator<List<?>> c = new Comparator<List<?>>() {
 			        @Override
@@ -5489,16 +5550,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			public class Lambda2 {
 				interface Sink<T> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<? extends Number> source) {
 					source.sendTo(a -> a.doubleValue());
 				}
@@ -5512,16 +5573,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			public class Lambda2 {
 				interface Sink<T> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<? extends Number> source) {
 					source.sendTo(Number::doubleValue);
 				}
@@ -5532,16 +5593,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			public class Lambda2 {
 				interface Sink<T> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<? extends Number> source) {
 					source.sendTo((Number a) -> a.doubleValue());
 				}
@@ -5551,16 +5612,16 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str4= """
 			package test1;
-			
+
 			public class Lambda2 {
 				interface Sink<T> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<? extends Number> source) {
 					source.sendTo(new Sink<Number>() {
 			            @Override
@@ -5593,18 +5654,18 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.math.BigDecimal;
-			
+
 			public class Lambda3 {
 				interface Sink<T extends Number> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends BigDecimal> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo(a -> a.scale());
 				}
@@ -5618,18 +5679,18 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.math.BigDecimal;
-			
+
 			public class Lambda3 {
 				interface Sink<T extends Number> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends BigDecimal> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo(BigDecimal::scale);
 				}
@@ -5640,18 +5701,18 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import java.math.BigDecimal;
-			
+
 			public class Lambda3 {
 				interface Sink<T extends Number> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends BigDecimal> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo((BigDecimal a) -> a.scale());
 				}
@@ -5661,18 +5722,18 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str4= """
 			package test1;
-			
+
 			import java.math.BigDecimal;
-			
+
 			public class Lambda3 {
 				interface Sink<T extends Number> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends BigDecimal> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo(new Sink<BigDecimal>() {
 			            @Override
@@ -5705,19 +5766,19 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class Lambda4 {
 				interface Sink<T extends List<Number>> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends ArrayList<Number>> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo(a -> a.size());
 				}
@@ -5731,21 +5792,21 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class Lambda4 {
 				interface Sink<T extends List<Number>> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends ArrayList<Number>> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
-					source.sendTo(ArrayList<Number>::size);
+					source.sendTo(ArrayList::size);
 				}
 			}
 			""";
@@ -5754,19 +5815,19 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class Lambda4 {
 				interface Sink<T extends List<Number>> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends ArrayList<Number>> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo((ArrayList<Number> a) -> a.size());
 				}
@@ -5776,19 +5837,19 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str4= """
 			package test1;
-			
+
 			import java.util.ArrayList;
 			import java.util.List;
-			
+
 			public class Lambda4 {
 				interface Sink<T extends List<Number>> {
 					void receive(T t);
 				}
-			
+
 				interface Source<U extends ArrayList<Number>> {
 					void sendTo(Sink<? super U> c);
 				}
-			
+
 				void f(Source<?> source) {
 					source.sendTo(new Sink<ArrayList<Number>>() {
 			            @Override
@@ -5815,7 +5876,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String str= """
 			@NonNullByDefault({ PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS })
 			package test1;
-			
+
 			import static org.eclipse.jdt.annotation.DefaultLocation.*;
 			import org.eclipse.jdt.annotation.NonNullByDefault;
 			""";
@@ -5828,10 +5889,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface X {}
 			""";
@@ -5839,10 +5900,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str2= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface Y {}
 			""";
@@ -5850,10 +5911,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str3= """
 			package test1;
-			
+
 			import java.lang.annotation.ElementType;
 			import java.lang.annotation.Target;
-			
+
 			@Target(ElementType.TYPE_USE)
 			@interface Z {}
 			""";
@@ -5861,14 +5922,14 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str4= """
 			package test1;
-			
+
 			class Ref<A> {}
 			""";
 		pack1.createCompilationUnit("Ref.java", str4, false, null);
 
 		String str5= """
 			package test1;
-			
+
 			interface SAM<A> {
 				void f(A[] a);
 			}
@@ -5877,7 +5938,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str6= """
 			package test1;
-			
+
 			public class Test {
 				static int nn(Object o) {
 					return 0;
@@ -5890,9 +5951,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str7= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN1 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					@NonNullByDefault({})
@@ -5909,9 +5970,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str8= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN2 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = a0 -> Test.nn(a0);
@@ -5930,9 +5991,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str9= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN1 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					@NonNullByDefault({})
@@ -5946,9 +6007,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str10= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN2 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = Test::nn;
@@ -5962,9 +6023,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str11= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN1 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					@NonNullByDefault({})
@@ -5977,9 +6038,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str12= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN2 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = (Ref<? extends @Y Ref<@X @Nullable String @Y [] @Z []>>[] a0) -> Test.nn(a0);
@@ -5992,9 +6053,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		// --- Convert to anonymous class creation without and with NNBD --
 		String str13= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN1 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					@NonNullByDefault({})
@@ -6013,9 +6074,9 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str14= """
 			package test1;
-			
+
 			import org.eclipse.jdt.annotation.*;
-			
+
 			public class LambdaNN2 {
 				void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {
 					SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = new SAM<Ref<? extends @Y Ref<@X @Nullable String @Y [] @Z []>>>() {
@@ -6036,15 +6097,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class Example {
 				@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE)
 				public @interface X {}
-			
+
 				interface SAM<T> {
 					T f(T t);
 				}
-			
+
 				@X
 				SAM<String> c = a -> a;
 			}
@@ -6057,15 +6118,15 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			public class Example {
 				@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE)
 				public @interface X {}
-			
+
 				interface SAM<T> {
 					T f(T t);
 				}
-			
+
 				@X
 				SAM<String> c = new @X SAM<String>() {
 			        @Override
@@ -6167,11 +6228,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws IOException {
 			        /*1*/Socket s = new Socket(), s2 = new Socket();
@@ -6181,7 +6242,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        System.out.println(is.markSupported());/*0*/
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		String strEnd= "/*0*/";
@@ -6198,11 +6259,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package p;
-			
+
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws IOException {
 			        try (/*1*/Socket s = new Socket();
@@ -6214,7 +6275,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
@@ -6231,11 +6292,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected2= """
 			package p;
-			
+
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws IOException {
 			        /*1*/Socket s = new Socket(), s2 = new Socket();
@@ -6246,7 +6307,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview2 }, new String[] { expected2 });
@@ -6263,12 +6324,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws FileNotFoundException {
 			        /*1*/Socket s = new Socket(), s2 = new Socket();
@@ -6279,7 +6340,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        System.out.println(is.markSupported());/*0*/
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		String strEnd= "/*0*/";
@@ -6296,13 +6357,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws FileNotFoundException {
 			        try (/*1*/Socket s = new Socket();
@@ -6320,7 +6381,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
@@ -6337,13 +6398,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected2= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws FileNotFoundException {
 			        /*1*/Socket s = new Socket(), s2 = new Socket();
@@ -6360,7 +6421,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview2 }, new String[] { expected2 });
@@ -6377,12 +6438,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() {
 			        try {
@@ -6396,7 +6457,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		String strEnd= "/*0*/";
@@ -6412,13 +6473,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() {
 			        try (/*1*/Socket s = new Socket();
@@ -6435,7 +6496,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
@@ -6446,12 +6507,12 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws FileNotFoundException {
 			        try {
@@ -6465,7 +6526,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 		String strEnd= "/*0*/";
@@ -6481,13 +6542,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package p;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
 			import java.io.InputStream;
 			import java.net.Socket;
-			
+
 			public class E {
 			    public void foo() throws FileNotFoundException {
 			        try (/*1*/Socket s = new Socket();
@@ -6504,7 +6565,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
@@ -6516,10 +6577,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
 		String str= """
 			package p;
-			
+
 			import java.io.File;
 			import java.util.stream.Stream;
-			
+
 			public class X {
 				public static void main(String[] args) throws Exception {
 					try {
@@ -6545,10 +6606,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 
 		String expected1= """
 			package p;
-			
+
 			import java.io.File;
 			import java.util.stream.Stream;
-			
+
 			public class X {
 				public static void main(String[] args) throws Exception {
 					try {
@@ -6704,10 +6765,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.IOException;
-			
+
 			class E {
 			    void f() throws IOException {
 			        new FileInputStream("f");
@@ -6725,10 +6786,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.IOException;
-			
+
 			class E {
 			    void f() throws IOException {
 			        try (FileInputStream fileInputStream = new FileInputStream("f")) {
@@ -6746,10 +6807,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
-			
+
 			class E {
 			    void f() throws FileNotFoundException {
 			        new FileInputStream("f");
@@ -6767,11 +6828,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			class E {
 			    void f() throws FileNotFoundException {
 			        try (FileInputStream fileInputStream = new FileInputStream("f")) {
@@ -6794,10 +6855,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
-			
+
 			class E {
 			    void f() {
 			        try {
@@ -6819,11 +6880,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			class E {
 			    void f() {
 			        try (FileInputStream fileInputStream = new FileInputStream("f")) {
@@ -6845,10 +6906,10 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
-			
+
 			class E {
 			    void f() throws FileNotFoundException {
 			        try {
@@ -6871,11 +6932,11 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			import java.io.FileInputStream;
 			import java.io.FileNotFoundException;
 			import java.io.IOException;
-			
+
 			class E {
 			    void f() throws FileNotFoundException {
 			        try {
@@ -6903,13 +6964,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			import java.io.BufferedReader;
 			import java.io.FileNotFoundException;
 			import java.io.FileReader;
 			import java.io.IOException;
 			import java.io.Reader;
-			
+
 			class E {
 			    public void foo() {
 			        try (Reader s = new BufferedReader(new FileReader("c.d"));
@@ -6933,13 +6994,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			import java.io.BufferedReader;
 			import java.io.FileNotFoundException;
 			import java.io.FileReader;
 			import java.io.IOException;
 			import java.io.Reader;
-			
+
 			class E {
 			    public void foo() {
 			        try (Reader s = new BufferedReader(new FileReader("c.d"))) {
@@ -6965,13 +7026,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			import java.io.BufferedReader;
 			import java.io.FileNotFoundException;
 			import java.io.FileReader;
 			import java.io.IOException;
 			import java.io.Reader;
-			
+
 			class E {
 			    public void foo() {
 			        try (Reader s = new BufferedReader(new FileReader("c.d"));
@@ -6995,13 +7056,13 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			import java.io.BufferedReader;
 			import java.io.FileNotFoundException;
 			import java.io.FileReader;
 			import java.io.IOException;
 			import java.io.Reader;
-			
+
 			class E {
 			    public void foo() {
 			        try (Reader s = new BufferedReader(new FileReader("c.d"));
@@ -7030,7 +7091,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			class E {
 			    private class E1 {
 			        public int foo(int a, int b) {
@@ -7066,7 +7127,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			class E {
 			    private class E1 {
 			        public int foo(int a, int b) {
@@ -7104,7 +7165,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			class E {
 			    private class E1 {
 			        public int foo(int a, int b) {
@@ -7145,7 +7206,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			class E {
 			    private class E1 {
 			        private int v = 5;
@@ -7182,7 +7243,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			class E {
 			    private class E1 {
 			        private int v = 5;
@@ -7220,7 +7281,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			public class E1 {
 			    private int v = 5;
 			    public int foo(int a, int b) {
@@ -7243,7 +7304,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src1=
 				"""
 			package test1;
-			
+
 			class E {
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1= new E1();
@@ -7268,7 +7329,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			public class E1 {
 			    public int v = 5;
 			    public int foo(int a, int b) {
@@ -7291,7 +7352,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src1=
 				"""
 			package test1;
-			
+
 			class E {
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1= new E1();
@@ -7308,7 +7369,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String expected=
 				"""
 			package test1;
-			
+
 			class E {
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1= new E1();
@@ -7329,7 +7390,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src=
 				"""
 			package test1;
-			
+
 			public class E1 {
 			    public int v = 5;
 			    public int foo(int a, int b) {
@@ -7346,7 +7407,7 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		String src1=
 				"""
 			package test1;
-			
+
 			class E {
 			    public int callfoo(int a, int b, int c) {
 			        E1 e1= new E1();

@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
@@ -1070,7 +1069,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 
@@ -1088,10 +1087,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    /**
 			     * Not much to say here.
 			     * @throws ParseException Parsing failed
-			     * @throws IOException\s
 			     */
-			    public void foo() throws ParseException, IOException {
-			        goo().substring(2);
+			    public void foo() throws ParseException {
+			        try {
+			            goo().substring(2);
+			        } catch (IOException | ParseException e) {
+			        }
 			    }
 			}
 			""";
@@ -1151,7 +1152,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 
@@ -1171,11 +1172,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    }
 			    /**
 			     * Not much to say here.
-			     * @throws InterruptedIOException\s
-			     * @throws FileNotFoundException\s
 			     */
-			    public void foo() throws FileNotFoundException, InterruptedIOException {
-			        goo(1).bar();
+			    public void foo() {
+			        try {
+			            goo(1).bar();
+			        } catch (FileNotFoundException | InterruptedIOException e) {
+			        }
 			    }
 			}
 			""";
@@ -1519,7 +1521,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 
@@ -1534,10 +1536,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    public static void goo() throws IOException, ParseException {
 			        return;
 			    }
-			    public void foo() throws ParseException {
+			    public void foo() {
 			        try {
 			            E.goo();
 			        } catch (IOException e) {
+			        } catch (ParseException e) {
 			        }
 			    }
 			}
@@ -1580,8 +1583,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    public void foo() {
 			        try {
 			            E.goo();
-			        } catch (IOException e) {
-			        } catch (ParseException e) {
+			        } catch (IOException | ParseException e) {
 			        }
 			    }
 			}
@@ -1882,7 +1884,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2); // 2 uncaught exceptions
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 
@@ -1894,8 +1896,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import java.io.IOException;
 			import java.text.ParseException;
 			public class E {
-			    public void m1() throws IOException, ParseException, MyException {
-			        m2();
+			    public void m1() throws IOException {
+			        try {
+			            m2();
+			        } catch (IOException | ParseException | MyException e) {
+			        }
 			    }
 			    public void m2() throws IOException, ParseException, MyException {
 			    }
@@ -1946,7 +1951,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2); // 2 uncaught exceptions
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 
@@ -1960,8 +1965,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			public class E {
 			    public void goo() throws IOException, ParseException {
 			    }
-			    public void foo() throws IOException, ParseException {
-			        goo();
+			    public void foo() {
+			        try {
+			            goo();
+			        } catch (IOException | ParseException e) {
+			        }
 			    }
 			}
 			""";
@@ -3059,6 +3067,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import test2.Inter;
 			public class E implements Inter{
 
+			    @Override
 			    public int getCount(Object[] o) throws IOException {
 			        return 0;
 			    }
@@ -3125,6 +3134,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import test2.InterImpl;
 			public class E extends InterImpl {
 
+			    @Override
 			    public int getCount(Object[] o) throws IOException {
 			        return 0;
 			    }
@@ -3183,6 +3193,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import test2.Inter;
 			public class E extends A implements Inter {
 
+			    @Override
 			    public int foo() {
 			        return 0;
 			    }
@@ -3236,6 +3247,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			public class A implements F {
 			    public void c() throws Exception, RuntimeException { }
 
+			    @Override
 			    public void e() {
 			    }
 			}
@@ -3295,9 +3307,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class A implements F {
 
+			    @Override
 			    public void b(Properties p) {
 			    }
 
+			    @Override
 			    public void g(test2.Properties p) {
 			    }
 			}
@@ -3351,6 +3365,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test2;
 			public class A implements IT {
 
+			    @Override
 			    public void foo(java.lang.Class clazz) {
 			    }
 			}
@@ -3411,6 +3426,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E implements Inter<String> {
 
+			    @Override
 			    public String doT(Collection<String> in) {
 			        return null;
 			    }
@@ -3459,6 +3475,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test1;
 			public class E implements Inter<String> {
 
+			    @Override
 			    public String doT(String in) {
 			        return null;
 			    }
@@ -3515,10 +3532,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			public class E implements Inter {
 
+			    @Override
 			    public <T> T doX(Collection<T> in) {
 			        return null;
 			    }
 
+			    @Override
 			    public <T extends Exception> T getException() {
 			        return null;
 			    }
@@ -3582,6 +3601,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			        return null;
 			    }
 
+			    @Override
 			    public <T> List<T> findElements(Class<T> clazz, List<String> tagsToMatch) {
 			        return null;
 			    }
@@ -3649,6 +3669,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			enum TestEnum implements IA {
 			    test1,test2;
 
+			    @Override
 			    public void foo() {
 			    }
 			}
@@ -3772,6 +3793,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test;
 			enum TestEnum implements Runnable {
 			    A {
+			        @Override
 			        public void run() {
 			        }
 			        @Override
@@ -3899,6 +3921,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			package test;
 			public class A implements I {
 
+			    @Override
 			    public void foo() {
 			    }
 			}
@@ -4194,6 +4217,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			    interface Interface2 { Integer getX(); }
 			    class Cls implements Interface1, Interface2 {
 
+			        @Override
 			        public Integer getX() {
 			            return null;
 			        }
@@ -4252,6 +4276,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			//Add unimplemented methods
 			class M implements D<BigInteger,BigInteger> {
 
+			    @Override
 			    public Object m(Class c) {
 			        return null;
 			    }
@@ -4295,6 +4320,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			class M implements D<BigInteger,BigInteger> {
 
+			    @Override
 			    public Object m(Class c) {
 			        return null;
 			    }
@@ -4338,6 +4364,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 			class M implements D<BigInteger,BigInteger> {
 
+			    @Override
 			    public Object m(Class c) {
 			        return null;
 			    }
@@ -11832,7 +11859,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			public class CollectionsTest {
 			    public void foo(Map<Object, Integer> map) { };
 			    {
-			        foo(Collections.<Object, Integer>emptyMap());
+			        foo(Collections.emptyMap());
 			    }
 			}
 			""";
@@ -11878,7 +11905,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			public class CollectionsTest {
 			    public void foo(Map<Date, Integer> map) { };
 			    {
-			        foo(Collections.<Date, Integer>emptyMap());
+			        foo(Collections.emptyMap());
 			    }
 			}
 			""";
@@ -12580,7 +12607,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		Map<String, String> saveOptions= fJProject1.getOptions(false);
 		Map<String, String> newOptions= new HashMap<>();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
@@ -12612,50 +12638,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		} finally {
 			fJProject1.setOptions(saveOptions);
 		}
-	}
-
-	@Test
-	public void testInsertInferredTypeArguments() throws Exception {
-
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			import java.util.ArrayList;
-			import java.util.List;
-
-			public class E {
-
-			    private void foo() {
-			        List<String> al1 = new ArrayList<>();
-
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
-		String str1= """
-			package test1;
-			import java.util.ArrayList;
-			import java.util.List;
-
-			public class E {
-
-			    private void foo() {
-			        List<String> al1 = new ArrayList<String>();
-
-			    }
-			}
-			""";
-		assertEqualString(preview, str1);
-
-		String expected1= str1;
-		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	// regression test for https://bugs.eclipse.org/434188 - [quick fix] shows sign of quick fix, but says no suggestions available.
@@ -12704,40 +12686,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		}
 		assertFalse("IProblem.ParsingErrorInsertToComplete is very general and should not trigger the quick fix lightbulb everywhere",
 				JavaCorrectionProcessor.hasCorrections(cu, IProblem.ParsingErrorInsertToComplete, IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER));
-	}
-
-	@Test
-	public void testConvertLambdaToAnonymous() throws Exception {
-		assertFalse("error should not appear in 1.8 or higher", JavaModelUtil.is1d8OrHigher(fJProject1));
-
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("p", false, null);
-		String str= """
-			package p;
-
-			public class Lambda {
-			    Runnable r= () -> { System.out.println(Lambda.this.r); };
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("Lambda.java", str, false, null);
-
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-
-		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
-
-		String[] expected= new String[2];
-		expected[0]= """
-			package p;
-
-			public class Lambda {
-			    Runnable r= new Runnable() {
-			        public void run() { System.out.println(Lambda.this.r); }
-			    };
-			}
-			""";
-
-		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	@Test

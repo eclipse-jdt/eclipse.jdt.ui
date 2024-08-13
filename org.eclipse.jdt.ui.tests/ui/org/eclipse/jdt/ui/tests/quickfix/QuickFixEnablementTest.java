@@ -14,7 +14,6 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,10 +27,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -61,10 +57,6 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 	@Test
 	public void testContributedQuickFix1() throws Exception {
-
-		HashMap<String, String> options= new HashMap<>();
-		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);
-		fJProject1.setOptions(options);
 
 		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -99,7 +91,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 	@Test
 	public void testContributedQuickFix2() throws Exception {
-		// quick fix is contributed only for files with name 'A.java' in a 1.5 project
+		// quick fix is contributed only for files with name 'A.java'
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
@@ -110,18 +102,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
-
-		HashMap<String, String> options= new HashMap<>();
-		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_6);
-		fJProject1.setOptions(options);
-
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 1); // ok
-
-		options= new HashMap<>();
-		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_4);
-		fJProject1.setOptions(options);
-
-		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 0); // wrong version
 
 		String str1= """
 			package test1;
@@ -132,11 +113,6 @@ public class QuickFixEnablementTest extends QuickFixTest {
 			}
 			""";
 		cu= pack1.createCompilationUnit("B.java", str1, false, null);
-
-		options= new HashMap<>();
-		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);
-		fJProject1.setOptions(options);
-
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 0); // wrong name
 	}
 

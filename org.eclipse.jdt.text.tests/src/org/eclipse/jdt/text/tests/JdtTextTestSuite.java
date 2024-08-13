@@ -14,13 +14,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+
 import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
 import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellCheckEngineTestCase;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 
 
 /**
@@ -30,6 +31,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+	PluginsNotLoadedTest.class,
 	CompilationUnitDocumentProviderTest.class,
 	JavaHeuristicScannerTest.class,
 	JavaAutoIndentStrategyTest.class,
@@ -47,14 +49,6 @@ import org.junit.runners.Suite;
 	MarkOccurrenceTest.class,
 	MarkOccurrenceTest1d7.class,
 	MarkOccurrenceTest1d8.class,
-	PluginsNotLoadedTest.class,
-//	PluginsNotLoadedTest.addLoadedPlugIns(
-//			new String[] {
-//					"org.eclipse.core.filebuffers.tests",
-//					"org.eclipse.core.variables",
-//					"org.eclipse.team.cvs.core",
-//					"org.eclipse.test.performance"
-//			});
 	BracketInserterTest.class,
 	SpellCheckEngineTestCase.class,
 	SemanticHighlightingTest.class,

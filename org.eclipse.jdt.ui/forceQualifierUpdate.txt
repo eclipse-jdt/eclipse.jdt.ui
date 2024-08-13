@@ -21,3 +21,4 @@ Comparator errors in I20231127-0750
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/1923
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/1979
 https://github.com/eclipse-platform/eclipse.platform.releng.aggregator/issues/2044
+Pick up changes from https://github.com/eclipse-jdt/eclipse.jdt.core/pull/2770

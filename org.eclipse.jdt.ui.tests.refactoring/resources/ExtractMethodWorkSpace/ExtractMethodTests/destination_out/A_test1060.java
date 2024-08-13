@@ -7,9 +7,9 @@ public class A_test1060 {
 				return extracted();
 			}
 		}
-	}
 
-	protected static int extracted() {
-		/*[*/return 0;/*]*/
+		static int extracted() {
+			/*[*/return 0;/*]*/
+		}
 	}
 }

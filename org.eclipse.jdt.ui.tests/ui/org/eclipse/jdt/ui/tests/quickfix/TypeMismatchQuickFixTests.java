@@ -17,7 +17,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.manipulation.CUCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -410,9 +409,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container {
 			    public static PrimaryContainer getContainer() {
 			        return null;
@@ -425,9 +424,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected4= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container implements PrimaryContainer {
 			    public static Container getContainer() {
 			        return null;
@@ -496,9 +495,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container {
 			    public static PrimaryContainer getContainer() {
 			        return null;
@@ -511,9 +510,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container implements PrimaryContainer {
 			    public static Container getContainer() {
 			        return null;
@@ -526,9 +525,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected4= """
 			package test0;
-			
+
 			import test1.Container;
-			
+
 			public interface PrimaryContainer {
 			    PrimaryContainer duplicate(Container container);
 			}
@@ -539,12 +538,12 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected5= """
 			package test0;
-			
+
 			import test1.Container;
-			
+
 			public interface PrimaryContainer {
 			    PrimaryContainer duplicate(PrimaryContainer container);
-			
+
 			    void duplicate(Container container);
 			}
 			""";
@@ -621,9 +620,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container<A> {
 			    public PrimaryContainer<String> getContainer() {
 			        return null;
@@ -636,9 +635,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected4= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container<A> implements PrimaryContainer<String> {
 			    public Container<A> getContainer() {
 			        return null;
@@ -722,9 +721,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import test0.PrimaryContainer;
-			
+
 			public class Container<A> {
 			    public PrimaryContainer<?> getContainer() {
 			        return null;
@@ -1351,9 +1350,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			public class E implements IBase {
 			    public List getCollection() {
 			        return null;
@@ -1494,13 +1493,29 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview1= getPreviewContent(proposal);
 
 		String expected1= """
+			package test1;
+			import java.lang.annotation.Annotation;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public <T extends Annotation> Annotation getAnnotation(Class<T> annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
 			package test1;
 			import java.lang.annotation.Annotation;
 			import java.lang.reflect.AccessibleObject;
@@ -1514,58 +1529,401 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 			}
 			""";
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	@Test
 	public void testMismatchingReturnTypeOnGenericMethod14() throws Exception {
-		Map<String, String> options= fJProject1.getOptions(false);
-		try {
-			Map<String, String> options14= new HashMap<>(options);
-			JavaModelUtil.setComplianceOptions(options14, JavaCore.VERSION_1_4);
-			fJProject1.setOptions(options14);
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-			String str= """
-				package test1;
-				import java.lang.reflect.AccessibleObject;
-				public class E {
-				    void m() {
-				        new AccessibleObject() {
-				            public void getAnnotation(Class annotationClass) {
-				            }
-				        };
-				    }
+		String str= """
+			package test1;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public void getAnnotation(Class annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			import java.lang.annotation.Annotation;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public Annotation getAnnotation(Class annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.lang.annotation.Annotation;
+			import java.lang.reflect.AccessibleObject;
+			public class E {
+			    void m() {
+			        new AccessibleObject() {
+			            public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+			            }
+			        };
+			    }
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> T myMethod(Class<T> asdf);
 				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 1);
-			assertCorrectLabels(proposals);
-
-			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-			String preview1= getPreviewContent(proposal);
-
-			String expected1= """
-				package test1;
-				import java.lang.annotation.Annotation;
-				import java.lang.reflect.AccessibleObject;
-				public class E {
-				    void m() {
-				        new AccessibleObject() {
-				            public Annotation getAnnotation(Class annotationClass) {
-				            }
-				        };
-				    }
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Class asdf) {
+					}
 				}
-				""";
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
-			assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
-		} finally {
-			fJProject1.setOptions(options);
-		}
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> T myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					List myMethod(Class asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> T myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<T extends List<Class<String>>> T myMethod(Class<T> asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview3= getPreviewContent((CUCorrectionProposal)proposals.get(2));
+
+		String expected3= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <T extends List<Class<String>>> void myMethod(Class<T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Class asdf) {
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2 , expected3});
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Interfacable asdf) {
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					List myMethod(Interfacable asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> T myMethod(Interfacable<Class<U>, T> asdf) {
+					}
+				}
+			}
+			""";
+
+		String preview3= getPreviewContent((CUCorrectionProposal)proposals.get(2));
+
+		String expected3= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				static interface Interfacable<A, B> {
+					void itsMethod();
+				}
+				private abstract static class MyClass {
+					abstract <U extends List, T extends List<Interfacable<Class<? extends String[][][]>, ? super Comparable<U>>>> void myMethod(Interfacable<Class<U>, T> asdf);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					void myMethod(Interfacable asdf) {
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2 , expected3 });
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T extends List<String>> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U, T extends List<String>> void myMethod(Class<U> clazz) {
+
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent((CUCorrectionProposal)proposals.get(0));
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T extends List<String>> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U, T extends List<String>> T myMethod(Class<U> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T extends List<String>> void myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<U, T extends List<String>> void myMethod(Class<U> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testMismatchingReturnTypeOnGenericMethodNestedTypeArgs4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> void myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent((CUCorrectionProposal)proposals.get(0));
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> Object myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		String preview2= getPreviewContent((CUCorrectionProposal)proposals.get(1));
+
+		String expected2= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> T myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> M myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		String preview3= getPreviewContent((CUCorrectionProposal)proposals.get(2));
+
+		String expected3= """
+			package test1;
+			import java.util.List;
+
+			public class E {
+				private abstract static class MyClass {
+					abstract <U, T> void myMethod(Class<U> clazz);
+				}
+				private static class MyExtensionClass extends MyClass {
+					@Override
+					<L, M> void myMethod(Class<L> clazz) {
+
+					}
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 
 	@Test
@@ -1740,9 +2098,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public interface IBase {
 			    String[] getValues() throws IOException;
 			}
@@ -1753,7 +2111,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class E implements IBase {
 			    public String[] getValues() {
 			        return null;
@@ -1946,9 +2304,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public interface IBase<T> {
 			    T[] getValues() throws IOException;
 			}
@@ -1959,7 +2317,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class E implements IBase<String> {
 			    public String[] getValues() {
 			        return null;
@@ -2261,9 +2619,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<String> l= null;   \s
@@ -2283,9 +2641,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<String> l= null;   \s
@@ -2303,9 +2661,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? extends String> l= null;   \s
@@ -2325,9 +2683,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? extends String> l= null;   \s
@@ -2345,9 +2703,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? super String> l= null;   \s
@@ -2367,9 +2725,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        List<? super String> l= null;   \s
@@ -2387,9 +2745,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        String[] l= null;
@@ -2409,9 +2767,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.List;
-			
+
 			public class E {
 			    public void foo() {
 			        String[] l= null;
@@ -2429,7 +2787,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    public void foo(String[] strings) {
 			        for (s: strings) {
@@ -2448,7 +2806,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    public void foo(String[] strings) {
 			        for (String s: strings) {
@@ -2465,14 +2823,14 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    public static void main(String arg) {
 			        while (arg) {
 			        }
 			    }
 			}
-			
+
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
@@ -2485,26 +2843,26 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package pack;
-			
+
 			public class E {
 			    public static void main(boolean arg) {
 			        while (arg) {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		expected[1]= """
 			package pack;
-			
+
 			public class E {
 			    public static void main(String arg) {
 			        while (arg != null) {
 			        }
 			    }
 			}
-			
+
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
@@ -2516,8 +2874,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        Object o= new Object();
@@ -2534,25 +2892,25 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 
 		ICompletionProposal proposal= proposals.get(0);
-		assertNotEquals(-1, proposal.getDisplayString().indexOf("Integer"));
+		assertNotEquals(-1, proposal.getDisplayString().indexOf("int"));
 
 		String[] expected= new String[3];
 		expected[0]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        Object o= new Object();
-			        int i= (Integer) o;
+			        int i= (int) o;
 			    }
 			}
 			""";
 
 		expected[1]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        int o= new Object();
@@ -2563,8 +2921,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		expected[2]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo() {
 			        Object o= new Object();
@@ -2581,8 +2939,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(long o) {
 			        int i= o;
@@ -2609,8 +2967,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		String[] expected= new String[3];
 		expected[0]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(long o) {
 			        int i= (int) o;
@@ -2620,8 +2978,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		expected[1]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(int o) {
 			        int i= o;
@@ -2631,8 +2989,8 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 
 		expected[2]= """
 			package pack;
-			
-			
+
+
 			public class E {
 			    public void foo(long o) {
 			        long i= o;

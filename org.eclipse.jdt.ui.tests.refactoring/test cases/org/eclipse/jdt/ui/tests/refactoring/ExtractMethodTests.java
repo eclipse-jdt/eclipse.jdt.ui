@@ -2730,4 +2730,9 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	public void testIssue1357_2() throws Exception {
 		validSelectionTestChecked();
 	}
+
+	@Test
+	public void testIssue1516() throws Exception {
+		invalidSelectionTest();
+	}
 }

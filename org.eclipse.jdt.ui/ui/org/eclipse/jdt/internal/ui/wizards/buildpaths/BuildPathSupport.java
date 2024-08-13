@@ -57,7 +57,6 @@ public class BuildPathSupport {
 
 	/* see also ComplianceConfigurationBlock#PREFS_COMPLIANCE */
 	private static final String[] PREFS_COMPLIANCE= new String[] {
-			JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.COMPILER_PB_ENUM_IDENTIFIER,
 			JavaCore.COMPILER_SOURCE, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM,
 			JavaCore.COMPILER_COMPLIANCE, JavaCore.COMPILER_RELEASE,
 			JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES
@@ -378,15 +377,9 @@ public class BuildPathSupport {
 					JavaModelUtil.setDefaultClassfileOptions(options, newProjectCompliance); // complete compliance options
 				}
 
-				String option= JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE;
-				String inlineJSR= eeOptions.get(option);
-				if (inlineJSR != null) {
-					options.put(option, inlineJSR);
-				}
-
 				// enable '--release' option for Java 7 or higher
 				String compliance= eeOptions.get(JavaCore.COMPILER_COMPLIANCE);
-				boolean release= compliance != null && JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_1_7) >= 0;
+				boolean release= compliance != null;
 				options.put(JavaCore.COMPILER_RELEASE, release ? JavaCore.ENABLED : JavaCore.DISABLED);
 
 				javaProject.setOptions(options);

@@ -21,12 +21,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 
 /**
  * This class is used to run tests on Java Dolphin 1.7 .
  */
-class Java1d7CompletionTestSetup extends Java1d7ProjectTestSetup {
+class Java1d7CompletionTestSetup extends Java1d8ProjectTestSetup {
 	public IPackageFragment getTestPackage() throws CoreException {
 		IJavaProject project= getProject();
 		IPackageFragmentRoot root= project.getPackageFragmentRoot("src");

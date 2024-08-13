@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d7ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class AssistQuickFixTest1d7 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java1d7ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java1d8ProjectTestSetup();
 
 	private static final String REMOVE_CATCH_CLAUSE= CorrectionMessages.QuickAssistProcessor_removecatchclause_description;
 	private static final String REPLACE_CATCH_CLAUSE_WITH_THROWS= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
@@ -275,39 +275,6 @@ public class AssistQuickFixTest1d7 extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertProposalDoesNotExist(proposals, CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK);
-	}
-
-	@Test
-	public void testConvertToMultiCatch6() throws Exception {
-		//Quick assist should not be offered in 1.5 mode
-		JavaProjectHelper.set15CompilerOptions(fJProject1);
-		try {
-			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-			String str= """
-				package test1;
-				public class E {
-				    void foo() {
-				        try {
-				            System.out.println("foo");
-				        } catch (IllegalArgumentException e) {
-				            e.printStackTrace();
-				        } catch (NullPointerException e) {
-				            e.printStackTrace();
-				        }
-				    }
-				}
-				""";
-			ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-			int offset= str.indexOf("catch");
-			AssistContext context= getCorrectionContext(cu, offset, 0);
-			assertNoErrors(context);
-			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-			assertProposalDoesNotExist(proposals, CONVERT_TO_A_SINGLE_MULTI_CATCH_BLOCK);
-		} finally {
-			JavaProjectHelper.set17CompilerOptions(fJProject1);
-		}
 	}
 
 	@Test

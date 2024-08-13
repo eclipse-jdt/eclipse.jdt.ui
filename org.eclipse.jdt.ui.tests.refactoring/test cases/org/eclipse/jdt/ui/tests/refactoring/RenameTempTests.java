@@ -278,12 +278,12 @@ public class RenameTempTests extends GenericRefactoringTest{
 
 	@Test
 	public void test25() throws Exception{
-		helper1("j");
+		helper2("j"); // this test now issues an error
 	}
 
 	@Test
 	public void test26() throws Exception{
-		helper1("j");
+		helper2("j"); // this test now issues an error
 	}
 
 //  deleted - incorrect. see testFail26
@@ -323,7 +323,7 @@ public class RenameTempTests extends GenericRefactoringTest{
 
 	@Test
 	public void test34() throws Exception{
-		helper1("j");
+		helper2("j"); // this test now issues an error
 	}
 
 	@Test
@@ -648,4 +648,8 @@ public class RenameTempTests extends GenericRefactoringTest{
 		helper2("j");
 	}
 
+	@Test
+	public void testIssue_1508() throws Exception{
+		helper2("newField");
+	}
 }

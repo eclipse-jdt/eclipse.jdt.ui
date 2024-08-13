@@ -21,9 +21,6 @@ package org.eclipse.jdt.ui.tests.core.source;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -35,9 +32,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -1845,106 +1840,68 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	@Test
 	public void subTypeAndArraysIn14() throws Exception {
-		IJavaProject javaProject= fPackageP.getJavaProject();
-		Map<String, String> oldOptions= javaProject.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>(oldOptions);
-		JavaModelUtil.setComplianceOptions(newOptions, JavaCore.VERSION_1_4);
-		javaProject.setOptions(newOptions);
-		try {
-			fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-					"\r\n" +
-					"public class B {\r\n" +
-					"	public int hashCode() {\r\n" +
-					"		return 1;\r\n" +
-					"	}\r\n" +
-					"	public boolean equals(Object obj) {\r\n" +
-					"		return obj instanceof B;\r\n" +
-					"	}\r\n" +
-					"\r\n" +
-					"}\r\n" +
-					"", true, null);
+		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
+				"\r\n" +
+				"public class B {\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return 1;\r\n" +
+				"	}\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		return obj instanceof B;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
 
-			ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-					"\r\n" +
-					"public class A extends B {\r\n" +
-					"\r\n" +
-					"	A[] anArray;\r\n" +
-					"	double[] anDArray;\r\n" +
-					"\r\n" +
-					"}\r\n" +
-					"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A extends B {\r\n" +
+				"\r\n" +
+				"	A[] anArray;\r\n" +
+				"	double[] anDArray;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
 
-			IField[] fields= getFields(a.getType("A"), new String[] {"anArray", "anDArray"});
-			runOperation(a.getType("A"), fields, false, false);
+		IField[] fields= getFields(a.getType("A"), new String[] {"anArray", "anDArray"});
+		runOperation(a.getType("A"), fields, false, false);
 
-			String expected= "package p;\r\n" +
-					"\r\n" +
-					"import java.util.Arrays;\r\n" +
-					"\r\n" +
-					"public class A extends B {\r\n" +
-					"\r\n" +
-					"	/**\r\n" +
-					"	 * Returns a hash code value for the array\r\n" +
-					"	 * @param array the array to create a hash code value for\r\n" +
-					"	 * @return a hash code value for the array\r\n" +
-					"	 */\r\n" +
-					"	private static int hashCode(double[] array) {\r\n" +
-					"		int prime = 31;\r\n" +
-					"		if (array == null)\r\n" +
-					"			return 0;\r\n" +
-					"		int result = 1;\r\n" +
-					"		for (int index = 0; index < array.length; index++) {\r\n" +
-					"			long temp = Double.doubleToLongBits(array[index]);\r\n" +
-					"			result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-					"		}\r\n" +
-					"		return result;\r\n" +
-					"	}\r\n" +
-					"	/**\r\n" +
-					"	 * Returns a hash code value for the array\r\n" +
-					"	 * @param array the array to create a hash code value for\r\n" +
-					"	 * @return a hash code value for the array\r\n" +
-					"	 */\r\n" +
-					"	private static int hashCode(Object[] array) {\r\n" +
-					"		int prime = 31;\r\n" +
-					"		if (array == null)\r\n" +
-					"			return 0;\r\n" +
-					"		int result = 1;\r\n" +
-					"		for (int index = 0; index < array.length; index++) {\r\n" +
-					"			result = prime * result + (array[index] == null ? 0 : array[index].hashCode());\r\n" +
-					"		}\r\n" +
-					"		return result;\r\n" +
-					"	}\r\n" +
-					"	A[] anArray;\r\n" +
-					"	double[] anDArray;\r\n" +
-					"	public int hashCode() {\r\n" +
-					"		final int prime = 31;\r\n" +
-					"		int result = super.hashCode();\r\n" +
-					"		result = prime * result + A.hashCode(anArray);\r\n" +
-					"		result = prime * result + A.hashCode(anDArray);\r\n" +
-					"		return result;\r\n" +
-					"	}\r\n" +
-					"	public boolean equals(Object obj) {\r\n" +
-					"		if (this == obj)\r\n" +
-					"			return true;\r\n" +
-					"		if (!super.equals(obj))\r\n" +
-					"			return false;\r\n" +
-					"		if (getClass() != obj.getClass())\r\n" +
-					"			return false;\r\n" +
-					"		A other = (A) obj;\r\n" +
-					"		if (!Arrays.equals(anArray, other.anArray))\r\n" +
-					"			return false;\r\n" +
-					"		if (!Arrays.equals(anDArray, other.anDArray))\r\n" +
-					"			return false;\r\n" +
-					"		return true;\r\n" +
-					"	}\r\n" +
-					"\r\n" +
-					"}\r\n" +
-					"";
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"\r\n" +
+				"public class A extends B {\r\n" +
+				"\r\n" +
+				"	A[] anArray;\r\n" +
+				"	double[] anDArray;\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = super.hashCode();\r\n" +
+				"		result = prime * result + Arrays.hashCode(anArray);\r\n" +
+				"		result = prime * result + Arrays.hashCode(anDArray);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (!super.equals(obj))\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		if (!Arrays.equals(anArray, other.anArray))\r\n" +
+				"			return false;\r\n" +
+				"		if (!Arrays.equals(anDArray, other.anDArray))\r\n" +
+				"			return false;\r\n" +
+				"		return true;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
 
-			compareSource(expected, a.getSource());
-		} finally {
-			javaProject.setOptions(oldOptions);
-		}
+		compareSource(expected, a.getSource());
 	}
 
 	/**
@@ -2110,7 +2067,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	public void insertAt() throws Exception {
 		String originalContent= """
 			package p;
-			
+
 			public class A  {
 				Runnable x;
 			\t
@@ -2232,62 +2189,53 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	@Test
 	public void arraysDeepEqualsIn15() throws Exception {
-		IJavaProject javaProject= fPackageP.getJavaProject();
-		Map<String, String> oldOptions= javaProject.getOptions(false);
-		Map<String, String> newOptions= new HashMap<>(oldOptions);
-		JavaModelUtil.setComplianceOptions(newOptions, JavaCore.VERSION_1_5);
-		javaProject.setOptions(newOptions);
-		try {
-			ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-					"\r\n" +
-					"public class A {\r\n" +
-					"\r\n" +
-					"	 int[][][] a = new int[][][] {{null}};\r\n" +
-					"	 int[][][] b = new int[][][] {{null}};\r\n" +
-					"\r\n" +
-					"}\r\n" +
-					"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"\r\n" +
+				"	 int[][][] a = new int[][][] {{null}};\r\n" +
+				"	 int[][][] b = new int[][][] {{null}};\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
 
-			IField[] fields= getFields(a.getType("A"), new String[] {"a", "b"});
-			runOperation(a.getType("A"), fields, false, false);
+		IField[] fields= getFields(a.getType("A"), new String[] {"a", "b"});
+		runOperation(a.getType("A"), fields, false, false);
 
-			String expected= "package p;\r\n" +
-					"\r\n" +
-					"import java.util.Arrays;\r\n" +
-					"\r\n" +
-					"public class A {\r\n" +
-					"\r\n" +
-					"	 int[][][] a = new int[][][] {{null}};\r\n" +
-					"	 int[][][] b = new int[][][] {{null}};\r\n" +
-					"	@Override\r\n" +
-					"	public int hashCode() {\r\n" +
-					"		final int prime = 31;\r\n" +
-					"		int result = 1;\r\n" +
-					"		result = prime * result + Arrays.deepHashCode(a);\r\n" +
-					"		result = prime * result + Arrays.deepHashCode(b);\r\n" +
-					"		return result;\r\n" +
-					"	}\r\n" +
-					"	@Override\r\n" +
-					"	public boolean equals(Object obj) {\r\n" +
-					"		if (this == obj)\r\n" +
-					"			return true;\r\n" +
-					"		if (obj == null)\r\n" +
-					"			return false;\r\n" +
-					"		if (getClass() != obj.getClass())\r\n" +
-					"			return false;\r\n" +
-					"		A other = (A) obj;\r\n" +
-					"		if (!Arrays.deepEquals(a, other.a))\r\n" +
-					"			return false;\r\n" +
-					"		if (!Arrays.deepEquals(b, other.b))\r\n" +
-					"			return false;\r\n" +
-					"		return true;\r\n" +
-					"	}\r\n" +
-					"\r\n" +
-					"}" +
-					"";
-			compareSource(expected, a.getSource());
-		} finally {
-			javaProject.setOptions(oldOptions);
-		}
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"\r\n" +
+				"	 int[][][] a = new int[][][] {{null}};\r\n" +
+				"	 int[][][] b = new int[][][] {{null}};\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(a);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(b);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		if (!Arrays.deepEquals(a, other.a))\r\n" +
+				"			return false;\r\n" +
+				"		if (!Arrays.deepEquals(b, other.b))\r\n" +
+				"			return false;\r\n" +
+				"		return true;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}" +
+				"";
+		compareSource(expected, a.getSource());
 	}
 }

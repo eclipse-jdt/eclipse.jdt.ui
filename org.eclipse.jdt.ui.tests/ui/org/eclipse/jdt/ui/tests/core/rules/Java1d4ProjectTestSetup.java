@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 /**
  * Setup the tests related to Java 1.4 (i.e. Merlin).
  */
+@Deprecated
 public class Java1d4ProjectTestSetup extends ProjectTestSetup {
 
 	public Java1d4ProjectTestSetup() {
@@ -36,7 +37,7 @@ public class Java1d4ProjectTestSetup extends ProjectTestSetup {
 	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= super.createAndInitializeProject();
-		JavaProjectHelper.set14CompilerOptions(javaProject);
+		JavaProjectHelper.set18CompilerOptions(javaProject);
 		return javaProject;
 	}
 }

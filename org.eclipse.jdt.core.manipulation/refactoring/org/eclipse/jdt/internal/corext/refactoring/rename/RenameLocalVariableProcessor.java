@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,12 +42,21 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.RecordDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -57,12 +66,16 @@ import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.SourceRangeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil.LocalAnalyzePackage;
@@ -283,6 +296,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			RefactoringStatus result= checkNewElementName(fNewName);
 			if (result.hasFatalError())
 				return result;
+			result.merge(checkFieldCollision());
+			if (result.hasFatalError()) {
+				return result;
+			}
 			createEdits();
 			if (!fIsComposite) {
 				LocalAnalyzePackage[] localAnalyzePackages= new RenameAnalyzeUtil.LocalAnalyzePackage[] { fLocalAnalyzePackage };
@@ -298,6 +315,68 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				fTempDeclarationNode= null;
 			}
 		}
+	}
+
+	private RefactoringStatus checkFieldCollision() {
+		RefactoringStatus result= new RefactoringStatus();
+		final IVariableBinding tempBinding= fTempDeclarationNode.resolveBinding();
+		if (tempBinding != null) {
+			ASTVisitor checkCollistionVisitor= new ASTVisitor() {
+				@Override
+				public boolean visit(SimpleName node) {
+					if (node.getFullyQualifiedName().equals(tempBinding.getName()) && !(node.getParent() instanceof FieldAccess) &&
+							!(node.getParent() instanceof QualifiedName) && !(node.getParent() instanceof VariableDeclaration)) {
+						IBinding binding= node.resolveBinding();
+						if (tempBinding.isEqualTo(binding)) {
+							ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(node, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
+							if (ancestor instanceof AbstractTypeDeclaration typeDecl) {
+								ITypeBinding typeDeclBinding= typeDecl.resolveBinding();
+								if (typeDeclBinding != null) {
+									IVariableBinding[] fields= typeDeclBinding.getDeclaredFields();
+									for (IVariableBinding field : fields) {
+										if (field.getName().equals(fNewName)) {
+											try {
+												result.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, typeDeclBinding.getName() + "." + field.getName()), //$NON-NLS-1$
+														new JavaStringStatusContext(fCu.getSource(),
+																SourceRangeFactory.create(node))));
+											} catch (JavaModelException e) {
+												// should not happen
+											}
+											throw new AbortSearchException();
+										}
+									}
+								}
+							} else if (ancestor instanceof AnonymousClassDeclaration anonDecl) {
+								ITypeBinding anonDeclBinding= anonDecl.resolveBinding();
+								if (anonDeclBinding != null) {
+									IVariableBinding[] fields= anonDeclBinding.getDeclaredFields();
+									for (IVariableBinding field : fields) {
+										if (field.getName().equals(fNewName)) {
+											try {
+												result.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, "ANONYMOUS." + field.getName()), //$NON-NLS-1$
+														new JavaStringStatusContext(fCu.getSource(),
+																SourceRangeFactory.create(node))));
+											} catch (JavaModelException e) {
+												// should not happen
+											}
+											result.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_field_collision, "ANONYMOUS." + field.getName()))); //$NON-NLS-1$
+											throw new AbortSearchException();
+										}
+									}
+								}
+							}
+						}
+					}
+					return false;
+				}
+			};
+			try {
+				fCompilationUnitNode.accept(checkCollistionVisitor);
+			} catch (AbortSearchException e) {
+				// do nothing
+			}
+		}
+		return result;
 	}
 
 	/*

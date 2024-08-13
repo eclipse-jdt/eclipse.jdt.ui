@@ -88,7 +88,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.help.ui",
 			"org.eclipse.help.webapp",
 			"org.eclipse.jdt",
-			"org.eclipse.jdt.apt.core",
+//			"org.eclipse.jdt.apt.core", loaded for Java 1.8+ projects
 			"org.eclipse.jdt.apt.ui",
 			"org.eclipse.jdt.compiler.apt",
 			"org.eclipse.jdt.compiler.tool",
@@ -163,7 +163,7 @@ public class PluginsNotLoadedTest {
 			"org.eclipse.equinox.launcher",
 			"org.eclipse.equinox.launcher.win32.win32.x86",
 			"org.eclipse.help.appserver",
-			"org.eclipse.jdt.apt.pluggable.core",
+//			"org.eclipse.jdt.apt.pluggable.core", loaded for Java 1.8+ projects
 			"org.eclipse.jdt.source",
 			"org.eclipse.jsch.ui",
 			"org.eclipse.osgi.util",
@@ -224,6 +224,7 @@ public class PluginsNotLoadedTest {
 
 	@Before
 	public void setUp() throws Exception {
+		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);

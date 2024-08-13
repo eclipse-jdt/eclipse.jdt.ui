@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.tests.core.rules.Java1d4ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 /**
@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
  */
 public class CleanUpTest1d4 extends CleanUpTestCase {
 	@Rule
-	public ProjectTestSetup projectSetup= new Java1d4ProjectTestSetup();
+	public ProjectTestSetup projectSetup= new Java1d8ProjectTestSetup();
 
 	@Override
 	protected IJavaProject getProject() {
@@ -208,7 +208,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 			package test1;
 			import java.io.Serializable;
 			public class E1 implements Serializable {
-			
+
 			    private Serializable s= new Serializable() {
 			       \s
 			    };

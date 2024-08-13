@@ -43,12 +43,16 @@ class PullUpToInterfaceBug {
 	}
 
 	static class B implements Foo {
+		@Override
 		public void baz1() {
 		}
+		@Override
 		public void baz2() {
 		}
+		@Override
 		public void baz3() {
 		}
+		@Override
 		public void baz4() {
 		}
 	}

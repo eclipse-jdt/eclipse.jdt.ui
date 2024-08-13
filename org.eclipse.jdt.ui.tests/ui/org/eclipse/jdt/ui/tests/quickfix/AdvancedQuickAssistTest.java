@@ -3335,7 +3335,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	@Test
 	public void testReplaceReturnIfWithCondition2() throws Exception {
 		try {
-			JavaProjectHelper.set14CompilerOptions(fJProject1);
+			JavaProjectHelper.set18CompilerOptions(fJProject1);
 
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 			String str= """
@@ -3363,14 +3363,14 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 				package test1;
 				public class E {
 				    public Number foo(Integer integer) {
-				        return integer != null ? integer : (Number) Double.valueOf(Double.MAX_VALUE);
+				        return integer != null ? integer : Double.valueOf(Double.MAX_VALUE);
 				    }
 				}
 				""";
 
 			assertExpectedExistInProposals(proposals, new String[] {expected1});
 		} finally {
-			JavaProjectHelper.set15CompilerOptions(fJProject1);
+			JavaProjectHelper.set18CompilerOptions(fJProject1);
 		}
 	}
 
@@ -4328,7 +4328,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -4361,7 +4361,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected1= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -4390,7 +4390,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;
 			    public static int getPower(int unit) {
@@ -4421,7 +4421,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected1= """
 			package pack;
-			
+
 			public class A {
 			    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;
 			    public static int getPower(int unit) {
@@ -4806,7 +4806,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        if (a == 1) {
@@ -4833,7 +4833,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        switch (a) {
@@ -4865,7 +4865,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        if (a == 1) {
@@ -4892,7 +4892,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        switch (a) {
@@ -4924,7 +4924,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        if (a == 1) {
@@ -4951,7 +4951,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        switch (a) {
@@ -4983,7 +4983,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        if (a == 1) {
@@ -5010,7 +5010,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        switch (a) {
@@ -5038,41 +5038,11 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 	@Test
-	public void testConvertIfToSwitchDoNotConvertStringUnderJava1d7() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String str= """
-			package test1;
-			public class E {
-			    public void foo(String s) {
-			        if ("abc".equals(s)) {
-			            System.out.println();
-			        } else if ("xyz".equals(s)) {
-			            System.out.println();
-			        } else {
-			            System.out.println();
-			        }
-			    }
-			}
-			""";
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
-
-		int offset= str.indexOf("if");
-		AssistContext context= getCorrectionContext(cu, offset, 0);
-		assertNoErrors(context);
-		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-
-		assertNumberOfProposals(proposals, 3);
-		assertCorrectLabels(proposals);
-
-		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertIfElseToSwitch);
-	}
-
-	@Test
 	public void testConvertIfToSwitchDoNotConvertAnnoyingBreak() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        while (a-- > 0) {
@@ -5108,7 +5078,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -5140,7 +5110,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected1= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -5170,7 +5140,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -5202,7 +5172,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected1= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -5232,7 +5202,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;
 			    public static int getPower(int unit) {
@@ -5262,7 +5232,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected1= """
 			package pack;
-			
+
 			public class A {
 			    final static int SECONDS=1, MILLISECONDS=2, MICROSECONDS=4,NANOSECONDS=8;
 			    public static int getPower(int unit) {
@@ -5348,7 +5318,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        while (a-- > 0) {
@@ -5378,7 +5348,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        while (a-- > 0) {
@@ -5412,7 +5382,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        loop: while (a-- > 0) {
@@ -5442,7 +5412,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			    public void foo(int a) {
 			        loop: while (a-- > 0) {
@@ -5574,7 +5544,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -5606,7 +5576,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected1= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -5630,7 +5600,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		String expected2= """
 			package pack;
-			
+
 			public class A {
 			    public enum TimeUnit {
 			        SECONDS, MILLISECONDS, MICROSECONDS, NANOSECONDS
@@ -6605,7 +6575,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            System.out.println("11");
 			        }
 			    }
-			
+
 			    public void foo2() {
 			        bar();
 			        if (b) {
@@ -6613,7 +6583,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            System.out.println("22");
 			        }
 			    }
-			
+
 			    public void foo3() {
 			        if (c) {
 			            if (d) {
@@ -6640,7 +6610,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			        System.out.println("1");
 			        System.out.println("11");
 			    }
-			
+
 			    public void foo2() {
 			        bar();
 			        if (b) {
@@ -6648,7 +6618,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            System.out.println("22");
 			        }
 			    }
-			
+
 			    public void foo3() {
 			        if (c) {
 			            if (d) {
@@ -6675,7 +6645,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            System.out.println("11");
 			        }
 			    }
-			
+
 			    public void foo2() {
 			        bar();
 			        if (!b)
@@ -6683,7 +6653,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			        System.out.println("2");
 			        System.out.println("22");
 			    }
-			
+
 			    public void foo3() {
 			        if (c) {
 			            if (d) {
@@ -6710,7 +6680,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            System.out.println("11");
 			        }
 			    }
-			
+
 			    public void foo2() {
 			        bar();
 			        if (b) {
@@ -6718,7 +6688,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            System.out.println("22");
 			        }
 			    }
-			
+
 			    public void foo3() {
 			        if (c) {
 			            if (!d)
@@ -6746,7 +6716,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			        }
 			        bar();\
 			    }
-			
+
 			    public void foo2() {
 			        if (a)\s
 			            if (b) {
@@ -6754,7 +6724,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			                System.out.println("2");
 			        	}
 			    }
-			
+
 			    public void foo3() {
 			        if (c) {
 			            return;
@@ -6804,7 +6774,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			            return "foo"
 			        }
 			    }
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
@@ -6838,7 +6808,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			        	}
 			        }
 			    }
-			
+
 			    public void foo2() {
 			        List<String> strs= new ArrayList<String>;
 			        for (String s : strs) {
@@ -6847,7 +6817,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			        	}
 			        }
 			    }
-			
+
 			    public void foo3() {
 			        do {
 			            if (c) {
@@ -6855,7 +6825,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			        	}
 			        } while (true)
 			    }
-			
+
 			    public void foo4() {
 			        while (true) {
 			            if (d) {
@@ -6901,11 +6871,11 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String buf= """
 			package test;
-			
+
 			package test16_3;
 			public class App {
 				private String s;
-			
+
 				public App(String s, String s3, String s2) {
 				}
 			}""";
@@ -6918,14 +6888,14 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertProposalExists(proposals, CorrectionMessages.AssignToVariableAssistProposal_assignallparamstofields_description);
 		String expected= """
 			package test;
-			
+
 			package test16_3;
 			public class App {
 				private String s;
 			    private String s4;
 			    private String s3;
 			    private String s2;
-			
+
 				public App(String s, String s3, String s2) {
 			        s4 = s;
 			        this.s3 = s3;

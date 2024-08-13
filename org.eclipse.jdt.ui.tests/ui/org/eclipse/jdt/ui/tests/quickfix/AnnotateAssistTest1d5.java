@@ -93,7 +93,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -173,7 +173,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -239,7 +239,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 					}
 					"""
 			};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(MY_MAP_PATH + ".eea"));
 		String initialContent=
@@ -395,7 +395,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH + ".eea"));
 		String initialContent=
@@ -472,7 +472,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH + ".eea"));
 		String initialContent=
@@ -548,7 +548,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -613,7 +613,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 						}
 						"""
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -682,7 +682,7 @@ public class AnnotateAssistTest1d5 extends AbstractAnnotateAssistTests {
 					"}\n"
 				};
 
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, unitResult -> !new Path(MISSINGPATH + ".java").equals(new Path(String.valueOf(unitResult.getFileName()))));
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, unitResult -> !new Path(MISSINGPATH + ".java").equals(new Path(String.valueOf(unitResult.getFileName()))));
 		IType type= fJProject1.findType(CLASS2_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
