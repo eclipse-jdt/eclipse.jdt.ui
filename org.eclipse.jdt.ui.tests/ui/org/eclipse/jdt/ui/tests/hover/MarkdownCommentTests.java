@@ -548,6 +548,41 @@ public class MarkdownCommentTests extends CoreTests {
 	}
 
 	@Test
+	public void testCodeAtEdge() throws CoreException {
+		String source= """
+				package p;
+
+				public class CodeAtEdge {
+				    ///     @Override
+				    ///     void m() {}
+				    ///
+				    /// Plain text
+				    ///
+				    ///     @Override
+				    ///     void m() {}
+				    public void m() {}
+				}
+
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/CodeAtEdge.java", source, null);
+		assertNotNull("CodeAtEdge.java", cu);
+
+		IType type= cu.getType("CodeAtEdge");
+
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		assertHtmlContent("""
+				<pre><code>@Override
+				void m() {}
+				</code></pre>
+				<p>Plain text</p>
+				<pre><code>@Override
+				void m() {}
+				</code></pre>
+				""",
+				actualHtmlContent);
+	}
+	@Test
 	public void testLineStarts() throws CoreException {
 		String source= """
 				package p;
@@ -627,5 +662,31 @@ public class MarkdownCommentTests extends CoreTests {
 				<pre><code>public void five() // dropped by javadoc
 				</code></pre>
 				""",
-				actualHtmlContent);	}
+				actualHtmlContent);
+	}
+
+
+	@Test
+	public void testSeeTag() throws CoreException {
+		String source= """
+				package p;
+
+				/// @see #m()
+				/// @see <a href="https://www.eclipse.org">Eclipse.org</a>
+				public class SeeTag {
+					public void m() {}
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/SeeTag.java", source, null);
+		assertNotNull("SeeTag.java", cu);
+
+		IType type= cu.getType("SeeTag");
+
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		String expectedContent= """
+				<dl><dt>See Also:</dt><dd><a href='METHOD_URI'>m()</a></dd><dd><a href="https://www.eclipse.org">Eclipse.org</a></dd></dl>
+				"""
+				.replace("METHOD_URI", makeEncodedMethodUri("p", "SeeTag", "SeeTag","m", ""));
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
 }
