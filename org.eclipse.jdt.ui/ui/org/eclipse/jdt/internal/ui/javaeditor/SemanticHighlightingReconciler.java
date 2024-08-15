@@ -15,7 +15,11 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -51,6 +55,8 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
+
+import org.eclipse.jdt.ui.text.java.SemanticTokensProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
@@ -260,33 +266,6 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		}
 
 		/**
-		 * Add a position with the given range and highlighting iff it does not exist already.
-		 * @param offset The range offset
-		 * @param length The range length
-		 * @param highlighting The highlighting
-		 */
-		private void addPosition(int offset, int length, Highlighting highlighting) {
-			boolean isExisting= false;
-			// TODO: use binary search
-			for (int i= 0, n= fRemovedPositions.size(); i < n; i++) {
-				HighlightedPosition position= (HighlightedPosition) fRemovedPositions.get(i);
-				if (position == null)
-					continue;
-				if (position.isEqual(offset, length, highlighting)) {
-					isExisting= true;
-					fRemovedPositions.set(i, null);
-					fNOfRemovedPositions--;
-					break;
-				}
-			}
-
-			if (!isExisting) {
-				Position position= fJobPresenter.createHighlightedPosition(offset, length, highlighting);
-				fAddedPositions.add(position);
-			}
-		}
-
-		/**
 		 * Retain the positions completely contained in the given range.
 		 * @param offset The range offset
 		 * @param length The range length
@@ -325,6 +304,35 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			return true;
 		}
 	}
+
+	/**
+	 * Add a position with the given range and highlighting iff it does not exist already.
+	 * @param offset The range offset
+	 * @param length The range length
+	 * @param highlighting The highlighting
+	 */
+	private void addPosition(int offset, int length, Highlighting highlighting) {
+		boolean isExisting= false;
+		// TODO: use binary search
+		for (int i= 0, n= fRemovedPositions.size(); i < n; i++) {
+			HighlightedPosition position= (HighlightedPosition) fRemovedPositions.get(i);
+			if (position == null)
+				continue;
+			if (position.isEqual(offset, length, highlighting)) {
+				isExisting= true;
+				fRemovedPositions.set(i, null);
+				fNOfRemovedPositions--;
+				break;
+			}
+		}
+
+		if (!isExisting) {
+			Position position= fJobPresenter.createHighlightedPosition(offset, length, highlighting);
+			fAddedPositions.add(position);
+		}
+	}
+
+
 
 	/** Position collector */
 	private PositionCollector fCollector= new PositionCollector();
@@ -400,6 +408,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fJobSemanticHighlightings= fSemanticHighlightings;
 		fJobHighlightings= fHighlightings;
 
+
 		try {
 			if (fJobPresenter == null || fJobSemanticHighlightings == null || fJobHighlightings == null)
 				return;
@@ -415,6 +424,11 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 			startReconcilingPositions();
 
+			List<SemanticTokensProvider.SemanticToken> contributedTokens = Collections.synchronizedList(new ArrayList<>());
+			CompletableFuture<?>[] futures = ast.getTypeRoot() == null ? new CompletableFuture<?>[0] : Arrays.stream(JavaPlugin.getDefault().getContributedSemanticTokensProviders())
+					.map(p -> p.computeSemanticTokens(ast.getTypeRoot().getPath()).thenAccept(t -> contributedTokens.addAll(t)))
+					.toArray(CompletableFuture[]::new);
+
 			if (!fJobPresenter.isCanceled()) {
 				fJobDeprecatedMemberHighlighting= null;
 				for (int i= 0, n= fJobSemanticHighlightings.length; i < n; i++) {
@@ -424,7 +438,17 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						break;
 					}
 				}
-				reconcilePositions(subtrees);
+
+				try {
+					CompletableFuture.allOf(futures).get();
+				} catch (InterruptedException e) {
+					// ignore
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+
+				reconcilePositions(subtrees, contributedTokens);
+
 			}
 
 			TextPresentation textPresentation= null;
@@ -467,14 +491,24 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * Reconcile positions based on the AST subtrees
 	 *
 	 * @param subtrees the AST subtrees
+	 * @param contributedTokens
 	 */
-	private void reconcilePositions(ASTNode[] subtrees) {
+	private void reconcilePositions(ASTNode[] subtrees, List<SemanticTokensProvider.SemanticToken> contributedTokens) {
 		// FIXME: remove positions not covered by subtrees
 
 
 
 		for (ASTNode subtree : subtrees)
 			subtree.accept(fCollector);
+
+		for (SemanticTokensProvider.SemanticToken t : contributedTokens) {
+			Highlighting h = fromSemanticTokenType(t.tokenType());
+			if (h == null) {
+				JavaPlugin.logErrorMessage("Cannot find semantic highlighting for %s".formatted(t.tokenType())); //$NON-NLS-1$
+			} else {
+				addPosition(t.ofset(), t.length(), h);
+			}
+		}
 		List<Position> oldPositions= fRemovedPositions;
 		List<Position> newPositions= new ArrayList<>(fNOfRemovedPositions);
 		for (Position current : oldPositions) {
@@ -482,6 +516,38 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				newPositions.add(current);
 		}
 		fRemovedPositions= newPositions;
+	}
+
+	private Highlighting fromSemanticTokenType(SemanticTokensProvider.TokenType type) {
+		switch (type) {
+			case COMMENT:
+				return findHighlighting(SemanticHighlightings.ANNOTATION);
+			case KEYWORD:
+				return findHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
+			case METHOD:
+				return findHighlighting(SemanticHighlightings.METHOD);
+			case TYPE:
+				return findHighlighting(SemanticHighlightings.CLASS);
+			case VARIABLE:
+				return findHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
+			default:
+				break;
+		}
+		return null;
+	}
+
+	private int findSemanticHighlightingIndex(String preferenceKey) {
+		for (int i = 0; i < fJobSemanticHighlightings.length; i++) {
+			if (preferenceKey.equals(fJobSemanticHighlightings[i].getPreferenceKey())) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	private Highlighting findHighlighting(String preferenceKey) {
+		int idx = findSemanticHighlightingIndex(preferenceKey);
+		return idx < 0 ? null : fJobHighlightings[idx];
 	}
 
 	/**
@@ -621,6 +687,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				fJob= new Job(JavaEditorMessages.SemanticHighlighting_job) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
+
 						if (oldJob != null) {
 							try {
 								oldJob.join();
@@ -631,6 +698,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						}
 						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
+						System.out.println("Semantic Reconcile: %s".formatted(element.getPath())); //$NON-NLS-1$
 						JavaCore.runReadOnly(() -> {
 							CompilationUnit ast= SharedASTProviderCore.getAST(element, SharedASTProviderCore.WAIT_YES, monitor);
 							reconciled(ast, false, monitor);
