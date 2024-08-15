@@ -404,7 +404,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fJRE50InfoText= new Link(infoComposite, SWT.WRAP);
 		fJRE50InfoText.setFont(composite.getFont());
 		// set a text: not the real one, just for layouting
-		String versionLabel= getVersionLabel(JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first());
+		String versionLabel= getVersionLabel(JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0));
 		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { versionLabel, versionLabel }));
 		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
@@ -804,7 +804,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		String source= getValue(PREF_SOURCE_COMPATIBILITY);
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 
-		String firstSupported = JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
+		String firstSupported = JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0);
 
 		// compliance must be supported
 		if (JavaModelUtil.isVersionLessThan(compliance, firstSupported)) {
@@ -1085,8 +1085,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				} else {
 					enablePreview= DISABLED;
 					reportPreview= WARNING;
-					source= JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
-					target= JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
+					source= JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0);
+					target= JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0);
 				}
 			}
 		} else {
@@ -1179,7 +1179,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (options == null)
 			return DISABLED;
 		String complianceOption= options.get(JavaCore.COMPILER_COMPLIANCE);
-		if (JavaCore.compareJavaVersions(complianceOption, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first()) < 0) {
+		if (JavaCore.compareJavaVersions(complianceOption, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0)) < 0) {
 			return DISABLED;
 		} else if (JavaCore.compareJavaVersions(complianceOption, JavaCore.VERSION_10) > 0) {
 			return checkDefaults(PREFS_COMPLIANCE_11_OR_HIGHER, options);
