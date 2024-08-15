@@ -475,8 +475,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fInstalledJVMs= getWorkspaceJREs();
 			Arrays.sort(fInstalledJVMs, (i0, i1) -> {
 				if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
-					String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first());
-					String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first());
+					String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0));
+					String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().get(0));
 					int result= JavaCore.compareJavaVersions(cc1, cc0);
 					if (result != 0)
 						return result;
