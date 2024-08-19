@@ -324,6 +324,35 @@ public class MarkdownCommentTests extends CoreTests {
 	}
 
 	@Test
+	public void testMarkdownLink3() throws Exception {
+		// reference mentions an array type: array-[] must be escaped
+		String source= """
+				package p;
+				/// ## TestClass
+				///
+				/// Simple link [#m1(int\\[\\])].
+				/// Link with custom text [method 1][#m1(int\\[\\])].
+				public class TestClass {
+					public void m1(int[] i) {}
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/TestClass.java", source, null);
+		assertNotNull("TestClass.java", cu);
+
+		String expectedURI= makeEncodedMethodUri("p", "TestClass", "TestClass", "m1", "int []");
+		String expectedHtmlContent= """
+				<h2>TestClass</h2>
+				<p>Simple link <code><a href='URI'>m1(int [])</a></code>.
+				Link with custom text <code><a href='URI'>method 1</a></code>.</p>
+				"""
+				.replaceAll("URI", expectedURI);
+
+		IType type= cu.getType("TestClass");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		assertHtmlContent(expectedHtmlContent, actualHtmlContent);
+	}
+
+	@Test
 	public void testSpec01Links() throws CoreException {
 		String source= """
 				package p;
@@ -687,6 +716,100 @@ public class MarkdownCommentTests extends CoreTests {
 				<dl><dt>See Also:</dt><dd><a href='METHOD_URI'>m()</a></dd><dd><a href="https://www.eclipse.org">Eclipse.org</a></dd></dl>
 				"""
 				.replace("METHOD_URI", makeEncodedMethodUri("p", "SeeTag", "SeeTag","m", ""));
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
+
+	@Test
+	public void testGH2808_codeAfterPara() throws CoreException {
+		String source= """
+				package p;
+
+				public class CodeAfterPara {
+					/// Plain Text
+					///     @Override public void four() // four significant spaces but no blank line
+					void noBlankLine() { }
+
+					/// Plain Text
+					///  \s
+					///     @Override public void four() // four significant spaces after blank line
+					void withBlankLine() { }
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/CodeAfterPara.java", source, null);
+		assertNotNull("CodeAfterPara.java", cu);
+
+		IType type= cu.getType("CodeAfterPara");
+
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		String expectedContent= """
+				<p>Plain Text</p>
+				<dl><dt>@Override</dt><dd>public void four() // four significant spaces but no blank line</dd></dl>
+				""";
+		assertHtmlContent(expectedContent, actualHtmlContent);
+
+		method= type.getMethods()[1];
+		actualHtmlContent= getHoverHtmlContent(cu, method);
+		expectedContent= """
+				<p>Plain Text</p>
+				<pre><code>@Override public void four() // four significant spaces after blank line
+				</code></pre>
+				""";
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
+
+	@Test
+	public void testGH2808_terminatingAnIndentedCodeBlock() throws CoreException {
+		String source= """
+				package p;
+
+				public class BlockEnding {
+					/// Plain Text
+					///
+					///     @Override public void four()
+					///     ```
+					///     /// doc
+					///     /// ```
+					///     /// @Override Nested Code
+					///     /// ```
+					///     ```
+					void indentedWithFence() { }
+
+					/// Plain Text
+					///
+					///     @Override public void four()
+					/// Plain again
+					void paraAfterCode() { }
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/BlockEnding.java", source, null);
+		assertNotNull("BlockEnding.java", cu);
+
+		IType type= cu.getType("BlockEnding");
+
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		String expectedContent= """
+				<p>Plain Text</p>
+				<pre><code>@Override public void four()
+				```
+				/// doc
+				/// ```
+				/// @Override Nested Code
+				/// ```
+				```
+				</code></pre>
+				""";
+		assertHtmlContent(expectedContent, actualHtmlContent);
+
+		method= type.getMethods()[1];
+		actualHtmlContent= getHoverHtmlContent(cu, method);
+		expectedContent= """
+				<p>Plain Text</p>
+				<pre><code>@Override public void four()
+				</code></pre>
+				<p>Plain again</p>
+				""";
 		assertHtmlContent(expectedContent, actualHtmlContent);
 	}
 }
