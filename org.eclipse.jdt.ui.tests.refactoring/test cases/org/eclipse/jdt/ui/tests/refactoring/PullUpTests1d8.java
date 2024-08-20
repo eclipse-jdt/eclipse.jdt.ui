@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 IBM Corporation and others.
+ * Copyright (c) 2014, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -275,4 +275,24 @@ public class PullUpTests1d8 extends PullUpTests {
 		assertEqualLines("MainImpl", getFileContents(getOutputTestFileName("MainImpl")), cuMainImpl.getSource());
 		assertEqualLines("OtherImpl", getFileContents(getOutputTestFileName("OtherImpl")), cuOtherImpl.getSource());
 	}
+
+	@Test
+	public void testGenericsTypeParameterRename() throws Exception {
+		String[] selectedMethodNames= { "m" };
+		String[][] selectedMethodSignatures= { new String[] { "QBar<QU;>;" } };
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPullUp= {};
+		String[][] signaturesOfMethodsToPullUp= {};
+		String[] namesOfFieldsToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= { "m" };
+		String[][] signaturesOfMethodsToDeclareAbstract= { new String[] { "QBar<QU;>;" } };
+
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], false, false, 0);
+	}
+
 }
