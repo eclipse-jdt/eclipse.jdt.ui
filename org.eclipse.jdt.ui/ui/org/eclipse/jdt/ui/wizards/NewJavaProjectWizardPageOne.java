@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -483,8 +484,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				return Policy.getComparator().compare(i0.getName(), i1.getName());
 			});
 
-			List<IExecutionEnvironment> environments= JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments();
-			fInstalledEEs= environments.toArray(IExecutionEnvironment[]::new);
+			IExecutionEnvironment[] environments= JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments().toArray(IExecutionEnvironment[]::new);
+			Collections.reverse(Arrays.asList(environments));
+			fInstalledEEs= environments;
 		}
 
 		public Control createControl(Composite composite) {
@@ -605,7 +607,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private String getDefaultEEName() {
 			IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();
 
-			List<IExecutionEnvironment> environments= JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments();
+			List<IExecutionEnvironment> environments= new ArrayList<>(JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments());
+			Collections.reverse(environments);
 			if (defaultVM != null) {
 				for (IExecutionEnvironment environment : environments) {
 					IVMInstall eeDefaultVM= environment.getDefaultVM();
