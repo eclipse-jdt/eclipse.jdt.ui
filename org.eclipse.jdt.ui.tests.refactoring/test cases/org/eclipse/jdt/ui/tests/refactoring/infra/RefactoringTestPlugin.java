@@ -43,7 +43,7 @@ public class RefactoringTestPlugin extends Plugin {
 
 	public InputStream getTestResourceStream(String fileName) throws IOException {
 		IPath path= new Path("resources").append(fileName);
-		URL url= new URL(getBundle().getEntry("/"), path.toString());
+		URL url= getBundle().getEntry("/"+ path.toString());
 		return url.openStream();
 	}
 
