@@ -2650,7 +2650,7 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addServiceProviderProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ASTNode node= problem.getCoveredNode(context.getASTRoot());
-		if (!(node instanceof Name) && !(node.getParent() instanceof ProvidesDirective)) {
+		if (!(node instanceof Name) || !(node.getParent() instanceof ProvidesDirective)) {
 			return;
 		}
 
