@@ -104,6 +104,7 @@ public class JavaFormatter {
 		private static void installJavaStuff(Document document, IJavaProject project) {
 			String[] types= new String[] {
 										  IJavaPartitions.JAVA_DOC,
+										  IJavaPartitions.JAVA_MARKDOWN_COMMENT,
 										  IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 										  IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 										  IJavaPartitions.JAVA_STRING,

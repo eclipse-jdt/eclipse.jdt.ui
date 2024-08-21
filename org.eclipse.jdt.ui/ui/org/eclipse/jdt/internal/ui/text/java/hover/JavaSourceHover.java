@@ -272,6 +272,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 					partition= doc.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 					switch (partition.getType()) {
 						case IJavaPartitions.JAVA_DOC:
+						case IJavaPartitions.JAVA_MARKDOWN_COMMENT:
 						case IJavaPartitions.JAVA_SINGLE_LINE_COMMENT:
 						case IJavaPartitions.JAVA_MULTI_LINE_COMMENT:
 							offset+= partition.getLength();

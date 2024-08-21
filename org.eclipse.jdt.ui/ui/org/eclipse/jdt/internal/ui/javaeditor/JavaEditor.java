@@ -1151,7 +1151,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					if (emptySelection) {
 						final ITypedRegion partition= TextUtilities.getPartition(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x, true);
 						String type= partition.getType();
-						if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type) || IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
+						if (IJavaPartitions.JAVA_DOC.equals(type)
+								|| IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(type)
+								|| IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)
+								|| IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
 							viewer.setSelectedRange(partition.getOffset(), partition.getLength());
 							viewer.doOperation(ISourceViewer.FORMAT);
 							return;

@@ -104,8 +104,12 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 			if (firstNonWS < offset) {
 				if (d.getChar(firstNonWS) == '/') {
-					// Javadoc started on this line
-					buf.append(" * "); //$NON-NLS-1$
+					// Javadoc/markdown started on this line
+					if (d.getChar(firstNonWS+1) == '/') {
+						buf.append("///"); //$NON-NLS-1$
+					} else {
+						buf.append(" * "); //$NON-NLS-1$
+					}
 
 					if (isPreferenceTrue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) && isNewComment(d, offset)) {
 						c.shiftsCaret= false;

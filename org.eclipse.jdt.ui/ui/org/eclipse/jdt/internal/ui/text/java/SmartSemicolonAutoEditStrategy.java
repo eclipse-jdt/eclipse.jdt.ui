@@ -985,6 +985,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	private static int getValidPositionForPartition(IDocument doc, ITypedRegion partition, int maxOffset) {
 		final int INVALID= -1;
 
+		if (IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(partition.getType()))
+			return INVALID;
 		if (IJavaPartitions.JAVA_DOC.equals(partition.getType()))
 			return INVALID;
 		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(partition.getType()))
