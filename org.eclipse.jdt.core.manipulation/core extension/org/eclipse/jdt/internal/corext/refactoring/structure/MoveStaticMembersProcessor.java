@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -72,16 +72,20 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
@@ -104,6 +108,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -388,6 +393,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (result.hasFatalError())
 				return result;
 
+			result.merge(checkMemberOverride());
 			result.merge(checkNativeMovedMethods(Progress.subMonitor(pm, 1)));
 
 			if (result.hasFatalError())
@@ -404,6 +410,61 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} finally {
 			pm.done();
 		}
+	}
+
+	private class OverrideFinder extends ASTVisitor {
+		private IBinding fOverrideBinding;
+
+		public IBinding getOverideBinding() {
+			return fOverrideBinding;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			if (node.getLocationInParent() != QualifiedName.NAME_PROPERTY &&
+					node.getLocationInParent() != FieldAccess.NAME_PROPERTY &&
+					node.getLocationInParent() != SuperFieldAccess.NAME_PROPERTY ||
+					(node.getParent() instanceof MethodInvocation methodInvocation &&
+							methodInvocation.getExpression() == null)) {
+				IBinding binding= node.resolveBinding();
+				if (binding instanceof IMethodBinding methodBinding) {
+					for (IMember member : fMembersToMove) {
+						if (member.getElementType() == IJavaElement.METHOD &&
+								member.getElementName().equals(methodBinding.getName())) {
+							fOverrideBinding= methodBinding;
+							throw new AbortSearchException();
+						}
+					}
+				} else if (binding instanceof IVariableBinding varBinding && varBinding.isField()) {
+					for (IMember member : fMembersToMove) {
+						if (member.getElementType() == IJavaElement.FIELD &&
+								member.getElementName().equals(varBinding.getName())) {
+							fOverrideBinding= varBinding;
+							throw new AbortSearchException();
+						}
+					}
+				}
+			}
+			return true;
+		}
+	}
+
+	private RefactoringStatus checkMemberOverride() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
+		AbstractTypeDeclaration decl= getDestinationNode();
+		OverrideFinder overrideFinder= new OverrideFinder();
+		try {
+			decl.accept(overrideFinder);
+		} catch (AbortSearchException e) {
+			IBinding overrideRef= overrideFinder.getOverideBinding();
+			String originalClassName= overrideRef instanceof IVariableBinding varBinding ? varBinding.getDeclaringClass().getName() : ((IMethodBinding)overrideRef).getDeclaringClass().getName();
+			IJavaElement element= overrideRef.getJavaElement();
+			result.addError(Messages.format(RefactoringCoreMessages.MoveMembersRefactoring_override_ref,
+					new Object[] {decl.getName(), element.getElementName(), originalClassName }),
+					JavaStatusContext.create((IMember) element));
+		}
+		return result;
 	}
 
 	private IFile[] getAllFilesToModify(List<ICompilationUnit> modifiedCus) {
