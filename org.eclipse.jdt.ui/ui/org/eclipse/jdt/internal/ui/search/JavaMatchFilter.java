@@ -330,6 +330,7 @@ class ImportFilter extends JavaMatchFilter {
 					case IJavaElement.METHOD:
 					case IJavaElement.FIELD:
 					case IJavaElement.PACKAGE_FRAGMENT:
+					case IJavaElement.JAVA_MODULE:
 						isApplicable= true;
 						break;
 					default:
