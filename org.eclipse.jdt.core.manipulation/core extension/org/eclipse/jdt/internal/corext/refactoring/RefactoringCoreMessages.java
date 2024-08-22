@@ -49,6 +49,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CallInliner_field_initializer_simple;
 
+	public static String CallInliner_incompatible_super_call_for_static_method;
+
 	public static String CallInliner_multiDeclaration;
 
 	public static String CallInliner_receiver_type;

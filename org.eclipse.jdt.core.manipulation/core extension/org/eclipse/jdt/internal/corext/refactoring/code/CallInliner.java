@@ -253,6 +253,8 @@ public class CallInliner {
 		if (result.getSeverity() >= severity)
 			return result;
 
+		checkInliningToStatic(result, severity);
+
 		initializeRewriteState();
 		initializeTargetNode();
 		flowAnalysis();
@@ -269,6 +271,21 @@ public class CallInliner {
 		checkAccessCompatibility(result, severity);
 
 		return result;
+	}
+
+	// checks if incompatible references will be in-lined into static method
+	private void checkInliningToStatic(RefactoringStatus result, int severity) {
+		if (!fSourceProvider.isStatic()) {
+			MethodDeclaration targetMethodDeclaration= ASTNodes.getFirstAncestorOrNull(fInvocation, MethodDeclaration.class);
+			if (targetMethodDeclaration != null && Modifier.isStatic(targetMethodDeclaration.getModifiers())) {
+				if (fSourceProvider.hasSuperMethodInvocation() || fSourceProvider.hasSuperFieldAccess()) {
+					result.addEntry(new RefactoringStatusEntry(
+							severity,
+							RefactoringCoreMessages.CallInliner_incompatible_super_call_for_static_method,
+							JavaStatusContext.create(fCUnit, fInvocation)));
+				}
+			}
+		}
 	}
 
 	private void initializeRewriteState() {

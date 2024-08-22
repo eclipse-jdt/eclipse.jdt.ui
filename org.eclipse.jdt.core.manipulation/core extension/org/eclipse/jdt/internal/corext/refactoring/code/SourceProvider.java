@@ -236,6 +236,10 @@ public class SourceProvider {
 		return fAnalyzer.hasSuperMethodInvocation();
 	}
 
+	public boolean hasSuperFieldAccess() {
+		return fAnalyzer.hasSuperFieldAccess();
+	}
+
 	public boolean mustEvaluateReturnedExpression() {
 		return fMustEvalReturnedExpression;
 	}
