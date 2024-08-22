@@ -109,6 +109,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -393,11 +394,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (result.hasFatalError())
 				return result;
 
-			result.merge(checkMemberOverride());
 			result.merge(checkNativeMovedMethods(Progress.subMonitor(pm, 1)));
 
 			if (result.hasFatalError())
 				return result;
+
+			result.merge(checkMemberOverride());
 
 			List<ICompilationUnit> modifiedCus= new ArrayList<>();
 			createChange(modifiedCus, result, Progress.subMonitor(pm, 7));
@@ -428,19 +430,38 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 							methodInvocation.getExpression() == null)) {
 				IBinding binding= node.resolveBinding();
 				if (binding instanceof IMethodBinding methodBinding) {
-					for (IMember member : fMembersToMove) {
-						if (member.getElementType() == IJavaElement.METHOD &&
-								member.getElementName().equals(methodBinding.getName())) {
-							fOverrideBinding= methodBinding;
-							throw new AbortSearchException();
+					// we only look for method calls for methods that are declared in a class that is neither
+					// the target or the source (other conflicts will be caught elsewhere)
+					String methodBindingClassName= methodBinding.getDeclaringClass().getQualifiedName();
+					if (!methodBindingClassName.equals(getDeclaringType().getFullyQualifiedName('.')) &&
+							!methodBindingClassName.equals(getDestinationType().getFullyQualifiedName('.'))) {
+						for (IMember member : fMembersToMove) {
+							if (member.getElementType() == IJavaElement.METHOD) {
+								IMethod memberMethod= (IMethod)member;
+								try {
+									if (memberMethod.getElementName().equals(methodBinding.getName()) &&
+											Bindings.sameParameters(methodBinding, memberMethod)) {
+										fOverrideBinding= methodBinding;
+										throw new AbortSearchException();
+									}
+								} catch (JavaModelException e) {
+									// do nothing
+								}
+							}
 						}
 					}
 				} else if (binding instanceof IVariableBinding varBinding && varBinding.isField()) {
-					for (IMember member : fMembersToMove) {
-						if (member.getElementType() == IJavaElement.FIELD &&
-								member.getElementName().equals(varBinding.getName())) {
-							fOverrideBinding= varBinding;
-							throw new AbortSearchException();
+					// we only look for method calls for methods that are declared in a class that is neither
+					// the target or the source (other conflicts will be caught elsewhere)
+					String varBindingClassName= varBinding.getDeclaringClass().getQualifiedName();
+					if (!varBindingClassName.equals(getDeclaringType().getFullyQualifiedName('.')) &&
+							!varBindingClassName.equals(getDestinationType().getFullyQualifiedName('.'))) {
+						for (IMember member : fMembersToMove) {
+							if (member.getElementType() == IJavaElement.FIELD &&
+									member.getElementName().equals(varBinding.getName())) {
+								fOverrideBinding= varBinding;
+								throw new AbortSearchException();
+							}
 						}
 					}
 				}

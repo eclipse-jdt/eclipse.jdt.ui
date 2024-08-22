@@ -1062,7 +1062,7 @@ public class Bindings {
 
 	//---- Helper methods to convert a method ---------------------------------------------
 
-	private static boolean sameParameters(IMethodBinding method, IMethod candidate) throws JavaModelException {
+	public static boolean sameParameters(IMethodBinding method, IMethod candidate) throws JavaModelException {
 		ITypeBinding[] methodParamters= method.getParameterTypes();
 		String[] candidateParameters= candidate.getParameterTypes();
 		if (methodParamters.length != candidateParameters.length)
