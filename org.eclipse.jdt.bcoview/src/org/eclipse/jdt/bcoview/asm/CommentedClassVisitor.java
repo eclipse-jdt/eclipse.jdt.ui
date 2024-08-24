@@ -213,13 +213,13 @@ public class CommentedClassVisitor extends Textifier implements ICommentedClassV
 					break;
 				case FIELD_DESCRIPTOR:
 					switch (desc) {
-						case "T":
+						case "T": //$NON-NLS-1$
 							buf1.append("top"); //$NON-NLS-1$
 							break;
-						case "N":
+						case "N": //$NON-NLS-1$
 							buf1.append("null"); //$NON-NLS-1$
 							break;
-						case "U":
+						case "U": //$NON-NLS-1$
 							buf1.append("uninitialized_this"); //$NON-NLS-1$
 							break;
 						default:
