@@ -197,7 +197,7 @@ public enum UpdateProperty {
 	 * Change
 	 * <code>System.getProperty("java.runtime.version");</code>
 	 * to
-	 * <code>Runtime.version().toString();</code>
+	 * <code>Runtime.version().feature();</code>
 	 */
 	JAVA_SPEC_VERSION("java.specification.version", //$NON-NLS-1$
 			Runtime.class,
