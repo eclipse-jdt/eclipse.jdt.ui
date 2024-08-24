@@ -156,7 +156,7 @@ public class AbstractSemanticHighlightingTest {
 	protected void setUpSemanticHighlighting(String semanticHighlighting) {
 		enableSemanticHighlighting(semanticHighlighting);
 		EditorTestHelper.forceReconcile(fSourceViewer);
-		assertTrue(EditorTestHelper.joinReconciler(fSourceViewer, 0, -1, 100));
+		assertTrue(EditorTestHelper.joinReconciler(fSourceViewer, 0, 10000, 100));
 		EditorTestHelper.runEventQueue(100);
 	}
 
