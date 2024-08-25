@@ -304,9 +304,6 @@ public class BuildPathSupport {
 	public static final JUnitPluginDescription JUNIT4_PLUGIN= new JUnitPluginDescription(
 			"org.junit", new VersionRange("[4.13.0,5.0.0)"), null, "org.junit_4.*.jar", "org.junit.source", "source-bundle/", JUnitPreferencesConstants.JUNIT4_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
-	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
-			"org.hamcrest.core", new VersionRange("[2.2.0,3.1.0)"), null, "org.hamcrest.core_2.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-
 	private static final JUnitPluginDescription HAMCREST_PLUGIN= new JUnitPluginDescription(
 			"org.hamcrest", new VersionRange("[2.2.0,3.1.0)"), null, "org.hamcrest_2.*.jar", "org.hamcrest.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
@@ -419,13 +416,6 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnit4as3LibraryEntry() {
 		return JUNIT4_AS_3_PLUGIN.getLibraryEntry();
-	}
-
-	/**
-	 * @return the org.hamcrest.core library, or <code>null</code> if not available
-	 */
-	public static IClasspathEntry getHamcrestCoreLibraryEntry() {
-		return HAMCREST_CORE_PLUGIN.getLibraryEntry();
 	}
 
 	/**
