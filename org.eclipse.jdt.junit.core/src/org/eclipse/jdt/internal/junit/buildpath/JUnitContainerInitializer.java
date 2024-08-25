@@ -121,7 +121,6 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		case JUNIT4:
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
-			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 			break;
 		case JUNIT5:
 			boolean vintage = isVintage(attributes);
@@ -145,7 +144,6 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 				entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			}
 			entriesList.add(BuildPathSupport.getHamcrestLibraryEntry());
- 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 			// errors will be reported above
 			entriesList.removeIf(e -> e == null);
 			break;
