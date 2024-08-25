@@ -42,7 +42,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		// see https://github.com/junit-team/junit/issues/570
 		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://junit.sourceforge.net/junit3.8.1/javadoc/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit.org/junit4/javadoc/latest/"); //$NON-NLS-1$
-		prefs.put(JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC, "http://hamcrest.org/JavaHamcrest/javadoc/1.3/"); //$NON-NLS-1$
+		prefs.put(JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC, "https://hamcrest.org/JavaHamcrest/javadoc/3.0/"); //$NON-NLS-1$
 
 		String junit5JavadocLocation= "http://junit.org/junit5/docs/current/api/"; //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC, junit5JavadocLocation);
