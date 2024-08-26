@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1137,6 +1137,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 					switch (token) {
 						case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
+						case ITerminalSymbols.TokenNameCOMMENT_MARKDOWN:
 						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
 							int end= scanner.getCurrentTokenEndPosition() + 1;
 							regions.add(new Region(start, end - start));
@@ -1189,7 +1190,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					&& (terminal != ITerminalSymbols.TokenNameenum)
 					&& (!foundComment || ((terminal != ITerminalSymbols.TokenNameimport) && (terminal != ITerminalSymbols.TokenNamepackage)))) {
 
-				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK || terminal == ITerminalSymbols.TokenNameCOMMENT_LINE) {
+				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC
+						|| terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK
+						|| terminal == ITerminalSymbols.TokenNameCOMMENT_LINE
+						|| terminal == ITerminalSymbols.TokenNameCOMMENT_MARKDOWN) {
 					if (!foundComment)
 						headerStart= scanner.getCurrentTokenStartPosition();
 					headerEnd= scanner.getCurrentTokenEndPosition();
