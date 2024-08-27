@@ -20,6 +20,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -57,7 +58,9 @@ public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperli
 				}
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+			if (e.getStatus().getCode() != IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 
