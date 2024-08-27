@@ -39,6 +39,8 @@ import org.junit.runners.Suite;
 			SpecialMethodsCompletionTest.class,
 			CodeCompletionTest.class,
 			CodeCompletionTest1d8.class,
+			CodeCompletionTest16.class,
+			CodeCompletionTest23.class,
 			ContinuousTypingCompletionTest.class,
 			ChainCompletionTest.class,
 			PostFixCompletionTest.class
