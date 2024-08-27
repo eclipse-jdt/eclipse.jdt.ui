@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,6 +7,10 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -1151,7 +1155,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					if (emptySelection) {
 						final ITypedRegion partition= TextUtilities.getPartition(viewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, selection.x, true);
 						String type= partition.getType();
-						if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type) || IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
+						if (IJavaPartitions.JAVA_DOC.equals(type)
+								|| IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(type)
+								|| IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)
+								|| IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type)) {
 							viewer.setSelectedRange(partition.getOffset(), partition.getLength());
 							viewer.doOperation(ISourceViewer.FORMAT);
 							return;
