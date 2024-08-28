@@ -1573,6 +1573,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_final_fields;
 
+	public static String PullUpRefactoring_inaccessible_outer_fields;
+
 	public static String PullUpRefactoring_incompatible_langauge_constructs;
 
 	public static String PullUpRefactoring_incompatible_language_constructs1;
@@ -2496,6 +2498,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String UseSupertypeWherePossibleRefactoring_name;
 
 	public static String ChangeSignatureRefactoring_lambda_expression;
+
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);

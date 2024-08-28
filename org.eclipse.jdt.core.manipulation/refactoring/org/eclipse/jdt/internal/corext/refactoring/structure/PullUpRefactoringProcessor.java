@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2023 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -82,6 +82,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -1159,7 +1160,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
-			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 12);
+			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 13);
 			clearCaches();
 
 			final RefactoringStatus result= new RefactoringStatus();
@@ -1170,6 +1171,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				throw new OperationCanceledException();
 			result.merge(checkGenericDeclaringType(subMonitor.newChild(1)));
 			result.merge(checkFinalFields(subMonitor.newChild(1)));
+			result.merge(checkOuterFields(subMonitor.newChild(1)));
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();
 			result.merge(checkAccesses(subMonitor.newChild(1)));
@@ -1193,6 +1195,99 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private class CheckInvalidOuterFieldAccess extends ASTVisitor {
+
+		private final IType fTargetType;
+		private final IType fSourceType;
+		private final ITypeBinding fTypeDeclBinding;
+		private IBinding fConflictBinding;
+
+		public CheckInvalidOuterFieldAccess(final IType sourceType, final IType targetType,	final ITypeBinding typeDeclBinding) {
+			fSourceType= sourceType;
+			fTargetType= targetType;
+			fTypeDeclBinding= typeDeclBinding;
+		}
+
+		public IBinding getConflictBinding() {
+			return fConflictBinding;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			IBinding binding= node.resolveBinding();
+			if (binding != null) {
+				if (binding instanceof IVariableBinding varBinding && varBinding.isField()) {
+					if (!(node.getParent() instanceof QualifiedName)) {
+						if (!(node.getParent() instanceof FieldAccess fieldAccess) || fieldAccess.getExpression() instanceof ThisExpression) {
+							ITypeBinding declBinding= varBinding.getDeclaringClass();
+							if (declBinding != null && !declBinding.isEqualTo(fTypeDeclBinding)) {
+								if (isChildTypeMember(declBinding, fSourceType) && !isChildTypeMember(declBinding, fTargetType)) {
+									fConflictBinding= varBinding;
+									throw new AbortSearchException();
+								}
+							}
+						}
+					}
+				} else if (binding instanceof IMethodBinding methodBinding && node.getLocationInParent() == MethodInvocation.NAME_PROPERTY && !Modifier.isStatic(methodBinding.getModifiers())) {
+					MethodInvocation invocation= (MethodInvocation) node.getParent();
+					if (invocation.getExpression() == null || invocation.getExpression() instanceof ThisExpression) {
+						ITypeBinding declBinding= methodBinding.getDeclaringClass();
+						if (declBinding != null && !declBinding.isEqualTo(fTypeDeclBinding)) {
+							if (isChildTypeMember(declBinding, fSourceType) && !isChildTypeMember(declBinding, fTargetType)) {
+								fConflictBinding= methodBinding;
+								throw new AbortSearchException();
+							}
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		private boolean isChildTypeMember(ITypeBinding parentTypeBinding, IType type) {
+			if (parentTypeBinding.getQualifiedName().equals(type.getFullyQualifiedName('.'))) {
+				return true;
+			}
+			ITypeBinding[] childTypes= parentTypeBinding.getDeclaredTypes();
+			for (ITypeBinding childType : childTypes) {
+				return isChildTypeMember(childType, type);
+			}
+			return false;
+		}
+	}
+
+	protected RefactoringStatus checkOuterFields(final IProgressMonitor monitor) throws JavaModelException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+		final RefactoringStatus result= new RefactoringStatus();
+		final IType sourceType= getDeclaringType();
+		final ICompilationUnit source= getDeclaringType().getCompilationUnit();
+		final IType destination= getDestinationType();
+		Map<ICompilationUnit, CompilationUnitRewrite> compilationUnitRewrites= new HashMap<>(3);
+		final CompilationUnitRewrite sourceRewriter= getCompilationUnitRewrite(compilationUnitRewrites, source);
+		final CompilationUnit root= sourceRewriter.getRoot();
+
+		for (final IMember member : fMembersToMove) {
+			if (member.getElementType() == IJavaElement.METHOD) {
+				final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);
+				AbstractTypeDeclaration typeDecl= ASTNodes.getFirstAncestorOrNull(oldMethod, AbstractTypeDeclaration.class);
+				if (typeDecl != null && (typeDecl.isLocalTypeDeclaration() || typeDecl.isMemberTypeDeclaration())) {
+					ITypeBinding typeDeclBinding= typeDecl.resolveBinding();
+					if (typeDeclBinding != null) {
+						CheckInvalidOuterFieldAccess checker= new CheckInvalidOuterFieldAccess(sourceType, destination, typeDeclBinding);
+						try {
+							oldMethod.accept(checker);
+						} catch (AbortSearchException e) {
+							result.addError(Messages.format(RefactoringCoreMessages.PullUpRefactoring_inaccessible_outer_fields, new String[] { JavaElementLabelsCore.getElementLabel(member, JavaElementLabelsCore.DEFAULT_QUALIFIED), JavaElementLabelsCore.getElementLabel(fDestinationType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED),
+									JavaElementLabelsCore.getElementLabel(checker.getConflictBinding().getJavaElement(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED)}), null);
+						}
+					}
+				}
+			}
+		}
+		subMonitor.done();
+		return result;
 	}
 
 	protected RefactoringStatus checkFinalFields(final IProgressMonitor monitor) throws JavaModelException {

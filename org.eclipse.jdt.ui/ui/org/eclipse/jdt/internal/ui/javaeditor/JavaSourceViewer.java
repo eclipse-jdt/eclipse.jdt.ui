@@ -157,29 +157,30 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	@Override
 	public void doOperation(int operation) {
-		JavaCore.runReadOnly(()->doOperationCached(operation));
-	}
-
-	private void doOperationCached(int operation) {
 		if (getTextWidget() == null)
 			return;
+		Boolean handled= JavaCore.callReadOnly(() -> doOperationCached(operation));
+		if (!handled) {
+			super.doOperation(operation);
+		}
+	}
 
+	private boolean doOperationCached(int operation) {
 		switch (operation) {
 			case SHOW_OUTLINE:
 				if (fOutlinePresenter != null)
 					fOutlinePresenter.showInformation();
-				return;
+				return true;
 			case OPEN_STRUCTURE:
 				if (fStructurePresenter != null)
 					fStructurePresenter.showInformation();
-				return;
+				return true;
 			case SHOW_HIERARCHY:
 				if (fHierarchyPresenter != null)
 					fHierarchyPresenter.showInformation();
-				return;
+				return true;
 		}
-
-		super.doOperation(operation);
+		return false;
 	}
 
 	/*
