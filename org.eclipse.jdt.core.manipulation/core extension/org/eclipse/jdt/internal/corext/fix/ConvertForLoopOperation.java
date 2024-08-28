@@ -929,8 +929,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		pg.addPosition(rewrite.track(name), true);
 		result.setName(name);
 
-		IMethodBinding sizeTypeBinding= ((MethodInvocation)sizeAccess).resolveMethodBinding();
-		ITypeBinding[] sizeTypeArguments= sizeTypeBinding.getDeclaringClass().getTypeArguments();
+
+		ITypeBinding sizeTypeBinding= ((MethodInvocation)sizeAccess).getExpression().resolveTypeBinding();
+		ITypeBinding[] sizeTypeArguments= sizeTypeBinding.getTypeArguments();
 
 		ITypeBinding elementType;
 		if (sizeTypeArguments == null || sizeTypeArguments.length == 0) {
