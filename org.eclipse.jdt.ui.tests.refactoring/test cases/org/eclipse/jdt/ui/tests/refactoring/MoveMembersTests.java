@@ -707,6 +707,24 @@ public class MoveMembersTests extends GenericRefactoringTest {
 				RefactoringStatus.FATAL, "p.B");
 	}
 
+	@Test
+	public void testFail25() throws Exception { // test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1530
+		// Move a static field that will override another field in the hierarchy that is referenced
+		fieldMethodTypeHelper_failing(new String[] {"m"},
+				new String[0], new String[][] {new String[0]},
+				new String[0],
+				RefactoringStatus.ERROR, "p.B");
+	}
+
+	@Test
+	public void testFail26() throws Exception { // test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1530
+		// Move a static method that will override another method in the hierarchy that is referenced
+		fieldMethodTypeHelper_failing(new String[0],
+				new String[] {"m"}, new String[][] {new String[0]},
+				new String[0],
+				RefactoringStatus.ERROR, "p.B");
+	}
+
 	// Delegate creation
 
 	@Test
