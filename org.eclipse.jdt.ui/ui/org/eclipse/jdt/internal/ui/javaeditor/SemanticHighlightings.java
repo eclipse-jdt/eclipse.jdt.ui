@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,15 +22,19 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -51,6 +55,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -1193,8 +1198,33 @@ public class SemanticHighlightings {
 		public boolean consumes(SemanticToken token) {
 			IBinding binding= getBinding(token);
 			if (binding != null) {
-				if (binding.isDeprecated())
+				if (binding.isDeprecated()) {
+					IAnnotationBinding[] annotations= binding.getAnnotations();
+					for (IAnnotationBinding annotation : annotations) {
+						if (annotation.getAnnotationType().getQualifiedName().equals("java.lang.Deprecated")) { //$NON-NLS-1$
+							IMemberValuePairBinding[] pairs= annotation.getAllMemberValuePairs();
+							for (IMemberValuePairBinding pair : pairs) {
+								if (pair.getName().equals("since")) { //$NON-NLS-1$
+									String value= (String) pair.getValue();
+									try {
+										int sinceValue= Integer.parseInt(value);
+										CompilationUnit root= token.getRoot();
+										IJavaProject project= root.getJavaElement().getJavaProject();
+										String compliance= JavaModelUtil.getSourceCompliance(project);
+										int apiLevel= Integer.parseInt(compliance);
+										if (apiLevel < sinceValue) {
+											return false;
+										}
+									} catch (NumberFormatException e) {
+										// do nothing and fall through
+									}
+
+								}
+							}
+						}
+					}
 					return true;
+				}
 				if (binding instanceof IMethodBinding) {
 					IMethodBinding methodBinding= (IMethodBinding) binding;
 					ITypeBinding declaringClass= methodBinding.getDeclaringClass();
