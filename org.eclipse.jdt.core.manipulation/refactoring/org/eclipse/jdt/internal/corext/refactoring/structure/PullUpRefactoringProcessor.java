@@ -1647,7 +1647,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(destination, rewrite.getRoot());
 							ModifierRewrite.create(rewriter, declaration).setModifiers(declaration.getModifiers() | Modifier.ABSTRACT, rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_make_target_abstract, SET_PULL_UP));
 						}
-						final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), destination);
+						TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), destination);
+						if (mapping.length == 0 && destination.isInterface()) {
+							mapping= TypeVariableUtil.subTypeToImplementedType(getDeclaringType(), destination);
+						}
 						final SubMonitor subsub= sub.newChild(1);
 						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(destination, rewrite.getRoot());
 						ImportRewriteContext context= new ContextSensitiveImportRewriteContext(declaration, rewrite.getImportRewrite());

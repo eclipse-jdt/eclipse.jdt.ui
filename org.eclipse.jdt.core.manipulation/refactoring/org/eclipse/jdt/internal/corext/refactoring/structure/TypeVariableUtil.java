@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -346,6 +346,61 @@ public final class TypeVariableUtil {
 				final String[] range= getVariableSignatures(signature);
 				if (range.length > 0)
 					return parametersToSignatures(domain, range, false);
+			}
+		}
+		return new TypeVariableMaplet[0];
+	}
+
+	/**
+	 * Returns a type variable mapping from a subclass to an implemented interface.
+	 *
+	 * @param subtype
+	 *        the type representing the subclass class
+	 * @param implemented
+	 *        the interface being implemented by the subclass
+	 * @return a type variable mapping. The mapping entries consist of simple type variable names.
+	 * @throws JavaModelException
+	 *         if the signature of one of the types involved could not be retrieved
+	 */
+	public static TypeVariableMaplet[] subTypeToImplementedType(final IType subtype, final IType implemented) throws JavaModelException {
+		Assert.isNotNull(subtype);
+		Assert.isNotNull(implemented);
+
+		Index index= new Index();
+		final TypeVariableMaplet[] mapping= subTypeToImplementedTypeMapping(subtype, implemented, index);
+		if (mapping.length > 0) {
+			final ITypeParameter[] range= implemented.getTypeParameters();
+			if (range.length > 0) {
+				final String signature= subtype.getSuperInterfaceTypeSignatures()[index.index];
+				if (signature != null) {
+					final String[] domain= getVariableSignatures(signature);
+					if (domain.length > 0)
+						return composeMappings(mapping, signaturesToParameters(domain, range));
+				}
+			}
+		}
+		return mapping;
+	}
+
+	private static class Index {
+		public int index;
+	}
+
+	private static TypeVariableMaplet[] subTypeToImplementedTypeMapping(final IType type, final IType implemented, Index index) throws JavaModelException {
+		Assert.isNotNull(type);
+		Assert.isNotNull(implemented);
+
+		final ITypeParameter[] domain= type.getTypeParameters();
+		if (domain.length > 0) {
+			final String[] signatures= type.getSuperInterfaceTypeSignatures();
+			for (int i= 0; i < signatures.length; ++i) {
+				String signature= signatures[i];
+				if (Signature.getSignatureSimpleName(Signature.getTypeErasure(signature)).equals(implemented.getElementName())) {
+					index.index= i;
+					final String[] range= getVariableSignatures(signature);
+					if (range.length > 0)
+						return parametersToSignatures(domain, range, false);
+				}
 			}
 		}
 		return new TypeVariableMaplet[0];
