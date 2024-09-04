@@ -80,7 +80,7 @@ public class JarWriter3 {
 
 	private Set<String> fDirectories= new HashSet<>();
 
-	private JarOutputStream fJarOutputStream;
+	private final JarOutputStream fJarOutputStream;
 
 	private JarPackageData fJarPackage;
 
@@ -124,23 +124,32 @@ public class JarWriter3 {
 		Assert.isTrue(fJarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
 		if (!canCreateJar(parent))
 			throw new OperationCanceledException("Cannot create JAR with path: " + fJarPackage.getAbsoluteJarLocation()); //$NON-NLS-1$
-
+		JarOutputStream jos= null;
 		try {
 			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {
 				Manifest manifest= fJarPackage.getManifestProvider().create(fJarPackage);
-				fJarOutputStream= new JarOutputStream(new BufferedOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile())), manifest);
-			} else
-				fJarOutputStream= new JarOutputStream(new BufferedOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile())));
+				jos= new JarOutputStream(new BufferedOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile())), manifest);
+			} else {
+				jos= new JarOutputStream(new BufferedOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toFile())));
+			}
 			String comment= jarPackage.getComment();
 			if (comment != null)
-				fJarOutputStream.setComment(comment);
+				jos.setComment(comment);
 			if (fJarPackage.isRefactoringAware()) {
 				Assert.isTrue(fJarPackage.areDirectoryEntriesIncluded());
 				final IPath metaPath= new Path(JarPackagerUtil.getMetaEntry());
 				addDirectories(metaPath);
 				addHistory(fJarPackage, new Path(JarPackagerUtil.getRefactoringsEntry()), new NullProgressMonitor());
 			}
+			fJarOutputStream= jos;
 		} catch (IOException exception) {
+			if (jos != null) {
+				try {
+					jos.close();
+				} catch (IOException e) {
+					exception.addSuppressed(e);
+				}
+			}
 			throw JarPackagerUtil.createCoreException(exception.getLocalizedMessage(), exception);
 		}
 	}

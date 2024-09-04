@@ -883,7 +883,7 @@ public class JarPackageData {
 	 *
 	 * @deprecated Use {@link #createJarWriter3(Shell)} instead
 	 */
-	@Deprecated
+	@Deprecated(forRemoval= true, since= "2024-12")
 	public JarWriter2 createJarWriter(Shell parent) throws CoreException {
 		return new JarWriter2(this, parent);
 	}

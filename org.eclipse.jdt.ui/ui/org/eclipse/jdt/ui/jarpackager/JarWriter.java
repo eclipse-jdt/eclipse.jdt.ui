@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  *
  * @deprecated use {@link org.eclipse.jdt.ui.jarpackager.JarWriter3 JarWriter3} instead.
  */
-@Deprecated
+@Deprecated(forRemoval= true, since= "2024-12")
 public class JarWriter {
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
