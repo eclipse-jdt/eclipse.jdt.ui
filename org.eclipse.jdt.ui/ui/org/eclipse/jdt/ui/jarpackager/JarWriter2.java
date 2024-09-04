@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  *
  * @deprecated Use {@link JarWriter3} instead which leverages new {@link org.eclipse.core.filesystem.EFS EFS} support
  */
-@Deprecated
+@Deprecated(forRemoval= true, since= "2024-12")
 public class JarWriter2 {
 
 	private JarOutputStream fJarOutputStream;
