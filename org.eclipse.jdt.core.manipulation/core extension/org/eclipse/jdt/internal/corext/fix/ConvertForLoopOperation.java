@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,7 +85,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private VariableDeclarationFragment fElementDeclaration;
 	private boolean fMakeFinal;
 	private boolean fIsCollection;
-	private IMethodBinding fSizeMethodBinding;
+	private ITypeBinding fSizeMethodTypeBinding;
 	private IMethodBinding fGetMethodBinding;
 	private MethodInvocation fSizeMethodAccess;
 	private boolean fCheckLoopVarUsed;
@@ -347,9 +347,19 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			}
 			ITypeBinding classBinding= methodBinding.getDeclaringClass();
 
+			if (methodCall.getExpression() == null) {
+				return false;
+			}
+
+			ITypeBinding expressionBinding= methodCall.getExpression().resolveTypeBinding();
+
+			if (expressionBinding == null) {
+				return false;
+			}
+
 			if (isCollection(classBinding)) {
 				fIsCollection= true;
-				fSizeMethodBinding= methodBinding;
+				fSizeMethodTypeBinding= expressionBinding;
 				fSizeMethodAccess= methodCall;
 				return true;
 			}
@@ -446,7 +456,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		return false;
 	}
 
-	/*
+	/**
 	 * returns false iff
 	 * <ul>
 	 * <li><code>indexBinding</code> is used for anything else then accessing
@@ -538,7 +548,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 										|| !GET_QUERY.equals(method.getName().getFullyQualifiedName())
 										|| parms.length != 1
 										|| !"int".equals(parms[0].getName()) //$NON-NLS-1$
-										|| !areTypeBindingEqual(fSizeMethodBinding.getDeclaringClass(), methodBinding.getDeclaringClass())
+										|| !areTypeBindingEqual(fSizeMethodTypeBinding, methodBinding.getDeclaringClass())
 										|| fSizeMethodAccess.getExpression() == null
 										|| !fSizeMethodAccess.getExpression().subtreeMatch(new ASTMatcher(), method.getExpression()))
 									throw new InvalidBodyError();
@@ -561,7 +571,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 						if (binding == null) {
 							throw new InvalidBodyError();
 						}
-						if (areTypeBindingEqual(fSizeMethodBinding.getDeclaringClass(), binding.getDeclaringClass())) {
+						if (areTypeBindingEqual(fSizeMethodTypeBinding, binding.getDeclaringClass())) {
 							String methodName= method.getName().getFullyQualifiedName();
 							if (!SIZE_QUERY.equals(methodName) &&
 									!GET_QUERY.equals(methodName) &&
@@ -621,7 +631,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 					ITypeBinding[] args= nodeBinding.getParameterTypes();
 					if (GET_QUERY.equals(nodeBinding.getName()) && args.length == 1 &&
 							"int".equals(args[0].getName()) && //$NON-NLS-1$
-							areTypeBindingEqual(nodeBinding.getDeclaringClass(), fSizeMethodBinding.getDeclaringClass())) {
+							areTypeBindingEqual(nodeBinding.getDeclaringClass(), fSizeMethodTypeBinding)) {
 						IBinding index= getBinding((Expression)node.arguments().get(0));
 						if (fIndexBinding.equals(index)) {
 							if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
@@ -844,7 +854,7 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		String baseName= modifyBaseName(name);
 		String[] elementSuggestions= StubUtility.getLocalNameSuggestions(project, baseName, 0, variableNames);
 
-		ITypeBinding[] typeArgs= fSizeMethodBinding.getDeclaringClass().getTypeArguments();
+		ITypeBinding[] typeArgs= fSizeMethodTypeBinding.getTypeArguments();
 
 		String type;
 		if (typeArgs == null || typeArgs.length == 0) {
@@ -919,8 +929,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		pg.addPosition(rewrite.track(name), true);
 		result.setName(name);
 
-		IMethodBinding sizeTypeBinding= ((MethodInvocation)sizeAccess).resolveMethodBinding();
-		ITypeBinding[] sizeTypeArguments= sizeTypeBinding.getDeclaringClass().getTypeArguments();
+
+		ITypeBinding sizeTypeBinding= ((MethodInvocation)sizeAccess).getExpression().resolveTypeBinding();
+		ITypeBinding[] sizeTypeArguments= sizeTypeBinding.getTypeArguments();
 
 		ITypeBinding elementType;
 		if (sizeTypeArguments == null || sizeTypeArguments.length == 0) {
