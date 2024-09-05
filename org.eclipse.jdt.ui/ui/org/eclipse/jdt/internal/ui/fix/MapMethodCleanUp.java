@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -108,7 +108,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 		    @Override
@@ -167,7 +167,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.UseDirectlyMapMethodCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[rewriteOperations.size()]));
 	}
 
 	@Override
@@ -180,7 +180,7 @@ public class MapMethodCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class MapMethodOperation extends CompilationUnitRewriteOperation {
+	private static class MapMethodOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final MethodInvocation subAggregateMi;
 		private final MethodInvocation globalMi;
 		private final String methodName;

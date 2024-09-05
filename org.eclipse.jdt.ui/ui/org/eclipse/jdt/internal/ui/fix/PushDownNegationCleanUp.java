@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -97,7 +97,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			PrefixExpression secondNotOperator= null;
@@ -152,7 +152,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		}
 
 		RemoveDoubleNegationOperation lastDoubleNegation= null;
-		for (CompilationUnitRewriteOperation op : rewriteOperations) {
+		for (CompilationUnitRewriteOperationWithSourceRange op : rewriteOperations) {
 			if (op instanceof ReplacementOperation) {
 				ReplacementOperation chainedOp= (ReplacementOperation) op;
 				if (lastDoubleNegation != null && chainedOp.getNode().subtreeMatch(new ASTMatcher(), lastDoubleNegation.getReplacementExpression())) {
@@ -165,7 +165,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.PushDownNegationCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[rewriteOperations.size()]));
 	}
 
 	@Override
@@ -178,7 +178,7 @@ public class PushDownNegationCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private abstract static class ReplacementOperation extends CompilationUnitRewriteOperation {
+	private abstract static class ReplacementOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private ASTNode node;
 
 		public void setNode(ASTNode node) {

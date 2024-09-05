@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -104,7 +104,7 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -190,7 +190,7 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -208,7 +208,7 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 		return null;
 	}
 
-	private static class StrictlyEqualOrDifferentOperation extends CompilationUnitRewriteOperation {
+	private static class StrictlyEqualOrDifferentOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Expression visited;
 		private final Expression firstExpression;
 		private final Expression secondExpression;

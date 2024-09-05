@@ -95,7 +95,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static class AddParenthesisOperation extends CompilationUnitRewriteOperation {
+	private static class AddParenthesisOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private final Expression[] fExpressions;
 
@@ -119,7 +119,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static class RemoveParenthesisOperation extends CompilationUnitRewriteOperation {
+	private static class RemoveParenthesisOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private final HashSet<ParenthesizedExpression> fExpressions;
 
@@ -172,8 +172,8 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 
 
-		CompilationUnitRewriteOperation op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
-		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+		CompilationUnitRewriteOperationWithSourceRange op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
+		return new ExpressionsFix(FixMessages.ExpressionsFix_addParanoiacParentheses_description, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op});
 	}
 
 	public static ExpressionsFix createRemoveUnnecessaryParenthesisFix(CompilationUnit compilationUnit, ASTNode[] nodes) {
@@ -188,7 +188,7 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 		HashSet<ParenthesizedExpression> expressions= new HashSet<>(changedNodes);
 		RemoveParenthesisOperation op= new RemoveParenthesisOperation(expressions);
-		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+		return new ExpressionsFix(FixMessages.ExpressionsFix_removeUnnecessaryParentheses_description, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op});
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit,
@@ -202,8 +202,8 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			if (changedNodes.isEmpty())
 				return null;
 
-			CompilationUnitRewriteOperation op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
-			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+			CompilationUnitRewriteOperationWithSourceRange op= new AddParenthesisOperation(changedNodes.toArray(new Expression[changedNodes.size()]));
+			return new ExpressionsFix(FixMessages.ExpressionsFix_add_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op});
 		} else if (removeUnnecessaryParenthesis) {
 			final ArrayList<ParenthesizedExpression> changedNodes = new ArrayList<>();
 			compilationUnit.accept(new UnnecessaryParenthesisVisitor(changedNodes));
@@ -212,13 +212,13 @@ public class ExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				return null;
 
 			HashSet<ParenthesizedExpression> expressions= new HashSet<>(changedNodes);
-			CompilationUnitRewriteOperation op= new RemoveParenthesisOperation(expressions);
-			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperation[] {op});
+			CompilationUnitRewriteOperationWithSourceRange op= new RemoveParenthesisOperation(expressions);
+			return new ExpressionsFix(FixMessages.ExpressionsFix_remove_parentheses_change_name, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op});
 		}
 		return null;
 	}
 
-	protected ExpressionsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
+	protected ExpressionsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 }

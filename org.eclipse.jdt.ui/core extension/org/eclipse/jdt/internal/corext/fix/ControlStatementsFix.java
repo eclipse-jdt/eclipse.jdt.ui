@@ -48,7 +48,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
 
-		private final List<CompilationUnitRewriteOperation> fResult;
+		private final List<CompilationUnitRewriteOperationWithSourceRange> fResult;
 		private final boolean fFindControlStatementsWithoutBlock;
 		private final boolean fRemoveUnnecessaryBlocks;
 		private final boolean fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow;
@@ -56,7 +56,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		public ControlStatementFinder(boolean findControlStatementsWithoutBlock,
 				boolean removeUnnecessaryBlocks,
 				boolean removeUnnecessaryBlocksOnlyWhenReturnOrThrow,
-				List<CompilationUnitRewriteOperation> resultingCollection) {
+				List<CompilationUnitRewriteOperationWithSourceRange> resultingCollection) {
 
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
@@ -487,18 +487,18 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
+		List<CompilationUnitRewriteOperationWithSourceRange> operations= new ArrayList<>();
 		ControlStatementFinder finder= new ControlStatementFinder(convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())
 			return null;
 
-		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperationWithSourceRange[] ops= operations.toArray(new CompilationUnitRewriteOperationWithSourceRange[operations.size()]);
 		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}
 
-	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
+	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 

@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -89,7 +89,7 @@ public class BitwiseConditionalExpressionCleanup extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -141,7 +141,7 @@ public class BitwiseConditionalExpressionCleanup extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CheckSignOfBitwiseOperation_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -154,7 +154,7 @@ public class BitwiseConditionalExpressionCleanup extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class RewriteInfixExpressionOperator extends CompilationUnitRewriteOperation {
+	private static class RewriteInfixExpressionOperator extends CompilationUnitRewriteOperationWithSourceRange {
 		private InfixExpression fExpression;
 
 		public RewriteInfixExpressionOperator(final InfixExpression expression) {

@@ -49,7 +49,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -100,7 +100,7 @@ public class MapCloningCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -210,7 +210,7 @@ public class MapCloningCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.MapCloningCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -223,7 +223,7 @@ public class MapCloningCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class MapCloningOperation extends CompilationUnitRewriteOperation {
+	private static class MapCloningOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final ExpressionStatement nodeToRemove;
 		private final ClassInstanceCreation classInstanceCreation;
 		private final Expression arg0;
