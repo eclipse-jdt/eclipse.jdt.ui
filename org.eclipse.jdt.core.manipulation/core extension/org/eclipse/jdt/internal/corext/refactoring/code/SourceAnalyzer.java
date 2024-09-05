@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -249,6 +250,13 @@ class SourceAnalyzer  {
 			return true;
 		}
 		@Override
+		public boolean visit(SuperFieldAccess node) {
+			if (fTypeCounter == 0) {
+				fHasSuperFieldAccess= true;
+			}
+			return true;
+		}
+		@Override
 		public boolean visit(SuperConstructorInvocation node) {
 			if (fTypeCounter == 0) {
 				fHasSuperMethodInvocation= true;
@@ -404,6 +412,7 @@ class SourceAnalyzer  {
 
 	private boolean fArrayAccess;
 	private boolean fHasSuperMethodInvocation;
+	private boolean fHasSuperFieldAccess;
 
 	private List<SimpleName> fTypesToImport;
 	private List<SimpleName> fStaticsToImport;
@@ -573,6 +582,10 @@ class SourceAnalyzer  {
 
 	public boolean hasSuperMethodInvocation() {
 		return fHasSuperMethodInvocation;
+	}
+
+	public boolean hasSuperFieldAccess() {
+		return fHasSuperFieldAccess;
 	}
 
 	private ASTNode[] getStatements() {
