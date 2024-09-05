@@ -184,12 +184,18 @@ public class CoreJavaDocSnippetStringEvaluator {
 		String modifiedStr= str;
 		for (TagElement tag : tags) {
 			String name= tag.getTagName();
-			if (TagElement.TAG_HIGHLIGHT.equals(name)) {
-				handleSnippetHighlight(modifiedStr, tag, actionElements);
-			} else if (TagElement.TAG_REPLACE.equals(name)) {
-				modifiedStr= handleSnippetReplace(modifiedStr, tag, actionElements);
-			} else if (TagElement.TAG_LINK.equals(name)) {
-				handleSnippetLink(modifiedStr, tag, actionElements);
+			switch (name) {
+				case TagElement.TAG_HIGHLIGHT:
+					handleSnippetHighlight(modifiedStr, tag, actionElements);
+					break;
+				case TagElement.TAG_REPLACE:
+					modifiedStr= handleSnippetReplace(modifiedStr, tag, actionElements);
+					break;
+				case TagElement.TAG_LINK:
+					handleSnippetLink(modifiedStr, tag, actionElements);
+					break;
+				default:
+					break;
 			}
 		}
 		return getString(modifiedStr, actionElements);

@@ -236,44 +236,52 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 			IJavaElement element= (IJavaElement) obj;
 			int elementType= element.getElementType();
 
-			if (elementType == IJavaElement.PACKAGE_FRAGMENT) {
-				return analyze((IPackageFragment) element, Progress.subMonitor(pm, 1));
-			} else if (elementType == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-				if (!root.isExternal() && !ReorgUtilsCore.isClassFolder(root)) {
-					return analyze((IPackageFragmentRoot) element, Progress.subMonitor(pm, 1));
-				} else {
+			switch (elementType) {
+				case IJavaElement.PACKAGE_FRAGMENT:
+					return analyze((IPackageFragment) element, Progress.subMonitor(pm, 1));
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT: {
+					IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+					if (!root.isExternal() && !ReorgUtilsCore.isClassFolder(root)) {
+						return analyze((IPackageFragmentRoot) element, Progress.subMonitor(pm, 1));
+					} else {
+						pm.worked(1);
+					}
+					break;
+				}
+				case IJavaElement.JAVA_PROJECT:
+					return analyze((IJavaProject) element, Progress.subMonitor(pm, 1));
+				case IJavaElement.COMPILATION_UNIT: {
+					ICompilationUnit cu= (ICompilationUnit)element;
+					if (cu.exists()) {
+						NonNLSElement nlsElement= analyze(cu);
+						if (nlsElement != null) {
+							pm.worked(1);
+							ArrayList<NonNLSElement> result= new ArrayList<>();
+							result.add(nlsElement);
+							return result;
+						}
+					}
 					pm.worked(1);
+					break;
 				}
-			} else if (elementType == IJavaElement.JAVA_PROJECT) {
-				return analyze((IJavaProject) element, Progress.subMonitor(pm, 1));
-			} else if (elementType == IJavaElement.COMPILATION_UNIT) {
-				ICompilationUnit cu= (ICompilationUnit)element;
-				if (cu.exists()) {
-					NonNLSElement nlsElement= analyze(cu);
-					if (nlsElement != null) {
-						pm.worked(1);
-						ArrayList<NonNLSElement> result= new ArrayList<>();
-						result.add(nlsElement);
-						return result;
+				case IJavaElement.TYPE: {
+					IType type= (IType)element;
+					ICompilationUnit cu= type.getCompilationUnit();
+					if (cu != null && cu.exists()) {
+						NonNLSElement nlsElement= analyze(cu);
+						if (nlsElement != null) {
+							pm.worked(1);
+							ArrayList<NonNLSElement> result= new ArrayList<>();
+							result.add(nlsElement);
+							return result;
+						}
 					}
+					pm.worked(1);
+					break;
 				}
-				pm.worked(1);
-			} else if (elementType == IJavaElement.TYPE) {
-				IType type= (IType)element;
-				ICompilationUnit cu= type.getCompilationUnit();
-				if (cu != null && cu.exists()) {
-					NonNLSElement nlsElement= analyze(cu);
-					if (nlsElement != null) {
-						pm.worked(1);
-						ArrayList<NonNLSElement> result= new ArrayList<>();
-						result.add(nlsElement);
-						return result;
-					}
-				}
-				pm.worked(1);
-			} else {
-				pm.worked(1);
+				default:
+					pm.worked(1);
+					break;
 			}
 		} else if (obj instanceof IWorkingSet) {
 			List<NonNLSElement> result= new ArrayList<>();

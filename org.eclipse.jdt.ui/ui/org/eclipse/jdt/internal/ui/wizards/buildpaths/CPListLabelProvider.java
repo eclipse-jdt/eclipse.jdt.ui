@@ -138,181 +138,191 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
 		String notAvailable= NewWizardMessages.CPListLabelProvider_none;
 		String key= attrib.getKey();
-		if (CPListElement.SOURCEATTACHMENT.equals(key)) {
-			String arg;
-			IPath path= (IPath) attrib.getValue();
-			if (path != null && !path.isEmpty()) {
-				if (attrib.getParent().getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					arg= getVariableString(path);
-				} else {
-					arg= getPathString(path, path.getDevice() != null);
-				}
-			} else {
-				arg= notAvailable;
-			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_source_attachment_label, new String[] { arg });
-		} else if (CPListElement.OUTPUT.equals(key)) {
-			String arg= null;
-			IPath path= (IPath) attrib.getValue();
-			if (path != null) {
-				arg= BasicElementLabels.getPathLabel(path, false);
-			} else {
-				arg= NewWizardMessages.CPListLabelProvider_default_output_folder_label;
-			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_output_folder_label, new String[] { arg });
-		} else if (CPListElement.EXCLUSION.equals(key)) {
-			String arg= null;
-			IPath[] patterns= (IPath[]) attrib.getValue();
-			if (patterns != null && patterns.length > 0) {
-				int patternsCount= 0;
-				StringBuilder buf= new StringBuilder();
-				for (IPath p : patterns) {
-					if (p.segmentCount() > 0) {
-						String pattern= BasicElementLabels.getPathLabel(p, false);
-						if (patternsCount > 0) {
-							buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator);
-						}
-						buf.append(pattern);
-						patternsCount++;
+		switch (key) {
+			case CPListElement.SOURCEATTACHMENT: {
+				String arg;
+				IPath path= (IPath) attrib.getValue();
+				if (path != null && !path.isEmpty()) {
+					if (attrib.getParent().getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+						arg= getVariableString(path);
+					} else {
+						arg= getPathString(path, path.getDevice() != null);
 					}
-				}
-				if (patternsCount > 0) {
-					arg= buf.toString();
 				} else {
 					arg= notAvailable;
 				}
-			} else {
-				arg= notAvailable;
+				return Messages.format(NewWizardMessages.CPListLabelProvider_source_attachment_label, new String[] { arg });
 			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_exclusion_filter_label, new String[] { arg });
-		} else if (CPListElement.INCLUSION.equals(key)) {
-			String arg= null;
-			IPath[] patterns= (IPath[]) attrib.getValue();
-			if (patterns != null && patterns.length > 0) {
-				int patternsCount= 0;
-				StringBuilder buf= new StringBuilder();
-				for (IPath p : patterns) {
-					if (p.segmentCount() > 0) {
-						String pattern= BasicElementLabels.getPathLabel(p, false);
-						if (patternsCount > 0) {
-							buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator);
-						}
-						buf.append(pattern);
-						patternsCount++;
-					}
+			case CPListElement.OUTPUT: {
+				String arg= null;
+				IPath path= (IPath) attrib.getValue();
+				if (path != null) {
+					arg= BasicElementLabels.getPathLabel(path, false);
+				} else {
+					arg= NewWizardMessages.CPListLabelProvider_default_output_folder_label;
 				}
-				if (patternsCount > 0) {
-					arg= buf.toString();
+				return Messages.format(NewWizardMessages.CPListLabelProvider_output_folder_label, new String[] { arg });
+			}
+			case CPListElement.EXCLUSION: {
+				String arg= null;
+				IPath[] patterns= (IPath[]) attrib.getValue();
+				if (patterns != null && patterns.length > 0) {
+					int patternsCount= 0;
+					StringBuilder buf= new StringBuilder();
+					for (IPath p : patterns) {
+						if (p.segmentCount() > 0) {
+							String pattern= BasicElementLabels.getPathLabel(p, false);
+							if (patternsCount > 0) {
+								buf.append(NewWizardMessages.CPListLabelProvider_exclusion_filter_separator);
+							}
+							buf.append(pattern);
+							patternsCount++;
+						}
+					}
+					if (patternsCount > 0) {
+						arg= buf.toString();
+					} else {
+						arg= notAvailable;
+					}
 				} else {
 					arg= notAvailable;
 				}
-			} else {
-				arg= NewWizardMessages.CPListLabelProvider_all;
+				return Messages.format(NewWizardMessages.CPListLabelProvider_exclusion_filter_label, new String[] { arg });
 			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_inclusion_filter_label, new String[] { arg });
-		} else if (CPListElement.ACCESSRULES.equals(key)) {
-			IAccessRule[] rules= (IAccessRule[]) attrib.getValue();
-			int nRules= rules != null ? rules.length : 0;
-
-			int parentKind= attrib.getParent().getEntryKind();
-			if (parentKind == IClasspathEntry.CPE_PROJECT) {
-				Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
-				if (nRules > 0) {
-					if (combined) {
-						if (nRules == 1) {
-							return NewWizardMessages.CPListLabelProvider_project_access_rules_combined_singular;
-						} else {
-							return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_combined_plural, String.valueOf(nRules));
-						}
-					} else {
-						if (nRules == 1) {
-							return NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined_singular;
-						} else {
-							return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined_plural, String.valueOf(nRules));
+			case CPListElement.INCLUSION: {
+				String arg= null;
+				IPath[] patterns= (IPath[]) attrib.getValue();
+				if (patterns != null && patterns.length > 0) {
+					int patternsCount= 0;
+					StringBuilder buf= new StringBuilder();
+					for (IPath p : patterns) {
+						if (p.segmentCount() > 0) {
+							String pattern= BasicElementLabels.getPathLabel(p, false);
+							if (patternsCount > 0) {
+								buf.append(NewWizardMessages.CPListLabelProvider_inclusion_filter_separator);
+							}
+							buf.append(pattern);
+							patternsCount++;
 						}
 					}
-				} else {
-					return NewWizardMessages.CPListLabelProvider_project_access_rules_no_rules;
-				}
-			} else if (parentKind == IClasspathEntry.CPE_CONTAINER) {
-				if (nRules > 1) {
-					return Messages.format(NewWizardMessages.CPListLabelProvider_container_access_rules_plural, String.valueOf(nRules));
-				} else if (nRules == 1) {
-					return NewWizardMessages.CPListLabelProvider_container_access_rules_singular;
-				} else {
-					return NewWizardMessages.CPListLabelProvider_container_no_access_rules;
-				}
-			} else {
-				if (nRules > 1) {
-					return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_plural, String.valueOf(nRules));
-				} else if (nRules == 1) {
-					return NewWizardMessages.CPListLabelProvider_access_rules_enabled_singular;
-				} else {
-					return NewWizardMessages.CPListLabelProvider_access_rules_disabled;
-				}
-			}
-		} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(key)) {
-			String arg;
-			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
-				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_yes;
-			} else {
-				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_no;
-			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_ignore_optional_problems_label, arg);
-		} else if (CPListElement.MODULE.equals(key)) {
-			Object value= attrib.getValue();
-			if (value instanceof ModuleEncapsulationDetail[]) {
-				boolean limitModules= false;
-				boolean modifiesEncaps= false;
-				for (ModuleEncapsulationDetail detail : (ModuleEncapsulationDetail[]) value) {
-					if (detail instanceof LimitModules) {
-						limitModules= true;
+					if (patternsCount > 0) {
+						arg= buf.toString();
 					} else {
-						modifiesEncaps= true;
+						arg= notAvailable;
+					}
+				} else {
+					arg= NewWizardMessages.CPListLabelProvider_all;
+				}
+				return Messages.format(NewWizardMessages.CPListLabelProvider_inclusion_filter_label, new String[] { arg });
+			}
+			case CPListElement.ACCESSRULES: {
+				IAccessRule[] rules= (IAccessRule[]) attrib.getValue();
+				int nRules= rules != null ? rules.length : 0;
+				int parentKind= attrib.getParent().getEntryKind();
+				if (parentKind == IClasspathEntry.CPE_PROJECT) {
+					Boolean combined= (Boolean) attrib.getParent().getAttribute(CPListElement.COMBINE_ACCESSRULES);
+					if (nRules > 0) {
+						if (combined) {
+							if (nRules == 1) {
+								return NewWizardMessages.CPListLabelProvider_project_access_rules_combined_singular;
+							} else {
+								return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_combined_plural, String.valueOf(nRules));
+							}
+						} else {
+							if (nRules == 1) {
+								return NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined_singular;
+							} else {
+								return Messages.format(NewWizardMessages.CPListLabelProvider_project_access_rules_not_combined_plural, String.valueOf(nRules));
+							}
+						}
+					} else {
+						return NewWizardMessages.CPListLabelProvider_project_access_rules_no_rules;
+					}
+				} else if (parentKind == IClasspathEntry.CPE_CONTAINER) {
+					if (nRules > 1) {
+						return Messages.format(NewWizardMessages.CPListLabelProvider_container_access_rules_plural, String.valueOf(nRules));
+					} else if (nRules == 1) {
+						return NewWizardMessages.CPListLabelProvider_container_access_rules_singular;
+					} else {
+						return NewWizardMessages.CPListLabelProvider_container_no_access_rules;
+					}
+				} else {
+					if (nRules > 1) {
+						return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_enabled_plural, String.valueOf(nRules));
+					} else if (nRules == 1) {
+						return NewWizardMessages.CPListLabelProvider_access_rules_enabled_singular;
+					} else {
+						return NewWizardMessages.CPListLabelProvider_access_rules_disabled;
 					}
 				}
-				if (modifiesEncaps) {
-					if (limitModules)
-						return NewWizardMessages.CPListLabelProvider_modular_modifiesContentsAndEncapsulation_label;
-					return NewWizardMessages.CPListLabelProvider_modular_modifiesEncapsulation_label;
-				} else if (limitModules) {
-					return NewWizardMessages.CPListLabelProvider_modular_modifiesContents_label;
+			}
+			case CPListElement.IGNORE_OPTIONAL_PROBLEMS: {
+				String arg;
+				if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
+					arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_yes;
+				} else {
+					arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_no;
 				}
-				return NewWizardMessages.CPListLabelProvider_modular_label;
-			} else {
-				return NewWizardMessages.CPListLabelProvider_not_modular_label;
+				return Messages.format(NewWizardMessages.CPListLabelProvider_ignore_optional_problems_label, arg);
 			}
-		} else if (CPListElement.TEST.equals(key)) {
-			String arg;
-			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
-				arg= NewWizardMessages.CPListLabelProvider_test_yes;
-			} else {
-				arg= NewWizardMessages.CPListLabelProvider_test_no;
+			case CPListElement.MODULE: {
+				Object value= attrib.getValue();
+				if (value instanceof ModuleEncapsulationDetail[]) {
+					boolean limitModules= false;
+					boolean modifiesEncaps= false;
+					for (ModuleEncapsulationDetail detail : (ModuleEncapsulationDetail[]) value) {
+						if (detail instanceof LimitModules) {
+							limitModules= true;
+						} else {
+							modifiesEncaps= true;
+						}
+					}
+					if (modifiesEncaps) {
+						if (limitModules)
+							return NewWizardMessages.CPListLabelProvider_modular_modifiesContentsAndEncapsulation_label;
+						return NewWizardMessages.CPListLabelProvider_modular_modifiesEncapsulation_label;
+					} else if (limitModules) {
+						return NewWizardMessages.CPListLabelProvider_modular_modifiesContents_label;
+					}
+					return NewWizardMessages.CPListLabelProvider_modular_label;
+				} else {
+					return NewWizardMessages.CPListLabelProvider_not_modular_label;
+				}
 			}
-			return Messages.format(attrib.getParent().getEntryKind() == IClasspathEntry.CPE_SOURCE
-					? NewWizardMessages.CPListLabelProvider_test_sources_label
-					: NewWizardMessages.CPListLabelProvider_test_dependency_label, arg);
-		} else if (CPListElement.WITHOUT_TEST_CODE.equals(key)) {
-			String arg;
-			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
-				arg= NewWizardMessages.CPListLabelProvider_test_yes;
-			} else {
-				arg= NewWizardMessages.CPListLabelProvider_test_no;
+			case CPListElement.TEST: {
+				String arg;
+				if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
+					arg= NewWizardMessages.CPListLabelProvider_test_yes;
+				} else {
+					arg= NewWizardMessages.CPListLabelProvider_test_no;
+				}
+				return Messages.format(attrib.getParent().getEntryKind() == IClasspathEntry.CPE_SOURCE
+						? NewWizardMessages.CPListLabelProvider_test_sources_label
+						: NewWizardMessages.CPListLabelProvider_test_dependency_label, arg);
 			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_without_test_code_label, arg);
-		} else {
-			ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
-			if (config != null) {
-				ClasspathAttributeAccess access= attrib.getClasspathAttributeAccess();
-				String nameLabel= config.getNameLabel(access);
-				String valueLabel= config.getValueLabel(access); // should be LTR marked
-				return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { nameLabel, valueLabel });
+			case CPListElement.WITHOUT_TEST_CODE: {
+				String arg;
+				if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
+					arg= NewWizardMessages.CPListLabelProvider_test_yes;
+				} else {
+					arg= NewWizardMessages.CPListLabelProvider_test_no;
+				}
+				return Messages.format(NewWizardMessages.CPListLabelProvider_without_test_code_label, arg);
 			}
-			String arg= (String) attrib.getValue();
-			if (arg == null) {
-				arg= notAvailable;
+			default: {
+				ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
+				if (config != null) {
+					ClasspathAttributeAccess access= attrib.getClasspathAttributeAccess();
+					String nameLabel= config.getNameLabel(access);
+					String valueLabel= config.getValueLabel(access); // should be LTR marked
+					return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { nameLabel, valueLabel });
+				}
+				String arg= (String) attrib.getValue();
+				if (arg == null) {
+					arg= notAvailable;
+				}
+				return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { key, arg });
 			}
-			return Messages.format(NewWizardMessages.CPListLabelProvider_attribute_label, new String[] { key, arg });
 		}
 	}
 
@@ -520,27 +530,32 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 		} else if (element instanceof CPListElementAttribute) {
 			CPListElementAttribute attribute= (CPListElementAttribute) element;
 			String key= (attribute).getKey();
-			if (CPListElement.SOURCEATTACHMENT.equals(key)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB);
-			} else if (CPListElement.OUTPUT.equals(key)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
-			} else if (CPListElement.EXCLUSION.equals(key)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
-			} else if (CPListElement.INCLUSION.equals(key)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
-			} else if (CPListElement.ACCESSRULES.equals(key)) {
-				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
-			} else if (CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(key)) {
-				Image image= fRegistry.get(getCPListElementBaseImage(attribute.getParent(), false));
-				if (image != null) {
-					ImageDescriptor overlay= JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS;
-					ImageDescriptor imageDescriptor= new DecorationOverlayIcon(image, overlay, IDecoration.BOTTOM_LEFT);
-					return fRegistry.get(imageDescriptor);
+			switch (key) {
+				case CPListElement.SOURCEATTACHMENT:
+					return fRegistry.get(JavaPluginImages.DESC_OBJS_SOURCE_ATTACH_ATTRIB);
+				case CPListElement.OUTPUT:
+					return fRegistry.get(JavaPluginImages.DESC_OBJS_OUTPUT_FOLDER_ATTRIB);
+				case CPListElement.EXCLUSION:
+					return fRegistry.get(JavaPluginImages.DESC_OBJS_EXCLUSION_FILTER_ATTRIB);
+				case CPListElement.INCLUSION:
+					return fRegistry.get(JavaPluginImages.DESC_OBJS_INCLUSION_FILTER_ATTRIB);
+				case CPListElement.ACCESSRULES:
+					return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
+				case CPListElement.IGNORE_OPTIONAL_PROBLEMS: {
+					Image image= fRegistry.get(getCPListElementBaseImage(attribute.getParent(), false));
+					if (image != null) {
+						ImageDescriptor overlay= JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS;
+						ImageDescriptor imageDescriptor= new DecorationOverlayIcon(image, overlay, IDecoration.BOTTOM_LEFT);
+						return fRegistry.get(imageDescriptor);
+					}
+					break;
 				}
-			} else {
-				ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
-				if (config != null) {
-					return fRegistry.get(config.getImageDescriptor(attribute.getClasspathAttributeAccess()));
+				default: {
+					ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
+					if (config != null) {
+						return fRegistry.get(config.getImageDescriptor(attribute.getClasspathAttributeAccess()));
+					}
+					break;
 				}
 			}
 			return  fSharedImages.getImage(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);

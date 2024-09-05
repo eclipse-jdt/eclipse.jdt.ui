@@ -212,14 +212,19 @@ public class CommentedClassVisitor extends Textifier implements ICommentedClassV
 					}
 					break;
 				case FIELD_DESCRIPTOR:
-					if ("T".equals(desc)) { //$NON-NLS-1$
-						buf1.append("top"); //$NON-NLS-1$
-					} else if ("N".equals(desc)) { //$NON-NLS-1$
-						buf1.append("null"); //$NON-NLS-1$
-					} else if ("U".equals(desc)) { //$NON-NLS-1$
-						buf1.append("uninitialized_this"); //$NON-NLS-1$
-					} else {
-						buf1.append(getSimpleName(Type.getType(desc)));
+					switch (desc) {
+						case "T": //$NON-NLS-1$
+							buf1.append("top"); //$NON-NLS-1$
+							break;
+						case "N": //$NON-NLS-1$
+							buf1.append("null"); //$NON-NLS-1$
+							break;
+						case "U": //$NON-NLS-1$
+							buf1.append("uninitialized_this"); //$NON-NLS-1$
+							break;
+						default:
+							buf1.append(getSimpleName(Type.getType(desc)));
+							break;
 					}
 					break;
 

@@ -910,14 +910,18 @@ public class SourceProvider {
 			return false;
 		Statement statement= statements.get(size - 1);
 		int nodeType= statement.getNodeType();
-		if (nodeType == ASTNode.IF_STATEMENT) {
-			IfStatement ifStatement= (IfStatement) statement;
-			return !(ifStatement.getThenStatement() instanceof Block)
-				&& !(ifStatement.getElseStatement() instanceof Block);
-		} else if (nodeType == ASTNode.FOR_STATEMENT) {
-			return !(((ForStatement)statement).getBody() instanceof Block);
-		} else if (nodeType == ASTNode.WHILE_STATEMENT) {
-			return !(((WhileStatement)statement).getBody() instanceof Block);
+		switch (nodeType) {
+			case ASTNode.IF_STATEMENT: {
+				IfStatement ifStatement= (IfStatement) statement;
+				return !(ifStatement.getThenStatement() instanceof Block)
+					&& !(ifStatement.getElseStatement() instanceof Block);
+			}
+			case ASTNode.FOR_STATEMENT:
+				return !(((ForStatement)statement).getBody() instanceof Block);
+			case ASTNode.WHILE_STATEMENT:
+				return !(((WhileStatement)statement).getBody() instanceof Block);
+			default:
+				break;
 		}
 		return false;
 	}
