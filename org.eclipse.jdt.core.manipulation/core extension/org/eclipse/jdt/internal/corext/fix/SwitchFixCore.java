@@ -24,6 +24,14 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jface.text.BadLocationException;
+
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -49,9 +57,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -63,10 +76,12 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 		static final class Variable {
 			private final Expression name;
 			private final List<Expression> constantValues;
+			private final List<Boolean> tagValues;
 
-			private Variable(final Expression firstOp, final List<Expression> constantValues) {
+			private Variable(final Expression firstOp, final List<Expression> constantValues, final List<Boolean> tagValues) {
 				this.name= firstOp;
 				this.constantValues= constantValues;
+				this.tagValues= tagValues;
 			}
 
 			private boolean isSameVariable(final Variable other) {
@@ -76,7 +91,9 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			private Variable mergeValues(final Variable other) {
 				List<Expression> values= new ArrayList<>(constantValues);
 				values.addAll(other.constantValues);
-				return new Variable(name, values);
+				List<Boolean> tags= new ArrayList<>(tagValues);
+				tags.addAll(other.tagValues);
+				return new Variable(name, values, tags);
 			}
 		}
 
@@ -171,6 +188,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 					while (ASTNodes.isSameVariable(switchExpression, variable.name)) {
 						cases.add(new SwitchCaseSection(variable.constantValues,
+								variable.tagValues,
 								ASTNodes.asList(currentNode.getThenStatement())));
 
 						if (!ASTNodes.fallsThrough(currentNode.getThenStatement())) {
@@ -235,8 +253,11 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 				for (SwitchCaseSection sourceCase : sourceCases) {
 					List<Expression> filteredExprs= new ArrayList<>();
+					List<Boolean> filteredTagList= new ArrayList<>();
 
-					for (Expression expression : sourceCase.literalExpressions) {
+					for (int i= 0; i < sourceCase.literalExpressions.size(); ++i) {
+						Expression expression= sourceCase.literalExpressions.get(i);
+						Boolean hasTag= sourceCase.tagList.get(i);
 						Object constantValue= expression.resolveConstantExpressionValue();
 						ITypeBinding expressiontypeBinding= expression.resolveTypeBinding();
 						if(constantValue == null && expressiontypeBinding != null && expressiontypeBinding.isEnum()) {
@@ -246,11 +267,12 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 						if (alreadyProccessedValues.add(constantValue)) {
 							// This is a new value (never seen before)
 							filteredExprs.add(expression);
+							filteredTagList.add(hasTag);
 						}
 					}
 
 					if (!filteredExprs.isEmpty()) {
-						results.add(new SwitchCaseSection(filteredExprs, sourceCase.statements));
+						results.add(new SwitchCaseSection(filteredExprs, filteredTagList, sourceCase.statements));
 					}
 				}
 
@@ -348,7 +370,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 						&& constanttypeBinding != null
 						&& (constanttypeBinding.isPrimitive() || isConstantEnum)
 						&& (constant.resolveConstantExpressionValue() != null || isConstantEnum)) {
-					return new Variable(variable, Arrays.asList(constant));
+					return new Variable(variable, Arrays.asList(constant), Arrays.asList(false));
 				}
 
 				return null;
@@ -359,11 +381,44 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 						&& ASTNodes.hasType(variable, String.class.getCanonicalName())
 						&& constant.resolveTypeBinding() != null
 						&& constant.resolveConstantExpressionValue() != null) {
-					return new Variable(variable, Arrays.asList(constant));
+					CompilationUnit cu= (CompilationUnit) variable.getRoot();
+					ICompilationUnit icu= (ICompilationUnit) cu.getJavaElement();
+					NLSLine nlsLine= scanCurrentLine(icu, variable);
+					boolean hasTag= false;
+					if (nlsLine != null) {
+						for (NLSElement element : nlsLine.getElements()) {
+							String value= element.getValue();
+							if (value.length() >= 2) {
+								value= value.substring(1, value.length() - 1);
+							}
+							if (value.equals(constant.resolveConstantExpressionValue()) && element.hasTag()) {
+								hasTag= true;
+							}
+						}
+					}
+					return new Variable(variable, Arrays.asList(constant), Arrays.asList(hasTag));
 				}
 
 				return null;
 			}
+
+			private NLSLine scanCurrentLine(ICompilationUnit cu, Expression exp) {
+				CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
+				int startLine= cUnit.getLineNumber(exp.getStartPosition());
+				int lineStart= cUnit.getPosition(startLine, 0);
+				int endOfLine= cUnit.getPosition(startLine + 1, 0);
+				NLSLine[] lines;
+				try {
+					lines= NLSScanner.scan(cu.getBuffer().getText(lineStart, endOfLine - lineStart));
+					if (lines.length > 0) {
+						return lines[0];
+					}
+				} catch (IndexOutOfBoundsException | JavaModelException | InvalidInputException | BadLocationException e) {
+					// fall-through
+				}
+				return null;
+			}
+
 		}
 	}
 
@@ -400,14 +455,14 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			switchStatement.setExpression(ASTNodes.createMoveTarget(rewrite, switchExpression));
 
 			for (SwitchCaseSection aCase : cases) {
-				addCaseWithStatements(rewrite, ast, switchStatement, aCase.literalExpressions, aCase.statements);
+				addCaseWithStatements(rewrite, ast, switchStatement, aCase.literalExpressions, aCase.tagList, aCase.statements);
 			}
 
 			if (remainingStatement != null) {
 				remainingStatement.setProperty(UNTOUCH_COMMENT_PROPERTY, Boolean.TRUE);
-				addCaseWithStatements(rewrite, ast, switchStatement, null, ASTNodes.asList(remainingStatement));
+				addCaseWithStatements(rewrite, ast, switchStatement, null, null, ASTNodes.asList(remainingStatement));
 			} else {
-				addCaseWithStatements(rewrite, ast, switchStatement, null, Collections.emptyList());
+				addCaseWithStatements(rewrite, ast, switchStatement, null, null, Collections.emptyList());
 			}
 
 			for (int i= 0; i < ifStatements.size() - 1; i++) {
@@ -417,16 +472,39 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			ASTNodes.replaceButKeepComment(rewrite, ifStatements.get(ifStatements.size() - 1), switchStatement, group);
 		}
 
-		private void addCaseWithStatements(final ASTRewrite rewrite, final AST ast, final SwitchStatement switchStatement, final List<Expression> caseValuesOrNullForDefault,
+		private void addCaseWithStatements(final ASTRewrite rewrite, final AST ast, final SwitchStatement switchStatement,
+				final List<Expression> caseValuesOrNullForDefault, final List<Boolean> tagList,
 				final List<Statement> innerStatements) {
 			List<Statement> switchStatements= switchStatement.statements();
+			boolean needBlock= checkForLocalDeclarations(innerStatements);
+			Boolean hasTag= false;
 
 			// Add the case statement(s)
 			if (caseValuesOrNullForDefault != null && !caseValuesOrNullForDefault.isEmpty()) {
-				for (Expression caseValue : caseValuesOrNullForDefault) {
-					SwitchCase newSwitchCase= ast.newSwitchCase();
-					newSwitchCase.expressions().add(ASTNodes.createMoveTarget(rewrite, caseValue));
-					switchStatements.add(newSwitchCase);
+				CompilationUnit unit= (CompilationUnit)caseValuesOrNullForDefault.get(0).getRoot();
+				ICompilationUnit cu= (ICompilationUnit)unit.getJavaElement();
+				String spaceBefore= getCoreOption(cu.getJavaProject(), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, false) ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
+				for (int i= 0; i < caseValuesOrNullForDefault.size(); ++i) {
+				    Expression caseValue= caseValuesOrNullForDefault.get(i);
+				    hasTag= tagList.get(i);
+				    if (hasTag) {
+				    	try {
+							IBuffer buffer= cu.getBuffer();
+							String newline= i == caseValuesOrNullForDefault.size() - 1 && needBlock ? "\n" : ""; //$NON-NLS-1$ //$NON-NLS-2$
+							String caseString= "case " + buffer.getText(caseValue.getStartPosition(), caseValue.getLength()) + spaceBefore + ": //$NON-NLS-1$" + newline; //$NON-NLS-1$ //$NON-NLS-2$
+ 							SwitchCase newSwitchCase= (SwitchCase)rewrite.createStringPlaceholder(caseString, ASTNode.SWITCH_CASE);
+ 							switchStatements.add(newSwitchCase);
+						} catch (JavaModelException e) {
+							JavaManipulationPlugin.log(e);
+							hasTag= false;
+						}
+
+				    }
+				    if (!hasTag) {
+				    	SwitchCase newSwitchCase= ast.newSwitchCase();
+				    	newSwitchCase.expressions().add(ASTNodes.createMoveTarget(rewrite, caseValue));
+				    	switchStatements.add(newSwitchCase);
+				    }
 				}
 			} else {
 				switchStatements.add(ast.newSwitchCase());
@@ -434,7 +512,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 			List<Statement> statementsList= switchStatement.statements();
 			boolean isBreakNeeded= true;
-			boolean needBlock= checkForLocalDeclarations(innerStatements);
 			Block block= null;
 			if (needBlock) {
 				block= ast.newBlock();
@@ -468,6 +545,22 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			}
 			return false;
 		}
+
+		protected boolean getCoreOption(IJavaProject project, String key, boolean def) {
+			String option= getCoreOption(project, key);
+			if (JavaCore.INSERT.equals(option))
+				return true;
+			if (JavaCore.DO_NOT_INSERT.equals(option))
+				return false;
+			return def;
+		}
+
+		protected String getCoreOption(IJavaProject project, String key) {
+			if (project == null)
+				return JavaCore.getOption(key);
+			return project.getOption(key, true);
+		}
+
 	}
 
 
@@ -501,6 +594,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 		 * build.
 		 */
 		private final List<Expression> literalExpressions;
+		private final List<Boolean> tagList;
 		/** The statements executed for the switch cases. */
 		private final List<Statement> statements;
 
@@ -510,9 +604,11 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 		 * @param literalExpressions The constant expressions
 		 * @param statements The statements
 		 */
-		private SwitchCaseSection(final List<Expression> literalExpressions, final List<Statement> statements) {
+		private SwitchCaseSection(final List<Expression> literalExpressions, final List<Boolean> tagList,
+				final List<Statement> statements) {
 			this.literalExpressions= literalExpressions;
 			this.statements= statements;
+			this.tagList= tagList;
 		}
 
 	}
