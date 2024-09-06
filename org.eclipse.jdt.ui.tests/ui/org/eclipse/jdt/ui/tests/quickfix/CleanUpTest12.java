@@ -1101,6 +1101,9 @@ public class CleanUpTest12 extends CleanUpTestCase {
 			        } else if (i1.equals(E.VALUE2)) {
 			            char integer1 = 'b';
 			            i = integer1;
+			        } else if (i1.equals("5") || i1.equals("five") || i1.equals("another string")) { //$NON-NLS-1$ //$NON-NLS-3$
+				        char integer1 = 'c';
+				        i = integer1;
 			        } else if (computeit(i1) || i1.equals(E.VALUE3)) {
 			        //
 			        //
@@ -1141,6 +1144,14 @@ public class E {
             }
             case E.VALUE2 : {
                 char integer1 = 'b';
+                i = integer1;
+                break;
+            }
+            case "5" : //$NON-NLS-1$
+            case "five" :
+            case "another string" : //$NON-NLS-1$
+             {
+                char integer1 = 'c';
                 i = integer1;
                 break;
             }
