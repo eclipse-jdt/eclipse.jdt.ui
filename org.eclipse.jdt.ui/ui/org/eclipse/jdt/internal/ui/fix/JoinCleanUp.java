@@ -108,23 +108,34 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.JOIN)) {
-			return "" //$NON-NLS-1$
-					+ "String concatenation= String.join(\", \", texts);\n" //$NON-NLS-1$
-					+ "return concatenation;\n\n\n\n\n\n\n\n\n\n"; //$NON-NLS-1$
+			return """
+				String concatenation= String.join(", ", texts);
+				return concatenation;
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean isFirst = true;\n" //$NON-NLS-1$
-				+ "StringBuilder concatenation = new StringBuilder();\n" //$NON-NLS-1$
-				+ "for (String text : texts) {\n" //$NON-NLS-1$
-				+ "  if (isFirst) {\n" //$NON-NLS-1$
-				+ "    isFirst = false;\n" //$NON-NLS-1$
-				+ "  } else {\n" //$NON-NLS-1$
-				+ "    concatenation.append(\", \");\n" //$NON-NLS-1$
-				+ "  }\n" //$NON-NLS-1$
-				+ "  concatenation.append(text);\n" //$NON-NLS-1$
-				+ "}\n" //$NON-NLS-1$
-				+ "return concatenation.toString();\n"; //$NON-NLS-1$
+		return """
+			boolean isFirst = true;
+			StringBuilder concatenation = new StringBuilder();
+			for (String text : texts) {
+			  if (isFirst) {
+			    isFirst = false;
+			  } else {
+			    concatenation.append(", ");
+			  }
+			  concatenation.append(text);
+			}
+			return concatenation.toString();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

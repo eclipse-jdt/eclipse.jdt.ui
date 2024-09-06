@@ -76,32 +76,39 @@ public class SwitchCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_SWITCH)) {
-			return "" //$NON-NLS-1$
-					+ "switch (number) {\n" //$NON-NLS-1$
-					+ "case 0:\n" //$NON-NLS-1$
-					+ "  i = 0;\n" //$NON-NLS-1$
-					+ "  break;\n" //$NON-NLS-1$
-					+ "case 1:\n" //$NON-NLS-1$
-					+ "  j = 10;\n" //$NON-NLS-1$
-					+ "  break;\n" //$NON-NLS-1$
-					+ "case 2:\n" //$NON-NLS-1$
-					+ "  k = 20;\n" //$NON-NLS-1$
-					+ "  break;\n" //$NON-NLS-1$
-					+ "default:\n" //$NON-NLS-1$
-					+ "  m = -1;\n" //$NON-NLS-1$
-					+ "  break;\n" //$NON-NLS-1$
-					+ "}\n"; //$NON-NLS-1$
+			return """
+				switch (number) {
+				case 0:
+				  i = 0;
+				  break;
+				case 1:
+				  j = 10;
+				  break;
+				case 2:
+				  k = 20;
+				  break;
+				default:
+				  m = -1;
+				  break;
+				}
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (number == 0) {\n" //$NON-NLS-1$
-				+ "    i = 0;\n" //$NON-NLS-1$
-				+ "} else if (number == 1) {\n" //$NON-NLS-1$
-				+ "    j = 10;\n" //$NON-NLS-1$
-				+ "} else if (2 == number) {\n" //$NON-NLS-1$
-				+ "    k = 20;\n" //$NON-NLS-1$
-				+ "} else {\n" //$NON-NLS-1$
-				+ "    m = -1;\n" //$NON-NLS-1$
-				+ "}\n\n\n\n\n\n"; //$NON-NLS-1$
+		return """
+			if (number == 0) {
+			    i = 0;
+			} else if (number == 1) {
+			    j = 10;
+			} else if (2 == number) {
+			    k = 20;
+			} else {
+			    m = -1;
+			}
+			
+			
+			
+			
+			
+			"""; //$NON-NLS-1$
 	}
 }

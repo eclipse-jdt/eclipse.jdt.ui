@@ -87,12 +87,13 @@ public class RedundantComparisonStatementCleanUp extends AbstractMultiFix implem
 			return "return i;\n\n\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (i != 123) {\n" //$NON-NLS-1$
-				+ " return i;\n" //$NON-NLS-1$
-				+ "} else {\n" //$NON-NLS-1$
-				+ " return 123;\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (i != 123) {
+			 return i;
+			} else {
+			 return 123;
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

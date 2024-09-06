@@ -94,10 +94,11 @@ public class ArraysFillCleanUp extends AbstractMultiFix {
 			return "Arrays.fill(array, true);\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "for (int i = 0; i < array.length; i++) {\n" //$NON-NLS-1$
-				+ "  array[i] = true;\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			for (int i = 0; i < array.length; i++) {
+			  array[i] = true;
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

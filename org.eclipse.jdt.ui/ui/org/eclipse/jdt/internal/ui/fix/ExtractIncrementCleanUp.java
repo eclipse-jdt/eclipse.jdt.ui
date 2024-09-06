@@ -93,9 +93,10 @@ public class ExtractIncrementCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.EXTRACT_INCREMENT)) {
-			return "" //$NON-NLS-1$
-					+ "i++;\n" //$NON-NLS-1$
-					+ "boolean isPositive = i > 0;\n"; //$NON-NLS-1$
+			return """
+				i++;
+				boolean isPositive = i > 0;
+				"""; //$NON-NLS-1$
 		}
 
 		return "boolean isPositive = ++i > 0;\n\n"; //$NON-NLS-1$

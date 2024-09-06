@@ -80,16 +80,18 @@ public class EvaluateNullableCleanUp extends AbstractMultiFix implements ICleanU
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.EVALUATE_NULLABLE)) {
-			return "" //$NON-NLS-1$
-					+ "boolean b1 = \"\".equals(s);\n" //$NON-NLS-1$
-					+ "boolean b2 = \"\".equalsIgnoreCase(s);\n" //$NON-NLS-1$
-					+ "boolean b3 = s instanceof String;\n"; //$NON-NLS-1$
+			return """
+				boolean b1 = "".equals(s);
+				boolean b2 = "".equalsIgnoreCase(s);
+				boolean b3 = s instanceof String;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean b1 = s != null && \"\".equals(s);\n" //$NON-NLS-1$
-				+ "boolean b2 = null != s && \"\".equalsIgnoreCase(s);\n" //$NON-NLS-1$
-				+ "boolean b3 = s != null && s instanceof String;\n"; //$NON-NLS-1$
+		return """
+			boolean b1 = s != null && "".equals(s);
+			boolean b2 = null != s && "".equalsIgnoreCase(s);
+			boolean b3 = s != null && s instanceof String;
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

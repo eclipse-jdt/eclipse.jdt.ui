@@ -70,15 +70,17 @@ public class ValueOfRatherThanInstantiationCleanUpCore extends AbstractCleanUp {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.VALUEOF_RATHER_THAN_INSTANTIATION)) {
-			return "" //$NON-NLS-1$
-					+ "Object characterObject = Character.valueOf('a');\n" //$NON-NLS-1$
-					+ "Byte.valueOf(\"0\").byteValue();\n" //$NON-NLS-1$
-					+ "long l = 42;\n"; //$NON-NLS-1$
+			return """
+				Object characterObject = Character.valueOf('a');
+				Byte.valueOf("0").byteValue();
+				long l = 42;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-					+ "Object characterObject = Character.valueOf('a');\n" //$NON-NLS-1$
-					+ "new Byte(\"0\").byteValue();\n" //$NON-NLS-1$
-					+ "long l = new Long(42);\n"; //$NON-NLS-1$
+		return """
+			Object characterObject = Character.valueOf('a');
+			new Byte("0").byteValue();
+			long l = new Long(42);
+			"""; //$NON-NLS-1$
 	}
 }

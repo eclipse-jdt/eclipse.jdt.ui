@@ -73,12 +73,13 @@ public class RedundantComparatorCleanUpCore extends AbstractCleanUp {
 			return "Collections.sort(listToSort);\n\n\n\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "Collections.sort(listToSort, new Comparator<Date>() {\n" //$NON-NLS-1$
-				+ "    @Override\n" //$NON-NLS-1$
-				+ "    public int compare(Date o1, Date o2) {\n" //$NON-NLS-1$
-				+ "        return o1.compareTo(o2);\n" //$NON-NLS-1$
-				+ "    }\n" //$NON-NLS-1$
-				+ "});\n"; //$NON-NLS-1$
+		return """
+			Collections.sort(listToSort, new Comparator<Date>() {
+			    @Override
+			    public int compare(Date o1, Date o2) {
+			        return o1.compareTo(o2);
+			    }
+			});
+			"""; //$NON-NLS-1$
 	}
 }

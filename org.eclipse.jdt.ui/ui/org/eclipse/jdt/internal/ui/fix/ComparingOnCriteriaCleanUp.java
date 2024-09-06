@@ -139,22 +139,23 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 			return "Comparator<Date> comparator = Comparator.nullsFirst(Comparator.comparing(Date::toString));\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "Comparator<Date> comparator = new Comparator<Date>() {\n" //$NON-NLS-1$
-				+ "    @Override\n" //$NON-NLS-1$
-				+ "    public int compare(Date o1, Date o2) {\n" //$NON-NLS-1$
-				+ "        if (o2 != null) {\n" //$NON-NLS-1$
-				+ "            if (o1 != null) {\n" //$NON-NLS-1$
-				+ "                return o1.toString().compareTo(o2.toString());\n" //$NON-NLS-1$
-				+ "            }\n" //$NON-NLS-1$
-				+ "            return -1;\n" //$NON-NLS-1$
-				+ "        } else if (o1 != null) {\n" //$NON-NLS-1$
-				+ "            return 1;\n" //$NON-NLS-1$
-				+ "        } else {\n" //$NON-NLS-1$
-				+ "            return 0;\n" //$NON-NLS-1$
-				+ "        }\n" //$NON-NLS-1$
-				+ "    }\n" //$NON-NLS-1$
-				+ "};\n"; //$NON-NLS-1$
+		return """
+			Comparator<Date> comparator = new Comparator<Date>() {
+			    @Override
+			    public int compare(Date o1, Date o2) {
+			        if (o2 != null) {
+			            if (o1 != null) {
+			                return o1.toString().compareTo(o2.toString());
+			            }
+			            return -1;
+			        } else if (o1 != null) {
+			            return 1;
+			        } else {
+			            return 0;
+			        }
+			    }
+			};
+			"""; //$NON-NLS-1$
 	}
 
 	private static boolean equalNotNull(final Object obj1, final Object obj2) {

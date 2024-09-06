@@ -82,14 +82,16 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PRIMITIVE_PARSING)) {
-			return "" //$NON-NLS-1$
-					+ "int number = Integer.parseInt(\"42\", 8);\n" //$NON-NLS-1$
-					+ "Double.parseDouble(\"42.42\");\n"; //$NON-NLS-1$
+			return """
+				int number = Integer.parseInt("42", 8);
+				Double.parseDouble("42.42");
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "int number = Integer.valueOf(\"42\", 8);\n" //$NON-NLS-1$
-				+ "new Double(\"42.42\").doubleValue();\n"; //$NON-NLS-1$
+		return """
+			int number = Integer.valueOf("42", 8);
+			new Double("42.42").doubleValue();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
