@@ -40,6 +40,9 @@ import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTestSuite;
+import org.eclipse.jdt.ui.tests.quickfix.Java10.QuickFixJava10TestSuite;
+import org.eclipse.jdt.ui.tests.quickfix.Java22.QuickFixJava22TestSuite;
+import org.eclipse.jdt.ui.tests.quickfix.Java8.QuickFixJava8TestSuite;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTests;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.views.SmokeViewsTest;
@@ -59,6 +62,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	CoreTests.class,
 	CoreTestSuite.class,
 	QuickFixTestSuite.class,
+	QuickFixJava8TestSuite.class,
+	QuickFixJava10TestSuite.class,
+	QuickFixJava22TestSuite.class,
 
 	NewJavaProjectWizardTest.class,
 	NewTypeWizardTest.class,

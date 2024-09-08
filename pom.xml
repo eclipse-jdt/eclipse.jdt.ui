@@ -54,7 +54,7 @@
   <modules>
     <module>org.eclipse.jdt.text.tests</module>
     <module>org.eclipse.jdt.ui.tests</module>
-    <module>org.eclipse.jdt.ui.tests.refactoring</module>
+	<module>org.eclipse.jdt.ui.tests.refactoring</module>
 	<module>org.eclipse.jdt.ui.junit.sampleproject</module>
 	<module>org.eclipse.jdt.ui.examples.projects</module>
     <module>org.eclipse.jdt.core.manipulation</module>
