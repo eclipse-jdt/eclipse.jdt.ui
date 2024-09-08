@@ -7125,9 +7125,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.toolscleanup">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UseExplicitEncodingCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.explicit_encoding"
+            runAfter="org.eclipse.jdt.ui.cleanup.switch">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUp"
             id="org.eclipse.jdt.ui.cleanup.add_all"
-            runAfter="org.eclipse.jdt.ui.cleanup.switch">
+            runAfter="org.eclipse.jdt.ui.cleanup.explicit_encoding">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUpCore"

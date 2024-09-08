@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SimplifyBooleanIfElseCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UseExplicitEncodingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
@@ -53,7 +54,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new InstanceofCleanUp(values),
 				new VariableDeclarationCleanUpCore(values),
 				new SimplifyBooleanIfElseCleanUpCore(values),
-				new LambdaExpressionAndMethodRefCleanUp(values)
+				new LambdaExpressionAndMethodRefCleanUp(values),
+				new UseExplicitEncodingCleanUp(values)
 		};
 	}
 
@@ -122,5 +124,16 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference simplifyLambdaExpressionAndMethodRef= createCheckboxPref(functionalInterfacesGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax, CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(simplifyLambdaExpressionAndMethodRef);
+
+		Group encodingGroup= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Encoding);
+		final CheckboxPreference explicit_encoding= createCheckboxPref(encodingGroup, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ExplicitEncoding, CleanUpConstants.EXPLICITENCODING_CLEANUP, CleanUpModifyDialog.FALSE_TRUE);
+		intent(encodingGroup);
+		final RadioPreference useKeep_Behavior= createRadioPref(encodingGroup, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Keep_Behavior, CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpModifyDialog.FALSE_TRUE);
+		intent(encodingGroup);
+		final RadioPreference useINSERT_UTF8= createRadioPref(encodingGroup, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Insert_UTF8, CleanUpConstants.EXPLICITENCODING_INSERT_UTF8, CleanUpModifyDialog.FALSE_TRUE);
+		intent(encodingGroup);
+		final RadioPreference useAGGREGATE_TO_UTF8= createRadioPref(encodingGroup, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Aggregate_to_UTF8, CleanUpConstants.EXPLICITENCODING_AGGREGATE_TO_UTF8, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(explicit_encoding, new RadioPreference[] {useKeep_Behavior, useINSERT_UTF8, useAGGREGATE_TO_UTF8});
+
 	}
 }
