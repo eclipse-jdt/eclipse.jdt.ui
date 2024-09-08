@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TryWithResourceCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnboxingCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UseExplicitEncodingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VarCleanUpCore;
 
 public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
@@ -59,7 +60,8 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new ConvertLoopCleanUp(values),
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
-				new ConstantsForSystemPropertyCleanUp(values)
+				new ConstantsForSystemPropertyCleanUp(values),
+				new UseExplicitEncodingCleanUp(values)
 		};
 	}
 
@@ -151,5 +153,16 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference unboxing= createCheckboxPref(java1d5Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_Unboxing, CleanUpConstants.USE_UNBOXING, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(unboxing);
+
+		Group java1d6Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java1d6);
+		final CheckboxPreference explicit_encoding= createCheckboxPref(java1d6Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ExplicitEncoding, CleanUpConstants.EXPLICITENCODING_CLEANUP, CleanUpModifyDialog.FALSE_TRUE);
+		intent(java1d6Group);
+		final RadioPreference useBlockAlwaysPref= createRadioPref(java1d6Group, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Keep_Behavior, CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpModifyDialog.FALSE_TRUE);
+		intent(java1d6Group);
+		final RadioPreference useBlockJDTStylePref= createRadioPref(java1d6Group, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Insert_UTF8, CleanUpConstants.EXPLICITENCODING_INSERT_UTF8, CleanUpModifyDialog.FALSE_TRUE);
+		intent(java1d6Group);
+		final RadioPreference useBlockNeverPref= createRadioPref(java1d6Group, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Aggregate_to_UTF8, CleanUpConstants.EXPLICITENCODING_AGGREGATE_TO_UTF8, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(explicit_encoding, new RadioPreference[] {useBlockAlwaysPref, useBlockJDTStylePref, useBlockNeverPref});
+
 	}
 }

@@ -13,10 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 import org.eclipse.jdt.core.dom.*;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 /**
  *
@@ -493,12 +496,40 @@ public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> exte
 		return true;
 	}
 
+//	@Override
+//	public boolean visit(MethodInvocation node) {
+//		if (this.helperVisitor.predicatemap.containsKey(VisitorEnum.MethodInvocation)) {
+//			String data=(String) this.helperVisitor.getSupplierData().get(VisitorEnum.MethodInvocation);
+//			if (data!= null && !node.getName().getIdentifier().equals(data)) {
+//				return true;
+//			}
+//			return ((BiPredicate<MethodInvocation, E>) (this.helperVisitor.predicatemap.get(VisitorEnum.MethodInvocation))).test(node, this.helperVisitor.dataholder);
+//		}
+//		return true;
+//	}
+
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (this.helperVisitor.predicatemap.containsKey(VisitorEnum.MethodInvocation)) {
-			String data=(String) this.helperVisitor.getSupplierData().get(VisitorEnum.MethodInvocation);
-			if (data!= null && !node.getName().getIdentifier().equals(data)) {
-				return true;
+			Map<String, Object> map=(Map<String, Object>) this.helperVisitor.getSupplierData().get(VisitorEnum.MethodInvocation);
+			if(map != null) {
+				String data=(String) map.get(HelperVisitor.METHODNAME);
+				if ((data!= null) && !node.getName().getIdentifier().equals(data)) {
+					return true;
+				}
+				Class<?> typeof=(Class<?>) map.get(HelperVisitor.TYPEOF);
+				String[] parameterTypesQualifiedNames=(String[]) map.get(HelperVisitor.PARAMTYPENAMES);
+
+				if(typeof!=null) {
+					if(parameterTypesQualifiedNames==null) {
+						if (ASTNodes.usesGivenSignature(node, typeof.getCanonicalName(), data)) {
+							return ((BiPredicate<MethodInvocation, E>) (this.helperVisitor.predicatemap.get(VisitorEnum.MethodInvocation))).test(node, this.helperVisitor.dataholder);
+						}
+					} else
+						if (ASTNodes.usesGivenSignature(node, typeof.getCanonicalName(), data, parameterTypesQualifiedNames)) {
+							return ((BiPredicate<MethodInvocation, E>) (this.helperVisitor.predicatemap.get(VisitorEnum.MethodInvocation))).test(node, this.helperVisitor.dataholder);
+						}
+				}
 			}
 			return ((BiPredicate<MethodInvocation, E>) (this.helperVisitor.predicatemap.get(VisitorEnum.MethodInvocation))).test(node, this.helperVisitor.dataholder);
 		}
