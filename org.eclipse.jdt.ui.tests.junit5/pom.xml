@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>eclipse.jdt.ui</groupId>
+		<artifactId>eclipse.jdt.ui</artifactId>
+		<version>4.34.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>org.eclipse.jdt.ui.tests.junit5</artifactId>
+	<name>Eclipse junit5 tests</name>
+	<packaging>eclipse-test-plugin</packaging>
+	<!--<dependencies>
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.ui</artifactId>
+			<version>4.34.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.ui.tests.junit5.common</artifactId>
+			<version>4.34.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>-->
+	<build>
+		<testSourceDirectory>src</testSourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<configuration>
+					<showEclipseLog>true</showEclipseLog>
+					<useJDK>BREE</useJDK>
+					<useUIHarness>false</useUIHarness>
+					<dependencies>
+						<dependency>
+							<type>eclipse-plugin</type>
+							<groupId>org.eclipse.jdt</groupId>
+							<artifactId>org.eclipse.jdt.ui</artifactId>
+							<!-- This is the minimum required version -->
+							<version>0.0.0</version>
+						</dependency>
+						<dependency>
+							<type>eclipse-plugin</type>
+							<groupId>org.eclipse.jdt</groupId>
+							<artifactId>org.eclipse.jdt.ui.tests.junit5.common</artifactId>
+							<version>0.0.0</version>
+						</dependency>
+					</dependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
