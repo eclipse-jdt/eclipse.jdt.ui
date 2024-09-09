@@ -201,6 +201,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.TRUE);
@@ -386,6 +388,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);

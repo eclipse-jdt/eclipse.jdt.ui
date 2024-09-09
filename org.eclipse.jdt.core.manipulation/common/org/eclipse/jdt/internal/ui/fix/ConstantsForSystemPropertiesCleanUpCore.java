@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,8 @@ import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_SEPARATOR;
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION;
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_LINE_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.FixMessages.ConstantsCleanUpFix_refactor;
@@ -24,6 +26,8 @@ import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.BOOLEAN_PROPERT
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.FILE_ENCODING;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.FILE_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.INTEGER_PROPERTY;
+import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.JAVA_RUNTIME_VERSION;
+import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.JAVA_SPEC_VERSION;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LINE_SEPARATOR;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.LONG_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.UpdateProperty.PATH_SEPARATOR;
@@ -112,6 +116,12 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 			fixSet.add(BOOLEAN_PROPERTY);
 			fixSet.add(INTEGER_PROPERTY);
 			fixSet.add(LONG_PROPERTY);
+		}
+		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION)) {
+			fixSet.add(JAVA_RUNTIME_VERSION);
+		}
+		if(isEnabled(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION)) {
+			fixSet.add(JAVA_SPEC_VERSION);
 		}
 		return fixSet;
 	}
@@ -205,6 +215,18 @@ public class ConstantsForSystemPropertiesCleanUpCore extends AbstractCleanUp {
 			sb.append("Long l3 = Long.getLong(\"arbitrarykey\", 15);\n"); //$NON-NLS-1$
 		} else {
 			sb.append("Long l3 = Long.parseLong(System.getProperty(\"arbitrarykey\" ,\"15\"));\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.JAVA_RUNTIME_VERSION)) {
+			sb.append("String jv = Runtime.version().toString();\n"); //$NON-NLS-1$
+		} else {
+			sb.append("String jv = System.getProperty(\"java.runtime.version\");\n"); //$NON-NLS-1$
+		}
+
+		if (isEnabled && computeFixSet.contains(UpdateProperty.JAVA_SPEC_VERSION)) {
+			sb.append("String jsv = Runtime.version().feature();\n"); //$NON-NLS-1$
+		} else {
+			sb.append("String jsv = System.getProperty(\"java.specification.version\");\n"); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}

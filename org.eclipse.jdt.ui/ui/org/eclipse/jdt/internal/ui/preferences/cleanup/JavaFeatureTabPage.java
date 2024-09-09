@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 IBM Corporation and others.
+ * Copyright (c) 2020, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -133,7 +133,10 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 		intent(java1d7Group);
 		CheckboxPreference systemconstantsFileEncoding= createCheckboxPref(java1d7Group, 1, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_FileEncoding, CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpModifyDialog.FALSE_TRUE);
 		CheckboxPreference systemconstantsBoxedTypeProperty= createCheckboxPref(java1d7Group, 1, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_BoxedTypeProperty, CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpModifyDialog.FALSE_TRUE);
-		registerSlavePreference(systemconstants, new CheckboxPreference[] {systemconstantsFileSeparator,systemconstantsPathSeparator,systemconstantsLineSeparator,systemconstantsFileEncoding,systemconstantsBoxedTypeProperty});
+		CheckboxPreference systemconstantsJavaVersionProperty= createCheckboxPref(java1d7Group, 1, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_JavaVersionProperty, CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION, CleanUpModifyDialog.FALSE_TRUE);
+		intent(java1d7Group);
+		CheckboxPreference systemconstantsJavaVersionSpecProperty= createCheckboxPref(java1d7Group, 1, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ConstantsForSystemProperty_JavaVersionSpecProperty, CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION, CleanUpModifyDialog.FALSE_TRUE);
+		registerSlavePreference(systemconstants, new CheckboxPreference[] {systemconstantsFileSeparator,systemconstantsPathSeparator,systemconstantsLineSeparator,systemconstantsFileEncoding,systemconstantsBoxedTypeProperty,systemconstantsJavaVersionProperty,systemconstantsJavaVersionSpecProperty});
 
 		Group java1d5Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java1d5);
 

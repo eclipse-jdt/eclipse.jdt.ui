@@ -1116,7 +1116,30 @@ public class CleanUpConstants {
 	 * @since 4.20
 	 */
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED= "cleanup.system_property_boolean"; //$NON-NLS-1$
-
+	/**
+	 * Replace java.runtime.version given using System property to methods designed
+	 * for the purpose.  For example, replace: <p>{@code System.getProperty("java.runtime.version")}</p> by<p>
+	 * {@code Runtime.version().toString()}
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.30
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION= "cleanup.system_property_javaversion"; //$NON-NLS-1$
+	/**
+	 * Replace java.runtime.version given using System property to methods designed
+	 * for the purpose.  For example, replace: <p>{@code System.getProperty("java.specification.version")}</p> by<p>
+	 * {@code Runtime.version().feature()}
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.30
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION= "cleanup.system_property_javaspecversion"; //$NON-NLS-1$
 	/**
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>
@@ -1126,6 +1149,7 @@ public class CleanUpConstants {
 	 * @see CleanUpOptions#FALSE
 	 * @since 4.18
 	 */
+
 	public static final String PREFER_BOOLEAN_LITERAL= "cleanup.boolean_literal"; //$NON-NLS-1$
 
 	/**

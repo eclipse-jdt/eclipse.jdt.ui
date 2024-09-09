@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 IBM Corporation and others.
+ * Copyright (c) 2021, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.FIELD_SEPARAT
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_BOOLEAN;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_DEFAULT_CHARSET;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_DISPLAY_NAME;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_FEATURE;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_DEFAULT;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_PROPERTY;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_GET_SEPARATOR;
@@ -27,6 +28,8 @@ import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_LONG;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSEBOOLEAN;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSEINTEGER;
 import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_PARSELONG;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_TOSTRING;
+import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_VERSION;
 import static org.eclipse.jdt.internal.ui.fix.MultiFixMessages.ConstantsCleanUp_description;
 
 import java.io.File;
@@ -175,7 +178,35 @@ public enum UpdateProperty {
 			Long.class,
 			null,
 			UpdateProperty::parselong_visitor,
-			UpdateProperty::boolintlongRewrite);
+			UpdateProperty::boolintlongRewrite),
+	/**
+	 * Change
+	 * <code>System.getProperty("java.runtime.version");</code>
+	 * to
+	 * <code>Runtime.version().toString();</code>
+	 */
+	JAVA_RUNTIME_VERSION("java.runtime.version", //$NON-NLS-1$
+			Runtime.class,
+			METHOD_VERSION,
+			METHOD_TOSTRING,
+			null,
+			null,
+			UpdateProperty::defaultvisitor,
+			UpdateProperty::defaultRewrite),
+	/**
+	 * Change
+	 * <code>System.getProperty("java.runtime.version");</code>
+	 * to
+	 * <code>Runtime.version().feature();</code>
+	 */
+	JAVA_SPEC_VERSION("java.specification.version", //$NON-NLS-1$
+			Runtime.class,
+			METHOD_VERSION,
+			METHOD_FEATURE,
+			null,
+			null,
+			UpdateProperty::defaultvisitor,
+			UpdateProperty::defaultRewrite);
 
 	public static Object UNUSED= new Object();
 
@@ -213,6 +244,10 @@ public enum UpdateProperty {
 				 * <code>System.getProperty("path.separator");</code>
 				 * <code>System.getProperty("file.separator");</code>
 				 * <code>System.getProperty("line.separator");</code>
+				 * <code>System.getProperty("java.runtime.version");</code>
+				 * <code>System.getProperty("java.specification.version");</code>
+				 * <code>System.getProperty("java.version");</code>
+				 * <code>System.getProperty("java.class.version");</code>
 				 */
 				if (ASTNodes.usesGivenSignature(visited, System.class.getCanonicalName(), METHOD_GET_PROPERTY, String.class.getCanonicalName())) {
 					Expression expression= (Expression) visited.arguments().get(0);
