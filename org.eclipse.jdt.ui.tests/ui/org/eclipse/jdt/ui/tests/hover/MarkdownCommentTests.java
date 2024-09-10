@@ -52,7 +52,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.ui.tests.core.CoreTests;
-import org.eclipse.jdt.ui.tests.core.rules.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.core.rules.Java23ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocBrowserInformationControlInput;
@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 public class MarkdownCommentTests extends CoreTests {
 
 	@Rule
-	public ProjectTestSetup pts= new Java17ProjectTestSetup("TestSetupProject", true);
+	public ProjectTestSetup pts= new Java23ProjectTestSetup("TestSetupProject", false);
 
 	private IJavaProject fJProject1;
 
