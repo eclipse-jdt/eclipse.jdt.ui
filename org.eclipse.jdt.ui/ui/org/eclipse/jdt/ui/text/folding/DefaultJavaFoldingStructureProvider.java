@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
@@ -107,7 +108,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		private IType fFirstType;
 		private boolean fHasHeaderComment;
 		private LinkedHashMap<JavaProjectionAnnotation, Position> fMap= new LinkedHashMap<>();
-		private IScanner fScanner;
+		private IScanner fDefaultScanner; // this one may or not be the shared DefaultJavaFoldingStructureProvider.fSharedScanner
+		private IScanner fScannerForProject;
 
 		private FoldingStructureComputationContext(IDocument document, ProjectionAnnotationModel model, boolean allowCollapsing, IScanner scanner) {
 			Assert.isNotNull(document);
@@ -115,7 +117,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			fDocument= document;
 			fModel= model;
 			fAllowCollapsing= allowCollapsing;
-			fScanner= scanner;
+			fDefaultScanner= scanner;
 		}
 
 		private void setFirstType(IType type) {
@@ -167,9 +169,28 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 
 		private IScanner getScanner() {
-			if (fScanner == null)
-				fScanner= ToolFactory.createScanner(true, false, false, false);
-			return fScanner;
+			if (fScannerForProject != null) {
+				return fScannerForProject;
+			}
+			IJavaProject javaProject= fInput != null ? fInput.getJavaProject(): null;
+			if (javaProject != null) {
+				String projectSource= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+				String projectCompliance= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+				if (!JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE).equals(projectCompliance)
+						|| !JavaCore.getOption(JavaCore.COMPILER_SOURCE).equals(projectSource)) {
+					return fScannerForProject= ToolFactory.createScanner(true, false, false, projectSource, projectCompliance);
+				}
+			}
+			if (fDefaultScanner == null)
+				fDefaultScanner= ToolFactory.createScanner(true, false, false, false);
+			return fDefaultScanner;
+		}
+
+		private void setSource(char[] source) {
+			if (fDefaultScanner != null)
+				fDefaultScanner.setSource(source);
+			if (fScannerForProject != null)
+				fScannerForProject.setSource(source);
 		}
 
 		/**
@@ -969,7 +990,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		Annotation[] changedArray= updates.toArray(new Annotation[updates.size()]);
 		ctx.getModel().modifyAnnotations(deletedArray, additions, changedArray);
 
-		ctx.fScanner.setSource(null);
+		ctx.setSource(null);
 	}
 
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
