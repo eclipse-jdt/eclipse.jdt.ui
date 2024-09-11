@@ -974,7 +974,9 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					while (parentTypeBinding != null) {
 						IMethodBinding[] parentTypeMethods= parentTypeBinding.getDeclaredMethods();
 						for (IMethodBinding parentTypeMethod : parentTypeMethods) {
-							if (parentTypeMethod.getName().equals(parentBinding.getName()) && !parentTypeMethod.isEqualTo(parentBinding)) {
+							if (parentTypeMethod.getName().equals(parentBinding.getName())
+									&& parentTypeMethod.getParameterTypes().length == args.size()
+									&& !parentTypeMethod.isEqualTo(parentBinding)) {
 								needCast= true;
 								break;
 							}
