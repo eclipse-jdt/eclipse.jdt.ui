@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -471,7 +471,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				if (field.getType().isArray()) {
 					body.statements().add(createAddArrayHashCode(field));
 				} else if (fUseJ7HashEquals) {
-					j7Invoc.arguments().add(fAst.newSimpleName(field.getName()));
+					j7Invoc.arguments().add(getThisAccessForHashCode(field.getName()));
 				} else if (field.getType().isPrimitive()) {
 					Statement[] sts= createAddSimpleHashCode(field.getType(), this::getThisAccessForHashCode, field.getName(), false);
 					body.statements().addAll(Arrays.asList(sts));

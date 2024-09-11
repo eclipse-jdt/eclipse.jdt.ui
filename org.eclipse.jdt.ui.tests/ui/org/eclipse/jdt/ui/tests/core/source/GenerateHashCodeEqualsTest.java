@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2237,5 +2237,119 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"}" +
 				"";
 		compareSource(expected, a.getSource());
+	}
+
+	@Test
+	public void testIssue1560() throws Exception {
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java",
+				"""
+				package p;
+
+				import java.util.Objects;
+
+				public class A {
+					static class Parent {
+
+						private int fieldA;
+						private String fieldB;
+
+						@Override
+						public int hashCode() {
+							return Objects.hash(fieldA, fieldB);
+						}
+
+						@Override
+						public boolean equals(Object obj) {
+							if (this == obj) {
+								return true;
+							}
+							if (!(obj instanceof Parent)) {
+								return false;
+							}
+							Parent other = (Parent) obj;
+							return fieldA == other.fieldA && Objects.equals(fieldB, other.fieldB);
+						}
+					}
+
+					static class Child extends Parent {
+
+						private String result;
+
+					}
+
+				}
+				""", true, null);
+
+		IType[] allTypes= a.getAllTypes();
+		IType childType= null;
+		for (IType type : allTypes) {
+			if (type.getElementName().equals("Child")) {
+				childType= type;
+				break;
+			}
+		}
+		IField[] fields= getFields(childType, new String[] { "result"} );
+		runJ7Operation(childType, fields, false);
+
+		String expected= """
+				package p;
+
+				import java.util.Objects;
+
+				public class A {
+					static class Parent {
+
+						private int fieldA;
+						private String fieldB;
+
+						@Override
+						public int hashCode() {
+							return Objects.hash(fieldA, fieldB);
+						}
+
+						@Override
+						public boolean equals(Object obj) {
+							if (this == obj) {
+								return true;
+							}
+							if (!(obj instanceof Parent)) {
+								return false;
+							}
+							Parent other = (Parent) obj;
+							return fieldA == other.fieldA && Objects.equals(fieldB, other.fieldB);
+						}
+					}
+
+					static class Child extends Parent {
+
+						private String result;
+
+						@Override
+						public int hashCode() {
+							final int prime = 31;
+							int result = super.hashCode();
+							result = prime * result + Objects.hash(this.result);
+							return result;
+						}
+
+						@Override
+						public boolean equals(Object obj) {
+							if (this == obj)
+								return true;
+							if (!super.equals(obj))
+								return false;
+							if (getClass() != obj.getClass())
+								return false;
+							Child other = (Child) obj;
+							return Objects.equals(result, other.result);
+						}
+
+					}
+
+				}
+				""";
+
+		compareSource(expected, a.getSource());
+
 	}
 }
