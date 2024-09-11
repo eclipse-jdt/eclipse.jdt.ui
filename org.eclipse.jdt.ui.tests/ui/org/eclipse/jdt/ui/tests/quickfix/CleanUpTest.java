@@ -17110,6 +17110,72 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testIssue1638() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String input= """
+			package test1;
+
+			public class E1 {
+			    public void doNotRemoveUselessReturn(boolean arg) {
+				    if (arg) {
+					    return;
+					} else {
+						System.out.println("here");
+					}
+			    }
+
+			    public void doNotRemoveUselessContinue(boolean arg) {
+					while (arg) {
+						arg = bar();
+						if (arg) {
+							continue;
+						} else {
+							System.out.println("Hello World");
+						}
+					}
+			    }
+
+				public boolean bar() {
+					return true;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", input, false, null);
+
+		enable(CleanUpConstants.REMOVE_USELESS_CONTINUE);
+		enable(CleanUpConstants.REMOVE_USELESS_RETURN);
+		enable(CleanUpConstants.REDUCE_INDENTATION);
+
+		String output= """
+			package test1;
+
+			public class E1 {
+			    public void doNotRemoveUselessReturn(boolean arg) {
+				    if (arg) {
+					    return;
+					}
+			        System.out.println("here");
+			    }
+
+			    public void doNotRemoveUselessContinue(boolean arg) {
+					while (arg) {
+						arg = bar();
+						if (arg) {
+							continue;
+						}
+			            System.out.println("Hello World");
+					}
+			    }
+
+				public boolean bar() {
+					return true;
+				}
+			}
+			""";
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { output });
+	}
+
+	@Test
 	public void testUnloopedWhile() throws Exception {
 		// Given
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
