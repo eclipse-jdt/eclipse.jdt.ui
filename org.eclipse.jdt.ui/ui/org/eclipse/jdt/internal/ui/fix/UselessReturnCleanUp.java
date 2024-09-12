@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -147,6 +147,16 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 						if (parent instanceof WhileStatement || parent instanceof EnhancedForStatement
 								|| parent instanceof ForStatement || parent instanceof DoStatement) {
 							return false;
+						}
+
+						if (parent instanceof IfStatement ifStatement && ifStatement.getElseStatement() != null
+								&& node.getLocationInParent() != IfStatement.ELSE_STATEMENT_PROPERTY) {
+							if (isEnabled(CleanUpConstants.REDUCE_INDENTATION)) {
+								Statement elseStatement= ifStatement.getElseStatement();
+								if (!(elseStatement instanceof Block elseBlock) || elseBlock.statements().size() == 1) {
+									return false;
+								}
+							}
 						}
 
 						if (parent instanceof Statement) {
