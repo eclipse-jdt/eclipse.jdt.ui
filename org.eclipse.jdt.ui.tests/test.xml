@@ -349,6 +349,7 @@
     	--add-opens java.management/sun.management.spi=ALL-UNNAMED
     	--add-opens jdk.management/com.sun.management=ALL-UNNAMED
     	--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+    	-XX:CompileCommand=exclude,org.eclipse.jdt.internal.core.dom.rewrite.ASTRewriteAnalyzer::getExtendedRange
     	" else="${java9vmargs}">
     	<javaversion atleast="17"/>
     </condition>
