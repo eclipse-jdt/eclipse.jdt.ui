@@ -5350,6 +5350,59 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 	}
 
 	@Test
+	public void testIssue1047_5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.function.Supplier;
+
+			public class E1 {
+			    public static void func( String ... args) {
+			    }
+			    private void called( Supplier<Object> r ) {
+			    }
+
+			}
+			""";
+		pack1.createCompilationUnit("E1.java", str, false, null);
+
+		String str1= """
+			package test1;
+
+			public class E extends E1 {
+
+			    void called( Runnable r, int i ) {
+			    }
+
+			    void test() {
+			        called(() -> E1.func(), 3);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
+
+		int offset= str1.indexOf("func()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		String expected1= """
+			package test1;
+
+			public class E extends E1 {
+
+			    void called( Runnable r, int i ) {
+			    }
+
+			    void test() {
+			        called(E1::func, 3);
+			    }
+			}
+			""";
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
 	public void testFixParenthesesInLambdaExpressionAdd() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
