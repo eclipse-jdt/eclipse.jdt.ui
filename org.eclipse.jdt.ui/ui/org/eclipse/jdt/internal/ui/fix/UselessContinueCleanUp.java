@@ -154,7 +154,7 @@ public class UselessContinueCleanUp extends AbstractMultiFix {
 								&& node.getLocationInParent() != IfStatement.ELSE_STATEMENT_PROPERTY) {
 							if (isEnabled(CleanUpConstants.REDUCE_INDENTATION)) {
 								Statement elseStatement= ifStatement.getElseStatement();
-								if (!(elseStatement instanceof Block elseBlock) || elseBlock.statements().size() == 1) {
+								if (elseStatement != null) {
 									return false;
 								}
 							}
