@@ -6,10 +6,6 @@
   which accompanies this distribution, and is available at
   http://www.eclipse.org/org/documents/edl-v10.php
  
-  This is an implementation of an early-draft specification developed under the Java
-  Community Process (JCP) and is made available for testing and evaluation purposes
-  only. The code is not compatible with any specification of the JCP.
-  
   Contributors:
      Igor Fedorenko - initial implementation
 -->
@@ -40,10 +36,6 @@
   <profiles>
     <profile>
       <id>build-individual-bundles</id>
-      <properties>
-      	<eclipse-p2-repo.url>https://download.eclipse.org/eclipse/updates/4.33-Y-builds</eclipse-p2-repo.url>
-      	<skipAPIAnalysis>true</skipAPIAnalysis>
-      </properties>
       <repositories>
         <repository>
           <releases>
