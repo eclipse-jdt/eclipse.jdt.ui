@@ -184,8 +184,7 @@ public class CoreJavadocAccess {
 			return packageFragment.getAttachedJavadoc(null);
 
 		}
-
-		return null;
+		return ""; //$NON-NLS-1$
 	}
 
 
