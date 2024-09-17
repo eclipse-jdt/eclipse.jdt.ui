@@ -758,14 +758,16 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	}
 
 	@Override
-	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
+	protected String constructCUContent(String typeName, ICompilationUnit cu, String typeContent, String lineDelimiter)
+			throws CoreException {
+
 		if (isJUnit4()) {
 			typeContent= appendAnnotations(typeContent, lineDelimiter);
 		} else if (isJUnit5()) {
 			typeContent= appendAnnotations5(typeContent, lineDelimiter);
 		}
 
-		return super.constructCUContent(cu, typeContent, lineDelimiter);
+		return super.constructCUContent(typeName, cu, typeContent, lineDelimiter);
 	}
 
 	private String appendAnnotations(String typeContent, String lineDelimiter) {

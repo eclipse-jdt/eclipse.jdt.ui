@@ -97,6 +97,16 @@ public class StatusInfo implements IStatus {
 	}
 
 	/**
+	 * Sets the status to ERROR and answers this instance.
+	 * @param errorMessage The error message (can be empty, but not null)
+	 * @return This instance
+	 */
+	public StatusInfo withError(String errorMessage) {
+		setError(errorMessage);
+		return this;
+	}
+
+	/**
 	 * Sets the status to WARNING.
 	 * @param warningMessage The warning message (can be empty, but not null)
 	 */
