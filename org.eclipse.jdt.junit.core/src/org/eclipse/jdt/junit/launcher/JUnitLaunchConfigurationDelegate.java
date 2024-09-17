@@ -540,8 +540,10 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					for (IJavaElement ije : children) {
 						if (ije instanceof ICompilationUnit icu) {
 							IType[] allTypes= icu.getAllTypes();
-							IType topLevelType = allTypes[0];
-							typesToExecute.add(topLevelType);
+							for (IType topLevelType: allTypes) {
+								typesToExecute.add(topLevelType);
+								break; // just one
+							}
 						}
 					}
 				}
