@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.readers.SubstitutionReader;
+
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
-import org.eclipse.jface.internal.text.html.SubstitutionTextReader;
 
 import org.eclipse.jdt.core.dom.TagElement;
 
@@ -31,7 +32,7 @@ import org.eclipse.jdt.core.dom.TagElement;
 /**
  * Processes JavaDoc tags.
  */
-public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
+public class JavaDoc2HTMLTextReader extends SubstitutionReader {
 
 
 	static private class Pair {
