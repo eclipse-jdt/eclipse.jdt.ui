@@ -11,13 +11,13 @@ import java.util.Map;
 
 public interface Layout /*permits Layout.PrimitiveLayout, Layout.ListLayout, Layout.StructLayout*/ {
     default boolean isPrimitive() {
-      return this instanceof Layout.PrimitiveLayout;
+      return this instanceof PrimitiveLayout;
     }
     default boolean isList() {
-      return this instanceof Layout.ListLayout;
+      return this instanceof ListLayout;
     }
     default boolean isStruct() {
-      return this instanceof Layout.StructLayout;
+      return this instanceof StructLayout;
     }
     boolean nullable();
     default Map<String, Layout> fields() {
@@ -30,56 +30,56 @@ public interface Layout /*permits Layout.PrimitiveLayout, Layout.ListLayout, Lay
       throw new IllegalArgumentException("no element");
     }
 
-    static Layout.PrimitiveLayout u1(boolean nullable) {
+    static PrimitiveLayout u1(boolean nullable) {
       return new PrimitiveLayout(nullable, boolean.class);
     }
-    static Layout.PrimitiveLayout byte8(boolean nullable) {
+    static PrimitiveLayout byte8(boolean nullable) {
       return new PrimitiveLayout(nullable, byte.class);
     }
-    static Layout.PrimitiveLayout short16(boolean nullable) {
+    static PrimitiveLayout short16(boolean nullable) {
       return new PrimitiveLayout(nullable, short.class);
     }
-    static Layout.PrimitiveLayout char16(boolean nullable) {
+    static PrimitiveLayout char16(boolean nullable) {
       return new PrimitiveLayout(nullable, char.class);
     }
-    static Layout.PrimitiveLayout int32(boolean nullable) {
+    static PrimitiveLayout int32(boolean nullable) {
       return new PrimitiveLayout(nullable, int.class);
     }
-    static Layout.PrimitiveLayout float32(boolean nullable) {
+    static PrimitiveLayout float32(boolean nullable) {
       return new PrimitiveLayout(nullable, float.class);
     }
-    static Layout.PrimitiveLayout double64(boolean nullable) {
+    static PrimitiveLayout double64(boolean nullable) {
       return new PrimitiveLayout(nullable, double.class);
     }
-    static Layout.PrimitiveLayout long64(boolean nullable) {
+    static PrimitiveLayout long64(boolean nullable) {
       return new PrimitiveLayout(nullable, long.class);
     }
 
-    static Layout.ListLayout list(boolean nullable, Layout layout) {
+    static ListLayout list(boolean nullable, Layout layout) {
       return new ListLayout(nullable, layout);
     }
-    static Layout.ListLayout string(boolean nullable) {
+    static ListLayout string(boolean nullable) {
       return list(true, char16(nullable));
     }
 
-    static Layout.Field field(String name, Layout layout) {
+    static Field field(String name, Layout layout) {
       return new Field(name, layout);
     }
-    static Layout.StructLayout struct(boolean nullable, Layout.Field... fields) {
+    static StructLayout struct(boolean nullable, Field... fields) {
       return new StructLayout(nullable, Arrays.stream(fields).collect(toMap(Field::name, Field::layout, (_1, _2) -> null, LinkedHashMap::new)));
     }
 
     private static String toString(String space, Layout layout) {
-      if (layout instanceof Layout.PrimitiveLayout primitiveLayout) {
+      if (layout instanceof PrimitiveLayout primitiveLayout) {
         return primitiveLayout.toString();
       }
-      if (layout instanceof Layout.ListLayout listLayout) {
-        if (listLayout.element instanceof Layout.PrimitiveLayout elementLayout && elementLayout.type == char.class) {
+      if (layout instanceof ListLayout listLayout) {
+        if (listLayout.element instanceof PrimitiveLayout elementLayout && elementLayout.type == char.class) {
           return "string(" + elementLayout.nullable + ")";
         }
         return "list(" + listLayout.nullable + ", " + toString(space, listLayout.element);
       }
-      if (layout instanceof Layout.StructLayout structLayout) {
+      if (layout instanceof StructLayout structLayout) {
         if (structLayout.fields.isEmpty()) {
           return "struct(" + structLayout.nullable + ")";
         }

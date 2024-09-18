@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -303,8 +303,17 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				final ITypeBinding binding= node.resolveBinding();
 				if (binding != null) {
 					final ITypeBinding declaring= binding.getDeclaringClass();
-					if (declaring != null && !Bindings.equals(declaring, fTypeBinding.getDeclaringClass()) && !Bindings.equals(binding, fTypeBinding) && fSourceRewrite.getRoot().findDeclaringNode(binding) != null && Modifier.isStatic(binding.getModifiers()))
+					if (declaring != null && !Bindings.equals(declaring, fTypeBinding.getDeclaringClass()) && !Bindings.equals(binding, fTypeBinding) && fSourceRewrite.getRoot().findDeclaringNode(binding) != null && Modifier.isStatic(binding.getModifiers())) {
+						ITypeBinding temp= binding;
+						while (temp != null && temp.isMember()) {
+							ITypeBinding declaringType= temp.getDeclaringClass();
+							if (Bindings.equals(declaringType, fTypeBinding)) {
+								return super.visit(node);
+							}
+							temp= declaringType;
+						}
 						addTypeQualification(node, fSourceRewrite, fGroup);
+					}
 				}
 			}
 			return super.visit(node);
