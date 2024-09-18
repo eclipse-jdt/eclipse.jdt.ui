@@ -32,6 +32,7 @@ import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTestSuite;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
+import org.eclipse.jdt.ui.tests.hover.MarkdownCommentTests;
 import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
@@ -82,6 +83,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	JarExportTests.class,
 	PackageJavadocTests.class,
 	JavadocHoverTests.class,
+	MarkdownCommentTests.class,
 	SmokeViewsTest.class
 })
 public class AutomatedSuite {

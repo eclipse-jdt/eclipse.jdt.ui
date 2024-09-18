@@ -268,14 +268,23 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		ArrayList<String> allJavaProjectVersions = new ArrayList<>(JavaCore.getAllJavaSourceVersionsSupportedByCompiler());
 		Collections.reverse(allJavaProjectVersions);
+
 		final String[] complianceVersions= allJavaProjectVersions.toArray(String[]::new);
-		final String[] complianceLabels= complianceVersions;
+
+		for (int i= 0; i < allJavaProjectVersions.size(); i++) {
+			String version= allJavaProjectVersions.get(i);
+			if (isBetaVersion(version)) {
+				allJavaProjectVersions.set(i, version + " (BETA)"); //$NON-NLS-1$
+				break;
+			}
+		}
+		final String[] complianceLabels= allJavaProjectVersions.toArray(String[]::new); // 2nd copy in case (BETA) was added
 
 		final String[] targetVersions= complianceVersions;
-		final String[] targetLabels= targetVersions;
+		final String[] targetLabels= complianceLabels;
 
 		final String[] sourceVersions= complianceVersions;
-		final String[] sourceLabels= sourceVersions;
+		final String[] sourceLabels= complianceLabels;
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		Composite composite= sc1.getBody();
@@ -680,10 +689,22 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 
+			if (isBetaVersion(getValue(PREF_COMPLIANCE))) {
+				fJRE50InfoText.setText(
+						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+				isVisible= true;
+			}
+
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
 			fJRE50InfoImage.getParent().layout();
 		}
+	}
+
+	@SuppressWarnings("unused")
+	protected boolean isBetaVersion(String compliance) {
+		return false;
+//		return JavaCore.VERSION_23.equals(compliance);
 	}
 
 	private String addsExportToSystemModule() {

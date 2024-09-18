@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,10 +43,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -104,8 +104,12 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 
 			if (firstNonWS < offset) {
 				if (d.getChar(firstNonWS) == '/') {
-					// Javadoc started on this line
-					buf.append(" * "); //$NON-NLS-1$
+					// Javadoc/markdown started on this line
+					if (d.getChar(firstNonWS+1) == '/') {
+						buf.append("///"); //$NON-NLS-1$
+					} else {
+						buf.append(" * "); //$NON-NLS-1$
+					}
 
 					if (isPreferenceTrue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS) && isNewComment(d, offset)) {
 						c.shiftsCaret= false;

@@ -212,24 +212,27 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		@Override
 		public boolean visit(Modifier node) {
 			AST ast= node.getAST();
+			int offset= node.getStartPosition();
+			int length = 0;
+			ModifierKeyword keyword= node.getKeyword();
 			if (ASTHelper.isSealedTypeSupportedInAST(ast)) {
-				ModifierKeyword keyword= node.getKeyword();
-				int offset= node.getStartPosition();
-				int length;
 				if (keyword == ModifierKeyword.SEALED_KEYWORD) {
 					length= 6;
 				} else if (keyword == ModifierKeyword.NON_SEALED_KEYWORD) {
 					length= 10;
-				} else {
-					return true;
 				}
-				if (offset > -1 && length > 0) {
-					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
-						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
-						if (semanticHighlighting instanceof RestrictedIdentifiersHighlighting) {
-							addPosition(offset, length, fJobHighlightings[i]);
-							return false;
-						}
+			}
+			if (length == 0 && ast.apiLevel() >= AST.JLS23) {
+				if (keyword == ModifierKeyword.MODULE_KEYWORD) {
+					length= 6;
+				}
+			}
+			if (offset > -1 && length > 0) {
+				for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
+					SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+					if (semanticHighlighting instanceof RestrictedIdentifiersHighlighting) {
+						addPosition(offset, length, fJobHighlightings[i]);
+						return false;
 					}
 				}
 			}
