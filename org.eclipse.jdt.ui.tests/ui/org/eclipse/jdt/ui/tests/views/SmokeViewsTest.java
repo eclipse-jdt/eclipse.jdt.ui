@@ -138,7 +138,8 @@ public class SmokeViewsTest {
 		view = window.getActivePage().showView(viewId);
 		assertNotNull("View " + viewId + " should be created", view);
 		DisplayHelper.driveEventQueue(Display.getDefault());
-		if(view instanceof org.eclipse.ui.internal.ErrorViewPart) {
+		if(view instanceof org.eclipse.ui.internal.ErrorViewPart errorView) {
+			System.out.println(errorView.getContentDescription());
 			fail("Error happened on opening view " + viewId);
 		}
 	}
