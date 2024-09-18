@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -320,7 +320,9 @@ public final class IndentUtil {
 		// don't count the space before javadoc like, asterix-style comment lines
 		if (to > from && to < endOffset - 1 && " *".equals(document.get(to - 1, 2))) { //$NON-NLS-1$
 			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
-			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
+			if (IJavaPartitions.JAVA_DOC.equals(type)
+					|| IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(type)
+					|| IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
 				to--;
 		}
 
@@ -380,7 +382,9 @@ public final class IndentUtil {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
 			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
 			String type= partition.getType();
-			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
+			if (IJavaPartitions.JAVA_DOC.equals(type)
+					|| IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(type)
+					|| IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)) {
 				indent= computeJavadocIndent(document, line, scanner, startingPartition);
 			} else if (!commentLines[lineIndex] && startingPartition.getOffset() == offset && IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(startingPartition.getType())) {
 				return false;

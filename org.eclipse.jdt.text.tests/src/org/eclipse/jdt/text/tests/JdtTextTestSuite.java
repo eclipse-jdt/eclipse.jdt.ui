@@ -53,6 +53,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	SpellCheckEngineTestCase.class,
 	SemanticHighlightingTest.class,
 	AutoboxingSemanticHighlightingTest.class,
+	Java23SemanticHighlightingTest.class,
 	NewForLoopJavaContextTest.class,
 	IteratorForLoopJavaContextTest.class,
 	ArrayWithTempVarForLoopJavaContextTest.class,

@@ -728,36 +728,6 @@ public abstract class HierarchicalASTVisitor extends ASTVisitor {
 	}
 
 	@Override
-	public boolean visit(StringTemplateExpression node) {
-		return visit((Expression) node);
-	}
-
-	@Override
-	public boolean visit(StringTemplateComponent node) {
-		return visit((Expression) node);
-	}
-
-	@Override
-	public boolean visit(StringFragment node) {
-		return visit((Expression) node);
-	}
-
-	@Override
-	public void endVisit(StringTemplateExpression node) {
-		endVisit((Expression) node);
-	}
-
-	@Override
-	public void endVisit(StringTemplateComponent node) {
-		endVisit((Expression) node);
-	}
-
-	@Override
-	public void endVisit(StringFragment node) {
-		endVisit((Expression) node);
-	}
-
-	@Override
 	public boolean visit(SuperFieldAccess node) {
 		return visit((Expression)node);
 	}

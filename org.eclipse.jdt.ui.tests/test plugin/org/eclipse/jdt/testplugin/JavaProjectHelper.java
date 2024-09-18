@@ -357,6 +357,23 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 23 for the given project.
+	 *
+	 * @param project the java project
+	 * @param enable_preview_feature sets enable-preview compliance project option based on the
+	 *            value specified.
+	 */
+	public static void set23CompilerOptions(IJavaProject project, boolean enable_preview_feature) {
+		Map<String, String> options= project.getOptions(false);
+		set23_CompilerOptions(options);
+		if (enable_preview_feature) {
+			options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
+			options.put(JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES, JavaCore.IGNORE);
+		}
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 9.
 	 *
 	 * @param options the compiler options to configure
@@ -435,6 +452,15 @@ public class JavaProjectHelper {
 	 */
 	public static void set17_CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_17, options);
+	}
+
+	/**
+	 * Sets the compiler options to 23.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set23_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_23, options);
 	}
 
 	/**

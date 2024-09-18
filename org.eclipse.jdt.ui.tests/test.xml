@@ -35,6 +35,7 @@
       <property name="data-dir" value="${jdt-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.ui.tests.AutomatedSuite"/>
+      <property name="vmargs" value="-XX:CompileCommand=exclude,org.eclipse.jdt.internal.core.dom.rewrite.ASTRewriteAnalyzer::getExtendedRange" />
     </ant>
     
   </target>
