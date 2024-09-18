@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -104,6 +104,7 @@ public class JavaFormatter {
 		private static void installJavaStuff(Document document, IJavaProject project) {
 			String[] types= new String[] {
 										  IJavaPartitions.JAVA_DOC,
+										  IJavaPartitions.JAVA_MARKDOWN_COMMENT,
 										  IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 										  IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 										  IJavaPartitions.JAVA_STRING,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,13 +57,13 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitioner;
@@ -632,6 +632,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	private void installJavaStuff(Document document) {
 		String[] types= new String[] {
 									  IJavaPartitions.JAVA_DOC,
+									  IJavaPartitions.JAVA_MARKDOWN_COMMENT,
 									  IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 									  IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 									  IJavaPartitions.JAVA_STRING,
@@ -801,7 +802,9 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		// don't count the space before javadoc like, asterisk-style comment lines
 		if (to > from && to < endOffset - 1 && " *".equals(document.get(to - 1, 2))) { //$NON-NLS-1$
 			String type= TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, to, true);
-			if (IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
+			if (IJavaPartitions.JAVA_DOC.equals(type)
+					|| IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type)
+					|| IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(type))
 				to--;
 		}
 

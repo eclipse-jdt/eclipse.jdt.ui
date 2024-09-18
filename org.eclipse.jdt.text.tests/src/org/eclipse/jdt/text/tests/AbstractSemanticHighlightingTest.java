@@ -36,6 +36,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -66,6 +67,14 @@ public class AbstractSemanticHighlightingTest {
 			fEditor= (JavaEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(fTestFilename), true);
 			fSourceViewer= EditorTestHelper.getSourceViewer(fEditor);
 			assertTrue(EditorTestHelper.joinReconciler(fSourceViewer, 0, 10000, 100));
+		}
+
+		public void updateCompliance(String compliance, boolean enablePreview) {
+			fJavaProject.setOption(JavaCore.COMPILER_SOURCE, compliance);
+			fJavaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compliance);
+			fJavaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compliance);
+			fJavaProject.setOption(JavaCore.COMPILER_RELEASE, JavaCore.ENABLED);
+			fJavaProject.setOption(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, enablePreview ? JavaCore.ENABLED: JavaCore.DISABLED);
 		}
 
 		protected String getTestFilename() {

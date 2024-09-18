@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,7 +31,8 @@ public class JavaPartitionerManager implements IJavaPartitionerManager {
 			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 			IJavaPartitions.JAVA_STRING,
 			IJavaPartitions.JAVA_CHARACTER,
-			IJavaPartitions.JAVA_MULTI_LINE_STRING
+			IJavaPartitions.JAVA_MULTI_LINE_STRING,
+			IJavaPartitions.JAVA_MARKDOWN_COMMENT
 	};
 
 	private static ITextEditor fEditor;

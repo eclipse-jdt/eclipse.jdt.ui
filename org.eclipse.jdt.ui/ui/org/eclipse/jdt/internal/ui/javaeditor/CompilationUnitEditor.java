@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -532,7 +532,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				}
 
 				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
-				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
+				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && !IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(partition.getType()))
 					return;
 				if (!validateEditorInputState())
 					return;

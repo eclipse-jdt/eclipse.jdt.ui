@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -407,6 +407,10 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_DOC);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_DOC);
 
+		dr= new DefaultDamagerRepairer(getJavaDocScanner());
+		reconciler.setDamager(dr, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
+		reconciler.setRepairer(dr, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
+
 		dr= new DefaultDamagerRepairer(getMultilineCommentScanner());
 		reconciler.setDamager(dr, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 		reconciler.setRepairer(dr, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
@@ -456,6 +460,9 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 			ContentAssistProcessor javadocProcessor= new JavadocCompletionProcessor(getEditor(), assistant);
 			assistant.setContentAssistProcessor(javadocProcessor, IJavaPartitions.JAVA_DOC);
+
+			ContentAssistProcessor markdownProcessor= new JavadocCompletionProcessor(getEditor(), assistant);
+			assistant.setContentAssistProcessor(markdownProcessor, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
 
 			ContentAssistProcessor multiLineStringProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_MULTI_LINE_STRING);
 			assistant.setContentAssistProcessor(multiLineStringProcessor, IJavaPartitions.JAVA_MULTI_LINE_STRING);
@@ -514,6 +521,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (contentType != null) {
 			switch (contentType) {
 				case IJavaPartitions.JAVA_DOC:
+				case IJavaPartitions.JAVA_MARKDOWN_COMMENT:
 				case IJavaPartitions.JAVA_MULTI_LINE_COMMENT:
 					return new IAutoEditStrategy[] { new JavaDocAutoIndentStrategy(partitioning) };
 				case IJavaPartitions.JAVA_STRING:
@@ -539,6 +547,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (contentType != null) {
 			switch (contentType) {
 				case IJavaPartitions.JAVA_DOC:
+				case IJavaPartitions.JAVA_MARKDOWN_COMMENT:
 					return new JavadocDoubleClickStrategy(getConfiguredDocumentPartitioning(sourceViewer));
 				case IJavaPartitions.JAVA_SINGLE_LINE_COMMENT:
 				case IJavaPartitions.JAVA_MULTI_LINE_COMMENT:
@@ -743,6 +752,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		return new String[] {
 			IDocument.DEFAULT_CONTENT_TYPE,
 			IJavaPartitions.JAVA_DOC,
+			IJavaPartitions.JAVA_MARKDOWN_COMMENT,
 			IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
 			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
 			IJavaPartitions.JAVA_STRING,
@@ -860,6 +870,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
@@ -905,6 +916,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		IInformationProvider provider= new JavaElementProvider(getEditor(), doCodeResolve);
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MARKDOWN_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);

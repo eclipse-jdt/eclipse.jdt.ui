@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,15 +45,18 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 	private static final int CHARACTER= 4;
 	private static final int STRING= 5;
 	private static final int MULTI_LINE_STRING= 6;
+	private static final int MARKDOWN_COMMENT = 7;
 
 	// beginning of prefixes and postfixes
 	private static final int NONE= 0;
 	private static final int BACKSLASH= 1; // postfix for STRING and CHARACTER
 	private static final int SLASH= 2; // prefix for SINGLE_LINE or MULTI_LINE or JAVADOC
-	private static final int SLASH_STAR= 3; // prefix for MULTI_LINE_COMMENT or JAVADOC
-	private static final int SLASH_STAR_STAR= 4; // prefix for MULTI_LINE_COMMENT or JAVADOC
-	private static final int STAR= 5; // postfix for MULTI_LINE_COMMENT or JAVADOC
-	private static final int CARRIAGE_RETURN=6; // postfix for STRING, CHARACTER and SINGLE_LINE_COMMENT
+	private static final int SLASH_SLASH = 3; // prefix for MARKDOWN
+	private static final int SLASH_STAR= 4; // prefix for MULTI_LINE_COMMENT or JAVADOC
+	private static final int SLASH_STAR_STAR= 5; // prefix for MULTI_LINE_COMMENT or JAVADOC
+	private static final int SLASH_SLASH_SLASH= 6; // prefix for MULTI_LINE_COMMENT or JAVADOC
+	private static final int STAR= 7; // postfix for MULTI_LINE_COMMENT or JAVADOC
+	private static final int CARRIAGE_RETURN=8; // postfix for STRING, CHARACTER and SINGLE_LINE_COMMENT
 	private static final int TRIPLE_QUOTE= 9; // prefix for TextBlock.
 
 	/** The scanner. */
@@ -87,7 +90,8 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 		new Token(JAVA_DOC),
 		new Token(JAVA_CHARACTER),
 		new Token(JAVA_STRING),
-		new Token(JAVA_MULTI_LINE_STRING)
+		new Token(JAVA_MULTI_LINE_STRING),
+		new Token(JAVA_MARKDOWN_COMMENT)
 	};
 
 	public AbstractFastJavaPartitionScanner(boolean emulate) {
@@ -149,6 +153,7 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 	 			} else {
 
 					switch (fState) {
+					case MARKDOWN_COMMENT:
 					case SINGLE_LINE_COMMENT:
 					case CHARACTER:
 					case STRING:
@@ -181,6 +186,7 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 
 	 		case '\n':
 				switch (fState) {
+				case MARKDOWN_COMMENT:
 				case SINGLE_LINE_COMMENT:
 				case CHARACTER:
 				case STRING:
@@ -254,9 +260,9 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 				case '/':
 					if (fLast == SLASH) {
 						if (fTokenLength - getLastLength(fLast) > 0) {
-							return preFix(JAVA, SINGLE_LINE_COMMENT, NONE, 2);
+							return preFix(JAVA, SINGLE_LINE_COMMENT, SLASH_SLASH, 2);
 						} else {
-							preFix(JAVA, SINGLE_LINE_COMMENT, NONE, 2);
+							preFix(JAVA, SINGLE_LINE_COMMENT, SLASH_SLASH, 2);
 							fTokenOffset += fTokenLength;
 							fTokenLength= fPrefixLength;
 							break;
@@ -326,9 +332,36 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 				break;
 
 	 		case SINGLE_LINE_COMMENT:
-				consume();
+				switch (ch) {
+					case '/':
+						if (fLast == SLASH_SLASH) {
+							fLast= SLASH_SLASH_SLASH;
+							fTokenLength++;
+							fState= MARKDOWN_COMMENT;
+						} else {
+							fTokenLength++;
+							fLast= SLASH;
+						}
+						break;
+					default:
+						consume();
+						break;
+				}
 				break;
-
+			case MARKDOWN_COMMENT:
+				switch (ch) {
+					case '\r':
+					case '\n':
+						return postFix(MARKDOWN_COMMENT);
+					case '/':
+						fTokenLength++;
+						fLast= SLASH_SLASH_SLASH;
+						break;
+					default:
+						consume();
+						break;
+					}
+				break;
 	 		case JAVADOC:
 				switch (ch) {
 				case '/':
@@ -632,10 +665,10 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 		case SLASH:
 		case STAR:
 			return 1;
-
+		case SLASH_SLASH:
 		case SLASH_STAR:
 			return 2;
-
+		case SLASH_SLASH_SLASH:
 		case SLASH_STAR_STAR:
 		case TRIPLE_QUOTE:
 			return 3;
@@ -695,6 +728,8 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 			return CHARACTER;
 		case JAVA_MULTI_LINE_STRING:
 			return MULTI_LINE_STRING;
+		case JAVA_MARKDOWN_COMMENT:
+			return MARKDOWN_COMMENT;
 		default:
 			return JAVA;
 		}

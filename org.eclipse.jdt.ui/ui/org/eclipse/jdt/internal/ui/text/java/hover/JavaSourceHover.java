@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -272,6 +272,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 					partition= doc.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
 					switch (partition.getType()) {
 						case IJavaPartitions.JAVA_DOC:
+						case IJavaPartitions.JAVA_MARKDOWN_COMMENT:
 						case IJavaPartitions.JAVA_SINGLE_LINE_COMMENT:
 						case IJavaPartitions.JAVA_MULTI_LINE_COMMENT:
 							offset+= partition.getLength();
