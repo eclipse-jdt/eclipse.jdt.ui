@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -430,6 +430,11 @@ public class MoveInnerToTopLevelTests extends GenericRefactoringTest {
 	@Test
 	public void test44() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "a", true, true, true, true);
+	}
+
+	@Test
+	public void testBug310510() throws Exception {
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 
 	// static context: https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
