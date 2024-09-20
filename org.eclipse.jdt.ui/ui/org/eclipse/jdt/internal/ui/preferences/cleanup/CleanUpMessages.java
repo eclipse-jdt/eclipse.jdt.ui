@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -64,6 +64,7 @@ public class CleanUpMessages extends NLS {
 	public static String CodeStyleTabPage_CheckboxName_ExtractIncrement;
 	public static String CodeStyleTabPage_CheckboxName_PullUpAssignment;
 	public static String CodeStyleTabPage_CheckboxName_ElseIf;
+	public static String CodeStyleTabPage_CheckboxName_SimplifyBooleanIfElse;
 	public static String CodeStyleTabPage_CheckboxName_ReduceIndentation;
 	public static String CodeStyleTabPage_CheckboxName_Instanceof;
 

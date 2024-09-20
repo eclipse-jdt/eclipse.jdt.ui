@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionAndMethodRefCleanUp;
 import org.eclipse.jdt.internal.ui.fix.NumberSuffixCleanUp;
 import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SimplifyBooleanIfElseCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 
@@ -51,6 +52,7 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new NumberSuffixCleanUp(values),
 				new InstanceofCleanUp(values),
 				new VariableDeclarationCleanUpCore(values),
+				new SimplifyBooleanIfElseCleanUpCore(values),
 				new LambdaExpressionAndMethodRefCleanUp(values)
 		};
 	}
@@ -70,6 +72,9 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference elseIf= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ElseIf, CleanUpConstants.ELSE_IF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(elseIf);
+
+		final CheckboxPreference simplifyIfElse= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_SimplifyBooleanIfElse, CleanUpConstants.SIMPLIFY_BOOLEAN_IF_ELSE, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(simplifyIfElse);
 
 		final CheckboxPreference reduceIndentationPref= createCheckboxPref(controlGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_ReduceIndentation, CleanUpConstants.REDUCE_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(reduceIndentationPref);

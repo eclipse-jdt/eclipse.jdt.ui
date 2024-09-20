@@ -2113,6 +2113,17 @@ public class CleanUpConstants {
 	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
 
 	/**
+	 * Convert if/else that returns true or false based on condition to a single return statement if possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.35
+	 */
+	public static final String SIMPLIFY_BOOLEAN_IF_ELSE= "cleanup.simplify_boolean_if_else"; //$NON-NLS-1$
+
+	/**
 	 * Uses an {@code instanceof} expression to check an object against a hardcoded class.
 	 * <p>
 	 * Possible values: {TRUE, FALSE}

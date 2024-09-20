@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2023 IBM Corporation and others.
+ * Copyright (c) 2018, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
+		options.setOption(SIMPLIFY_BOOLEAN_IF_ELSE, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
 		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
@@ -242,6 +243,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
+		options.setOption(SIMPLIFY_BOOLEAN_IF_ELSE, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
 		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);

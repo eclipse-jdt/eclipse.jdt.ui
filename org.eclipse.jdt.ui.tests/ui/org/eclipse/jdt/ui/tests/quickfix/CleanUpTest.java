@@ -16622,58 +16622,266 @@ public class CleanUpTest extends CleanUpTestCase {
 			package test1;
 
 			public class E {
-			    private int i;
+				private int i;
+				public int doNotInlineFieldAssignment1() {
+					i = 0;
+					return i;
+				}
 
-			    public int doNotInlineFieldAssignment1() {
-			        i = 0;
-			        return i;
-			    }
+				public int doNotInlineFieldAssignment2() {
+					this.i = 0;
+					return i;
+				}
 
-			    public int doNotInlineFieldAssignment2() {
-			        this.i = 0;
-			        return i;
-			    }
+				public int doNotInlineVariableInFinally() {
+					int i = 0;
+					try {
+						i = 1;
+						return i;
+					} finally {
+						System.out.println(i);
+					}
+				}
+				public int doNotInlineCatchVariableInFinally() {
+					int i = 0;
+					try {
+						return 1;
+					} catch (Exception e) {
+						i = 1;
+						return 2;
+					} finally {
+						System.out.println(i);
+					}
+				}
 
-			    public int doNotInlineVariableInFinally() {
-			        int i = 0;
-			        try {
-			            i = 1;
-			            return i;
-			        } finally {
-			            System.out.println(i);
-			        }
-			    }
-
-			    public int doNotInlineCatchVariableInFinally() {
-			        int i = 0;
-			        try {
-			            return 1;
-			        } catch (Exception e) {
-			            i = 1;
-			            return 2;
-			        } finally {
-			            System.out.println(i);
-			        }
-			    }
-
-			    public int doNotInlineVariableInFarAwayFinally() {
-			        int i = 0;
-			        try {
-			            try {
-			                i = 1;
-			                return i;
-			            } finally {
-			                System.out.println("Finished");
-			            }
-			        } finally {
-			            System.out.println(i);
-			        }
-			    }
+				public int doNotInlineVariableInFarAwayFinally() {
+					int i = 0;
+					try {
+						try {
+							i = 1;
+							return i;
+						} finally {
+							System.out.println("Finished");
+						}
+					} finally {
+						System.out.println(i);
+					}
+				}
 			}
 			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
 
 		enable(CleanUpConstants.RETURN_EXPRESSION);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
+	}
+
+	@Test
+	public void testSimplifyBooleanIfElseExpression01() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+			    public boolean simplifyNormal(int x) {
+			        if (x > 0 && x < 7) {
+			            return true;
+			        } else {
+			            return false;
+			        }
+			    }
+
+			    public boolean simplifyReverse(int x) {
+			        if (x > 0 && x < 7) {
+			            return false;
+			        } else {
+			            return true;
+			        }
+			    }
+
+				public boolean simplifyCompoundIf(int x) {
+				    if (x < 0) {
+				        return false;
+				    } else if (x < 7) {
+				        return true;
+				    } else {
+				        return false;
+				    }
+				}
+
+				public boolean simplifyNLS(String x) {
+				    if (x.equals("abc")) { //$NON-NLS-1$
+				        return true;
+				    } else {
+				        return false;
+				    }
+				}
+			}
+		    """;
+
+		String expected= """
+			package test1;
+
+			public class E {
+			    public boolean simplifyNormal(int x) {
+			        return x > 0 && x < 7;
+			    }
+
+			    public boolean simplifyReverse(int x) {
+			        return !(x > 0 && x < 7);
+			    }
+
+				public boolean simplifyCompoundIf(int x) {
+				    if (x < 0) {
+				        return false;
+				    } else
+			            return x < 7;
+				}
+
+				public boolean simplifyNLS(String x) {
+				    return x.equals("abc"); //$NON-NLS-1$
+				}
+			}
+		    """;
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_BOOLEAN_IF_ELSE);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_SimplifyBooleanIfElse_description)));
+	}
+
+	@Test
+	public void testSimplifyBooleanIfElseExpression02() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+			    public boolean simplifyNormal(int x) {
+			        if (x > 0 && x < 7) {
+			            return true;
+			        } else {
+			            return false;
+			        }
+			    }
+
+			    public boolean simplifyReverse(int x) {
+			        if (x > 0 && x < 7) {
+			            return false;
+			        } else {
+			            return true;
+			        }
+			    }
+
+				public boolean simplifyCompoundIf(int x) {
+				    if (x < 0) {
+				        return false;
+				    } else if (x < 7) {
+				        return true;
+				    } else {
+				        return false;
+				    }
+				}
+
+				public boolean simplifyNLS(String x) {
+				    if (x.equals("abc")) { //$NON-NLS-1$
+				        return true;
+				    } else {
+				        return false;
+				    }
+				}
+			}
+		    """;
+
+		String expected= """
+			package test1;
+
+			public class E {
+			    public boolean simplifyNormal(int x) {
+			        return x > 0 && x < 7;
+			    }
+
+			    public boolean simplifyReverse(int x) {
+			        return !(x > 0 && x < 7);
+			    }
+
+				public boolean simplifyCompoundIf(int x) {
+				    if (x < 0) {
+				        return false;
+				    } else
+			            return x < 7;
+				}
+
+				public boolean simplifyNLS(String x) {
+				    return x.equals("abc"); //$NON-NLS-1$
+				}
+			}
+		    """;
+
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_BOOLEAN_IF_ELSE);
+		enable(CleanUpConstants.REDUCE_INDENTATION);
+
+		// Then
+		assertNotEquals("The class must be changed", given, expected);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.CodeStyleCleanUp_SimplifyBooleanIfElse_description)));
+	}
+
+	@Test
+	public void testDoNotSimplifyBooleanIfElseExpression01() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+			    public boolean doNotSimplifyIfBooleanSame(int x) {
+			        if (x > 0 && x < 7) {
+			            return true;
+			        } else {
+			            return true;
+			        }
+			    }
+
+			    public boolean doNotSimplifyIfBooleanTheSame2(int x) {
+			        if (x > 0 && x < 7) {
+			            return false;
+			        } else {
+			            return false;
+			        }
+			    }
+
+				public boolean doNotSimplifyIfNoElse(int x) {
+				    if (x < 0) {
+				        return false;
+				    } else if (x < 7) {
+				        return true;
+				    }
+				    return false;
+				}
+
+				public int doNotSimplifyNoneBoolean(String x) {
+				    if (x.equals("abc")) { //$NON-NLS-1$
+				        return 1;
+				    } else {
+				        return 2;
+				    }
+				}
+			}
+		    """;
+
+
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.SIMPLIFY_BOOLEAN_IF_ELSE);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}
