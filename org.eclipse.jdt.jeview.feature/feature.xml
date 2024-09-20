@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.jeview.feature"
       label="Java Element View"
-      version="1.1.400.qualifier"
+      version="1.1.500.qualifier"
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
@@ -16,8 +16,8 @@
    </license>
 
    <requires>
-      <import plugin="org.eclipse.jdt.core" version="3.31.0" match="compatible"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.27.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.core" version="3.40.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.33.100" match="compatible"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>

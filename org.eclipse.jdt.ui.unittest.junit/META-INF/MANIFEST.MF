@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.unittest.junit
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.ui.unittest.junit;singleton:=true
-Bundle-Version: 1.1.400.qualifier
+Bundle-Version: 1.1.500.qualifier
 Bundle-Activator: org.eclipse.jdt.ui.unittest.junit.JUnitTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %providerName
@@ -17,8 +17,8 @@ Require-Bundle:
  org.eclipse.ui.workbench.texteditor;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.ui;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.debug.ui;bundle-version="[3.5.0,4.0.0)",
- org.eclipse.jdt.core;bundle-version="[3.24.0,4.0.0)",
- org.eclipse.jdt.ui;bundle-version="[3.29.0,4.0.0)",
+ org.eclipse.jdt.core;bundle-version="[3.40.0,4.0.0)",
+ org.eclipse.jdt.ui;bundle-version="[3.33.0,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.29.0,4.0.0)",
  org.eclipse.jdt.launching;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.jdt.debug.ui;bundle-version="[3.3.0,4.0.0)",
