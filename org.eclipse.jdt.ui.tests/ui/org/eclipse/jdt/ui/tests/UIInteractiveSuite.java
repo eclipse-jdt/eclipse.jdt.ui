@@ -13,18 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+/**
+ * Test all areas of the UI.
+ */
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.dialogs.DialogsTest;
 import org.eclipse.jdt.ui.tests.dialogs.PreferencesTest;
 import org.eclipse.jdt.ui.tests.dialogs.WizardsTest;
 
-/**
- * Test all areas of the UI.
- */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	PreferencesTest.class,
 	WizardsTest.class,
 	DialogsTest.class

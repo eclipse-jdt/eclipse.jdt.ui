@@ -13,15 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-
-/**
- * @since 3.5
- */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	BuildpathModifierActionEnablementTest.class,
 	BuildpathModifierActionTest.class,
 	CPUserLibraryTest.class,

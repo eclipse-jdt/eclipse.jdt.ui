@@ -14,13 +14,13 @@
 
 package org.eclipse.jdt.ui.tests.performance;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.performance.views.TypeHierarchyPerfTest;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	TypeHierarchyPerfTest.class
 })
 public class PerformanceTestSuite {

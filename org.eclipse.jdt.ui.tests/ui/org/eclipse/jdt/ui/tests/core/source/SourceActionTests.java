@@ -14,17 +14,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
-
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  *
  * Tests for the actions in the source menu
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 AddUnimplementedMethodsTest.class,
 GenerateGettersSettersTest.class,
 GenerateGettersSettersTest16.class,
