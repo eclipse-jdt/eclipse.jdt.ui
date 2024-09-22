@@ -13,11 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.all;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.class,
 	org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.class,
 	org.eclipse.jdt.ui.tests.refactoring.AllTests.class,
