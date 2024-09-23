@@ -24,14 +24,11 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jface.text.BadLocationException;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -64,11 +61,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
+import org.eclipse.jdt.internal.ui.fix.CleanUpNLSUtils;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
 
 public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
@@ -383,7 +380,7 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 						&& constant.resolveConstantExpressionValue() != null) {
 					CompilationUnit cu= (CompilationUnit) variable.getRoot();
 					ICompilationUnit icu= (ICompilationUnit) cu.getJavaElement();
-					NLSLine nlsLine= scanCurrentLine(icu, variable);
+					NLSLine nlsLine= CleanUpNLSUtils.scanCurrentLine(icu, variable);
 					boolean hasTag= false;
 					if (nlsLine != null) {
 						for (NLSElement element : nlsLine.getElements()) {
@@ -399,23 +396,6 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 					return new Variable(variable, Arrays.asList(constant), Arrays.asList(hasTag));
 				}
 
-				return null;
-			}
-
-			private NLSLine scanCurrentLine(ICompilationUnit cu, Expression exp) {
-				CompilationUnit cUnit= (CompilationUnit)exp.getRoot();
-				int startLine= cUnit.getLineNumber(exp.getStartPosition());
-				int lineStart= cUnit.getPosition(startLine, 0);
-				int endOfLine= cUnit.getPosition(startLine + 1, 0);
-				NLSLine[] lines;
-				try {
-					lines= NLSScanner.scan(cu.getBuffer().getText(lineStart, endOfLine - lineStart));
-					if (lines.length > 0) {
-						return lines[0];
-					}
-				} catch (IndexOutOfBoundsException | JavaModelException | InvalidInputException | BadLocationException e) {
-					// fall-through
-				}
 				return null;
 			}
 

@@ -7135,10 +7135,15 @@
             id="org.eclipse.jdt.ui.cleanup.else_if"
             runAfter="org.eclipse.jdt.ui.cleanup.variables">
       </cleanUp>
+       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.SimplifyBooleanIfElseCleanUpCore"
+            id="org.eclipse.jdt.ui.cleanup.simplify_boolean_if_else"
+            runAfter="org.eclipse.jdt.ui.cleanup.else_if">
+      </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp"
             id="org.eclipse.jdt.ui.cleanup.reduce_indentation"
-            runAfter="org.eclipse.jdt.ui.cleanup.else_if">
+            runAfter="org.eclipse.jdt.ui.cleanup.simplify_boolean_if_else">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp"
