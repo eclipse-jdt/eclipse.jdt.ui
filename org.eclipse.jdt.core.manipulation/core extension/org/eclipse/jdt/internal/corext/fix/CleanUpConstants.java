@@ -1466,6 +1466,18 @@ public class CleanUpConstants {
 	public static final String REMOVE_UNNECESSARY_NLS_TAGS= "cleanup.remove_unnecessary_nls_tags"; //$NON-NLS-1$
 
 	/**
+	 * Remove unnecessary SuppressWarnings specifiers.
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.34
+	 */
+	public static final String REMOVE_UNNECESSARY_SUPPRESS_WARNINGS= "cleanup.remove_unnecessary_suppress_warnings"; //$NON-NLS-1$
+
+	/**
 	 * Insert inferred type arguments for diamonds.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
