@@ -808,4 +808,95 @@ public class MarkdownCommentTests extends CoreTests {
 				""";
 		assertHtmlContent(expectedContent, actualHtmlContent);
 	}
+	@Test
+	public void testGH2980() throws CoreException {
+		String source= """
+				package p;
+
+				public class X {
+					/// This is a test Javadoc for method test1()
+					/// ```java
+					/// test1(42);
+					/// ```
+					/// @param a some parameter for test1
+					public void test1(int a) {}
+					///
+					/// This is a test Javadoc for method test2()
+					/// 'test2(0)'
+					/// @param b some parameter for test1
+					public void test2(int b) {}
+					/// This is a test Javadoc for method test3()
+					/// ```java
+					/// int r = test3();
+					/// System.out.println(r);
+					/// ```
+					/// @return an int value
+					public int test3() {
+						return 0;
+					}
+					/// This is a test Javadoc for method test4()
+					/// Invocation method 1:
+					/// ```java
+					/// int r = test4();
+					/// System.out.println(r);
+					/// ```
+					/// Invocation method 2:
+					/// ```java
+					/// System.out.println(test4());
+					/// ```
+					/// @return an int value
+					/// @param i an int param
+					public int test4(int i) {
+						return 0;
+					}
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/X.java", source, null);
+		assertNotNull("X.java", cu);
+
+		IType type= cu.getType("X");
+
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		String expectedContent= """
+					<p>This is a test Javadoc for method test1()</p>
+					<pre><code class="language-java">test1(42);
+					</code></pre>
+					<dl><dt>Parameters:</dt><dd><b>a</b> some parameter for test1</dd></dl>
+					""";
+		assertHtmlContent(expectedContent, actualHtmlContent);
+
+		method= type.getMethods()[1];
+		actualHtmlContent= getHoverHtmlContent(cu, method);
+		expectedContent= """
+					<p>This is a test Javadoc for method test2()
+					'test2(0)'</p>
+					<dl><dt>Parameters:</dt><dd><b>b</b> some parameter for test1</dd></dl>
+					""";
+		assertHtmlContent(expectedContent, actualHtmlContent);
+
+		method= type.getMethods()[2];
+		actualHtmlContent= getHoverHtmlContent(cu, method);
+		expectedContent= """
+					<p>This is a test Javadoc for method test3()</p>
+					<pre><code class="language-java">int r = test3();
+					System.out.println(r);
+					</code></pre>
+					<dl><dt>Returns:</dt><dd>an int value</dd></dl>
+					""";
+		method= type.getMethods()[3];
+		actualHtmlContent= getHoverHtmlContent(cu, method);
+		expectedContent= """
+					<p>This is a test Javadoc for method test4()
+					Invocation method 1:</p>
+					<pre><code class="language-java">int r = test4();
+					System.out.println(r);
+					</code></pre>
+					<p>Invocation method 2:</p>
+					<pre><code class="language-java">System.out.println(test4());
+					</code></pre>
+					<dl><dt>Parameters:</dt><dd><b>i</b> an int param</dd><dt>Returns:</dt><dd>an int value</dd></dl>
+					""";
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
 }
