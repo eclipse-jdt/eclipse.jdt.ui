@@ -495,6 +495,8 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_declareSealedAsDirectSuperClass_description;
 	public static String LocalCorrectionsSubProcessor_declareSubClassAsPermitsSealedClass_description;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
+	public static String SuppressWarningsSubProcessor_remove_all_annotations_label;
+	public static String SuppressWarningsSubProcessor_remove_any_unused_annotations_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;
 	public static String VarargsWarningsSubProcessor_add_safevarargs_label;
 	public static String VarargsWarningsSubProcessor_add_safevarargs_to_method_label;

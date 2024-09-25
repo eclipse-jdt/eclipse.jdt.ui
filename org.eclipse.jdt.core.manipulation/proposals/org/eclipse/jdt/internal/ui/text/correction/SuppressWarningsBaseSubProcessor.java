@@ -16,7 +16,9 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -48,11 +50,18 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.fix.UnusedSuppressWarningsCleanUp;
 
 public abstract class SuppressWarningsBaseSubProcessor<T> {
 
@@ -224,30 +233,41 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		}
 
 		ASTNode parent= coveringNode.getParent();
-
-		ASTRewrite rewrite= ASTRewrite.create(coveringNode.getAST());
-		if (parent instanceof SingleMemberAnnotation) {
-			rewrite.remove(parent, null);
-		} else if (parent instanceof NormalAnnotation) {
-			NormalAnnotation annot= (NormalAnnotation) parent;
-			if (annot.values().size() == 1) {
-				rewrite.remove(annot, null);
-			} else {
-				rewrite.remove(coveringNode, null);
-			}
-		} else if (parent instanceof ArrayInitializer) {
-			rewrite.remove(coveringNode, null);
-		} else {
+		if (!(parent instanceof SingleMemberAnnotation) && !(parent instanceof NormalAnnotation) && !(parent instanceof ArrayInitializer)) {
 			return;
 		}
-		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
-		T proposal= createASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_ANNOTATION);
-		proposals.add(proposal);
-		return;
+		IProposableFix fix= UnusedSuppressWarningsFixCore.createFix(context.getASTRoot(), problem);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
+			cleanUp.setLiteral(literal);
+			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
+			proposals.add(proposal);
+		}
+		fix= UnusedSuppressWarningsFixCore.createAllFix(context.getASTRoot(), literal);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
+			cleanUp.setLiteral(literal);
+			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
+			proposals.add(proposal);
+		}
+		fix= UnusedSuppressWarningsFixCore.createAllFix(context.getASTRoot(), null);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
+			cleanUp.setLiteral(literal);
+			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
+			proposals.add(proposal);
+		}
 	}
 
 	protected abstract T createSuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance);
 
 	protected abstract T createASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance);
 
+	protected abstract T createFixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context);
 }

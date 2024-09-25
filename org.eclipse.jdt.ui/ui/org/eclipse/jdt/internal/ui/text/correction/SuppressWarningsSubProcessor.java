@@ -27,12 +27,16 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcessor<ICommandAccess> {
 
@@ -71,6 +75,18 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		return new ASTRewriteCorrectionProposal(name, cu, rewrite, relevance, image);
+	}
+
+	@Override
+	protected ICommandAccess createFixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context) {
+		// Initialize as default image, though it should always trigger one of the two if statements below
+		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
+			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		}
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, relevance, image, context);
+		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
+		return proposal;
 	}
 
 	SuppressWarningsSubProcessor() {
