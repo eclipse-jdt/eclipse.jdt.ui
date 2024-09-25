@@ -899,4 +899,63 @@ public class MarkdownCommentTests extends CoreTests {
 					""";
 		assertHtmlContent(expectedContent, actualHtmlContent);
 	}
+	@Test
+	public void testFenceLenFour_1() throws CoreException {
+		String source= """
+				/// ````
+				/// ```
+				/// @param is not a tag here because this is nested literal *markdown*
+				/// ```
+				/// ````
+				public class FenceLenFour {
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/FenceLenFour.java", source, null);
+		assertNotNull("FenceLenFour.java", cu);
+
+		String expectedContent= """
+				<pre><code>```
+				@param is not a tag here because this is nested literal *markdown*
+				```
+				</code></pre>
+				""";
+		IType type= cu.getType("FenceLenFour");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
+	@Test
+	public void testFenceLenFour_2() throws CoreException {
+		String source= """
+				public class FenceLenFour {
+					/// `````
+					/// ````
+					/// ```
+					/// @param is not a tag here because this is nested literal *markdown*
+					/// ```
+					/// ````
+					/// `````
+					/// @return an int value
+					/// @param i real param
+					public int foo(int i) {
+						return 0;
+					}
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/FenceLenFour.java", source, null);
+		assertNotNull("FenceLenFour.java", cu);
+
+		String expectedContent= """
+				<pre><code>````
+				```
+				@param is not a tag here because this is nested literal *markdown*
+				```
+				````
+				</code></pre>
+				<dl><dt>Parameters:</dt><dd><b>i</b> real param</dd><dt>Returns:</dt><dd>an int value</dd></dl>
+				""";
+		IType type= cu.getType("FenceLenFour");
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
 }
