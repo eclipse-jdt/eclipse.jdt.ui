@@ -81,9 +81,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 	protected ICommandAccess createFixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context) {
 		// Initialize as default image, though it should always trigger one of the two if statements below
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		if(relevance == IProposalRelevance.FIX_SUPPRESS_TOKEN) {
-			image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		} else if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
+		if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
 			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, relevance, image, context);

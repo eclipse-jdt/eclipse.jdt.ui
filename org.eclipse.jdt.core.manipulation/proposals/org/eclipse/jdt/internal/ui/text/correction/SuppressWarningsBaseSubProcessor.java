@@ -233,24 +233,6 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		}
 
 		ASTNode parent= coveringNode.getParent();
-//
-//		ASTRewrite rewrite= ASTRewrite.create(coveringNode.getAST());
-//		if (parent instanceof SingleMemberAnnotation) {
-//			rewrite.remove(parent, null);
-//		} else if (parent instanceof NormalAnnotation) {
-//			NormalAnnotation annot= (NormalAnnotation) parent;
-//			if (annot.values().size() == 1) {
-//				rewrite.remove(annot, null);
-//			} else {
-//				rewrite.remove(coveringNode, null);
-//			}
-//		} else if (parent instanceof ArrayInitializer) {
-//			rewrite.remove(coveringNode, null);
-//		} else {
-//			return;
-//		}
-//		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
-//		T proposal= createASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_ANNOTATION);
 		if (!(parent instanceof SingleMemberAnnotation) && !(parent instanceof NormalAnnotation) && !(parent instanceof ArrayInitializer)) {
 			return;
 		}
