@@ -2976,4 +2976,111 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
 	}
 
+	@Test
+	public void testIssue1668() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, CompilerOptions.ENABLED);
+		options.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+				package test1;
+				public class E {
+					@SuppressWarnings("restriction")
+					public boolean simplifyNormal(int x) {
+						return true;
+					}
+
+					@SuppressWarnings("restriction")
+					public boolean simplifyCompoundIf(int x) {
+						return false;
+					}
+
+					@SuppressWarnings("unchecked")
+					public boolean simplifyNLS(String x) {
+						return true;
+					}
+
+					public boolean simplifyAll() {
+						return false;
+					}
+				}
+				""";
+
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(3, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrectionsNoCheck(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		String expected1 = """
+				package test1;
+				public class E {
+					public boolean simplifyNormal(int x) {
+						return true;
+					}
+
+					@SuppressWarnings("restriction")
+					public boolean simplifyCompoundIf(int x) {
+						return false;
+					}
+
+					@SuppressWarnings("unchecked")
+					public boolean simplifyNLS(String x) {
+						return true;
+					}
+
+					public boolean simplifyAll() {
+						return false;
+					}
+				}
+				""";
+
+		String expected2= """
+				package test1;
+				public class E {
+					public boolean simplifyNormal(int x) {
+						return true;
+					}
+
+					public boolean simplifyCompoundIf(int x) {
+						return false;
+					}
+
+					@SuppressWarnings("unchecked")
+					public boolean simplifyNLS(String x) {
+						return true;
+					}
+
+					public boolean simplifyAll() {
+						return false;
+					}
+				}
+				""";
+
+		String expected3= """
+				package test1;
+				public class E {
+					public boolean simplifyNormal(int x) {
+						return true;
+					}
+
+					public boolean simplifyCompoundIf(int x) {
+						return false;
+					}
+
+					public boolean simplifyNLS(String x) {
+						return true;
+					}
+
+					public boolean simplifyAll() {
+						return false;
+					}
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
+	}
 }

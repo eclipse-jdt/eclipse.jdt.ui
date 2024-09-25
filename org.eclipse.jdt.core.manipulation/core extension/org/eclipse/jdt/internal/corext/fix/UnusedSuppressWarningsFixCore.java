@@ -14,7 +14,9 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -41,36 +43,45 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 /**
  * Remove unneeded SuppressWarnings annotations.
  */
-public class UnneededSuppressWarningsFixCore extends CompilationUnitRewriteOperationsFixCore {
+public class UnusedSuppressWarningsFixCore extends CompilationUnitRewriteOperationsFixCore {
 
-	public UnneededSuppressWarningsFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
+	public UnusedSuppressWarningsFixCore(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation operation) {
 		super(name, compilationUnit, operation);
 	}
 
-	public static IProposableFix createFix(CompilationUnit compilationUnit, StringLiteral origLiteral) {
+	public static IProposableFix createAllFix(CompilationUnit compilationUnit, StringLiteral origLiteral) {
 		IProblem[] problems= compilationUnit.getProblems();
 		List<IProblemLocation> locationsList= new ArrayList<>();
+		Set<String> tokens= new HashSet<>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation location= new ProblemLocation(problems[i]);
 			if (location.getProblemId() == IProblem.UnusedWarningToken) {
 				ASTNode node= location.getCoveringNode(compilationUnit);
 				if (node instanceof StringLiteral literal) {
-					if (literal.getLiteralValue() == origLiteral.getLiteralValue()) {
+					if (origLiteral == null || literal.getLiteralValue().equals(origLiteral.getLiteralValue())) {
 						locationsList.add(location);
+						tokens.add(literal.getLiteralValue());
 					}
 				}
 			}
 		}
 		IProblemLocation[] locations= locationsList.toArray(new IProblemLocation[0]);
-		return createFix(compilationUnit, origLiteral, locations);
+		if (locations.length > 1 && (origLiteral != null || tokens.size() > 1)) {
+			String label= origLiteral == null
+					? CorrectionMessages.SuppressWarningsSubProcessor_remove_any_unused_annotations_label
+					: Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_all_annotations_label, origLiteral.getLiteralValue());
+			return createFix(label, compilationUnit, locations);
+		}
+		return null;
 	}
 
 	public static IProposableFix createFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		StringLiteral literal= (StringLiteral)problem.getCoveringNode(compilationUnit);
-		return createFix(compilationUnit, literal, new IProblemLocation[] { problem });
+		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
+		return createFix(label, compilationUnit, new IProblemLocation[] { problem });
 	}
 
-	public static IProposableFix createFix(CompilationUnit compilationUnit, StringLiteral literal, IProblemLocation[] problems) {
+	private static IProposableFix createFix(String label, CompilationUnit compilationUnit, IProblemLocation[] problems) {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		try {
 			if (!cu.isStructureKnown())
@@ -78,8 +89,7 @@ public class UnneededSuppressWarningsFixCore extends CompilationUnitRewriteOpera
 		} catch (JavaModelException e) {
 			return null;
 		}
-		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_annotation_label, literal.getLiteralValue());
-		return new UnneededSuppressWarningsFixCore(label, compilationUnit, new RemoveUnneededSuppressWarningsOperation(problems));
+		return new UnusedSuppressWarningsFixCore(label, compilationUnit, new RemoveUnneededSuppressWarningsOperation(problems));
 	}
 
 	private static class RemoveUnneededSuppressWarningsOperation extends CompilationUnitRewriteOperation {

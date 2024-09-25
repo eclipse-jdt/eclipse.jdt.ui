@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.UnneededSuppressWarningsFixCore;
+import org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -34,15 +34,15 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Create fix to remove unnecessary SuppressWarnings
- * @see org.eclipse.jdt.internal.corext.fix.UnneededSuppressWarningsFixCore
+ * @see org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore
  */
-public class UnneededSuppressWarningsCleanUp extends AbstractMultiFix {
+public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 
-	public UnneededSuppressWarningsCleanUp(Map<String, String> options) {
+	public UnusedSuppressWarningsCleanUp(Map<String, String> options) {
 		super(options);
 	}
 
-	public UnneededSuppressWarningsCleanUp() {
+	public UnusedSuppressWarningsCleanUp() {
 		super();
 	}
 
@@ -69,7 +69,7 @@ public class UnneededSuppressWarningsCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		ICleanUpFix coreFix= UnneededSuppressWarningsFixCore.createFix(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
+		ICleanUpFix coreFix= UnusedSuppressWarningsFixCore.createAllFix(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
 				fLiteral);
 		return coreFix;
 	}
@@ -79,15 +79,17 @@ public class UnneededSuppressWarningsCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		ICleanUpFix coreFix= UnneededSuppressWarningsFixCore.createFix(compilationUnit, fLiteral, problems);
+		ICleanUpFix coreFix= UnusedSuppressWarningsFixCore.createAllFix(compilationUnit, fLiteral);
 		return coreFix;
 	}
 
 	private Map<String, String> getRequiredOptions() {
 		Map<String, String> result= new Hashtable<>();
 
-		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS))
-			result.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.WARNING);
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS)) {
+			result.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.ENABLED);
+			result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.WARNING);
+		}
 
 		return result;
 	}

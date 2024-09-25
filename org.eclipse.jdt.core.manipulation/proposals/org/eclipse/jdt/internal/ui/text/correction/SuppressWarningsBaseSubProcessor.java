@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
-import org.eclipse.jdt.internal.corext.fix.UnneededSuppressWarningsFixCore;
+import org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -61,7 +61,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.fix.UnneededSuppressWarningsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedSuppressWarningsCleanUp;
 
 public abstract class SuppressWarningsBaseSubProcessor<T> {
 
@@ -254,11 +254,29 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		if (!(parent instanceof SingleMemberAnnotation) && !(parent instanceof NormalAnnotation) && !(parent instanceof ArrayInitializer)) {
 			return;
 		}
-		IProposableFix fix= UnneededSuppressWarningsFixCore.createFix(context.getASTRoot(), problem);
+		IProposableFix fix= UnusedSuppressWarningsFixCore.createFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
-			UnneededSuppressWarningsCleanUp cleanUp= new UnneededSuppressWarningsCleanUp(options);
+			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
+			cleanUp.setLiteral(literal);
+			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
+			proposals.add(proposal);
+		}
+		fix= UnusedSuppressWarningsFixCore.createAllFix(context.getASTRoot(), literal);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
+			cleanUp.setLiteral(literal);
+			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
+			proposals.add(proposal);
+		}
+		fix= UnusedSuppressWarningsFixCore.createAllFix(context.getASTRoot(), null);
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
 			cleanUp.setLiteral(literal);
 			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
 			proposals.add(proposal);
