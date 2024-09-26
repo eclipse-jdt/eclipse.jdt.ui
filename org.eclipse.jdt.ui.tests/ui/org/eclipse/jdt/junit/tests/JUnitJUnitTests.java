@@ -15,11 +15,11 @@
 
 package org.eclipse.jdt.junit.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 // TODO disabled unreliable tests driving the event loop:
 //WrappingSystemTest.class,
 //WrappingUnitTest.class,

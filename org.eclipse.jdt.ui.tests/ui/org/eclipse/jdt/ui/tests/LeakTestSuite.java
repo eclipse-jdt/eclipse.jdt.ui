@@ -13,20 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+
+
+/**
+ * Test for leaks
+ */
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
 import org.eclipse.jdt.ui.tests.leaks.TextViewerUndoManagerLeakTest;
 import org.eclipse.jdt.ui.tests.leaks.UndoManagerLeakTest;
 import org.eclipse.jdt.ui.tests.search.SearchLeakTestWrapper;
 
-
-/**
- * Test for leaks
- */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	JavaLeakTest.class,
 	SearchLeakTestWrapper.class,
 	UndoManagerLeakTest.class,

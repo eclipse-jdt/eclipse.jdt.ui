@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests; singleton:=true
-Bundle-Version: 3.15.600.qualifier
+Bundle-Version: 3.15.700.qualifier
 Bundle-Activator: org.eclipse.jdt.testplugin.JavaTestPlugin
 Bundle-Vendor: %Plugin.providerName
 Bundle-Localization: plugin
@@ -75,12 +75,22 @@ Require-Bundle:
  org.eclipse.jdt.astview,
  org.eclipse.compare.core,
  org.eclipse.compare,
- org.eclipse.core.tests.harness
+ org.eclipse.core.tests.harness,
+ junit-jupiter-api
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Eclipse-BundleShape: dir
 Bundle-ActivationPolicy: lazy
 Import-Package: org.assertj.core.api;version="3.24.2",
  org.junit.jupiter.api,
+ org.junit.jupiter.api.extension,
+ org.junit.jupiter.migrationsupport,
+ org.junit.jupiter.migrationsupport.conditions,
+ org.junit.jupiter.migrationsupport.rules,
+ org.junit.jupiter.params,
+ org.junit.jupiter.params.aggregator,
+ org.junit.jupiter.params.converter,
+ org.junit.jupiter.params.provider,
+ org.junit.jupiter.params.support,
  org.junit.platform.suite.api,
  org.junit.platform.suite.commons;status=INTERNAL,
  org.junit.platform.suite.engine;status=INTERNAL

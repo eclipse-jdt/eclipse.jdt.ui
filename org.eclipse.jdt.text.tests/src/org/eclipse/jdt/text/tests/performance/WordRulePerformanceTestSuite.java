@@ -13,14 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * @since 3.6
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	WordRulePerformanceTest.class
 })
 public class WordRulePerformanceTestSuite {

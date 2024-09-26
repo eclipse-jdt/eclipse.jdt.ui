@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.text.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.text.tests;singleton:=true
-Bundle-Version: 3.14.550.qualifier
+Bundle-Version: 3.14.600.qualifier
 Bundle-Activator: org.eclipse.jdt.text.tests.JdtTextTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
@@ -36,7 +36,21 @@ Require-Bundle:
  org.eclipse.jdt.ui.tests,
  org.eclipse.test.performance,
  org.eclipse.jdt.core.manipulation,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.eclipse.core.tests.harness,
+ junit-jupiter-api
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Eclipse-BundleShape: dir
-Import-Package: org.junit.jupiter.api
+Import-Package: org.junit.jupiter.api,
+ org.junit.jupiter.api.extension,
+ org.junit.jupiter.migrationsupport,
+ org.junit.jupiter.migrationsupport.conditions,
+ org.junit.jupiter.migrationsupport.rules,
+ org.junit.jupiter.params,
+ org.junit.jupiter.params.aggregator,
+ org.junit.jupiter.params.converter,
+ org.junit.jupiter.params.provider,
+ org.junit.jupiter.params.support,
+ org.junit.platform.suite.api,
+ org.junit.platform.suite.commons;status=INTERNAL,
+ org.junit.platform.suite.engine;status=INTERNAL

@@ -13,12 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.typeconstraints;
 
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	TypeConstraintTests.class,
 	TypeEnvironmentTests.class
 })

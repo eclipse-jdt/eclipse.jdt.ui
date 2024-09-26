@@ -13,14 +13,14 @@
  *******************************************************************************/
  package org.eclipse.jdt.ui.tests.refactoring.all;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.refactoring.reorg.AllReorgPerformanceTests;
 import org.eclipse.jdt.ui.tests.refactoring.type.AllTypeConstraintsPerformanceTests;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	AllReorgPerformanceTests.class,
 	AllTypeConstraintsPerformanceTests.class
 })

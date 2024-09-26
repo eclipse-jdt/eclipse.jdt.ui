@@ -13,16 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
 
 import org.eclipse.jdt.internal.ui.compare.JavaIgnoreWhitespaceContributorTest;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparatorTest;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 AddImportTest.class,
 SourceActionTests.class,
 ASTNodesInsertTest.class,

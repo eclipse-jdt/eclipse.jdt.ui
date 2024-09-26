@@ -14,9 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.junit.launcher.JUnitLauncherTests;
 import org.eclipse.jdt.junit.tests.JUnitJUnitTests;
@@ -51,8 +51,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Test all areas of JDT UI.
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	CoreTests.class,
 	CoreTestSuite.class,
 	QuickFixTestSuite.class,
@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	SmokeViewsTest.class
 })
 public class AutomatedSuite {
-	@Before
+	@BeforeEach
 	protected void setUp() throws Exception {
 		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();
