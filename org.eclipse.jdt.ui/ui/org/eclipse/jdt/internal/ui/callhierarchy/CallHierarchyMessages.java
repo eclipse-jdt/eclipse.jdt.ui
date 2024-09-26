@@ -66,6 +66,11 @@ public final class CallHierarchyMessages extends NLS {
 	public static String ShowExpandWithConstructorsDialogAction_text;
 	public static String ShowFilterDialogAction_text;
 	public static String FiltersDialog_filter;
+
+	public static String FiltersDialog_ShowAllCode;
+	public static String FiltersDialog_HideTestCode;
+	public static String FiltersDialog_TestCodeOnly;
+
 	public static String FiltersDialog_filterOnNames;
 	public static String FiltersDialog_filterOnNamesSubCaption;
 	public static String FiltersDialog_maxCallDepth;
