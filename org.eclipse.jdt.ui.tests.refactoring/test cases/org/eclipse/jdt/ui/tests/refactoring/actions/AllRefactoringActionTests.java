@@ -11,15 +11,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring.changes;
+package org.eclipse.jdt.ui.tests.refactoring.actions;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	TrackPositionTest.class,
-	TextDiffContentTest.class
+	StructureSelectionActionTests.class,
+	GoToNextPreviousMemberActionTests.class
 })
-public class AllTests {
+public class AllRefactoringActionTests {
 }
+
+

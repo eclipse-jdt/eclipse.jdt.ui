@@ -18,13 +18,13 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-	org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.actions.AllRefactoringActionTests.class,
 	org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.class,
 	org.eclipse.jdt.ui.tests.refactoring.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.extensions.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.changes.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.ccp.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.typeconstraints.AllTests.class
+	org.eclipse.jdt.ui.tests.refactoring.extensions.AllRefactoringExtensionsTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.changes.AllRefactoringChangesTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.ccp.AllRefactoringCCPTests.class,
+	org.eclipse.jdt.ui.tests.refactoring.typeconstraints.AllRefactoringTypeConstraintsTests.class
 })
 public class AllAllRefactoringTests {
 }
