@@ -6925,4 +6925,132 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
     }
 
+	@Test
+	public void testConvertToLambdaIssue1535_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, new Iterable<String>() {
+							@Override
+							public Iterator<String> iterator() {
+                				return rankedListIterator;
+							}
+						});
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		String expected= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, (Iterable<String>) () -> rankedListIterator);
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+
+	}
+
+	@Test
+	public void testConvertToLambdaIssue1535_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+
+					private Iterator<String> myfunc() {
+						class K implements Iterator<String> {
+							@Override
+							public boolean hasNext() {
+								return false;
+							}
+
+							@Override
+							public String next() {
+								return null;
+							}
+						}
+						return new K();
+					}
+
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, new Iterable<String>() {
+							@Override
+							public Iterator<String> iterator() {
+                				return myfunc();
+							}
+						});
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.ALSO_SIMPLIFY_LAMBDA);
+
+		String expected= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+
+					private Iterator<String> myfunc() {
+						class K implements Iterator<String> {
+							@Override
+							public boolean hasNext() {
+								return false;
+							}
+
+							@Override
+							public String next() {
+								return null;
+							}
+						}
+						return new K();
+					}
+
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, (Iterable<String>) this::myfunc);
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+
+	}
 }

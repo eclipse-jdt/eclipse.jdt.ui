@@ -945,7 +945,7 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				}
 
 				ITypeBinding targetTypeBinding= ASTNodes.getTargetType(classInstanceCreation);
-				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, ASTNodes.isExplicitlyTypedLambda(cicReplacement)) || targetTypeBinding.getFunctionalInterfaceMethod() == null) {
+				if (needCastForWildcardArgument(classInstanceCreation) || ASTNodes.isTargetAmbiguous(classInstanceCreation, ASTNodes.isExplicitlyTypedLambda(cicReplacement)) || targetTypeBinding.getFunctionalInterfaceMethod() == null) {
 					CastExpression cast= ast.newCastExpression();
 					cast.setExpression(cicReplacement);
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
@@ -960,6 +960,49 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				importRemover.registerRemovedNode(classInstanceCreation);
 				importRemover.registerRetainedNode(lambdaBody);
 			}
+		}
+
+		private boolean needCastForWildcardArgument(ClassInstanceCreation classInstanceCreation) {
+			if (classInstanceCreation.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				MethodInvocation parent= (MethodInvocation)classInstanceCreation.getParent();
+				List<Expression> arguments= parent.arguments();
+				IMethodBinding methodBinding= parent.resolveMethodBinding();
+				if (methodBinding != null) {
+					ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+					int index= -1;
+					for (int i= 0; i < arguments.size(); ++i) {
+						if (arguments.get(i) == classInstanceCreation) {
+							index= i;
+							break;
+						}
+					}
+					if (index >= 0) {
+						ITypeBinding parameterTypeBinding= null;
+						if (index < parameterTypes.length) {
+							parameterTypeBinding= parameterTypes[index];
+						} else {
+							parameterTypeBinding= parameterTypes[parameterTypes.length - 1].getComponentType();
+						}
+						ITypeBinding classInstanceParameterizedType= classInstanceCreation.getType().resolveBinding();
+						ITypeBinding[] classInstanceTypeArguments= classInstanceParameterizedType.getTypeArguments();
+						ITypeBinding[] typeArguments= parameterTypeBinding.getTypeArguments();
+						for (int i= 0; i < typeArguments.length; ++i) {
+							ITypeBinding typeArgument= typeArguments[i];
+							if (typeArgument.isWildcardType()) {
+								ITypeBinding bound= typeArgument.getBound();
+								if (bound == null) {
+									bound= typeArgument.getErasure();
+								}
+								ITypeBinding classInstanceTypeArgument= classInstanceTypeArguments[i];
+								if (!bound.isSubTypeCompatible(classInstanceTypeArgument)) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		private Expression castMethodRefIfNeeded(final CompilationUnitRewrite cuRewrite, AST ast, Expression methodRef, Expression visited) {
