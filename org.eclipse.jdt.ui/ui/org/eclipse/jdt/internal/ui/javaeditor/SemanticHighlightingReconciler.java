@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -32,6 +34,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 
@@ -347,6 +350,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private SemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
 	private Highlighting[] fHighlightings;
+	private Highlighting fDefaultHighlighting;
 
 	/** Background job's added highlighted positions */
 	private List<Position> fAddedPositions= new ArrayList<>();
@@ -370,6 +374,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @since 3.2
 	 */
 	private boolean fIsReconciling= false;
+	private CompletableFuture<List<SemanticTokensProvider.SemanticToken>> fContributionsReconcilingFuture = CompletableFuture.completedFuture(List.of());
 
 	/** The semantic highlighting presenter - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
 	private SemanticHighlightingPresenter fJobPresenter;
@@ -377,12 +382,15 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private SemanticHighlighting[] fJobSemanticHighlightings;
 	/** Highlightings - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
 	private Highlighting[] fJobHighlightings;
+	private Highlighting fJobDefaultHighlighting;
 
 	/**
 	 * XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
 	 * @since 3.5
 	 */
 	private Highlighting fJobDeprecatedMemberHighlighting;
+
+	private List<SemanticTokensProvider.SemanticToken> fContributedTokens = List.of();
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
@@ -392,21 +400,46 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		// Do nothing
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
-	 */
-	@Override
-	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+	private CompletableFuture<List<SemanticTokensProvider.SemanticToken>> fetchContributedSemanticTokens(CompilationUnit ast) {
+		List<SemanticTokensProvider.SemanticToken> newContributedTokens = Collections.synchronizedList(new ArrayList<>());
+		CompletableFuture<?>[] futures = ast.getTypeRoot() == null ? new CompletableFuture<?>[0] : Arrays.stream(JavaPlugin.getDefault().getContributedSemanticTokensProviders())
+				.map(p -> p.computeSemanticTokens(ast.getTypeRoot().getPath()).thenAccept(t -> newContributedTokens.addAll(t)))
+				.toArray(CompletableFuture[]::new);
+		return CompletableFuture.allOf(futures).thenApply(v -> {
+			synchronized (fReconcileLock) {
+				if (!fContributedTokens.equals(newContributedTokens)) {
+					scheduleJob();
+				}
+				return newContributedTokens;
+			}
+
+		});
+	}
+
+	private void doReconcile(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+		List<SemanticTokensProvider.SemanticToken> contributedTokens = Collections.emptyList();
+		boolean shouldFetchContributedTokens = false;
 		// ensure at most one thread can be reconciling at any time
 		synchronized (fReconcileLock) {
 			if (fIsReconciling)
 				return;
 			else
 				fIsReconciling= true;
+
+			if (fContributionsReconcilingFuture.isDone()) {
+				try {
+					contributedTokens = fContributionsReconcilingFuture.get();
+					shouldFetchContributedTokens = contributedTokens.equals(fContributedTokens);
+					fContributedTokens = contributedTokens;
+				} catch (InterruptedException | ExecutionException e) {
+					// ignore, shouldn't happen as future is completed already
+				}
+			}
 		}
 		fJobPresenter= fPresenter;
 		fJobSemanticHighlightings= fSemanticHighlightings;
 		fJobHighlightings= fHighlightings;
+		fJobDefaultHighlighting = fDefaultHighlighting;
 
 
 		try {
@@ -424,10 +457,15 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 			startReconcilingPositions();
 
-			List<SemanticTokensProvider.SemanticToken> contributedTokens = Collections.synchronizedList(new ArrayList<>());
-			CompletableFuture<?>[] futures = ast.getTypeRoot() == null ? new CompletableFuture<?>[0] : Arrays.stream(JavaPlugin.getDefault().getContributedSemanticTokensProviders())
-					.map(p -> p.computeSemanticTokens(ast.getTypeRoot().getPath()).thenAccept(t -> contributedTokens.addAll(t)))
-					.toArray(CompletableFuture[]::new);
+			if (shouldFetchContributedTokens) {
+				fContributionsReconcilingFuture = fetchContributedSemanticTokens(ast);
+			}
+//			try {
+//				contributedTokens = fetchContributedSemanticTokens(ast).get();
+//			} catch (InterruptedException | ExecutionException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
 			if (!fJobPresenter.isCanceled()) {
 				fJobDeprecatedMemberHighlighting= null;
@@ -437,14 +475,6 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						fJobDeprecatedMemberHighlighting= fJobHighlightings[i];
 						break;
 					}
-				}
-
-				try {
-					CompletableFuture.allOf(futures).get();
-				} catch (InterruptedException e) {
-					// ignore
-				} catch (ExecutionException e) {
-					e.printStackTrace();
 				}
 
 				reconcilePositions(subtrees, contributedTokens);
@@ -464,10 +494,22 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			fJobSemanticHighlightings= null;
 			fJobHighlightings= null;
 			fJobDeprecatedMemberHighlighting= null;
+			fJobDefaultHighlighting = null;
 			synchronized (fReconcileLock) {
 				fIsReconciling= false;
 			}
 		}
+	}
+
+
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
+	 */
+	@Override
+	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+		resetContributedSemanticTokens();
+		doReconcile(ast, forced, progressMonitor);
 	}
 
 	/**
@@ -496,8 +538,6 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private void reconcilePositions(ASTNode[] subtrees, List<SemanticTokensProvider.SemanticToken> contributedTokens) {
 		// FIXME: remove positions not covered by subtrees
 
-
-
 		for (ASTNode subtree : subtrees)
 			subtree.accept(fCollector);
 
@@ -519,19 +559,63 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	}
 
 	private Highlighting fromSemanticTokenType(SemanticTokensProvider.TokenType type) {
-		switch (type) {
-			case COMMENT:
-				return findHighlighting(SemanticHighlightings.ANNOTATION);
-			case KEYWORD:
-				return findHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
-			case METHOD:
-				return findHighlighting(SemanticHighlightings.METHOD);
-			case TYPE:
-				return findHighlighting(SemanticHighlightings.CLASS);
-			case VARIABLE:
-				return findHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
-			default:
-				break;
+		if (type != null) {
+			switch (type) {
+				case COMMENT:
+					return findHighlighting(SemanticHighlightings.ANNOTATION);
+				case KEYWORD:
+					return findHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
+				case METHOD:
+					return findHighlighting(SemanticHighlightings.METHOD);
+				case ABSTRACT_CLASS:
+					return findHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
+				case ABSTRACT_METHOD_INVOCATION:
+					return findHighlighting(SemanticHighlightings.ABSTRACT_METHOD_INVOCATION);
+				case ANNOTATION:
+					return findHighlighting(SemanticHighlightings.ANNOTATION);
+				case ANNOTATION_ELEMENT_REFERENCE:
+					return findHighlighting(SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE);
+				case AUTOBOXING:
+					return findHighlighting(SemanticHighlightings.AUTOBOXING);
+				case CLASS:
+					return findHighlighting(SemanticHighlightings.CLASS);
+				case DEFAULT:
+					return fJobDefaultHighlighting;
+				case DEPRECATED_MEMBER:
+					return findHighlighting(SemanticHighlightings.DEPRECATED_MEMBER);
+				case ENUM:
+					return findHighlighting(SemanticHighlightings.ENUM);
+				case FIELD:
+					return findHighlighting(SemanticHighlightings.FIELD);
+				case INHERITED_FIELD:
+					return findHighlighting(SemanticHighlightings.INHERITED_FIELD);
+				case INHERITED_METHOD_INVOCATION:
+					return findHighlighting(SemanticHighlightings.INHERITED_METHOD_INVOCATION);
+				case INTERFACE:
+					return findHighlighting(SemanticHighlightings.INTERFACE);
+				case LOCAL_VARIABLE:
+					return findHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
+				case LOCAL_VARIABLE_DECLARATION:
+					return findHighlighting(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION);
+				case METHOD_DECLARATION:
+					return findHighlighting(SemanticHighlightings.METHOD_DECLARATION);
+				case NUMBER:
+					return findHighlighting(SemanticHighlightings.NUMBER);
+				case PARAMETER_VARIABLE:
+					return findHighlighting(SemanticHighlightings.PARAMETER_VARIABLE);
+				case STATIC_FIELD:
+					return findHighlighting(SemanticHighlightings.STATIC_FIELD);
+				case STATIC_FINAL_FIELD:
+					return findHighlighting(SemanticHighlightings.STATIC_FINAL_FIELD);
+				case STATIC_METHOD_INVOCATION:
+					return findHighlighting(SemanticHighlightings.STATIC_METHOD_INVOCATION);
+				case TYPE_ARGUMENT:
+					return findHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
+				case TYPE_VARIABLE:
+					return findHighlighting(SemanticHighlightings.TYPE_VARIABLE);
+				default:
+					break;
+			}
 		}
 		return null;
 	}
@@ -608,6 +692,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fPresenter= presenter;
 		fSemanticHighlightings= semanticHighlightings;
 		fHighlightings= highlightings;
+
+		StyledText tw= sourceViewer.getTextWidget();
+		TextAttribute defaultEditTextAttr= new TextAttribute(tw.getForeground(), null, SWT.None, tw.getFont());
+		fDefaultHighlighting = new Highlighting(defaultEditTextAttr, true);
 
 		fEditor= editor;
 		fSourceViewer= sourceViewer;
@@ -701,7 +789,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						System.out.println("Semantic Reconcile: %s".formatted(element.getPath())); //$NON-NLS-1$
 						JavaCore.runReadOnly(() -> {
 							CompilationUnit ast= SharedASTProviderCore.getAST(element, SharedASTProviderCore.WAIT_YES, monitor);
-							reconciled(ast, false, monitor);
+							doReconcile(ast, false, monitor);
 						});
 						synchronized (fJobLock) {
 							// allow the job to be gc'ed
@@ -746,6 +834,16 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @since 3.2
 	 */
 	public void refresh() {
+		resetContributedSemanticTokens();
 		scheduleJob();
+	}
+
+	private void resetContributedSemanticTokens() {
+		if (!fContributionsReconcilingFuture.isDone()) {
+			System.out.println("Contributions tokens future CANCELLED"); //$NON-NLS-1$
+			fContributionsReconcilingFuture.cancel(true);
+		}
+		fContributionsReconcilingFuture = CompletableFuture.completedFuture(List.of());
+		fContributedTokens = List.of();
 	}
 }
