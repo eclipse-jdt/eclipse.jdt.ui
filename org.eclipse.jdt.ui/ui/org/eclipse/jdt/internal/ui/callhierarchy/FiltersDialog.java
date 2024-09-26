@@ -40,8 +40,9 @@ class FiltersDialog extends StatusDialog {
     private Button fFilterOnNames;
     private Text fNames;
     private Text fMaxCallDepth;
-    private Button fFilterTestCode;
-
+    private Button fShowAll;
+    private Button fHideTest;
+    private Button fShowTest;
 
     protected FiltersDialog(Shell parentShell) {
         super(parentShell);
@@ -112,10 +113,34 @@ class FiltersDialog extends StatusDialog {
     }
 
     private void createTestCodeArea(Composite parent) {
-        fFilterTestCode = createCheckbox(parent,
-                CallHierarchyMessages.FiltersDialog_filterTestCode, true);
-    }
+		Composite radioGroup= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
+		radioGroup.setLayout(layout);
 
+		fShowAll= new Button(radioGroup, SWT.RADIO);
+		fShowAll.setText(CallHierarchyMessages.FiltersDialog_ShowAllCode);
+
+		fHideTest= new Button(radioGroup, SWT.RADIO);
+		fHideTest.setText(CallHierarchyMessages.FiltersDialog_HideTestCode);
+
+		fShowTest= new Button(radioGroup, SWT.RADIO);
+		fShowTest.setText(CallHierarchyMessages.FiltersDialog_TestCodeOnly);
+		setSelection();
+
+		GridData gridData= new GridData();
+		gridData.horizontalIndent= 0;
+		fShowAll.setLayoutData(gridData);
+		fHideTest.setLayoutData(gridData);
+		fShowTest.setLayoutData(gridData);
+	}
+
+    private void setSelection() {
+		fShowAll.setSelection(CallHierarchy.getDefault().isShowAll());
+		fHideTest.setSelection(CallHierarchy.getDefault().isHideTestCode());
+		fShowTest.setSelection(CallHierarchy.getDefault().isShowTestCode());
+
+    }
 
     /**
      * Creates a check box button with the given parent and text.
@@ -157,27 +182,33 @@ class FiltersDialog extends StatusDialog {
     }
 
     /**
-     * Updates the given filter from the UI state.
-     */
-    private void updateFilterFromUI() {
-        int maxCallDepth = Integer.parseInt(this.fMaxCallDepth.getText());
+	 * Updates the given filter from the UI state.
+	 */
+	private void updateFilterFromUI() {
+		int maxCallDepth= Integer.parseInt(this.fMaxCallDepth.getText());
 
-        CallHierarchyUI.getDefault().setMaxCallDepth(maxCallDepth);
-        CallHierarchy.getDefault().setFilters(fNames.getText());
-        CallHierarchy.getDefault().setFilterEnabled(fFilterOnNames.getSelection());
-        CallHierarchy.getDefault().setFilterTestCode(fFilterTestCode.getSelection());
-    }
+		CallHierarchyUI.getDefault().setMaxCallDepth(maxCallDepth);
+		CallHierarchy.getDefault().setFilters(fNames.getText());
+		CallHierarchy.getDefault().setFilterEnabled(fFilterOnNames.getSelection());
 
-    /**
-     * Updates the UI state from the given filter.
-     */
-    private void updateUIFromFilter() {
-      fMaxCallDepth.setText(String.valueOf(CallHierarchyUI.getDefault().getMaxCallDepth()));
-      fNames.setText(CallHierarchy.getDefault().getFilters());
-      fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
-      fFilterTestCode.setSelection(CallHierarchy.getDefault().isFilterTestCode());
-      updateEnabledState();
-    }
+		CallHierarchy.getDefault().setShowAll(fShowAll.getSelection());
+		CallHierarchy.getDefault().setHideTestCode(fHideTest.getSelection());
+		CallHierarchy.getDefault().setShowTestCode(fShowTest.getSelection());
+	}
+
+	/**
+	 * Updates the UI state from the given filter.
+	 */
+	private void updateUIFromFilter() {
+		fMaxCallDepth.setText(String.valueOf(CallHierarchyUI.getDefault().getMaxCallDepth()));
+		fNames.setText(CallHierarchy.getDefault().getFilters());
+		fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
+
+		setSelection();
+		
+		updateEnabledState();
+	}
+
 
 	/**
      * Updates the filter from the UI state.
