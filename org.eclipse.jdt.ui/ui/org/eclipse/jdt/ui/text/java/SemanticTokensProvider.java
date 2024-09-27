@@ -1,18 +1,21 @@
 package org.eclipse.jdt.ui.text.java;
 
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
 
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public interface SemanticTokensProvider {
-
 
 	record SemanticToken(int ofset, int length, TokenType tokenType) {}
 
 	enum TokenType {
 		DEFAULT,
-		COMMENT,
+		OPERATOR,
+		SINGLE_LINE_COMMENT,
+		MULTI_LINE_COMMENT,
+		BRACKET,
+		STRING,
+		RESTRICTED_IDENTIFIER,
 		STATIC_FINAL_FIELD,
 		STATIC_FIELD,
 		FIELD,
@@ -39,7 +42,7 @@ public interface SemanticTokensProvider {
 		KEYWORD,
 	}
 
-	CompletableFuture<Collection<SemanticToken>> computeSemanticTokens(IPath resource);
+	Collection<SemanticToken> computeSemanticTokens(CompilationUnit ast);
 
 }
 
