@@ -18,18 +18,19 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 import org.eclipse.jdt.core.dom.*;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 /**
  *
  * @author chammer
  *
- * @param <E>
- * @param <V>
- * @param <T>
+ * @param <E> - type that extends HelpVisitorProvider that provides {@code HelperVisitor<V, T>}
+ * @param <V> - type that HelperVisitor uses as map key type
+ * @param <T> - type that HelperVisitor uses as map value type
  * @since 1.15
  */
-@SuppressWarnings({ "unchecked", "restriction" })
+@SuppressWarnings({ "unchecked" })
 public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> extends ASTVisitor {
 	/**
 	 *
@@ -37,7 +38,7 @@ public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> exte
 	private final HelperVisitor<E,V,T> helperVisitor;
 
 	/**
-	 * @param helperVisitor
+	 * @param helperVisitor - HelperVisitor
 	 */
 	LambdaASTVisitor(HelperVisitor<E,V,T> helperVisitor) {
 		super(false);
@@ -520,7 +521,7 @@ public class LambdaASTVisitor<E extends HelperVisitorProvider<V,T,E>, V, T> exte
 				}
 				Class<?> typeof=(Class<?>) map.get(HelperVisitor.TYPEOF);
 				String[] parameterTypesQualifiedNames=(String[]) map.get(HelperVisitor.PARAMTYPENAMES);
-				
+
 				if(typeof!=null) {
 					if(parameterTypesQualifiedNames==null) {
 						if (ASTNodes.usesGivenSignature(node, typeof.getCanonicalName(), data)) {
