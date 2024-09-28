@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
@@ -93,13 +94,13 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 		if (ASTNodes.usesGivenSignature(visited, URLDecoder.class.getCanonicalName(), METHOD_DECODE, String.class.getCanonicalName())) {
 			Nodedata nd=new Nodedata();
 			switch(cb) {
-				case KEEP:
+				case KEEP_BEHAVIOR:
 					nd.encoding=null;
 					break;
-				case USE_UTF8:
+				case ENFORCE_UTF8:
 					nd.encoding="UTF_8"; //$NON-NLS-1$
 					break;
-				case USE_UTF8_AGGREGATE:
+				case ENFORCE_UTF8_AGGREGATE:
 					break;
 			}
 			nd.replace=false;
@@ -116,25 +117,31 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, ((Nodedata) data.get(visited)).encoding);
+		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() or StandardCharsets.UTF_8 as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, MethodInvocation.ARGUMENTS_PROPERTY);
-		if(((Nodedata)(data.get(visited))).replace) {
-			listRewrite.replace(((Nodedata) data.get(visited)).visited, callToCharsetDefaultCharset, group);
+		if(nodedata.replace) {
+			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
+		removeUnsupportedEncodingException(visited, group, rewrite, importRewriter);
 	}
 
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "java.net.URLDecoder.decode(\"asdf\", StandardCharsets.UTF_8);\n"+ //$NON-NLS-1$
-					""; //$NON-NLS-1$
+			return "java.net.URLDecoder.decode(\"asdf\", StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 		}
-		return "java.net.URLDecoder.decode(\"asdf\", \"UTF-8\");\n"+ //$NON-NLS-1$
-		""; //$NON-NLS-1$
+		return "java.net.URLDecoder.decode(\"asdf\", \"UTF-8\");\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "URLDecoder.decode()"; //$NON-NLS-1$
 	}
 }

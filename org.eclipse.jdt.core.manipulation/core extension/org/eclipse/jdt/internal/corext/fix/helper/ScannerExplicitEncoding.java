@@ -72,48 +72,39 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore, Set<CompilationUnitRewriteOperation> operations,
 			ChangeBehavior cb, ClassInstanceCreation visited,
 			ReferenceHolder<ASTNode, Object> holder) {
-		List<ASTNode> arguments= visited.arguments();
+		List<ASTNode> arguments = visited.arguments();
+		Nodedata nd = new Nodedata();
+
 		switch (arguments.size()) {
-		case 4:
-			if(!(arguments.get(3) instanceof StringLiteral)) {
-				return false;
-			}
-			StringLiteral argstring4= (StringLiteral) arguments.get(3);
-			if (!encodings.contains(argstring4.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd=new Nodedata();
-			nd.encoding=encodingmap.get(argstring4.getLiteralValue().toUpperCase());
-			nd.replace=true;
-			nd.visited=argstring4;
-			holder.put(visited,nd);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		case 2:
-			if(!(arguments.get(1) instanceof StringLiteral)) {
-				return false;
-			}
-			StringLiteral argstring3= (StringLiteral) arguments.get(1);
-			if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd2=new Nodedata();
-			nd2.encoding=encodingmap.get(argstring3.getLiteralValue().toUpperCase());
-			nd2.replace=true;
-			nd2.visited=argstring3;
-			holder.put(visited,nd2);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		case 1:
-			Nodedata nd3=new Nodedata();
-			nd3.encoding=null;
-			nd3.replace=false;
-			nd3.visited=visited;
-			holder.put(visited,nd3);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		default:
-			break;
+			case 4:
+			case 2:
+				int encodingIndex = (arguments.size() == 4) ? 3 : 1;
+				ASTNode argumentNode = arguments.get(encodingIndex);
+
+				if (argumentNode instanceof StringLiteral) {
+					StringLiteral encodingLiteral = (StringLiteral) argumentNode;
+					String encodingValue = encodingLiteral.getLiteralValue().toUpperCase();
+
+					if (encodings.contains(encodingValue)) {
+						nd.encoding = encodingmap.get(encodingValue);
+						nd.replace = true;
+						nd.visited = encodingLiteral;
+						holder.put(visited, nd);
+						operations.add(fixcore.rewrite(visited, cb, holder));
+					}
+				}
+				break;
+
+			case 1:
+				nd.encoding = null;
+				nd.replace = false;
+				nd.visited = visited;
+				holder.put(visited, nd);
+				operations.add(fixcore.rewrite(visited, cb, holder));
+				break;
+
+			default:
+				break;
 		}
 
 		return false;
@@ -124,13 +115,14 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, ((Nodedata) data.get(visited)).encoding);
+		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-		if(((Nodedata)(data.get(visited))).replace) {
-			listRewrite.replace(((Nodedata) data.get(visited)).visited, callToCharsetDefaultCharset, group);
+		if(nodedata.replace) {
+			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
@@ -139,8 +131,13 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "new java.util.Scanner(\"asdf\","+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "new java.util.Scanner(\"asdf\",StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 		}
 		return "new java.util.Scanner(\"asdf\", \"UTF-8\");\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "new java.util.Scanner()"; //$NON-NLS-1$
 	}
 }

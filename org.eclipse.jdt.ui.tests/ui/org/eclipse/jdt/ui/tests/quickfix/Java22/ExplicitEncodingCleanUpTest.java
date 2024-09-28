@@ -11,7 +11,7 @@
  * Contributors:
  *
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.quickfix.Java10;
+package org.eclipse.jdt.ui.tests.quickfix.Java22;
 
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Hashtable;
@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.tests.quickfix.rules.AbstractEclipseJava;
-import org.eclipse.jdt.ui.tests.quickfix.rules.EclipseJava10;
+import org.eclipse.jdt.ui.tests.quickfix.rules.EclipseJava22;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -51,7 +51,7 @@ public class ExplicitEncodingCleanUpTest {
 	}
 
 	@RegisterExtension
-	AbstractEclipseJava context = new EclipseJava10();
+	AbstractEclipseJava context = new EclipseJava22();
 
 	enum ExplicitEncodingPatterns {
 
@@ -80,31 +80,33 @@ public class ExplicitEncodingCleanUpTest {
 				    }
 				}
 				""",
-				"""
-						package test1;
 
-						import java.io.ByteArrayOutputStream;
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.io.FileNotFoundException;
+"""
+package test1;
 
-						public class E1 {
-						    void method(String filename) {
-						        Charset cs1= Charset.forName("UTF-8");
-						        Charset cs1b= Charset.forName("Utf-8");
-						        Charset cs2= Charset.forName("UTF-16");
-						        Charset cs3= Charset.forName("UTF-16BE");
-						        Charset cs4= Charset.forName("UTF-16LE");
-						        Charset cs5= Charset.forName("ISO-8859-1");
-						        Charset cs6= Charset.forName("US-ASCII");
-						        String result= cs1.toString();
-						       }
-						    }
-						}
-						"""),
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileNotFoundException;
+
+public class E1 {
+    void method(String filename) {
+        Charset cs1= StandardCharsets.UTF_8;
+        Charset cs1b= StandardCharsets.UTF_8;
+        Charset cs2= StandardCharsets.UTF_16;
+        Charset cs3= StandardCharsets.UTF_16BE;
+        Charset cs4= StandardCharsets.UTF_16LE;
+        Charset cs5= StandardCharsets.ISO_8859_1;
+        Charset cs6= StandardCharsets.US_ASCII;
+        String result= cs1.toString();
+       }
+    }
+}
+"""),
 		BYTEARRAYOUTSTREAM("""
 				package test1;
 

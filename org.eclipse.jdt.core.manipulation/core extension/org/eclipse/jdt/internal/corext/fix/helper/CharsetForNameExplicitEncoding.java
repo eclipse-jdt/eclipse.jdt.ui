@@ -81,12 +81,6 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		if (!JavaModelUtil.is18OrHigher(cuRewrite.getCu().getJavaProject())) {
-			/**
-			 * For Java 17 and older just do nothing
-			 */
-			return;
-		}
 		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
 		ASTNodes.replaceButKeepComment(rewrite, visited, callToCharsetDefaultCharset, group);
 	}
@@ -94,10 +88,13 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Charset s=StandardCharsets.UTF_8;\n"+ //$NON-NLS-1$
-					""; //$NON-NLS-1$
+			return "Charset s=StandardCharsets.UTF_8;\n"; //$NON-NLS-1$
 		}
-		return "Charset s=Charset.forName(\"UTF-8\");\n"+ //$NON-NLS-1$
-		""; //$NON-NLS-1$
+		return "Charset s=Charset.forName(\"UTF-8\");\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "Charset.forName(\"UTF-8\")"; //$NON-NLS-1$
 	}
 }

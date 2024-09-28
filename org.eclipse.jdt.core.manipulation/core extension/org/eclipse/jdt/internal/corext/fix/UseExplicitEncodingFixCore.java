@@ -78,7 +78,15 @@ public enum UseExplicitEncodingFixCore {
 	}
 
 	public String getPreview(boolean i, ChangeBehavior cb) {
-		return explicitencoding.getPreview(i,cb);
+		long countother= explicitencoding.getPreview(!i, cb).lines().count();
+		StringBuilder preview= new StringBuilder(explicitencoding.getPreview(i,cb));
+		long countnow= preview.toString().lines().count();
+		if(countnow<countother) {
+			for (long ii=0;ii<countother-countnow;ii++) {
+				preview.append(System.lineSeparator());
+			}
+		}
+		return preview.toString();
 	}
 	/**
 	 * Compute set of CompilationUnitRewriteOperation to refactor supported situations using default encoding to make use of explicit calls
@@ -112,4 +120,9 @@ public enum UseExplicitEncodingFixCore {
 			return super.computeSourceRange(nodeWithComment);
 		}
 	};
+
+	@Override
+	public String toString() {
+		return explicitencoding.toString();
+	}
 }

@@ -11,7 +11,7 @@
  * Contributors:
  *
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.quickfix.Java10;
+package org.eclipse.jdt.ui.tests.quickfix.Java22;
 
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
@@ -20,5 +20,5 @@ import org.junit.platform.suite.api.Suite;
 @SelectClasses({
 	ExplicitEncodingCleanUpTest.class
 })
-public class QuickFixJava10TestSuite {
+public class QuickFixJava22TestSuite {
 }

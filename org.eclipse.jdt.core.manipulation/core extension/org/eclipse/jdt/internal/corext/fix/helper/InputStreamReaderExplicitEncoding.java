@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  *
  * Find: 		InputStreamReader(InputStream in, String cs)
@@ -90,19 +89,14 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		if (!JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject())) {
-			/**
-			 * For Java 1.4 and older just do nothing
-			 */
-			return;
-		}
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, ((Nodedata) data.get(visited)).encoding);
+		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-		if(((Nodedata)(data.get(visited))).encoding!= null) {
-			listRewrite.replace(((Nodedata) data.get(visited)).visited, callToCharsetDefaultCharset, group);
+		if(nodedata.replace) {
+			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
@@ -114,5 +108,10 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 			return "Reader r=new InputStreamReader(in, "+computeCharsetforPreview(cb)+");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Reader r=new InputStreamReader(in);\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "new InputStreamReader(in)"; //$NON-NLS-1$
 	}
 }
