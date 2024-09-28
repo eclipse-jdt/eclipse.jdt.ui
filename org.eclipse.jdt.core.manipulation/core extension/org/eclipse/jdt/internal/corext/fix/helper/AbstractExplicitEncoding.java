@@ -69,7 +69,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	public abstract void rewrite(UseExplicitEncodingFixCore useExplicitEncodingFixCore, T visited, CompilationUnitRewrite cuRewrite,
 			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data);
 
-	protected Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, ChangeBehavior cb, String charset) {
+	protected static Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, ChangeBehavior cb, String charset) {
 		Expression callToCharsetDefaultCharset=null;
 		switch(cb) {
 		case KEEP:
@@ -92,7 +92,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		return callToCharsetDefaultCharset;
 	}
 
-	protected String computeCharsetforPreview(ChangeBehavior cb) {
+	protected static String computeCharsetforPreview(ChangeBehavior cb) {
 		String insert=""; //$NON-NLS-1$
 		switch(cb) {
 		case KEEP:
@@ -116,7 +116,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	 * @param charset Charset as String
 	 * @return FieldAccess that returns Charset for UTF_8
 	 */
-	protected FieldAccess addCharsetUTF8(CompilationUnitRewrite cuRewrite, AST ast, String charset) {
+	protected static FieldAccess addCharsetUTF8(CompilationUnitRewrite cuRewrite, AST ast, String charset) {
 		/**
 		 * Add import java.nio.charset.StandardCharsets - available since Java 1.7
 		 */
@@ -138,7 +138,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	 * @param ast AST
 	 * @return MethodInvocation that returns Charset for platform encoding
 	 */
-	protected MethodInvocation addCharsetComputation(final CompilationUnitRewrite cuRewrite, AST ast) {
+	protected static MethodInvocation addCharsetComputation(final CompilationUnitRewrite cuRewrite, AST ast) {
 		/**
 		 * Add import java.nio.charset.Charset
 		 */
@@ -162,7 +162,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	 * @param charset Charset as String
 	 * @return MethodInvocation that returns String
 	 */
-	protected MethodInvocation addCharsetStringComputation(final CompilationUnitRewrite cuRewrite, AST ast, ChangeBehavior cb, String charset) {
+	protected static MethodInvocation addCharsetStringComputation(final CompilationUnitRewrite cuRewrite, AST ast, ChangeBehavior cb, String charset) {
 		Expression callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, charset);
 		/**
 		 * Add second call to Charset.defaultCharset().displayName()
@@ -184,7 +184,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	 * @return simple name of a class if the import was added and fully qualified name if there was
 	 *         a conflict
 	 */
-	protected Name addImport(String typeName, final CompilationUnitRewrite cuRewrite, AST ast) {
+	protected static Name addImport(String typeName, final CompilationUnitRewrite cuRewrite, AST ast) {
 		String importedName= cuRewrite.getImportRewrite().addImport(typeName);
 		return ast.newName(importedName);
 	}

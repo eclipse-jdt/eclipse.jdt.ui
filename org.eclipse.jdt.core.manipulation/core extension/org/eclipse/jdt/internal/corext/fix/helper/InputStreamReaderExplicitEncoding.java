@@ -68,6 +68,7 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 			nd.replace=true;
 			nd.visited=argstring3;
 			holder.put(visited,nd);
+			operations.add(fixcore.rewrite(visited, cb, holder));
 			break;
 		case 1:
 			Nodedata nd2=new Nodedata();
@@ -75,11 +76,12 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 			nd2.replace=false;
 			nd2.visited=visited;
 			holder.put(visited,nd2);
+			operations.add(fixcore.rewrite(visited, cb, holder));
 			break;
 		default:
 			break;
 		}
-		operations.add(fixcore.rewrite(visited, cb, holder));
+
 		return false;
 	}
 
