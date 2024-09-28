@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -971,11 +971,11 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					return fCombinedPreferenceStore;
 				}
 			}
-
+			
 			// Block below may init other bundles and shouldn't be executed with lock held
 			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 			ChainedPreferenceStore store = new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(getJavaCorePluginPreferences()), generalTextStore });
-
+			
 			synchronized (this) {
 				if (fCombinedPreferenceStore == null) {
 					fCombinedPreferenceStore = store;
