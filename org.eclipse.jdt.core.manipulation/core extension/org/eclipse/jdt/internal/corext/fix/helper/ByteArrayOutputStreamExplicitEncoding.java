@@ -90,7 +90,6 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 			nd.visited=argstring3;
 			holder.put(visited,nd);
 			operations.add(fixcore.rewrite(visited, cb, holder));
-			nodesprocessed.add(visited);
 			return false;
 		}
 		if (ASTNodes.usesGivenSignature(visited, ByteArrayOutputStream.class.getCanonicalName(), METHOD_TOSTRING)) {
@@ -100,7 +99,6 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 			nd2.visited=visited;
 			holder.put(visited,nd2);
 			operations.add(fixcore.rewrite(visited, cb, holder));
-			nodesprocessed.add(visited);
 			return false;
 		}
 		return false;
