@@ -11,14 +11,14 @@
  * Contributors:
  *
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.quickfix.Java10;
+package org.eclipse.jdt.ui.tests.quickfix.rules;
 
-import org.junit.platform.suite.api.SelectClasses;
-import org.junit.platform.suite.api.Suite;
+import org.eclipse.jdt.core.JavaCore;
 
-@Suite
-@SelectClasses({
-	ExplicitEncodingCleanUpTest.class
-})
-public class QuickFixJava10TestSuite {
+public class EclipseJava22 extends AbstractEclipseJava {
+	private static final String TESTRESOURCES_RTSTUBS_22_JAR= "testresources/rtstubs_22.jar"; //$NON-NLS-1$
+
+	public EclipseJava22() {
+		super(TESTRESOURCES_RTSTUBS_22_JAR, JavaCore.VERSION_22);
+	}
 }

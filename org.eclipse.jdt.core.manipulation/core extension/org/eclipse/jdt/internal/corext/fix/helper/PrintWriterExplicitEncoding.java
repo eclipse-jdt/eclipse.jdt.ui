@@ -108,4 +108,9 @@ public class PrintWriterExplicitEncoding extends AbstractExplicitEncoding<ClassI
 		}
 		return "Writer w=new PrintWriter(outputfile);\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new PrintWriter(outputfile)"; //$NON-NLS-1$
+	}
 }

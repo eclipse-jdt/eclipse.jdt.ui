@@ -737,7 +737,9 @@ public class HelperVisitor<E extends HelperVisitorProvider<V, T, E>,V,T> {
 	 */
 	public BiPredicate<? extends ASTNode, E> addMethodInvocation(String methodname,
 			BiPredicate<MethodInvocation, E> bs) {
-		this.predicatedata.put(VisitorEnum.MethodInvocation, methodname);
+		this.predicatedata.put(VisitorEnum.MethodInvocation, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(METHODNAME, methodname)
+				));
 		return predicatemap.put(VisitorEnum.MethodInvocation, bs);
 	}
 

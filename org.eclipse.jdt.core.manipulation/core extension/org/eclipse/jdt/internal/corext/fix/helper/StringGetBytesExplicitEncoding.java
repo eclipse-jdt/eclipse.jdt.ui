@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
@@ -33,7 +34,6 @@ import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * Find:  String.getBytes()
  *
@@ -89,22 +89,19 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		if (!JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject())) {
-			/**
-			 * For Java 1.4 and older just do nothing
-			 */
-			return;
-		}
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, ((Nodedata) data.get(visited)).encoding);
+		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, MethodInvocation.ARGUMENTS_PROPERTY);
-		if(((Nodedata)(data.get(visited))).encoding!= null) {
-			listRewrite.replace(((Nodedata) data.get(visited)).visited, callToCharsetDefaultCharset, group);
+		if(nodedata.replace) {
+			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
+		removeUnsupportedEncodingException(visited, group, rewrite, importRewriter);
 	}
 
 	@Override
@@ -115,5 +112,10 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 		}
 		return "String s=\"asdf\";\n"+ //$NON-NLS-1$
 		"byte[] bytes= s.getBytes();\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "String.getBytes()"; //$NON-NLS-1$
 	}
 }
