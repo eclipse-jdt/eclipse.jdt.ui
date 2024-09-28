@@ -1857,6 +1857,11 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper2(new String[] { "foo" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
+	public void testFail35() throws Exception {
+		helper2(new String[] { "method" }, new String[][] { new String[0] }, true, false, 0);
+	}
+
 	//----------------------------------------------------------
 	@Test
 	public void testField0() throws Exception {

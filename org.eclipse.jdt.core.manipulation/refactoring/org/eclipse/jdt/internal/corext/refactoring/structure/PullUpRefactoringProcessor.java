@@ -804,6 +804,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	/** The cached set of skipped supertypes */
 	private Set<IType> fCachedSkippedSuperTypes;
 
+	/** The cached set of all supertypes */
+	private Set<IType> fCachedSuperTypes;
+
 	/** Whether an argument has been added to handle this references in pulled up methods */
 	private boolean fArgumentAddedToHandleThis;
 
@@ -1160,7 +1163,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
-			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 13);
+			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 14);
 			clearCaches();
 
 			final RefactoringStatus result= new RefactoringStatus();
@@ -1177,6 +1180,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			result.merge(checkAccesses(subMonitor.newChild(1)));
 			result.merge(checkMembersInTypeAndAllSubtypes(subMonitor.newChild(2)));
 			result.merge(checkIfSkippingOverElements(subMonitor.newChild(1)));
+			result.merge(checkIfOverridingSuperClass(subMonitor.newChild(1)));
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();
 			if (!JdtFlags.isAbstract(getDestinationType()) && getAbstractMethods().length > 0)
@@ -1385,7 +1389,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final IMethod methodInType= JavaModelUtil.findMethod(iMethod.getElementName(), iMethod.getParameterTypes(), iMethod.isConstructor(), type);
 		if (methodInType == null || !methodInType.exists())
 			return null;
-		final String[] keys= { JavaElementLabelsCore.getTextLabel(methodInType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getTextLabel(type, JavaElementLabelsCore.ALL_FULLY_QUALIFIED)};
+		final String[] keys= { JavaElementLabelsCore.getTextLabel(methodInType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), iMethod.getElementName(), JavaElementLabelsCore.getTextLabel(methodInType, JavaElementLabelsCore.ALL_FULLY_QUALIFIED) };
 		final String msg= Messages.format(RefactoringCoreMessages.PullUpRefactoring_Method_declared_in_class, keys);
 		final RefactoringStatusContext context= JavaStatusContext.create(methodInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
@@ -1408,6 +1412,23 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
+	private RefactoringStatus checkIfOverridingSuperClass(final IProgressMonitor monitor) throws JavaModelException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+		try {
+			final Set<IType> superTypeSet= getAllSuperTypes(subMonitor.newChild(1));
+			final IType[] superTypes= superTypeSet.toArray(new IType[superTypeSet.size()]);
+			final RefactoringStatus result= new RefactoringStatus();
+			for (final IMember element : fMembersToMove) {
+				for (IType element2 : superTypes) {
+					result.merge(checkIfDeclaredIn(element, element2));
+				}
+			}
+			return result;
+		} finally {
+			monitor.done();
+		}
+
+	}
 	private RefactoringStatus checkIfTypeDeclaredIn(final IType iType, final IType type) {
 		final IType typeInType= type.getType(iType.getElementName());
 		if (!typeInType.exists())
@@ -2282,6 +2303,26 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	// All super classes of the destination
+	private Set<IType> getAllSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 1);
+		try {
+			if (fCachedSuperTypes != null)
+				return fCachedSkippedSuperTypes;
+			final ITypeHierarchy hierarchy= getDestinationTypeHierarchy(subMonitor.newChild(1));
+			fCachedSuperTypes= new HashSet<>(2);
+			IType current= hierarchy.getSuperclass(getDeclaringType());
+			while (current != null && !current.getFullyQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
+				fCachedSuperTypes.add(current);
+				current= hierarchy.getSuperclass(current);
+			}
+			return fCachedSuperTypes;
+		} finally {
+			monitor.done();
+		}
+
 	}
 
 	private RefactoringStatus initialize(final JavaRefactoringArguments extended) {
