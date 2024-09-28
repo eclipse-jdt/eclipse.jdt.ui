@@ -79,6 +79,7 @@ public class StringExplicitEncoding extends AbstractExplicitEncoding<ClassInstan
 			nd.replace=true;
 			nd.visited=argstring4;
 			holder.put(visited,nd);
+			operations.add(fixcore.rewrite(visited, cb, holder));
 			break;
 		case 2:
 			if(!(arguments.get(1) instanceof StringLiteral)) {
@@ -93,12 +94,13 @@ public class StringExplicitEncoding extends AbstractExplicitEncoding<ClassInstan
 			nd2.replace=true;
 			nd2.visited=argstring3;
 			holder.put(visited,nd2);
+			operations.add(fixcore.rewrite(visited, cb, holder));
 			break;
 		case 1:
 		default:
 			break;
 		}
-		operations.add(fixcore.rewrite(visited, cb, holder));
+
 		return false;
 	}
 
