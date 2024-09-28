@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Carsten Hammer and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *
+ *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix.rules;
 
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS;
@@ -138,7 +151,6 @@ public class AbstractEclipseJava implements AfterEachCallback, BeforeEachCallbac
 	 *
 	 * @param elem the element to delete
 	 * @throws CoreException if operation failed
-	 * @see #ASSERT_NO_MIXED_LINE_DELIMIERS
 	 */
 	public void delete(final IJavaElement elem) throws CoreException {
 		IWorkspaceRunnable runnable= monitor -> {

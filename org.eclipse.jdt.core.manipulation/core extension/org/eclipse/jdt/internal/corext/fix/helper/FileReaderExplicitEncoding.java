@@ -34,7 +34,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * Change
  *
@@ -82,12 +81,6 @@ public class FileReaderExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		if (!JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject())) {
-			/**
-			 * For Java 1.4 and older just do nothing
-			 */
-			return;
-		}
 		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
 		/**
 		 * new FileInputStream(<filename>)
@@ -112,5 +105,10 @@ public class FileReaderExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 			return "Reader r=new InputStreamReader(new FileInputStream(inputfile),"+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Reader r=new FileReader(inputfile);\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "new FileReader(inputfile)"; //$NON-NLS-1$
 	}
 }

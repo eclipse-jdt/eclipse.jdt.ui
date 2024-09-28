@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
@@ -109,30 +110,33 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, ((Nodedata) data.get(visited)).encoding);
+		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset().displayName() as second (last) parameter of "toString()" call
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, MethodInvocation.ARGUMENTS_PROPERTY);
-		if(((Nodedata)(data.get(visited))).encoding!= null) {
-			listRewrite.replace(((Nodedata) data.get(visited)).visited, callToCharsetDefaultCharset, group);
+		if(nodedata.replace) {
+			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
+		removeUnsupportedEncodingException(visited, group, rewrite, importRewriter);
 	}
 
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		String insert=""; //$NON-NLS-1$
 		switch(cb) {
-		case KEEP:
+		case KEEP_BEHAVIOR:
 			insert="Charset.defaultCharset().displayName()"; //$NON-NLS-1$
 			break;
-		case USE_UTF8_AGGREGATE:
+		case ENFORCE_UTF8_AGGREGATE:
 			//				insert="charset_constant"; //$NON-NLS-1$
 			//$FALL-THROUGH$
-		case USE_UTF8:
+		case ENFORCE_UTF8:
 			insert="StandardCharsets.UTF_8.displayName()"; //$NON-NLS-1$
 			break;
 		}
@@ -152,5 +156,10 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 				e1.printStackTrace();
 			}
 			"""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "ba.toString()"; //$NON-NLS-1$
 	}
 }

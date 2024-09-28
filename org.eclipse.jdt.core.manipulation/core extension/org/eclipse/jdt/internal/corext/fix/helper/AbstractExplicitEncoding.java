@@ -18,6 +18,7 @@ import static org.eclipse.jdt.internal.corext.fix.LibStandardNames.METHOD_DISPLA
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,12 +26,21 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -51,7 +61,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		    "US-ASCII", "US_ASCII" //$NON-NLS-1$ //$NON-NLS-2$
 		);
 	static Set<String> encodings=encodingmap.keySet();
-	public enum ChangeBehavior {KEEP, USE_UTF8, USE_UTF8_AGGREGATE}
+	public enum ChangeBehavior {KEEP_BEHAVIOR, ENFORCE_UTF8, ENFORCE_UTF8_AGGREGATE}
 
 	static class Nodedata {
 		public boolean replace;
@@ -72,7 +82,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	protected static Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, ChangeBehavior cb, String charset) {
 		Expression callToCharsetDefaultCharset=null;
 		switch(cb) {
-		case KEEP:
+		case KEEP_BEHAVIOR:
 			if(charset!=null) {
 				callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast,charset);
 			} else {
@@ -80,11 +90,11 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 				callToCharsetDefaultCharset= addCharsetComputation(cuRewrite, ast);
 			}
 			break;
-		case USE_UTF8_AGGREGATE:
+		case ENFORCE_UTF8_AGGREGATE:
 			/**
 			 * @TODO not implemented
 			 */
-		case USE_UTF8:
+		case ENFORCE_UTF8:
 			// needs Java 1.7
 			callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast,charset);
 			break;
@@ -95,13 +105,13 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	protected static String computeCharsetforPreview(ChangeBehavior cb) {
 		String insert=""; //$NON-NLS-1$
 		switch(cb) {
-		case KEEP:
+		case KEEP_BEHAVIOR:
 			insert="Charset.defaultCharset()"; //$NON-NLS-1$
 			break;
-		case USE_UTF8_AGGREGATE:
+		case ENFORCE_UTF8_AGGREGATE:
 			//				insert="charset_constant"; //$NON-NLS-1$
 			//$FALL-THROUGH$
-		case USE_UTF8:
+		case ENFORCE_UTF8:
 			insert="StandardCharsets.UTF_8"; //$NON-NLS-1$
 			break;
 		}
@@ -173,7 +183,6 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		return secondCall;
 	}
 
-
 	/**
 	 * Adds an import to the class. This method should be used for every class reference added to
 	 * the generated code.
@@ -189,6 +198,61 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		return ast.newName(importedName);
 	}
 
-
 	public abstract String getPreview(boolean afterRefactoring, ChangeBehavior cb);
+
+	protected void removeUnsupportedEncodingException(final ASTNode visited, TextEditGroup group, ASTRewrite rewrite, ImportRewrite importRewriter) {
+	    importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
+
+	    ASTNode parent = visited.getParent();
+	    while (parent != null && !(parent instanceof MethodDeclaration) && !(parent instanceof TryStatement)) {
+	        parent = parent.getParent();
+	    }
+
+	    if (parent instanceof MethodDeclaration) {
+	        MethodDeclaration method = (MethodDeclaration) parent;
+	        ListRewrite throwsRewrite = rewrite.getListRewrite(method, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
+	        List<Type> thrownExceptions = method.thrownExceptionTypes();
+	        for (Type exceptionType : thrownExceptions) {
+	            if (exceptionType.toString().equals("UnsupportedEncodingException")) { //$NON-NLS-1$
+	                throwsRewrite.remove(exceptionType, group);
+	            }
+	        }
+	    } else if (parent instanceof TryStatement) {
+	        TryStatement tryStatement = (TryStatement) parent;
+
+	        List<CatchClause> catchClauses = tryStatement.catchClauses();
+	        for (CatchClause catchClause : catchClauses) {
+	            SingleVariableDeclaration exception = catchClause.getException();
+	            Type exceptionType = exception.getType();
+
+	            if (exceptionType instanceof UnionType) {
+	                UnionType unionType = (UnionType) exceptionType;
+	                ListRewrite unionRewrite = rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
+
+	                List<Type> types = unionType.types();
+	                types.stream()
+	                     .filter(type -> type.toString().equals("UnsupportedEncodingException")) //$NON-NLS-1$
+	                     .forEach(type -> unionRewrite.remove(type, group));
+
+	                if (types.size() == 1) {
+	                    rewrite.replace(unionType, types.get(0), group);
+	                } else if (types.isEmpty()) {
+	                    rewrite.remove(catchClause, group);
+	                }
+	            } else if (exceptionType.toString().equals("UnsupportedEncodingException")) { //$NON-NLS-1$
+	                rewrite.remove(catchClause, group);
+	            }
+	        }
+
+	        if (tryStatement.catchClauses().isEmpty() && tryStatement.getFinally() == null) {
+	            Block tryBlock = tryStatement.getBody();
+
+	            if (tryStatement.resources().isEmpty() && tryBlock.statements().isEmpty()) {
+	                rewrite.remove(tryStatement, group);
+	            } else if (tryStatement.resources().isEmpty()) {
+	                rewrite.replace(tryStatement, tryBlock, group);
+	            }
+	        }
+	    }
+	}
 }

@@ -35,7 +35,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  * Change
  *
@@ -99,12 +98,6 @@ public class PrintStreamExplicitEncoding extends AbstractExplicitEncoding<ClassI
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		if (!JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject())) {
-			/**
-			 * For Java 1.4 and older just do nothing
-			 */
-			return;
-		}
 		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
 		/**
 		 * new FileOutputStream(<filename>)
@@ -141,5 +134,10 @@ public class PrintStreamExplicitEncoding extends AbstractExplicitEncoding<ClassI
 			Stream w=new PrintStream("out.txt","UTF-8");
 			Stream w=new PrintStream(new File("out.txt"),"UTF-8");
 			"""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "new PrintStream(\"out.txt\")"; //$NON-NLS-1$
 	}
 }

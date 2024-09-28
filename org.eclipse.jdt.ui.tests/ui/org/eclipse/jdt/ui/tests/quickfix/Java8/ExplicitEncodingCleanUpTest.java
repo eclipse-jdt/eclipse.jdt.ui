@@ -1,3 +1,16 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Carsten Hammer and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *
+ *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix.Java8;
 
 import java.util.Hashtable;
@@ -66,33 +79,6 @@ public class ExplicitEncodingCleanUpTest {
 				    }
 				}
 				""",
-
-//					"""
-//						package test1;
-//
-//						import java.io.ByteArrayOutputStream;
-//						import java.io.InputStreamReader;
-//						import java.io.FileInputStream;
-//						import java.io.FileReader;
-//						import java.io.Reader;
-//						import java.nio.charset.Charset;
-//						import java.nio.charset.StandardCharsets;
-//						import java.io.FileNotFoundException;
-//
-//						public class E1 {
-//						    void method(String filename) {
-//						        Charset cs1= StandardCharsets.UTF_8;
-//						        Charset cs1b= StandardCharsets.UTF_8;
-//						        Charset cs2= StandardCharsets.UTF_16;
-//						        Charset cs3= StandardCharsets.UTF_16BE;
-//						        Charset cs4= StandardCharsets.UTF_16LE;
-//						        Charset cs5= StandardCharsets.ISO_8859_1;
-//						        Charset cs6= StandardCharsets.US_ASCII;
-//						        String result= cs1.toString();
-//						       }
-//						    }
-//						}
-//						"""),
 				"""
 						package test1;
 
@@ -551,27 +537,25 @@ public class ExplicitEncodingCleanUpTest {
 					}
 				}
 				""",
+"""
+package test1;
 
-				"""
-						package test1;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 
-						import java.io.FileOutputStream;
-						import java.io.IOException;
-						import java.nio.charset.StandardCharsets;
-						import java.util.Properties;
-
-						public class E1 {
-							static void blu() throws IOException {
-								Properties p=new Properties();
-								try (FileOutputStream os = new FileOutputStream("out.xml")) {
-									p.storeToXML(os, null, StandardCharsets.UTF_8);
-								}
-								try (FileOutputStream os = new FileOutputStream("out.xml")) {
-									p.storeToXML(os, null, StandardCharsets.UTF_8);
-								}
-							}
-						}
-												"""),
+public class E1 {
+	static void blu() throws IOException {
+		Properties p=new Properties();
+		try (FileOutputStream os = new FileOutputStream("out.xml")) {
+			p.storeToXML(os, null, "UTF-8");
+		}
+		try (FileOutputStream os = new FileOutputStream("out.xml")) {
+			p.storeToXML(os, null);
+		}
+	}
+}
+"""),
 		URLDECODER("""
 				package test1;
 				import java.io.UnsupportedEncodingException;
@@ -664,21 +648,21 @@ public class ExplicitEncodingCleanUpTest {
 						Formatter s=new Formatter(new File("asdf"),"UTF-8");
 					}
 				}
-				""", """
-				package test1;
-				import java.io.File;
-				import java.io.FileNotFoundException;
-				import java.io.UnsupportedEncodingException;
-				import java.nio.charset.StandardCharsets;
-				import java.util.Formatter;
+				""",
+"""
+package test1;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.util.Formatter;
 
-				public class E4 {
+public class E4 {
 
-					static void bla() throws FileNotFoundException, UnsupportedEncodingException {
-						Formatter s=new Formatter(new File("asdf"),StandardCharsets.UTF_8);
-					}
-				}
-								"""),
+	static void bla() throws FileNotFoundException {
+		Formatter s=new Formatter(new File("asdf"),StandardCharsets.UTF_8);
+	}
+}
+"""),
 		THREE("""
 				package test1;
 

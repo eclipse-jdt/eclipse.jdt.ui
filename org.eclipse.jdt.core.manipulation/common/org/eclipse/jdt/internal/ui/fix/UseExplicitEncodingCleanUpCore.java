@@ -82,15 +82,15 @@ public class UseExplicitEncodingCleanUpCore extends AbstractCleanUp {
 	}
 
 	private ChangeBehavior computeRefactorDeepth() {
-		ChangeBehavior cb=ChangeBehavior.KEEP;
+		ChangeBehavior cb=ChangeBehavior.KEEP_BEHAVIOR;
 		if(isEnabled(EXPLICITENCODING_KEEP_BEHAVIOR)) {
-			cb=ChangeBehavior.KEEP;
+			cb=ChangeBehavior.KEEP_BEHAVIOR;
 		}
 		if(isEnabled(EXPLICITENCODING_INSERT_UTF8)) {
-			cb=ChangeBehavior.USE_UTF8;
+			cb=ChangeBehavior.ENFORCE_UTF8;
 		}
 		if(isEnabled(EXPLICITENCODING_AGGREGATE_TO_UTF8)) {
-			cb=ChangeBehavior.USE_UTF8_AGGREGATE;
+			cb=ChangeBehavior.ENFORCE_UTF8_AGGREGATE;
 		}
 		return cb;
 	}

@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 /**
  *
  * Find: 		new java.util.Formatter(new File(), String cs)
@@ -75,36 +75,38 @@ public class FormatterExplicitEncoding extends AbstractExplicitEncoding<ClassIns
 	}
 
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore,
-			Set<CompilationUnitRewriteOperation> operations, ChangeBehavior cb,
-			ClassInstanceCreation visited, ReferenceHolder<ASTNode, Object> holder) {
-		List<ASTNode> arguments= visited.arguments();
+			Set<CompilationUnitRewriteOperation> operations,
+			ChangeBehavior cb,
+			ClassInstanceCreation visited,
+			ReferenceHolder<ASTNode, Object> holder) {
+		List<ASTNode> arguments = visited.arguments();
+		Nodedata nd = new Nodedata();
+
 		switch (arguments.size()) {
-		case 3:
-		case 2:
-			if(!(arguments.get(1) instanceof StringLiteral)) {
-				return false;
-			}
-			StringLiteral argstring3= (StringLiteral) arguments.get(1);
-			if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd=new Nodedata();
-			nd.encoding=encodingmap.get(argstring3.getLiteralValue().toUpperCase());
-			nd.replace=true;
-			nd.visited=argstring3;
-			holder.put(visited,nd);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		case 1:
-			Nodedata nd2=new Nodedata();
-			nd2.encoding=null;
-			nd2.replace=false;
-			nd2.visited=visited;
-			holder.put(visited,nd2);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		default:
-			break;
+			case 2:
+			case 3:
+				if (arguments.get(1) instanceof StringLiteral) {
+					StringLiteral argString = (StringLiteral) arguments.get(1);
+					String encodingKey = argString.getLiteralValue().toUpperCase();
+
+					if (encodings.contains(encodingKey)) {
+						nd.encoding = encodingmap.get(encodingKey);
+						nd.replace = true;
+						nd.visited = argString;
+						holder.put(visited, nd);
+						operations.add(fixcore.rewrite(visited, cb, holder));
+					}
+				}
+				break;
+			case 1:
+				nd.encoding = null;
+				nd.replace = false;
+				nd.visited = visited;
+				holder.put(visited, nd);
+				operations.add(fixcore.rewrite(visited, cb, holder));
+				break;
+			default:
+				break;
 		}
 		return false;
 	}
@@ -114,22 +116,19 @@ public class FormatterExplicitEncoding extends AbstractExplicitEncoding<ClassIns
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		if (!JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject())) {
-			/**
-			 * For Java 1.4 and older just do nothing
-			 */
-			return;
-		}
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, ((Nodedata) data.get(visited)).encoding);
+		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
+		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-		if(((Nodedata)(data.get(visited))).replace) {
-			listRewrite.replace(((Nodedata) data.get(visited)).visited, callToCharsetDefaultCharset, group);
+		if(nodedata.replace) {
+			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
+		removeUnsupportedEncodingException(visited, group, rewrite, importRewriter);
 	}
 
 	@Override
@@ -138,5 +137,10 @@ public class FormatterExplicitEncoding extends AbstractExplicitEncoding<ClassIns
 			return "Formatter r=new java.util.Formatter(out, "+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Formatter r=new java.util.Formatter(out);\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "new java.util.Formatter(out)"; //$NON-NLS-1$
 	}
 }
