@@ -13,10 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.manipulation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
@@ -173,12 +174,18 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 		if (bundles != null)
 			return bundles;
 
-		// Accessing unresolved bundle
-		ServiceReference<PackageAdmin> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class);
-		PackageAdmin admin= fBundleContext.getService(serviceRef);
-		bundles= admin.getBundles(bundleName, version);
-		if (bundles != null && bundles.length > 0)
-			return bundles;
+		bundles = fBundleContext.getBundles();
+		List<Bundle> matchingBundles = new ArrayList<>();
+		for (Bundle bundle : bundles) {
+		    if (bundle.getSymbolicName().equals(bundleName)) {
+		        if (version == null || bundle.getVersion().toString().equals(version)) {
+		            matchingBundles.add(bundle);
+		        }
+		    }
+		}
+		if (!matchingBundles.isEmpty()) {
+			return (Bundle[]) matchingBundles.toArray();
+		}
 		return null;
 	}
 
