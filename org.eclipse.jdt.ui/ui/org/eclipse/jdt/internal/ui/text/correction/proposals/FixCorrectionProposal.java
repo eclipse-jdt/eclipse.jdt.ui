@@ -140,7 +140,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 				flag= JavaElementImageDescriptor.INFO;
 			}
 
-			ImageDescriptor composite= new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width, image.getImageData().height));
+			ImageDescriptor composite= new JavaElementImageDescriptor(image, flag, new Point(image.getImageData(100).width, image.getImageData(100).height));
 			return composite.createImage();
 		} else {
 			return super.getImage();
