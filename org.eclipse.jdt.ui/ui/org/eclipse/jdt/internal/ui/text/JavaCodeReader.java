@@ -16,7 +16,7 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.io.IOException;
 
-import org.eclipse.jface.internal.text.html.SingleCharReader;
+import org.eclipse.text.readers.SingleCharacterReader;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -26,7 +26,7 @@ import org.eclipse.jface.text.IDocument;
  * Reads from a document either forwards or backwards. May be configured to
  * skip comments and strings.
  */
-public class JavaCodeReader extends SingleCharReader {
+public class JavaCodeReader extends SingleCharacterReader {
 
 	/** The EOF character */
 	public static final int EOF= -1;
