@@ -138,7 +138,6 @@ public class AbstractEclipseJava implements AfterEachCallback, BeforeEachCallbac
 	 *
 	 * @param elem the element to delete
 	 * @throws CoreException if operation failed
-	 * @see #ASSERT_NO_MIXED_LINE_DELIMIERS
 	 */
 	public void delete(final IJavaElement elem) throws CoreException {
 		IWorkspaceRunnable runnable= monitor -> {
