@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -863,15 +864,19 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldField != null) {
 								FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
-								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
+								TextEditGroup group= unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN);
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), group);
 								ImportRewriteUtil.addImports(unitRewriter, context, oldField.getParent(), new HashMap<>(), new HashMap<>(), false);
+								replaceTargetSuperFieldReferences(declaration, member, unitRewriter.getASTRewrite(), group);
 							}
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
 								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], mapping, unitRewriter, oldMethod);
-								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, BodyDeclarationRewrite.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
+								TextEditGroup group= unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN);
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, BodyDeclarationRewrite.getInsertionIndex(newMethod, declaration.bodyDeclarations()), group);
 								ImportRewriteUtil.addImports(unitRewriter, context, oldMethod, new HashMap<>(), new HashMap<>(), false);
+								replaceTargetSuperMethodInvocations(declaration, member, unitRewriter.getASTRewrite(), group);
 							}
 						}
 					}
@@ -880,6 +885,60 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private void replaceTargetSuperMethodInvocations(AbstractTypeDeclaration declaration, IMember member, ASTRewrite astRewrite, TextEditGroup group) {
+		ASTVisitor removeSuperMethodInvocationVisitor= new ASTVisitor() {
+			@Override
+			public boolean visit(SuperMethodInvocation node) {
+				IMethodBinding binding= node.resolveMethodBinding();
+				if (binding != null) {
+					if (binding.getJavaElement() != null && binding.getJavaElement().equals(member)) {
+						AST ast= astRewrite.getAST();
+						MethodInvocation newMethodInvocation= ast.newMethodInvocation();
+						newMethodInvocation.setName(ast.newSimpleName(node.getName().getFullyQualifiedName()));
+						ListRewrite typeArgs= astRewrite.getListRewrite(node, SuperMethodInvocation.TYPE_ARGUMENTS_PROPERTY);
+						List<Type> originalTypeList= typeArgs.getOriginalList();
+						if (originalTypeList.size() > 0) {
+							ASTNode typeArgsCopy= typeArgs.createCopyTarget(originalTypeList.get(0), originalTypeList.get(originalTypeList.size() - 1));
+							newMethodInvocation.typeArguments().add(typeArgsCopy);
+						}
+						ListRewrite args= astRewrite.getListRewrite(node, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+						List<Type> originalArgsList= args.getOriginalList();
+						if (originalArgsList.size() > 0) {
+							ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalTypeList.size() - 1));
+							newMethodInvocation.arguments().add(argsCopy);
+						}
+						newMethodInvocation.setExpression(ast.newThisExpression());
+						astRewrite.replace(node, newMethodInvocation, group);
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+		declaration.accept(removeSuperMethodInvocationVisitor);
+	}
+
+	private void replaceTargetSuperFieldReferences(AbstractTypeDeclaration declaration, IMember member, ASTRewrite astRewrite, TextEditGroup group) {
+		ASTVisitor removeSuperFieldVisitor= new ASTVisitor() {
+			@Override
+			public boolean visit(SuperFieldAccess node) {
+				IVariableBinding binding= node.resolveFieldBinding();
+				if (binding != null) {
+					if (binding.isField() && binding.getJavaElement() != null && binding.getJavaElement().equals(member)) {
+						AST ast= astRewrite.getAST();
+						FieldAccess newFieldAccess= ast.newFieldAccess();
+						newFieldAccess.setName(ast.newSimpleName(node.getName().getFullyQualifiedName()));
+						newFieldAccess.setExpression(ast.newThisExpression());
+						astRewrite.replace(node, newFieldAccess, group);
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+		declaration.accept(removeSuperFieldVisitor);
 	}
 
 	@Override
