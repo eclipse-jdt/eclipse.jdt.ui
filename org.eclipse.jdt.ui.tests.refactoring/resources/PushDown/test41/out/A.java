@@ -6,7 +6,7 @@ class A {
 			int f;
 
 			public void mB() {
-				this.m();
+				m();
 				this.f = 0;
 			}
 

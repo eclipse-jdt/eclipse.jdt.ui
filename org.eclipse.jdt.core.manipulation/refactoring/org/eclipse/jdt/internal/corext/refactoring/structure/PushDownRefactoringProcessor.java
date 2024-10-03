@@ -909,7 +909,6 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 							ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalTypeList.size() - 1));
 							newMethodInvocation.arguments().add(argsCopy);
 						}
-						newMethodInvocation.setExpression(ast.newThisExpression());
 						astRewrite.replace(node, newMethodInvocation, group);
 						return false;
 					}
