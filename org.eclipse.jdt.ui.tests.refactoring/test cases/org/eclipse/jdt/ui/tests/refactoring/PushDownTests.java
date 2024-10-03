@@ -964,6 +964,24 @@ public class PushDownTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test40() throws Exception { //https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1679
+		String[] selectedMethodNames= { };
+		String[][] selectedMethodSignatures= { new String[0] };
+		String[] selectedFieldNames= { "f" };
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		helper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	@Test
 	public void testFail0() throws Exception {
 		String[] selectedMethodNames= {"f"};
 		String[][] selectedMethodSignatures= {new String[0]};

@@ -629,6 +629,19 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					continue;
 				if (!(element instanceof IMember))
 					continue;
+				IType[] destinationTypes= getAbstractDestinations(new NullProgressMonitor());
+				IMember elementMember= (IMember)element;
+				IType elementMemberType= elementMember.getDeclaringType();
+				boolean isMoveDestination= false;
+				for (IType destinationType : destinationTypes) {
+					if (destinationType.getFullyQualifiedName().equals(elementMemberType.getFullyQualifiedName())) {
+						isMoveDestination= true;
+						break;
+					}
+				}
+				if (isMoveDestination) {
+					continue;
+				}
 				IMember referencingMember= (IMember) element;
 				Object[] keys= { label, createLabel(referencingMember) };
 				String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys);
