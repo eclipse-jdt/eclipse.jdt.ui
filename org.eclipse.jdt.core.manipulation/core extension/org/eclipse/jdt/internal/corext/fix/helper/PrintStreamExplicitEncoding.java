@@ -142,4 +142,9 @@ public class PrintStreamExplicitEncoding extends AbstractExplicitEncoding<ClassI
 			Stream w=new PrintStream(new File("out.txt"),"UTF-8");
 			"""; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new PrintStream(\"out.txt\")"; //$NON-NLS-1$
+	}
 }

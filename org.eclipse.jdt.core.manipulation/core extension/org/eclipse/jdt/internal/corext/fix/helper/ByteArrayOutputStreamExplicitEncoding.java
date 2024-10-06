@@ -126,13 +126,13 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		String insert=""; //$NON-NLS-1$
 		switch(cb) {
-		case KEEP:
+		case KEEP_BEHAVIOR:
 			insert="Charset.defaultCharset().displayName()"; //$NON-NLS-1$
 			break;
-		case USE_UTF8_AGGREGATE:
+		case ENFORCE_UTF8_AGGREGATE:
 			//				insert="charset_constant"; //$NON-NLS-1$
 			//$FALL-THROUGH$
-		case USE_UTF8:
+		case ENFORCE_UTF8:
 			insert="StandardCharsets.UTF_8.displayName()"; //$NON-NLS-1$
 			break;
 		}
@@ -152,5 +152,10 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 				e1.printStackTrace();
 			}
 			"""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "ba.toString()"; //$NON-NLS-1$
 	}
 }

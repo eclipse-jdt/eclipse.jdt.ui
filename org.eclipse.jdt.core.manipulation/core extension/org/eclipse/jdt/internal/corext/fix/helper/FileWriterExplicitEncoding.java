@@ -93,4 +93,9 @@ public class FileWriterExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 		}
 		return "Writer w=new FileWriter(outputfile);\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new FileWriter(outputfile)"; //$NON-NLS-1$
+	}
 }

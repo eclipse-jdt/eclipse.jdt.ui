@@ -127,4 +127,9 @@ public class OutputStreamWriterExplicitEncoding extends AbstractExplicitEncoding
 		}
 		return "Writer w = new OutputStreamWriter(out);\nOutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new OutputStreamWriter(out)"; //$NON-NLS-1$
+	}
 }

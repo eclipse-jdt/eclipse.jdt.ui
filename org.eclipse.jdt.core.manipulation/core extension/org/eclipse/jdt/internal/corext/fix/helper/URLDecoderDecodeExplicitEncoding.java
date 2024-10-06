@@ -93,13 +93,13 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 		if (ASTNodes.usesGivenSignature(visited, URLDecoder.class.getCanonicalName(), METHOD_DECODE, String.class.getCanonicalName())) {
 			Nodedata nd=new Nodedata();
 			switch(cb) {
-				case KEEP:
+				case KEEP_BEHAVIOR:
 					nd.encoding=null;
 					break;
-				case USE_UTF8:
+				case ENFORCE_UTF8:
 					nd.encoding="UTF_8"; //$NON-NLS-1$
 					break;
-				case USE_UTF8_AGGREGATE:
+				case ENFORCE_UTF8_AGGREGATE:
 					break;
 			}
 			nd.replace=false;
@@ -136,5 +136,10 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 		}
 		return "java.net.URLDecoder.decode(\"asdf\", \"UTF-8\");\n"+ //$NON-NLS-1$
 		""; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "URLDecoder.decode()"; //$NON-NLS-1$
 	}
 }

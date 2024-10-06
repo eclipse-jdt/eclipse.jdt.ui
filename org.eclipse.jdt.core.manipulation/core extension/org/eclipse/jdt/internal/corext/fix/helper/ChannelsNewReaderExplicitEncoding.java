@@ -107,4 +107,9 @@ public class ChannelsNewReaderExplicitEncoding extends AbstractExplicitEncoding<
 		return "Reader r=Channels.newReader(ch,\"UTF-8\");\n"+ //$NON-NLS-1$
 		""; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "Channels.newReader(ch,StandardCharsets.UTF_8)"; //$NON-NLS-1$
+	}
 }

@@ -115,4 +115,9 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 		}
 		return "Reader r=new InputStreamReader(in);\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new InputStreamReader(in)"; //$NON-NLS-1$
+	}
 }

@@ -139,4 +139,9 @@ public class FormatterExplicitEncoding extends AbstractExplicitEncoding<ClassIns
 		}
 		return "Formatter r=new java.util.Formatter(out);\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new java.util.Formatter(out)"; //$NON-NLS-1$
+	}
 }
