@@ -571,7 +571,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
 		IContextService contextService = editorSite.getService(IContextService.class);
 		contextService.activateContext("org.eclipse.jdt.ui.breadcrumbEditorScope"); //$NON-NLS-1$
-//		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.breadcrumbEditorScope" }); //$NON-NLS-1$
 		getJavaEditor().setActionsActivated(false);
 		fBreadcrumbActionGroup.fillActionBars(editorSite.getActionBars());
 	}
@@ -584,7 +583,6 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
 		IContextService contextService = editorSite.getService(IContextService.class);
 		contextService.activateContext("org.eclipse.jdt.ui.javaEditorScope"); //$NON-NLS-1$
-//		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" }); //$NON-NLS-1$
 		getJavaEditor().getActionGroup().fillActionBars(editorSite.getActionBars());
 		getJavaEditor().setActionsActivated(true);
 		fEditorSelection= null;
