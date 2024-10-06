@@ -112,4 +112,9 @@ public enum UseExplicitEncodingFixCore {
 			return super.computeSourceRange(nodeWithComment);
 		}
 	};
+
+	@Override
+	public String toString() {
+		return explicitencoding.toString();
+	}
 }

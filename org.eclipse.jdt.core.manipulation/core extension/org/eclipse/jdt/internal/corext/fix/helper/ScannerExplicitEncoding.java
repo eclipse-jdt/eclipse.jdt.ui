@@ -139,8 +139,13 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "new java.util.Scanner(\"asdf\","+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "new java.util.Scanner(\"asdf\",StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 		}
 		return "new java.util.Scanner(\"asdf\", \"UTF-8\");\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "new java.util.Scanner()"; //$NON-NLS-1$
 	}
 }
