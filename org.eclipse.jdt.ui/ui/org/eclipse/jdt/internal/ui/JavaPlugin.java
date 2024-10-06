@@ -661,7 +661,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		return JavaCore.getPlugin().getPluginPreferences();
 	}
 
-	public static org.osgi.service.prefs.Preferences getJavaCorePluginPreferencesNew() {
+	public static IEclipsePreferences getJavaCorePluginPreferencesNew() {
 		return InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 	}
 
