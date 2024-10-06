@@ -128,4 +128,9 @@ public class StringExplicitEncoding extends AbstractExplicitEncoding<ClassInstan
 		}
 		return "String s=new String(byte[],\"UTF-8\");\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new String(byte[])"; //$NON-NLS-1$
+	}
 }

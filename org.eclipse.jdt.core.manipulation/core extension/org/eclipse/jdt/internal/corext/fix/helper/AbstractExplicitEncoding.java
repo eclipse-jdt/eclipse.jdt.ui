@@ -51,7 +51,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		    "US-ASCII", "US_ASCII" //$NON-NLS-1$ //$NON-NLS-2$
 		);
 	static Set<String> encodings=encodingmap.keySet();
-	public enum ChangeBehavior {KEEP, USE_UTF8, USE_UTF8_AGGREGATE}
+	public enum ChangeBehavior {KEEP_BEHAVIOR, ENFORCE_UTF8, ENFORCE_UTF8_AGGREGATE}
 
 	static class Nodedata {
 		public boolean replace;
@@ -72,7 +72,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	protected static Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, ChangeBehavior cb, String charset) {
 		Expression callToCharsetDefaultCharset=null;
 		switch(cb) {
-		case KEEP:
+		case KEEP_BEHAVIOR:
 			if(charset!=null) {
 				callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast,charset);
 			} else {
@@ -80,11 +80,11 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 				callToCharsetDefaultCharset= addCharsetComputation(cuRewrite, ast);
 			}
 			break;
-		case USE_UTF8_AGGREGATE:
+		case ENFORCE_UTF8_AGGREGATE:
 			/**
 			 * @TODO not implemented
 			 */
-		case USE_UTF8:
+		case ENFORCE_UTF8:
 			// needs Java 1.7
 			callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast,charset);
 			break;
@@ -95,13 +95,13 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	protected static String computeCharsetforPreview(ChangeBehavior cb) {
 		String insert=""; //$NON-NLS-1$
 		switch(cb) {
-		case KEEP:
+		case KEEP_BEHAVIOR:
 			insert="Charset.defaultCharset()"; //$NON-NLS-1$
 			break;
-		case USE_UTF8_AGGREGATE:
+		case ENFORCE_UTF8_AGGREGATE:
 			//				insert="charset_constant"; //$NON-NLS-1$
 			//$FALL-THROUGH$
-		case USE_UTF8:
+		case ENFORCE_UTF8:
 			insert="StandardCharsets.UTF_8"; //$NON-NLS-1$
 			break;
 		}

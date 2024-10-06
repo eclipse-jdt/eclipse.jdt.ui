@@ -105,4 +105,9 @@ public class ChannelsNewWriterExplicitEncoding extends AbstractExplicitEncoding<
 		return "Writer w=Channels.newWriter(ch, \"UTF-8\");\n"+ //$NON-NLS-1$
 		""; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "Channels.newWriter(ch,StandardCharsets.UTF_8)"; //$NON-NLS-1$
+	}
 }

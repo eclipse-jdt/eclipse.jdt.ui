@@ -113,4 +113,9 @@ public class FileReaderExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 		}
 		return "Reader r=new FileReader(inputfile);\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "new FileReader(inputfile)"; //$NON-NLS-1$
+	}
 }

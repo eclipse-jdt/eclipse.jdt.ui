@@ -94,10 +94,13 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Charset s=StandardCharsets.UTF_8;\n"+ //$NON-NLS-1$
-					""; //$NON-NLS-1$
+			return "Charset s=StandardCharsets.UTF_8;\n"; //$NON-NLS-1$
 		}
-		return "Charset s=Charset.forName(\"UTF-8\");\n"+ //$NON-NLS-1$
-		""; //$NON-NLS-1$
+		return "Charset s=Charset.forName(\"UTF-8\");\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "Charset.forName(\"UTF-8\")"; //$NON-NLS-1$
 	}
 }

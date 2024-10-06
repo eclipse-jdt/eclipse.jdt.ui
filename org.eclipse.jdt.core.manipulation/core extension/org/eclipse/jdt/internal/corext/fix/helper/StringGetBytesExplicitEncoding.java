@@ -116,4 +116,9 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 		return "String s=\"asdf\";\n"+ //$NON-NLS-1$
 		"byte[] bytes= s.getBytes();\n"; //$NON-NLS-1$
 	}
+
+	@Override
+	public String toString() {
+		return "String.getBytes()"; //$NON-NLS-1$
+	}
 }

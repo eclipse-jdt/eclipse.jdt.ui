@@ -114,9 +114,14 @@ public class PropertiesStoreToXMLExplicitEncoding extends AbstractExplicitEncodi
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
 			return "Properties p=new Properties();\n"+ //$NON-NLS-1$
-					"p.storeToXML(java.io.OutputStream,String,"+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+					"p.storeToXML(java.io.OutputStream,String,StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 		}
 		return "Properties p=new Properties();\n"+ //$NON-NLS-1$
 		"p.storeToXML(java.io.OutputStream,String,\"UTF-8\");\n"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String toString() {
+		return "Properties.storeToXML()"; //$NON-NLS-1$
 	}
 }
