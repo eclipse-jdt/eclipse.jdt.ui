@@ -655,7 +655,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 *
 	 * @return the Java Core plug-in preferences
 	 * @since 3.7
-	 * @deprecated use getJavaCorePluginPreferencesNew
+	 * deprecated use getJavaCorePluginPreferencesNew
 	 */
 	public static org.eclipse.core.runtime.Preferences getJavaCorePluginPreferences() {
 		return JavaCore.getPlugin().getPluginPreferences();
