@@ -76,18 +76,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\" + //$NON-NLS-1$\n");
-        buf.append("            \"public void foo() {\\n\" + //$NON-NLS-1$\n");
-        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" + //$NON-NLS-1$\n");
-        buf.append("            \"}\\n\"; //$NON-NLS-1$ // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = "" + //$NON-NLS-1$
+			            "public void foo() {\\n" + //$NON-NLS-1$
+			            "    System.out.println(\\"abc\\");\\n" + //$NON-NLS-1$
+			            "}\\n"; //$NON-NLS-1$ // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("x");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
@@ -127,18 +128,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\" +\n");
-        buf.append("            \"public void foo() { \\n\" +\n");
-        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" +\n");
-        buf.append("            \"}\\n\"; // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = "" +
+			            "public void foo() { \\n" +
+			            "    System.out.println(\\"abc\\");\\n" +
+			            "}\\n"; // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("System");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -178,18 +180,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\" +\n");
-        buf.append("            \"public void foo() { \\n\" +\n");
-        buf.append("            \"    System.out.println(\\\"\\\"\\\"abc\\\"\\\"\\\");\\n\" +\n");
-        buf.append("            \"}\\n\"; // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = "" +
+			            "public void foo() { \\n" +
+			            "    System.out.println(\\"\\"\\"abc\\"\\"\\");\\n" +
+			            "}\\n"; // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("System");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -229,18 +232,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\" +\n");
-        buf.append("            \"abcdef\" +\n");
-        buf.append("            \"ghijkl\\\"\\\"\\\"123\\\"\\\"\\\"\" +\n");
-        buf.append("            \"mnop\";\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = "" +
+			            "abcdef" +
+			            "ghijkl\\"\\"\\"123\\"\\"\\"" +
+			            "mnop";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("abcdef");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -279,24 +283,25 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        StringBuffer buf= new StringBuffer(\"intro string\\n\");\n");
-		buf.append("        buf.append(\"public void foo() {\\n\");\n");
-		buf.append("        buf.append(\"    return null;\\n\");\n");
-		buf.append("        buf.append(\"}\\n\");\n");
-		buf.append("        buf.append(\"\\n\");\n");
-		buf.append("        System.out.println(buf.toString());\n");
-		buf.append("        System.out.println(buf.toString() + \"abc\");\n");
-		buf.append("        // comment 2\n");
-		buf.append("        buf = new StringBuffer(\"intro string 2\\n\");\n");
-		buf.append("        buf.append(\"some string\\n\");\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        StringBuffer buf= new StringBuffer("intro string\\n");
+			        buf.append("public void foo() {\\n");
+			        buf.append("    return null;\\n");
+			        buf.append("}\\n");
+			        buf.append("\\n");
+			        System.out.println(buf.toString());
+			        System.out.println(buf.toString() + "abc");
+			        // comment 2
+			        buf = new StringBuffer("intro string 2\\n");
+			        buf.append("some string\\n");
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -343,21 +348,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder buf3= new StringBuilder();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\");\n");
-		buf.append("        buf3.append(\"    return null;\\n\");\n");
-		buf.append("        buf3.append(\"}\\n\");\n");
-		buf.append("        buf3.append(\"\\n\");\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = buf3.toString();\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        StringBuilder buf3= new StringBuilder();
+			        buf3.append("public void foo() {\\n");
+			        buf3.append("    return null;\\n");
+			        buf3.append("}\\n");
+			        buf3.append("\\n");
+			        // comment 1
+			        String k = buf3.toString();
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -399,21 +405,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder buf3= new StringBuilder();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"    return null;\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"}\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"\\n\"); //$NON-NLS-1$\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = buf3.toString();\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        StringBuilder buf3= new StringBuilder();
+			        buf3.append("public void foo() {\\n"); //$NON-NLS-1$
+			        buf3.append("    return null;\\n"); //$NON-NLS-1$
+			        buf3.append("}\\n"); //$NON-NLS-1$
+			        buf3.append("\\n"); //$NON-NLS-1$
+			        // comment 1
+			        String k = buf3.toString();
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
@@ -456,21 +463,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder buf3= new StringBuilder();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"    return null;\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"}\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"\\n\"); //$NON-NLS-1$\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String k = buf3.toString();\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        StringBuilder buf3= new StringBuilder();
+			        buf3.append("public void foo() {\\n"); //$NON-NLS-1$
+			        buf3.append("    return null;\\n"); //$NON-NLS-1$
+			        buf3.append("}\\n"); //$NON-NLS-1$
+			        buf3.append("\\n"); //$NON-NLS-1$
+			        // comment 1
+			        String k = buf3.toString();
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("StringBuilder");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
@@ -513,15 +521,16 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"foo \\n\" + \"bar  \" + \"baz\" + \"biz\";\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = "foo \\n" + "bar  " + "baz" + "biz";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("x");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -564,15 +573,16 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"foo \\n\" + \"bar  \" + \"baz\" + \"biz\";\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x = "foo \\n" + "bar  " + "baz" + "biz";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("x");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -615,19 +625,20 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x =\"\\tif (true) {\\n\" +\n");
-		buf.append("                \"\\t\\tstuff();\\n\" +\n");
-		buf.append("                \"\\t} else\\n\" +\n");
-		buf.append("                \"\\t\\tnoStuff\";\n");
-		buf.append("        System.out.println(x);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x ="\\tif (true) {\\n" +
+			                "\\t\\tstuff();\\n" +
+			                "\\t} else\\n" +
+			                "\\t\\tnoStuff";
+			        System.out.println(x);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("x");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -669,24 +680,25 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        StringBuilder buf3= new StringBuilder();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"    return null;\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"}\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"\\n\"); //$NON-NLS-1$\n");
-		buf.append("        // comment 1\n");
-		buf.append("        write(buf3);\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("    private void write(CharSequence c) {\n");
-		buf.append("        System.out.println(c);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        StringBuilder buf3= new StringBuilder();
+			        buf3.append("public void foo() {\\n"); //$NON-NLS-1$
+			        buf3.append("    return null;\\n"); //$NON-NLS-1$
+			        buf3.append("}\\n"); //$NON-NLS-1$
+			        buf3.append("\\n"); //$NON-NLS-1$
+			        // comment 1
+			        write(buf3);
+			       \s
+			    }
+			    private void write(CharSequence c) {
+			        System.out.println(c);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
@@ -732,17 +744,18 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \n");
-        buf.append("            \"abcdef\" +\n");
-        buf.append("            \"ghijkl\";\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x =\s
+			            "abcdef" +
+			            "ghijkl";
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("abcdef");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -767,18 +780,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \n");
-        buf.append("            \"abcdef\" +\n");
-        buf.append("            \"ghijkl\" +\n");
-        buf.append("            String.valueOf(true);\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x =\s
+			            "abcdef" +
+			            "ghijkl" +
+			            String.valueOf(true);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("abcdef");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -803,18 +817,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \n");
-        buf.append("            \"abcdef\" +\n");
-        buf.append("            \"ghijkl\" +\n");
-        buf.append("            3;\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        // comment 1
+			        String x =\s
+			            "abcdef" +
+			            "ghijkl" +
+			            3;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("abcdef");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -839,18 +854,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String a) {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \n");
-        buf.append("            \"abcdef\" +\n");
-        buf.append("            \"ghijkl\" +\n");
-        buf.append("            a;\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo(String a) {
+			        // comment 1
+			        String x =\s
+			            "abcdef" +
+			            "ghijkl" +
+			            a;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("abcdef");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -875,19 +891,20 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void noToString() {\n");
-		buf.append("        StringBuilder buf3= new StringBuilder();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\");\n");
-		buf.append("        buf3.append(\"    return null;\\n\");\n");
-		buf.append("        buf3.append(\"}\\n\");\n");
-		buf.append("        buf3.append(\"\\n\");\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void noToString() {
+			        StringBuilder buf3= new StringBuilder();
+			        buf3.append("public void foo() {\\n");
+			        buf3.append("    return null;\\n");
+			        buf3.append("}\\n");
+			        buf3.append("\\n");
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -912,21 +929,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void extraAppend() {\n");
-		buf.append("        StringBuilder buf3= new StringBuilder();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\");\n");
-		buf.append("        buf3.append(\"    return null;\\n\");\n");
-		buf.append("        buf3.append(\"}\\n\");\n");
-		buf.append("        buf3.append(\"\\n\");\n");
-		buf.append("        String k = buf3.toString();\n");
-		buf.append("        buf3.append(\"extra stuff\\n\");\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void extraAppend() {
+			        StringBuilder buf3= new StringBuilder();
+			        buf3.append("public void foo() {\\n");
+			        buf3.append("    return null;\\n");
+			        buf3.append("}\\n");
+			        buf3.append("\\n");
+			        String k = buf3.toString();
+			        buf3.append("extra stuff\\n");
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -951,20 +969,21 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void combinedAppendWithNLS() {\n");
-		buf.append("        StringBuffer buf3= new StringBuffer();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"    return null;\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"}\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"\\n\").append(\"extra append\\n\"); //$NON-NLS-1$ //$NON-NLS-2$\n");
-		buf.append("        String k = buf3.toString();\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void combinedAppendWithNLS() {
+			        StringBuffer buf3= new StringBuffer();
+			        buf3.append("public void foo() {\\n"); //$NON-NLS-1$
+			        buf3.append("    return null;\\n"); //$NON-NLS-1$
+			        buf3.append("}\\n"); //$NON-NLS-1$
+			        buf3.append("\\n").append("extra append\\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			        String k = buf3.toString();
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -989,20 +1008,21 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void inconsistentNLSMarkers() {\n");
-		buf.append("        StringBuffer buf3= new StringBuffer();\n");
-		buf.append("        buf3.append(\"public void foo() {\\n\"); //$NON-NLS-1$\n");
-		buf.append("        buf3.append(\"    return null;\\n\");\n");
-		buf.append("        buf3.append(\"}\\n\");\n");
-		buf.append("        buf3.append(\"\\n\");\n");
-		buf.append("        String k = buf3.toString();\n");
-		buf.append("        \n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void inconsistentNLSMarkers() {
+			        StringBuffer buf3= new StringBuffer();
+			        buf3.append("public void foo() {\\n"); //$NON-NLS-1$
+			        buf3.append("    return null;\\n");
+			        buf3.append("}\\n");
+			        buf3.append("\\n");
+			        String k = buf3.toString();
+			       \s
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
@@ -1027,18 +1047,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void inconsistentNLS() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String x = \"\" + //$NON-NLS-1$\n");
-        buf.append("            \"public void foo() {\\n\" +\n");
-        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" + //$NON-NLS-1$\n");
-        buf.append("            \"}\\n\"; //$NON-NLS-1$ // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void inconsistentNLS() {
+			        // comment 1
+			        String x = "" + //$NON-NLS-1$
+			            "public void foo() {\\n" +
+			            "    System.out.println(\\"abc\\");\\n" + //$NON-NLS-1$
+			            "}\\n"; //$NON-NLS-1$ // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("x");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
@@ -1063,20 +1084,21 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void inconsistentNLS() {\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String y = \"something\";\n");
-		buf.append("        String x = \"\" +\n");
-        buf.append("            \"public void foo() {\\n\" +\n");
-        buf.append("            \"    System.out.println(\\\"abc\\\");\\n\" +\n");
-        buf.append("                  y + \n");
-        buf.append("            \"}\\n\"; //$NON-NLS-1$ // comment 2\n");
-        buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void inconsistentNLS() {
+			        // comment 1
+			        String y = "something";
+			        String x = "" +
+			            "public void foo() {\\n" +
+			            "    System.out.println(\\"abc\\");\\n" +
+			                  y +\s
+			            "}\\n"; //$NON-NLS-1$ // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 
 		int index= buf.indexOf("x");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 1);
@@ -1101,22 +1123,23 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/***********\\n\" +\n");
-		buf.append("                \" * simple {} \\n\" +\n");
-		buf.append("                \" * copyright\\n\" +\n");
-		buf.append("                statement +\n");
-		buf.append("                \" * notice {0}\\n\" +\n");
-		buf.append("                \"***********/\\n\"; // comment 2\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/***********\\n" +
+			                " * simple {} \\n" +
+			                " * copyright\\n" +
+			                statement +
+			                " * notice {0}\\n" +
+			                "***********/\\n"; // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1163,22 +1186,23 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/******************************\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement +\n");
-		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" ******************************/\\n\"; //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/******************************\\n" + //$NON-NLS-1$
+			                " * simple   \\n" + //$NON-NLS-1$
+			                statement +
+			                " * copyright\\n" + //$NON-NLS-1$
+			                " ******************************/\\n"; //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1225,21 +1249,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/***************************************************\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement;\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/***************************************************\\n" + //$NON-NLS-1$
+			                " * simple   \\n" + //$NON-NLS-1$
+			                " * copyright\\n" + //$NON-NLS-1$
+			                statement;
+			        System.out.println(copyright);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1284,21 +1309,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/*********************\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement + \" * notice\\n\" + \"*********************/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/*********************\\n" + //$NON-NLS-1$
+			                " * simple   \\n" + //$NON-NLS-1$
+			                " * copyright\\n" + //$NON-NLS-1$
+			                statement + " * notice\\n" + "*********************/\\n"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1346,15 +1372,16 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String name, String id) {\n");
-		buf.append("        String title = \"Name: \" + name + \" ID: \" + id;\n");
-		buf.append("        System.out.println(title);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = "Name: " + name + " ID: " + id;
+			        System.out.println(title);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("title");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1392,18 +1419,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String name, String id) {\n");
-		buf.append("        String title = \"Name: \" +\n");
-		buf.append("                          name + \n");
-		buf.append("                          \" ID: \" + \n");
-		buf.append("                          id;\n");
-		buf.append("        System.out.println(title);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = "Name: " +
+			                          name +\s
+			                          " ID: " +\s
+			                          id;
+			        System.out.println(title);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("title");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1441,22 +1469,23 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/*******************************\\n\" +\n");
-		buf.append("                \" * simple   \\n\" +\n");
-		buf.append("                \" * copyright %\\n\" +\n");
-		buf.append("                statement +\n");
-		buf.append("                \" * notice\\n\" +\n");
-		buf.append("                \" *******************************/\\n\"; // comment 2\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/*******************************\\n" +
+			                " * simple   \\n" +
+			                " * copyright %\\n" +
+			                statement +
+			                " * notice\\n" +
+			                " *******************************/\\n"; // comment 2
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1500,22 +1529,23 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/******************************\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement +\n");
-		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" ******************************/\\n\"; //$NON-NLS-1$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/******************************\\n" + //$NON-NLS-1$
+			                " * simple   \\n" + //$NON-NLS-1$
+			                statement +
+			                " * copyright\\n" + //$NON-NLS-1$
+			                " ******************************/\\n"; //$NON-NLS-1$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1559,21 +1589,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/***************************************************\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement;\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/***************************************************\\n" + //$NON-NLS-1$
+			                " * simple   \\n" + //$NON-NLS-1$
+			                " * copyright\\n" + //$NON-NLS-1$
+			                statement;
+			        System.out.println(copyright);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1615,21 +1646,22 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        String statement= \" * statement\\n\";\n");
-		buf.append("        // comment 1\n");
-		buf.append("        String copyright=\n");
-		buf.append("                \"/*********************\\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * simple   \\n\" + //$NON-NLS-1$\n");
-		buf.append("                \" * copyright\\n\" + //$NON-NLS-1$\n");
-		buf.append("                statement + \" * notice\\n\" + \"*********************/\\n\"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$\n");
-		buf.append("        System.out.println(copyright);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String statement= " * statement\\n";
+			        // comment 1
+			        String copyright=
+			                "/*********************\\n" + //$NON-NLS-1$
+			                " * simple   \\n" + //$NON-NLS-1$
+			                " * copyright\\n" + //$NON-NLS-1$
+			                statement + " * notice\\n" + "*********************/\\n"; //comment 2 //$NON-NLS-1$ //$NON-NLS-2$
+			        System.out.println(copyright);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("simple");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1674,15 +1706,16 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String name, String id) {\n");
-		buf.append("        String title = \"Name: \" + name + \" ID: \" + id;\n");
-		buf.append("        System.out.println(title);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = "Name: " + name + " ID: " + id;
+			        System.out.println(title);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("title");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);
@@ -1717,18 +1750,19 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test;\n");
-		buf.append("public class Cls {\n");
-		buf.append("    public void foo(String name, String id) {\n");
-		buf.append("        String title = \"Name: \" +\n");
-		buf.append("                          name + \n");
-		buf.append("                          \" ID: \" + \n");
-		buf.append("                          id;\n");
-		buf.append("        System.out.println(title);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		String buf= """
+			package test;
+			public class Cls {
+			    public void foo(String name, String id) {
+			        String title = "Name: " +
+			                          name +\s
+			                          " ID: " +\s
+			                          id;
+			        System.out.println(title);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf, false, null);
 		int index= buf.indexOf("title");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
 		assertNoErrors(ctx);

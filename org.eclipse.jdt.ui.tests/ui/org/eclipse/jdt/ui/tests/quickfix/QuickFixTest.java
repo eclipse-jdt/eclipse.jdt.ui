@@ -554,7 +554,7 @@ public class QuickFixTest {
 
 			buf.append("buf= new StringBuffer();\n");
 			wrapInBufAppend(curr, buf);
-			buf.append("expected[" + i + "]= buf.toString();\n\n");
+			buf.append("expected[").append(i).append("]= buf.toString();\n\n");
 		}
 
 		buf.append("assertExpectedExistInProposals(proposals, expected);\n");

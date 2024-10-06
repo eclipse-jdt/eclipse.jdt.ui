@@ -66,14 +66,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "\n" //
-				+ "    " + FIELD_COMMENT + "\n" //
-				+ "    private static final long serialVersionUID = 1L;\n" //
-				+ "}\n";
+		String expected= "package test1;\n" + "import java.io.Serializable;\n" + "public class E1 implements Serializable {\n" + "\n" + "    " + FIELD_COMMENT + "\n" + "    private static final long serialVersionUID = 1L;\n" + "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
@@ -98,23 +91,8 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "    " + FIELD_COMMENT + "\n" //
-				+ "    private static final long serialVersionUID = 1L;\n" //
-				+ "    public class B1 implements Serializable {\n" //
-				+ "\n" //
-				+ "        " + FIELD_COMMENT + "\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "    }\n" //
-				+ "    public class B2 extends B1 {\n" //
-				+ "\n" //
-				+ "        " + FIELD_COMMENT + "\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= "package test1;\n" + "import java.io.Serializable;\n" + "public class E1 implements Serializable {\n" + "    " + FIELD_COMMENT + "\n" + "    private static final long serialVersionUID = 1L;\n" + "    public class B1 implements Serializable {\n" + "\n" + "        " + FIELD_COMMENT + "\n" + "        private static final long serialVersionUID = 1L;\n" + "    }\n" + "    public class B2 extends B1 {\n" + "\n" + "        " + FIELD_COMMENT + "\n" + "        private static final long serialVersionUID = 1L;\n"
+				+ "    }\n" + "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
@@ -143,14 +121,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-		String expected2= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "\n" //
-				+ "    " + FIELD_COMMENT + "\n" //
-				+ "    private static final long serialVersionUID = 1L;\n" //
-				+ "}\n";
+		String expected2= "package test1;\n" + "import java.io.Serializable;\n" + "public class E1 implements Serializable {\n" + "\n" + "    " + FIELD_COMMENT + "\n" + "    private static final long serialVersionUID = 1L;\n" + "}\n";
 
 		String expected1= """
 			package test1;
@@ -181,21 +152,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "    " + FIELD_COMMENT + "\n" //
-				+ "    private static final long serialVersionUID = 1L;\n" //
-				+ "\n" //
-				+ "    public void foo() {\n" //
-				+ "        Serializable s= new Serializable() {\n" //
-				+ "\n" //
-				+ "            " + FIELD_COMMENT + "\n" //
-				+ "            private static final long serialVersionUID = 1L;\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= "package test1;\n" + "import java.io.Serializable;\n" + "public class E1 implements Serializable {\n" + "    " + FIELD_COMMENT + "\n" + "    private static final long serialVersionUID = 1L;\n" + "\n" + "    public void foo() {\n" + "        Serializable s= new Serializable() {\n" + "\n" + "            " + FIELD_COMMENT + "\n" + "            private static final long serialVersionUID = 1L;\n" + "        };\n" + "    }\n" + "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
@@ -220,20 +177,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 implements Serializable {\n" //
-				+ "\n" //
-				+ "    " + FIELD_COMMENT + "\n" //
-				+ "    private static final long serialVersionUID = 1L;\n" //
-				+ "    private Serializable s= new Serializable() {\n" //
-				+ "\n" //
-				+ "        " + FIELD_COMMENT + "\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
-				+ "        \n" //
-				+ "    };\n" //
-				+ "}\n";
+		String expected= "package test1;\n" + "import java.io.Serializable;\n" + "public class E1 implements Serializable {\n" + "\n" + "    " + FIELD_COMMENT + "\n" + "    private static final long serialVersionUID = 1L;\n" + "    private Serializable s= new Serializable() {\n" + "\n" + "        " + FIELD_COMMENT + "\n" + "        private static final long serialVersionUID = 1L;\n" + "        \n" + "    };\n" + "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
@@ -264,27 +208,8 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
 		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
 
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 {\n" //
-				+ "    void foo1() {\n" //
-				+ "        new Serializable() {\n" //
-				+ "\n" //
-				+ "            " + FIELD_COMMENT + "\n" //
-				+ "            private static final long serialVersionUID = 1L;\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "    void foo2() {\n" //
-				+ "        new Object() {\n" //
-				+ "        };\n" //
-				+ "        new Serializable() {\n" //
-				+ "\n" //
-				+ "            " + FIELD_COMMENT + "\n" //
-				+ "            private static final long serialVersionUID = 1L;\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
+		String expected= "package test1;\n" + "import java.io.Serializable;\n" + "public class E1 {\n" + "    void foo1() {\n" + "        new Serializable() {\n" + "\n" + "            " + FIELD_COMMENT + "\n" + "            private static final long serialVersionUID = 1L;\n" + "        };\n" + "    }\n" + "    void foo2() {\n" + "        new Object() {\n" + "        };\n" + "        new Serializable() {\n" + "\n" + "            " + FIELD_COMMENT + "\n" + "            private static final long serialVersionUID = 1L;\n"
+				+ "        };\n" + "    }\n" + "}\n";
 
 		assertNotEquals("The class must be changed", given, expected);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});

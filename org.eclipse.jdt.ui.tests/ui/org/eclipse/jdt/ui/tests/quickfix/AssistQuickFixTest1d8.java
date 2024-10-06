@@ -2940,18 +2940,20 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public class E1 {\n");
-		buf.append("    FI fi= (Integer i, String[][] s) -> {};\n"); // no varargs
-		buf.append("}\n");
-		buf.append("interface FI {\n");
-		buf.append("    void foo(Integer i, String[]... s);\n");
-		buf.append("}\n");
+		String buf= """
+			package test1;
+			public class E1 {
+			    FI fi= (Integer i, String[][] s) -> {};
+			}
+			interface FI {
+			    void foo(Integer i, String[]... s);
+			}
+			""";
+		 // no varargs
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
-		String expected1= buf.toString();
+		String expected1= buf;
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}

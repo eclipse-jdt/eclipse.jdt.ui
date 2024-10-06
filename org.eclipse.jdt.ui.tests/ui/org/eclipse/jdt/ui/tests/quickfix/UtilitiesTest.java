@@ -82,29 +82,34 @@ public class UtilitiesTest extends QuickFixTest {
 	@Test
 	public void testGuessBindingForTypeReference() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("public class E<T> {\n");
-		buf.append("\n"); // array types
-		buf.append("    public class F<U> {}\n");
-		buf.append("    X[] x1= new String[0];\n");
-		buf.append("    X[][] x2= new String[][0];\n");
-		buf.append("    X[][] x3= new String[][][0];\n");
-		buf.append("\n"); // parameterized types
-		buf.append("    ArrayList<X> x4= new ArrayList<String>();\n");
-		buf.append("    X<String> x5= new ArrayList<String>();\n");
-		buf.append("    HashMap<ArrayList<String>, X> x6= new HashMap<ArrayList<String>, Number>();\n");
-		buf.append("    HashMap<ArrayList<X>, Number> x7= new HashMap<ArrayList<String>, Number>();\n");
-		buf.append("\n"); // wildcard types
-		buf.append("    HashMap<? extends X, Number> x8= new HashMap<? extends Number, Number>();\n");
-		buf.append("\n"); // qualified types
-		buf.append("    E<String>.F<X> x9 = new E<String>().new F<Number>();\n");
-		buf.append("    E<String>.X<Number> x10 = new E<String>().new F<Number>();\n");
-		buf.append("    X<String>.F<Number> x11 = new E<String>().new F<Number>();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String buf= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.HashMap;
+			public class E<T> {
+			
+			    public class F<U> {}
+			    X[] x1= new String[0];
+			    X[][] x2= new String[][0];
+			    X[][] x3= new String[][][0];
+			
+			    ArrayList<X> x4= new ArrayList<String>();
+			    X<String> x5= new ArrayList<String>();
+			    HashMap<ArrayList<String>, X> x6= new HashMap<ArrayList<String>, Number>();
+			    HashMap<ArrayList<X>, Number> x7= new HashMap<ArrayList<String>, Number>();
+			
+			    HashMap<? extends X, Number> x8= new HashMap<? extends Number, Number>();
+			
+			    E<String>.F<X> x9 = new E<String>().new F<Number>();
+			    E<String>.X<Number> x10 = new E<String>().new F<Number>();
+			    X<String>.F<Number> x11 = new E<String>().new F<Number>();
+			}
+			""";
+		 // array types
+		 // parameterized types
+		 // wildcard types
+		 // qualified types
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf, false, null);
 
 		String[] expected= {
 				"java.lang.String", "java.lang.String", "null",
@@ -128,25 +133,26 @@ public class UtilitiesTest extends QuickFixTest {
 	@Test
 	public void testGuessBindingForTypeReference2() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
-		buf.append("public class E {\n");
-		buf.append("    private Object o;\n");
-		buf.append("    public void foo(String s) {\n");
-		buf.append("        foo((X) o);\n");
-		buf.append("    }\n");
-		buf.append("    public void foo2(List<Number> s) {\n");
-		buf.append("        foo2((X<Number>) o);\n");
-		buf.append("    }\n");
-		buf.append("    public void foo3() {\n");
-		buf.append("        X.foo3();\n");
-		buf.append("    }\n");
-		buf.append("    public Class[][] foo4() {\n");
-		buf.append("        return new X[][];\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String buf= """
+			package test1;
+			import java.util.List;
+			public class E {
+			    private Object o;
+			    public void foo(String s) {
+			        foo((X) o);
+			    }
+			    public void foo2(List<Number> s) {
+			        foo2((X<Number>) o);
+			    }
+			    public void foo3() {
+			        X.foo3();
+			    }
+			    public Class[][] foo4() {
+			        return new X[][];
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf, false, null);
 
 		String[] expected= { "java.lang.String", "java.util.List<java.lang.Number>", "null",  "java.lang.Class" };
 
@@ -166,27 +172,28 @@ public class UtilitiesTest extends QuickFixTest {
 	@Test
 	public void testGetPossibleTypeKinds() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("public class E<T> {\n");
-		buf.append("    X x1;\n");
-		buf.append("    X[] x2;\n");
-		buf.append("    X<String> x3;\n");
-		buf.append("    ArrayList<X> x4;\n");
-		buf.append("    ArrayList<? extends X> x5;\n");
-		buf.append("\n");
-		buf.append("    E<String>.X x6;\n");
-		buf.append("    X<String>.A x7;\n");
-		buf.append("    Object x8= new X();\n");
-		buf.append("    Object x9= new X() { };\n");
-		buf.append("    Object x10= (X) x1;\n");
-		buf.append("\n");
-		buf.append("    X.A x11;\n");
-		buf.append("    Object x12= X.class;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String buf= """
+			package test1;
+			import java.util.ArrayList;
+			import java.util.HashMap;
+			public class E<T> {
+			    X x1;
+			    X[] x2;
+			    X<String> x3;
+			    ArrayList<X> x4;
+			    ArrayList<? extends X> x5;
+			
+			    E<String>.X x6;
+			    X<String>.A x7;
+			    Object x8= new X();
+			    Object x9= new X() { };
+			    Object x10= (X) x1;
+			
+			    X.A x11;
+			    Object x12= X.class;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf, false, null);
 
 		int[] expected= {
 				TypeKinds.ALL_TYPES,
@@ -221,12 +228,13 @@ public class UtilitiesTest extends QuickFixTest {
 		JavaProjectHelper.set17CompilerOptions(fJProject1, true);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public sealed interface E permits X {}\n");
-		buf.append("public sealed class F permits X {}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String buf= """
+			package test1;
+			public sealed interface E permits X {}
+			public sealed class F permits X {}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf, false, null);
 
 		int[] expected= {
 				TypeKinds.CLASSES | TypeKinds.INTERFACES,

@@ -137,22 +137,24 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			""";
 		pack1.createCompilationUnit("package-info.java", str, false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("\n");
-		buf.append("interface Type<@Nullable K> {\n");
-		buf.append("	@NonNullByDefault(DefaultLocation.RETURN_TYPE)\n"); // no effect
-		buf.append("	K get();\n");
-		buf.append("\n");
-		buf.append("	class U implements Type<@Nullable String> {\n");
-		buf.append("		@Override\n");
-		buf.append("		public String get() { // <-- error \"The default '@NonNull' conflicts...\"\n");
-		buf.append("			return \"\";\n");
-		buf.append("		}\n");
-		buf.append("	}\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		String buf= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			
+			interface Type<@Nullable K> {
+				@NonNullByDefault(DefaultLocation.RETURN_TYPE)
+				K get();
+			
+				class U implements Type<@Nullable String> {
+					@Override
+					public String get() { // <-- error "The default '@NonNull' conflicts..."
+						return "";
+					}
+				}
+			}
+			""";
+		 // no effect
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
@@ -1564,7 +1566,7 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			buf= new StringBuilder();
 			buf.append("package test;\n");
 			buf.append("import my.*;\n");
-			buf.append(defaultNullnessAnnotations+ "\n");
+			buf.append(defaultNullnessAnnotations).append("\n");
 			buf.append("public class A implements api.I {\n");
 			buf.append("}\n");
 			ICompilationUnit cu= test.createCompilationUnit("A.java", buf.toString(), false, null);
@@ -1576,25 +1578,21 @@ public class NullAnnotationsQuickFixTest1d8 extends QuickFixTest {
 			buf= new StringBuilder();
 			buf.append("package test;\n");
 			buf.append("import my.*;\n");
-			buf.append(defaultNullnessAnnotations+ "\n");
+			buf.append(defaultNullnessAnnotations).append("\n");
 			buf.append("public class A implements api.I {\n");
 			buf.append("\n");
 			buf.append("    @Override\n");
 			if (useTypeAnnotations) {
-				buf.append("    public " + (expectReturnAnnotation ? "@NonNull " : "")
-						+ "Object someMethod(" + (expectParamAnnotation ? "@NonNull " : "")
-						+ "Object p) {\n");
+				buf.append("    public ").append((expectReturnAnnotation ? "@NonNull " : "")).append("Object someMethod(").append((expectParamAnnotation ? "@NonNull " : "")).append("Object p) {\n");
 			} else {
 				if (expectReturnAnnotation) {
 					buf.append("    @NonNull\n");
 				}
-				buf.append("    public Object someMethod(" + (expectParamAnnotation ? "@NonNull " : "")
-						+ "Object p) {\n");
+				buf.append("    public Object someMethod(").append((expectParamAnnotation ? "@NonNull " : "")).append("Object p) {\n");
 			}
 			buf.append("        return null;\n");
 			buf.append("    }\n");
 			buf.append("}\n");
-			buf.append("");
 			assertProposalPreviewEquals(buf.toString(), "Add unimplemented methods", proposals);
 		} finally {
 			fJProject1.setOptions(options);

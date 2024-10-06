@@ -1721,16 +1721,18 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			""";
 		pack1.createCompilationUnit("package-info.java", str, false, null);
 
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault(false)\n"); // <- HERE
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Object bar() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String buf= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault(false)
+			public class E {
+			    @Nullable Object bar() {
+			        return new Object();
+			    }
+			}
+			""";
+		 // <- HERE
+		pack1.createCompilationUnit("E.java", buf, false, null);
 
 		String str1= """
 			package test1;

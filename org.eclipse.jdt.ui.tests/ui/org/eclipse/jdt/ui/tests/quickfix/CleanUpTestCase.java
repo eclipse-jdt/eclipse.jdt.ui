@@ -243,7 +243,7 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 
 		if (hasProblems) {
 			StringBuilder builder= new StringBuilder();
-			builder.append(cu.getElementName() + " has compilation problems: \n");
+			builder.append(cu.getElementName()).append(" has compilation problems: \n");
 
 			for (IProblem prob : problems) {
 				builder.append(prob.getMessage()).append('\n');
