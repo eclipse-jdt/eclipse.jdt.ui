@@ -273,7 +273,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			}
 			""";
 
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
 	}
