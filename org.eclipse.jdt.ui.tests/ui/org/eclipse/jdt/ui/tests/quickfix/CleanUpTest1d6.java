@@ -271,7 +271,7 @@ public class CleanUpTest1d6 extends CleanUpTestCase {
 		enable(CleanUpConstants.CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(Messages.format(ConstantsCleanUp_description,UpdateProperty.FILE_SEPARATOR.toString()),
 						Messages.format(ConstantsCleanUp_description,UpdateProperty.PATH_SEPARATOR.toString()),
