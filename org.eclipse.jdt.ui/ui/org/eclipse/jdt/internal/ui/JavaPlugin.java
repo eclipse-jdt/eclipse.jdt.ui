@@ -14,21 +14,21 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.osgi.service.debug.DebugOptions;
@@ -1136,18 +1136,12 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		if (bundles != null)
 			return bundles;
 
-		bundles = fBundleContext.getBundles();
-		List<Bundle> matchingBundles = new ArrayList<>();
-		for (Bundle bundle : bundles) {
-		    if (bundle.getSymbolicName().equals(bundleName)) {
-		        if (version == null || bundle.getVersion().toString().equals(version)) {
-		            matchingBundles.add(bundle);
-		        }
-		    }
-		}
-		if (!matchingBundles.isEmpty()) {
-			return (Bundle[]) matchingBundles.toArray();
-		}
+		// Accessing unresolved bundle
+		ServiceReference<PackageAdmin> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class);
+		PackageAdmin admin= fBundleContext.getService(serviceRef);
+		bundles= admin.getBundles(bundleName, version);
+		if (bundles != null && bundles.length > 0)
+			return bundles;
 		return null;
 	}
 
