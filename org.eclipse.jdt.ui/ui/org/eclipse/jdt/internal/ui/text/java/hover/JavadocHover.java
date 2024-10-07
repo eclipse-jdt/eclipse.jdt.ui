@@ -688,7 +688,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			@Override
 			public void handleTextSet() {
 			}
-		}, (String loc) -> control.isLocationForBrowserCustomText(loc)));
+		}, (String loc) -> control.isLocationForCustomText(loc)));
 	}
 
 	/**
