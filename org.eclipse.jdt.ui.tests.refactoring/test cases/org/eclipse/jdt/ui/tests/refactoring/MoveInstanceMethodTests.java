@@ -708,6 +708,13 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 	public void test79() throws Exception {
 		helper1(new String[] { "A" }, "A", 11, 17, 11, 18, FIELD, "b", true, true);
 	}
+
+	@Test
+	public void test80() throws Exception {
+		helper1(new String[] { "A" }, "A", 6, 10, 6, 16, FIELD, "b", true, true);
+	}
+
+
 	// Move mA1 to field fB, do not inline delegator
 	@Test
 	public void test3() throws Exception {

@@ -2238,6 +2238,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			adjustor.rewriteVisibility(Progress.subMonitor(monitor, 1));
 			sourceRewrite.rewriteAST(document, fMethod.getCompilationUnit().getOptions(true));
 			createMethodSignature(document, declaration, sourceRewrite, rewrites);
+			modifyInheritedMethodCalls(document, declaration, sourceRewrite, rewrites);
 			ICompilationUnit unit= null;
 			CompilationUnitRewrite rewrite= null;
 			for (final Iterator<ICompilationUnit> iterator= rewrites.keySet().iterator(); iterator.hasNext();) {
@@ -3033,6 +3034,89 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		} catch (BadLocationException exception) {
 			JavaManipulationPlugin.log(exception);
 		}
+	}
+
+	private class SuperMethodChecker extends ASTVisitor {
+		private final CompilationUnitRewrite fRewriter;
+
+		public SuperMethodChecker(final CompilationUnitRewrite rewriter) {
+			fRewriter= rewriter;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			if (node.getName().getFullyQualifiedName().equals(fMethodName)) {
+				IMethodBinding methodBinding= node.resolveMethodBinding();
+				if (methodBinding != null) {
+					ITypeBinding typeBinding= methodBinding.getDeclaringClass();
+					if (typeBinding != null) {
+						ITypeBinding targetTypeBinding= fTarget.getType();
+						if (!typeBinding.isEqualTo(targetTypeBinding) && findInHierarchy(typeBinding, targetTypeBinding)) {
+							ASTRewrite astRewrite= fRewriter.getASTRewrite();
+							AST ast= node.getAST();
+							SuperMethodInvocation superMethod= ast.newSuperMethodInvocation();
+							superMethod.setName(ast.newSimpleName(node.getName().getFullyQualifiedName()));
+							ListRewrite typeArgs= astRewrite.getListRewrite(node, MethodInvocation.TYPE_ARGUMENTS_PROPERTY);
+							List<Type> originalTypeList= typeArgs.getOriginalList();
+							if (originalTypeList.size() > 0) {
+								ASTNode typeArgsCopy= typeArgs.createCopyTarget(originalTypeList.get(0), originalTypeList.get(originalTypeList.size() - 1));
+								superMethod.typeArguments().add(typeArgsCopy);
+							}
+							ListRewrite args= astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY);
+							List<Type> originalArgsList= args.getOriginalList();
+							if (originalArgsList.size() > 0) {
+								ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalTypeList.size() - 1));
+								superMethod.arguments().add(argsCopy);
+							}
+							astRewrite.replace(node, superMethod, null);
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		private boolean findInHierarchy(ITypeBinding toFind, ITypeBinding binding) {
+			if (binding == null) {
+				return false;
+			}
+			if (toFind.isEqualTo(binding)) {
+				return true;
+			}
+			if (findInHierarchy(toFind, binding.getSuperclass())) {
+				return true;
+			}
+			ITypeBinding[] bindingInterfaces= binding.getInterfaces();
+			for (ITypeBinding bindingInterface : bindingInterfaces) {
+				if (findInHierarchy(toFind, bindingInterface)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	/**
+	 * @param document
+	 *            the buffer containing the source of the source compilation
+	 *            unit
+	 * @param declaration
+	 *            the method declaration to use as source
+	 * @param rewrite
+	 *            the ast rewrite to use for the copy of the method body
+	 * @param rewrites
+	 *            the compilation unit rewrites
+	 * @throws JavaModelException
+	 *             if the insertion point cannot be found
+	 */
+	protected void modifyInheritedMethodCalls(final IDocument document, final MethodDeclaration declaration, final ASTRewrite rewrite, final Map<ICompilationUnit, CompilationUnitRewrite> rewrites) throws JavaModelException {
+		Assert.isNotNull(document);
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(rewrite);
+		Assert.isNotNull(rewrites);
+		final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
+		final AbstractTypeDeclaration type= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetType(), rewriter.getRoot());
+		type.accept(new SuperMethodChecker(rewriter));
 	}
 
 	/**
