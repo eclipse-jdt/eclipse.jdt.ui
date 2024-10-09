@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.tests.hover;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -203,7 +204,7 @@ public class JavadocHoverTests extends CoreTests {
 
 			// value should be expanded:
 			int index= actualHtmlContent.indexOf("<pre><code>");
-			org.junit.Assert.assertNotEquals(-1, index);
+			assertNotEquals(-1, index);
 			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
 			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
 		}
