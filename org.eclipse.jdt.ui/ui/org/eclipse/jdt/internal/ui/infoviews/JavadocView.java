@@ -1429,7 +1429,7 @@ public class JavadocView extends AbstractInfoView {
 					}
 				}
 			}
-		}));
+		}, (String loc) -> browser.isLocationForCustomText(loc)));
 	}
 
 }

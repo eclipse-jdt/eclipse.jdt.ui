@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
@@ -590,15 +591,15 @@ public class JavaElementLinks {
 	 * @param handler the handler to use to handle links
 	 * @return a new {@link LocationListener}
 	 */
-	public static LocationListener createLocationListener(final ILinkHandler handler) {
+	public static LocationListener createLocationListener(final ILinkHandler handler, Function<String, Boolean> baseUrlHandler) {
 		return new LocationAdapter() {
 			@Override
 			public void changing(LocationEvent event) {
 				String loc= event.location;
 
-				if ("about:blank".equals(loc) || loc.startsWith("data:")) { //$NON-NLS-1$ //$NON-NLS-2$
+				if (baseUrlHandler.apply(loc) || loc.startsWith("data:")) { //$NON-NLS-1$
 					/*
-					 * Using the Browser.setText API triggers a location change to "about:blank".
+					 * Using the Browser.setText API triggers a location change to Browser's BASE_URI.
 					 * XXX: remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
 					 */
 					// The check for "data:" is due to Edge browser issuing a location change with a URL using the data: protocol
