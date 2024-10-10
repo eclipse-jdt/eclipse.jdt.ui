@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -145,7 +146,7 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -187,9 +188,9 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			/**
 			 * Type
 			 */
@@ -241,14 +242,14 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * Type
 			 */
 			public class E extends A<String> {
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -303,14 +304,14 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * Type
 			 */
 			public class E extends A<String> {
-			
+
 			    /**
 			     * Constructor
 			     */
@@ -318,12 +319,12 @@ public class NewTypeWizardTest {
 			        super(t);
 			    }
 			    /* class body */
-			
+
 			    /**
 			     * Method
 			     */
 			    public static void main(String[] args) {
-			
+
 			    }
 			}
 			""";
@@ -370,9 +371,9 @@ public class NewTypeWizardTest {
 
 		String expected= """
 			package pack;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class A<T> {
 			    /**
 			     * Type
@@ -380,7 +381,70 @@ public class NewTypeWizardTest {
 			    public class E<S> extends ArrayList<S> {
 			        /* class body */
 			    }
-			
+
+			    public abstract void foo(T t);
+			}
+			""";
+
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
+	}
+
+	@Test
+	public void testCreateMultipleInnerClasses1() throws Exception {
+
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
+		String str= """
+			package pack;
+			public class A<T> {
+			    public abstract void foo(T t);
+			}
+			""";
+		ICompilationUnit outer= pack0.createCompilationUnit("A.java", str, false, null);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewClassWizardPage wizardPage= new NewClassWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(pack1, true);
+		wizardPage.setEnclosingTypeSelection(true, true);
+		wizardPage.setEnclosingType(outer.findPrimaryType(), true);
+		wizardPage.setTypeName("E<S>;F<S>", true);
+
+		wizardPage.setSuperClass("java.util.ArrayList<S>", true);
+
+		List<String> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfaces(interfaces, true);
+
+		wizardPage.setMethodStubSelection(false, false, true, true);
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
+
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+
+		String expected= """
+			package pack;
+
+			import java.util.ArrayList;
+
+			public class A<T> {
+			    /**
+			     * Type
+			     */
+			    public class F<S> extends ArrayList<S> {
+			        /* class body */
+			    }
+
+			    /**
+			     * Type
+			     */
+			    public class E<S> extends ArrayList<S> {
+			        /* class body */
+			    }
+
 			    public abstract void foo(T t);
 			}
 			""";
@@ -423,11 +487,11 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.io.File;
 			import java.util.List;
 			import java.util.Map;
-			
+
 			/**
 			 * Type
 			 */
@@ -486,16 +550,16 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * Type
 			 */
 			public class E extends A {
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -526,9 +590,9 @@ public class NewTypeWizardTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			public class B {
 			}
 			""";
@@ -558,18 +622,18 @@ public class NewTypeWizardTest {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			import pack.A;
-			
+
 			public class B {
-			
+
 			    /**
 			     * Type
 			     */
 			    public class E extends A {
-			
+
 			        /**
 			         * Overridden
 			         */
@@ -612,9 +676,9 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			/**
 			 * Type
 			 */
@@ -652,7 +716,7 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -690,7 +754,7 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -811,9 +875,9 @@ public class NewTypeWizardTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class Foo1 {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Foo1.java", str, false, null);
@@ -823,9 +887,9 @@ public class NewTypeWizardTest {
 		pack1= fSourceFolder.createPackageFragment("test2", false, null);
 		String str1= """
 			package test2;
-			
+
 			public class Foo3 {
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("Foo3.java", str1, false, null);
@@ -849,7 +913,7 @@ public class NewTypeWizardTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String test= """
 			package test1;
-			
+
 			public final class A{
 			}
 			""";
@@ -875,6 +939,76 @@ public class NewTypeWizardTest {
 		assertNotNull(status);
 		assertTrue(status.getSeverity() == IStatus.ERROR);
 		assertTrue(expected.equals(status.getMessage()));
+	}
+
+	@Test
+	public void testCreateMultipleClasses1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewClassWizardPage wizardPage= new NewClassWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(pack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("E;F", true);
+
+		wizardPage.setSuperClass("", true);
+
+		List<String> interfaces= new ArrayList<>();
+		wizardPage.setSuperInterfaces(interfaces, true);
+
+		wizardPage.setMethodStubSelection(false, false, false, true);
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		wizardPage.createType(testMonitor);
+		testMonitor.assertUsedUp();
+
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+
+		String expected= """
+			/**
+			 * File
+			 */
+			package test1;
+
+			/**
+			 * Type
+			 */
+			public class E {
+			    /* class body */
+			}
+			""";
+
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
+	}
+
+	@Test
+	public void testCreateMultipleClassesDuplicateError1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		NewClassWizardPage wizardPage = new NewClassWizardPage();
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(pack1, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName("X", true); // Will be changed below
+		wizardPage.setSuperClass("", true);
+		wizardPage.setSuperInterfaces(new ArrayList<>(), true);
+		wizardPage.setMethodStubSelection(false, false, false, true);
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+
+		// In this error examples the first (single letter) class name is always the duplicate
+		Stream.of("A;A", "B;C;B", "D;D<T>", "E;E< T >", "F;F<T, U>", "G; T1; T2; T3; G")
+			.forEach(names -> {
+				wizardPage.setTypeName(names, true);
+				IStatus status = wizardPage.getTypeNameStatus();
+				assertNotNull(status);
+				assertTrue(status.getSeverity() == IStatus.ERROR);
+				String duplicate = names.substring(0, 1); // See comment above
+				String expected = Messages.format(NewWizardMessages.NewTypeWizardPage_error_DuplicateName, duplicate);
+				assertEquals(expected, status.getMessage());
+			});
 	}
 
 	private static ITypeBinding getTypeBinding(ICompilationUnit cu) {

@@ -157,6 +157,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_InvalidTypeName;
 	public static String NewTypeWizardPage_error_QualifiedName;
 	public static String NewTypeWizardPage_info_FileExtensionNotRequired;
+	public static String NewTypeWizardPage_info_NamesSeparatedBySemicolon;
+	public static String NewTypeWizardPage_error_DuplicateName;
 	public static String NewTypeWizardPage_warning_TypeNameDiscouraged;
 	public static String NewTypeWizardPage_error_TypeParameters;
 	public static String NewTypeWizardPage_error_InvalidSuperClassName;
