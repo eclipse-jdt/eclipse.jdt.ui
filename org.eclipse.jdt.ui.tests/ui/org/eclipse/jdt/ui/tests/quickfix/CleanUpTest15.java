@@ -401,6 +401,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf10.append("     * foo\\n");
 			        buf10.append("     */");
 			        write(buf10);
+			        StringBuilder buf11 = new StringBuilder();
+			        buf11.append("abcd\\n");
+			        buf11.append("efgh\\n");
+			        buf11.append("ijkl\\n");
+			        buf11.append("mnop\\n");
+			        int index = buf11.indexOf("fg");
+			        System.out.println(buf11.toString());
 			    }
 			    private void write(CharSequence c) {
 			        System.out.println(c);
@@ -522,6 +529,14 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			                 */\\
 			            \""";
 			        write(str8);
+			        String str9 = \"""
+			            abcd
+			            efgh
+			            ijkl
+			            mnop
+			            \""";
+			        int index = str9.indexOf("fg");
+			        System.out.println(str9);
 			    }
 			    private void write(CharSequence c) {
 			        System.out.println(c);
@@ -789,6 +804,16 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf.append("abcdef\\n");
 			        buf.append("123456\\n"); //$NON-NLS-1$
 			        buf.append("ghijkl\\n");
+			        buf.append(3);
+			        String x = buf.toString();
+			    }
+
+			    public void testIndexOfInBetween() {
+			        StringBuffer buf = new StringBuffer();
+			        buf.append("abcdef\\n");
+			        buf.append("123456\\n");
+			        buf.append("ghijkl\\n");
+			        int index = buf.indexOf("123");
 			        buf.append(3);
 			        String x = buf.toString();
 			    }
