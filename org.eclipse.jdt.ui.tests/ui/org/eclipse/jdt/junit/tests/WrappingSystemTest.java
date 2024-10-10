@@ -14,9 +14,9 @@
 package org.eclipse.jdt.junit.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 import java.util.List;
@@ -213,10 +213,9 @@ public class WrappingSystemTest implements ILaunchesListener2 {
 			int millisecondTimeout, boolean lastItemHasImage) throws PartInitException {
 		long startTime = System.currentTimeMillis();
 		while (stillWaiting(numExpectedTableLines, lastItemHasImage)) {
-			if (System.currentTimeMillis() - startTime > millisecondTimeout)
-				fail("Timeout waiting for " + numExpectedTableLines
-						+ " lines in table. Present: " + getNumTableItems() + " items.\n"
-						+ "The 2nd vm has " + (hasNotTerminated() ? "not " : "") + "terminated.");
+			assertFalse("Timeout waiting for " + numExpectedTableLines
+					+ " lines in table. Present: " + getNumTableItems() + " items.\n"
+					+ "The 2nd vm has " + (hasNotTerminated() ? "not " : "") + "terminated.", System.currentTimeMillis() - startTime > millisecondTimeout);
 			dispatchEvents();
 		}
 	}

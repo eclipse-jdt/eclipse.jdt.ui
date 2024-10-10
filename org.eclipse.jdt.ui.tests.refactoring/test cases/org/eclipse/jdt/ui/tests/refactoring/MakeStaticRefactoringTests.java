@@ -12,6 +12,7 @@
 
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -154,14 +155,14 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testMethodNotFound() throws Exception {
 		//Method cannot be found
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 2, 0, 2, 1);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage().equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_on_this_selection));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_on_this_selection);
 	}
 
 	@Test
 	public void testIsConstructor() throws Exception {
 		//Check if Constructor
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 2, 12, 2, 15);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage().equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_constructors));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_constructors);
 	}
 
 	@Test
@@ -197,46 +198,42 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testRecursive() throws Exception {
 		//MethodInvocation in MethodDeclaration with object of the same Class in parameter
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 3, 10, 3, 13);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods);
 	}
 
 	@Test
 	public void testRecursive2() throws Exception {
 		//recursive invocation after invoking a method that returns a new instance of the same class
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 6, 10, 6, 13);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods);
 	}
 
 	@Test
 	public void testRecursive3() throws Exception {
 		//simple recursive invocation of instance method
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 2, 17, 2, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods);
 	}
 
 	@Test
 	public void testInheritance() throws Exception {
 		//Refactor of method that overrides method of supertype (Selection is set to MethodDeclaration)
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 4, 19, 4, 22);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_explicit_super_method_invocation));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_explicit_super_method_invocation);
 	}
 
 	@Test
 	public void testInheritance2() throws Exception {
 		//Refactor of method in super type that has child type overriding the method -> should fail
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SuperClass", "p.SubClass" }, 3, 19, 3, 22);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage().equals(RefactoringCoreMessages.MakeStaticRefactoring_method_is_overridden_in_subtype));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_method_is_overridden_in_subtype);
 	}
 
 	@Test
 	public void testInheritance3() throws Exception {
 		//Selecting SuperMethodInvocation -> should fail
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 5, 26, 5, 29);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage().equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_super_method_invocations));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_super_method_invocations);
 	}
 
 	@Test
@@ -244,14 +241,14 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 		//Refactor method without parameters on the lowest hierarchy level ->
 		//After refactoring it is static but has the same signature as parent type method -> should fail
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 4, 19, 4, 22);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage().equals(RefactoringCoreMessages.MakeStaticRefactoring_hiding_method_of_parent_type));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_hiding_method_of_parent_type);
 	}
 
 	@Test
 	public void testInheritance5() throws Exception {
 		//Inheritance with Recursion
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 4, 10, 4, 13);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage().equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods);
 	}
 
 	@Test
@@ -265,8 +262,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testDuplicateMethod() throws Exception {
 		//Selected method has instance usage and there is an existing method that is equal to the selected method after being refactored
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 5, 19, 5, 22);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_duplicate_method_signature));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_duplicate_method_signature);
 	}
 
 	@Test
@@ -280,8 +276,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testMethodAlreadyStatic() throws Exception {
 		//Selected method is already static
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 2, 24, 2, 27);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_method_already_static));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_method_already_static);
 	}
 
 	@Test
@@ -353,16 +348,14 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testGenericDeclaration9() throws Exception {
 		//check for wildcardTypes as bounds (T extends List<?>)
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 7, 17, 7, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_wildCardTypes_as_bound));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_wildCardTypes_as_bound);
 	}
 
 	@Test
 	public void testGenericDeclaration10() throws Exception {
 		//check for wildcardTypes as bounds (T extends Map<? extends Runnable, ? extends Throwable>)
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 7, 17, 7, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_wildCardTypes_as_bound));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_wildCardTypes_as_bound);
 	}
 
 	@Test
@@ -419,8 +412,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testVariousInstanceCases() throws Exception {
 		//Various cases of instance access in many different forms
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 14, 17, 14, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_selected_method_uses_super_field_access));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_selected_method_uses_super_field_access);
 	}
 
 	@Test
@@ -455,8 +447,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testSuperMethodReference() throws Exception {
 		//Selected method is used in SuperMethodReference -> Should throw error
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SuperClass", "p.SubClass" }, 4, 19, 4, 22);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references);
 	}
 
 	@Test
@@ -477,8 +468,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testExplicitSuperMethodInvocation() throws Exception {
 		//MethodDeclaration uses explcit SuperMethodInvocation to call method of parent type -> semantic change not allowed
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 3, 17, 3, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_explicit_super_method_invocation));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_explicit_super_method_invocation);
 	}
 
 	@Test
@@ -492,8 +482,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testSuperFieldAccess() throws Exception {
 		//MethodDeclaration uses SuperFieldAccess -> throws warning but is possible
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.SubClass", "p.SuperClass" }, 6, 17, 6, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_selected_method_uses_super_field_access));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_selected_method_uses_super_field_access);
 	}
 
 	@Test
@@ -505,8 +494,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	@Test
 	public void testSourceNotAvailable() throws Exception {
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 3, 20, 3, 27);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_source_not_available_for_selected_method));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_source_not_available_for_selected_method);
 	}
 
 	@Test
@@ -527,8 +515,7 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testConvertMethodReferenceToLambda() throws Exception {
 		//MethodReference needs to be co0nverted to lambda because refactored method accepts two parameters
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 10, 10, 10, 13);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references);
 	}
 
 	@Test
@@ -541,32 +528,28 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testMethodReference() throws Exception {
 		//TypeMethodReference
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 8, 10, 8, 13);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references);
 	}
 
 	@Test
 	public void testMethodReference2() throws Exception {
 		//ExpressionMethodReference in anonymous class -> Refactoring not allowed in anonymous class and method references also not allowed
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 4, 26, 4, 29);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_local_or_anonymous_types));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_local_or_anonymous_types);
 	}
 
 	@Test
 	public void testMethodReference3() throws Exception {
 		//ExpressionMethodReference with recursion
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 2, 17, 2, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_recursive_methods);
 	}
 
 	@Test
 	public void testMethodReference4() throws Exception {
 		//ExpressionMethodReference
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 8, 17, 8, 20);
-		assertTrue(status.getEntryWithHighestSeverity().getMessage()
-				.equals(RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references));
+		assertEquals(status.getEntryWithHighestSeverity().getMessage(), RefactoringCoreMessages.MakeStaticRefactoring_not_available_for_method_references);
 	}
 
 	@Test
