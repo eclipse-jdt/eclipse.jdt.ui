@@ -166,7 +166,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	}
 
 	private void internalRun(List<?> initialSelection) {
-		ListSelectionDialog dialog= new ListSelectionDialog(getShell(), getClosedProjectsInWorkspace(), ArrayContentProvider.getInstance(), new JavaElementLabelProvider(), ActionMessages.OpenProjectAction_dialog_message);
+		ListSelectionDialog dialog= ListSelectionDialog.of(getClosedProjectsInWorkspace()).contentProvider(ArrayContentProvider.getInstance()).labelProvider(new JavaElementLabelProvider()).message(ActionMessages.OpenProjectAction_dialog_message).create(getShell());
 		dialog.setTitle(ActionMessages.OpenProjectAction_dialog_title);
 		if (initialSelection != null && !initialSelection.isEmpty()) {
 			dialog.setInitialElementSelections(initialSelection);

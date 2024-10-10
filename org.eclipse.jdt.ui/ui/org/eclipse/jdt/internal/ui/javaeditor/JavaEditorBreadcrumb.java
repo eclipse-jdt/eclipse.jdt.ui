@@ -47,6 +47,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -568,7 +569,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	protected void activateBreadcrumb() {
 		fEditorSelection= getJavaEditor().getSelectionProvider().getSelection();
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
-		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.breadcrumbEditorScope" }); //$NON-NLS-1$
+		IContextService contextService = editorSite.getService(IContextService.class);
+		contextService.activateContext("org.eclipse.jdt.ui.breadcrumbEditorScope"); //$NON-NLS-1$
 		getJavaEditor().setActionsActivated(false);
 		fBreadcrumbActionGroup.fillActionBars(editorSite.getActionBars());
 	}
@@ -579,7 +581,8 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 	@Override
 	protected void deactivateBreadcrumb() {
 		IEditorSite editorSite= getJavaEditor().getEditorSite();
-		editorSite.getKeyBindingService().setScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" }); //$NON-NLS-1$
+		IContextService contextService = editorSite.getService(IContextService.class);
+		contextService.activateContext("org.eclipse.jdt.ui.javaEditorScope"); //$NON-NLS-1$
 		getJavaEditor().getActionGroup().fillActionBars(editorSite.getActionBars());
 		getJavaEditor().setActionsActivated(true);
 		fEditorSelection= null;

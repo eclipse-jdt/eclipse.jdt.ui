@@ -655,10 +655,16 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 *
 	 * @return the Java Core plug-in preferences
 	 * @since 3.7
+	 * deprecated use getJavaCorePluginPreferencesNew
 	 */
 	public static org.eclipse.core.runtime.Preferences getJavaCorePluginPreferences() {
 		return JavaCore.getPlugin().getPluginPreferences();
 	}
+
+	public static IEclipsePreferences getJavaCorePluginPreferencesNew() {
+		return InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
+	}
+
 
 	/**
 	 * Returns the AST provider.
@@ -941,11 +947,11 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					return fCombinedPreferenceStore;
 				}
 			}
-			
+
 			// Block below may init other bundles and shouldn't be executed with lock held
 			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 			ChainedPreferenceStore store = new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(getJavaCorePluginPreferences()), generalTextStore });
-			
+
 			synchronized (this) {
 				if (fCombinedPreferenceStore == null) {
 					fCombinedPreferenceStore = store;
