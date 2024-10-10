@@ -50,10 +50,9 @@ public class CallHierarchyCore {
 	public static final String PREF_HIDE_TEST_CODE = "PREF_HIDE_TEST_CODE";	//$NON-NLS-1$
 	public static final String PREF_SHOW_TEST_CODE_ONLY = "PREF_SHOW_TEST_CODE_ONLY";	//$NON-NLS-1$
 
-	private static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
-	private static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
-	private static final String PREF_FILTERS_LIST= "PREF_FILTERS_LIST"; //$NON-NLS-1$
-
+    public static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
+    public static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
+    public static final String PREF_FILTERS_LIST= "PREF_FILTERS_LIST"; //$NON-NLS-1$
     private String defaultIgnoreFilters= "java.*,javax.*"; //$NON-NLS-1$
 
     private static CallHierarchyCore fgInstance;
