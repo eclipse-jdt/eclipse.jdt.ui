@@ -117,14 +117,15 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        Integer k = foo("" +\s
 			                  "abcdef\\n" +\s
 			                  "123456\\n" +\s
-			                  "klm");
+			                  "klm" +\s
+			                  "");
 			    }
 			    public void testAssignment() {
 			        Integer k = null;
 			        k = foo("" +\s
 			                  "abcdef\\n" +\s
 			                  "123456\\n" +\s
-			                  "klm");
+			                  "" + "klm");
 			    }
 			    public void testConcatInConstructor() {
 			        new StringBuffer("abc\\n" + "def\\n" + "ghi");
