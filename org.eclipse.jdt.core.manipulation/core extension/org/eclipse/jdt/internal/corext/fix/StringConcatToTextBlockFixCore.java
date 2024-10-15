@@ -156,7 +156,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
 					hasComments= hasComments || hasNLS(ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()), cu);
 					String string= stringLiteral.getLiteralValue();
-					if (!string.isEmpty() && (fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1)) { //$NON-NLS-1$
+					if (string.isEmpty() || fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1) { //$NON-NLS-1$
 						continue;
 					}
 				}
@@ -315,8 +315,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			expressions.forEach(new Consumer<Expression>() {
 				@Override
 				public void accept(Expression t) {
-					String value= ((StringLiteral) t).getEscapedValue();
-					parts.addAll(unescapeBlock(value.substring(1, value.length() - 1)));
+					StringLiteral literal= (StringLiteral)t;
+					if (!literal.getLiteralValue().equals("\"\"")) { //$NON-NLS-1$
+						String value= literal.getEscapedValue();
+						parts.addAll(unescapeBlock(value.substring(1, value.length() - 1)));
+					}
 				}
 			});
 
