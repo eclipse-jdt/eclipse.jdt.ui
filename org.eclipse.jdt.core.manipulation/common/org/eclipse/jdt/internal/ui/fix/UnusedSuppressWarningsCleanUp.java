@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
@@ -31,6 +32,8 @@ import org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fix to remove unnecessary SuppressWarnings
@@ -127,8 +130,28 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS))
-			result+= getNumberOfProblems(problems, IProblem.UnusedWarningToken);
+			result+= getNumberOfProblems(problems, compilationUnit);
 
 		return result;
 	}
+
+	private int getNumberOfProblems(IProblem[] problems, CompilationUnit compilationUnit) {
+		int result= 0;
+		if (fLiteral == null) {
+			return 1;
+		}
+		for (IProblem problem : problems) {
+			IProblemLocation location= new ProblemLocation(problem);
+			if (location.getProblemId() == IProblem.UnusedWarningToken) {
+				ASTNode node= location.getCoveringNode(compilationUnit);
+				if (node instanceof StringLiteral literal) {
+					if (literal.getLiteralValue().equals(fLiteral.getLiteralValue())) {
+						result++;
+					}
+				}
+			}
+		}
+		return result;
+	}
+
 }
