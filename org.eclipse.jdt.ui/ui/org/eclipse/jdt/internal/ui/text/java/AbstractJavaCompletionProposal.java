@@ -800,13 +800,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		if (!isOffsetValid(offset))
 			return fIsValidated= false;
 
-		fIsValidated= isValidPrefix(getPrefix(document, offset));
+		String prefix = getPrefix(document, offset);
+		fIsValidated= isValidPrefix(prefix);
 
 		if (fIsValidated && event != null) {
-			// adapt replacement range to document change
-			int delta= (event.fText == null ? 0 : event.fText.length()) - event.fLength;
-			final int newLength= Math.max(getReplacementLength() + delta, 0);
-			setReplacementLength(newLength);
+			setReplacementLength(prefix.length());
 		}
 
 		return fIsValidated;
