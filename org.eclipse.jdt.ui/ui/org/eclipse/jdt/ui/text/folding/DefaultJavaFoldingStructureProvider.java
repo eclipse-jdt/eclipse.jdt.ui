@@ -68,7 +68,23 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -497,7 +513,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 			IRegion preRegion;
 			if (firstLine < captionLine) {
-//				preRegion= new Region(offset + prefixEnd, contentStart - prefixEnd);
 				int preOffset= document.getLineOffset(firstLine);
 				IRegion preEndLineInfo= document.getLineInformation(captionLine);
 				int preEnd= preEndLineInfo.getOffset();
@@ -540,33 +555,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 			return 0;
 		}
-
-//		/**
-//		 * Finds the offset of the first identifier part within <code>content</code>.
-//		 * Returns 0 if none is found.
-//		 *
-//		 * @param content the content to search
-//		 * @return the first index of a unicode identifier part, or zero if none can
-//		 *         be found
-//		 */
-//		private int findPrefixEnd(final CharSequence content) {
-//			// return the index after the leading '/*' or '/**'
-//			int len= content.length();
-//			int i= 0;
-//			while (i < len && isWhiteSpace(content.charAt(i)))
-//				i++;
-//			if (len >= i + 2 && content.charAt(i) == '/' && content.charAt(i + 1) == '*')
-//				if (len >= i + 3 && content.charAt(i + 2) == '*')
-//					return i + 3;
-//				else
-//					return i + 2;
-//			else
-//				return i;
-//		}
-//
-//		private boolean isWhiteSpace(char c) {
-//			return c == ' ' || c == '\t';
-//		}
 
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
@@ -990,18 +978,110 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
-		IParent parent= (IParent) fInput;
-		try {
-			if (!(fInput instanceof ISourceReference))
-				return;
-			String source= ((ISourceReference)fInput).getSource();
-			if (source == null)
-				return;
+	    ICompilationUnit unit = (ICompilationUnit) fInput;
+	    ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+	    parser.setSource(unit);
+	    parser.setResolveBindings(true);
+	    CompilationUnit ast = (CompilationUnit) parser.createAST(null);
 
-			ctx.getScanner().setSource(source.toCharArray());
-			computeFoldingStructure(parent.getChildren(), ctx);
-		} catch (JavaModelException x) {
-		}
+	    try {
+	        if (!(fInput instanceof ISourceReference)) return;
+	        String source = ((ISourceReference) fInput).getSource();
+	        if (source == null) return;
+	        ctx.getScanner().setSource(source.toCharArray());
+	        IParent parent = (IParent) fInput;
+	        computeFoldingStructure(parent.getChildren(), ctx);
+
+	        ast.accept(new ASTVisitor() {
+	            @Override
+	            public boolean visit(IfStatement node) {
+                    processStatement(node, ctx);
+                    Statement elseStatement = node.getElseStatement();
+                    if (elseStatement != null) {
+                        processStatement(elseStatement, ctx);
+                    }
+                    return super.visit(node);
+                }
+
+	            @Override
+	            public boolean visit(WhileStatement node) {
+	                processStatement(node, ctx);
+	                return super.visit(node);
+	            }
+
+	            @Override
+                public boolean visit(DoStatement node) {
+                    processStatement(node, ctx);
+                    return super.visit(node);
+                }
+
+	            @Override
+	            public boolean visit(ForStatement node) {
+	                processStatement(node, ctx);
+	                return super.visit(node);
+	            }
+
+	            @Override
+                public boolean visit(EnhancedForStatement node) {
+                    processStatement(node, ctx);
+                    return super.visit(node);
+                }
+
+	            @Override
+	            public boolean visit(SwitchStatement node) {
+	                processStatement(node, ctx);
+	                return super.visit(node);
+	            }
+
+	            @Override
+                public boolean visit(TryStatement node) {
+                    processStatement(node.getBody(), ctx);
+                    for (Object catchClauseObj : node.catchClauses()) {
+                        CatchClause catchClause = (CatchClause) catchClauseObj;
+                        processStatement(catchClause.getBody(), ctx);
+                    }
+                    Block finallyBlock = node.getFinally();
+                    if (finallyBlock != null) {
+                        processStatement(finallyBlock, ctx);
+                    }
+                    return super.visit(node);
+                }
+
+	            @Override
+                public boolean visit(LambdaExpression node) {
+                    if (node.getBody() instanceof Block) {
+                        processStatement((Block) node.getBody(), ctx);
+                    }
+                    return super.visit(node);
+                }
+
+	            @Override
+                public boolean visit(SynchronizedStatement node) {
+                    processStatement(node, ctx);
+                    return super.visit(node);
+                }
+
+	            @Override
+                public boolean visit(LabeledStatement node) {
+                    processStatement(node, ctx);
+                    return super.visit(node);
+                }
+	        });
+	    } catch (JavaModelException e) {
+	    }
+	}
+
+
+	private void processStatement(Statement node, FoldingStructureComputationContext ctx) {
+	    int start = node.getStartPosition();
+	    int length = node.getLength();
+
+	    IRegion aligned = alignRegion(new Region(start, length), ctx);
+	    if (aligned != null) {
+	        Position position = new Position(aligned.getOffset(), aligned.getLength());
+	        JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(ctx.collapseMembers(), null, false);
+	        ctx.addProjectionRange(annotation, position);
+	    }
 	}
 
 	private void computeFoldingStructure(IJavaElement[] elements, FoldingStructureComputationContext ctx) throws JavaModelException {
@@ -1273,32 +1353,27 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 *         only one line)
 	 */
 	protected final IRegion alignRegion(IRegion region, FoldingStructureComputationContext ctx) {
-		if (region == null)
-			return null;
+	    if (region == null)
+	        return null;
 
-		IDocument document= ctx.getDocument();
+	    IDocument document = ctx.getDocument();
 
-		try {
+	    try {
+	        int start = document.getLineOfOffset(region.getOffset());
+	        int end = document.getLineOfOffset(region.getOffset() + region.getLength());
 
-			int start= document.getLineOfOffset(region.getOffset());
-			int end= document.getLineOfOffset(region.getOffset() + region.getLength());
-			if (start >= end)
-				return null;
+	        if (start >= end)
+	            return null;
 
-			int offset= document.getLineOffset(start);
-			int endOffset;
-			if (document.getNumberOfLines() > end + 1)
-				endOffset= document.getLineOffset(end + 1);
-			else
-				endOffset= document.getLineOffset(end) + document.getLineLength(end);
+	        int offset = document.getLineOffset(start);
+	        int endOffset = document.getLineOffset(end) + document.getLineLength(end);
 
-			return new Region(offset, endOffset - offset);
-
-		} catch (BadLocationException x) {
-			// concurrent modification
-			return null;
-		}
+	        return new Region(offset, endOffset - offset);
+	    } catch (BadLocationException e) {
+	        return null;
+	    }
 	}
+
 
 	private ProjectionAnnotationModel getModel() {
 		return fEditor.getAdapter(ProjectionAnnotationModel.class);
