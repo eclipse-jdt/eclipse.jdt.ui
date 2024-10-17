@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -21,14 +20,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -94,13 +90,8 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		fJProject1= projectSetup.getProject();
 
 		if (ANNOTATION_JAR_PATH == null) {
-			String version= "[1.1.0,2.0.0)"; // tests run at 1.8, but still use "old" null annotations
-			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
-			File bundleFile= FileLocator.getBundleFileLocation(bundles[0]).get();
-			if (bundleFile.isDirectory())
-				ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
-			else
-				ANNOTATION_JAR_PATH= bundleFile.getPath();
+			// tests run at 1.8, but still use "old" null annotations:
+			ANNOTATION_JAR_PATH= NullAnnotationsQuickFixTest.getAnnotationV1LibPath();
 		}
 		JavaProjectHelper.addLibrary(fJProject1, new Path(ANNOTATION_JAR_PATH));
 
@@ -121,9 +112,9 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
 		String str= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -134,7 +125,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @NonNull Object data) {
 			    }
@@ -152,10 +143,10 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 
 		String str1= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -166,7 +157,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @Nullable Object data) {
 			    }
@@ -179,9 +170,9 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 
 		String str2= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -193,7 +184,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @NonNull Object data) {
 			    }
@@ -212,9 +203,9 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("testNullAnnotations", false, null);
 		String str= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -225,7 +216,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @NonNull Object data) {
 			    }
@@ -243,9 +234,9 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 
 		String str1= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -256,7 +247,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @NonNull Object data) {
 			    }
@@ -269,10 +260,10 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 
 		String str2= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
 			import org.eclipse.jdt.annotation.Nullable;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -283,7 +274,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @Nullable Object data) {
 			    }
@@ -296,9 +287,9 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 
 		String str3= """
 			package testNullAnnotations;
-			
+
 			import org.eclipse.jdt.annotation.NonNull;
-			
+
 			interface Consumer<T> {
 			    void accept(T t);
 			}
@@ -310,7 +301,7 @@ public class NullAnnotationsQuickFixTest1d8Mix extends QuickFixTest {
 				}
 			\t
 				private void doStuff(int a, int b, final double min, final double max, Consumer<Object> postAction) {
-			
+
 				}
 			    private void updateSelectionData(final @NonNull Object data) {
 			    }
