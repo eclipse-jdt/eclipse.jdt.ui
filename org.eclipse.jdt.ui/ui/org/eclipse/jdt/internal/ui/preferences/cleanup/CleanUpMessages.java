@@ -241,6 +241,12 @@ public class CleanUpMessages extends NLS {
 
 	public static String JavaFeatureTabPage_CheckboxName_StringBufferBuilderToTextBlock;
 
+	public static String JavaFeatureTabPage_GroupName_Encoding;
+	public static String JavaFeatureTabPage_CheckboxName_ExplicitEncoding;
+	public static String JavaFeatureTabPage_RadioName_Keep_Behavior;
+	public static String JavaFeatureTabPage_RadioName_Insert_UTF8;
+	public static String JavaFeatureTabPage_RadioName_Aggregate_to_UTF8;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, CleanUpMessages.class);
