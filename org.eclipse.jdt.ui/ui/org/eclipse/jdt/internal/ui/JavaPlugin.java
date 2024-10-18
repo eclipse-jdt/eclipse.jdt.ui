@@ -111,7 +111,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jdt.ui.text.java.SemanticTokensProvider;
+import org.eclipse.jdt.ui.text.java.ISemanticTokensProvider;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
@@ -279,7 +279,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	private BundleContext fBundleContext;
 
 	private ServiceRegistration<DebugOptionsListener> fDebugRegistration;
-	private SemanticTokensProvider[] fSemanticTokensProviders;
+	private ISemanticTokensProvider[] fSemanticTokensProviders;
 
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -754,19 +754,19 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		}
 	}
 
-	public SemanticTokensProvider[] getContributedSemanticTokensProviders() {
+	public ISemanticTokensProvider[] getContributedSemanticTokensProviders() {
 		if (fSemanticTokensProviders == null) {
 			synchronized(this) {
 				IExtensionRegistry registry= Platform.getExtensionRegistry();
 				IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT);
 				fSemanticTokensProviders = Arrays.stream(elements).map(ce -> {
 					try {
-						return (SemanticTokensProvider) ce.createExecutableExtension("class"); //$NON-NLS-1$
+						return (ISemanticTokensProvider) ce.createExecutableExtension("class"); //$NON-NLS-1$
 					} catch (Exception e) {
 						getLog().error("Cannot instatiate semantic tokens provider", e); //$NON-NLS-1$
 						return null;
 					}
-				}).filter(Objects::nonNull).toArray(SemanticTokensProvider[]::new);
+				}).filter(Objects::nonNull).toArray(ISemanticTokensProvider[]::new);
 			}
 		}
 		return fSemanticTokensProviders;

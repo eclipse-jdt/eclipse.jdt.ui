@@ -54,7 +54,7 @@ import org.eclipse.jdt.core.dom.YieldStatement;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.SemanticTokensProvider;
+import org.eclipse.jdt.ui.text.java.ISemanticTokensProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
@@ -394,9 +394,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		// Do nothing
 	}
 
-	private List<SemanticTokensProvider.SemanticToken> getContributedSemanticTokens(CompilationUnit ast) {
-		List<SemanticTokensProvider.SemanticToken> contributedTokens = new ArrayList<>();
-		for (SemanticTokensProvider provider : JavaPlugin.getDefault().getContributedSemanticTokensProviders()) {
+	private List<ISemanticTokensProvider.SemanticToken> getContributedSemanticTokens(CompilationUnit ast) {
+		List<ISemanticTokensProvider.SemanticToken> contributedTokens = new ArrayList<>();
+		for (ISemanticTokensProvider provider : JavaPlugin.getDefault().getContributedSemanticTokensProviders()) {
 			contributedTokens.addAll(provider.computeSemanticTokens(ast));
 		}
 		return contributedTokens;
@@ -491,13 +491,13 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @param subtrees the AST subtrees
 	 * @param contributedTokens contributed semantic tokens data
 	 */
-	private void reconcilePositions(ASTNode[] subtrees, List<SemanticTokensProvider.SemanticToken> contributedTokens) {
+	private void reconcilePositions(ASTNode[] subtrees, List<ISemanticTokensProvider.SemanticToken> contributedTokens) {
 		// FIXME: remove positions not covered by subtrees
 
 		for (ASTNode subtree : subtrees)
 			subtree.accept(fCollector);
 
-		for (SemanticTokensProvider.SemanticToken t : contributedTokens) {
+		for (ISemanticTokensProvider.SemanticToken t : contributedTokens) {
 			Highlighting h = fromSemanticTokenType(t.tokenType());
 			if (h == null) {
 				JavaPlugin.logErrorMessage("Cannot find semantic highlighting for %s".formatted(t)); //$NON-NLS-1$
@@ -514,7 +514,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fRemovedPositions= newPositions;
 	}
 
-	private Highlighting fromSemanticTokenType(SemanticTokensProvider.TokenType type) {
+	private Highlighting fromSemanticTokenType(ISemanticTokensProvider.TokenType type) {
 		if (type != null) {
 			switch (type) {
 				case OPERATOR:
