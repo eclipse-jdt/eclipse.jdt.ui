@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.tests.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -297,7 +298,7 @@ public class TypeInfoTest {
 
 		filter= new TypeInfoFilter("Test", scope, 0, null);
 		assertEquals("Test", filter.getNamePattern());
-		assertEquals(null, filter.getPackagePattern());
+		assertNull(filter.getPackagePattern());
    }
 
 }

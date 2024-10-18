@@ -13,8 +13,8 @@
 package org.eclipse.jdt.text.tests.templates;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -102,9 +102,7 @@ public class TemplateCompletionTests {
 		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 
 		boolean fail= proposals.stream().anyMatch(p -> "new_class - create new class".equals(p.getDisplayString()));
-		if (fail) {
-			fail("Proposal '" + propDisplay + "' should not exist");
-		}
+		assertFalse("Proposal '" + propDisplay + "' should not exist", fail);
 	}
 
 	@Test

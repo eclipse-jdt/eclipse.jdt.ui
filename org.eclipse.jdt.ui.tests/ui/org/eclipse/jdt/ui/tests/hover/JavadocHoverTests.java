@@ -15,7 +15,7 @@
 package org.eclipse.jdt.ui.tests.hover;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -204,7 +204,7 @@ public class JavadocHoverTests extends CoreTests {
 
 			// value should be expanded:
 			int index= actualHtmlContent.indexOf("<pre><code>");
-			assertFalse(index == -1);
+			assertNotEquals(-1, index);
 			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
 			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
 		}
@@ -255,7 +255,7 @@ public class JavadocHoverTests extends CoreTests {
 
 			// value should be expanded:
 			int index= actualHtmlContent.indexOf("<pre>{");
-			assertFalse(index == -1);
+			assertNotEquals(-1, index);
 			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
 			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
 		}
@@ -319,7 +319,7 @@ public class JavadocHoverTests extends CoreTests {
 
 			// value should be expanded:
 			int index= actualHtmlContent.indexOf("<pre><code>");
-			assertFalse(index == -1);
+			assertNotEquals(-1, index);
 			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
 			assertEquals("sequence doesn't match", actualSnippet, expectedCodeSequence);
 		}

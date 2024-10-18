@@ -18,7 +18,6 @@ package org.eclipse.jdt.ui.tests.wizardapi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -145,7 +144,7 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -187,9 +186,9 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			/**
 			 * Type
 			 */
@@ -241,14 +240,14 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * Type
 			 */
 			public class E extends A<String> {
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -303,14 +302,14 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * Type
 			 */
 			public class E extends A<String> {
-			
+
 			    /**
 			     * Constructor
 			     */
@@ -318,12 +317,12 @@ public class NewTypeWizardTest {
 			        super(t);
 			    }
 			    /* class body */
-			
+
 			    /**
 			     * Method
 			     */
 			    public static void main(String[] args) {
-			
+
 			    }
 			}
 			""";
@@ -370,9 +369,9 @@ public class NewTypeWizardTest {
 
 		String expected= """
 			package pack;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class A<T> {
 			    /**
 			     * Type
@@ -380,7 +379,7 @@ public class NewTypeWizardTest {
 			    public class E<S> extends ArrayList<S> {
 			        /* class body */
 			    }
-			
+
 			    public abstract void foo(T t);
 			}
 			""";
@@ -423,11 +422,11 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.io.File;
 			import java.util.List;
 			import java.util.Map;
-			
+
 			/**
 			 * Type
 			 */
@@ -486,16 +485,16 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			import pack.A;
-			
+
 			/**
 			 * Type
 			 */
 			public class E extends A {
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -526,9 +525,9 @@ public class NewTypeWizardTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			public class B {
 			}
 			""";
@@ -558,18 +557,18 @@ public class NewTypeWizardTest {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.Map;
-			
+
 			import pack.A;
-			
+
 			public class B {
-			
+
 			    /**
 			     * Type
 			     */
 			    public class E extends A {
-			
+
 			        /**
 			         * Overridden
 			         */
@@ -612,9 +611,9 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			import java.util.List;
-			
+
 			/**
 			 * Type
 			 */
@@ -652,7 +651,7 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -690,7 +689,7 @@ public class NewTypeWizardTest {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -811,9 +810,9 @@ public class NewTypeWizardTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class Foo1 {
-			
+
 			}
 			""";
 		ICompilationUnit cu= pack1.createCompilationUnit("Foo1.java", str, false, null);
@@ -823,9 +822,9 @@ public class NewTypeWizardTest {
 		pack1= fSourceFolder.createPackageFragment("test2", false, null);
 		String str1= """
 			package test2;
-			
+
 			public class Foo3 {
-			
+
 			}
 			""";
 		pack1.createCompilationUnit("Foo3.java", str1, false, null);
@@ -849,7 +848,7 @@ public class NewTypeWizardTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String test= """
 			package test1;
-			
+
 			public final class A{
 			}
 			""";
@@ -873,8 +872,8 @@ public class NewTypeWizardTest {
 
 		IStatus status= wizardPage.getSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(expected.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(expected, status.getMessage());
 	}
 
 	private static ITypeBinding getTypeBinding(ICompilationUnit cu) {

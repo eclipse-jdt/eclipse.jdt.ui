@@ -75,7 +75,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    private static final long serialVersionUID = 1L;\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 
@@ -116,7 +116,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 
@@ -197,7 +197,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 
@@ -235,7 +235,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    };\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 
@@ -286,7 +286,7 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    }\n" //
 				+ "}\n";
 
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 }
