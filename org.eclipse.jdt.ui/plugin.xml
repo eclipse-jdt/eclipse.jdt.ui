@@ -34,6 +34,7 @@
    <extension-point id="classpathAttributeConfiguration" name="%classpathAttributeConfiguration" schema="schema/classpathAttributeConfiguration.exsd"/>
    <extension-point id="javadocExportWizardPage" name="%javadocExportWizardPageExtensionPoint" schema="schema/javadocExportWizardPage.exsd"/>
    <extension-point id="cleanUps" name="%cleanUpExtensionPoint" schema="schema/cleanUps.exsd"/>
+   <extension-point id="semanticTokens" name="%semanticTokensExtensionPoint" schema="schema/semanticTokens.exsd"/>
 
 <extension
 	point="org.eclipse.ui.decorators">
