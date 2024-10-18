@@ -208,6 +208,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_USE_ADD_ALL, CleanUpOptions.FALSE);
+		options.setOption(EXPLICITENCODING_CLEANUP, CleanUpOptions.FALSE);
+		options.setOption(EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpOptions.TRUE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -396,6 +398,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_USE_ADD_ALL, CleanUpOptions.FALSE);
+		options.setOption(EXPLICITENCODING_CLEANUP, CleanUpOptions.FALSE);
+		options.setOption(EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpOptions.TRUE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {

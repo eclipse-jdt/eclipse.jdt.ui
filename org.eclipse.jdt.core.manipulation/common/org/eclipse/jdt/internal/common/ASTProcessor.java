@@ -13,8 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.common;
 
+import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -1197,7 +1199,9 @@ public class ASTProcessor<E extends HelperVisitorProvider<V, T, E>, V, T> {
 	 */
 	public ASTProcessor<E, V, T> callMethodInvocationVisitor(String methodname,
 			BiPredicate<ASTNode, E> bs) {
-		nodetypelist.put(VisitorEnum.MethodInvocation, new NodeHolder(bs, null, methodname));
+		nodetypelist.put(VisitorEnum.MethodInvocation, new NodeHolder(bs, null, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(HelperVisitor.METHODNAME, methodname)
+				)));
 		return this;
 	}
 
@@ -1209,7 +1213,9 @@ public class ASTProcessor<E extends HelperVisitorProvider<V, T, E>, V, T> {
 	 */
 	public ASTProcessor<E, V, T> callMethodInvocationVisitor(String methodname,
 			BiPredicate<ASTNode, E> bs, Function<ASTNode, ASTNode> navigate) {
-		nodetypelist.put(VisitorEnum.MethodInvocation, new NodeHolder(bs, navigate, methodname));
+		nodetypelist.put(VisitorEnum.MethodInvocation, new NodeHolder(bs, navigate, Map.ofEntries(
+				new AbstractMap.SimpleEntry<>(HelperVisitor.METHODNAME, methodname)
+				)));
 		return this;
 	}
 
