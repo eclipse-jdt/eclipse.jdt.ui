@@ -15,7 +15,7 @@ import java.util.Collection;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-public interface SemanticTokensProvider {
+public interface ISemanticTokensProvider {
 
 	record SemanticToken(int ofset, int length, TokenType tokenType) {}
 
