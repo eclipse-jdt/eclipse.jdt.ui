@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,7 +62,7 @@ public class ExtractConstantTests1d7 extends ExtractConstantTests {
 
 		assertNotNull("precondition was supposed to fail", result);
 		if(checkMsg)
-			assertTrue(errorMsg.equals(result.getEntryMatchingSeverity(RefactoringStatus.FATAL).getMessage()));
+			assertEquals(errorMsg, result.getEntryMatchingSeverity(RefactoringStatus.FATAL).getMessage());
 	}
 	//--- TESTS
 

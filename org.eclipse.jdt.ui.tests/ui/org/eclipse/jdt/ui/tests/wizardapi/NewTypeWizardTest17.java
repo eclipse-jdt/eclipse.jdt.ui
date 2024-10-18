@@ -15,7 +15,7 @@
 package org.eclipse.jdt.ui.tests.wizardapi;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -122,14 +122,14 @@ public class NewTypeWizardTest17 {
 		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String test= """
 			package test;
-			
+
 			public sealed class Shape permits Square {
 			}
 			""";
 		fSealedSuperCls= fpack1.createCompilationUnit("Shape.java", test, false, null);
 		test= """
 			package test;
-			
+
 			public non-sealed class Square extends Shape {
 			}
 			""";
@@ -137,14 +137,14 @@ public class NewTypeWizardTest17 {
 		fSealedClsBinding= getTypeBinding(fSealedSuperCls);
 		test= """
 			package test;
-			
+
 			public sealed interface IShape permits ISquare {
 			}
 			""";
 		fSealedSuperInterface= fpack1.createCompilationUnit("IShape.java", test, false, null);
 		test= """
 			package test;
-			
+
 			public non-sealed interface ISquare extends IShape {
 			}
 			""";
@@ -159,14 +159,14 @@ public class NewTypeWizardTest17 {
 		fMpack1= fMSourceFolder.createPackageFragment("test1", false, null);
 		String test= """
 			package test;
-			
+
 			public sealed class Shape permits Square {
 			}
 			""";
 		fMSealedSuperCls= fMpack1.createCompilationUnit("Shape.java", test, false, null);
 		test= """
 			package test;
-			
+
 			public non-sealed class Square extends Shape {
 			}
 			""";
@@ -174,14 +174,14 @@ public class NewTypeWizardTest17 {
 		fMSealedClsBinding= getTypeBinding(fMSealedSuperCls);
 		test= """
 			package test;
-			
+
 			public sealed interface IShape permits ISquare {
 			}
 			""";
 		fMSealedSuperInterface= fMpack1.createCompilationUnit("IShape.java", test, false, null);
 		test= """
 			package test;
-			
+
 			public non-sealed interface ISquare extends IShape {
 			}
 			""";
@@ -204,8 +204,8 @@ public class NewTypeWizardTest17 {
 
 	private void createModuleInfo() throws Exception {
 		String test= """
-			
-			
+
+
 			module modTest1 {
 				exports test1;
 			}
@@ -220,8 +220,8 @@ public class NewTypeWizardTest17 {
 		fMSourceFolder= JavaProjectHelper.addSourceContainer(fJProjectM2, "src");
 		fMpack1= fMSourceFolder.createPackageFragment("test3", false, null);
 		String test= """
-			
-			
+
+
 			module modTest2 {
 				requires modTest2;
 			}
@@ -276,8 +276,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentPackage.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentPackage, status.getMessage());
 	}
 
 	// Throw error if the sealed super interface is in different package to the new class
@@ -301,8 +301,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentPackage.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentPackage, status.getMessage());
 	}
 
 	// Throw error if the sealed super interface is in different package to the new interface
@@ -325,8 +325,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentPackage.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentPackage, status.getMessage());
 	}
 
 	// Successfully Create non-sealed class which has sealed super class
@@ -350,17 +350,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccNonSealed, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -371,7 +371,7 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -386,7 +386,7 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			public sealed class Shape permits Square, E {
 			}
 			""";
@@ -414,17 +414,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccNonSealed, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -435,7 +435,7 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -450,7 +450,7 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			public sealed interface IShape permits ISquare, E {
 			}
 			""";
@@ -479,17 +479,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccFinal, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -500,7 +500,7 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -515,7 +515,7 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			public sealed class Shape permits Square, E {
 			}
 			""";
@@ -543,17 +543,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccFinal, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -564,7 +564,7 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -579,7 +579,7 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			public sealed interface IShape permits ISquare, E {
 			}
 			""";
@@ -606,17 +606,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedInterface_extend_superinterface_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedInterface_extend_superinterface_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccNonSealed, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -627,7 +627,7 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
@@ -642,7 +642,7 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			public sealed interface IShape permits ISquare, IE {
 			}
 			""";
@@ -677,8 +677,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentProject.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentProject, status.getMessage());
 	}
 
 	// Throw error if the sealed super interface is in different project to the new class
@@ -703,8 +703,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentProject.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentProject, status.getMessage());
 	}
 
 	// Throw error if the sealed super interface is in different project to the new interface
@@ -728,8 +728,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentProject.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentProject, status.getMessage());
 	}
 
 
@@ -761,17 +761,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccNonSealed, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -782,9 +782,9 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test2;
-			
+
 			import test1.Shape;
-			
+
 			/**
 			 * Type
 			 */
@@ -799,9 +799,9 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			import test2.E;
-			
+
 			public sealed class Shape permits Square, E {
 			}
 			""";
@@ -832,17 +832,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccNonSealed, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -853,9 +853,9 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test2;
-			
+
 			import test1.IShape;
-			
+
 			/**
 			 * Type
 			 */
@@ -870,9 +870,9 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			import test2.E;
-			
+
 			public sealed interface IShape permits ISquare, E {
 			}
 			""";
@@ -904,17 +904,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_extend_superclass_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccFinal, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -925,9 +925,9 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test2;
-			
+
 			import test1.Shape;
-			
+
 			/**
 			 * Type
 			 */
@@ -942,9 +942,9 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			import test2.E;
-			
+
 			public sealed class Shape permits Square, E {
 			}
 			""";
@@ -975,17 +975,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedClass_implement_superinterface_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccFinal, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -996,9 +996,9 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test2;
-			
+
 			import test1.IShape;
-			
+
 			/**
 			 * Type
 			 */
@@ -1013,9 +1013,9 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			import test2.E;
-			
+
 			public sealed interface IShape permits ISquare, E {
 			}
 			""";
@@ -1045,17 +1045,17 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedInterface_extend_superinterface_notSelected_message.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_SealedFinalNonSealedInterface_extend_superinterface_notSelected_message, status.getMessage());
 		int modifiers= wizardPage.getModifiers();
 		wizardPage.setModifiers(modifiers | Flags.AccNonSealed, true);
 		status= wizardPage.getSealedModifierStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.OK);
+		assertEquals(IStatus.OK, status.getSeverity());
 
 		wizardPage.createType(null);
 
@@ -1066,9 +1066,9 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test2;
-			
+
 			import test1.IShape;
-			
+
 			/**
 			 * Type
 			 */
@@ -1083,9 +1083,9 @@ public class NewTypeWizardTest17 {
 
 		expected= """
 			package test;
-			
+
 			import test2.IE;
-			
+
 			public sealed interface IShape permits ISquare, IE {
 			}
 			""";
@@ -1120,8 +1120,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentModule.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperClassInDifferentModule, status.getMessage());
 	}
 
 	// Throw error if the sealed super interface is in different module to the new class
@@ -1146,8 +1146,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentModule.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_class_SealedSuperInterfaceInDifferentModule, status.getMessage());
 	}
 
 	// Throw error if the sealed super interface is in different module to the new interface
@@ -1171,8 +1171,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSealedSuperInterfaceStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentModule.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(NewWizardMessages.NewTypeWizardPage_error_interface_SealedSuperInterfaceInDifferentModule, status.getMessage());
 	}
 
 	@Test
@@ -1182,7 +1182,7 @@ public class NewTypeWizardTest17 {
 		fpack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String test= """
 			package test;
-			
+
 			public record Rec1(int x){
 			}
 			""";
@@ -1209,8 +1209,8 @@ public class NewTypeWizardTest17 {
 
 		IStatus status= wizardPage.getSuperClassStatus();
 		assertNotNull(status);
-		assertTrue(status.getSeverity() == IStatus.ERROR);
-		assertTrue(expected.equals(status.getMessage()));
+		assertEquals(IStatus.ERROR, status.getSeverity());
+		assertEquals(expected, status.getMessage());
 	}
 
 	@Test
@@ -1242,12 +1242,12 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
 			public record Rec1() {
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -1255,7 +1255,7 @@ public class NewTypeWizardTest17 {
 			    public boolean equals(Object arg0) {
 			        return false;
 			    }
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -1263,7 +1263,7 @@ public class NewTypeWizardTest17 {
 			    public int hashCode() {
 			        return 0;
 			    }
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -1271,7 +1271,7 @@ public class NewTypeWizardTest17 {
 			    public String toString() {
 			        return null;
 			    }
-			
+
 			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
@@ -1306,12 +1306,12 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
 			public record Rec1() {
-			
+
 			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
@@ -1346,19 +1346,19 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
 			public record Rec1() {
-			
+
 			    /**
 			     * Method
 			     */
 			    public static void main(String[] args) {
-			
+
 			    }
-			
+
 			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
@@ -1393,12 +1393,12 @@ public class NewTypeWizardTest17 {
 			 * File
 			 */
 			package test1;
-			
+
 			/**
 			 * Type
 			 */
 			public record Rec1() {
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -1406,7 +1406,7 @@ public class NewTypeWizardTest17 {
 			    public boolean equals(Object arg0) {
 			        return false;
 			    }
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -1414,7 +1414,7 @@ public class NewTypeWizardTest17 {
 			    public int hashCode() {
 			        return 0;
 			    }
-			
+
 			    /**
 			     * Overridden
 			     */
@@ -1422,14 +1422,14 @@ public class NewTypeWizardTest17 {
 			    public String toString() {
 			        return null;
 			    }
-			
+
 			    /**
 			     * Method
 			     */
 			    public static void main(String[] args) {
-			
+
 			    }
-			
+
 			}""" ;
 
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
