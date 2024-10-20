@@ -15,10 +15,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.changes;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -72,7 +72,7 @@ public class TextDiffContentTest {
 
 	private TextEditChangeGroup fChange3;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fDocument = new Document(MODIFIED_SOURCE_CONTENTS);
 		fDocumentChange = new DocumentChange("Changes to document", fDocument);

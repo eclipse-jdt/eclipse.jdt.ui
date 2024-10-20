@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.changes;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -39,7 +39,7 @@ public class TrackPositionTest {
 	private IDocument fDocument;
 	private DocumentChange fChange;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fDocument= new Document("0123456789");
 		fChange= new DocumentChange(NN, fDocument);
@@ -47,7 +47,7 @@ public class TrackPositionTest {
 		fChange.initializeValidationData(new NullProgressMonitor());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		fChange= null;
 	}
@@ -65,8 +65,8 @@ public class TrackPositionTest {
 		TextEdit edit= new ReplaceEdit(5, 3, "xy");
 		TextChangeCompatibility.addTextEdit(fChange, NN, edit);
 		IDocument preview= fChange.getPreviewDocument(new NullProgressMonitor());
-		Assert.assertEquals("0123456789", fDocument.get());
-		Assert.assertEquals("01234xy89", preview.get());
+		Assertions.assertEquals("0123456789", fDocument.get());
+		Assertions.assertEquals("01234xy89", preview.get());
 		assertEquals(fChange.getPreviewEdit(edit).getRegion(), 5, 2);
 	}
 
@@ -80,7 +80,7 @@ public class TrackPositionTest {
 	}
 
 	private static void assertEquals(IRegion r, int offset, int length) {
-		Assert.assertEquals("Offset", offset, r.getOffset());
-		Assert.assertEquals("Length", length, r.getLength());
+		Assertions.assertEquals(offset, r.getOffset(), "Offset");
+		Assertions.assertEquals(length, r.getLength(), "Length");
 	}
 }
