@@ -44,8 +44,10 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -62,6 +64,7 @@ import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
@@ -432,29 +435,54 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 			});
 
 			SwitchStatement switchStatement= ast.newSwitchStatement();
-			switchStatement.setExpression(ASTNodes.createMoveTarget(rewrite, switchExpression));
+			ASTNode newStatement= switchStatement;
+
+			CompilationUnit unit= cuRewrite.getRoot();
+			ICompilationUnit cu= (ICompilationUnit)unit.getJavaElement();
+			ITypeBinding switchTypeBinding= switchExpression.resolveTypeBinding();
+			boolean isEnum= switchTypeBinding != null && switchTypeBinding.isEnum();
+
+			if (cu != null && !JavaModelUtil.is21OrHigher(cu.getJavaProject())) {
+				if (switchTypeBinding != null && !switchTypeBinding.isPrimitive()) {
+					IfStatement newIfStatement= ast.newIfStatement();
+					InfixExpression newInfixExpression= ast.newInfixExpression();
+					newInfixExpression.setOperator(Operator.NOT_EQUALS);
+					newInfixExpression.setLeftOperand((Expression) rewrite.createCopyTarget(switchExpression));
+					newInfixExpression.setRightOperand(ast.newNullLiteral());
+					newIfStatement.setExpression(newInfixExpression);
+					Block newBlock= ast.newBlock();
+					newIfStatement.setThenStatement(newBlock);
+					newBlock.statements().add(switchStatement);
+					newStatement= newIfStatement;
+				}
+			}
+
+			switchStatement.setExpression((Expression) rewrite.createCopyTarget(switchExpression));
 
 			for (SwitchCaseSection aCase : cases) {
-				addCaseWithStatements(rewrite, ast, switchStatement, aCase.literalExpressions, aCase.tagList, aCase.statements);
+				addCaseWithStatements(rewrite, ast, switchStatement, aCase.literalExpressions, aCase.tagList, aCase.statements, isEnum);
 			}
 
 			if (remainingStatement != null) {
 				remainingStatement.setProperty(UNTOUCH_COMMENT_PROPERTY, Boolean.TRUE);
-				addCaseWithStatements(rewrite, ast, switchStatement, null, null, ASTNodes.asList(remainingStatement));
+				addCaseWithStatements(rewrite, ast, switchStatement, null, null, ASTNodes.asList(remainingStatement), isEnum);
+				if (newStatement instanceof IfStatement ifStatement) {
+					ifStatement.setElseStatement((Statement) rewrite.createCopyTarget(remainingStatement));
+				}
 			} else {
-				addCaseWithStatements(rewrite, ast, switchStatement, null, null, Collections.emptyList());
+				addCaseWithStatements(rewrite, ast, switchStatement, null, null, Collections.emptyList(), isEnum);
 			}
 
 			for (int i= 0; i < ifStatements.size() - 1; i++) {
 				ASTNodes.removeButKeepComment(rewrite, ifStatements.get(i), group);
 			}
 
-			ASTNodes.replaceButKeepComment(rewrite, ifStatements.get(ifStatements.size() - 1), switchStatement, group);
+			ASTNodes.replaceButKeepComment(rewrite, ifStatements.get(ifStatements.size() - 1), newStatement, group);
 		}
 
 		private void addCaseWithStatements(final ASTRewrite rewrite, final AST ast, final SwitchStatement switchStatement,
 				final List<Expression> caseValuesOrNullForDefault, final List<Boolean> tagList,
-				final List<Statement> innerStatements) {
+				final List<Statement> innerStatements, boolean isEnum) {
 			List<Statement> switchStatements= switchStatement.statements();
 			boolean needBlock= checkForLocalDeclarations(innerStatements);
 			Boolean hasTag= false;
@@ -466,6 +494,9 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				String spaceBefore= getCoreOption(cu.getJavaProject(), DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CASE, false) ? " " : ""; //$NON-NLS-1$ //$NON-NLS-2$
 				for (int i= 0; i < caseValuesOrNullForDefault.size(); ++i) {
 				    Expression caseValue= caseValuesOrNullForDefault.get(i);
+				    if (isEnum && caseValue instanceof QualifiedName qName) {
+				    	caseValue= qName.getName();
+				    }
 				    hasTag= tagList.get(i);
 				    if (hasTag) {
 				    	try {
@@ -487,6 +518,16 @@ public class SwitchFixCore extends CompilationUnitRewriteOperationsFixCore {
 				    }
 				}
 			} else {
+				CompilationUnit unit= (CompilationUnit)switchExpression.getRoot();
+				ICompilationUnit cu= (ICompilationUnit)unit.getJavaElement();
+				if (cu != null && JavaModelUtil.is21OrHigher(cu.getJavaProject())) {
+					ITypeBinding switchTypeBinding= switchExpression.resolveTypeBinding();
+					if (switchTypeBinding != null && !switchTypeBinding.isPrimitive()) {
+						SwitchCase newSwitchCase= ast.newSwitchCase();
+						newSwitchCase.expressions().add(ast.newNullLiteral());
+						switchStatements.add(newSwitchCase);
+					}
+				}
 				switchStatements.add(ast.newSwitchCase());
 			}
 

@@ -1131,36 +1131,41 @@ public class E {
 
     public void bug1(String i1) {
         int i = 0;
-        switch (i1) {
-            case E.VALUE0 : {
-                int integer1 = 0;
-                i = integer1;
-                break;
-            }
-            case E.VALUE1 : {
-                char integer1 = 'a';
-                i = integer1;
-                break;
-            }
-            case E.VALUE2 : {
-                char integer1 = 'b';
-                i = integer1;
-                break;
-            }
-            case "5" : //$NON-NLS-1$
-            case "five" :
-            case "another string" : //$NON-NLS-1$
-             {
-                char integer1 = 'c';
-                i = integer1;
-                break;
-            }
-            default :
-                if (computeit(i1) || i1.equals(E.VALUE3)) {
-                //
-                //
+        if (i1 != null) {
+            switch (i1) {
+                case E.VALUE0 : {
+                    int integer1 = 0;
+                    i = integer1;
+                    break;
                 }
-                break;
+                case E.VALUE1 : {
+                    char integer1 = 'a';
+                    i = integer1;
+                    break;
+                }
+                case E.VALUE2 : {
+                    char integer1 = 'b';
+                    i = integer1;
+                    break;
+                }
+                case "5" : //$NON-NLS-1$
+                case "five" :
+                case "another string" : //$NON-NLS-1$
+                 {
+                    char integer1 = 'c';
+                    i = integer1;
+                    break;
+                }
+                default :
+                    if (computeit(i1) || i1.equals(E.VALUE3)) {
+                    //
+                    //
+                    }
+                    break;
+            }
+        } else if (computeit(i1) || i1.equals(E.VALUE3)) {
+        //
+        //
         }
     }
 
@@ -1221,29 +1226,34 @@ public class E {
 
 	public void bug1(MYENUM i1) {
 		int i = 0;
-		switch (i1) {
-            case MYENUM.VALUE0 : {
-                int integer1 = 0;
-                i = integer1;
-                break;
-            }
-            case MYENUM.VALUE1 : {
-                char integer1 = 'a';
-                i = integer1;
-                break;
-            }
-            case MYENUM.VALUE2 : {
-                char integer1 = 'b';
-                i = integer1;
-                break;
-            }
-            default :
-                if (computeit(i1) || i1 == MYENUM.VALUE3) {
-                	//
-                	//
+		if (i1 != null) {
+            switch (i1) {
+                case VALUE0 : {
+                    int integer1 = 0;
+                    i = integer1;
+                    break;
                 }
-                break;
-        }
+                case VALUE1 : {
+                    char integer1 = 'a';
+                    i = integer1;
+                    break;
+                }
+                case VALUE2 : {
+                    char integer1 = 'b';
+                    i = integer1;
+                    break;
+                }
+                default :
+                    if (computeit(i1) || i1 == MYENUM.VALUE3) {
+                    	//
+                    	//
+                    }
+                    break;
+            }
+        } else if (computeit(i1) || i1 == MYENUM.VALUE3) {
+			//
+			//
+		}
 	}
 
 	private boolean computeit(MYENUM i) {
