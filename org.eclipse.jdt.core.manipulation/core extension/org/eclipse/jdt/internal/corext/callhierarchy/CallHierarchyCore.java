@@ -46,18 +46,9 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchyCore {
 
-	//to add a new one just add here and change the isIgnored Method
-
 	public static final String PREF_SHOW_ALL_CODE = "PREF_SHOW_ALL_CODE";	//$NON-NLS-1$
-	public static final String[] A_SHOW_ALL_CODE = {PREF_SHOW_ALL_CODE, "Show All Code"}; //$NON-NLS-1$
-
 	public static final String PREF_HIDE_TEST_CODE = "PREF_HIDE_TEST_CODE";	//$NON-NLS-1$
-	public static final String[] A_HIDE_TEST_CODE = {PREF_HIDE_TEST_CODE, "Hide Test Code"}; //$NON-NLS-1$
-
 	public static final String PREF_SHOW_TEST_CODE_ONLY = "PREF_SHOW_TEST_CODE_ONLY";	//$NON-NLS-1$
-	public static final String[] A_SHOW_TEST_CODE = {PREF_SHOW_TEST_CODE_ONLY, "Test Code only"}; //$NON-NLS-1$
-
-	public static final String[][] PREF_FILTERS = {A_SHOW_ALL_CODE, A_HIDE_TEST_CODE, A_SHOW_TEST_CODE};
 
     public static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
     public static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
@@ -81,7 +72,6 @@ public class CallHierarchyCore {
     }
 
     public boolean isShowTestCode() {
-
         return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_SHOW_TEST_CODE_ONLY, null));
     }
 
@@ -91,13 +81,6 @@ public class CallHierarchyCore {
 
 	public boolean isHideTestCode() {
 		return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_HIDE_TEST_CODE, null));
-	}
-	public String getActiveFilter() {
-		for (String[] string : PREF_FILTERS) { //must be one of the threee
-			if(Boolean.parseBoolean(JavaManipulation.getPreference(string[0], null))) {
-				return string[0];
-			}
-		} return null;
 	}
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
@@ -345,5 +328,4 @@ public class CallHierarchyCore {
 
         return true;
     }
-
 }

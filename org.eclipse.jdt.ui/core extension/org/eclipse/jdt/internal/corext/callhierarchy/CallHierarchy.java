@@ -18,6 +18,9 @@
 package org.eclipse.jdt.internal.corext.callhierarchy;
 
 import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_FILTERS_LIST;
+import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_HIDE_TEST_CODE;
+import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_SHOW_ALL_CODE;
+import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_SHOW_TEST_CODE_ONLY;
 import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_USE_FILTERS;
 import static org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyCore.PREF_USE_IMPLEMENTORS;
 
@@ -57,16 +60,19 @@ public class CallHierarchy {
         return fgInstance;
     }
 
-    public void setActiveFilter (String string) {
+    public void setShowAll(boolean value) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
-        for (String[] s : CallHierarchyCore.PREF_FILTERS) {
-			if(s[0] == string) {
-				settings.setValue(s[0], true);
-			} else {
-				settings.setValue(s[0], false);
-			}
-		}
+        settings.setValue(PREF_SHOW_ALL_CODE, value);
+    }
 
+    public void setHideTestCode(boolean value) {
+        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+        settings.setValue(PREF_HIDE_TEST_CODE, value);
+    }
+
+    public void setShowTestCode(boolean value) {
+        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+        settings.setValue(PREF_SHOW_TEST_CODE_ONLY, value);
     }
 
     public boolean isSearchUsingImplementorsEnabled() {
@@ -133,15 +139,21 @@ public class CallHierarchy {
         return settings.getBoolean(PREF_USE_FILTERS);
     }
 
-    public String getActiveFilter() {
-    	IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+    public boolean isShowAll() {
+        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+        return settings.getBoolean(PREF_SHOW_ALL_CODE);
+    }
 
-		for (String[] string : CallHierarchyCore.PREF_FILTERS) { //must be one of the threee
-			if(settings.getBoolean(string[0])) {
-				return string[0];
-			}
-		} return null;
-	}
+    public boolean isHideTestCode() {
+    	IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+        return settings.getBoolean(PREF_HIDE_TEST_CODE);
+    }
+
+    public boolean isShowTestCode() {
+    	IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+        return settings.getBoolean(PREF_SHOW_TEST_CODE_ONLY);
+    }
+
 
     public void setFilterEnabled(boolean filterEnabled) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();

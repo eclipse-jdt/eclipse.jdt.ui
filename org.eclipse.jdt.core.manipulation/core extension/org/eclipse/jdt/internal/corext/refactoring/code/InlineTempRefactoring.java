@@ -262,18 +262,16 @@ public class InlineTempRefactoring extends Refactoring {
 			for (Name name : initializerNames) {
 				if (clashesWithNewVariables(newVariables, name)) {
 					List<Expression> alternativeQualifications= getAlternativeQualifications(reference, name);
-					if (alternativeQualifications.size() > 0) {
-						boolean inlinable= false;
-						for (Expression alternative : alternativeQualifications) {
-							if (!clashesWithNewVariables(newVariables, alternative)) {
-								inlinable= true;
-								break;
-							}
+					boolean inlinable= false;
+					for (Expression alternative : alternativeQualifications) {
+						if (!clashesWithNewVariables(newVariables, alternative)) {
+							inlinable= true;
+							break;
 						}
-						if (!inlinable) {
-							return RefactoringStatus.createFatalErrorStatus(
-									Messages.format(RefactoringCoreMessages.InlineTemRefactoring_error_message_inliningClashes, name));
-						}
+					}
+					if (!inlinable) {
+						return RefactoringStatus.createFatalErrorStatus(
+								Messages.format(RefactoringCoreMessages.InlineTemRefactoring_error_message_inliningClashes, name));
 					}
 				}
 			}
@@ -654,19 +652,13 @@ public class InlineTempRefactoring extends Refactoring {
 			}
 		} else if (initializerName instanceof QualifiedName){
 			QualifiedName initializerQualifiedName = (QualifiedName) initializerName;
-			IBinding resolveBinding= initializerQualifiedName.resolveBinding();
-			if (resolveBinding instanceof IVariableBinding resolvedVariableBinding) {
-				boolean isStatic= Modifier.isStatic(resolvedVariableBinding.getModifiers());
-				if (isStatic) {
-					SimpleName simpleName= initializerQualifiedName.getName();
-					int i= findCommonDeclaringClassIndex(reference, initializerQualifiedName);
-					ITypeBinding initializerQualifiedNameTypeBinding= initializerQualifiedName.getQualifier().resolveTypeBinding();
-					ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, false));
-					ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, i, false));
-					ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, true));
-					ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, i, true));
-				}
-			}
+			SimpleName simpleName= initializerQualifiedName.getName();
+			int i= findCommonDeclaringClassIndex(reference, initializerQualifiedName);
+			ITypeBinding initializerQualifiedNameTypeBinding= initializerQualifiedName.getQualifier().resolveTypeBinding();
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, false));
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, i, false));
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, true));
+			ans.add(createFullyQualifiedName(simpleName, initializerQualifiedNameTypeBinding, i, true));
 		}
 		return ans;
 	}
