@@ -682,6 +682,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private static final Key PREF_PB_HIDDEN_CATCH_BLOCK= getJDTCoreKey(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK);
 	private static final Key PREF_PB_UNUSED_LOCAL= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_LOCAL);
+	private static final Key PREF_PB_UNUSED_LAMBDA_PARAMETER= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_LAMBDA_PARAMETER);
 	private static final Key PREF_PB_UNUSED_PARAMETER= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PARAMETER);
 	private static final Key PREF_PB_UNUSED_EXCEPTION_PARAMETER= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_EXCEPTION_PARAMETER);
 	private static final Key PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PARAMETER_WHEN_OVERRIDING_CONCRETE);
@@ -842,6 +843,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		return new Key[] {
 				PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 				PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_TERMINAL_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
+				PREF_PB_UNUSED_LAMBDA_PARAMETER,
 				PREF_PB_API_LEAKS,
 				PREF_PB_UNSTABLE_AUTO_MODULE_NAME,
 				PREF_PB_UNUSED_PARAMETER, PREF_PB_UNUSED_EXCEPTION_PARAMETER, PREF_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE,
@@ -1200,6 +1202,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_local_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_LOCAL, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_lambda_parameter_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_LAMBDA_PARAMETER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_parameter_label;
 		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PARAMETER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
