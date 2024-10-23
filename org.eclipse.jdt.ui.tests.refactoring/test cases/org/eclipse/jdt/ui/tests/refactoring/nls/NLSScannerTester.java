@@ -14,11 +14,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
@@ -29,42 +29,42 @@ public class NLSScannerTester {
 	public void test0() throws Exception{
 		String text= "fred"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("empty", 0, l.length); //$NON-NLS-1$
+		assertEquals(0, l.length, "empty"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test1() throws Exception{
 		String text= "fred\"x\"";
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("1 line", 1, l.length);
+		assertEquals(1, l.length, "1 line");
 	}
 
 	@Test
 	public void test1a() throws Exception{
 		String text= "fred\n\"x\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("1 line", 1, l.length); //$NON-NLS-1$
+		assertEquals(1, l.length, "1 line"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test2() throws Exception{
 		String text= "fred\"x\"\n\"xx\"";
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("2 line", 2, l.length);
+		assertEquals(2, l.length, "2 line");
 	}
 
 	@Test
 	public void test2a() throws Exception{
 		String text= "fred\n\"x\" \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("1 lines", 1, l.length); //$NON-NLS-1$
+		assertEquals(1, l.length, "1 lines"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test3() throws Exception{
 		String text= "fred\"x\"\n \"xx\"";
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("2 lines", 2, l.length);
+		assertEquals(2, l.length, "2 lines");
 	}
 
 
@@ -72,7 +72,7 @@ public class NLSScannerTester {
 	public void test4() throws Exception{
 		String text= "fred\n \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
-		assertEquals("1 line", 1, l.length); //$NON-NLS-1$
+		assertEquals(1, l.length, "1 line"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class NLSScannerTester {
 		String text= "\n \"xx\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("1 string", 1, line.size()); //$NON-NLS-1$
+		assertEquals(1, line.size(), "1 string"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class NLSScannerTester {
 		String text= "\n \"xx\" \"dff\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("2 string", 2, line.size()); //$NON-NLS-1$
+		assertEquals(2, line.size(), "2 string"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -96,10 +96,10 @@ public class NLSScannerTester {
 		String text= "\n \"xx\" \n\"dff\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("1 string A", 1, line.size()); //$NON-NLS-1$
+		assertEquals(1, line.size(), "1 string A"); //$NON-NLS-1$
 
 		line= l[1];
-		assertEquals("1 string B", 1, line.size()); //$NON-NLS-1$
+		assertEquals(1, line.size(), "1 string B"); //$NON-NLS-1$
 	}
 
 
@@ -108,10 +108,10 @@ public class NLSScannerTester {
 		String text= "\n \"xx\" \n\"dff\" \"ccc\""; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("1 string A", 1, line.size()); //$NON-NLS-1$
+		assertEquals(1, line.size(), "1 string A"); //$NON-NLS-1$
 
 		line= l[1];
-		assertEquals("2 strings B", 2, line.size()); //$NON-NLS-1$
+		assertEquals(2, line.size(), "2 strings B"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class NLSScannerTester {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		NLSElement el= line.get(0);
-		assertTrue("has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "has tag"); //$NON-NLS-1$
 	}
 
 
@@ -130,7 +130,7 @@ public class NLSScannerTester {
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
 		NLSElement el= line.get(0);
-		assertFalse("has tag", el.hasTag()); //$NON-NLS-1$
+		assertFalse(el.hasTag(), "has tag"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -142,13 +142,13 @@ public class NLSScannerTester {
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
+		assertEquals(2, line.size(), "2 strings"); //$NON-NLS-1$
 
 		NLSElement el= line.get(0);
-		assertTrue("0 has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "0 has tag"); //$NON-NLS-1$
 
 		el= line.get(1);
-		assertTrue("1 has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "1 has tag"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -160,13 +160,13 @@ public class NLSScannerTester {
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
+		assertEquals(2, line.size(), "2 strings"); //$NON-NLS-1$
 
 		NLSElement el= line.get(0);
-		assertTrue("0 has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "0 has tag"); //$NON-NLS-1$
 
 		el= line.get(1);
-		assertTrue("1 has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "1 has tag"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -177,13 +177,13 @@ public class NLSScannerTester {
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
+		assertEquals(2, line.size(), "2 strings"); //$NON-NLS-1$
 
 		NLSElement el= line.get(0);
-		assertTrue("0 has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "0 has tag"); //$NON-NLS-1$
 
 		el= line.get(1);
-		assertFalse("1 has no tag", el.hasTag()); //$NON-NLS-1$
+		assertFalse(el.hasTag(), "1 has no tag"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -194,13 +194,13 @@ public class NLSScannerTester {
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("2 strings", 2, line.size()); //$NON-NLS-1$
+		assertEquals(2, line.size(), "2 strings"); //$NON-NLS-1$
 
 		NLSElement el= line.get(0);
-		assertFalse("0 has no tag", el.hasTag()); //$NON-NLS-1$
+		assertFalse(el.hasTag(), "0 has no tag"); //$NON-NLS-1$
 
 		el= line.get(1);
-		assertTrue("1 has tag", el.hasTag()); //$NON-NLS-1$
+		assertTrue(el.hasTag(), "1 has tag"); //$NON-NLS-1$
 	}
 
 	// test for bug 102132
@@ -433,9 +433,9 @@ public class NLSScannerTester {
 				+ "\n"; //$NON-NLS-1$
 		NLSLine[] l= NLSScanner.scan(text);
 		NLSLine line=l[0];
-		assertEquals("1 strings", 1, line.size()); //$NON-NLS-1$
+		assertEquals(1, line.size(), "1 strings"); //$NON-NLS-1$
 
 		NLSElement el= line.get(0);
-		assertFalse("0 has no tag", el.hasTag()); //$NON-NLS-1$
+		assertFalse(el.hasTag(), "0 has no tag"); //$NON-NLS-1$
 	}
 }
