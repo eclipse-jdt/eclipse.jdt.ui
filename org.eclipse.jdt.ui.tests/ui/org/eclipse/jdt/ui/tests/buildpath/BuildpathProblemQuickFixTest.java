@@ -13,15 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -52,7 +52,7 @@ public class BuildpathProblemQuickFixTest {
 
 	private IJavaProject fJavaProject2;
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		if (fJavaProject1 != null) {
 			JavaProjectHelper.delete(fJavaProject1);

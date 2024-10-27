@@ -13,17 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.browsing;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -110,8 +110,8 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertTrue("Correct package removed", fMyPart.getRemovedObject().contains(fPack12)); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRemoveHappened(), "Remove happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getRemovedObject().contains(fPack12), "Correct package removed"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertFalse("No remove happened, in Logical Package", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRemoveHappened(), "No remove happened, in Logical Package"); //$NON-NLS-1$
 	}
 
 	//This is a bogus test because this situation could never occur
@@ -162,15 +162,15 @@ public class PackagesViewDeltaTests {
 		fMyPart.pushDisplay();
 
 		// Assert remove happened
-		assertFalse("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertFalse("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRemoveHappened(), "Remove happened"); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
 
 		// Test life cycle of Logical Package
 		Object parent= fProvider.getParent(ChildCp1);
-		assertTrue("wrong parent found for logical package after remove", parent instanceof LogicalPackage);
+		assertTrue(parent instanceof LogicalPackage, "wrong parent found for logical package after remove");
 
 		LogicalPackage lp= (LogicalPackage) parent;
-		assertEquals("PackageFragment removed from logical package", expectedParent, lp); //$NON-NLS-1$
+		assertEquals(expectedParent, lp, "PackageFragment removed from logical package"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -208,16 +208,16 @@ public class PackagesViewDeltaTests {
 		fMyPart.pushDisplay();
 
 		// Assert delta correct (no remove or refresh, only change to logicalpackage)
-		assertFalse("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertFalse("Refresh happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRemoveHappened(), "Refresh happened"); //$NON-NLS-1$
 
 		// Test life cycle of LogicalPackage
 		Object[] child= fProvider.getChildren(ParentCp5);
 
-		assertTrue("wrong parent found for logical package after remove", (child.length == 1) && (child[0] instanceof LogicalPackage)); //$NON-NLS-1$
+		assertTrue((child.length == 1) && (child[0] instanceof LogicalPackage), "wrong parent found for logical package after remove"); //$NON-NLS-1$
 
 		LogicalPackage lp= (LogicalPackage) child[0];
-		assertEquals("PackageFragment removed from logical package", expectedChild, lp); //$NON-NLS-1$
+		assertEquals(expectedChild, lp, "PackageFragment removed from logical package"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -253,16 +253,16 @@ public class PackagesViewDeltaTests {
 		fMyPart.pushDisplay();
 
 		// Assert remove happened (delta worked)
-		assertTrue("Refresh happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertTrue("Refresh happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRemoveHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.hasAddHappened(), "Refresh happened"); //$NON-NLS-1$
 		Object addedObject= fMyPart.getAddedObject().get(0);
 		Object removedObject= fMyPart.getRemovedObject().get(0);
-		assertEquals("Correct guy removed", cp10, removedObject); //$NON-NLS-1$
-		assertEquals("Correct guy added", fInternalPack10, addedObject); //$NON-NLS-1$
+		assertEquals(cp10, removedObject, "Correct guy removed"); //$NON-NLS-1$
+		assertEquals(fInternalPack10, addedObject, "Correct guy added"); //$NON-NLS-1$
 
 		// Assert correct children gotten
 		Object[] children= fProvider.getChildren(ParentCp4);
-		assertTrue("PackageFragment removed from logial package", compareArrays(children, new Object[] { fPack91, fInternalPack10 })); //$NON-NLS-1$
+		assertTrue(compareArrays(children, new Object[] { fPack91, fInternalPack10 }), "PackageFragment removed from logial package"); //$NON-NLS-1$
 	}
 
 	//-----------------------Add delta test cases----------------------------------
@@ -281,8 +281,8 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
-		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
+		assertTrue(fMyPart.hasAddHappened(), "Add happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getAddedObject().contains(test), "Correct package added"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -305,7 +305,7 @@ public class PackagesViewDeltaTests {
 		fMyPart.pushDisplay();
 
 		// Make sure no refresh happened
-		assertFalse("Refresh did not happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRefreshHappened(), "Refresh did not happened"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -332,9 +332,9 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
-		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getRefreshedObject().contains(fPack81), "Correct package refreshed"); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "Correct number of refreshes");//$NON-NLS-1$
 	}
 
 	@Test
@@ -359,9 +359,9 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(cp3)); //$NON-NLS-1$
-		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getRefreshedObject().contains(cp3), "Correct package refreshed"); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "Correct number of refreshes"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -390,9 +390,9 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
-		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getRefreshedObject().contains(fPack81), "Correct package refreshed"); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "Correct number of refreshes");//$NON-NLS-1$
 	}
 
 	@Test
@@ -417,9 +417,9 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(cp3)); //$NON-NLS-1$
-		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getRefreshedObject().contains(cp3), "Correct package refreshed"); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "Correct number of refreshes");//$NON-NLS-1$
 	}
 
 	@Test
@@ -443,14 +443,14 @@ public class PackagesViewDeltaTests {
 		// Force events from display
 		fMyPart.pushDisplay();
 
-		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
-		assertTrue("Corrent package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
+		assertTrue(fMyPart.hasAddHappened(), "Add happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getAddedObject().contains(test), "Corrent package added"); //$NON-NLS-1$
 	}
 
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
@@ -462,12 +462,12 @@ public class PackagesViewDeltaTests {
 
 		//------------set up project ------------------------------
 		fJProject= JavaProjectHelper.createJavaProject("TestProject2", "bin"); //$NON-NLS-1$//$NON-NLS-2$
-		assertNotNull("project null", fJProject); //$NON-NLS-1$
+		assertNotNull(fJProject, "project null"); //$NON-NLS-1$
 
 		//----------------Set up internal jar----------------------------
 		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar")); //$NON-NLS-1$
-		assertNotNull("lib not found", myInternalJar); //$NON-NLS-1$
-		assertTrue("lib not found", myInternalJar.exists()); //$NON-NLS-1$
+		assertNotNull(myInternalJar, "lib not found"); //$NON-NLS-1$
+		assertTrue(myInternalJar.exists(), "lib not found"); //$NON-NLS-1$
 		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject, Path.fromOSString(myInternalJar.getPath()), null, null);
 		fInternalJarRoot.getPackageFragment(""); //$NON-NLS-1$
 		fInternalPack3= fInternalJarRoot.getPackageFragment("pack3"); //$NON-NLS-1$
@@ -542,7 +542,7 @@ public class PackagesViewDeltaTests {
 	/*
 	 * @see TestCase#tearDown()
 	 */
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 		fProvider.inputChanged(null, null, null);
