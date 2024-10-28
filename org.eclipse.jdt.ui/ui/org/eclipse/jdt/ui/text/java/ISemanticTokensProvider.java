@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 /**
  * Computes semantic tokens contributed to the Java source editor via extension point <code>semanticTokens</code>
  *
- * @since 3.34
+ * @since 3.33
  */
 public interface ISemanticTokensProvider {
 
