@@ -3050,7 +3050,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 						return false;
 					}
 
-					@SuppressWarnings("unchecked")
 					public boolean simplifyNLS(String x) {
 						return true;
 					}
@@ -3060,27 +3059,6 @@ public class QuickFixTest1d8 extends QuickFixTest {
 					}
 				}
 				""";
-
-		String expected3= """
-				package test1;
-				public class E {
-					public boolean simplifyNormal(int x) {
-						return true;
-					}
-
-					public boolean simplifyCompoundIf(int x) {
-						return false;
-					}
-
-					public boolean simplifyNLS(String x) {
-						return true;
-					}
-
-					public boolean simplifyAll() {
-						return false;
-					}
-				}
-				""";
-		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
 	}
 }

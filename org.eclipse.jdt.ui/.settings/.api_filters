@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
+    <resource path="META-INF/MANIFEST.MF">
+        <filter comment="The version was accidentially increased twice but it ended up in an I-build so we have to live with the problem: https://github.com/eclipse-jdt/eclipse.jdt.ui/pull/1671" id="931135546">
+            <message_arguments>
+                <message_argument value="3.33.200"/>
+                <message_argument value="3.33.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="internal compatibility/org/eclipse/jdt/internal/corext/SourceRange.java" type="org.eclipse.jdt.internal.corext.SourceRange">
         <filter id="574619656">
             <message_arguments>

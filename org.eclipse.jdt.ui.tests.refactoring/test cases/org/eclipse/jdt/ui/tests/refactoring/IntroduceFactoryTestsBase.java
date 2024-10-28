@@ -15,6 +15,7 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -164,10 +165,8 @@ public class IntroduceFactoryTestsBase extends GenericRefactoringTest {
 		int		begin= source.indexOf(SELECTION_START_HERALD) + SELECTION_START_HERALD.length();
 		int		end= source.indexOf(SELECTION_END_HERALD);
 
-		if (begin < SELECTION_START_HERALD.length())
-			fail("No selection start comment in input source file!");
-		if (end < 0)
-			fail("No selection end comment in input source file!");
+		assertFalse("No selection start comment in input source file!", begin < SELECTION_START_HERALD.length());
+		assertFalse("No selection end comment in input source file!", end < 0);
 
 		return new SourceRange(begin, end-begin);
 	}

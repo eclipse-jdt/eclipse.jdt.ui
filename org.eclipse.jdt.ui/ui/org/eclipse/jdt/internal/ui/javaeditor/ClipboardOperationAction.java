@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,9 +45,14 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.IEditorPart;
@@ -86,6 +91,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -563,7 +569,9 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				}
 				try {
 					fOperationTarget.doOperation(fOperationCode);
-					addImports((ICompilationUnit)inputElement, importsData);
+					if (!targetIsInString()) {
+						addImports((ICompilationUnit)inputElement, importsData);
+					}
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				} finally {
@@ -577,6 +585,25 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		} finally {
 			clipboard.dispose();
 		}
+	}
+
+	private boolean targetIsInString() {
+		ITextEditor editor= getTextEditor();
+		IDocument document= editor.getDocumentProvider().getDocument(editor.getEditorInput());
+		if (document != null) {
+			int offset= ((ITextSelection)editor.getSelectionProvider().getSelection()).getOffset();
+			try {
+				IDocumentExtension3 extension= (IDocumentExtension3) document;
+			    ITypedRegion region= extension.getPartition(IJavaPartitions.JAVA_PARTITIONING, offset, false);
+				String partitionType= region.getType();
+				if (partitionType.equals(IJavaPartitions.JAVA_STRING) ||
+						partitionType.equals(IJavaPartitions.JAVA_MULTI_LINE_STRING)) {
+					return true;
+				}
+			} catch (BadLocationException | BadPartitioningException e) {
+			}
+		}
+		return false;
 	}
 
 	private void addImports(final ICompilationUnit unit, ClipboardData data) throws CoreException {

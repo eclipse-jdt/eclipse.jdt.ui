@@ -21,12 +21,9 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionGroup;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Action group to add the filter actions to a view part's toolbar
@@ -36,19 +33,6 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * </p>
  */
 public class CallHierarchyFiltersActionGroup extends ActionGroup {
-
-    class ShowFilterDialogAction extends Action {
-        ShowFilterDialogAction() {
-            setText(CallHierarchyMessages.ShowFilterDialogAction_text);
-            setImageDescriptor(JavaPluginImages.DESC_ELCL_FILTER);
-			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
-        }
-
-        @Override
-		public void run() {
-            openFiltersDialog();
-        }
-    }
 
     class ShowExpandWithConstructorsDialogAction extends Action {
     	ShowExpandWithConstructorsDialogAction() {
@@ -82,7 +66,7 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
 
     private void fillViewMenu(IMenuManager viewMenu) {
         viewMenu.add(new Separator("filters")); //$NON-NLS-1$
-        viewMenu.add(new ShowFilterDialogAction());
+        viewMenu.add(new ShowCallHierarchyFilterDialogAction(fPart, null));
         viewMenu.add(new ShowExpandWithConstructorsDialogAction());
     }
 
@@ -92,15 +76,6 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
     }
 
     // ---------- dialog related code ----------
-
-    private void openFiltersDialog() {
-        FiltersDialog dialog= new FiltersDialog(
-            fPart.getViewSite().getShell());
-
-        if(Window.OK == dialog.open()) {
-        	fPart.refresh();
-        }
-    }
 
     private void openExpandWithConstructorsDialog() {
     	Shell parentShell= fPart.getViewSite().getShell();

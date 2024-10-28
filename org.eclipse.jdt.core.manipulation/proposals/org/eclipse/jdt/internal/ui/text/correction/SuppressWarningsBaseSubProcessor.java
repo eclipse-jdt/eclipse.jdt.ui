@@ -245,21 +245,11 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
 			proposals.add(proposal);
 		}
-		fix= UnusedSuppressWarningsFixCore.createAllFix(context.getASTRoot(), literal);
-		if (fix != null) {
-			Map<String, String> options= new Hashtable<>();
-			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
-			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
-			cleanUp.setLiteral(literal);
-			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
-			proposals.add(proposal);
-		}
 		fix= UnusedSuppressWarningsFixCore.createAllFix(context.getASTRoot(), null);
 		if (fix != null) {
 			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
 			UnusedSuppressWarningsCleanUp cleanUp= new UnusedSuppressWarningsCleanUp(options);
-			cleanUp.setLiteral(literal);
 			T proposal= createFixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_ANNOTATION, context);
 			proposals.add(proposal);
 		}

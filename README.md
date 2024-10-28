@@ -17,6 +17,10 @@ Contributions to JDT UI are most welcome. There are many ways to contribute,
 from entering high quality bug reports, to contributing code or documentation changes. 
 For a complete guide, see the [How to Contribute] [1] page on the team wiki.
 
+[![Create Eclipse Development Environment for JDT UI](https://download.eclipse.org/oomph/www/setups/svg/JDT_UI.svg)](
+https://www.eclipse.org/setups/installer/?url=https://raw.githubusercontent.com/eclipse-jdt/eclipse.jdt.ui/master/org.eclipse.jdt.ui.setup/JdtUIConfiguration.setup&show=true
+"Click to open Eclipse-Installer Auto Launch or drag into your running installer")
+
 Developer resources:
 --------------------
 

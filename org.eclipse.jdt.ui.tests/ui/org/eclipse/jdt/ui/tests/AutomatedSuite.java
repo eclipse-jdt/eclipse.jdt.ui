@@ -24,6 +24,8 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.common.VisitorTest;
+
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
@@ -53,6 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 @Suite
 @SelectClasses({
+	VisitorTest.class,
 	CoreTests.class,
 	CoreTestSuite.class,
 	QuickFixTestSuite.class,

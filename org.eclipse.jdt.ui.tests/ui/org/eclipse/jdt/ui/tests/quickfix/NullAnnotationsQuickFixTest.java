@@ -18,7 +18,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -26,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -111,17 +111,17 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1= projectSetup.getProject();
 
 		if (ANNOTATION_JAR_PATH == null) {
-			String version= "[1.1.0,2.0.0)"; // tests run at 1.5, need the "old" null annotations
-			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
-			File bundleFile= FileLocator.getBundleFileLocation(bundles[0]).get();
-			if (bundleFile.isDirectory())
-				ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
-			else
-				ANNOTATION_JAR_PATH= bundleFile.getPath();
+			// these tests us the "old" null annotations
+			ANNOTATION_JAR_PATH= getAnnotationV1LibPath();
 		}
 		JavaProjectHelper.addLibrary(fJProject1, new Path(ANNOTATION_JAR_PATH));
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	}
+
+	public static String getAnnotationV1LibPath() throws IOException {
+		URL libEntry = Platform.getBundle("org.eclipse.jdt.ui.tests").getEntry("/lib/org.eclipse.jdt.annotation_1.2.100.v20241001-0914.jar");
+		return FileLocator.toFileURL(libEntry).getPath();
 	}
 
 	@After

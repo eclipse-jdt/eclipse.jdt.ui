@@ -125,7 +125,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 		private String previousFilterText;
 
 		public FilteredTreeWithFilter(Composite parent, int treeStyle, String initialFilter, boolean deepFiltering) {
-			super(parent, treeStyle, new MultiplePatternFilter(deepFiltering), true);
+			super(parent, treeStyle, new MultiplePatternFilter(deepFiltering), true, true);
 			if (initialFilter != null) {
 				setFilterText(initialFilter);
 				textChanged();

@@ -26,11 +26,13 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -64,8 +66,13 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -74,6 +81,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -621,6 +630,19 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					continue;
 				if (!(element instanceof IMember))
 					continue;
+				IType[] destinationTypes= getAbstractDestinations(new NullProgressMonitor());
+				IMember elementMember= (IMember)element;
+				IType elementMemberType= elementMember.getDeclaringType();
+				boolean isMoveDestination= false;
+				for (IType destinationType : destinationTypes) {
+					if (destinationType.getFullyQualifiedName().equals(elementMemberType.getFullyQualifiedName())) {
+						isMoveDestination= true;
+						break;
+					}
+				}
+				if (isMoveDestination) {
+					continue;
+				}
 				IMember referencingMember= (IMember) element;
 				Object[] keys= { label, createLabel(referencingMember) };
 				String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys);
@@ -667,6 +689,123 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		}
 	}
 
+	/**
+	 * AST node visitor which performs check of name collision in target and adds super qualifiers to
+	 * members as needed.
+	 */
+	public static class MemberVisitor extends ASTVisitor {
+
+		private final ITypeHierarchy fDeclaringTypeHierarchy;
+		private final IType fDeclaringType;
+		private final IType[] fDestinationTypes;
+		private final ASTRewrite fRewrite;
+
+		public MemberVisitor(final ASTRewrite rewrite, final IType declaringType, final ITypeHierarchy declaringTypeHierarchy, final IType[] destinationTypes) {
+			Assert.isNotNull(rewrite);
+			Assert.isNotNull(declaringTypeHierarchy);
+			Assert.isNotNull(declaringType);
+			Assert.isNotNull(destinationTypes);
+			fRewrite= rewrite;
+			fDeclaringTypeHierarchy= declaringTypeHierarchy;
+			fDeclaringType= declaringType;
+			fDestinationTypes= destinationTypes;
+		}
+
+		@Override
+		public final boolean visit(SimpleName node) {
+			if (node.getLocationInParent() != MethodInvocation.NAME_PROPERTY
+					&& node.getLocationInParent() != FieldAccess.NAME_PROPERTY) {
+				IBinding nodeBinding= node.resolveBinding();
+				if (nodeBinding instanceof IVariableBinding varBinding && varBinding.isField()) {
+					ITypeBinding typeBinding= varBinding.getDeclaringClass();
+					if (typeBinding != null && !typeBinding.getQualifiedName().equals(fDeclaringType.getFullyQualifiedName())) {
+						boolean mayNeedSuper= false;
+						for (IType destinationType : fDestinationTypes) {
+							try {
+								IField[] fields= destinationType.getFields();
+								for (IField field : fields) {
+									if (field.getElementName().equals(node.getFullyQualifiedName())) {
+										mayNeedSuper= true;
+										break;
+									}
+								}
+							} catch (JavaModelException e) {
+								// do nothing
+							}
+						}
+						if (mayNeedSuper) {
+							IType[] superTypes= fDeclaringTypeHierarchy.getAllSuperclasses(fDeclaringType);
+							for (IType superType : superTypes) {
+								if (superType.getFullyQualifiedName().equals(typeBinding.getQualifiedName())) {
+									AST ast= fRewrite.getAST();
+									SuperFieldAccess superFieldAccess= ast.newSuperFieldAccess();
+									superFieldAccess.setName(ast.newSimpleName(node.getFullyQualifiedName()));
+									fRewrite.replace(node, superFieldAccess, null);
+									return true;
+								}
+							}
+						}
+
+					}
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public final boolean visit(MethodInvocation node) {
+			Expression exp= node.getExpression();
+			if (exp == null) {
+				IMethodBinding methodBinding= node.resolveMethodBinding();
+				if (methodBinding != null) {
+					ITypeBinding typeBinding= methodBinding.getDeclaringClass();
+					if (typeBinding != null && !typeBinding.getQualifiedName().equals(fDeclaringType.getFullyQualifiedName())) {
+						boolean mayNeedSuper= false;
+						for (IType destinationType : fDestinationTypes) {
+							try {
+								IMethod[] methods= destinationType.getMethods();
+								for (IMethod method : methods) {
+									if (method.getElementName().equals(node.getName().getFullyQualifiedName()) &&
+											method.getNumberOfParameters() == node.arguments().size()) {
+										mayNeedSuper= true;
+										break;
+									}
+								}
+							} catch (JavaModelException e) {
+								// do nothing
+							}
+						}
+						if (mayNeedSuper) {
+							IType[] superTypes= fDeclaringTypeHierarchy.getAllSuperclasses(fDeclaringType);
+							for (IType superType : superTypes) {
+								if (superType.getFullyQualifiedName().equals(typeBinding.getQualifiedName())) {
+									AST ast= fRewrite.getAST();
+									SuperMethodInvocation superMethodInvocation= ast.newSuperMethodInvocation();
+									superMethodInvocation.setName(ast.newSimpleName(node.getName().getFullyQualifiedName()));
+									ListRewrite typeArgs= fRewrite.getListRewrite(node, MethodInvocation.TYPE_ARGUMENTS_PROPERTY);
+									List<Type> originalTypeList= typeArgs.getOriginalList();
+									if (originalTypeList.size() > 0) {
+										ASTNode typeArgsCopy= typeArgs.createCopyTarget(originalTypeList.get(0), originalTypeList.get(originalTypeList.size() - 1));
+										superMethodInvocation.typeArguments().add(typeArgsCopy);
+									}
+									ListRewrite args= fRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY);
+									List<Type> originalArgsList= args.getOriginalList();
+									if (originalArgsList.size() > 0) {
+										ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalTypeList.size() - 1));
+										superMethodInvocation.arguments().add(argsCopy);
+									}
+									fRewrite.replace(node, superMethodInvocation, null);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			return true;
+		}
+	}
+
 	private void copyBodyOfPushedDownMethod(ASTRewrite targetRewrite, IMethod method, MethodDeclaration oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
 		Block body= oldMethod.getBody();
 		if (body == null) {
@@ -679,6 +818,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			final ITrackedNodePosition position= rewriter.track(body);
 			body.accept(new TypeVariableMapper(rewriter, mapping));
 			body.accept(new ThisVisitor(rewriter, fCachedDeclaringType));
+			body.accept(new MemberVisitor(rewriter, fCachedDeclaringType, getHierarchyOfDeclaringClass(new NullProgressMonitor()), getAbstractDestinations(new NullProgressMonitor())));
 			rewriter.rewriteAST(document, getDeclaringType().getCompilationUnit().getOptions(true)).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			String[] lines= Strings.convertIntoLines(content);
@@ -724,15 +864,19 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldField != null) {
 								FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
-								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
+								TextEditGroup group= unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN);
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, BodyDeclarationRewrite.getInsertionIndex(newField, declaration.bodyDeclarations()), group);
 								ImportRewriteUtil.addImports(unitRewriter, context, oldField.getParent(), new HashMap<>(), new HashMap<>(), false);
+								replaceTargetSuperFieldReferences(declaration, member, unitRewriter.getASTRewrite(), group);
 							}
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
 								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], mapping, unitRewriter, oldMethod);
-								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, BodyDeclarationRewrite.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN));
+								TextEditGroup group= unitRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PUSH_DOWN);
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, BodyDeclarationRewrite.getInsertionIndex(newMethod, declaration.bodyDeclarations()), group);
 								ImportRewriteUtil.addImports(unitRewriter, context, oldMethod, new HashMap<>(), new HashMap<>(), false);
+								replaceTargetSuperMethodInvocations(declaration, member, unitRewriter.getASTRewrite(), group);
 							}
 						}
 					}
@@ -741,6 +885,59 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private void replaceTargetSuperMethodInvocations(AbstractTypeDeclaration declaration, IMember member, ASTRewrite astRewrite, TextEditGroup group) {
+		ASTVisitor removeSuperMethodInvocationVisitor= new ASTVisitor() {
+			@Override
+			public boolean visit(SuperMethodInvocation node) {
+				IMethodBinding binding= node.resolveMethodBinding();
+				if (binding != null) {
+					if (binding.getJavaElement() != null && binding.getJavaElement().equals(member)) {
+						AST ast= astRewrite.getAST();
+						MethodInvocation newMethodInvocation= ast.newMethodInvocation();
+						newMethodInvocation.setName(ast.newSimpleName(node.getName().getFullyQualifiedName()));
+						ListRewrite typeArgs= astRewrite.getListRewrite(node, SuperMethodInvocation.TYPE_ARGUMENTS_PROPERTY);
+						List<Type> originalTypeList= typeArgs.getOriginalList();
+						if (originalTypeList.size() > 0) {
+							ASTNode typeArgsCopy= typeArgs.createCopyTarget(originalTypeList.get(0), originalTypeList.get(originalTypeList.size() - 1));
+							newMethodInvocation.typeArguments().add(typeArgsCopy);
+						}
+						ListRewrite args= astRewrite.getListRewrite(node, SuperMethodInvocation.ARGUMENTS_PROPERTY);
+						List<Type> originalArgsList= args.getOriginalList();
+						if (originalArgsList.size() > 0) {
+							ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalTypeList.size() - 1));
+							newMethodInvocation.arguments().add(argsCopy);
+						}
+						astRewrite.replace(node, newMethodInvocation, group);
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+		declaration.accept(removeSuperMethodInvocationVisitor);
+	}
+
+	private void replaceTargetSuperFieldReferences(AbstractTypeDeclaration declaration, IMember member, ASTRewrite astRewrite, TextEditGroup group) {
+		ASTVisitor removeSuperFieldVisitor= new ASTVisitor() {
+			@Override
+			public boolean visit(SuperFieldAccess node) {
+				IVariableBinding binding= node.resolveFieldBinding();
+				if (binding != null) {
+					if (binding.isField() && binding.getJavaElement() != null && binding.getJavaElement().equals(member)) {
+						AST ast= astRewrite.getAST();
+						FieldAccess newFieldAccess= ast.newFieldAccess();
+						newFieldAccess.setName(ast.newSimpleName(node.getName().getFullyQualifiedName()));
+						newFieldAccess.setExpression(ast.newThisExpression());
+						astRewrite.replace(node, newFieldAccess, group);
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+		declaration.accept(removeSuperFieldVisitor);
 	}
 
 	@Override

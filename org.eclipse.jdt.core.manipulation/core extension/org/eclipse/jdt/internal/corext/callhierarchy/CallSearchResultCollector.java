@@ -72,19 +72,21 @@ class CallSearchResultCollector {
      * Method isIgnored.
      * @return boolean
      */
-    private boolean isIgnored(IMember enclosingElement) {
-        String fullyQualifiedName = getTypeOfElement(enclosingElement)
-                                        .getFullyQualifiedName();
+	private boolean isIgnored(IMember enclosingElement) {
+		String fullyQualifiedName= getTypeOfElement(enclosingElement).getFullyQualifiedName();
 
-		if (CallHierarchyCore.getDefault().isFilterTestCode()) {
-			IClasspathEntry classpathEntry= determineClassPathEntry(enclosingElement);
-			if (classpathEntry != null && classpathEntry.isTest()) {
-				return true;
-			}
+		if (CallHierarchyCore.getDefault().isShowAll()) {
+			return false;
 		}
+		IClasspathEntry classpathEntry= determineClassPathEntry(enclosingElement);
 
-        return CallHierarchyCore.getDefault().isIgnored(fullyQualifiedName);
-    }
+		if (classpathEntry != null) {
+			boolean isTest= classpathEntry.isTest();
+			return CallHierarchyCore.getDefault().isHideTestCode() && isTest
+					|| CallHierarchyCore.getDefault().isShowTestCode() && !isTest;
+		}
+		return CallHierarchyCore.getDefault().isIgnored(fullyQualifiedName);
+	}
 
 	private static IClasspathEntry determineClassPathEntry(Object element) {
 		if (element instanceof IJavaElement) {

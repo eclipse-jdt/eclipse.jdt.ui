@@ -156,7 +156,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					endPosition= getLineOffset(cUnit, lineNo + 1) == -1 ? cUnit.getLength() : getLineOffset(cUnit, lineNo + 1);
 					hasComments= hasComments || hasNLS(ASTNodes.getCommentsForRegion(cUnit, stringLiteral.getStartPosition(), endPosition - stringLiteral.getStartPosition()), cu);
 					String string= stringLiteral.getLiteralValue();
-					if (!string.isEmpty() && (fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1)) { //$NON-NLS-1$
+					if (string.isEmpty() || fAllConcats || string.endsWith("\n") || i == extendedOperands.size() - 1) { //$NON-NLS-1$
 						continue;
 					}
 				}
@@ -315,8 +315,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			expressions.forEach(new Consumer<Expression>() {
 				@Override
 				public void accept(Expression t) {
-					String value= ((StringLiteral) t).getEscapedValue();
-					parts.addAll(unescapeBlock(value.substring(1, value.length() - 1)));
+					StringLiteral literal= (StringLiteral)t;
+					if (!literal.getLiteralValue().equals("\"\"")) { //$NON-NLS-1$
+						String value= literal.getEscapedValue();
+						parts.addAll(unescapeBlock(value.substring(1, value.length() - 1)));
+					}
 				}
 			});
 
@@ -487,6 +490,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private Map<ExpressionStatement, ChangeStringBufferToTextBlock> conversions= new HashMap<>();
 		private static final String APPEND= "append"; //$NON-NLS-1$
 		private static final String TO_STRING= "toString"; //$NON-NLS-1$
+		private static final String INDEX_OF= "indexOf"; //$NON-NLS-1$
 		private BodyDeclaration fLastBodyDecl;
 		private final Set<String> fExcludedNames;
 		private final Set<IBinding> fRemovedDeclarations= new HashSet<>();
@@ -503,6 +507,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			private int lastStatementEnd;
 			private IBinding varBinding;
 			private List<MethodInvocation> toStringList= new ArrayList<>();
+			private List<MethodInvocation> indexOfList= new ArrayList<>();
 			private List<SimpleName> argList= new ArrayList<>();
 
 			public CheckValidityVisitor(int lastStatementEnd, IBinding varBinding) {
@@ -520,6 +525,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			public List<MethodInvocation> getToStringList() {
 				return toStringList;
+			}
+
+			public List<MethodInvocation> getIndexOfList() {
+				return indexOfList;
 			}
 
 			public List<SimpleName> getArgList() {
@@ -546,6 +555,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 							if (invocation.getName().getFullyQualifiedName().equals(TO_STRING)) {
 								valid= true;
 								toStringList.add(invocation);
+								return true;
+							} else if (invocation.getName().getFullyQualifiedName().equals(INDEX_OF)) {
+								valid= true;
+								indexOfList.add(invocation);
 								return true;
 							} else {
 								valid= false;
@@ -645,6 +658,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					if (exp instanceof MethodInvocation) {
 						class MethodVisitor extends ASTVisitor {
 							private boolean valid= false;
+							private boolean indexOfSeen= false;
 							public boolean isValid() {
 								return valid;
 							}
@@ -653,11 +667,19 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 								if (simpleName.getFullyQualifiedName().equals(APPEND) && simpleName.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
 									return true;
 								}
-								if (simpleName.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY && simpleName.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())
-										&& ((MethodInvocation)simpleName.getParent()).getName().getFullyQualifiedName().equals(APPEND)) {
-									extractConcatenatedAppends(simpleName);
-									valid= true;
-									return false;
+								if (simpleName.getLocationInParent() == MethodInvocation.EXPRESSION_PROPERTY && simpleName.getFullyQualifiedName().equals(originalVarName.getFullyQualifiedName())) {
+									if (((MethodInvocation)simpleName.getParent()).getName().getFullyQualifiedName().equals(APPEND)) {
+										if (!indexOfSeen) {
+											extractConcatenatedAppends(simpleName);
+											valid= true;
+										} else {
+											valid= false;
+										}
+										return false;
+									} else if (((MethodInvocation)simpleName.getParent()).getName().getFullyQualifiedName().equals(INDEX_OF)) {
+										indexOfSeen= true;
+										return false;
+									}
 								}
 								return true;
 							}
@@ -724,12 +746,13 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			List<Statement> statements= new ArrayList<>(statementList);
 			List<StringLiteral> literals= new ArrayList<>(fLiterals);
 			List<MethodInvocation> toStringList= new ArrayList<>(checkValidityVisitor.getToStringList());
+			List<MethodInvocation> indexOfList= new ArrayList<>(checkValidityVisitor.getIndexOfList());
 			List<SimpleName> argList= new ArrayList<>(checkValidityVisitor.getArgList());
 			BodyDeclaration bodyDecl= ASTNodes.getFirstAncestorOrNull(node, BodyDeclaration.class);
 			if (statements.get(0) instanceof VariableDeclarationStatement) {
 				fRemovedDeclarations.add(originalVarName.resolveBinding());
 			}
-			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, argList, statements, literals,
+			ChangeStringBufferToTextBlock operation= new ChangeStringBufferToTextBlock(toStringList, indexOfList, argList, statements, literals,
 					fRemovedDeclarations.contains(originalVarName.resolveBinding()) ? assignmentToConvert : null, fExcludedNames, fLastBodyDecl, nonNLS);
 			fLastBodyDecl= bodyDecl;
 			fOperations.add(operation);
@@ -864,6 +887,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 	public static class ChangeStringBufferToTextBlock extends CompilationUnitRewriteOperation {
 
 		private final List<MethodInvocation> fToStringList;
+		private final List<MethodInvocation> fIndexOfList;
 		private final List<SimpleName> fArgList;
 		private final List<Statement> fStatements;
 		private final List<StringLiteral> fLiterals;
@@ -873,9 +897,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final boolean fNonNLS;
 		private ExpressionStatement fAssignmentToConvert;
 
-		public ChangeStringBufferToTextBlock(final List<MethodInvocation> toStringList, final List<SimpleName> argList, List<Statement> statements,
-				List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, BodyDeclaration lastBodyDecl, boolean nonNLS) {
+		public ChangeStringBufferToTextBlock(final List<MethodInvocation> toStringList, final List<MethodInvocation> indexOfList, final List<SimpleName> argList,
+				List<Statement> statements, List<StringLiteral> literals, ExpressionStatement assignmentToConvert, Set<String> excludedNames, BodyDeclaration lastBodyDecl, boolean nonNLS) {
 			this.fToStringList= toStringList;
+			this.fIndexOfList= indexOfList;
 			this.fArgList= argList;
 			this.fStatements= statements;
 			this.fLiterals= literals;
@@ -976,6 +1001,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			buf.append("\"\"\""); //$NON-NLS-1$
 			AST ast= fStatements.get(0).getAST();
 			if (fToStringList.size() == 1 &&
+					fIndexOfList.isEmpty() &&
 					!fNonNLS &&
 					ASTNodes.getLeadingComments(fStatements.get(0)).size() == 0 &&
 					(fToStringList.get(0).getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY ||
@@ -1023,6 +1049,15 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				for (MethodInvocation toStringCall : fToStringList) {
 					SimpleName name= ast.newSimpleName(newVarName);
 					rewrite.replace(toStringCall, name, group);
+				}
+				for (MethodInvocation indexOfCall : fIndexOfList) {
+					MethodInvocation newCall= ast.newMethodInvocation();
+					newCall.setName(ast.newSimpleName("indexOf")); //$NON-NLS-1$
+					SimpleName caller= ast.newSimpleName(newVarName);
+					newCall.setExpression(caller);
+					List<Expression> arguments= indexOfCall.arguments();
+					newCall.arguments().add(rewrite.createCopyTarget(arguments.get(0)));
+					rewrite.replace(indexOfCall, newCall, group);
 				}
 				for (SimpleName arg : fArgList) {
 					SimpleName name= ast.newSimpleName(newVarName);
