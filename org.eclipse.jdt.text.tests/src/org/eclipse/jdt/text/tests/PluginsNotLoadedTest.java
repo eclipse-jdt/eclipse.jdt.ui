@@ -275,7 +275,6 @@ public class PluginsNotLoadedTest {
 				buf.append('\n');
 			}
 		}
-		System.out.println(buf.toString());
 		assertEquals("Wrong bundles loaded:\n" + buf, 0, buf.length());
 	}
 }
