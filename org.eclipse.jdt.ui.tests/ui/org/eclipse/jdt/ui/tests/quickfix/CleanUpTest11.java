@@ -566,7 +566,7 @@ public class CleanUpTest11 extends CleanUpTestCase {
 		enable(CleanUpConstants.USE_STRING_IS_BLANK);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected }, new HashSet<>(Arrays.asList(FixMessages.UseStringIsBlankCleanUp_description)));
 	}
 

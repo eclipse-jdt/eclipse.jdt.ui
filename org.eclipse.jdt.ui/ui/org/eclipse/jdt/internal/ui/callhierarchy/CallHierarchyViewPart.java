@@ -244,6 +244,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	private IPartListener2 fPartListener;
 	private boolean fIsPinned;
 	private PinCallHierarchyViewAction fPinViewAction;
+	private ShowCallHierarchyFilterDialogAction fFiltersAction;
 
 
     public CallHierarchyViewPart() {
@@ -1024,6 +1025,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
         toolBar.add(fHistoryDropDownAction);
         toolBar.add(fPinViewAction);
+        toolBar.add(fFiltersAction);
     }
 
     private void makeActions() {
@@ -1048,6 +1050,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fExpandWithConstructorsAction= new ExpandWithConstructorsAction(this, fCallHierarchyViewer);
         fRemoveFromViewAction= new RemoveFromViewAction(this, fCallHierarchyViewer);
         fPinViewAction= new PinCallHierarchyViewAction(this);
+        fFiltersAction = new ShowCallHierarchyFilterDialogAction(this, CallHierarchyMessages.ShowFilterDialogAction_text);
+
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),

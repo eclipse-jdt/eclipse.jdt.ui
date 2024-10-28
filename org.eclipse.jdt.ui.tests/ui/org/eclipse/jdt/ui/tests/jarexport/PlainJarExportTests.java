@@ -65,7 +65,6 @@ public class PlainJarExportTests {
 
 	@BeforeClass
 	public static void setUpTest() {
-		System.setProperty("jdt.bug.367669", "non-null");
 	}
 
 	private IJavaProject fProject;

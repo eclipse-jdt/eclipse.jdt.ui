@@ -703,11 +703,11 @@ public class SourceViewerInformationControl
 	public Point computeSizeConstraints(int widthInChars, int heightInChars) {
 		GC gc= new GC(fText);
 		gc.setFont(fTextFont);
-		int width= gc.getFontMetrics().getAverageCharWidth();
+		double width= gc.getFontMetrics().getAverageCharacterWidth();
 		int height= fText.getLineHeight(); //https://bugs.eclipse.org/bugs/show_bug.cgi?id=377109
 		gc.dispose();
 
-		return new Point(widthInChars * width, heightInChars * height);
+		return new Point((int) (widthInChars * width), heightInChars * height);
 	}
 
 	protected void setContentFrom(ISourceViewer other) {

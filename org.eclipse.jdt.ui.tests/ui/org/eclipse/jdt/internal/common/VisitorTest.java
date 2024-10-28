@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Carsten Hammer.
+ * Copyright (c) 2021, 2024 Carsten Hammer.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,8 +28,14 @@ import java.util.function.BiPredicate;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -44,70 +50,82 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+
+import org.eclipse.jdt.ui.tests.core.rules.Java11ProjectTestSetup;
 
 public class VisitorTest {
 
 	private static CompilationUnit result;
 	private static CompilationUnit result2;
 
+	private static class VisitorProjectTestSetup extends Java11ProjectTestSetup {
+		public void initialize() throws CoreException {
+			createAndInitializeProject();
+		}
+	}
+
 	@BeforeAll
 	public static void init() {
-		ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
-		String code ="""
-			package test;
-			import java.util.Collection;
-			
-			public class E {
-				public void hui(Collection<String> arr) {
-					Collection coll = null;
-					for (String var : arr) {
-						 coll.add(var);
-						 System.out.println(var);
-						 System.err.println(var);
+		VisitorProjectTestSetup projectSetup= new VisitorProjectTestSetup();
+		try {
+			projectSetup.initialize();
+			IJavaProject project= projectSetup.getProject();
+			IPackageFragmentRoot fSourceFolder= JavaProjectHelper.addSourceContainer(project, "src");
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+			String code ="""
+					package test;
+					import java.util.Collection;
+
+					public class E {
+						public void hui(Collection<String> arr) {
+							Collection coll = null;
+							for (String var : arr) {
+								 coll.add(var);
+								 System.out.println(var);
+								 System.err.println(var);
+							}
+							System.out.println(arr);
+						}
+					}""";
+
+			ICompilationUnit cu1= pack1.createCompilationUnit("E.java", code, false, null);
+			ASTParser parser = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+			parser.setSource(cu1);
+			parser.setResolveBindings(true);
+
+			result = (CompilationUnit) parser.createAST(null);
+
+			String code2="""
+					package test;
+					import java.util.*;
+					public class Test {
+					    void m(List<String> strings,List<String> strings2) {
+					        Collections.reverse(strings);
+					        Iterator it = strings.iterator();
+					        while (it.hasNext()) {
+					            Iterator it2 = strings2.iterator();
+					            while (it2.hasNext()) {
+					                String s2 = (String) it2.next();
+					                System.out.println(s2);
+					            }
+					            // OK
+					            System.out.println(it.next());
+					        }
+					        System.out.println();
+					    }
 					}
-					System.out.println(arr);
-				}
-			}""";
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setEnvironment(new String[]{}, new String[]{}, null, true);
-		parser.setBindingsRecovery(true);
-		parser.setResolveBindings(true);
-		Map<String, String> options = JavaCore.getOptions();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_11, options);
-		parser.setCompilerOptions(options);
-		parser.setUnitName("E");
-		parser.setSource(code.toCharArray());
-		result = (CompilationUnit) parser.createAST(null);
-
-
-		String code2="""
-			package test;
-			import java.util.*;
-			public class Test {
-			    void m(List<String> strings,List<String> strings2) {
-			        Collections.reverse(strings);
-			        Iterator it = strings.iterator();
-			        while (it.hasNext()) {
-			            Iterator it2 = strings2.iterator();
-			            while (it2.hasNext()) {
-			                String s2 = (String) it2.next();
-			                System.out.println(s2);
-			            }
-			            // OK
-			            System.out.println(it.next());
-			        }
-			        System.out.println();
-			    }
-			}
-			""";
-		parser.setEnvironment(new String[]{}, new String[]{}, null, true);
-		parser.setBindingsRecovery(true);
-		parser.setResolveBindings(true);
-		parser.setUnitName("Test");
-		parser.setSource(code2.toCharArray());
-		result2 = (CompilationUnit) parser.createAST(null);
-//		System.out.println(result.toString());
+					""";
+			ICompilationUnit cu2= pack1.createCompilationUnit("Test.java", code2, false, null);
+			parser.setSource(cu2);
+			parser.setResolveBindings(true);
+			result2 = (CompilationUnit) parser.createAST(null);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void astnodeprocessorend(ASTNode node, @SuppressWarnings("unused") ReferenceHolder<String,NodeFound> holder) {

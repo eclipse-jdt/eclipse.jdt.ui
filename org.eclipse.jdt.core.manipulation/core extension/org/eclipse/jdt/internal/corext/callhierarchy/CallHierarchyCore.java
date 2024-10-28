@@ -46,11 +46,13 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchyCore {
 
-    private static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
-    private static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
-    private static final String PREF_FILTERS_LIST= "PREF_FILTERS_LIST"; //$NON-NLS-1$
-    private static final String PREF_FILTER_TESTCODE= "PREF_FILTER_TESTCODE"; //$NON-NLS-1$
+	public static final String PREF_SHOW_ALL_CODE = "PREF_SHOW_ALL_CODE";	//$NON-NLS-1$
+	public static final String PREF_HIDE_TEST_CODE = "PREF_HIDE_TEST_CODE";	//$NON-NLS-1$
+	public static final String PREF_SHOW_TEST_CODE_ONLY = "PREF_SHOW_TEST_CODE_ONLY";	//$NON-NLS-1$
 
+    public static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
+    public static final String PREF_USE_FILTERS= "PREF_USE_FILTERS"; //$NON-NLS-1$
+    public static final String PREF_FILTERS_LIST= "PREF_FILTERS_LIST"; //$NON-NLS-1$
     private String defaultIgnoreFilters= "java.*,javax.*"; //$NON-NLS-1$
 
     private static CallHierarchyCore fgInstance;
@@ -69,9 +71,17 @@ public class CallHierarchyCore {
         return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_USE_IMPLEMENTORS, null));
     }
 
-    public boolean isFilterTestCode() {
-        return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_FILTER_TESTCODE, null));
+    public boolean isShowTestCode() {
+        return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_SHOW_TEST_CODE_ONLY, null));
     }
+
+    public boolean isShowAll() {
+		return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_SHOW_ALL_CODE, null));
+    }
+
+	public boolean isHideTestCode() {
+		return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_HIDE_TEST_CODE, null));
+	}
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {
@@ -196,10 +206,8 @@ public class CallHierarchyCore {
         		}
         	}
         }
-
         return false;
     }
-
     public boolean isFilterEnabled() {
         return Boolean.parseBoolean(JavaManipulation.getPreference(PREF_USE_FILTERS, null));
     }

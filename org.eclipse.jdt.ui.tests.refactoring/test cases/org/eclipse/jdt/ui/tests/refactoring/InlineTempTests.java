@@ -347,66 +347,6 @@ public class InlineTempTests extends GenericRefactoringTest {
 		helper1(5, 43, 5, 46);
 	}
 
-	public void test62() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(14, 13, 14, 14);
-	}
-
-	public void test63() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(11, 13, 11, 14);
-	}
-
-	public void test64() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(7, 13, 7, 14);
-	}
-
-	public void test53() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(12, 13, 12, 14);
-	}
-
-	public void test54() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(7, 13, 7, 14);
-	}
-
-	public void test55() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(11, 13, 11, 14);
-	}
-
-	public void test56() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(12, 13, 12, 14);
-	}
-
-	public void test57() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(9, 26, 9, 27);
-	}
-
-	public void test58() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(9, 26, 9, 27);
-	}
-
-	public void test59() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(11, 11, 11, 12);
-	}
-
-	public void test60() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(7, 13, 7, 14);
-	}
-
-	public void test61() throws Exception {
-		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
-		helper1(9, 13, 9, 14);
-	}
-
 	@Test
 	public void test41() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
@@ -477,6 +417,84 @@ public class InlineTempTests extends GenericRefactoringTest {
 	public void test52() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=434747
 		helper1(4, 14, 4, 15);
+	}
+
+	@Test
+	public void test53() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(12, 13, 12, 14);
+	}
+
+	@Test
+	public void test54() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(7, 13, 7, 14);
+	}
+
+	@Test
+	public void test55() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(11, 13, 11, 14);
+	}
+
+	@Test
+	public void test56() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(12, 13, 12, 14);
+	}
+
+	@Test
+	public void test57() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(9, 26, 9, 27);
+	}
+
+	@Test
+	public void test58() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(9, 26, 9, 27);
+	}
+
+	@Test
+	public void test59() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(11, 11, 11, 12);
+	}
+
+	@Test
+	public void test60() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(7, 13, 7, 14);
+	}
+
+	@Test
+	public void test61() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(9, 13, 9, 14);
+	}
+
+	@Test
+	public void test62() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(14, 13, 14, 14);
+	}
+
+	@Test
+	public void test63() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(11, 13, 11, 14);
+	}
+
+	@Test
+	public void test64() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=367536
+		helper1(7, 13, 7, 14);
+	}
+
+	@Test
+	public void test65() throws Exception {
+		//https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1705
+		helper1(6, 13, 6, 19);
 	}
 
 	//------

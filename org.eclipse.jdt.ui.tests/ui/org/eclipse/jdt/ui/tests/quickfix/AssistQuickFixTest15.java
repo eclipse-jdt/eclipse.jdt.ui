@@ -718,6 +718,65 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 	}
 
 	@Test
+	public void testConcatToTextBlock13() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set15CompilerOptions(fJProject1, false);
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		String str= """
+			module test {
+			}
+			""";
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", str, false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuilder buf= new StringBuilder();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuilder buf3= new StringBuilder();\n");
+		buf.append("        buf3.append(\"public void foo() {\\n\");\n");
+		buf.append("        buf3.append(\"    return null;\\n\");\n");
+		buf.append("        buf3.append(\"}\\n\");\n");
+		buf.append("        buf3.append(\"\\n\");\n");
+		buf.append("        // comment 1\n");
+		buf.append("        int index = buf3.indexOf(\"null\");\n");
+		buf.append("        String k = buf3.toString();\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int index= buf.indexOf("StringBuilder");
+		IInvocationContext ctx= getCorrectionContext(cu, index, 4);
+		assertNoErrors(ctx);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(ctx, false);
+
+		String expected= """
+			package test;
+			public class Cls {
+			    public void foo() {
+			        String str = \"""
+						public void foo() {
+						    return null;
+						}
+					\t
+						\""";
+			        // comment 1
+			        int index = str.indexOf("null");
+			        String k = str;
+			       \s
+			    }
+			}
+			""";
+
+		assertProposalExists(proposals, FixMessages.StringConcatToTextBlockFix_convert_msg);
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	@Test
 	public void testNoConcatToTextBlock1() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
@@ -1001,8 +1060,18 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 		buf.append("        String k = buf3.toString();\n");
 		buf.append("        \n");
 		buf.append("    }\n");
+		buf.append("    public void indexOfInside() {\n");
+		buf.append("        StringBuffer buf3= new StringBuffer();\n");
+		buf.append("        buf3.append(\"public void foo() {\\n\");\n");
+		buf.append("        buf3.append(\"    return null;\\n\");\n");
+		buf.append("        buf3.append(\"}\\n\");\n");
+		buf.append("        int index = buf3.indexOf(\"foo\");\n");
+		buf.append("        buf3.append(\"\\n\");\n");
+		buf.append("        String k = buf3.toString();\n");
+		buf.append("        \n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+	ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
 
 		int index= buf.indexOf("buf3");
 		IInvocationContext ctx= getCorrectionContext(cu, index, 6);
