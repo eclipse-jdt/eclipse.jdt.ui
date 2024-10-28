@@ -13,12 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -94,8 +94,8 @@ public class ContentProviderTests7 {
 	}
 
 	private void assertResults(Object[][] actual, Object[] expectedSrcFolderChildren, Object[] expectedDefaultPkgChildren) {
-		assertTrue("Wrong children found for source folder", compareArrays(actual[0], expectedSrcFolderChildren));
-		assertTrue("Wrong children found for default package", compareArrays(actual[1], expectedDefaultPkgChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actual[0], expectedSrcFolderChildren), "Wrong children found for source folder");
+		assertTrue(compareArrays(actual[1], expectedDefaultPkgChildren), "Wrong children found for default package");//$NON-NLS-1$
 	}
 
 	@Test
@@ -190,10 +190,10 @@ public class ContentProviderTests7 {
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");//$NON-NLS-1$//$NON-NLS-2$
-		assertNotNull("project null", fJProject);//$NON-NLS-1$
+		assertNotNull(fJProject, "project null");//$NON-NLS-1$
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_9);
 		JavaProjectHelper.set9CompilerOptions(fJProject);
 		IClasspathAttribute[] attributes= { new ClasspathAttribute(IClasspathAttribute.MODULE, "true") };
@@ -203,7 +203,7 @@ public class ContentProviderTests7 {
 
 		//set up project : Add classFolder
 		fSrcFolder= JavaProjectHelper.addSourceContainer(fJProject, "src", null, null); //$NON-NLS-1$
-		assertNotNull("source folder null", fSrcFolder); //$NON-NLS-1$
+		assertNotNull(fSrcFolder, "source folder null"); //$NON-NLS-1$
 	}
 
 	private boolean compareArrays(Object[] children, Object[] expectedChildren) {
@@ -244,7 +244,7 @@ public class ContentProviderTests7 {
 		return false;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}

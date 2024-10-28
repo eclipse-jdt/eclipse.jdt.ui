@@ -14,14 +14,14 @@
 
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -59,7 +59,7 @@ public class PackageExplorerShowInTests {
 	private PackageExplorerPart fPackageExplorer;
 	private IWorkbenchPage fPage;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fJProject= pts.getProject();
 		fPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -67,7 +67,7 @@ public class PackageExplorerShowInTests {
 		fPackageExplorer.selectAndReveal(new StructuredSelection());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, pts.getDefaultClasspath());
 		fPage.hideView(fPackageExplorer);

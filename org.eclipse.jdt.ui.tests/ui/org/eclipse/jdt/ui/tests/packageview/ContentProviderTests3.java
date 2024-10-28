@@ -13,18 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -111,7 +111,7 @@ public class ContentProviderTests3{
 	public void testGetChildrenProjectWithSourceFolders() throws Exception{
 		Object[] expectedChildren= new Object[]{fRoot1, fFile1, fFile2, dotSettings, jdk};
 		Object[] children= fProvider.getChildren(fJProject2);
-		assertTrue("Wrong children found for project with folding", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren), "Wrong children found for project with folding");//$NON-NLS-1$
 	}
 
 
@@ -119,14 +119,14 @@ public class ContentProviderTests3{
 	public void testGetChildrentMidLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack4, fPack6};
 		Object[] children= fProvider.getChildren(fPack3);
-		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren),"Wrong children found for PackageFragment with folding");//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenBottomLevelFragment() throws Exception{
 		Object[] expectedChildren= new Object[]{};
 		Object[] children= fProvider.getChildren(fPack1);
-		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren),"Wrong children found for PackageFragment with folding");//$NON-NLS-1$
 
 	}
 
@@ -134,28 +134,28 @@ public class ContentProviderTests3{
 	public void testGetChildrenBottomLevelFragmentWithCU() throws Exception{
 		Object[] expectedChildren= new Object[]{fCU1};
 		Object[] children= fProvider.getChildren(fPack2);
-		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));	//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren),"Wrong children found for PackageFragment with folding");	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fCUIMoney, fCUMoney, fCUMoneyBag, fCUMoneyTest};
 		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
-		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive with folding", compareArrays(children, expectedChildren));	//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren), "wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive with folding");	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenSource() throws Exception{
 		Object[] expectedChildren= new Object[]{fPack1,fPack2,fPack3, fRoot1.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fRoot1);
-		assertTrue("Wrong children found for PackageFragmentRoot with folding", compareArrays(children, expectedChildren));	//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren), "Wrong children found for PackageFragmentRoot with folding");	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenArchive(){
 		Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};//$NON-NLS-1$
 		Object[] children= fProvider.getChildren(fArchiveFragmentRoot);
-		assertTrue("Wrong child found for PackageFragmentRoot Archive with folding", compareArrays(children,expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren), "Wrong child found for PackageFragmentRoot Archive with folding");//$NON-NLS-1$
 
 	}
 
@@ -164,28 +164,28 @@ public class ContentProviderTests3{
 	@Test
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
-		assertSame("Wrong parent found for PackageFragmentRoot Archive with folding", parent, fJProject1);//$NON-NLS-1$
+		assertSame(parent, fJProject1, "Wrong parent found for PackageFragmentRoot Archive with folding");//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunit;
 		Object parent= fProvider.getParent(fPackJunitSamples);
-		assertEquals("Wrong parent found for a top level PackageFragment in an Archive with folding", expectedParent, parent);	//$NON-NLS-1$
+		assertEquals(expectedParent, parent, "Wrong parent found for a top level PackageFragment in an Archive with folding");	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
-		assertEquals("Wrong parent found for a top level PackageFragment with folding", expectedParent, parent); //$NON-NLS-1$
+		assertEquals(expectedParent, parent, "Wrong parent found for a top level PackageFragment with folding"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentFoldedBottomFragment() throws Exception{
 		Object expectedParent= fRoot1;
 		Object parent= fProvider.getParent(fPack3);
-		assertEquals("Wrong parent found for a top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
+		assertEquals(expectedParent, parent, "Wrong parent found for a top level PackageFragment with folding");//$NON-NLS-1$
 
 	}
 
@@ -193,7 +193,7 @@ public class ContentProviderTests3{
 	public void testGetParentMidLevelFragment() throws Exception{
 		Object expectedParent= fPack3;
 		Object parent= fProvider.getParent(fPack4);
-		assertEquals("Wrong parent found for a NON top level PackageFragment with folding", expectedParent, parent);//$NON-NLS-1$
+		assertEquals(expectedParent, parent, "Wrong parent found for a NON top level PackageFragment with folding");//$NON-NLS-1$
 	}
 
 	@Test
@@ -207,9 +207,9 @@ public class ContentProviderTests3{
 		//force events from dispaly
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch())
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
-		assertEquals("Single refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.wasObjectRefreshed(fRoot1), "Correct Refresh"); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "Single refresh"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -225,10 +225,10 @@ public class ContentProviderTests3{
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertFalse("No add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
-		assertEquals("Single refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasAddHappened(), "No add happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.wasObjectRefreshed(fRoot1), "Correct Refresh"); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "Single refresh"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -242,7 +242,7 @@ public class ContentProviderTests3{
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertEquals("No refreshs", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertEquals(0, fMyPart.getRefreshedObject().size(), "No refreshs"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -256,7 +256,7 @@ public class ContentProviderTests3{
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertEquals("No refreshs",0,  fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertEquals(0,fMyPart.getRefreshedObject().size(),  "No refreshs"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -272,7 +272,7 @@ public class ContentProviderTests3{
 		}
 
 		// removing more than one CU now results in a refresh.
-		assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertEquals(1, fMyPart.getRefreshedObject().size(), "One refresh"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -287,16 +287,16 @@ public class ContentProviderTests3{
 		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
-		assertTrue("Correct refresh", fMyPart.getRemovedObjects().contains(fCU2)); //$NON-NLS-1$
-		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRemoveHappened(), "Remove happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.getRemovedObjects().contains(fCU2), "Correct refresh"); //$NON-NLS-1$
+		assertEquals(0, fMyPart.getRefreshedObject().size(), "No refreshes"); //$NON-NLS-1$
 	}
 
 
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		fWorkspace= ResourcesPlugin.getWorkspace();
@@ -309,8 +309,8 @@ public class ContentProviderTests3{
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");//$NON-NLS-1$//$NON-NLS-2$
 
-		assertNotNull("project1 null", fJProject1);//$NON-NLS-1$
-		assertNotNull("project2 null", fJProject2);//$NON-NLS-1$
+		assertNotNull(fJProject1, "project1 null");//$NON-NLS-1$
+		assertNotNull(fJProject2, "project2 null");//$NON-NLS-1$
 
 		for (Object object : fJProject2.getNonJavaResources()) {
 			if(object instanceof IFile){
@@ -332,12 +332,12 @@ public class ContentProviderTests3{
 
 		//set up project #1 : External Jar and zip file
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		assertNotNull("jdk not found", jdk);//$NON-NLS-1$
+		assertNotNull(jdk, "jdk not found");//$NON-NLS-1$
 
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 
-		assertNotNull("junit src not found", junitSrcArchive);//$NON-NLS-1$
-		assertTrue("junit src not found", junitSrcArchive.exists());//$NON-NLS-1$
+		assertNotNull(junitSrcArchive, "junit src not found");//$NON-NLS-1$
+		assertTrue(junitSrcArchive.exists(), "junit src not found");//$NON-NLS-1$
 
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$
 
@@ -351,15 +351,15 @@ public class ContentProviderTests3{
 		fPackJunitTextUi= fArchiveFragmentRoot.getPackageFragment("junit.textui");//$NON-NLS-1$
 		fPackJunitUi= fArchiveFragmentRoot.getPackageFragment("junit.ui");//$NON-NLS-1$
 
-		assertNotNull("creating fPackJunit", fPackJunit);//$NON-NLS-1$
-		assertNotNull("creating fPackJunitSamples", fPackJunitSamples);//$NON-NLS-1$
-		assertNotNull("creating fPackJunitSamplesMoney",fPackJunitSamplesMoney);//$NON-NLS-1$
-		assertNotNull("", fPackJunitExtentions);//$NON-NLS-1$
-		assertNotNull("",fPackJunitFramework);//$NON-NLS-1$
-		assertNotNull("",fPackJunitRunner);//$NON-NLS-1$
-		assertNotNull("",fPackJunitTests);//$NON-NLS-1$
-		assertNotNull("",fPackJunitTextUi);//$NON-NLS-1$
-		assertNotNull("",fPackJunitUi);//$NON-NLS-1$
+		assertNotNull(fPackJunit, "creating fPackJunit");//$NON-NLS-1$
+		assertNotNull(fPackJunitSamples, "creating fPackJunitSamples");//$NON-NLS-1$
+		assertNotNull(fPackJunitSamplesMoney,"creating fPackJunitSamplesMoney");//$NON-NLS-1$
+		assertNotNull(fPackJunitExtentions, "");//$NON-NLS-1$
+		assertNotNull(fPackJunitFramework,"");//$NON-NLS-1$
+		assertNotNull(fPackJunitRunner,"");//$NON-NLS-1$
+		assertNotNull(fPackJunitTests,"");//$NON-NLS-1$
+		assertNotNull(fPackJunitTextUi,"");//$NON-NLS-1$
+		assertNotNull(fPackJunitUi,"");//$NON-NLS-1$
 
 		fCUIMoney= fPackJunitSamplesMoney.getCompilationUnit("IMoney.java");//$NON-NLS-1$
 		fCUMoney= fPackJunitSamplesMoney.getCompilationUnit("Money.java");//$NON-NLS-1$
@@ -367,8 +367,8 @@ public class ContentProviderTests3{
 		fCUMoneyTest= fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");//$NON-NLS-1$
 
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertNotNull("lib not found", mylibJar);//$NON-NLS-1$
-		assertTrue("lib not found", mylibJar.exists());//$NON-NLS-1$
+		assertNotNull(mylibJar, "lib not found");//$NON-NLS-1$
+		assertTrue(mylibJar.exists(), "lib not found");//$NON-NLS-1$
 		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 
 		//set up project #2: file system structure with in a source folder
@@ -422,7 +422,7 @@ public class ContentProviderTests3{
 		assertNotNull(fProvider);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		fArchiveFragmentRoot.close();
 		JavaProjectHelper.delete(fJProject1);
