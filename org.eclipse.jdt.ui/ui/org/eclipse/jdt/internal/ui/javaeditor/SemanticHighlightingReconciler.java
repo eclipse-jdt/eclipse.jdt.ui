@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highli
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMemberHighlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.RestrictedIdentifiersHighlighting;
-import org.eclipse.jdt.internal.ui.preferences.SyntaxColorHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
@@ -346,6 +345,8 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private SemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
 	private Highlighting[] fHighlightings;
+	/** Syntax Highlightings */
+	private Highlighting[] fSyntaxHighlightings;
 
 	/** Background job's added highlighted positions */
 	private List<Position> fAddedPositions= new ArrayList<>();
@@ -376,15 +377,13 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private SemanticHighlighting[] fJobSemanticHighlightings;
 	/** Highlightings - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
 	private Highlighting[] fJobHighlightings;
-	private Highlighting[] fJobEditorHighlightings;
+	private Highlighting[] fJobSyntaxHighlightings;
 
 	/**
 	 * XXX Hack for performance reasons (should loop over fJobSemanticHighlightings can call consumes(*))
 	 * @since 3.5
 	 */
 	private Highlighting fJobDeprecatedMemberHighlighting;
-
-	private Highlighting[] fEditorHighlightings;
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
@@ -417,7 +416,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fJobPresenter= fPresenter;
 		fJobSemanticHighlightings= fSemanticHighlightings;
 		fJobHighlightings= fHighlightings;
-		fJobEditorHighlightings = fEditorHighlightings;
+		fJobSyntaxHighlightings = fSyntaxHighlightings;
 
 		try {
 			if (fJobPresenter == null || fJobSemanticHighlightings == null || fJobHighlightings == null)
@@ -461,7 +460,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			fJobSemanticHighlightings= null;
 			fJobHighlightings= null;
 			fJobDeprecatedMemberHighlighting= null;
-			fJobEditorHighlightings = null;
+			fJobSyntaxHighlightings = null;
 			synchronized (fReconcileLock) {
 				fIsReconciling= false;
 			}
@@ -518,87 +517,86 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		if (type != null) {
 			switch (type) {
 				case OPERATOR:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR);
 				case SINGLE_LINE_COMMENT:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR);
 				case KEYWORD:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR);
 				case BRACKET:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR);
 				case MULTI_LINE_COMMENT:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR);
 				case STRING:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_STRING_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_STRING_COLOR);
 				case METHOD:
-					return findHighlighting(SemanticHighlightings.METHOD);
+					return findSemanticHighlighting(SemanticHighlightings.METHOD);
 				case ABSTRACT_CLASS:
-					return findHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
+					return findSemanticHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
 				case ABSTRACT_METHOD_INVOCATION:
-					return findHighlighting(SemanticHighlightings.ABSTRACT_METHOD_INVOCATION);
+					return findSemanticHighlighting(SemanticHighlightings.ABSTRACT_METHOD_INVOCATION);
 				case ANNOTATION:
-					return findHighlighting(SemanticHighlightings.ANNOTATION);
+					return findSemanticHighlighting(SemanticHighlightings.ANNOTATION);
 				case ANNOTATION_ELEMENT_REFERENCE:
-					return findHighlighting(SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE);
+					return findSemanticHighlighting(SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE);
 				case AUTOBOXING:
-					return findHighlighting(SemanticHighlightings.AUTOBOXING);
+					return findSemanticHighlighting(SemanticHighlightings.AUTOBOXING);
 				case CLASS:
-					return findHighlighting(SemanticHighlightings.CLASS);
+					return findSemanticHighlighting(SemanticHighlightings.CLASS);
 				case DEPRECATED_MEMBER:
-					return findHighlighting(SemanticHighlightings.DEPRECATED_MEMBER);
+					return findSemanticHighlighting(SemanticHighlightings.DEPRECATED_MEMBER);
 				case ENUM:
-					return findHighlighting(SemanticHighlightings.ENUM);
+					return findSemanticHighlighting(SemanticHighlightings.ENUM);
 				case FIELD:
-					return findHighlighting(SemanticHighlightings.FIELD);
+					return findSemanticHighlighting(SemanticHighlightings.FIELD);
 				case INHERITED_FIELD:
-					return findHighlighting(SemanticHighlightings.INHERITED_FIELD);
+					return findSemanticHighlighting(SemanticHighlightings.INHERITED_FIELD);
 				case INHERITED_METHOD_INVOCATION:
-					return findHighlighting(SemanticHighlightings.INHERITED_METHOD_INVOCATION);
+					return findSemanticHighlighting(SemanticHighlightings.INHERITED_METHOD_INVOCATION);
 				case INTERFACE:
-					return findHighlighting(SemanticHighlightings.INTERFACE);
+					return findSemanticHighlighting(SemanticHighlightings.INTERFACE);
 				case LOCAL_VARIABLE:
-					return findHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
+					return findSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
 				case LOCAL_VARIABLE_DECLARATION:
-					return findHighlighting(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION);
+					return findSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION);
 				case METHOD_DECLARATION:
-					return findHighlighting(SemanticHighlightings.METHOD_DECLARATION);
+					return findSemanticHighlighting(SemanticHighlightings.METHOD_DECLARATION);
 				case NUMBER:
-					return findHighlighting(SemanticHighlightings.NUMBER);
+					return findSemanticHighlighting(SemanticHighlightings.NUMBER);
 				case PARAMETER_VARIABLE:
-					return findHighlighting(SemanticHighlightings.PARAMETER_VARIABLE);
+					return findSemanticHighlighting(SemanticHighlightings.PARAMETER_VARIABLE);
 				case STATIC_FIELD:
-					return findHighlighting(SemanticHighlightings.STATIC_FIELD);
+					return findSemanticHighlighting(SemanticHighlightings.STATIC_FIELD);
 				case STATIC_FINAL_FIELD:
-					return findHighlighting(SemanticHighlightings.STATIC_FINAL_FIELD);
+					return findSemanticHighlighting(SemanticHighlightings.STATIC_FINAL_FIELD);
 				case STATIC_METHOD_INVOCATION:
-					return findHighlighting(SemanticHighlightings.STATIC_METHOD_INVOCATION);
+					return findSemanticHighlighting(SemanticHighlightings.STATIC_METHOD_INVOCATION);
 				case TYPE_ARGUMENT:
-					return findHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
+					return findSemanticHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
 				case TYPE_VARIABLE:
-					return findHighlighting(SemanticHighlightings.TYPE_VARIABLE);
+					return findSemanticHighlighting(SemanticHighlightings.TYPE_VARIABLE);
 				case RESTRICTED_IDENTIFIER:
-					return findHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
+					return findSemanticHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
 				case DEFAULT:
 				default:
-					return findEditorHighlighting(PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR);
+					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR);
 			}
 		}
 		return null;
 	}
 
-	private Highlighting findHighlighting(String preferenceKey) {
-		for (int i = 0; i < fJobSemanticHighlightings.length; i++) {
-			if (Objects.equals(preferenceKey, fJobSemanticHighlightings[i].getPreferenceKey())) {
+	private Highlighting findSemanticHighlighting(String preferenceKey) {
+		for (int i = 0; i < fJobHighlightings.length; i++) {
+			if (Objects.equals(preferenceKey, fJobHighlightings[i].getKey())) {
 				return fJobHighlightings[i];
 			}
 		}
 		return null;
 	}
 
-	private Highlighting findEditorHighlighting(String key) {
-		SyntaxColorHighlighting[] h= SyntaxColorHighlighting.getSyntaxColorHighlightings();
-		for (int i = 0; i < h.length; i++) {
-			if (Objects.equals(key, h[i].preferenceKey())) {
-				return fJobEditorHighlightings[i];
+	private Highlighting findSyntaxHighlighting(String key) {
+		for (int i = 0; i < fJobSyntaxHighlightings.length; i++) {
+			if (Objects.equals(key, fJobSyntaxHighlightings[i].getKey())) {
+				return fJobSyntaxHighlightings[i];
 			}
 		}
 		return null;
@@ -657,13 +655,13 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @param presenter the semantic highlighting presenter
 	 * @param semanticHighlightings the semantic highlightings
 	 * @param highlightings the highlightings
-	 * @param editorHighlightings editor highlightings
+	 * @param syntaxHighlightings editor syntax highlightings
 	 */
-	public void install(JavaEditor editor, ISourceViewer sourceViewer, SemanticHighlightingPresenter presenter, SemanticHighlighting[] semanticHighlightings, Highlighting[] highlightings, Highlighting[] editorHighlightings) {
+	public void install(JavaEditor editor, ISourceViewer sourceViewer, SemanticHighlightingPresenter presenter, SemanticHighlighting[] semanticHighlightings, Highlighting[] highlightings, Highlighting[] syntaxHighlightings) {
 		fPresenter= presenter;
 		fSemanticHighlightings= semanticHighlightings;
 		fHighlightings= highlightings;
-		fEditorHighlightings= editorHighlightings;
+		fSyntaxHighlightings= syntaxHighlightings;
 
 		fEditor= editor;
 		fSourceViewer= sourceViewer;

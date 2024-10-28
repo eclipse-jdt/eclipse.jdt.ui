@@ -15,6 +15,11 @@ import java.util.Collection;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+/**
+ * Computes semantic tokens contributed to the Java source editor via extension point <code>semanticTokens</code>
+ *
+ * @since 3.34
+ */
 public interface ISemanticTokensProvider {
 
 	record SemanticToken(int ofset, int length, TokenType tokenType) {}
