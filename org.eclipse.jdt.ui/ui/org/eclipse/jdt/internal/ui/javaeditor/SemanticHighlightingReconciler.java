@@ -587,6 +587,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Highlighting findSemanticHighlighting(String preferenceKey) {
 		for (int i = 0; i < fJobHighlightings.length; i++) {
 			if (Objects.equals(preferenceKey, fJobHighlightings[i].getKey())) {
+				if (!fJobHighlightings[i].isEnabled()) {
+					break;
+				}
 				return fJobHighlightings[i];
 			}
 		}
@@ -596,6 +599,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Highlighting findSyntaxHighlighting(String key) {
 		for (int i = 0; i < fJobSyntaxHighlightings.length; i++) {
 			if (Objects.equals(key, fJobSyntaxHighlightings[i].getKey())) {
+				if (!fJobSyntaxHighlightings[i].isEnabled()) {
+					break;
+				}
 				return fJobSyntaxHighlightings[i];
 			}
 		}
