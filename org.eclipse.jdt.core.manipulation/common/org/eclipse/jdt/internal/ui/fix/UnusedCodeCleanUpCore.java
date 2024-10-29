@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,13 +26,19 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Pattern;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fixes which can remove unused code
@@ -111,8 +117,9 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES)))
 			result.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
 
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) {
 			result.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
+		}
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS)) {
 			result.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.WARNING);
@@ -174,7 +181,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 				    public void zoz() {
 				        zozo();
 				    }
-				
+
 				    private void zozo() {
 				        System.out.println("");
 				    };
@@ -186,7 +193,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 				    public void zoz() {
 				        zozo(34);
 				    }
-				
+
 				    private void zozo(int k) {
 				        System.out.println("");
 				    };
@@ -230,7 +237,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 		if (UnusedCodeFixCore.isUnusedImport(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 
-		if (UnusedCodeFixCore.isUnusedMember(problem))
+		if (UnusedCodeFixCore.isUnusedMember(problem) || UnusedCodeFixCore.isUnusedLambdaParameter(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES) ||
@@ -264,8 +271,20 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateType);
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_FELDS))
 			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateField);
-		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES))
-			result+= getNumberOfProblems(problems, IProblem.LocalVariableIsNeverUsed);
+		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES)) {
+			for (IProblem problem : problems) {
+				int id= problem.getID();
+				if (id == IProblem.LocalVariableIsNeverUsed) {
+					ProblemLocation location= new ProblemLocation(problem);
+					SimpleName name= UnusedCodeFixCore.getUnusedName(compilationUnit, location);
+					if (!JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject()) ||
+							!(name.getParent() instanceof SingleVariableDeclaration nameParent) ||
+							!(nameParent.getParent() instanceof Pattern)) {
+						result++;
+					}
+				}
+			}
+		}
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_METHOD_PARAMETERS))
 			result+= getNumberOfProblems(problems, IProblem.ArgumentIsNeverUsed);
 		return result;

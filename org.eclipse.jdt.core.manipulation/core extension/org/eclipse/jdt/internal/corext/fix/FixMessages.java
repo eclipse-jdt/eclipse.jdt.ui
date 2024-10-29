@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,6 +91,7 @@ public final class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveUnusedField_description;
 	public static String UnusedCodeFix_RemoveUnusedVariabl_description;
 	public static String UnusedCodeFix_RemoveUnnecessaryArrayCreation_description;
+	public static String UnusedCodeFix_RenameToUnnamedVariable_description;
 
 	public static String Java50Fix_AddMissingAnnotation_description;
 	public static String Java50Fix_AddDeprecated_description;

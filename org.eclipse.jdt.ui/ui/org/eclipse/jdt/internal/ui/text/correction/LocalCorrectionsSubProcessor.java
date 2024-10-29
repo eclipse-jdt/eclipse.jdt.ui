@@ -148,6 +148,7 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50FixCore;
+import org.eclipse.jdt.internal.corext.fix.RenameUnusedVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
@@ -906,6 +907,17 @@ public class LocalCorrectionsSubProcessor {
 
 	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		int problemId= problem.getProblemId();
+		if (JavaModelUtil.is22OrHigher(context.getCompilationUnit().getJavaProject()) &&
+				(problemId == IProblem.LocalVariableIsNeverUsed || problemId == IProblem.LambdaParameterIsNeverUsed)) {
+			RenameUnusedVariableFixCore fix= RenameUnusedVariableFixCore.createRenameToUnnamedFix(context.getASTRoot(), problem);
+			if (fix != null) {
+				addRenameProposal(context, proposals, fix);
+				return;
+			}
+		}
+		if (problemId == IProblem.LambdaParameterIsNeverUsed) {
+			return;
+		}
 		UnusedCodeFixCore fix= UnusedCodeFixCore.createUnusedMemberFix(context.getASTRoot(), problem, false);
 		if (fix != null) {
 			addProposal(context, proposals, fix);
@@ -956,6 +968,14 @@ public class LocalCorrectionsSubProcessor {
 	private static void addProposal(IInvocationContext context, Collection<ICommandAccess> proposals, final UnusedCodeFixCore fix) {
 		if (fix != null) {
 			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
+			proposals.add(proposal);
+		}
+	}
+
+	private static void addRenameProposal(IInvocationContext context, Collection<ICommandAccess> proposals, final RenameUnusedVariableFixCore fix) {
+		if (fix != null) {
+			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_REDO);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
 			proposals.add(proposal);
 		}
