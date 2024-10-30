@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
@@ -41,7 +40,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
@@ -111,7 +109,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jdt.ui.text.java.ISemanticTokensProvider;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
@@ -143,8 +140,6 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
  * of the plug-in such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener {
-
-	private static final String JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT= "org.eclipse.jdt.ui.semanticTokens"; //$NON-NLS-1$
 
 	/**
 	 * The key to store customized templates.
@@ -279,7 +274,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	private BundleContext fBundleContext;
 
 	private ServiceRegistration<DebugOptionsListener> fDebugRegistration;
-	private ISemanticTokensProvider[] fSemanticTokensProviders;
 
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -754,24 +748,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		}
 	}
 
-	public ISemanticTokensProvider[] getContributedSemanticTokensProviders() {
-		if (fSemanticTokensProviders == null) {
-			synchronized(this) {
-				IExtensionRegistry registry= Platform.getExtensionRegistry();
-				IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT);
-				fSemanticTokensProviders = Arrays.stream(elements).map(ce -> {
-					try {
-						return (ISemanticTokensProvider) ce.createExecutableExtension("class"); //$NON-NLS-1$
-					} catch (Exception e) {
-						getLog().error("Cannot instatiate semantic tokens provider", e); //$NON-NLS-1$
-						return null;
-					}
-				}).filter(Objects::nonNull).toArray(ISemanticTokensProvider[]::new);
-			}
-		}
-		return fSemanticTokensProviders;
-	}
-
 	/**
 	 * Resets the Java editor text hovers contributed to the workbench.
 	 * <p>
@@ -971,11 +947,11 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					return fCombinedPreferenceStore;
 				}
 			}
-			
+
 			// Block below may init other bundles and shouldn't be executed with lock held
 			IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 			ChainedPreferenceStore store = new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(getJavaCorePluginPreferences()), generalTextStore });
-			
+
 			synchronized (this) {
 				if (fCombinedPreferenceStore == null) {
 					fCombinedPreferenceStore = store;
