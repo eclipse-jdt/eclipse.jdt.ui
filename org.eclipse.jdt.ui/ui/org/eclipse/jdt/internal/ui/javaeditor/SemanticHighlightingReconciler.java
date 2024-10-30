@@ -15,14 +15,18 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -330,7 +334,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		}
 	}
 
+	private static final String JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT= "org.eclipse.jdt.ui.semanticTokens"; //$NON-NLS-1$
 
+	private static ISemanticTokensProvider[] fSemanticTokensProviders;
 
 	/** Position collector */
 	private PositionCollector fCollector= new PositionCollector();
@@ -393,9 +399,27 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		// Do nothing
 	}
 
+	private static ISemanticTokensProvider[] getContributedSemanticTokensProviders() {
+		if (fSemanticTokensProviders == null) {
+			synchronized(SemanticHighlightingReconciler.class) {
+				IExtensionRegistry registry= Platform.getExtensionRegistry();
+				IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT);
+				fSemanticTokensProviders = Arrays.stream(elements).map(ce -> {
+					try {
+						return (ISemanticTokensProvider) ce.createExecutableExtension("class"); //$NON-NLS-1$
+					} catch (Exception e) {
+						JavaPlugin.getDefault().getLog().error("Cannot instatiate semantic tokens provider", e); //$NON-NLS-1$
+						return null;
+					}
+				}).filter(Objects::nonNull).toArray(ISemanticTokensProvider[]::new);
+			}
+		}
+		return fSemanticTokensProviders;
+	}
+
 	private List<ISemanticTokensProvider.SemanticToken> getContributedSemanticTokens(CompilationUnit ast) {
 		List<ISemanticTokensProvider.SemanticToken> contributedTokens = new ArrayList<>();
-		for (ISemanticTokensProvider provider : JavaPlugin.getDefault().getContributedSemanticTokensProviders()) {
+		for (ISemanticTokensProvider provider : getContributedSemanticTokensProviders()) {
 			contributedTokens.addAll(provider.computeSemanticTokens(ast));
 		}
 		return contributedTokens;

@@ -36,7 +36,7 @@ import org.eclipse.jdt.ui.text.java.ISemanticTokensProvider;
  * - Numbers are NUMBER
  * - all other lower case starting words are LOCAL_VARIABLE
  */
-public class TestSemanticTokensProvider implements ISemanticTokensProvider {
+public class SampleSqlSemanticTokensProvider implements ISemanticTokensProvider {
 
 	private static final String SQL_PREFIX = "SQL:";
 
