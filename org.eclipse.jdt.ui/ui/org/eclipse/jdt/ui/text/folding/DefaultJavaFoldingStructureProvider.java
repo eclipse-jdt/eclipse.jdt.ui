@@ -930,7 +930,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			 * position update and keep the old range, in order to keep the folding structure
 			 * stable.
 			 */
-			boolean isMalformedAnonymousType= newPosition.getOffset() == 0 && element.getElementType() == IJavaElement.TYPE && isInnerType((IType) element);
+			boolean isMalformedAnonymousType= newPosition.getOffset() == 0 && element != null && element.getElementType() == IJavaElement.TYPE && isInnerType((IType) element);
 			List<Tuple> annotations= oldStructure.get(element);
 			if (annotations == null) {
 				if (!isMalformedAnonymousType)
