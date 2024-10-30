@@ -803,8 +803,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 	}
 
 	public static boolean isUnusedLambdaParameter(IProblemLocation problem) {
-		int id= problem.getProblemId();
-		return id == IProblem.LambdaParameterIsNeverUsed;
+		return problem.getProblemId() == IProblem.LambdaParameterIsNeverUsed;
 	}
 
 	public static boolean isUnusedParameter(IProblemLocation problem) {
@@ -941,7 +940,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 							}
 							variableDeclarations.get(varDecl).add(name);
 						} else {
-							result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, true));
+							result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
 						}
 					}
 				}
@@ -964,7 +963,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 			}
 		}
 		for (List<SimpleName> names : variableDeclarations.values()) {
-			result.add(new RemoveUnusedMemberOperation(names.toArray(new SimpleName[0]), true));
+			result.add(new RemoveUnusedMemberOperation(names.toArray(new SimpleName[0]), false));
 		}
 		if (unnecessaryCasts.size() > 0)
 			result.add(new RemoveAllCastOperation(unnecessaryCasts));
