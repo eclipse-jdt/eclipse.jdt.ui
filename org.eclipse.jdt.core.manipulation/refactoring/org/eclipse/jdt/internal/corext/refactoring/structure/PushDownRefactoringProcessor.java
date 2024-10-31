@@ -791,7 +791,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 									ListRewrite args= fRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY);
 									List<Type> originalArgsList= args.getOriginalList();
 									if (originalArgsList.size() > 0) {
-										ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalTypeList.size() - 1));
+										ASTNode argsCopy= typeArgs.createCopyTarget(originalArgsList.get(0), originalArgsList.get(originalArgsList.size() - 1));
 										superMethodInvocation.arguments().add(argsCopy);
 									}
 									fRewrite.replace(node, superMethodInvocation, null);
