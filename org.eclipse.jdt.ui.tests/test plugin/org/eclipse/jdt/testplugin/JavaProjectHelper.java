@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -106,6 +106,8 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS15= new Path("testresources/rtstubs_15.jar");
 	public static final IPath RT_STUBS16= new Path("testresources/rtstubs_16.jar");
 	public static final IPath RT_STUBS17= new Path("testresources/rtstubs_17.jar");
+	public static final IPath RT_STUBS22= new Path("testresources/rtstubs_22.jar");
+	public static final IPath RT_STUBS23= new Path("testresources/rtstubs_23.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -357,6 +359,18 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 22 for the given project.
+	 *
+	 * @param project the java project
+	 * @since 3.15
+	 */
+	public static void set22CompilerOptions(IJavaProject project) {
+		Map<String, String> options= project.getOptions(false);
+		set22_CompilerOptions(options);
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 23 for the given project.
 	 *
 	 * @param project the java project
@@ -452,6 +466,15 @@ public class JavaProjectHelper {
 	 */
 	public static void set17_CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_17, options);
+	}
+
+	/**
+	 * Sets the compiler options to 22.
+	 *
+	 * @param options the compiler options to configure
+	 */
+	public static void set22_CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_22, options);
 	}
 
 	/**

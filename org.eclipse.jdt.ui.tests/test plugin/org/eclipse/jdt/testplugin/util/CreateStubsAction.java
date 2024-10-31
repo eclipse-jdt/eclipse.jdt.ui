@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2017 IBM Corporation and others.
+ * Copyright (c) 2005, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -97,7 +97,12 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			"java.lang.module",
 			"java.nio.file.spi",
 			//13:
-			"java.lang.constant"
+			"java.lang.constant",
+			//22
+			"java.lang.runtime",
+			"java.lang.foreign",
+			"java.util.random",
+			"java.util.concurrent.atomic",
 	};
 
 	private static final String SETTINGS_ID_STUBS_PROJECT= "stubsProject";
