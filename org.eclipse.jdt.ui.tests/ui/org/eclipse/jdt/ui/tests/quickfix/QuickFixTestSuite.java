@@ -24,6 +24,7 @@ import org.junit.platform.suite.api.Suite;
 	QuickFixTest14.class,
 	QuickFixTest15.class,
 	QuickFixTest17.class,
+	QuickFixTest22.class,
 	SerialVersionQuickFixTest.class,
 	UtilitiesTest.class,
 	UnresolvedTypesQuickFixTest.class,

@@ -129,6 +129,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedPrivateField:
 			case IProblem.UnusedPrivateType:
 			case IProblem.LocalVariableIsNeverUsed:
+			case IProblem.LambdaParameterIsNeverUsed:
 			case IProblem.ArgumentIsNeverUsed:
 			case IProblem.MethodRequiresBody:
 			case IProblem.NeedToEmulateFieldReadAccess:
@@ -626,6 +627,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedPrivateType:
 			case IProblem.LocalVariableIsNeverUsed:
 			case IProblem.ArgumentIsNeverUsed:
+			case IProblem.LambdaParameterIsNeverUsed:
 				LocalCorrectionsSubProcessor.addUnusedMemberProposal(context, problem, proposals);
 				break;
 			case IProblem.NeedToEmulateFieldReadAccess:

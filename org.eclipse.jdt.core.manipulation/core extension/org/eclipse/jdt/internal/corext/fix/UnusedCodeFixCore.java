@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -257,9 +257,9 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		private int fRemovedAssignmentsCount;
 		private int fAlteredAssignmentsCount;
 
-		public RemoveUnusedMemberOperation(SimpleName[] unusedNames, boolean removeAllAsignements) {
+		public RemoveUnusedMemberOperation(SimpleName[] unusedNames, boolean removeAllAssignements) {
 			fUnusedNames= unusedNames;
-			fForceRemove= removeAllAsignements;
+			fForceRemove= removeAllAssignements;
 		}
 
 		@Override
@@ -802,6 +802,10 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				|| id == IProblem.LocalVariableIsNeverUsed;
 	}
 
+	public static boolean isUnusedLambdaParameter(IProblemLocation problem) {
+		return problem.getProblemId() == IProblem.LambdaParameterIsNeverUsed;
+	}
+
 	public static boolean isUnusedParameter(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
 	}
@@ -922,13 +926,14 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				}
 			}
 
-			if ((removeUnusedLocalVariables && id == IProblem.LocalVariableIsNeverUsed) || (removeUnusedPrivateFields && id == IProblem.UnusedPrivateField)) {
+			if ((removeUnusedLocalVariables && id == IProblem.LocalVariableIsNeverUsed) || (removeUnusedPrivateFields && id == IProblem.UnusedPrivateField)
+					|| (removeUnusedLocalVariables && id == IProblem.LambdaParameterIsNeverUsed)) {
 				SimpleName name= getUnusedName(compilationUnit, problem);
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding instanceof IVariableBinding && !isFormalParameterInEnhancedForStatement(name) && (!((IVariableBinding) binding).isField() || isSideEffectFree(name, compilationUnit))) {
 						VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
-						if (parent != null) {
+						if (parent != null && id != IProblem.LambdaParameterIsNeverUsed) {
 							ASTNode varDecl= parent.getParent();
 							if (!variableDeclarations.containsKey(varDecl)) {
 								variableDeclarations.put(varDecl, new ArrayList<>());
