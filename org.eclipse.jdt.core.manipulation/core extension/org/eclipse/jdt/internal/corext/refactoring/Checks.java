@@ -915,7 +915,7 @@ public class Checks {
 		return true;
 	}
 
-	private static  CompilationUnit convertICUtoCU(ICompilationUnit compilationUnit) {
+	public static CompilationUnit convertICUtoCU(ICompilationUnit compilationUnit) {
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(compilationUnit);
