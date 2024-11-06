@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 
 /**
@@ -119,6 +120,9 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		if (resolve != null) {
 			try {
 				return resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
+			} catch (RuntimeException e) {
+				SelectionUtil.logException("computing hover information", e, getEditor().getTitle(), document, hoverRegion.getOffset()); //$NON-NLS-1$
+				return null;
 			} catch (JavaModelException x) {
 				return null;
 			}
