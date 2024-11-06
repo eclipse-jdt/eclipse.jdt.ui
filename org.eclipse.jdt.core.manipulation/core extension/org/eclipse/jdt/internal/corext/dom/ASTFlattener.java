@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2017,8 +2017,13 @@ public class ASTFlattener extends GenericVisitor {
 
 	@Override
 	public boolean visit(TypePattern node) {
-		if (ASTHelper.isPatternSupported(node.getAST())) {
-			node.getPatternVariable().accept(this);
+		AST ast= node.getAST();
+		if (ASTHelper.isPatternSupported(ast)) {
+			if (ast.apiLevel() >= ASTHelper.JLS22) {
+				node.getPatternVariable2().accept(this);
+			} else {
+				node.getPatternVariable().accept(this);
+			}
 		}
 		return false;
 	}
