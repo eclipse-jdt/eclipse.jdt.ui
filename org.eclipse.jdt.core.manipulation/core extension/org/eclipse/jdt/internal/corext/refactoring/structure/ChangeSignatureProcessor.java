@@ -457,39 +457,40 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private void checkShadowing(RefactoringStatus result) {
-		try {
-			SearchResultGroup[] matches= findReferences(fMethod, new NullProgressMonitor());
-			for (SearchResultGroup match : matches) {
-				ICompilationUnit cu= match.getCompilationUnit();
+		if (!fMethodName.equals(fMethod.getElementName())) {
+			try {
+				SearchResultGroup[] matches= findReferences(fMethod, new NullProgressMonitor());
+				for (SearchResultGroup match : matches) {
+					ICompilationUnit cu= match.getCompilationUnit();
 
-				for (SearchMatch matchResult : match.getSearchResults()) {
-					if (matchResult instanceof MethodReferenceMatch methodMatch) {
-						IMethod method= (IMethod)methodMatch.getElement();
-						final MethodDeclaration methodDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, Checks.convertICUtoCU(cu));
-						ASTNode typeParent= ASTNodes.getFirstAncestorOrNull(methodDecl, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
-						ITypeBinding typeBinding= null;
-						if (typeParent instanceof AbstractTypeDeclaration atd) {
-							typeBinding= atd.resolveBinding();
-						} else if (typeParent instanceof AnonymousClassDeclaration acd) {
-							typeBinding= acd.resolveBinding();
-						}
-						if (typeBinding != null) {
-							if (recursiveShadowCheck(typeBinding, typeBinding.getPackage().getName(), true)) {
-								RefactoringStatusContext context= JavaStatusContext.create(method.getTypeRoot(), new SourceRange(methodMatch.getOffset(), methodMatch.getLength()));
-								String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow, new Object[] {fMethod.getElementName(), fMethodName});
-								if (method.getParameterNames().length == 0 && fMethodName.equals(methodDecl.getName().getFullyQualifiedName())) {
-									result.addFatalError(msg, context);
-									return;
-								} else {
-									result.addError(msg, context);
+					for (SearchMatch matchResult : match.getSearchResults()) {
+						if (matchResult instanceof MethodReferenceMatch methodMatch && methodMatch.getElement() instanceof IMethod method) {
+							final MethodDeclaration methodDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, Checks.convertICUtoCU(cu));
+							ASTNode typeParent= ASTNodes.getFirstAncestorOrNull(methodDecl, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
+							ITypeBinding typeBinding= null;
+							if (typeParent instanceof AbstractTypeDeclaration atd) {
+								typeBinding= atd.resolveBinding();
+							} else if (typeParent instanceof AnonymousClassDeclaration acd) {
+								typeBinding= acd.resolveBinding();
+							}
+							if (typeBinding != null) {
+								if (recursiveShadowCheck(typeBinding, typeBinding.getPackage().getName(), true)) {
+									RefactoringStatusContext context= JavaStatusContext.create(method.getTypeRoot(), new SourceRange(methodMatch.getOffset(), methodMatch.getLength()));
+									String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow, new Object[] {fMethod.getElementName(), fMethodName});
+									if (method.getParameterNames().length == 0 && fMethodName.equals(methodDecl.getName().getFullyQualifiedName())) {
+										result.addFatalError(msg, context);
+										return;
+									} else {
+										result.addError(msg, context);
+									}
 								}
 							}
 						}
 					}
 				}
+			} catch (JavaModelException e) {
+				// ignore and exit
 			}
-		} catch (JavaModelException e) {
-			// ignore and exit
 		}
 	}
 
