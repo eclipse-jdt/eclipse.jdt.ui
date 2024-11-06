@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.lang.ref.Cleaner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,16 +49,21 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.SourceRange;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -137,6 +143,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.ReturnTypeInfo;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
@@ -183,6 +190,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	private List<ExceptionInfo> fExceptionInfos;
 	private TextChangeManager fChangeManager;
 
+	private Cleaner fCleaner= Cleaner.create();
+	private CleanableWorkingCopyOwner fOwner= new CleanableWorkingCopyOwner();
 	private IMethod fMethod;
 	private IMethod fTopMethod;
 	private IMethod[] fRippleMethods;
@@ -206,6 +215,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	public ChangeSignatureProcessor(JavaRefactoringArguments arguments, RefactoringStatus status) throws JavaModelException {
 		this((IMethod) null);
+		fCleaner.register(this, fOwner);
 		status.merge(initialize(arguments));
 	}
 
@@ -225,6 +235,26 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			fReturnTypeInfo= new ReturnTypeInfo(Signature.toString(Signature.getReturnType(fMethod.getSignature())));
 			fMethodName= fMethod.getElementName();
 			fVisibility= JdtFlags.getVisibilityCode(fMethod);
+		}
+	}
+
+	static class CleanableWorkingCopyOwner extends WorkingCopyOwner implements Runnable {
+        @Override
+		public void run() {
+            resetWorkingCopies(this);
+        }
+	}
+
+	/**
+	 * Resets the working copies.
+	 */
+	private static void resetWorkingCopies(WorkingCopyOwner owner) {
+		for (ICompilationUnit unit : JavaCore.getWorkingCopies(owner)) {
+			try {
+				unit.discardWorkingCopy();
+			} catch (Exception exception) {
+				// Do nothing
+			}
 		}
 	}
 
@@ -395,7 +425,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		checkMethodName(result);
 		if (result.hasFatalError())
 			return result;
-
+		checkShadowing(result);
+		if (result.hasFatalError())
+			return result;
 		checkParameterNamesAndValues(result);
 		if (result.hasFatalError())
 			return result;
@@ -422,6 +454,86 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 		//checkExceptions() unnecessary (IType always ok)
 		return result;
+	}
+
+	private void checkShadowing(RefactoringStatus result) {
+		if (!fMethodName.equals(fMethod.getElementName())) {
+			try {
+				SearchResultGroup[] matches= findReferences(fMethod, new NullProgressMonitor());
+				for (SearchResultGroup match : matches) {
+					ICompilationUnit cu= match.getCompilationUnit();
+
+					for (SearchMatch matchResult : match.getSearchResults()) {
+						if (matchResult instanceof MethodReferenceMatch methodMatch && methodMatch.getElement() instanceof IMethod method) {
+							final MethodDeclaration methodDecl= ASTNodeSearchUtil.getMethodDeclarationNode(method, Checks.convertICUtoCU(cu));
+							ASTNode typeParent= ASTNodes.getFirstAncestorOrNull(methodDecl, AbstractTypeDeclaration.class, AnonymousClassDeclaration.class);
+							ITypeBinding typeBinding= null;
+							if (typeParent instanceof AbstractTypeDeclaration atd) {
+								typeBinding= atd.resolveBinding();
+							} else if (typeParent instanceof AnonymousClassDeclaration acd) {
+								typeBinding= acd.resolveBinding();
+							}
+							if (typeBinding != null) {
+								if (recursiveShadowCheck(typeBinding, typeBinding.getPackage().getName(), true)) {
+									RefactoringStatusContext context= JavaStatusContext.create(method.getTypeRoot(), new SourceRange(methodMatch.getOffset(), methodMatch.getLength()));
+									String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow, new Object[] {fMethod.getElementName(), fMethodName});
+									if (method.getParameterNames().length == 0 && fMethodName.equals(methodDecl.getName().getFullyQualifiedName())) {
+										result.addFatalError(msg, context);
+										return;
+									} else {
+										result.addError(msg, context);
+									}
+								}
+							}
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				// ignore and exit
+			}
+		}
+	}
+
+	private boolean recursiveShadowCheck(ITypeBinding typeBinding, String origPackage, boolean allowPrivate) {
+		if (typeBinding == null) {
+			return false;
+		}
+		IMethodBinding[] methods= typeBinding.getDeclaredMethods();
+		for (IMethodBinding method : methods) {
+			if (method.getName().equals(fMethodName) && method.getParameterNames().length == fParameterInfos.size() &&
+					(allowPrivate || Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())
+							|| !Modifier.isPrivate(method.getModifiers()) && typeBinding.getPackage().getName().equals(origPackage))) {
+				return true;
+			}
+		}
+		if (recursiveShadowCheck(typeBinding.getSuperclass(), origPackage, false)) {
+			return true;
+		}
+		ITypeBinding[] interfaces= typeBinding.getInterfaces();
+		for (ITypeBinding implemented : interfaces) {
+			if (recursiveShadowCheck(implemented, origPackage, false)) {
+				return true;
+			}
+		}
+		if (typeBinding.isMember()) {
+			if (recursiveShadowCheck(typeBinding.getDeclaringClass(), origPackage, true)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private SearchResultGroup[] findReferences(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
+		SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return new SearchResultGroup[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
+		engine.setOwner(fOwner);
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(member));
+		engine.searchPattern(monitor);
+		return (SearchResultGroup[]) engine.getResults();
 	}
 
 	public boolean isSignatureSameAsInitial() throws JavaModelException {
