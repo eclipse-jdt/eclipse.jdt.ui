@@ -7550,6 +7550,11 @@
             id="org.eclipse.jdt.ui.cleanup.unboxing"
             runAfter="org.eclipse.jdt.ui.cleanup.autoboxing">
       </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RenameUnusedVariableCleanUpCore"
+            id="org.eclipse.jdt.ui.cleanup.rename_unused"
+            runAfter="org.eclipse.jdt.ui.cleanup.unboxing">
+      </cleanUp>
    </extension>
 
   <extension

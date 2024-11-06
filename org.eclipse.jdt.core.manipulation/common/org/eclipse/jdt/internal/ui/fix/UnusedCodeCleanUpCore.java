@@ -237,7 +237,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 		if (UnusedCodeFixCore.isUnusedImport(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
 
-		if (UnusedCodeFixCore.isUnusedMember(problem) || UnusedCodeFixCore.isUnusedLambdaParameter(problem))
+		if (UnusedCodeFixCore.isUnusedMember(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_CONSTRUCTORS) ||
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_TYPES) ||

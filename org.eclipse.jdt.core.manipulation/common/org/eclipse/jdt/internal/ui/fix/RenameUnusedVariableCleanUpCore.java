@@ -134,7 +134,7 @@ public class RenameUnusedVariableCleanUpCore extends AbstractMultiFix {
 
 	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
-		if (UnusedCodeFixCore.isUnusedMember(problem) || UnusedCodeFixCore.isUnusedLambdaParameter(problem))
+		if (RenameUnusedVariableFixCore.isUnusedMember(problem) || RenameUnusedVariableFixCore.isUnusedLambdaParameter(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_LOCAL_VARIABLES);
 
 		return false;
