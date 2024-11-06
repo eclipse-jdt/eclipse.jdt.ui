@@ -17,12 +17,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+
+import org.eclipse.core.runtime.ILog;
 
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -119,6 +125,36 @@ public class SelectionUtil {
 	}
 
 	private SelectionUtil() {
+	}
+
+	private static String lastErrorMsg;
+
+	public static void logException(String action, RuntimeException e, String title, IDocument document, int offset) {
+		// log error and keep going
+		String errorMsg= e.getClass().getSimpleName() + " " + action; //$NON-NLS-1$
+		if (title != null) {
+			errorMsg+= " in " + title; //$NON-NLS-1$
+		}
+		errorMsg+= " at offset " + offset; //$NON-NLS-1$
+		try {
+			int lineOfOffset= document.getLineOfOffset(offset);
+			String source= "Source line " + (lineOfOffset + 1); //$NON-NLS-1$
+			int CONTEXT_LINES= 10;
+			int startLineOffset= document.getLineOffset(Math.max(0, lineOfOffset - CONTEXT_LINES));
+			source+= " :"+System.lineSeparator(); //$NON-NLS-1$
+			source+= "-----" + System.lineSeparator(); //$NON-NLS-1$
+			source+= document.get(startLineOffset, offset - startLineOffset); // source until offset
+			source+= '|'; // cursor
+			source+= document.get(offset, document.getLineOffset(lineOfOffset) + document.getLineLength(lineOfOffset) - offset); // rest of line
+			source+= "-----"; //$NON-NLS-1$
+			e.addSuppressed(new Throwable(source));
+		} catch (BadLocationException ble) {
+			e.addSuppressed(ble);
+		}
+		if (!Objects.equals(lastErrorMsg, errorMsg)) { // avoid repetitive logging
+			lastErrorMsg= errorMsg;
+			ILog.get().error(errorMsg, e);
+		}
 	}
 
 }

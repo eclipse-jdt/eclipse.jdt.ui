@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
@@ -27,7 +26,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
@@ -35,10 +33,11 @@ import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -49,6 +48,7 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 /**
  * The description of an extension to the
@@ -328,7 +328,6 @@ final class CompletionProposalComputerDescriptor {
 		return (IJavaCompletionProposalComputer) fElement.createExecutableExtension(CLASS);
 	}
 
-	private String lastErrorMsg;
 	/**
 	 * Safely computes completion proposals through the described extension. If the extension
 	 * is disabled, throws an exception or otherwise does not adhere to the contract described in
@@ -360,8 +359,8 @@ final class CompletionProposalComputerDescriptor {
 				}
 			} finally {
 				// If computers are using non-ui thread, don't report delays.
-				fIsReportingDelay= !(context.getViewer() instanceof JavaSourceViewer)
-						|| !((JavaSourceViewer) context.getViewer()).isAsyncCompletionActive();
+				fIsReportingDelay= !(context.getViewer() instanceof JavaSourceViewer viewer)
+						|| !viewer.isAsyncCompletionActive();
 			}
 			status= createAPIViolationStatus(COMPUTE_COMPLETION_PROPOSALS);
 		} catch (InvalidRegistryObjectException x) {
@@ -370,25 +369,8 @@ final class CompletionProposalComputerDescriptor {
 			status= createExceptionStatus(x);
 		} catch (RuntimeException x) {
 			// log error and keep going with other providers
-			String where= ""; //$NON-NLS-1$
-			if (context instanceof JavaContentAssistInvocationContext ctx) {
-				if (ctx.getCompilationUnit() != null) {
-					where+= ctx.getCompilationUnit().getElementName();
-				}
-			}
-			where+= " at offset " + context.getInvocationOffset(); //$NON-NLS-1$
-			try {
-				IDocument doc= context.getDocument();
-				int lineOfOffset= doc.getLineOfOffset(context.getInvocationOffset());
-				where+= " line " + (lineOfOffset + 1); //$NON-NLS-1$
-				int CONTEXT_LINES= 10;
-				where+= " :\n" + doc.get(doc.getLineOffset(Math.max(0, lineOfOffset - CONTEXT_LINES)), context.getInvocationOffset()) + '|'; //$NON-NLS-1$
-			} catch (BadLocationException e1) {
-			}
-			if (!Objects.equals(lastErrorMsg, where)) { // avoid repetitive logging
-				lastErrorMsg= where;
-				ILog.get().error("RuntimeException computing completion proposal for " + where, x); //$NON-NLS-1$
-			}
+			String title= (context instanceof JavaContentAssistInvocationContext ctx) && (ctx.getCompilationUnit() instanceof ICompilationUnit cu) ? cu.getElementName() : null;
+			SelectionUtil.logException("computing completion proposal", x, title, context.getDocument(), context.getInvocationOffset()); //$NON-NLS-1$
 			status= createExceptionStatus(x);
 			return Collections.emptyList();
 		} finally {
