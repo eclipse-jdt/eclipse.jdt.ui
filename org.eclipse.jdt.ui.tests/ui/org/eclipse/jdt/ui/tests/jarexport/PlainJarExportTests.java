@@ -28,7 +28,6 @@ import java.util.zip.ZipFile;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -62,10 +61,6 @@ public class PlainJarExportTests {
 
 	@Rule
 	public TestName tn= new TestName();
-
-	@BeforeClass
-	public static void setUpTest() {
-	}
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fMainRoot;

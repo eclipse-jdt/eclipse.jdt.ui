@@ -47,7 +47,6 @@ public class ProjectTestSetup extends ExternalResource {
 
 	public ProjectTestSetup() {
 		this.projectname="TestSetupProject";
-//		this.ipath=JavaProjectHelper.RT_STUBS_18;
 		this.ipath=JavaProjectHelper.RT_STUBS_15;
 	}
 
