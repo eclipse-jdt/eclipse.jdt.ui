@@ -530,54 +530,56 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private void checkShadowing2(RefactoringStatus result) {
 		try {
-			ICompilationUnit icu= fMethod.getCompilationUnit();
-			CompilationUnit cu= Checks.convertICUtoCU(icu);
-			if (cu == null) {
-				return;
-			}
-			ShadowedMethodVisitor visitor= new ShadowedMethodVisitor();
-			try {
-				AbstractTypeDeclaration methodTypeDecl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fMethod.getDeclaringType(), cu);
-				if (methodTypeDecl != null) {
-					methodTypeDecl.accept(visitor);
+			if (!fMethodName.equals(fMethod.getElementName())) {
+				ICompilationUnit icu= fMethod.getCompilationUnit();
+				CompilationUnit cu= Checks.convertICUtoCU(icu);
+				if (cu == null) {
+					return;
 				}
-			} catch (AbortSearchException e) {
-				MethodInvocation method= visitor.getMethod();
-				RefactoringStatusContext context= JavaStatusContext.create(icu, new SourceRange(method.getStartPosition(), method.getLength()));
-				String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow2, new Object[] {fMethod.getElementName(), fMethodName});
-				if (fMethod.getParameterNames().length == 0) {
-					result.addFatalError(msg, context);
-				} else {
-					result.addError(msg, context);
-				}
-				return;
-			}
-			if (!fMethodName.equals(fMethod.getElementName()) && !Modifier.isPrivate(fMethod.getFlags())) {
-				SearchResultGroup[] matches= findImplementors(fMethod.getDeclaringType(), new NullProgressMonitor());
-				for (SearchResultGroup match : matches) {
-					icu= match.getCompilationUnit();
-					cu= Checks.convertICUtoCU(icu);
-					if (cu == null) {
-						return;
+				ShadowedMethodVisitor visitor= new ShadowedMethodVisitor();
+				try {
+					AbstractTypeDeclaration methodTypeDecl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fMethod.getDeclaringType(), cu);
+					if (methodTypeDecl != null) {
+						methodTypeDecl.accept(visitor);
 					}
-					for (SearchMatch matchResult : match.getSearchResults()) {
-						if (matchResult instanceof TypeReferenceMatch typeMatch && typeMatch.getElement() instanceof IType type) {
-							final TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(type, cu);
-							if (typeDecl != null) {
-								ITypeBinding typeBinding= typeDecl.resolveBinding();
-								if (Modifier.isPublic(fMethod.getFlags()) || Modifier.isProtected(fMethod.getFlags()) ||
-										typeBinding != null && typeBinding.getPackage().getName().equals(fMethod.getDeclaringType().getPackageFragment().getElementName())) {
-									visitor= new ShadowedMethodVisitor();
-									try {
-										typeDecl.accept(visitor);
-									} catch (AbortSearchException e) {
-										MethodInvocation method= visitor.getMethod();
-										RefactoringStatusContext context= JavaStatusContext.create(icu, new SourceRange(method.getStartPosition(), method.getLength()));
-										String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow2, new Object[] {fMethod.getElementName(), fMethodName});
-										if (fMethod.getParameterNames().length == 0) {
-											result.addFatalError(msg, context);
-										} else {
-											result.addError(msg, context);
+				} catch (AbortSearchException e) {
+					MethodInvocation method= visitor.getMethod();
+					RefactoringStatusContext context= JavaStatusContext.create(icu, new SourceRange(method.getStartPosition(), method.getLength()));
+					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow2, new Object[] {fMethod.getElementName(), fMethodName});
+					if (fMethod.getParameterNames().length == 0) {
+						result.addFatalError(msg, context);
+					} else {
+						result.addError(msg, context);
+					}
+					return;
+				}
+				if (!Modifier.isPrivate(fMethod.getFlags())) {
+					SearchResultGroup[] matches= findImplementors(fMethod.getDeclaringType(), new NullProgressMonitor());
+					for (SearchResultGroup match : matches) {
+						icu= match.getCompilationUnit();
+						cu= Checks.convertICUtoCU(icu);
+						if (cu == null) {
+							return;
+						}
+						for (SearchMatch matchResult : match.getSearchResults()) {
+							if (matchResult instanceof TypeReferenceMatch typeMatch && typeMatch.getElement() instanceof IType type) {
+								final TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(type, cu);
+								if (typeDecl != null) {
+									ITypeBinding typeBinding= typeDecl.resolveBinding();
+									if (Modifier.isPublic(fMethod.getFlags()) || Modifier.isProtected(fMethod.getFlags()) ||
+											typeBinding != null && typeBinding.getPackage().getName().equals(fMethod.getDeclaringType().getPackageFragment().getElementName())) {
+										visitor= new ShadowedMethodVisitor();
+										try {
+											typeDecl.accept(visitor);
+										} catch (AbortSearchException e) {
+											MethodInvocation method= visitor.getMethod();
+											RefactoringStatusContext context= JavaStatusContext.create(icu, new SourceRange(method.getStartPosition(), method.getLength()));
+											String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow2, new Object[] {fMethod.getElementName(), fMethodName});
+											if (fMethod.getParameterNames().length == 0) {
+												result.addFatalError(msg, context);
+											} else {
+												result.addError(msg, context);
+											}
 										}
 									}
 								}
