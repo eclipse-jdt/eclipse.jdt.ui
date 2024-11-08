@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -195,6 +195,32 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 		assertEqualLines("invalid change of method name", expectedFileContents, newcu.getSource());
 
 		assertParticipant(classType);
+	}
+
+	/*
+	 * Rename method 'm(signature)' to 'newMethodName(signature)'
+	 */
+	private void helperRenameMethodFail(String[] signature, String newMethodName, int expectedSeverity, boolean createDelegate, boolean markAsDeprecated, String typeName) throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
+		IType classType= getType(cu, typeName);
+		IMethod method = classType.getMethod("m", signature);
+		assertTrue("method m does not exist in " +typeName, method.exists());
+		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
+
+		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		processor.setNewMethodName(newMethodName);
+		processor.setDelegateUpdating(createDelegate);
+		processor.setDeprecateDelegates(markAsDeprecated);
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		ref.checkInitialConditions(testMonitor);
+		testMonitor.assertUsedUp();
+
+		JavaRefactoringDescriptor descriptor= processor.createDescriptor();
+		RefactoringStatus result= performRefactoring(descriptor);
+		assertNotNull("precondition was supposed to fail", result);
+		assertEquals("Severity:", expectedSeverity, result.getSeverity());
 	}
 
 	private void helperDoAll(String typeName,
@@ -579,6 +605,12 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 	@Test
 	public void testFail1() throws Exception{
 		helperFail(new String[0], new String[0], RefactoringStatus.FATAL);
+	}
+
+	@Test
+	public void testFailIssue1751() throws Exception {
+		String[] signature= {};
+		helperRenameMethodFail(signature, "k", RefactoringStatus.FATAL, false, true, "A_testFailIssue1751");
 	}
 
 	@Test

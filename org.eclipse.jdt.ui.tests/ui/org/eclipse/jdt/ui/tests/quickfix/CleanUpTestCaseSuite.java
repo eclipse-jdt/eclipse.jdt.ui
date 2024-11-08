@@ -33,6 +33,7 @@ import org.junit.platform.suite.api.Suite;
 	CleanUpTest14.class,
 	CleanUpTest15.class,
 	CleanUpTest16.class,
+	CleanUpTest22.class,
 	CleanUpAnnotationTest.class,
 	SaveParticipantTest.class,
 	CleanUpActionTest.class,
