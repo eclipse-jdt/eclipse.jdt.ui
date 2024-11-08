@@ -143,13 +143,22 @@ public class RenameUnusedVariableFixCore extends CompilationUnitRewriteOperation
 	}
 
 	public static boolean canRenameToUnnamedVariable(CompilationUnit compilationUnit, SimpleName name) {
-		return (JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject()) &&
-				name.getParent() instanceof SingleVariableDeclaration nameParent &&
-				(nameParent.getParent() instanceof Pattern || nameParent.getParent() instanceof EnhancedForStatement) ||
-				name.getParent() instanceof VariableDeclarationFragment varFragment &&
-						(varFragment.getParent() instanceof LambdaExpression ||
-								varFragment.getParent() instanceof VariableDeclarationExpression varFragmentParent &&
-										(varFragmentParent.getParent() instanceof TryStatement || varFragmentParent.getParent() instanceof ForStatement)));
+		if (JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+			if (name.getParent() instanceof SingleVariableDeclaration nameParent) {
+				if (nameParent.getParent() instanceof Pattern || nameParent.getParent() instanceof EnhancedForStatement) {
+					return true;
+				}
+			} else if (name.getParent() instanceof VariableDeclarationFragment varFragment) {
+				if (varFragment.getParent() instanceof LambdaExpression) {
+					return true;
+				} else if (varFragment.getParent() instanceof VariableDeclarationExpression varFragmentParent) {
+					if (varFragmentParent.getParent() instanceof TryStatement || varFragmentParent.getParent() instanceof ForStatement) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
