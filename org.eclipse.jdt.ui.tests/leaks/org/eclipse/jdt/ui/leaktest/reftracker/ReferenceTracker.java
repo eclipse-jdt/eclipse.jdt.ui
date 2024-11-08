@@ -81,6 +81,11 @@ public final class ReferenceTracker {
 			if (fieldVal != null) {
 				fQueue.add(new ReferencedFieldElement(ref, fld, fieldVal));
 			}
+		} catch (IllegalArgumentException  e) {
+			// XXX workaround for error in JDK: https://bugs.openjdk.org/browse/JDK-8337622
+			if (!"Can not get final java.lang.Class field java.lang.Class.componentType on java.lang.Class".equals(e.getMessage())) {
+				throw e;
+			}
 		} catch (IllegalAccessException  e) {
 			handleError(e, fld);
 		}
