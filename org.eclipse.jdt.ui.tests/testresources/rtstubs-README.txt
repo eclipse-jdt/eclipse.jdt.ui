@@ -26,7 +26,7 @@ Building rtstubs*.jar
 - Create a Java project with the JRE for which you need to generate stubs
    (e.g. "JDK9")
 
-- Select all the modules. This will use the hardcoded default list of
+- Open the JRE/JDK in the project explorer to show modules.  Select all the modules. This will use the hardcoded default list of
    packages. In Java 9: from modules java.base, java.compiler, java.desktop, and
    java.sql. Before Java 9: select rt.jar. 
    (in CreateStubsAction, add additionally required packages there).
@@ -40,6 +40,9 @@ Building rtstubs*.jar
 - Team > Share Project... > Git, and commit a base version in case you later
    want to revert.
 
+- Perform a find . | xargs sed -i -e's/sealed //g' on the command line to remove all sealed modifiers
+  from all .java files in the project (can do this manually in editor if desired)
+
 - Manually remove everything from the java.beans package, except for:
 PropertyChangeEvent
 PropertyChangeListener
@@ -50,6 +53,11 @@ PropertyChangeListener
      "Java Type Indicator" decorator help :-)
   - all methods/implements clauses with references to javax, sun, or java.time.*
      (could maybe generate java.time* in the future if this avoids manual work)
+
+- For some missing internal types, simply choose quick fix to create them
+
+- For constructors that refer to missing type in parameters, possibly change to java.lang.Object
+  if class is not removed
 
 - Make sure there are no compile errors remaining.
 

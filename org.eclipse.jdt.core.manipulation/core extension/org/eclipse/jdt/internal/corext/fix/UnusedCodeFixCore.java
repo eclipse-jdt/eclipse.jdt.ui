@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2022 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -89,6 +90,7 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ReplaceRewrite;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -257,9 +259,9 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		private int fRemovedAssignmentsCount;
 		private int fAlteredAssignmentsCount;
 
-		public RemoveUnusedMemberOperation(SimpleName[] unusedNames, boolean removeAllAsignements) {
+		public RemoveUnusedMemberOperation(SimpleName[] unusedNames, boolean removeAllAssignements) {
 			fUnusedNames= unusedNames;
-			fForceRemove= removeAllAsignements;
+			fForceRemove= removeAllAssignements;
 		}
 
 		@Override
@@ -802,6 +804,10 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				|| id == IProblem.LocalVariableIsNeverUsed;
 	}
 
+	public static boolean isUnusedLambdaParameter(IProblemLocation problem) {
+		return problem.getProblemId() == IProblem.LambdaParameterIsNeverUsed;
+	}
+
 	public static boolean isUnusedParameter(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.ArgumentIsNeverUsed;
 	}
@@ -935,7 +941,16 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 							}
 							variableDeclarations.get(varDecl).add(name);
 						} else {
-							result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+							if (id == IProblem.LocalVariableIsNeverUsed) {
+								SimpleName nameNode= UnusedCodeFixCore.getUnusedName(compilationUnit, problem);
+								if (!JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject()) ||
+										!(nameNode.getParent() instanceof SingleVariableDeclaration nameParent) ||
+										!(nameParent.getParent() instanceof Pattern)) {
+									result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+								}
+							} else {
+								result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+							}
 						}
 					}
 				}

@@ -564,7 +564,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (obj instanceof IType resultType) {
 				try {
 					ASTNode typeDecl= null;
-					if (resultType.isLocal() || resultType.isAnonymous()) {
+					if (resultType.isLocal() || resultType.isAnonymous() || resultType.isMember()) {
 						ICompilationUnit icu= resultType.getCompilationUnit();
 						typeDecl= getTypeDeclaration(resultType, icu);
 					}
