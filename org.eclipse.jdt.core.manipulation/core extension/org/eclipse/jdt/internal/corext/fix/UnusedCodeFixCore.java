@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -90,7 +89,6 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ReplaceRewrite;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -930,7 +928,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 
 			if ((removeUnusedLocalVariables && id == IProblem.LocalVariableIsNeverUsed) || (removeUnusedPrivateFields && id == IProblem.UnusedPrivateField)) {
 				SimpleName name= getUnusedName(compilationUnit, problem);
-				if (name != null) {
+				if (name != null && !RenameUnusedVariableFixCore.canRenameToUnnamedVariable(compilationUnit, name)) {
 					IBinding binding= name.resolveBinding();
 					if (binding instanceof IVariableBinding && !isFormalParameterInEnhancedForStatement(name) && (!((IVariableBinding) binding).isField() || isSideEffectFree(name, compilationUnit))) {
 						VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
@@ -941,16 +939,7 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 							}
 							variableDeclarations.get(varDecl).add(name);
 						} else {
-							if (id == IProblem.LocalVariableIsNeverUsed) {
-								SimpleName nameNode= UnusedCodeFixCore.getUnusedName(compilationUnit, problem);
-								if (!JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject()) ||
-										!(nameNode.getParent() instanceof SingleVariableDeclaration nameParent) ||
-										!(nameParent.getParent() instanceof Pattern)) {
-									result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
-								}
-							} else {
-								result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
-							}
+							result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
 						}
 					}
 				}
