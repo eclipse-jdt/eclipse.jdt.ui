@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -35,10 +36,11 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -78,15 +80,10 @@ public class RenameUnusedVariableFixCore extends CompilationUnitRewriteOperation
 			if (name != null) {
 				IBinding binding= name.resolveBinding();
 				if (binding != null) {
-					if (JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
-						if (name.getParent() instanceof SingleVariableDeclaration parent &&
-								parent.getParent() instanceof Pattern ||
-								name.getParent() instanceof VariableDeclarationFragment parent2 &&
-								parent2.getParent() instanceof LambdaExpression) {
-							String label= FixMessages.UnusedCodeFix_RenameToUnnamedVariable_description;
-							RenameToUnnamedVariableOperation operation= new RenameToUnnamedVariableOperation(name);
-							return new RenameUnusedVariableFixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] { operation }, getCleanUpOptions());
-						}
+					if (canRenameToUnnamedVariable(compilationUnit, name)) {
+						String label= FixMessages.UnusedCodeFix_RenameToUnnamedVariable_description;
+						RenameToUnnamedVariableOperation operation= new RenameToUnnamedVariableOperation(name);
+						return new RenameUnusedVariableFixCore(label, compilationUnit, new CompilationUnitRewriteOperation[] { operation }, getCleanUpOptions());
 					}
 				}
 			}
@@ -131,16 +128,8 @@ public class RenameUnusedVariableFixCore extends CompilationUnitRewriteOperation
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding instanceof IVariableBinding) {
-						VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
-						if (parent == null || id == IProblem.LambdaParameterIsNeverUsed) {
-							if (JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
-								if (name.getParent() instanceof SingleVariableDeclaration nameParent &&
-										nameParent.getParent() instanceof Pattern ||
-										name.getParent() instanceof VariableDeclarationFragment varFragment &&
-										varFragment.getParent() instanceof LambdaExpression) {
-									result.add(new RenameToUnnamedVariableOperation(name));
-								}
-							}
+						if (canRenameToUnnamedVariable(compilationUnit, name)) {
+							result.add(new RenameToUnnamedVariableOperation(name));
 						}
 					}
 				}
@@ -153,8 +142,23 @@ public class RenameUnusedVariableFixCore extends CompilationUnitRewriteOperation
 		return new RenameUnusedVariableFixCore(FixMessages.UnusedCodeFix_change_name, compilationUnit, result.toArray(new CompilationUnitRewriteOperation[result.size()]));
 	}
 
-	public static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {
-		return name.getParent() instanceof SingleVariableDeclaration && name.getParent().getLocationInParent() == EnhancedForStatement.PARAMETER_PROPERTY;
+	public static boolean canRenameToUnnamedVariable(CompilationUnit compilationUnit, SimpleName name) {
+		if (JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+			if (name.getParent() instanceof SingleVariableDeclaration nameParent) {
+				if (nameParent.getParent() instanceof Pattern || nameParent.getParent() instanceof EnhancedForStatement) {
+					return true;
+				}
+			} else if (name.getParent() instanceof VariableDeclarationFragment varFragment) {
+				if (varFragment.getParent() instanceof LambdaExpression) {
+					return true;
+				} else if (varFragment.getParent() instanceof VariableDeclarationExpression varFragmentParent) {
+					if (varFragmentParent.getParent() instanceof TryStatement || varFragmentParent.getParent() instanceof ForStatement) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
