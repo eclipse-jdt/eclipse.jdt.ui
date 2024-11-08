@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -148,7 +149,7 @@ public class RenameUnusedVariableFixCore extends CompilationUnitRewriteOperation
 				name.getParent() instanceof VariableDeclarationFragment varFragment &&
 						(varFragment.getParent() instanceof LambdaExpression ||
 								varFragment.getParent() instanceof VariableDeclarationExpression varFragmentParent &&
-										varFragmentParent.getParent() instanceof TryStatement));
+										(varFragmentParent.getParent() instanceof TryStatement || varFragmentParent.getParent() instanceof ForStatement)));
 	}
 
 	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
