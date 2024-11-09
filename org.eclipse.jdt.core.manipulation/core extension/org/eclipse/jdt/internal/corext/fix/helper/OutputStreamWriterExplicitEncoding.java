@@ -102,7 +102,7 @@ public class OutputStreamWriterExplicitEncoding extends AbstractExplicitEncoding
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
@@ -117,7 +117,7 @@ public class OutputStreamWriterExplicitEncoding extends AbstractExplicitEncoding
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Writer w = new OutputStreamWriter(out, "+computeCharsetforPreview(cb)+");\nOutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Writer w = new OutputStreamWriter(out, "+cb.computeCharsetforPreview()+");\nOutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Writer w = new OutputStreamWriter(out);\nOutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$
 	}

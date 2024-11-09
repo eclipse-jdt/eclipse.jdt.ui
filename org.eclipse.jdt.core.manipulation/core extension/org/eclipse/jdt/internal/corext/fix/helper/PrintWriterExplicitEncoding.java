@@ -77,7 +77,7 @@ public class PrintWriterExplicitEncoding extends AbstractExplicitEncoding<ClassI
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited));
 		/**
 		 * new FileOutputStream(<filename>)
 		 */
@@ -104,7 +104,7 @@ public class PrintWriterExplicitEncoding extends AbstractExplicitEncoding<ClassI
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Writer w=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputfile),"+computeCharsetforPreview(cb)+"));\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Writer w=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputfile),"+cb.computeCharsetforPreview()+"));\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Writer w=new PrintWriter(outputfile);\n"; //$NON-NLS-1$
 	}
