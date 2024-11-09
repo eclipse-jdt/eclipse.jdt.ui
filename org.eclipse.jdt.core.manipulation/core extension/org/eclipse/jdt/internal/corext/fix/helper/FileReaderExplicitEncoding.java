@@ -81,7 +81,7 @@ public class FileReaderExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited));
 		/**
 		 * new FileInputStream(<filename>)
 		 */
@@ -102,7 +102,7 @@ public class FileReaderExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Reader r=new InputStreamReader(new FileInputStream(inputfile),"+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Reader r=new InputStreamReader(new FileInputStream(inputfile),"+cb.computeCharsetforPreview()+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Reader r=new FileReader(inputfile);\n"; //$NON-NLS-1$
 	}

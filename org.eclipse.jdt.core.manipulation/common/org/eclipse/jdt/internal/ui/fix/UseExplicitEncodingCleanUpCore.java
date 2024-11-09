@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
-import org.eclipse.jdt.internal.corext.fix.helper.AbstractExplicitEncoding.ChangeBehavior;
+import org.eclipse.jdt.internal.corext.fix.helper.ChangeBehavior;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;

@@ -61,7 +61,7 @@ public class FileWriterExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited));
 		/**
 		 * new FileInputStream(<filename>)
 		 */
@@ -82,7 +82,7 @@ public class FileWriterExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Writer w=new OutputStreamWriter(new FileOutputStream(outputfile),"+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Writer w=new OutputStreamWriter(new FileOutputStream(outputfile),"+cb.computeCharsetforPreview()+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Writer w=new FileWriter(outputfile);\n"; //$NON-NLS-1$
 	}
