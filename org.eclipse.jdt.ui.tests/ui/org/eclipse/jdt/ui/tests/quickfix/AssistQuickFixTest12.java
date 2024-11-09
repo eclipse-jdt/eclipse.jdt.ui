@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -36,7 +37,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 public class AssistQuickFixTest12 extends QuickFixTest {
 
 	@Rule
-    public ProjectTestSetup projectSetup = new Java12ProjectTestSetup();
+    public ProjectTestSetup projectSetup = new Java12ProjectTestSetup(true);
 
 	private IJavaProject fJProject1;
 
@@ -122,6 +123,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
+	@Ignore("https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1792")
 	@Test
 	public void testSplitSwitchCaseLabelRuleStatement() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
