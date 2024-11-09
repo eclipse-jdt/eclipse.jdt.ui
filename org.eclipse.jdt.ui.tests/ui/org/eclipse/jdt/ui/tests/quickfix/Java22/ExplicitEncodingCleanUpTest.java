@@ -51,7 +51,7 @@ public class ExplicitEncodingCleanUpTest {
 	}
 
 	@RegisterExtension
-	AbstractEclipseJava context = new EclipseJava22();
+	AbstractEclipseJava context= new EclipseJava22();
 
 	enum ExplicitEncodingPatterns {
 
