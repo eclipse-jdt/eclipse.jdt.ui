@@ -90,7 +90,7 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
@@ -105,7 +105,7 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "Reader r=new InputStreamReader(in, "+computeCharsetforPreview(cb)+");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Reader r=new InputStreamReader(in, "+cb.computeCharsetforPreview()+");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Reader r=new InputStreamReader(in);\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 	}

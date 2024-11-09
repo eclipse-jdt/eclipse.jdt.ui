@@ -112,7 +112,7 @@ public class StringExplicitEncoding extends AbstractExplicitEncoding<ClassInstan
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
@@ -128,7 +128,7 @@ public class StringExplicitEncoding extends AbstractExplicitEncoding<ClassInstan
 	@Override
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
-			return "String s=new String(byte[],"+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "String s=new String(byte[],"+cb.computeCharsetforPreview()+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "String s=new String(byte[],\"UTF-8\");\n"; //$NON-NLS-1$
 	}

@@ -81,7 +81,7 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, (String) data.get(visited));
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited));
 		ASTNodes.replaceButKeepComment(rewrite, visited, callToCharsetDefaultCharset, group);
 	}
 

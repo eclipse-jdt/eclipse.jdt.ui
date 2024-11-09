@@ -91,7 +91,7 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= computeCharsetASTNode(cuRewrite, ast, cb, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
@@ -108,7 +108,7 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
 		if(afterRefactoring) {
 			return "String s=\"asdf\";\n"+ //$NON-NLS-1$
-					"byte[] bytes= s.getBytes("+computeCharsetforPreview(cb)+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+					"byte[] bytes= s.getBytes("+cb.computeCharsetforPreview()+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "String s=\"asdf\";\n"+ //$NON-NLS-1$
 		"byte[] bytes= s.getBytes();\n"; //$NON-NLS-1$
