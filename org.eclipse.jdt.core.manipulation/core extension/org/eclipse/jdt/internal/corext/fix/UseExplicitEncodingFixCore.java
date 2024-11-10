@@ -86,7 +86,7 @@ public enum UseExplicitEncodingFixCore {
 				preview.append(System.lineSeparator());
 			}
 		}
-		return preview.toString();
+		return preview.toString()+System.lineSeparator();
 	}
 	/**
 	 * Compute set of CompilationUnitRewriteOperation to refactor supported situations using default encoding to make use of explicit calls
