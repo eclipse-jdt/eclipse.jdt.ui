@@ -32,11 +32,12 @@ import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 /**
  *
- * Find: 		InputStreamReader(InputStream in, String cs)
+ * Find: InputStreamReader(InputStream in, String cs)
  *
- * Rewrite: 	InputStreamReader(InputStream in, Charset cs) is available since Java 1.4
+ * Rewrite: InputStreamReader(InputStream in, Charset cs) is available since Java 1.4
  *
  * Charset.defaultCharset() is available since Java 1.5
  *
@@ -44,9 +45,10 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<ClassInstanceCreation> {
 
 	@Override
-	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed,ChangeBehavior cb) {
+	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, ChangeBehavior cb) {
 		ReferenceHolder<ASTNode, Object> datah= new ReferenceHolder<>();
-		HelperVisitor.callClassInstanceCreationVisitor(InputStreamReader.class, compilationUnit, datah, nodesprocessed, (visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
+		HelperVisitor.callClassInstanceCreationVisitor(InputStreamReader.class, compilationUnit, datah, nodesprocessed,
+				(visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
 	}
 
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore,
@@ -54,39 +56,39 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 			ClassInstanceCreation visited, ReferenceHolder<ASTNode, Object> holder) {
 		List<ASTNode> arguments= visited.arguments();
 		switch (arguments.size()) {
-		case 2:
-			if(!(arguments.get(1) instanceof StringLiteral)) {
-				return false;
-			}
-			StringLiteral argstring3= (StringLiteral) arguments.get(1);
-			if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd=new Nodedata();
-			nd.encoding=encodingmap.get(argstring3.getLiteralValue().toUpperCase());
-			nd.replace=true;
-			nd.visited=argstring3;
-			holder.put(visited,nd);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		case 1:
-			Nodedata nd2=new Nodedata();
-			nd2.encoding=null;
-			nd2.replace=false;
-			nd2.visited=visited;
-			holder.put(visited,nd2);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			break;
-		default:
-			break;
+			case 2:
+				if (!(arguments.get(1) instanceof StringLiteral)) {
+					return false;
+				}
+				StringLiteral argstring3= (StringLiteral) arguments.get(1);
+				if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
+					return false;
+				}
+				Nodedata nd= new Nodedata();
+				nd.encoding= encodingmap.get(argstring3.getLiteralValue().toUpperCase());
+				nd.replace= true;
+				nd.visited= argstring3;
+				holder.put(visited, nd);
+				operations.add(fixcore.rewrite(visited, cb, holder));
+				break;
+			case 1:
+				Nodedata nd2= new Nodedata();
+				nd2.encoding= null;
+				nd2.replace= false;
+				nd2.visited= visited;
+				holder.put(visited, nd2);
+				operations.add(fixcore.rewrite(visited, cb, holder));
+				break;
+			default:
+				break;
 		}
 
 		return false;
 	}
 
 	@Override
-	public void rewrite(UseExplicitEncodingFixCore upp,final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
+	public void rewrite(UseExplicitEncodingFixCore upp, final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
+			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		Nodedata nodedata= (Nodedata) data.get(visited);
@@ -95,7 +97,7 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-		if(nodedata.replace) {
+		if (nodedata.replace) {
 			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
@@ -103,9 +105,9 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 	}
 
 	@Override
-	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
-		if(afterRefactoring) {
-			return "Reader r=new InputStreamReader(in, "+cb.computeCharsetforPreview()+");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+	public String getPreview(boolean afterRefactoring, ChangeBehavior cb) {
+		if (afterRefactoring) {
+			return "Reader r=new InputStreamReader(in, " + cb.computeCharsetforPreview() + ");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "Reader r=new InputStreamReader(in);\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 	}

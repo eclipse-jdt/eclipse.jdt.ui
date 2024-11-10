@@ -33,32 +33,33 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 /**
  *
  * Java 10
  *
  * Change
  *
- * Find:     	new java.util.Scanner(new File("filename.txt"),"UTF-8")
+ * Find: new java.util.Scanner(new File("filename.txt"),"UTF-8")
  *
- * Rewrite:    	new java.util.Scanner(new File("filename.txt"),StandardCharsets.UTF_8);
+ * Rewrite: new java.util.Scanner(new File("filename.txt"),StandardCharsets.UTF_8);
  *
- * Find:     	new java.util.Scanner("filename.txt", "UTF-8")
+ * Find: new java.util.Scanner("filename.txt", "UTF-8")
  *
- * Rewrite:    	new java.util.Scanner("filename.txt", StandardCharsets.UTF_8)
+ * Rewrite: new java.util.Scanner("filename.txt", StandardCharsets.UTF_8)
  *
- * Find:     	new java.util.Scanner(java.io.OutputStream, "UTF-8")
+ * Find: new java.util.Scanner(java.io.OutputStream, "UTF-8")
  *
- * Rewrite:    	new java.util.Scanner(java.io.OutputStream, StandardCharsets.UTF_8)
+ * Rewrite: new java.util.Scanner(java.io.OutputStream, StandardCharsets.UTF_8)
  *
- * Find:     	new java.util.Scanner(java.io.OutputStream)
+ * Find: new java.util.Scanner(java.io.OutputStream)
  *
- * Rewrite:    	new java.util.Scanner(java.io.OutputStream, Charset.defaultCharset())
+ * Rewrite: new java.util.Scanner(java.io.OutputStream, Charset.defaultCharset())
  */
 public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInstanceCreation> {
 
 	@Override
-	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed,ChangeBehavior cb) {
+	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, ChangeBehavior cb) {
 		if (!JavaModelUtil.is10OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			/**
 			 * For Java 9 and older just do nothing
@@ -72,23 +73,23 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore, Set<CompilationUnitRewriteOperation> operations,
 			ChangeBehavior cb, ClassInstanceCreation visited,
 			ReferenceHolder<ASTNode, Object> holder) {
-		List<ASTNode> arguments = visited.arguments();
-		Nodedata nd = new Nodedata();
+		List<ASTNode> arguments= visited.arguments();
+		Nodedata nd= new Nodedata();
 
 		switch (arguments.size()) {
 			case 4:
 			case 2:
-				int encodingIndex = (arguments.size() == 4) ? 3 : 1;
-				ASTNode argumentNode = arguments.get(encodingIndex);
+				int encodingIndex= (arguments.size() == 4) ? 3 : 1;
+				ASTNode argumentNode= arguments.get(encodingIndex);
 
 				if (argumentNode instanceof StringLiteral) {
-					StringLiteral encodingLiteral = (StringLiteral) argumentNode;
-					String encodingValue = encodingLiteral.getLiteralValue().toUpperCase();
+					StringLiteral encodingLiteral= (StringLiteral) argumentNode;
+					String encodingValue= encodingLiteral.getLiteralValue().toUpperCase();
 
 					if (encodings.contains(encodingValue)) {
-						nd.encoding = encodingmap.get(encodingValue);
-						nd.replace = true;
-						nd.visited = encodingLiteral;
+						nd.encoding= encodingmap.get(encodingValue);
+						nd.replace= true;
+						nd.visited= encodingLiteral;
 						holder.put(visited, nd);
 						operations.add(fixcore.rewrite(visited, cb, holder));
 					}
@@ -96,9 +97,9 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 				break;
 
 			case 1:
-				nd.encoding = null;
-				nd.replace = false;
-				nd.visited = visited;
+				nd.encoding= null;
+				nd.replace= false;
+				nd.visited= visited;
 				holder.put(visited, nd);
 				operations.add(fixcore.rewrite(visited, cb, holder));
 				break;
@@ -111,8 +112,8 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 	}
 
 	@Override
-	public void rewrite(UseExplicitEncodingFixCore upp,final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
+	public void rewrite(UseExplicitEncodingFixCore upp, final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
+			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		Nodedata nodedata= (Nodedata) data.get(visited);
@@ -121,7 +122,7 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
-		if(nodedata.replace) {
+		if (nodedata.replace) {
 			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
@@ -129,8 +130,8 @@ public class ScannerExplicitEncoding extends AbstractExplicitEncoding<ClassInsta
 	}
 
 	@Override
-	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
-		if(afterRefactoring) {
+	public String getPreview(boolean afterRefactoring, ChangeBehavior cb) {
+		if (afterRefactoring) {
 			return "new java.util.Scanner(\"asdf\",StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 		}
 		return "new java.util.Scanner(\"asdf\", \"UTF-8\");\n"; //$NON-NLS-1$

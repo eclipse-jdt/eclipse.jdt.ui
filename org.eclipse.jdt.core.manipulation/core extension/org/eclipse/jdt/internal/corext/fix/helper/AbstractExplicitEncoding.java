@@ -51,23 +51,29 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
  */
 public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	private static final String UNSUPPORTED_ENCODING_EXCEPTION= "UnsupportedEncodingException"; //$NON-NLS-1$
-	static Map<String, String> encodingmap = Map.of(
-		    "UTF-8", "UTF_8", //$NON-NLS-1$ //$NON-NLS-2$
-		    "UTF-16", "UTF_16", //$NON-NLS-1$ //$NON-NLS-2$
-		    "UTF-16BE", "UTF_16BE", //$NON-NLS-1$ //$NON-NLS-2$
-		    "UTF-16LE", "UTF_16LE", //$NON-NLS-1$ //$NON-NLS-2$
-		    "ISO-8859-1", "ISO_8859_1", //$NON-NLS-1$ //$NON-NLS-2$
-		    "US-ASCII", "US_ASCII" //$NON-NLS-1$ //$NON-NLS-2$
-		);
-	static Set<String> encodings=encodingmap.keySet();
+
+	static Map<String, String> encodingmap= Map.of(
+			"UTF-8", "UTF_8", //$NON-NLS-1$ //$NON-NLS-2$
+			"UTF-16", "UTF_16", //$NON-NLS-1$ //$NON-NLS-2$
+			"UTF-16BE", "UTF_16BE", //$NON-NLS-1$ //$NON-NLS-2$
+			"UTF-16LE", "UTF_16LE", //$NON-NLS-1$ //$NON-NLS-2$
+			"ISO-8859-1", "ISO_8859_1", //$NON-NLS-1$ //$NON-NLS-2$
+			"US-ASCII", "US_ASCII" //$NON-NLS-1$ //$NON-NLS-2$
+	);
+
+	static Set<String> encodings= encodingmap.keySet();
+
 	static class Nodedata {
 		public boolean replace;
+
 		public ASTNode visited;
+
 		public String encoding;
 	}
 
-	protected static final String ENCODING = "encoding"; //$NON-NLS-1$
-	protected static final String REPLACE = "replace"; //$NON-NLS-1$
+	protected static final String ENCODING= "encoding"; //$NON-NLS-1$
+
+	protected static final String REPLACE= "replace"; //$NON-NLS-1$
 
 	public abstract void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, ChangeBehavior cb);
 
@@ -90,103 +96,103 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	}
 
 	protected static String findVariableValue(SimpleName variable, ASTNode context) {
-	    ASTNode current = context.getParent();
-	    while (current != null && !(current instanceof MethodDeclaration) && !(current instanceof TypeDeclaration)) {
-	        current = current.getParent();
-	    }
+		ASTNode current= context.getParent();
+		while (current != null && !(current instanceof MethodDeclaration) && !(current instanceof TypeDeclaration)) {
+			current= current.getParent();
+		}
 
-	    if (current instanceof MethodDeclaration) {
-	        MethodDeclaration method = (MethodDeclaration) current;
-	        List<?> statements = method.getBody().statements();
+		if (current instanceof MethodDeclaration) {
+			MethodDeclaration method= (MethodDeclaration) current;
+			List<?> statements= method.getBody().statements();
 
-	        for (Object stmt : statements) {
-	            if (stmt instanceof VariableDeclarationStatement) {
-	                VariableDeclarationStatement varDeclStmt = (VariableDeclarationStatement) stmt;
-	                for (Object frag : varDeclStmt.fragments()) {
-	                    VariableDeclarationFragment fragment = (VariableDeclarationFragment) frag;
-	                    if (fragment.getName().getIdentifier().equals(variable.getIdentifier())) {
-	                        Expression initializer = fragment.getInitializer();
-	                        if (initializer instanceof StringLiteral) {
-	                            return ((StringLiteral) initializer).getLiteralValue().toUpperCase();
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	    } else if (current instanceof TypeDeclaration) {
-	        TypeDeclaration type = (TypeDeclaration) current;
-	        FieldDeclaration[] fields = type.getFields();
+			for (Object stmt : statements) {
+				if (stmt instanceof VariableDeclarationStatement) {
+					VariableDeclarationStatement varDeclStmt= (VariableDeclarationStatement) stmt;
+					for (Object frag : varDeclStmt.fragments()) {
+						VariableDeclarationFragment fragment= (VariableDeclarationFragment) frag;
+						if (fragment.getName().getIdentifier().equals(variable.getIdentifier())) {
+							Expression initializer= fragment.getInitializer();
+							if (initializer instanceof StringLiteral) {
+								return ((StringLiteral) initializer).getLiteralValue().toUpperCase();
+							}
+						}
+					}
+				}
+			}
+		} else if (current instanceof TypeDeclaration) {
+			TypeDeclaration type= (TypeDeclaration) current;
+			FieldDeclaration[] fields= type.getFields();
 
-	        for (FieldDeclaration field : fields) {
-	            for (Object frag : field.fragments()) {
-	                VariableDeclarationFragment fragment = (VariableDeclarationFragment) frag;
-	                if (fragment.getName().getIdentifier().equals(variable.getIdentifier())) {
-	                    Expression initializer = fragment.getInitializer();
-	                    if (initializer instanceof StringLiteral) {
-	                        return ((StringLiteral) initializer).getLiteralValue().toUpperCase();
-	                    }
-	                }
-	            }
-	        }
-	    }
-	    return null;
+			for (FieldDeclaration field : fields) {
+				for (Object frag : field.fragments()) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment) frag;
+					if (fragment.getName().getIdentifier().equals(variable.getIdentifier())) {
+						Expression initializer= fragment.getInitializer();
+						if (initializer instanceof StringLiteral) {
+							return ((StringLiteral) initializer).getLiteralValue().toUpperCase();
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public abstract String getPreview(boolean afterRefactoring, ChangeBehavior cb);
 
 	protected void removeUnsupportedEncodingException(final ASTNode visited, TextEditGroup group, ASTRewrite rewrite, ImportRewrite importRewriter) {
-	    ASTNode parent = visited.getParent();
-	    while (parent != null && !(parent instanceof MethodDeclaration) && !(parent instanceof TryStatement)) {
-	        parent = parent.getParent();
-	    }
+		ASTNode parent= visited.getParent();
+		while (parent != null && !(parent instanceof MethodDeclaration) && !(parent instanceof TryStatement)) {
+			parent= parent.getParent();
+		}
 
-	    if (parent instanceof MethodDeclaration) {
-	        MethodDeclaration method = (MethodDeclaration) parent;
-	        ListRewrite throwsRewrite = rewrite.getListRewrite(method, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
-	        List<Type> thrownExceptions = method.thrownExceptionTypes();
-	        for (Type exceptionType : thrownExceptions) {
-	            if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
-	                throwsRewrite.remove(exceptionType, group);
-	                importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
-	            }
-	        }
-	    } else if (parent instanceof TryStatement) {
-	        TryStatement tryStatement = (TryStatement) parent;
+		if (parent instanceof MethodDeclaration) {
+			MethodDeclaration method= (MethodDeclaration) parent;
+			ListRewrite throwsRewrite= rewrite.getListRewrite(method, MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY);
+			List<Type> thrownExceptions= method.thrownExceptionTypes();
+			for (Type exceptionType : thrownExceptions) {
+				if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
+					throwsRewrite.remove(exceptionType, group);
+					importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
+				}
+			}
+		} else if (parent instanceof TryStatement) {
+			TryStatement tryStatement= (TryStatement) parent;
 
-	        List<CatchClause> catchClauses = tryStatement.catchClauses();
-	        for (CatchClause catchClause : catchClauses) {
-	            SingleVariableDeclaration exception = catchClause.getException();
-	            Type exceptionType = exception.getType();
+			List<CatchClause> catchClauses= tryStatement.catchClauses();
+			for (CatchClause catchClause : catchClauses) {
+				SingleVariableDeclaration exception= catchClause.getException();
+				Type exceptionType= exception.getType();
 
-	            if (exceptionType instanceof UnionType) {
-	                UnionType unionType = (UnionType) exceptionType;
-	                ListRewrite unionRewrite = rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
+				if (exceptionType instanceof UnionType) {
+					UnionType unionType= (UnionType) exceptionType;
+					ListRewrite unionRewrite= rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
 
-	                List<Type> types = unionType.types();
-	                types.stream()
-	                     .filter(type -> type.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION))
-	                     .forEach(type -> unionRewrite.remove(type, group));
+					List<Type> types= unionType.types();
+					types.stream()
+							.filter(type -> type.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION))
+							.forEach(type -> unionRewrite.remove(type, group));
 
-	                if (types.size() == 1) {
-	                    rewrite.replace(unionType, types.get(0), group);
-	                } else if (types.isEmpty()) {
-	                    rewrite.remove(catchClause, group);
-	                }
-	            } else if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
-	                rewrite.remove(catchClause, group);
-	                importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
-	            }
-	        }
+					if (types.size() == 1) {
+						rewrite.replace(unionType, types.get(0), group);
+					} else if (types.isEmpty()) {
+						rewrite.remove(catchClause, group);
+					}
+				} else if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
+					rewrite.remove(catchClause, group);
+					importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
+				}
+			}
 
-	        if (tryStatement.catchClauses().isEmpty() && tryStatement.getFinally() == null) {
-	            Block tryBlock = tryStatement.getBody();
+			if (tryStatement.catchClauses().isEmpty() && tryStatement.getFinally() == null) {
+				Block tryBlock= tryStatement.getBody();
 
-	            if (tryStatement.resources().isEmpty() && tryBlock.statements().isEmpty()) {
-	                rewrite.remove(tryStatement, group);
-	            } else if (tryStatement.resources().isEmpty()) {
-	                rewrite.replace(tryStatement, tryBlock, group);
-	            }
-	        }
-	    }
+				if (tryStatement.resources().isEmpty() && tryBlock.statements().isEmpty()) {
+					rewrite.remove(tryStatement, group);
+				} else if (tryStatement.resources().isEmpty()) {
+					rewrite.replace(tryStatement, tryBlock, group);
+				}
+			}
+		}
 	}
 }

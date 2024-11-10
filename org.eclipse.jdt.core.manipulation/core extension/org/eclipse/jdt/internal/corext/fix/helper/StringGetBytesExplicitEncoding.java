@@ -34,21 +34,23 @@ import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 /**
- * Find:  String.getBytes()
+ * Find: String.getBytes()
  *
  * Rewrite: String.getBytes(Charset.defaultCharset())
  *
- * Find:  String.getBytes("Utf-8")
+ * Find: String.getBytes("Utf-8")
  *
  * Rewrite: String.getBytes(StandardCharsets.UTF_8)
  */
 public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<MethodInvocation> {
 
 	@Override
-	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed,ChangeBehavior cb) {
+	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, ChangeBehavior cb) {
 		ReferenceHolder<ASTNode, Object> datah= new ReferenceHolder<>();
-		HelperVisitor.callMethodInvocationVisitor(String.class, METHOD_GET_BYTES, compilationUnit, datah, nodesprocessed, (visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
+		HelperVisitor.callMethodInvocationVisitor(String.class, METHOD_GET_BYTES, compilationUnit, datah, nodesprocessed,
+				(visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
 	}
 
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore,
@@ -56,37 +58,37 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 			MethodInvocation visited, ReferenceHolder<ASTNode, Object> holder) {
 		List<ASTNode> arguments= visited.arguments();
 		switch (arguments.size()) {
-		case 1:
-			if(!(arguments.get(0) instanceof StringLiteral)) {
+			case 1:
+				if (!(arguments.get(0) instanceof StringLiteral)) {
+					return false;
+				}
+				StringLiteral argstring3= (StringLiteral) arguments.get(0);
+				if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
+					return false;
+				}
+				Nodedata nd= new Nodedata();
+				nd.encoding= encodingmap.get(argstring3.getLiteralValue().toUpperCase());
+				nd.replace= true;
+				nd.visited= argstring3;
+				holder.put(visited, nd);
+				break;
+			case 0:
+				Nodedata nd2= new Nodedata();
+				nd2.encoding= null;
+				nd2.replace= false;
+				nd2.visited= visited;
+				holder.put(visited, nd2);
+				break;
+			default:
 				return false;
-			}
-			StringLiteral argstring3= (StringLiteral) arguments.get(0);
-			if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd=new Nodedata();
-			nd.encoding=encodingmap.get(argstring3.getLiteralValue().toUpperCase());
-			nd.replace=true;
-			nd.visited=argstring3;
-			holder.put(visited,nd);
-			break;
-		case 0:
-			Nodedata nd2=new Nodedata();
-			nd2.encoding=null;
-			nd2.replace=false;
-			nd2.visited=visited;
-			holder.put(visited,nd2);
-			break;
-		default:
-			return false;
 		}
 		operations.add(fixcore.rewrite(visited, cb, holder));
 		return false;
 	}
 
 	@Override
-	public void rewrite(UseExplicitEncodingFixCore upp,final MethodInvocation visited, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
+	public void rewrite(UseExplicitEncodingFixCore upp, final MethodInvocation visited, final CompilationUnitRewrite cuRewrite,
+			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
@@ -96,7 +98,7 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, MethodInvocation.ARGUMENTS_PROPERTY);
-		if(nodedata.replace) {
+		if (nodedata.replace) {
 			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
@@ -105,13 +107,13 @@ public class StringGetBytesExplicitEncoding extends AbstractExplicitEncoding<Met
 	}
 
 	@Override
-	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
-		if(afterRefactoring) {
-			return "String s=\"asdf\";\n"+ //$NON-NLS-1$
-					"byte[] bytes= s.getBytes("+cb.computeCharsetforPreview()+");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+	public String getPreview(boolean afterRefactoring, ChangeBehavior cb) {
+		if (afterRefactoring) {
+			return "String s=\"asdf\";\n" + //$NON-NLS-1$
+					"byte[] bytes= s.getBytes(" + cb.computeCharsetforPreview() + ");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		return "String s=\"asdf\";\n"+ //$NON-NLS-1$
-		"byte[] bytes= s.getBytes();\n"; //$NON-NLS-1$
+		return "String s=\"asdf\";\n" + //$NON-NLS-1$
+				"byte[] bytes= s.getBytes();\n"; //$NON-NLS-1$
 	}
 
 	@Override

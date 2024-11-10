@@ -36,21 +36,22 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCo
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 /**
  * Java 18
  *
- * Find:  Charset.forName("UTF-8")
+ * Find: Charset.forName("UTF-8")
  *
  * Rewrite: StandardCharsets.UTF_8
  *
- * Find:  Charset.forName("UTF-16")
+ * Find: Charset.forName("UTF-16")
  *
  * Rewrite: StandardCharsets.UTF_16
  */
 public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<MethodInvocation> {
 
 	@Override
-	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed,ChangeBehavior cb) {
+	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, ChangeBehavior cb) {
 		if (!JavaModelUtil.is18OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			/**
 			 * For Java 17 and older just do nothing
@@ -58,7 +59,8 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 			return;
 		}
 		ReferenceHolder<ASTNode, Object> datah= new ReferenceHolder<>();
-		HelperVisitor.callMethodInvocationVisitor(Charset.class, METHOD_FOR_NAME, compilationUnit, datah, nodesprocessed, (visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
+		HelperVisitor.callMethodInvocationVisitor(Charset.class, METHOD_FOR_NAME, compilationUnit, datah, nodesprocessed,
+				(visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
 	}
 
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore,
@@ -68,30 +70,30 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 		if (!ASTNodes.usesGivenSignature(visited, Charset.class.getCanonicalName(), METHOD_FOR_NAME, String.class.getCanonicalName())) {
 			return true;
 		}
-		ASTNode encodingArg = arguments.get(0);
+		ASTNode encodingArg= arguments.get(0);
 
-        String encodingValue = null;
-        if (encodingArg instanceof StringLiteral) {
-            encodingValue = ((StringLiteral) encodingArg).getLiteralValue().toUpperCase();
-        } else if (encodingArg instanceof SimpleName) {
-            encodingValue = findVariableValue((SimpleName) encodingArg, visited);
-        }
+		String encodingValue= null;
+		if (encodingArg instanceof StringLiteral) {
+			encodingValue= ((StringLiteral) encodingArg).getLiteralValue().toUpperCase();
+		} else if (encodingArg instanceof SimpleName) {
+			encodingValue= findVariableValue((SimpleName) encodingArg, visited);
+		}
 
-        if (encodingValue != null && encodings.contains(encodingValue)) {
-            Nodedata nd = new Nodedata();
-            nd.encoding = encodingmap.get(encodingValue);
-            nd.replace = true;
-            nd.visited = encodingArg;
-            holder.put(visited, nd);
-            operations.add(fixcore.rewrite(visited, cb, holder));
-            return false;
-        }
+		if (encodingValue != null && encodings.contains(encodingValue)) {
+			Nodedata nd= new Nodedata();
+			nd.encoding= encodingmap.get(encodingValue);
+			nd.replace= true;
+			nd.visited= encodingArg;
+			holder.put(visited, nd);
+			operations.add(fixcore.rewrite(visited, cb, holder));
+			return false;
+		}
 		return false;
 	}
 
 	@Override
-	public void rewrite(UseExplicitEncodingFixCore upp,final MethodInvocation visited, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
+	public void rewrite(UseExplicitEncodingFixCore upp, final MethodInvocation visited, final CompilationUnitRewrite cuRewrite,
+			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		Nodedata nodedata= (Nodedata) data.get(visited);
@@ -100,8 +102,8 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 	}
 
 	@Override
-	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
-		if(afterRefactoring) {
+	public String getPreview(boolean afterRefactoring, ChangeBehavior cb) {
+		if (afterRefactoring) {
 			return "Charset s=StandardCharsets.UTF_8;\n"; //$NON-NLS-1$
 		}
 		return "Charset s=Charset.forName(\"UTF-8\");\n"; //$NON-NLS-1$
