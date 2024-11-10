@@ -46,34 +46,33 @@ public enum ChangeBehavior {
 
 		@Override
 		protected String computeCharsetforPreview() {
-			String insert= ""; //$NON-NLS-1$
-			insert= "Charset.defaultCharset()"; //$NON-NLS-1$
+			String insert= "Charset.defaultCharset()"; //$NON-NLS-1$
 			return insert;
 		}
 	},
 	ENFORCE_UTF8() {
 		@Override
 		protected Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, String charset) {
-			Expression callToCharsetDefaultCharset= null;
-			callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast, charset);
+			Expression callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast, charset);
 			return callToCharsetDefaultCharset;
 		}
 
 		@Override
 		protected String computeCharsetforPreview() {
-			String insert= ""; //$NON-NLS-1$
-			insert= "StandardCharsets.UTF_8"; //$NON-NLS-1$
+			String insert= "StandardCharsets.UTF_8"; //$NON-NLS-1$
 			return insert;
 		}
 	},
 	ENFORCE_UTF8_AGGREGATE() {
 		@Override
 		protected Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, String charset) {
-			Expression callToCharsetDefaultCharset= null;
 			/**
 			 * @TODO not implemented
 			 */
-			return callToCharsetDefaultCharset;
+			FieldAccess callToCharsetUTF8 = ast.newFieldAccess();
+		    callToCharsetUTF8.setName(ast.newSimpleName("ENCODING_UTF_8")); // Verwendet die statische Konstante //$NON-NLS-1$
+		    callToCharsetUTF8.setExpression(ast.newSimpleName("StandardCharsets")); //$NON-NLS-1$
+			return callToCharsetUTF8;
 		}
 
 		@Override

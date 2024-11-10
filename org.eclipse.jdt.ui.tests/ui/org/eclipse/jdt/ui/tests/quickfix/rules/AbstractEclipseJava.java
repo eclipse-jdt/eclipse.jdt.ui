@@ -475,6 +475,11 @@ public class AbstractEclipseJava implements AfterEachCallback, BeforeEachCallbac
 		commitProfile();
 	}
 
+	public void disable(String key) throws CoreException {
+		fProfile.getSettings().put(key, CleanUpOptions.FALSE);
+		commitProfile();
+	}
+
 	private void commitProfile() throws CoreException {
 		List<Profile> profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(fProfile);
