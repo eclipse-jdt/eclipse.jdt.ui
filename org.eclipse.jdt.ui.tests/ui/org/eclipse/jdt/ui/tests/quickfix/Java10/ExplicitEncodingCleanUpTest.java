@@ -896,106 +896,93 @@ public class E1 {
 """
 package test1;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Constant for encoding
+    private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Konstante für Encoding
+    private String encodingVar = "ISO-8859-1"; // Encoding-Variable
 
-    // Variant 1: storeToXML without Charset (could throw UnsupportedEncodingException)
-    void method(String filename) throws UnsupportedEncodingException, IOException {
+    // Fall 1: UTF-8 als String; Cleanup soll zu StandardCharsets.UTF_8 ändern
+    void storeWithTryWithResources() throws IOException {
         Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null); // could throw UnsupportedEncodingException
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "UTF-8");
         }
     }
 
-    // Variant 2: storeToXML with Charset as String (could throw UnsupportedEncodingException)
-    void methodWithCharset(String filename) throws UnsupportedEncodingException, IOException {
+    // Fall 2: Benutzerdefiniertes Encoding als Variable; Cleanup soll diesen Fall unverändert lassen
+    void storeWithTryWithResourcesAndCustomEncoding() throws IOException {
         Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "UTF-8"); // could throw UnsupportedEncodingException
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", encodingVar);
         }
     }
 
-    // Variant 3: storeToXML with Charset as StandardCharsets constant (no error)
-    void methodWithStandardCharsets(String filename) throws IOException {
+    // Fall 3: Ungültiges Encoding als String; Cleanup soll auf StandardCharsets.UTF_8 ändern und den catch-Block entfernen
+    void storeWithTryWithResourcesAndInvalidEncoding() {
         Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "UTF-8"); // could throw UnsupportedEncodingException
-        }
-    }
-
-    // Variant 4: storeToXML with Charset as ENCODING_UTF8 constant (could throw UnsupportedEncodingException)
-    void methodWithEncodingUTF8(String filename) throws UnsupportedEncodingException, IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, ENCODING_UTF8); // could throw UnsupportedEncodingException
-        }
-    }
-
-    // Variant 5: storeToXML with an invalid Charset as String (throws UnsupportedEncodingException)
-    void methodWithInvalidCharset(String filename) throws UnsupportedEncodingException, IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "non-existing-encoding"); // could throw UnsupportedEncodingException
-        }
-    }
-
-    // Variant 6: storeToXML with an invalid Charset, replaced by StandardCharsets (no error anymore)
-    void methodWithInvalidCharsetChanged(String filename) throws IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "UTF-8"); // no UnsupportedEncodingException anymore
-        }
-    }
-
-    // Method without exceptions, after the cleanup no UnsupportedEncodingException will be thrown
-    void methodNoException(String filename) throws IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "UTF-8"); // no UnsupportedEncodingException anymore
-        }
-    }
-
-    // Variant with overriding encoding, remains unchanged (no modification in cleanup)
-    void methodWithCustomEncoding(String filename) throws IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "windows-1252"); // remains unchanged, no modification in cleanup
-        }
-    }
-
-    // Method with a catch block that handles UnsupportedEncodingException
-    void methodWithCatch(String filename) {
-        try {
-            Properties p = new Properties();
-            try (OutputStream os = new FileOutputStream(filename)) {
-                p.storeToXML(os, null, "non-existing-encoding"); // could throw UnsupportedEncodingException
-            }
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "non-existing-encoding");
         } catch (UnsupportedEncodingException e) {
-            // Here the UnsupportedEncodingException is caught
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Unsupported encoding caught!");
         }
     }
 
-    // Method with a catch block that handles UnsupportedEncodingException, but becomes redundant after cleanup
-    void methodWithCatchChange(String filename) {
+    // Fall 4: FileOutputStream außerhalb des try-Blocks und UTF-8 als String; Cleanup soll auf StandardCharsets.UTF_8 ändern und den catch-Block entfernen
+    void storeWithoutTryWithResources(String filename) throws IOException {
+        Properties p = new Properties();
+        FileOutputStream os = new FileOutputStream(filename);
         try {
-            Properties p = new Properties();
-            try (OutputStream os = new FileOutputStream(filename)) {
-                p.storeToXML(os, null, "UTF-8"); // no UnsupportedEncodingException anymore
-            }
+            p.storeToXML(os, "Kommentar", "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            // This block will no longer be reached, as no UnsupportedEncodingException will be thrown anymore
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Unexpected UnsupportedEncodingException");
+        } finally {
+            os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
+        }
+    }
+
+    // Fall 5: Gültiges Encoding ohne Konstante in StandardCharsets (windows-1252); Cleanup soll diesen Fall unverändert lassen
+    void storeWithWindows1252Encoding() throws IOException {
+        Properties p = new Properties();
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "windows-1252");
+        }
+    }
+
+    // Fall 6: Gültiges Encoding ohne Konstante in StandardCharsets (Shift_JIS); Cleanup soll diesen Fall unverändert lassen
+    void storeWithShiftJISEncoding() throws IOException {
+        Properties p = new Properties();
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "Shift_JIS");
+        }
+    }
+
+    // Fall 7: Ungültiges Encoding außerhalb von try-with-resources; Cleanup soll auf StandardCharsets.UTF_8 ändern und den catch-Block entfernen
+    void storeWithInvalidEncodingOutsideTry(String filename) throws IOException {
+        Properties p = new Properties();
+        FileOutputStream os = new FileOutputStream(filename);
+        try {
+            p.storeToXML(os, "Kommentar", "non-existing-encoding");
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Unsupported encoding caught!");
+        } finally {
+            os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
+        }
+    }
+
+    // Fall 8: StandardCharsets.UTF_8 ohne try-with-resources; Cleanup soll diesen Fall unverändert lassen
+    void storeWithoutTryWithResourcesStandardCharsets(String filename) throws IOException {
+        Properties p = new Properties();
+        FileOutputStream os = new FileOutputStream(filename);
+        try {
+            p.storeToXML(os, "Kommentar", StandardCharsets.UTF_8);
+        } finally {
+            os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
         }
     }
 }
@@ -1004,239 +991,591 @@ public class E1 {
 """
 package test1;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Constant for encoding
+    private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Konstante für Encoding
+    private String encodingVar = "ISO-8859-1"; // Encoding-Variable
 
-    // Variant 1: storeToXML without Charset (could throw UnsupportedEncodingException)
-    void method(String filename) throws UnsupportedEncodingException, IOException {
+    // Fall 1: UTF-8 als String; Cleanup soll zu StandardCharsets.UTF_8 ändern
+    void storeWithTryWithResources() throws IOException {
         Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, StandardCharsets.UTF_8); // could throw UnsupportedEncodingException
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", StandardCharsets.UTF_8);
         }
     }
 
-    // Variant 2: storeToXML with Charset as String (could throw UnsupportedEncodingException)
-    void methodWithCharset(String filename) throws UnsupportedEncodingException, IOException {
+    // Fall 2: Benutzerdefiniertes Encoding als Variable; Cleanup soll diesen Fall unverändert lassen
+    void storeWithTryWithResourcesAndCustomEncoding() throws IOException {
         Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, StandardCharsets.UTF_8); // could throw UnsupportedEncodingException
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", encodingVar);
         }
     }
 
-    // Variant 3: storeToXML with Charset as StandardCharsets constant (no error)
-    void methodWithStandardCharsets(String filename) throws IOException {
+    // Fall 3: Ungültiges Encoding als String; Cleanup soll auf StandardCharsets.UTF_8 ändern und den catch-Block entfernen
+    void storeWithTryWithResourcesAndInvalidEncoding() {
         Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, StandardCharsets.UTF_8); // could throw UnsupportedEncodingException
-        }
-    }
-
-    // Variant 4: storeToXML with Charset as ENCODING_UTF8 constant (could throw UnsupportedEncodingException)
-    void methodWithEncodingUTF8(String filename) throws UnsupportedEncodingException, IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, ENCODING_UTF8); // could throw UnsupportedEncodingException
-        }
-    }
-
-    // Variant 5: storeToXML with an invalid Charset as String (throws UnsupportedEncodingException)
-    void methodWithInvalidCharset(String filename) throws UnsupportedEncodingException, IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "non-existing-encoding"); // could throw UnsupportedEncodingException
-        }
-    }
-
-    // Variant 6: storeToXML with an invalid Charset, replaced by StandardCharsets (no error anymore)
-    void methodWithInvalidCharsetChanged(String filename) throws IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, StandardCharsets.UTF_8); // no UnsupportedEncodingException anymore
-        }
-    }
-
-    // Method without exceptions, after the cleanup no UnsupportedEncodingException will be thrown
-    void methodNoException(String filename) throws IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, StandardCharsets.UTF_8); // no UnsupportedEncodingException anymore
-        }
-    }
-
-    // Variant with overriding encoding, remains unchanged (no modification in cleanup)
-    void methodWithCustomEncoding(String filename) throws IOException {
-        Properties p = new Properties();
-        try (OutputStream os = new FileOutputStream(filename)) {
-            p.storeToXML(os, null, "windows-1252"); // remains unchanged, no modification in cleanup
-        }
-    }
-
-    // Method with a catch block that handles UnsupportedEncodingException
-    void methodWithCatch(String filename) {
-        try {
-            Properties p = new Properties();
-            try (OutputStream os = new FileOutputStream(filename)) {
-                p.storeToXML(os, null, "non-existing-encoding"); // could throw UnsupportedEncodingException
-            }
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "non-existing-encoding");
         } catch (UnsupportedEncodingException e) {
-            // Here the UnsupportedEncodingException is caught
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Unsupported encoding caught!");
         }
     }
 
-    // Method with a catch block that handles UnsupportedEncodingException, but becomes redundant after cleanup
-    void methodWithCatchChange(String filename) {
+    // Fall 4: FileOutputStream außerhalb des try-Blocks und UTF-8 als String; Cleanup soll auf StandardCharsets.UTF_8 ändern und den catch-Block entfernen
+    void storeWithoutTryWithResources(String filename) throws IOException {
+        Properties p = new Properties();
+        FileOutputStream os = new FileOutputStream(filename);
         try {
-            Properties p = new Properties();
-            try (OutputStream os = new FileOutputStream(filename)) {
-                p.storeToXML(os, null, StandardCharsets.UTF_8); // no UnsupportedEncodingException anymore
-            }
+            p.storeToXML(os, "Kommentar", StandardCharsets.UTF_8);
+        } finally {
+            os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
+        }
+    }
+
+    // Fall 5: Gültiges Encoding ohne Konstante in StandardCharsets (windows-1252); Cleanup soll diesen Fall unverändert lassen
+    void storeWithWindows1252Encoding() throws IOException {
+        Properties p = new Properties();
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "windows-1252");
+        }
+    }
+
+    // Fall 6: Gültiges Encoding ohne Konstante in StandardCharsets (Shift_JIS); Cleanup soll diesen Fall unverändert lassen
+    void storeWithShiftJISEncoding() throws IOException {
+        Properties p = new Properties();
+        try (FileOutputStream os = new FileOutputStream("out.xml")) {
+            p.storeToXML(os, "Kommentar", "Shift_JIS");
+        }
+    }
+
+    // Fall 7: Ungültiges Encoding außerhalb von try-with-resources; Cleanup soll auf StandardCharsets.UTF_8 ändern und den catch-Block entfernen
+    void storeWithInvalidEncodingOutsideTry(String filename) throws IOException {
+        Properties p = new Properties();
+        FileOutputStream os = new FileOutputStream(filename);
+        try {
+            p.storeToXML(os, "Kommentar", "non-existing-encoding");
         } catch (UnsupportedEncodingException e) {
-            // This block will no longer be reached, as no UnsupportedEncodingException will be thrown anymore
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Unsupported encoding caught!");
+        } finally {
+            os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
+        }
+    }
+
+    // Fall 8: StandardCharsets.UTF_8 ohne try-with-resources; Cleanup soll diesen Fall unverändert lassen
+    void storeWithoutTryWithResourcesStandardCharsets(String filename) throws IOException {
+        Properties p = new Properties();
+        FileOutputStream os = new FileOutputStream(filename);
+        try {
+            p.storeToXML(os, "Kommentar", StandardCharsets.UTF_8);
+        } finally {
+            os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
         }
     }
 }
 """),
-		URLDECODER("""
-				package test1;
-				import java.io.UnsupportedEncodingException;
-				import java.net.URLDecoder;
-
-				public class E2 {
-
-					static void bla() throws UnsupportedEncodingException {
-						String url=URLDecoder.decode("asdf","UTF-8");
-						String url2=URLDecoder.decode("asdf");
-					}
-				}
-								""", """
-				package test1;
-				import java.net.URLDecoder;
-				import java.nio.charset.Charset;
-				import java.nio.charset.StandardCharsets;
-
-				public class E2 {
-
-					static void bla() {
-						String url=URLDecoder.decode("asdf",StandardCharsets.UTF_8);
-						String url2=URLDecoder.decode("asdf", Charset.defaultCharset());
-					}
-				}
-												"""),
-		URLENCODER("""
-				package test1;
-				import java.io.UnsupportedEncodingException;
-				import java.net.URLEncoder;
-
-				public class E2 {
-
-					static void bla() throws UnsupportedEncodingException {
-						String url=URLEncoder.encode("asdf","UTF-8");
-						String url4=URLEncoder.encode("asdf");
-					}
-				}
-								""", """
-				package test1;
-				import java.net.URLEncoder;
-				import java.nio.charset.Charset;
-				import java.nio.charset.StandardCharsets;
-
-				public class E2 {
-
-					static void bla() {
-						String url=URLEncoder.encode("asdf",StandardCharsets.UTF_8);
-						String url4=URLEncoder.encode("asdf", Charset.defaultCharset());
-					}
-				}
-												"""),
-		SCANNER("""
-				package test1;
-				import java.io.File;
-				import java.io.FileNotFoundException;
-				import java.util.Scanner;
-
-				public class E3 {
-
-					static void bla3(InputStream is) throws FileNotFoundException {
-						Scanner s=new Scanner(new File("asdf"),"UTF-8");
-						Scanner s2=new Scanner(is,"UTF-8");
-						Scanner s3=new Scanner("asdf");
-					}
-				}
-				""",
+		URLDECODER(
 """
 package test1;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
+public class E2 {
+    private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
+    private String encodingVar = "ISO-8859-1"; // Variable für Encoding
+
+    // Methode ohne Encoding-Angabe, bleibt unverändert
+    static void decodeDefault() {
+        String url = URLDecoder.decode("example");
+    }
+
+    // Methode, die "UTF-8" als String verwendet und UnsupportedEncodingException wirft
+    static void decodeWithThrows() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", "UTF-8"); // sollte in StandardCharsets.UTF_8 geändert werden
+    }
+
+    // Methode, die eine ungültige Kodierung verwendet und `UnsupportedEncodingException` wirft
+    static void decodeWithInvalidEncodingThrows() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", "non-existing-encoding");
+    }
+
+    // Methode, die eine benutzerdefinierte Konstante für Encoding verwendet, bleibt unverändert
+    void decodeWithCustomConstant() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", ENCODING_UTF8);
+    }
+
+    // Methode, die Encoding als Variable übergibt, bleibt unverändert
+    void decodeWithVariableEncoding() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", encodingVar);
+    }
+
+    // Methode mit `try-catch`-Block für ungültiges Encoding
+    static void decodeWithTryCatch() {
+        try {
+            String url = URLDecoder.decode("example", "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Caught UnsupportedEncodingException for invalid encoding!");
+        }
+    }
+
+    // Beispiel mit StandardCharsets-Konstanten, bleibt unverändert
+    static void decodeWithStandardCharset() {
+        String url = URLDecoder.decode("example", StandardCharsets.UTF_8);
+    }
+}
+""",
+"""
+package test1;
+
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+public class E2 {
+    private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
+    private String encodingVar = "ISO-8859-1"; // Variable für Encoding
+
+    // Methode ohne Encoding-Angabe, bleibt unverändert
+    static void decodeDefault() {
+        String url = URLDecoder.decode("example", Charset.defaultCharset());
+    }
+
+    // Methode, die "UTF-8" als String verwendet und UnsupportedEncodingException wirft
+    static void decodeWithThrows() {
+        String url = URLDecoder.decode("example", StandardCharsets.UTF_8); // sollte in StandardCharsets.UTF_8 geändert werden
+    }
+
+    // Methode, die eine ungültige Kodierung verwendet und `UnsupportedEncodingException` wirft
+    static void decodeWithInvalidEncodingThrows() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", "non-existing-encoding");
+    }
+
+    // Methode, die eine benutzerdefinierte Konstante für Encoding verwendet, bleibt unverändert
+    void decodeWithCustomConstant() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", ENCODING_UTF8);
+    }
+
+    // Methode, die Encoding als Variable übergibt, bleibt unverändert
+    void decodeWithVariableEncoding() throws UnsupportedEncodingException {
+        String url = URLDecoder.decode("example", encodingVar);
+    }
+
+    // Methode mit `try-catch`-Block für ungültiges Encoding
+    static void decodeWithTryCatch() {
+        try {
+            String url = URLDecoder.decode("example", "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Caught UnsupportedEncodingException for invalid encoding!");
+        }
+    }
+
+    // Beispiel mit StandardCharsets-Konstanten, bleibt unverändert
+    static void decodeWithStandardCharset() {
+        String url = URLDecoder.decode("example", StandardCharsets.UTF_8);
+    }
+}
+"""),
+		URLENCODER(
+"""
+package test1;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
+public class E1 {
+    private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Kodierungskonstante
+    private String encodingVar = "ISO-8859-1"; // Variable für eine Kodierung
+
+    // Methode ohne explizite Kodierung, bleibt unverändert
+    static void encodeDefault() {
+        String url = URLEncoder.encode("example");
+    }
+
+    // Methode, die "UTF-8" als String-Literal verwendet und `throws UnsupportedEncodingException` hat
+    static void encodeWithThrows() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", "UTF-8"); // sollte in StandardCharsets.UTF_8 geändert werden
+    }
+
+    // Methode, die eine ungültige Kodierung verwendet und `UnsupportedEncodingException` wirft
+    static void encodeWithInvalidEncodingThrows() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", "non-existing-encoding");
+    }
+
+    // Methode, die eine benutzerdefinierte Kodierungskonstante verwendet, bleibt unverändert
+    void encodeWithCustomConstant() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", ENCODING_UTF8);
+    }
+
+    // Methode, die eine Kodierungsvariable verwendet, bleibt unverändert
+    void encodeWithVariableEncoding() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", encodingVar);
+    }
+
+    // Methode mit `try-catch`-Block für eine ungültige Kodierung
+    static void encodeWithTryCatch() {
+        try {
+            String url = URLEncoder.encode("example", "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Caught UnsupportedEncodingException for invalid encoding!");
+        }
+    }
+
+    // Beispiel mit StandardCharsets-Konstanten, bleibt unverändert
+    static void encodeWithStandardCharset() {
+        String url = URLEncoder.encode("example", StandardCharsets.UTF_8);
+    }
+}
+""",
+"""
+package test1;
+
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
+public class E1 {
+    private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Kodierungskonstante
+    private String encodingVar = "ISO-8859-1"; // Variable für eine Kodierung
+
+    // Methode ohne explizite Kodierung, bleibt unverändert
+    static void encodeDefault() {
+        String url = URLEncoder.encode("example", Charset.defaultCharset());
+    }
+
+    // Methode, die "UTF-8" als String-Literal verwendet und `throws UnsupportedEncodingException` hat
+    static void encodeWithThrows() {
+        String url = URLEncoder.encode("example", StandardCharsets.UTF_8); // sollte in StandardCharsets.UTF_8 geändert werden
+    }
+
+    // Methode, die eine ungültige Kodierung verwendet und `UnsupportedEncodingException` wirft
+    static void encodeWithInvalidEncodingThrows() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", "non-existing-encoding");
+    }
+
+    // Methode, die eine benutzerdefinierte Kodierungskonstante verwendet, bleibt unverändert
+    void encodeWithCustomConstant() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", ENCODING_UTF8);
+    }
+
+    // Methode, die eine Kodierungsvariable verwendet, bleibt unverändert
+    void encodeWithVariableEncoding() throws UnsupportedEncodingException {
+        String url = URLEncoder.encode("example", encodingVar);
+    }
+
+    // Methode mit `try-catch`-Block für eine ungültige Kodierung
+    static void encodeWithTryCatch() {
+        try {
+            String url = URLEncoder.encode("example", "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("Caught UnsupportedEncodingException for invalid encoding!");
+        }
+    }
+
+    // Beispiel mit StandardCharsets-Konstanten, bleibt unverändert
+    static void encodeWithStandardCharset() {
+        String url = URLEncoder.encode("example", StandardCharsets.UTF_8);
+    }
+}
+"""),
+		SCANNER(
+"""
+package test1;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
+
+public class E1 {
+
+    // Methode mit File und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
+    static void bla3(File file) throws FileNotFoundException {
+        // Konstruktor mit String-Encoding, sollte durch StandardCharsets.UTF_8 ersetzt werden
+        Scanner s = new Scanner(file, "UTF-8");
+    }
+
+    // Methode mit InputStream und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
+    static void bla4(InputStream is) throws FileNotFoundException {
+        Scanner s2 = new Scanner(is, "UTF-8");
+    }
+
+    // Methode mit Scanner, aber ohne explizites Encoding, bleibt unverändert
+    static void bla5() {
+        Scanner s3 = new Scanner("asdf");
+    }
+
+    // Methode, die eine benutzerdefinierte Konstante für die Kodierung verwendet (bleibt unverändert)
+    private static final String ENCODING_UTF8 = "UTF-8";
+    static void bla6(File file) throws FileNotFoundException {
+        Scanner s = new Scanner(file, ENCODING_UTF8);
+    }
+
+    // Methode mit einer ungültigen Kodierung (muss UnsupportedEncodingException werfen)
+    static void bla7(File file) throws FileNotFoundException {
+        try {
+            Scanner s = new Scanner(file, "non-existing-encoding"); // wirft UnsupportedEncodingException
+        } catch (Exception e) {
+            e.printStackTrace(); // Catch block für UnsupportedEncodingException
+        }
+    }
+
+    // Methode mit Scanner und ungültiger Kodierung, die `throws UnsupportedEncodingException` wirft
+    static void bla8(InputStream is) throws FileNotFoundException, UnsupportedEncodingException {
+        Scanner s = new Scanner(is, "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+    }
+
+    // Methode, die eine ungültige Kodierung und ein try-catch verwendet (für FileNotFoundException)
+    static void bla9(File file) {
+        try {
+            Scanner s = new Scanner(file, "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (FileNotFoundException e) {
+            // Datei nicht gefunden, hier wird FileNotFoundException behandelt
+            e.printStackTrace();
+        } catch (Exception e) {
+            // UnsupportedEncodingException wird hier abgefangen
+            e.printStackTrace();
+        }
+    }
+
+    // Beispiel mit StandardCharsets-Konstanten, die keine Änderung brauchen
+    static void bla10(File file) {
+        Scanner s = new Scanner(file, StandardCharsets.UTF_8);
+    }
+
+    // Beispiel mit Scanner und InputStream, ohne explizite Kodierung (bleibt unverändert)
+    static void bla11(InputStream is) {
+        Scanner s = new Scanner(is);
+    }
+
+    // Methode mit Scanner und einer benutzerdefinierten Kodierung als Variable (bleibt unverändert)
+    private String encodingVar = "ISO-8859-1";
+    static void bla12(InputStream is) throws FileNotFoundException {
+        Scanner s = new Scanner(is, "ISO-8859-1");
+    }
+}
+""",
+"""
+package test1;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class E3 {
+public class E1 {
 
-	static void bla3(InputStream is) throws FileNotFoundException {
-		Scanner s=new Scanner(new File("asdf"),StandardCharsets.UTF_8);
-		Scanner s2=new Scanner(is,StandardCharsets.UTF_8);
-		Scanner s3=new Scanner("asdf", Charset.defaultCharset());
-	}
+    // Methode mit File und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
+    static void bla3(File file) throws FileNotFoundException {
+        // Konstruktor mit String-Encoding, sollte durch StandardCharsets.UTF_8 ersetzt werden
+        Scanner s = new Scanner(file, StandardCharsets.UTF_8);
+    }
+
+    // Methode mit InputStream und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
+    static void bla4(InputStream is) throws FileNotFoundException {
+        Scanner s2 = new Scanner(is, StandardCharsets.UTF_8);
+    }
+
+    // Methode mit Scanner, aber ohne explizites Encoding, bleibt unverändert
+    static void bla5() {
+        Scanner s3 = new Scanner("asdf", Charset.defaultCharset());
+    }
+
+    // Methode, die eine benutzerdefinierte Konstante für die Kodierung verwendet (bleibt unverändert)
+    private static final String ENCODING_UTF8 = "UTF-8";
+    static void bla6(File file) throws FileNotFoundException {
+        Scanner s = new Scanner(file, ENCODING_UTF8);
+    }
+
+    // Methode mit einer ungültigen Kodierung (muss UnsupportedEncodingException werfen)
+    static void bla7(File file) throws FileNotFoundException {
+        try {
+            Scanner s = new Scanner(file, "non-existing-encoding"); // wirft UnsupportedEncodingException
+        } catch (Exception e) {
+            e.printStackTrace(); // Catch block für UnsupportedEncodingException
+        }
+    }
+
+    // Methode mit Scanner und ungültiger Kodierung, die `throws UnsupportedEncodingException` wirft
+    static void bla8(InputStream is) throws FileNotFoundException, UnsupportedEncodingException {
+        Scanner s = new Scanner(is, "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+    }
+
+    // Methode, die eine ungültige Kodierung und ein try-catch verwendet (für FileNotFoundException)
+    static void bla9(File file) {
+        try {
+            Scanner s = new Scanner(file, "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (FileNotFoundException e) {
+            // Datei nicht gefunden, hier wird FileNotFoundException behandelt
+            e.printStackTrace();
+        } catch (Exception e) {
+            // UnsupportedEncodingException wird hier abgefangen
+            e.printStackTrace();
+        }
+    }
+
+    // Beispiel mit StandardCharsets-Konstanten, die keine Änderung brauchen
+    static void bla10(File file) {
+        Scanner s = new Scanner(file, StandardCharsets.UTF_8);
+    }
+
+    // Beispiel mit Scanner und InputStream, ohne explizite Kodierung (bleibt unverändert)
+    static void bla11(InputStream is) {
+        Scanner s = new Scanner(is, Charset.defaultCharset());
+    }
+
+    // Methode mit Scanner und einer benutzerdefinierten Kodierung als Variable (bleibt unverändert)
+    private String encodingVar = "ISO-8859-1";
+    static void bla12(InputStream is) throws FileNotFoundException {
+        Scanner s = new Scanner(is, StandardCharsets.ISO_8859_1);
+    }
 }
 """),
 		FORMATTER(
 """
 package test1;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 
-public class E4 {
+public class E1 {
 
-	static void bla() throws FileNotFoundException, UnsupportedEncodingException {
-		Formatter s=new Formatter(new File("asdf"),"UTF-8");
-	}
+    // Methode mit explizitem UTF-8, sollte durch StandardCharsets.UTF_8 ersetzt werden
+    static void bla() throws FileNotFoundException, UnsupportedEncodingException {
+        Formatter s = new Formatter(new File("asdf"), "UTF-8"); // 'UTF-8' wird zu StandardCharsets.UTF_8
+    }
 
-	static void bli() throws FileNotFoundException {
-		try {
-			Formatter s=new Formatter(new File("asdf"),"UTF-8");
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    // Methode mit try-catch, die eine Kodierung verwendet und Fehler wirft
+    static void bli() throws FileNotFoundException {
+        try {
+            Formatter s = new Formatter(new File("asdf"), "UTF-8"); // 'UTF-8' wird zu StandardCharsets.UTF_8
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            // Der Catch-Block für UnsupportedEncodingException sollte im Cleanup entfernt werden
+            e.printStackTrace();
+        }
+    }
+
+    // Methode mit benutzerdefinierter Konstante für das Encoding
+    private static final String ENCODING_UTF8 = "UTF-8";
+
+    static void blc() throws FileNotFoundException, UnsupportedEncodingException {
+        Formatter s = new Formatter(new File("asdf"), ENCODING_UTF8); // 'UTF-8' als Konstante
+    }
+
+    // Methode mit einer ungültigen Kodierung (z.B. 'non-existing-encoding')
+    static void bld() throws FileNotFoundException {
+        try {
+            Formatter s = new Formatter(new File("asdf"), "non-existing-encoding"); // wirft UnsupportedEncodingException
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace(); // UnsupportedEncodingException wird hier erwartet
+        }
+    }
+
+    // Methode, die eine ungültige Kodierung und ein try-catch verwendet
+    static void ble() throws FileNotFoundException {
+        try {
+            Formatter s = new Formatter(new File("asdf"), "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (FileNotFoundException e) {
+            // Datei nicht gefunden, hier wird FileNotFoundException behandelt
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // UnsupportedEncodingException wird hier behandelt
+            e.printStackTrace();
+        }
+    }
+
+    // Methode mit StandardCharsets.UTF_8
+    static void blf() throws FileNotFoundException {
+        Formatter s = new Formatter(new File("asdf"), StandardCharsets.UTF_8); // Verwendung von StandardCharsets.UTF_8
+    }
+
+    // Beispiel, bei dem das Encoding in einer Variablen gespeichert ist
+    private String encodingVar = "UTF-8";
+
+    static void blg() throws FileNotFoundException {
+        String encoding = "UTF-8";
+        Formatter s = new Formatter(new File("asdf"), encoding); // encoding als Variable
+    }
 }
 """, """
 package test1;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 
-public class E4 {
+public class E1 {
 
-	static void bla() throws FileNotFoundException {
-		Formatter s=new Formatter(new File("asdf"),StandardCharsets.UTF_8);
-	}
+    // Methode mit explizitem UTF-8, sollte durch StandardCharsets.UTF_8 ersetzt werden
+    static void bla() throws FileNotFoundException {
+        Formatter s = new Formatter(new File("asdf"), StandardCharsets.UTF_8); // 'UTF-8' wird zu StandardCharsets.UTF_8
+    }
 
-	static void bli() throws FileNotFoundException {
-		try {
-			Formatter s=new Formatter(new File("asdf"),StandardCharsets.UTF_8);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+    // Methode mit try-catch, die eine Kodierung verwendet und Fehler wirft
+    static void bli() throws FileNotFoundException {
+        try {
+            Formatter s = new Formatter(new File("asdf"), StandardCharsets.UTF_8); // 'UTF-8' wird zu StandardCharsets.UTF_8
+        } catch (FileNotFoundException e) {
+            // Der Catch-Block für UnsupportedEncodingException sollte im Cleanup entfernt werden
+            e.printStackTrace();
+        }
+    }
+
+    // Methode mit benutzerdefinierter Konstante für das Encoding
+    private static final String ENCODING_UTF8 = "UTF-8";
+
+    static void blc() throws FileNotFoundException, UnsupportedEncodingException {
+        Formatter s = new Formatter(new File("asdf"), ENCODING_UTF8); // 'UTF-8' als Konstante
+    }
+
+    // Methode mit einer ungültigen Kodierung (z.B. 'non-existing-encoding')
+    static void bld() throws FileNotFoundException {
+        try {
+            Formatter s = new Formatter(new File("asdf"), "non-existing-encoding"); // wirft UnsupportedEncodingException
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace(); // UnsupportedEncodingException wird hier erwartet
+        }
+    }
+
+    // Methode, die eine ungültige Kodierung und ein try-catch verwendet
+    static void ble() throws FileNotFoundException {
+        try {
+            Formatter s = new Formatter(new File("asdf"), "non-existing-encoding"); // könnte UnsupportedEncodingException werfen
+        } catch (FileNotFoundException e) {
+            // Datei nicht gefunden, hier wird FileNotFoundException behandelt
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            // UnsupportedEncodingException wird hier behandelt
+            e.printStackTrace();
+        }
+    }
+
+    // Methode mit StandardCharsets.UTF_8
+    static void blf() throws FileNotFoundException {
+        Formatter s = new Formatter(new File("asdf"), StandardCharsets.UTF_8); // Verwendung von StandardCharsets.UTF_8
+    }
+
+    // Beispiel, bei dem das Encoding in einer Variablen gespeichert ist
+    private String encodingVar = "UTF-8";
+
+    static void blg() throws FileNotFoundException {
+        String encoding = "UTF-8";
+        Formatter s = new Formatter(new File("asdf"), encoding); // encoding als Variable
+    }
 }
 """),
 		THREE("""
