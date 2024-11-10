@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
@@ -101,6 +102,7 @@ public class OutputStreamWriterExplicitEncoding extends AbstractExplicitEncoding
 			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
+		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
 		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
 		/**
@@ -112,6 +114,7 @@ public class OutputStreamWriterExplicitEncoding extends AbstractExplicitEncoding
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
+		removeUnsupportedEncodingException(visited, group, rewrite, importRewriter);
 	}
 
 	@Override
