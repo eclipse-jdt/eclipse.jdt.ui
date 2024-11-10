@@ -1927,11 +1927,37 @@ public class E1 {
 
 	@ParameterizedTest
 	@EnumSource(ExplicitEncodingPatterns.class)
-	public void testExplicitEncodingParametrized(ExplicitEncodingPatterns test) throws CoreException {
+	public void testExplicitEncodingParametrizedKeepBehavior(ExplicitEncodingPatterns test) throws CoreException {
 		IPackageFragment pack= context.getfSourceFolder().createPackageFragment("test1", false, null);
 		ICompilationUnit cu= pack.createCompilationUnit("E1.java", test.given, false, null);
 		context.enable(CleanUpConstants.EXPLICITENCODING_CLEANUP);
 		context.enable(CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR);
+		context.disable(CleanUpConstants.EXPLICITENCODING_INSERT_UTF8);
+		context.disable(CleanUpConstants.EXPLICITENCODING_AGGREGATE_TO_UTF8);
+		context.assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { test.expected }, null);
+	}
+
+	@ParameterizedTest
+	@EnumSource(ExplicitEncodingPatterns.class)
+	public void testExplicitEncodingParametrizedPreferUTF8(ExplicitEncodingPatterns test) throws CoreException {
+		IPackageFragment pack= context.getfSourceFolder().createPackageFragment("test1", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E1.java", test.given, false, null);
+		context.enable(CleanUpConstants.EXPLICITENCODING_CLEANUP);
+		context.disable(CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR);
+		context.enable(CleanUpConstants.EXPLICITENCODING_INSERT_UTF8);
+		context.disable(CleanUpConstants.EXPLICITENCODING_AGGREGATE_TO_UTF8);
+		context.assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { test.expected }, null);
+	}
+
+	@ParameterizedTest
+	@EnumSource(ExplicitEncodingPatterns.class)
+	public void testExplicitEncodingParametrizedAggregateUTF8(ExplicitEncodingPatterns test) throws CoreException {
+		IPackageFragment pack= context.getfSourceFolder().createPackageFragment("test1", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E1.java", test.given, false, null);
+		context.enable(CleanUpConstants.EXPLICITENCODING_CLEANUP);
+		context.disable(CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR);
+		context.disable(CleanUpConstants.EXPLICITENCODING_INSERT_UTF8);
+		context.enable(CleanUpConstants.EXPLICITENCODING_AGGREGATE_TO_UTF8);
 		context.assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { test.expected }, null);
 	}
 
