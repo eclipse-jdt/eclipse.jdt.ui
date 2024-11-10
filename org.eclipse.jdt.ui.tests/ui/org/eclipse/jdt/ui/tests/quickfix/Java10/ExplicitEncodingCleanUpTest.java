@@ -231,51 +231,146 @@ public class ExplicitEncodingCleanUpTest {
 						}
 						"""),
 		INPUTSTREAMREADER(
-				"""
-						package test1;
+"""
+package test1;
 
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
-						public class E1 {
-						    void method(String filename) {
-						        try {
-						            InputStreamReader is1=new InputStreamReader(new FileInputStream("file1.txt")); //$NON-NLS-1$
-						            InputStreamReader is2=new InputStreamReader(new FileInputStream("file2.txt"), "UTF-8"); //$NON-NLS-1$
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
-						""",
+public class E1 {
 
-				"""
-						package test1;
+    void method(String filename) {
+        try {
+            // Standardkonstruktor ohne Encoding
+            InputStreamReader is1 = new InputStreamReader(new FileInputStream("file1.txt")); //$NON-NLS-1$
 
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.nio.charset.StandardCharsets;
-						import java.io.FileNotFoundException;
+            // String Literal Encodings, die nach StandardCharsets umgeschrieben werden sollten
+            InputStreamReader is2 = new InputStreamReader(new FileInputStream("file2.txt"), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is3 = new InputStreamReader(new FileInputStream("file3.txt"), "ISO-8859-1"); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is4 = new InputStreamReader(new FileInputStream("file4.txt"), "US-ASCII"); //$NON-NLS-1$ //$NON-NLS-2$
 
-						public class E1 {
-						    void method(String filename) {
-						        try {
-						            InputStreamReader is1=new InputStreamReader(new FileInputStream("file1.txt"), Charset.defaultCharset()); //$NON-NLS-1$
-						            InputStreamReader is2=new InputStreamReader(new FileInputStream("file2.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
-						"""),
+            // String-basiertes Encoding, das in Charset umgeschrieben werden kann, jedoch ohne vordefinierte Konstante
+            InputStreamReader is5 = new InputStreamReader(new FileInputStream("file5.txt"), "UTF-16"); //$NON-NLS-1$ //$NON-NLS-2$
+
+            // String-basierte Encodings mit Groß-/Kleinschreibungsvarianten
+            InputStreamReader is6 = new InputStreamReader(new FileInputStream("file6.txt"), "utf-8"); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is7 = new InputStreamReader(new FileInputStream("file7.txt"), "Utf-8"); //$NON-NLS-1$ //$NON-NLS-2$
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace(); // Sollte nach Cleanup entfernt werden
+        }
+    }
+
+    void methodWithTryCatch(String filename) {
+        try {
+            // Variante, bei der UnsupportedEncodingException behandelt wird
+            InputStreamReader is8 = new InputStreamReader(new FileInputStream("file8.txt"), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace(); // Sollte nach Cleanup entfernt werden
+        }
+    }
+
+    void methodWithoutException(String filename) throws UnsupportedEncodingException, FileNotFoundException {
+        // Case ohne Try-Catch-Block, sollte Charset-Konstanten direkt ersetzen
+        InputStreamReader is9 = new InputStreamReader(new FileInputStream("file9.txt"), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    void methodWithVariableEncoding(String filename) throws UnsupportedEncodingException, FileNotFoundException {
+        // Case, bei dem das Encoding aus einer Variablen kommt, Cleanup sollte hier keine Änderungen machen
+        String encoding = "UTF-8"; //$NON-NLS-1$
+        InputStreamReader is10 = new InputStreamReader(new FileInputStream("file10.txt"), encoding); //$NON-NLS-1$
+    }
+
+    void methodWithNonStandardEncoding(String filename) {
+        try {
+            // Case mit nicht vordefiniertem Charset, sollte keine Umwandlung in StandardCharsets erfolgen
+            InputStreamReader is11 = new InputStreamReader(new FileInputStream("file11.txt"), "windows-1252"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Methode mit "throws UnsupportedEncodingException" zur Prüfung des Cleanups
+    void methodWithThrows(String filename) throws FileNotFoundException, UnsupportedEncodingException {
+        InputStreamReader is3 = new InputStreamReader(new FileInputStream(filename), "UTF-8"); //$NON-NLS-1$
+    }
+}
+""",
+
+"""
+package test1;
+
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+public class E1 {
+
+    void method(String filename) {
+        try {
+            // Standardkonstruktor ohne Encoding
+            InputStreamReader is1 = new InputStreamReader(new FileInputStream("file1.txt"), Charset.defaultCharset()); //$NON-NLS-1$
+
+            // String Literal Encodings, die nach StandardCharsets umgeschrieben werden sollten
+            InputStreamReader is2 = new InputStreamReader(new FileInputStream("file2.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is3 = new InputStreamReader(new FileInputStream("file3.txt"), StandardCharsets.ISO_8859_1); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is4 = new InputStreamReader(new FileInputStream("file4.txt"), StandardCharsets.US_ASCII); //$NON-NLS-1$ //$NON-NLS-2$
+
+            // String-basiertes Encoding, das in Charset umgeschrieben werden kann, jedoch ohne vordefinierte Konstante
+            InputStreamReader is5 = new InputStreamReader(new FileInputStream("file5.txt"), StandardCharsets.UTF_16); //$NON-NLS-1$ //$NON-NLS-2$
+
+            // String-basierte Encodings mit Groß-/Kleinschreibungsvarianten
+            InputStreamReader is6 = new InputStreamReader(new FileInputStream("file6.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is7 = new InputStreamReader(new FileInputStream("file7.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void methodWithTryCatch(String filename) {
+        try {
+            // Variante, bei der UnsupportedEncodingException behandelt wird
+            InputStreamReader is8 = new InputStreamReader(new FileInputStream("file8.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void methodWithoutException(String filename) throws FileNotFoundException {
+        // Case ohne Try-Catch-Block, sollte Charset-Konstanten direkt ersetzen
+        InputStreamReader is9 = new InputStreamReader(new FileInputStream("file9.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    void methodWithVariableEncoding(String filename) throws UnsupportedEncodingException, FileNotFoundException {
+        // Case, bei dem das Encoding aus einer Variablen kommt, Cleanup sollte hier keine Änderungen machen
+        String encoding = "UTF-8"; //$NON-NLS-1$
+        InputStreamReader is10 = new InputStreamReader(new FileInputStream("file10.txt"), encoding); //$NON-NLS-1$
+    }
+
+    void methodWithNonStandardEncoding(String filename) {
+        try {
+            // Case mit nicht vordefiniertem Charset, sollte keine Umwandlung in StandardCharsets erfolgen
+            InputStreamReader is11 = new InputStreamReader(new FileInputStream("file11.txt"), "windows-1252"); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Methode mit "throws UnsupportedEncodingException" zur Prüfung des Cleanups
+    void methodWithThrows(String filename) throws FileNotFoundException {
+        InputStreamReader is3 = new InputStreamReader(new FileInputStream(filename), StandardCharsets.UTF_8); //$NON-NLS-1$
+    }
+}
+"""),
 		OUTPUTSTREAMWRITER(
 """
 package test1;
