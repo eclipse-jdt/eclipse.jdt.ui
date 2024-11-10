@@ -55,55 +55,97 @@ public class ExplicitEncodingCleanUpTest {
 
 	enum ExplicitEncodingPatterns {
 
-		CHARSET("""
-				package test1;
+		CHARSET(
+"""
+package test1;
 
-				import java.io.ByteArrayOutputStream;
-				import java.io.InputStreamReader;
-				import java.io.FileInputStream;
-				import java.io.FileReader;
-				import java.io.Reader;
-				import java.nio.charset.Charset;
-				import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
-				public class E1 {
-				    void method(String filename) {
-				        Charset cs1= Charset.forName("UTF-8");
-				        Charset cs1b= Charset.forName("Utf-8");
-				        Charset cs2= Charset.forName("UTF-16");
-				        Charset cs3= Charset.forName("UTF-16BE");
-				        Charset cs4= Charset.forName("UTF-16LE");
-				        Charset cs5= Charset.forName("ISO-8859-1");
-				        Charset cs6= Charset.forName("US-ASCII");
-				        String result= cs1.toString();
-				       }
-				    }
-				}
-				""",
+public class E1 {
+
+    void method(String filename) {
+        // Ursprüngliche Verwendung von Charset.forName() mit verschiedenen Charsets
+        Charset cs1 = Charset.forName("UTF-8");
+        Charset cs1b = Charset.forName("Utf-8");  // Unterschiedliche Schreibweise (diese sollten gleich behandelt werden)
+        Charset cs2 = Charset.forName("UTF-16");
+        Charset cs3 = Charset.forName("UTF-16BE");
+        Charset cs4 = Charset.forName("UTF-16LE");
+        Charset cs5 = Charset.forName("ISO-8859-1");
+        Charset cs6 = Charset.forName("US-ASCII");
+
+        // Ausgabe, die durch den Cleanup angepasst wird
+        System.out.println(cs1.toString());
+        System.out.println(cs2.toString());
+
+        // Beispiel mit einer Variablen
+        String charsetName = "UTF-8";  // Wird durch eine Variable ersetzt
+        Charset cs7 = Charset.forName(charsetName);  // Umstellung erforderlich
+        System.out.println(cs7);
+
+        // Testen eines ungültigen Charsets
+        try {
+            Charset cs8 = Charset.forName("non-existing-charset");  // Ungültiger Charset
+            System.out.println(cs8);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Fehler: " + e.getMessage());
+        }
+
+        // Ein benutzerdefinierter Charset-Test
+        Charset cs9 = Charset.forName("windows-1252");
+        System.out.println(cs9.toString());
+    }
+
+    void methodWithVariableCharset(String charsetName) {
+        Charset cs = Charset.forName(charsetName);  // Charset über eine Variable
+        System.out.println(cs.toString());
+    }
+}
+""",
 
 """
 package test1;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.io.FileNotFoundException;
 
 public class E1 {
+
     void method(String filename) {
-        Charset cs1= StandardCharsets.UTF_8;
-        Charset cs1b= StandardCharsets.UTF_8;
-        Charset cs2= StandardCharsets.UTF_16;
-        Charset cs3= StandardCharsets.UTF_16BE;
-        Charset cs4= StandardCharsets.UTF_16LE;
-        Charset cs5= StandardCharsets.ISO_8859_1;
-        Charset cs6= StandardCharsets.US_ASCII;
-        String result= cs1.toString();
-       }
+        // Ursprüngliche Verwendung von Charset.forName() mit verschiedenen Charsets
+        Charset cs1 = StandardCharsets.UTF_8;
+        Charset cs1b = StandardCharsets.UTF_8;  // Unterschiedliche Schreibweise (diese sollten gleich behandelt werden)
+        Charset cs2 = StandardCharsets.UTF_16;
+        Charset cs3 = StandardCharsets.UTF_16BE;
+        Charset cs4 = StandardCharsets.UTF_16LE;
+        Charset cs5 = StandardCharsets.ISO_8859_1;
+        Charset cs6 = StandardCharsets.US_ASCII;
+
+        // Ausgabe, die durch den Cleanup angepasst wird
+        System.out.println(cs1.toString());
+        System.out.println(cs2.toString());
+
+        // Beispiel mit einer Variablen
+        String charsetName = "UTF-8";  // Wird durch eine Variable ersetzt
+        Charset cs7 = StandardCharsets.UTF_8;  // Umstellung erforderlich
+        System.out.println(cs7);
+
+        // Testen eines ungültigen Charsets
+        try {
+            Charset cs8 = Charset.forName("non-existing-charset");  // Ungültiger Charset
+            System.out.println(cs8);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Fehler: " + e.getMessage());
+        }
+
+        // Ein benutzerdefinierter Charset-Test
+        Charset cs9 = Charset.forName("windows-1252");
+        System.out.println(cs9.toString());
+    }
+
+    void methodWithVariableCharset(String charsetName) {
+        Charset cs = Charset.forName(charsetName);  // Charset über eine Variable
+        System.out.println(cs.toString());
     }
 }
 """),
