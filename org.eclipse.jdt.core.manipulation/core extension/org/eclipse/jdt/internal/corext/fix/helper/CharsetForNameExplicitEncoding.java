@@ -68,11 +68,6 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 		if (!ASTNodes.usesGivenSignature(visited, Charset.class.getCanonicalName(), METHOD_FOR_NAME, String.class.getCanonicalName())) {
 			return true;
 		}
-
-
-
-
-
 		ASTNode encodingArg = arguments.get(0);
 
         String encodingValue = null;
@@ -91,20 +86,6 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
             operations.add(fixcore.rewrite(visited, cb, holder));
             return false;
         }
-
-
-
-
-
-
-
-
-//		StringLiteral argstring3= (StringLiteral) arguments.get(0);
-//		if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-//			return false;
-//		}
-//		holder.put(visited,encodingmap.get(argstring3.getLiteralValue().toUpperCase()));
-//		operations.add(fixcore.rewrite(visited, cb, holder));
 		return false;
 	}
 
