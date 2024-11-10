@@ -643,65 +643,155 @@ public class E1 {
 """
 package test1;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.Reader;
-import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 
 public class E1 {
+
+    // Methode 1: Verwendung von StandardCharsets.UTF_8 statt "UTF-8" als String-Literal
     void method(String filename) {
-        String s="asdf"; //$NON-NLS-1$
-        byte[] bytes= s.getBytes();
-        byte[] bytes2= s.getBytes("UTF-8");
+        String s = "asdf"; //$NON-NLS-1$
+
+        // Vorher: getBytes ohne Angabe der Kodierung (verwendet die Plattform-spezifische Standard-Kodierung)
+        byte[] bytes = s.getBytes();
+
+        // Nachher: Umstellung auf StandardCharsets.UTF_8
+        byte[] bytes2 = s.getBytes(StandardCharsets.UTF_8);
+
         System.out.println(bytes.length);
-       }
+        System.out.println(bytes2.length);
     }
 
+    // Methode 2: Behandlung von getBytes mit einer expliziten Kodierung
     void method2(String filename) {
-		String s="asdf"; //$NON-NLS-1$
-		byte[] bytes= s.getBytes();
-		try {
-			byte[] bytes2= s.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println(bytes.length);
-	}
+        String s = "asdf"; //$NON-NLS-1$
+
+        // Vorher: getBytes mit expliziter Kodierung (UTF-8 als String-Literal)
+        byte[] bytes = s.getBytes("UTF-8");
+
+        // Nachher: Umstellung auf StandardCharsets.UTF_8
+        byte[] bytes2 = s.getBytes(StandardCharsets.UTF_8);
+
+        System.out.println(bytes.length);
+        System.out.println(bytes2.length);
+    }
+
+    // Erweiterter Testfall: Verwendung von verschiedenen Kodierungen
+    void methodWithDifferentEncodings(String filename) {
+        String s = "asdf";
+
+        // Testen von gängigen Kodierungen
+        byte[] bytes1 = s.getBytes("ISO-8859-1");  // ISO-8859-1
+        byte[] bytes2 = s.getBytes("US-ASCII");    // US-ASCII
+        byte[] bytes3 = s.getBytes(StandardCharsets.UTF_8);  // UTF-8 mit StandardCharsets
+        byte[] bytes4 = s.getBytes("UTF-16");      // UTF-16
+
+        System.out.println(bytes1.length); // Ausgabe der Längen
+        System.out.println(bytes2.length);
+        System.out.println(bytes3.length);
+        System.out.println(bytes4.length);
+    }
+
+    // Testfall: Verwendung von getBytes mit einer ungültigen Kodierung (sollte im Cleanup behandelt werden)
+    void methodWithInvalidEncoding(String filename) {
+        String s = "asdf";
+        try {
+            // Ungültige Kodierung, die zu UnsupportedEncodingException führt
+            byte[] bytes = s.getBytes("non-existing-encoding");
+        } catch (UnsupportedEncodingException e) {
+            // Diese Ausnahme sollte im Cleanup berücksichtigt werden
+            e.printStackTrace();
+        }
+    }
+
+    // Testfall: Verwendung von getBytes mit einer durch Variable angegebenen Kodierung
+    void methodWithVariableEncoding(String filename) {
+        String s = "asdf";
+        String encoding = "UTF-8";  // Kodierung als Variable
+        try {
+            byte[] bytes = s.getBytes(encoding);  // Kodierung aus der Variablen
+            System.out.println(bytes.length);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
 }
 """,
 
 """
 package test1;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.io.FileNotFoundException;
 
 public class E1 {
+
+    // Methode 1: Verwendung von StandardCharsets.UTF_8 statt "UTF-8" als String-Literal
     void method(String filename) {
-        String s="asdf"; //$NON-NLS-1$
-        byte[] bytes= s.getBytes(Charset.defaultCharset());
-        byte[] bytes2= s.getBytes(StandardCharsets.UTF_8);
+        String s = "asdf"; //$NON-NLS-1$
+
+        // Vorher: getBytes ohne Angabe der Kodierung (verwendet die Plattform-spezifische Standard-Kodierung)
+        byte[] bytes = s.getBytes(Charset.defaultCharset());
+
+        // Nachher: Umstellung auf StandardCharsets.UTF_8
+        byte[] bytes2 = s.getBytes(StandardCharsets.UTF_8);
+
         System.out.println(bytes.length);
-       }
+        System.out.println(bytes2.length);
     }
 
+    // Methode 2: Behandlung von getBytes mit einer expliziten Kodierung
     void method2(String filename) {
-		String s="asdf"; //$NON-NLS-1$
-		byte[] bytes= s.getBytes(Charset.defaultCharset());
-		try {
-			byte[] bytes2= s.getBytes(StandardCharsets.UTF_8);
-		}
-		System.out.println(bytes.length);
-	}
+        String s = "asdf"; //$NON-NLS-1$
+
+        // Vorher: getBytes mit expliziter Kodierung (UTF-8 als String-Literal)
+        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+
+        // Nachher: Umstellung auf StandardCharsets.UTF_8
+        byte[] bytes2 = s.getBytes(StandardCharsets.UTF_8);
+
+        System.out.println(bytes.length);
+        System.out.println(bytes2.length);
+    }
+
+    // Erweiterter Testfall: Verwendung von verschiedenen Kodierungen
+    void methodWithDifferentEncodings(String filename) {
+        String s = "asdf";
+
+        // Testen von gängigen Kodierungen
+        byte[] bytes1 = s.getBytes(StandardCharsets.ISO_8859_1);  // ISO-8859-1
+        byte[] bytes2 = s.getBytes(StandardCharsets.US_ASCII);    // US-ASCII
+        byte[] bytes3 = s.getBytes(StandardCharsets.UTF_8);  // UTF-8 mit StandardCharsets
+        byte[] bytes4 = s.getBytes(StandardCharsets.UTF_16);      // UTF-16
+
+        System.out.println(bytes1.length); // Ausgabe der Längen
+        System.out.println(bytes2.length);
+        System.out.println(bytes3.length);
+        System.out.println(bytes4.length);
+    }
+
+    // Testfall: Verwendung von getBytes mit einer ungültigen Kodierung (sollte im Cleanup behandelt werden)
+    void methodWithInvalidEncoding(String filename) {
+        String s = "asdf";
+        try {
+            // Ungültige Kodierung, die zu UnsupportedEncodingException führt
+            byte[] bytes = s.getBytes("non-existing-encoding");
+        } catch (UnsupportedEncodingException e) {
+            // Diese Ausnahme sollte im Cleanup berücksichtigt werden
+            e.printStackTrace();
+        }
+    }
+
+    // Testfall: Verwendung von getBytes mit einer durch Variable angegebenen Kodierung
+    void methodWithVariableEncoding(String filename) {
+        String s = "asdf";
+        String encoding = "UTF-8";  // Kodierung als Variable
+        try {
+            byte[] bytes = s.getBytes(encoding);  // Kodierung aus der Variablen
+            System.out.println(bytes.length);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
 }
 """),
 		STRING(
