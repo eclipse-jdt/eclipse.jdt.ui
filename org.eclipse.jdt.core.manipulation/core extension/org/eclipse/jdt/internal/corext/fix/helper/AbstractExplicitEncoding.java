@@ -24,12 +24,19 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -82,11 +89,52 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		return ast.newName(importedName);
 	}
 
+	protected static String findVariableValue(SimpleName variable, ASTNode context) {
+	    ASTNode current = context.getParent();
+	    while (current != null && !(current instanceof MethodDeclaration) && !(current instanceof TypeDeclaration)) {
+	        current = current.getParent();
+	    }
+
+	    if (current instanceof MethodDeclaration) {
+	        MethodDeclaration method = (MethodDeclaration) current;
+	        List<?> statements = method.getBody().statements();
+
+	        for (Object stmt : statements) {
+	            if (stmt instanceof VariableDeclarationStatement) {
+	                VariableDeclarationStatement varDeclStmt = (VariableDeclarationStatement) stmt;
+	                for (Object frag : varDeclStmt.fragments()) {
+	                    VariableDeclarationFragment fragment = (VariableDeclarationFragment) frag;
+	                    if (fragment.getName().getIdentifier().equals(variable.getIdentifier())) {
+	                        Expression initializer = fragment.getInitializer();
+	                        if (initializer instanceof StringLiteral) {
+	                            return ((StringLiteral) initializer).getLiteralValue().toUpperCase();
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    } else if (current instanceof TypeDeclaration) {
+	        TypeDeclaration type = (TypeDeclaration) current;
+	        FieldDeclaration[] fields = type.getFields();
+
+	        for (FieldDeclaration field : fields) {
+	            for (Object frag : field.fragments()) {
+	                VariableDeclarationFragment fragment = (VariableDeclarationFragment) frag;
+	                if (fragment.getName().getIdentifier().equals(variable.getIdentifier())) {
+	                    Expression initializer = fragment.getInitializer();
+	                    if (initializer instanceof StringLiteral) {
+	                        return ((StringLiteral) initializer).getLiteralValue().toUpperCase();
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    return null;
+	}
+
 	public abstract String getPreview(boolean afterRefactoring, ChangeBehavior cb);
 
 	protected void removeUnsupportedEncodingException(final ASTNode visited, TextEditGroup group, ASTRewrite rewrite, ImportRewrite importRewriter) {
-	    importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
-
 	    ASTNode parent = visited.getParent();
 	    while (parent != null && !(parent instanceof MethodDeclaration) && !(parent instanceof TryStatement)) {
 	        parent = parent.getParent();
@@ -99,6 +147,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	        for (Type exceptionType : thrownExceptions) {
 	            if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
 	                throwsRewrite.remove(exceptionType, group);
+	                importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
 	            }
 	        }
 	    } else if (parent instanceof TryStatement) {
@@ -125,6 +174,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 	                }
 	            } else if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
 	                rewrite.remove(catchClause, group);
+	                importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
 	            }
 	        }
 
