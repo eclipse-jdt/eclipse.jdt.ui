@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -47,6 +48,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  *
  * Rewrite:  Reader r=Channels.newReader(ch,StandardCharsets.UTF_8)
  *
+ * Find:     Reader r5 = Channels.newReader(ch, "ISO-8859-1", 0, 1024)
+ *
+ * Rewrite:  Reader r5 = Channels.newReader(ch, StandardCharsets.ISO_8859_1, 0, 1024)
+ *
+ *
+ *
  */
 public class ChannelsNewReaderExplicitEncoding extends AbstractExplicitEncoding<MethodInvocation> {
 
@@ -63,23 +70,32 @@ public class ChannelsNewReaderExplicitEncoding extends AbstractExplicitEncoding<
 	}
 
 	private static boolean processFoundNode(UseExplicitEncodingFixCore fixcore,
-			Set<CompilationUnitRewriteOperation> operations, ChangeBehavior cb,
-			MethodInvocation visited, ReferenceHolder<ASTNode, Object> holder) {
-		List<ASTNode> arguments= visited.arguments();
-		if (ASTNodes.usesGivenSignature(visited, Channels.class.getCanonicalName(), METHOD_NEW_READER, ReadableByteChannel.class.getCanonicalName(),String.class.getCanonicalName())) {
-			StringLiteral argstring3= (StringLiteral) arguments.get(1);
-			if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd=new Nodedata();
-			nd.encoding=encodingmap.get(argstring3.getLiteralValue().toUpperCase());
-			nd.replace=true;
-			nd.visited=argstring3;
-			holder.put(visited,nd);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			return false;
-		}
-		return false;
+	        Set<CompilationUnitRewriteOperation> operations, ChangeBehavior cb,
+	        MethodInvocation visited, ReferenceHolder<ASTNode, Object> holder) {
+	    List<ASTNode> arguments = visited.arguments();
+	    if (ASTNodes.usesGivenSignature(visited, Channels.class.getCanonicalName(), METHOD_NEW_READER,
+	            ReadableByteChannel.class.getCanonicalName(), String.class.getCanonicalName())) {
+
+	        ASTNode encodingArg = arguments.get(1);
+
+	        String encodingValue = null;
+	        if (encodingArg instanceof StringLiteral) {
+	            encodingValue = ((StringLiteral) encodingArg).getLiteralValue().toUpperCase();
+	        } else if (encodingArg instanceof SimpleName) {
+	            encodingValue = findVariableValue((SimpleName) encodingArg, visited);
+	        }
+
+	        if (encodingValue != null && encodings.contains(encodingValue)) {
+	            Nodedata nd = new Nodedata();
+	            nd.encoding = encodingmap.get(encodingValue);
+	            nd.replace = true;
+	            nd.visited = encodingArg;
+	            holder.put(visited, nd);
+	            operations.add(fixcore.rewrite(visited, cb, holder));
+	            return false;
+	        }
+	    }
+	    return false;
 	}
 
 	@Override
