@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -79,17 +80,24 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 			MethodInvocation visited, ReferenceHolder<ASTNode, Object> holder) {
 		List<ASTNode> arguments= visited.arguments();
 		if (ASTNodes.usesGivenSignature(visited, URLDecoder.class.getCanonicalName(), METHOD_DECODE, String.class.getCanonicalName(),String.class.getCanonicalName())) {
-			StringLiteral argstring3= (StringLiteral) arguments.get(1);
-			if (!encodings.contains(argstring3.getLiteralValue().toUpperCase())) {
-				return false;
-			}
-			Nodedata nd=new Nodedata();
-			nd.encoding=encodingmap.get(argstring3.getLiteralValue().toUpperCase());
-			nd.replace=true;
-			nd.visited=argstring3;
-			holder.put(visited,nd);
-			operations.add(fixcore.rewrite(visited, cb, holder));
-			return false;
+			ASTNode encodingArg = arguments.get(1);
+
+	        String encodingValue = null;
+	        if (encodingArg instanceof StringLiteral) {
+	            encodingValue = ((StringLiteral) encodingArg).getLiteralValue().toUpperCase();
+	        } else if (encodingArg instanceof SimpleName) {
+	            encodingValue = findVariableValue((SimpleName) encodingArg, visited);
+	        }
+
+	        if (encodingValue != null && encodings.contains(encodingValue)) {
+	            Nodedata nd = new Nodedata();
+	            nd.encoding = encodingmap.get(encodingValue);
+	            nd.replace = true;
+	            nd.visited = encodingArg;
+	            holder.put(visited, nd);
+	            operations.add(fixcore.rewrite(visited, cb, holder));
+	            return false;
+	        }
 		}
 		if (ASTNodes.usesGivenSignature(visited, URLDecoder.class.getCanonicalName(), METHOD_DECODE, String.class.getCanonicalName())) {
 			Nodedata nd=new Nodedata();
