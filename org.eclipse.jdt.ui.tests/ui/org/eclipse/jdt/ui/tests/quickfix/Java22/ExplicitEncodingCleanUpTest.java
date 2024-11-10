@@ -920,24 +920,25 @@ public class E4 {
 		String expected;
 
 		ExplicitEncodingPatterns(String given, String expected) {
-			this.given = given;
-			this.expected = expected;
+			this.given= given;
+			this.expected= expected;
 		}
 	}
 
 	@ParameterizedTest
 	@EnumSource(ExplicitEncodingPatterns.class)
 	public void testExplicitEncodingParametrized(ExplicitEncodingPatterns test) throws CoreException {
-		IPackageFragment pack = context.getfSourceFolder().createPackageFragment("test1", false, null);
-		ICompilationUnit cu = pack.createCompilationUnit("E1.java", test.given, false, null);
+		IPackageFragment pack= context.getfSourceFolder().createPackageFragment("test1", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E1.java", test.given, false, null);
 		context.enable(CleanUpConstants.EXPLICITENCODING_CLEANUP);
+		context.enable(CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR);
 		context.assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { test.expected }, null);
 	}
 
 	@Test
 	public void testExplicitEncodingdonttouch() throws CoreException {
-		IPackageFragment pack = context.getfSourceFolder().createPackageFragment("test1", false, null);
-		ICompilationUnit cu = pack.createCompilationUnit("E2.java",
+		IPackageFragment pack= context.getfSourceFolder().createPackageFragment("test1", false, null);
+		ICompilationUnit cu= pack.createCompilationUnit("E2.java",
 				"""
 						package test1;
 
@@ -967,6 +968,7 @@ public class E4 {
 				false, null);
 
 		context.enable(CleanUpConstants.EXPLICITENCODING_CLEANUP);
+		context.enable(CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR);
 
 		context.assertRefactoringHasNoChange(new ICompilationUnit[] { cu });
 	}

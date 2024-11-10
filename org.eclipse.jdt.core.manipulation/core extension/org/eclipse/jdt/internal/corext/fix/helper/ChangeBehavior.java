@@ -55,7 +55,6 @@ public enum ChangeBehavior {
 		@Override
 		protected Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, String charset) {
 			Expression callToCharsetDefaultCharset= null;
-			// needs Java 1.7
 			callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast, charset);
 			return callToCharsetDefaultCharset;
 		}

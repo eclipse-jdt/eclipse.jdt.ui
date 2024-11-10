@@ -35,26 +35,27 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+
 /**
  * Change
  *
- * Find:     Stream fw=new PrintStream("file.txt", "UTF-8")
+ * Find: Stream fw=new PrintStream("file.txt", "UTF-8")
  *
- * Rewrite:  Stream fw=new PrintStream("file.txt", StandardCharsets.UTF_8)
+ * Rewrite: Stream fw=new PrintStream("file.txt", StandardCharsets.UTF_8)
  *
- * Find:     Stream fw=new PrintStream(new File("file.txt"), "UTF-8")
+ * Find: Stream fw=new PrintStream(new File("file.txt"), "UTF-8")
  *
- * Rewrite:  Stream fw=new PrintStream(new File("file.txt"), StandardCharsets.UTF_8)
+ * Rewrite: Stream fw=new PrintStream(new File("file.txt"), StandardCharsets.UTF_8)
  *
- * Find:     Stream fw=new PrintStream(new java.io.OutputStream(), boolean, "UTF-8")
+ * Find: Stream fw=new PrintStream(new java.io.OutputStream(), boolean, "UTF-8")
  *
- * Rewrite:  Stream fw=new PrintStream(new java.io.OutputStream(), boolean, StandardCharsets.UTF_8)
+ * Rewrite: Stream fw=new PrintStream(new java.io.OutputStream(), boolean, StandardCharsets.UTF_8)
  *
  */
 public class PrintStreamExplicitEncoding extends AbstractExplicitEncoding<ClassInstanceCreation> {
 
 	@Override
-	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed,ChangeBehavior cb) {
+	public void find(UseExplicitEncodingFixCore fixcore, CompilationUnit compilationUnit, Set<CompilationUnitRewriteOperation> operations, Set<ASTNode> nodesprocessed, ChangeBehavior cb) {
 		ReferenceHolder<ASTNode, Object> datah= new ReferenceHolder<>();
 		HelperVisitor.callClassInstanceCreationVisitor(PrintStream.class, compilationUnit, datah, nodesprocessed, (visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
 	}
@@ -64,38 +65,38 @@ public class PrintStreamExplicitEncoding extends AbstractExplicitEncoding<ClassI
 			ReferenceHolder<ASTNode, Object> holder) {
 		List<ASTNode> arguments= visited.arguments();
 		switch (arguments.size()) {
-		case 1:
-			break;
-		case 2:
-			if(!(arguments.get(1) instanceof StringLiteral)) {
+			case 1:
+				break;
+			case 2:
+				if (!(arguments.get(1) instanceof StringLiteral)) {
+					return false;
+				}
+				StringLiteral argstring3= (StringLiteral) arguments.get(1);
+				if (!encodings.contains(argstring3.getLiteralValue())) {
+					return false;
+				}
+				holder.put(argstring3, encodingmap.get(argstring3.getLiteralValue()));
+				break;
+			case 3:
+				if (!(arguments.get(2) instanceof StringLiteral)) {
+					return false;
+				}
+				StringLiteral argstring4= (StringLiteral) arguments.get(2);
+				if (!encodings.contains(argstring4.getLiteralValue())) {
+					return false;
+				}
+				holder.put(argstring4, encodingmap.get(argstring4.getLiteralValue()));
+				break;
+			default:
 				return false;
-			}
-			StringLiteral argstring3= (StringLiteral) arguments.get(1);
-			if (!encodings.contains(argstring3.getLiteralValue())) {
-				return false;
-			}
-			holder.put(argstring3,encodingmap.get(argstring3.getLiteralValue()));
-			break;
-		case 3:
-			if(!(arguments.get(2) instanceof StringLiteral)) {
-				return false;
-			}
-			StringLiteral argstring4= (StringLiteral) arguments.get(2);
-			if (!encodings.contains(argstring4.getLiteralValue())) {
-				return false;
-			}
-			holder.put(argstring4,encodingmap.get(argstring4.getLiteralValue()));
-			break;
-		default:
-			return false;
 		}
 		operations.add(fixcore.rewrite(visited, cb, holder));
 		return false;
 	}
 
 	@Override
-	public void rewrite(UseExplicitEncodingFixCore upp,final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
-			TextEditGroup group,ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
+	public void rewrite(UseExplicitEncodingFixCore upp, final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
+			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited));
@@ -123,17 +124,17 @@ public class PrintStreamExplicitEncoding extends AbstractExplicitEncoding<ClassI
 	}
 
 	@Override
-	public String getPreview(boolean afterRefactoring,ChangeBehavior cb) {
-		if(afterRefactoring) {
-			return "Stream w=new PrintStream(\"out.txt\","+cb.computeCharsetforPreview()+"));\n"+ //$NON-NLS-1$ //$NON-NLS-2$
-			"Stream w=new PrintStream(\"out.txt\",StandardCharsets.UTF_8));\n"+ //$NON-NLS-1$
-			"Stream w=new PrintStream(new File(\"out.txt\"),StandardCharsets.UTF_8));\n"; //$NON-NLS-1$
+	public String getPreview(boolean afterRefactoring, ChangeBehavior cb) {
+		if (afterRefactoring) {
+			return "Stream w=new PrintStream(\"out.txt\"," + cb.computeCharsetforPreview() + "));\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"Stream w=new PrintStream(\"out.txt\",StandardCharsets.UTF_8));\n" + //$NON-NLS-1$
+					"Stream w=new PrintStream(new File(\"out.txt\"),StandardCharsets.UTF_8));\n"; //$NON-NLS-1$
 		}
 		return """
-			Stream w=new PrintStream("out.txt");
-			Stream w=new PrintStream("out.txt","UTF-8");
-			Stream w=new PrintStream(new File("out.txt"),"UTF-8");
-			"""; //$NON-NLS-1$
+				Stream w=new PrintStream("out.txt");
+				Stream w=new PrintStream("out.txt","UTF-8");
+				Stream w=new PrintStream(new File("out.txt"),"UTF-8");
+				"""; //$NON-NLS-1$
 	}
 
 	@Override
