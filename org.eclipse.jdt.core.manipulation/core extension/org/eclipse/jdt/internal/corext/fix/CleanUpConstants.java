@@ -2352,7 +2352,7 @@ public class CleanUpConstants {
 	/**
 	 *
 	 */
-	public static final String EXPLICITENCODING_CLEANUP= "org.eclipse.jdt.ui.cleanup.explicit_encoding"; //$NON-NLS-1$
+	public static final String EXPLICITENCODING_CLEANUP= "cleanup.explicit_encoding"; //$NON-NLS-1$
 
 	/**
 	 * Don't change behavior - just replace or insert to make use of platform encoding visible in the code.
