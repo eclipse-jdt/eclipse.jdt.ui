@@ -53,7 +53,8 @@ public enum ChangeBehavior {
 	ENFORCE_UTF8() {
 		@Override
 		protected Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, String charset) {
-			Expression callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast, charset);
+			String charset2= charset==null?"UTF_8":charset; //$NON-NLS-1$
+			Expression callToCharsetDefaultCharset= addCharsetUTF8(cuRewrite, ast, charset2);
 			return callToCharsetDefaultCharset;
 		}
 
