@@ -120,7 +120,7 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding, Nodedata.charsetConstants);
 		/**
 		 * Add Charset.defaultCharset().displayName() as second (last) parameter of "toString()"
 		 * call Add Charset.defaultCharset() as second (last) parameter
