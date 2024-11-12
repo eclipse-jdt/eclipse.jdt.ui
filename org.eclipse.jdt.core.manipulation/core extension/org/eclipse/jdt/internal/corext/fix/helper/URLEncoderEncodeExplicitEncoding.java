@@ -72,6 +72,7 @@ public class URLEncoderEncodeExplicitEncoding extends AbstractExplicitEncoding<M
 			return;
 		}
 		ReferenceHolder<ASTNode, Object> datah= new ReferenceHolder<>();
+		Nodedata.charsetConstants.clear();
 		HelperVisitor.callMethodInvocationVisitor(URLEncoder.class, METHOD_ENCODE, compilationUnit, datah, nodesprocessed,
 				(visited, holder) -> processFoundNode(fixcore, operations, cb, visited, holder));
 	}
@@ -128,7 +129,7 @@ public class URLEncoderEncodeExplicitEncoding extends AbstractExplicitEncoding<M
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding,Nodedata.charsetConstants);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */

@@ -102,7 +102,7 @@ public class PropertiesStoreToXMLExplicitEncoding extends AbstractExplicitEncodi
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding,Nodedata.charsetConstants);
 		/**
 		 * Add StandardCharsets.UTF_8 as third (last) parameter
 		 */

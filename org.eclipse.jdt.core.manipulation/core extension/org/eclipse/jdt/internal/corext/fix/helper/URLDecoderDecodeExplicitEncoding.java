@@ -128,7 +128,7 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding,Nodedata.charsetConstants);
 		/**
 		 * Add Charset.defaultCharset() or StandardCharsets.UTF_8 as second (last) parameter
 		 */
