@@ -97,7 +97,7 @@ public class CharsetForNameExplicitEncoding extends AbstractExplicitEncoding<Met
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding,Nodedata.charsetConstants);
 		ASTNodes.replaceButKeepComment(rewrite, visited, callToCharsetDefaultCharset, group);
 	}
 

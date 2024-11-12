@@ -17,7 +17,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Hashtable;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -78,7 +77,7 @@ public class ExplicitEncodingCleanUpTest {
 		context.assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { test.expected }, null);
 	}
 
-	@Disabled("Not Implemented")
+//	@Disabled("Not Implemented")
 	@ParameterizedTest
 	@EnumSource(ExplicitEncodingPatternsAggregateUTF8.class)
 	public void testExplicitEncodingParametrizedAggregateUTF8(ExplicitEncodingPatternsAggregateUTF8 test) throws CoreException {

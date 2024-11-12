@@ -87,26 +87,28 @@ public enum ExplicitEncodingPatternsAggregateUTF8 {
 				""",
 
 				"""
-						package test1;
+package test1;
 
-						import java.io.ByteArrayOutputStream;
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.nio.charset.StandardCharsets;
-						import java.io.FileNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileNotFoundException;
 
-						public class E1 {
-						    void method(String filename) {
-						        ByteArrayOutputStream ba=new ByteArrayOutputStream();
-						        String result=ba.toString(Charset.defaultCharset());
-						        ByteArrayOutputStream ba2=new ByteArrayOutputStream();
-						        String result2=ba2.toString(StandardCharsets.UTF_8);
-						       }
-						    }
-						}
+public class E1 {
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
+        ByteArrayOutputStream ba=new ByteArrayOutputStream();
+        String result=ba.toString(E1.UTF_8);
+        ByteArrayOutputStream ba2=new ByteArrayOutputStream();
+        String result2=ba2.toString(E1.UTF_8);
+       }
+    }
+}
 						"""),
 		FILEREADER("""
 				package test1;
@@ -130,26 +132,29 @@ public enum ExplicitEncodingPatternsAggregateUTF8 {
 				""",
 
 				"""
-						package test1;
+package test1;
 
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileNotFoundException;
 
-						public class E1 {
-						    void method(String filename) {
-						        try {
-						            Reader is=new InputStreamReader(new FileInputStream(filename), Charset.defaultCharset());
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
-						"""),
+public class E1 {
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
+        try {
+            Reader is=new InputStreamReader(new FileInputStream(filename), E1.UTF_8);
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+       }
+    }
+}
+"""),
 		FILEWRITER("""
 				package test1;
 
@@ -170,25 +175,28 @@ public enum ExplicitEncodingPatternsAggregateUTF8 {
 				""",
 
 				"""
-						package test1;
+package test1;
 
-						import java.io.FileWriter;
-						import java.io.OutputStreamWriter;
-						import java.io.Writer;
-						import java.nio.charset.Charset;
-						import java.io.FileNotFoundException;
-						import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
-						public class E1 {
-						    void method(String filename) {
-						        try {
-						            Writer fw=new OutputStreamWriter(new FileOutputStream(filename), Charset.defaultCharset());
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
+public class E1 {
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
+        try {
+            Writer fw=new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_8);
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+       }
+    }
+}
 						"""),
 		INPUTSTREAMREADER(
 """
@@ -274,22 +282,27 @@ import java.io.FileNotFoundException;
 
 public class E1 {
 
-    void method(String filename) {
+    private static final Charset UTF_16 = StandardCharsets.UTF_16;
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
+	private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
         try {
             // Standardkonstruktor ohne Encoding
-            InputStreamReader is1 = new InputStreamReader(new FileInputStream("file1.txt"), Charset.defaultCharset()); //$NON-NLS-1$
+            InputStreamReader is1 = new InputStreamReader(new FileInputStream("file1.txt"), E1.UTF_8); //$NON-NLS-1$
 
             // String Literal Encodings, die nach StandardCharsets umgeschrieben werden sollten
-            InputStreamReader is2 = new InputStreamReader(new FileInputStream("file2.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
-            InputStreamReader is3 = new InputStreamReader(new FileInputStream("file3.txt"), StandardCharsets.ISO_8859_1); //$NON-NLS-1$ //$NON-NLS-2$
-            InputStreamReader is4 = new InputStreamReader(new FileInputStream("file4.txt"), StandardCharsets.US_ASCII); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is2 = new InputStreamReader(new FileInputStream("file2.txt"), E1.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is3 = new InputStreamReader(new FileInputStream("file3.txt"), E1.ISO_8859_1); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is4 = new InputStreamReader(new FileInputStream("file4.txt"), E1.US_ASCII); //$NON-NLS-1$ //$NON-NLS-2$
 
             // String-basiertes Encoding, das in Charset umgeschrieben werden kann, jedoch ohne vordefinierte Konstante
-            InputStreamReader is5 = new InputStreamReader(new FileInputStream("file5.txt"), StandardCharsets.UTF_16); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is5 = new InputStreamReader(new FileInputStream("file5.txt"), E1.UTF_16); //$NON-NLS-1$ //$NON-NLS-2$
 
             // String-basierte Encodings mit Groß-/Kleinschreibungsvarianten
-            InputStreamReader is6 = new InputStreamReader(new FileInputStream("file6.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
-            InputStreamReader is7 = new InputStreamReader(new FileInputStream("file7.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is6 = new InputStreamReader(new FileInputStream("file6.txt"), E1.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is7 = new InputStreamReader(new FileInputStream("file7.txt"), E1.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -299,7 +312,7 @@ public class E1 {
     void methodWithTryCatch(String filename) {
         try {
             // Variante, bei der UnsupportedEncodingException behandelt wird
-            InputStreamReader is8 = new InputStreamReader(new FileInputStream("file8.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+            InputStreamReader is8 = new InputStreamReader(new FileInputStream("file8.txt"), E1.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -307,7 +320,7 @@ public class E1 {
 
     void methodWithoutException(String filename) throws FileNotFoundException {
         // Case ohne Try-Catch-Block, sollte Charset-Konstanten direkt ersetzen
-        InputStreamReader is9 = new InputStreamReader(new FileInputStream("file9.txt"), StandardCharsets.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
+        InputStreamReader is9 = new InputStreamReader(new FileInputStream("file9.txt"), E1.UTF_8); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     void methodWithVariableEncoding(String filename) throws UnsupportedEncodingException, FileNotFoundException {
@@ -327,7 +340,7 @@ public class E1 {
 
     // Methode mit "throws UnsupportedEncodingException" zur Prüfung des Cleanups
     void methodWithThrows(String filename) throws FileNotFoundException {
-        InputStreamReader is3 = new InputStreamReader(new FileInputStream(filename), StandardCharsets.UTF_8); //$NON-NLS-1$
+        InputStreamReader is3 = new InputStreamReader(new FileInputStream(filename), E1.UTF_8); //$NON-NLS-1$
     }
 }
 """),
@@ -440,24 +453,28 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
+    private static final Charset UTF_16 = StandardCharsets.UTF_16;
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
+	private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
 
     void method(String filename) {
         try {
             // Standard-Konstruktor ohne Encoding
-            OutputStreamWriter os1 = new OutputStreamWriter(new FileOutputStream(filename), Charset.defaultCharset());
+            OutputStreamWriter os1 = new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_8);
 
             // Konstruktor mit String-Encoding (UTF-8) -> muss durch StandardCharsets.UTF_8 ersetzt werden
-            OutputStreamWriter os2 = new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8);  // "UTF-8" als String-Literal
+            OutputStreamWriter os2 = new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_8);  // "UTF-8" als String-Literal
 
             // Konstruktor mit String-Encoding (ISO-8859-1) -> muss durch StandardCharsets.ISO_8859_1 ersetzt werden
-            OutputStreamWriter os3 = new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.ISO_8859_1); // "ISO-8859-1" als String-Literal
+            OutputStreamWriter os3 = new OutputStreamWriter(new FileOutputStream(filename), E1.ISO_8859_1); // "ISO-8859-1" als String-Literal
 
             // Konstruktor mit String-Encoding (US-ASCII) -> muss durch StandardCharsets.US_ASCII ersetzt werden
-            OutputStreamWriter os4 = new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.US_ASCII); // "US-ASCII" als String-Literal
+            OutputStreamWriter os4 = new OutputStreamWriter(new FileOutputStream(filename), E1.US_ASCII); // "US-ASCII" als String-Literal
 
             // Konstruktor mit String-Encoding (UTF-16) -> muss durch StandardCharsets.UTF_16 ersetzt werden
-            OutputStreamWriter os5 = new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_16);   // "UTF-16" als String-Literal
+            OutputStreamWriter os5 = new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_16);   // "UTF-16" als String-Literal
 
             // Der Konstruktor mit einer benutzerdefinierten Konstante bleibt unverändert
             OutputStreamWriter os6 = new OutputStreamWriter(new FileOutputStream(filename), ENCODING_UTF8);  // bleibt unverändert
@@ -499,7 +516,7 @@ public class E1 {
     // Neue Methode: methodWithThrowsChange() - nach dem Cleanup wird keine UnsupportedEncodingException mehr geworfen
     void methodWithThrowsChange(String filename) throws FileNotFoundException {
         // Nach dem Cleanup, der String "UTF-8" wird zu einer StandardCharset-Konstanten geändert
-        OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8); // wirft keine UnsupportedEncodingException mehr
+        OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_8); // wirft keine UnsupportedEncodingException mehr
     }
 
     // Methode mit einem try-catch, um die UnsupportedEncodingException zu behandeln (und durch den Cleanup angepasst wird)
@@ -516,7 +533,7 @@ public class E1 {
     void methodWithCatchChange(String filename) {
         try {
             // Nach dem Cleanup wird "UTF-8" ersetzt
-            OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8); // keine UnsupportedEncodingException
+            OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_8); // keine UnsupportedEncodingException
         }
     }
 }
@@ -562,17 +579,22 @@ import java.io.Reader;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
+    private static final Charset UTF_16 = StandardCharsets.UTF_16;
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
+	private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
 
     void method(ReadableByteChannel ch, CharsetDecoder decoder) {
         // Fälle für StandardCharsets-Konstanten
-        Reader r1 = Channels.newReader(ch, StandardCharsets.UTF_8);        // soll StandardCharsets.UTF_8 werden
-        Reader r2 = Channels.newReader(ch, StandardCharsets.ISO_8859_1);   // soll StandardCharsets.ISO_8859_1 werden
-        Reader r3 = Channels.newReader(ch, StandardCharsets.US_ASCII);     // soll StandardCharsets.US_ASCII werden
-        Reader r4 = Channels.newReader(ch, StandardCharsets.UTF_16);       // soll StandardCharsets.UTF_16 werden
+        Reader r1 = Channels.newReader(ch, E1.UTF_8);        // soll StandardCharsets.UTF_8 werden
+        Reader r2 = Channels.newReader(ch, E1.ISO_8859_1);   // soll StandardCharsets.ISO_8859_1 werden
+        Reader r3 = Channels.newReader(ch, E1.US_ASCII);     // soll StandardCharsets.US_ASCII werden
+        Reader r4 = Channels.newReader(ch, E1.UTF_16);       // soll StandardCharsets.UTF_16 werden
 
         // Aufruf mit einer String-Konstanten (soll unverändert bleiben)
         Reader r5 = Channels.newReader(ch, ENCODING_UTF8);  // bleibt unverändert
@@ -631,14 +653,18 @@ import java.nio.charset.StandardCharsets;
 import java.nio.charset.Charset;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
+    private static final Charset UTF_16 = StandardCharsets.UTF_16;
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
+	private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
 
     void method(WritableByteChannel ch, Charset charset) {
         // Fälle für StandardCharsets-Konstanten
-        Writer w1 = Channels.newWriter(ch, StandardCharsets.UTF_8);        // soll StandardCharsets.UTF_8 werden
-        Writer w2 = Channels.newWriter(ch, StandardCharsets.ISO_8859_1);   // soll StandardCharsets.ISO_8859_1 werden
-        Writer w3 = Channels.newWriter(ch, StandardCharsets.US_ASCII);     // soll StandardCharsets.US_ASCII werden
-        Writer w4 = Channels.newWriter(ch, StandardCharsets.UTF_16);       // soll StandardCharsets.UTF_16 werden
+        Writer w1 = Channels.newWriter(ch, E1.UTF_8);        // soll StandardCharsets.UTF_8 werden
+        Writer w2 = Channels.newWriter(ch, E1.ISO_8859_1);   // soll StandardCharsets.ISO_8859_1 werden
+        Writer w3 = Channels.newWriter(ch, E1.US_ASCII);     // soll StandardCharsets.US_ASCII werden
+        Writer w4 = Channels.newWriter(ch, E1.UTF_16);       // soll StandardCharsets.UTF_16 werden
 
         // Aufruf mit einer String-Konstanten (soll unverändert bleiben)
         Writer w5 = Channels.newWriter(ch, ENCODING_UTF8);  // bleibt unverändert
@@ -673,26 +699,29 @@ public class E1 {
 				""",
 
 				"""
-						package test1;
+package test1;
 
-						import java.io.PrintWriter;
-						import java.io.Writer;
-						import java.nio.charset.Charset;
-						import java.io.BufferedWriter;
-						import java.io.FileNotFoundException;
-						import java.io.FileOutputStream;
-						import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 
-						public class E1 {
-						    void method(String filename) {
-						        try {
-						            Writer w=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), Charset.defaultCharset()));
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
+public class E1 {
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
+        try {
+            Writer w=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), E1.UTF_8));
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+       }
+    }
+}
 						"""),
 		STRINGGETBYTES(
 """
@@ -780,12 +809,17 @@ import java.nio.charset.StandardCharsets;
 
 public class E1 {
 
-    // Methode 1: Verwendung von StandardCharsets.UTF_8 statt "UTF-8" als String-Literal
+    private static final Charset UTF_16 = StandardCharsets.UTF_16;
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
+	private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	// Methode 1: Verwendung von StandardCharsets.UTF_8 statt "UTF-8" als String-Literal
     void method(String filename) {
         String s = "asdf"; //$NON-NLS-1$
 
         // Vorher: getBytes ohne Angabe der Kodierung (verwendet die Plattform-spezifische Standard-Kodierung)
-        byte[] bytes = s.getBytes(Charset.defaultCharset());
+        byte[] bytes = s.getBytes(E1.UTF_8);
 
         // Nachher: Umstellung auf StandardCharsets.UTF_8
         byte[] bytes2 = s.getBytes(StandardCharsets.UTF_8);
@@ -799,7 +833,7 @@ public class E1 {
         String s = "asdf"; //$NON-NLS-1$
 
         // Vorher: getBytes mit expliziter Kodierung (UTF-8 als String-Literal)
-        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes = s.getBytes(E1.UTF_8);
 
         // Nachher: Umstellung auf StandardCharsets.UTF_8
         byte[] bytes2 = s.getBytes(StandardCharsets.UTF_8);
@@ -813,10 +847,10 @@ public class E1 {
         String s = "asdf";
 
         // Testen von gängigen Kodierungen
-        byte[] bytes1 = s.getBytes(StandardCharsets.ISO_8859_1);  // ISO-8859-1
-        byte[] bytes2 = s.getBytes(StandardCharsets.US_ASCII);    // US-ASCII
+        byte[] bytes1 = s.getBytes(E1.ISO_8859_1);  // ISO-8859-1
+        byte[] bytes2 = s.getBytes(E1.US_ASCII);    // US-ASCII
         byte[] bytes3 = s.getBytes(StandardCharsets.UTF_8);  // UTF-8 mit StandardCharsets
-        byte[] bytes4 = s.getBytes(StandardCharsets.UTF_16);      // UTF-16
+        byte[] bytes4 = s.getBytes(E1.UTF_16);      // UTF-16
 
         System.out.println(bytes1.length); // Ausgabe der Längen
         System.out.println(bytes2.length);
@@ -955,28 +989,33 @@ import java.nio.charset.StandardCharsets;
 
 public class E1 {
 
-    static void bla(String filename) throws FileNotFoundException {
+    private static final Charset UTF_16 = StandardCharsets.UTF_16;
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
+	private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	static void bla(String filename) throws FileNotFoundException {
         byte[] b = {(byte) 59};
 
         // Fälle mit String Encoding als "UTF-8" (soll durch StandardCharsets.UTF_8 ersetzt werden)
-        String s1 = new String(b, StandardCharsets.UTF_8); // "UTF-8" als String-Literal
-        String s2 = new String(b, 0, 1, StandardCharsets.UTF_8); // "UTF-8" als String-Literal
+        String s1 = new String(b, E1.UTF_8); // "UTF-8" als String-Literal
+        String s2 = new String(b, 0, 1, E1.UTF_8); // "UTF-8" als String-Literal
 
         // Fall mit ISO-8859-1 Encoding (soll durch StandardCharsets.ISO_8859_1 ersetzt werden)
-        String s3 = new String(b, StandardCharsets.ISO_8859_1); // "ISO-8859-1" als String-Literal
-        String s4 = new String(b, 0, 1, StandardCharsets.ISO_8859_1); // "ISO-8859-1" als String-Literal
+        String s3 = new String(b, E1.ISO_8859_1); // "ISO-8859-1" als String-Literal
+        String s4 = new String(b, 0, 1, E1.ISO_8859_1); // "ISO-8859-1" als String-Literal
 
         // Fall mit US-ASCII Encoding (soll durch StandardCharsets.US_ASCII ersetzt werden)
-        String s5 = new String(b, StandardCharsets.US_ASCII); // "US-ASCII" als String-Literal
-        String s6 = new String(b, 0, 1, StandardCharsets.US_ASCII); // "US-ASCII" als String-Literal
+        String s5 = new String(b, E1.US_ASCII); // "US-ASCII" als String-Literal
+        String s6 = new String(b, 0, 1, E1.US_ASCII); // "US-ASCII" als String-Literal
 
         // Fall mit UTF-16 Encoding (soll durch StandardCharsets.UTF_16 ersetzt werden)
-        String s7 = new String(b, StandardCharsets.UTF_16); // "UTF-16" als String-Literal
-        String s8 = new String(b, 0, 1, StandardCharsets.UTF_16); // "UTF-16" als String-Literal
+        String s7 = new String(b, E1.UTF_16); // "UTF-16" als String-Literal
+        String s8 = new String(b, 0, 1, E1.UTF_16); // "UTF-16" als String-Literal
 
         // Fall mit einer benutzerdefinierten Konstante für Encoding, bleibt unverändert
-        String s9 = new String(b, StandardCharsets.UTF_8); // bleibt unverändert
-        String s10 = new String(b, 0, 1, StandardCharsets.UTF_8); // bleibt unverändert
+        String s9 = new String(b, E1.UTF_8); // bleibt unverändert
+        String s10 = new String(b, 0, 1, E1.UTF_8); // bleibt unverändert
 
         // Fälle ohne Entsprechung in StandardCharsets, bleiben unverändert
         String s11 = new String(b, "windows-1252"); // bleibt unverändert
@@ -1014,7 +1053,7 @@ public class E1 {
     // Nach dem Cleanup sollte dies keine UnsupportedEncodingException mehr werfen
     static void methodWithThrowsChange(String filename) throws FileNotFoundException {
         byte[] b = {(byte) 59};
-        String s1 = new String(b, StandardCharsets.UTF_8); // wirft keine UnsupportedEncodingException mehr
+        String s1 = new String(b, E1.UTF_8); // wirft keine UnsupportedEncodingException mehr
     }
 
     // Methodendeklaration mit try-catch für UnsupportedEncodingException (wird im Cleanup angepasst)
@@ -1032,7 +1071,7 @@ public class E1 {
     static void methodWithCatchChange(String filename) {
         byte[] b = {(byte) 59};
         try {
-            String s1 = new String(b, StandardCharsets.UTF_8); // keine UnsupportedEncodingException
+            String s1 = new String(b, E1.UTF_8); // keine UnsupportedEncodingException
         }
     }
 }
@@ -1139,18 +1178,20 @@ package test1;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Konstante für Encoding
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Konstante für Encoding
     private String encodingVar = "ISO-8859-1"; // Encoding-Variable
 
     // Fall 1: UTF-8 als String; Cleanup soll zu StandardCharsets.UTF_8 ändern
     void storeWithTryWithResources() throws IOException {
         Properties p = new Properties();
         try (FileOutputStream os = new FileOutputStream("out.xml")) {
-            p.storeToXML(os, "Kommentar", StandardCharsets.UTF_8);
+            p.storeToXML(os, "Kommentar", E1.UTF_8);
         }
     }
 
@@ -1177,7 +1218,7 @@ public class E1 {
         Properties p = new Properties();
         FileOutputStream os = new FileOutputStream(filename);
         try {
-            p.storeToXML(os, "Kommentar", StandardCharsets.UTF_8);
+            p.storeToXML(os, "Kommentar", E1.UTF_8);
         } finally {
             os.close(); // Bleibt erhalten, um die Ressource korrekt zu schließen
         }
@@ -1284,17 +1325,18 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class E2 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	private static final String ENCODING_UTF8 = "UTF-8"; // Konstante für Encoding
     private String encodingVar = "ISO-8859-1"; // Variable für Encoding
 
     // Methode ohne Encoding-Angabe, bleibt unverändert
     static void decodeDefault() {
-        String url = URLDecoder.decode("example", Charset.defaultCharset());
+        String url = URLDecoder.decode("example", E2.UTF_8);
     }
 
     // Methode, die "UTF-8" als String verwendet und UnsupportedEncodingException wirft
     static void decodeWithThrows() {
-        String url = URLDecoder.decode("example", StandardCharsets.UTF_8); // sollte in StandardCharsets.UTF_8 geändert werden
+        String url = URLDecoder.decode("example", E2.UTF_8); // sollte in StandardCharsets.UTF_8 geändert werden
     }
 
     // Methode, die eine ungültige Kodierung verwendet und `UnsupportedEncodingException` wirft
@@ -1387,17 +1429,18 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class E1 {
-    private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Kodierungskonstante
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	private static final String ENCODING_UTF8 = "UTF-8"; // Benutzerdefinierte Kodierungskonstante
     private String encodingVar = "ISO-8859-1"; // Variable für eine Kodierung
 
     // Methode ohne explizite Kodierung, bleibt unverändert
     static void encodeDefault() {
-        String url = URLEncoder.encode("example", Charset.defaultCharset());
+        String url = URLEncoder.encode("example", E1.UTF_8);
     }
 
     // Methode, die "UTF-8" als String-Literal verwendet und `throws UnsupportedEncodingException` hat
     static void encodeWithThrows() {
-        String url = URLEncoder.encode("example", StandardCharsets.UTF_8); // sollte in StandardCharsets.UTF_8 geändert werden
+        String url = URLEncoder.encode("example", E1.UTF_8); // sollte in StandardCharsets.UTF_8 geändert werden
     }
 
     // Methode, die eine ungültige Kodierung verwendet und `UnsupportedEncodingException` wirft
@@ -1520,20 +1563,22 @@ import java.util.Scanner;
 
 public class E1 {
 
-    // Methode mit File und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
+    private static final Charset ISO_8859_1 = StandardCharsets.ISO_8859_1;
+	private static final Charset UTF_8 = StandardCharsets.UTF_8;
+	// Methode mit File und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
     static void bla3(File file) throws FileNotFoundException {
         // Konstruktor mit String-Encoding, sollte durch StandardCharsets.UTF_8 ersetzt werden
-        Scanner s = new Scanner(file, StandardCharsets.UTF_8);
+        Scanner s = new Scanner(file, E1.UTF_8);
     }
 
     // Methode mit InputStream und explizitem "UTF-8" (wird durch StandardCharsets.UTF_8 ersetzt)
     static void bla4(InputStream is) throws FileNotFoundException {
-        Scanner s2 = new Scanner(is, StandardCharsets.UTF_8);
+        Scanner s2 = new Scanner(is, E1.UTF_8);
     }
 
     // Methode mit Scanner, aber ohne explizites Encoding, bleibt unverändert
     static void bla5() {
-        Scanner s3 = new Scanner("asdf", Charset.defaultCharset());
+        Scanner s3 = new Scanner("asdf", E1.UTF_8);
     }
 
     // Methode, die eine benutzerdefinierte Konstante für die Kodierung verwendet (bleibt unverändert)
@@ -1576,13 +1621,13 @@ public class E1 {
 
     // Beispiel mit Scanner und InputStream, ohne explizite Kodierung (bleibt unverändert)
     static void bla11(InputStream is) {
-        Scanner s = new Scanner(is, Charset.defaultCharset());
+        Scanner s = new Scanner(is, E1.UTF_8);
     }
 
     // Methode mit Scanner und einer benutzerdefinierten Kodierung als Variable (bleibt unverändert)
     private String encodingVar = "ISO-8859-1";
     static void bla12(InputStream is) throws FileNotFoundException {
-        Scanner s = new Scanner(is, StandardCharsets.ISO_8859_1);
+        Scanner s = new Scanner(is, E1.ISO_8859_1);
     }
 }
 """),
@@ -1660,20 +1705,23 @@ package test1;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 
 public class E1 {
 
-    // Methode mit explizitem UTF-8, sollte durch StandardCharsets.UTF_8 ersetzt werden
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	// Methode mit explizitem UTF-8, sollte durch StandardCharsets.UTF_8 ersetzt werden
     static void bla() throws FileNotFoundException {
-        Formatter s = new Formatter(new File("asdf"), StandardCharsets.UTF_8); // 'UTF-8' wird zu StandardCharsets.UTF_8
+        Formatter s = new Formatter(new File("asdf"), E1.UTF_8); // 'UTF-8' wird zu StandardCharsets.UTF_8
     }
 
     // Methode mit try-catch, die eine Kodierung verwendet und Fehler wirft
     static void bli() throws FileNotFoundException {
         try {
-            Formatter s = new Formatter(new File("asdf"), StandardCharsets.UTF_8); // 'UTF-8' wird zu StandardCharsets.UTF_8
+            Formatter s = new Formatter(new File("asdf"), E1.UTF_8); // 'UTF-8' wird zu StandardCharsets.UTF_8
         } catch (FileNotFoundException e) {
             // Der Catch-Block für UnsupportedEncodingException sollte im Cleanup entfernt werden
             e.printStackTrace();
@@ -1761,41 +1809,44 @@ public class E1 {
 				""",
 
 				"""
-						package test1;
+package test1;
 
-						import java.io.ByteArrayOutputStream;
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.io.FileNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileNotFoundException;
 
-						public class E1 {
-						    void method(String filename) {
-						        String s="asdf"; //$NON-NLS-1$
-						        byte[] bytes= s.getBytes(Charset.defaultCharset());
-						        System.out.println(bytes.length);
-						        ByteArrayOutputStream ba=new ByteArrayOutputStream();
-						        String result=ba.toString(Charset.defaultCharset());
-						        try {
-						            InputStreamReader is=new InputStreamReader(new FileInputStream(""), Charset.defaultCharset()); //$NON-NLS-1$
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						        try {
-						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), Charset.defaultCharset()); //$NON-NLS-1$
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						        try {
-						            Reader is=new InputStreamReader(new FileInputStream(filename), Charset.defaultCharset());
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
+public class E1 {
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
+        String s="asdf"; //$NON-NLS-1$
+        byte[] bytes= s.getBytes(E1.UTF_8);
+        System.out.println(bytes.length);
+        ByteArrayOutputStream ba=new ByteArrayOutputStream();
+        String result=ba.toString(E1.UTF_8);
+        try {
+            InputStreamReader is=new InputStreamReader(new FileInputStream(""), E1.UTF_8); //$NON-NLS-1$
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+        try {
+            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), E1.UTF_8); //$NON-NLS-1$
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+        try {
+            Reader is=new InputStreamReader(new FileInputStream(filename), E1.UTF_8);
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+       }
+    }
+}
 						"""),
 		ENCODINGASSTRINGPARAMETER(
 				"""
@@ -1837,43 +1888,45 @@ public class E1 {
 						""",
 
 				"""
-						package test1;
+package test1;
 
-						import java.io.ByteArrayOutputStream;
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.nio.charset.StandardCharsets;
-						import java.io.FileNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.io.FileNotFoundException;
 
-						public class E1 {
-						    void method(String filename) {
-						        String s="asdf"; //$NON-NLS-1$
-						        //byte[] bytes= s.getBytes(StandardCharsets.UTF_8);
-						        byte[] bytes= s.getBytes(StandardCharsets.UTF_8);
-						        System.out.println(bytes.length);
-						        ByteArrayOutputStream ba=new ByteArrayOutputStream();
-						        String result=ba.toString(Charset.defaultCharset());
-						        try {
-						            InputStreamReader is=new InputStreamReader(new FileInputStream(""), StandardCharsets.UTF_8); //$NON-NLS-1$
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						        try {
-						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), StandardCharsets.UTF_8); //$NON-NLS-1$
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						        try {
-						            Reader is=new InputStreamReader(new FileInputStream(filename), Charset.defaultCharset());
-						            } catch (FileNotFoundException e) {
-						            e.printStackTrace();
-						            }
-						       }
-						    }
-						}
+public class E1 {
+    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+
+	void method(String filename) {
+        String s="asdf"; //$NON-NLS-1$
+        //byte[] bytes= s.getBytes(StandardCharsets.UTF_8);
+        byte[] bytes= s.getBytes(E1.UTF_8);
+        System.out.println(bytes.length);
+        ByteArrayOutputStream ba=new ByteArrayOutputStream();
+        String result=ba.toString(E1.UTF_8);
+        try {
+            InputStreamReader is=new InputStreamReader(new FileInputStream(""), E1.UTF_8); //$NON-NLS-1$
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+        try {
+            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), E1.UTF_8); //$NON-NLS-1$
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+        try {
+            Reader is=new InputStreamReader(new FileInputStream(filename), E1.UTF_8);
+            } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            }
+       }
+    }
+}
 						""");
 
 		String given;

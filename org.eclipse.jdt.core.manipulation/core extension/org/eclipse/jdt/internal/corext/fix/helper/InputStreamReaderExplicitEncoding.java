@@ -99,7 +99,8 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 		AST ast= cuRewrite.getRoot().getAST();
 		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
 		Nodedata nodedata= (Nodedata) data.get(visited);
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding);
+
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding, Nodedata.charsetConstants);
 		/**
 		 * Add Charset.defaultCharset() as second (last) parameter
 		 */
@@ -116,64 +117,59 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 
 	@SuppressWarnings("unused")
 	private void removeNLSComment(ASTNode node, CompilationUnitRewrite cuRewrite, TextEditGroup group) {
-	    CompilationUnit unit = cuRewrite.getRoot();
-	    ASTRewrite rewrite = cuRewrite.getASTRewrite();
+		CompilationUnit unit= cuRewrite.getRoot();
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
-	    // Liste aller Kommentare in der CompilationUnit
-	    List<Comment> comments = unit.getCommentList();
-	    boolean removed = false;
+		List<Comment> comments= unit.getCommentList();
+		boolean removed= false;
 
-	    for (Comment comment : comments) {
-	        if (comment instanceof LineComment) {
-	            // Hole den Text des Kommentars
-	            String commentContent = getCommentContent(comment, cuRewrite);
-	            System.out.println("Checking comment: " + commentContent); //$NON-NLS-1$
+		for (Comment comment : comments) {
+			if (comment instanceof LineComment) {
+				String commentContent= getCommentContent(comment, cuRewrite);
+				System.out.println("Checking comment: " + commentContent); //$NON-NLS-1$
 
-	            if (commentContent != null && commentContent.contains("$NON-NLS-")) { //$NON-NLS-1$
-	                // Stelle sicher, dass der Kommentar nach dem gegebenen node kommt
-	                if (comment.getStartPosition() > node.getStartPosition()) {
-	                    // Versuche, den Kommentar zu entfernen
-	                    ASTNode parent = comment.getParent();
-	                    if (parent != null) {
-	                        StructuralPropertyDescriptor property = comment.getLocationInParent();
-	                        if (property != null) {
-	                            // Kommentar in seiner Elternstruktur entfernen
-	                            if (property.isChildListProperty()) {
-	                                ListRewrite listRewrite = rewrite.getListRewrite(parent, (ChildListPropertyDescriptor) property);
-	                                System.out.println("Removing comment at position: " + comment.getStartPosition()); //$NON-NLS-1$
-	                                listRewrite.remove(comment, group);
-	                                removed = true;
-	                            } else {
-	                                rewrite.remove(comment, group);
-	                                removed = true;
-	                            }
-	                        } else {
-	                            System.err.println("No valid location found for comment."); //$NON-NLS-1$
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	    }
+				if (commentContent != null && commentContent.contains("$NON-NLS-")) { //$NON-NLS-1$
+					if (comment.getStartPosition() > node.getStartPosition()) {
+						ASTNode parent= comment.getParent();
+						if (parent != null) {
+							StructuralPropertyDescriptor property= comment.getLocationInParent();
+							if (property != null) {
+								if (property.isChildListProperty()) {
+									ListRewrite listRewrite= rewrite.getListRewrite(parent, (ChildListPropertyDescriptor) property);
+									System.out.println("Removing comment at position: " + comment.getStartPosition()); //$NON-NLS-1$
+									listRewrite.remove(comment, group);
+									removed= true;
+								} else {
+									rewrite.remove(comment, group);
+									removed= true;
+								}
+							} else {
+								System.err.println("No valid location found for comment."); //$NON-NLS-1$
+							}
+						}
+					}
+				}
+			}
+		}
 
-	    if (!removed) {
-	        System.out.println("No NLS comment found to remove."); //$NON-NLS-1$
-	    }
+		if (!removed) {
+			System.out.println("No NLS comment found to remove."); //$NON-NLS-1$
+		}
 	}
 
 	private String getCommentContent(Comment comment, CompilationUnitRewrite cuRewrite) {
-	    try {
-	        int startPosition = comment.getStartPosition();
-	        int length = comment.getLength();
+		try {
+			int startPosition= comment.getStartPosition();
+			int length= comment.getLength();
 
-	        ICompilationUnit icu = (ICompilationUnit) cuRewrite.getRoot().getJavaElement();
-	        if (icu != null) {
-	            return icu.getSource().substring(startPosition, startPosition + length);
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    return null;
+			ICompilationUnit icu= (ICompilationUnit) cuRewrite.getRoot().getJavaElement();
+			if (icu != null) {
+				return icu.getSource().substring(startPosition, startPosition + length);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override

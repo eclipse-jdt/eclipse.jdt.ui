@@ -83,7 +83,7 @@ public class FileReaderExplicitEncoding extends AbstractExplicitEncoding<ClassIn
 			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited));
+		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, (String) data.get(visited),Nodedata.charsetConstants);
 		/**
 		 * new FileInputStream(<filename>)
 		 */

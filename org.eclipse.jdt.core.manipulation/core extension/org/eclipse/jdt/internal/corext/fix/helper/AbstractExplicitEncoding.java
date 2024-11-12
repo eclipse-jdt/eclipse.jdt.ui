@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix.helper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -50,6 +52,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
  * @param <T> Type found in Visitor
  */
 public abstract class AbstractExplicitEncoding<T extends ASTNode> {
+	private static final String JAVA_IO_UNSUPPORTED_ENCODING_EXCEPTION= "java.io.UnsupportedEncodingException"; //$NON-NLS-1$
+
 	private static final String UNSUPPORTED_ENCODING_EXCEPTION= "UnsupportedEncodingException"; //$NON-NLS-1$
 
 	static Map<String, String> encodingmap= Map.of(
@@ -69,6 +73,8 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		public ASTNode visited;
 
 		public String encoding;
+
+		public static Map<String, QualifiedName> charsetConstants=new HashMap<>();
 	}
 
 	protected static final String ENCODING= "encoding"; //$NON-NLS-1$
@@ -153,7 +159,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 			for (Type exceptionType : thrownExceptions) {
 				if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
 					throwsRewrite.remove(exceptionType, group);
-					importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
+					importRewriter.removeImport(JAVA_IO_UNSUPPORTED_ENCODING_EXCEPTION);
 				}
 			}
 		} else if (parent instanceof TryStatement) {
@@ -180,7 +186,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 					}
 				} else if (exceptionType.toString().equals(UNSUPPORTED_ENCODING_EXCEPTION)) {
 					rewrite.remove(catchClause, group);
-					importRewriter.removeImport("java.io.UnsupportedEncodingException"); //$NON-NLS-1$
+					importRewriter.removeImport(JAVA_IO_UNSUPPORTED_ENCODING_EXCEPTION);
 				}
 			}
 
