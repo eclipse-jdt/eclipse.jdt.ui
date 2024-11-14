@@ -7117,9 +7117,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.toolscleanup">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.UseExplicitEncodingCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.explicit_encoding"
+            runAfter="org.eclipse.jdt.ui.cleanup.switch">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.AddAllCleanUp"
             id="org.eclipse.jdt.ui.cleanup.add_all"
-            runAfter="org.eclipse.jdt.ui.cleanup.switch">
+            runAfter="org.eclipse.jdt.ui.cleanup.explicit_encoding">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUpCore"
@@ -7442,14 +7447,9 @@
             runAfter="org.eclipse.jdt.ui.cleanup.operand_factorization">
       </cleanUp>
       <cleanUp
-            class="org.eclipse.jdt.internal.ui.fix.UseExplicitEncodingCleanUp"
-            id="org.eclipse.jdt.ui.cleanup.explicit_encoding"
-            runAfter="org.eclipse.jdt.ui.cleanup.ternary_operator">
-      </cleanUp>
-      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StrictlyEqualOrDifferentCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strictly_equal_or_different"
-            runAfter="org.eclipse.jdt.ui.cleanup.explicit_encoding">
+            runAfter="org.eclipse.jdt.ui.cleanup.ternary_operator">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.MergeConditionalBlocksCleanUp"

@@ -112,6 +112,7 @@ public class OutputStreamWriterExplicitEncoding extends AbstractExplicitEncoding
 		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 		if (nodedata.replace) {
 			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
+			removeNLSComment(cuRewrite, visited, group, rewrite);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
