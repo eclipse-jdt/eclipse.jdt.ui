@@ -77,8 +77,10 @@ public class UseExplicitEncodingCleanUpCore extends AbstractCleanUp {
 		if (operations.isEmpty()) {
 			return null;
 		}
+
+		CompilationUnitRewriteOperation[] array= operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]);
 		return new CompilationUnitRewriteOperationsFixCore(ExplicitEncodingCleanUpFix_refactor,
-				compilationUnit, operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]));
+				compilationUnit, array);
 	}
 
 	private ChangeBehavior computeRefactorDeepth() {
