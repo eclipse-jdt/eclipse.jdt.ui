@@ -19,18 +19,11 @@ import java.util.Set;
 
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.common.HelperVisitor;
@@ -93,83 +86,23 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 	}
 
 	@Override
-	public void rewrite(UseExplicitEncodingFixCore upp, final ClassInstanceCreation visited, final CompilationUnitRewrite cuRewrite,
+	public void rewrite(UseExplicitEncodingFixCore upp, ClassInstanceCreation visited, CompilationUnitRewrite cuRewrite,
 			TextEditGroup group, ChangeBehavior cb, ReferenceHolder<ASTNode, Object> data) {
-		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-		AST ast= cuRewrite.getRoot().getAST();
-		ImportRewrite importRewriter= cuRewrite.getImportRewrite();
-		Nodedata nodedata= (Nodedata) data.get(visited);
+		ASTRewrite rewrite = cuRewrite.getASTRewrite();
+		Nodedata nodedata = (Nodedata) data.get(visited);
 
-		ASTNode callToCharsetDefaultCharset= cb.computeCharsetASTNode(cuRewrite, ast, nodedata.encoding, Nodedata.charsetConstants);
-		/**
-		 * Add Charset.defaultCharset() as second (last) parameter
-		 */
-		ListRewrite listRewrite= rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+		ASTNode callToCharsetDefaultCharset = cb.computeCharsetASTNode(cuRewrite, cuRewrite.getRoot().getAST(),
+				nodedata.encoding, Nodedata.charsetConstants);
+
+		ListRewrite listRewrite = rewrite.getListRewrite(visited, ClassInstanceCreation.ARGUMENTS_PROPERTY);
 		if (nodedata.replace) {
 			listRewrite.replace(nodedata.visited, callToCharsetDefaultCharset, group);
-			// Remove NLS comment
-//		    removeNLSComment(visited, cuRewrite, group);
+			removeNLSComment(cuRewrite, visited, group, rewrite);
 		} else {
 			listRewrite.insertLast(callToCharsetDefaultCharset, group);
 		}
-		removeUnsupportedEncodingException(visited, group, rewrite, importRewriter);
-	}
 
-	@SuppressWarnings("unused")
-	private void removeNLSComment(ASTNode node, CompilationUnitRewrite cuRewrite, TextEditGroup group) {
-		CompilationUnit unit= cuRewrite.getRoot();
-		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-
-		List<Comment> comments= unit.getCommentList();
-		boolean removed= false;
-
-		for (Comment comment : comments) {
-			if (comment instanceof LineComment) {
-				String commentContent= getCommentContent(comment, cuRewrite);
-				System.out.println("Checking comment: " + commentContent); //$NON-NLS-1$
-
-				if (commentContent != null && commentContent.contains("$NON-NLS-")) { //$NON-NLS-1$
-					if (comment.getStartPosition() > node.getStartPosition()) {
-						ASTNode parent= comment.getParent();
-						if (parent != null) {
-							StructuralPropertyDescriptor property= comment.getLocationInParent();
-							if (property != null) {
-								if (property.isChildListProperty()) {
-									ListRewrite listRewrite= rewrite.getListRewrite(parent, (ChildListPropertyDescriptor) property);
-									System.out.println("Removing comment at position: " + comment.getStartPosition()); //$NON-NLS-1$
-									listRewrite.remove(comment, group);
-									removed= true;
-								} else {
-									rewrite.remove(comment, group);
-									removed= true;
-								}
-							} else {
-								System.err.println("No valid location found for comment."); //$NON-NLS-1$
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if (!removed) {
-			System.out.println("No NLS comment found to remove."); //$NON-NLS-1$
-		}
-	}
-
-	private String getCommentContent(Comment comment, CompilationUnitRewrite cuRewrite) {
-		try {
-			int startPosition= comment.getStartPosition();
-			int length= comment.getLength();
-
-			ICompilationUnit icu= (ICompilationUnit) cuRewrite.getRoot().getJavaElement();
-			if (icu != null) {
-				return icu.getSource().substring(startPosition, startPosition + length);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		removeUnsupportedEncodingException(visited, group, rewrite, cuRewrite.getImportRewrite());
 	}
 
 	@Override

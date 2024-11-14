@@ -16,54 +16,42 @@ package org.eclipse.jdt.ui.tests.quickfix.Java10;
 public enum ExplicitEncodingPatternsKeepBehavior {
 
 		CHARSET("""
-				package test1;
+package test1;
 
-				import java.io.ByteArrayOutputStream;
-				import java.io.InputStreamReader;
-				import java.io.FileInputStream;
-				import java.io.FileReader;
-				import java.io.Reader;
-				import java.nio.charset.Charset;
-				import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 
-				public class E1 {
-				    void method(String filename) {
-				        Charset cs1= Charset.forName("UTF-8");
-				        Charset cs1b= Charset.forName("Utf-8");
-				        Charset cs2= Charset.forName("UTF-16");
-				        Charset cs3= Charset.forName("UTF-16BE");
-				        Charset cs4= Charset.forName("UTF-16LE");
-				        Charset cs5= Charset.forName("ISO-8859-1");
-				        Charset cs6= Charset.forName("US-ASCII");
-				        String result= cs1.toString();
-				       }
-				    }
-				}
+public class E1 {
+	@SuppressWarnings("unused")
+	void method(String filename) {
+		Charset cs1= Charset.forName("UTF-8"); //$NON-NLS-1$
+		Charset cs1b= Charset.forName("Utf-8"); //$NON-NLS-1$
+		Charset cs2= Charset.forName("UTF-16"); //$NON-NLS-1$
+		Charset cs3= Charset.forName("UTF-16BE"); //$NON-NLS-1$
+		Charset cs4= Charset.forName("UTF-16LE"); //$NON-NLS-1$
+		Charset cs5= Charset.forName("ISO-8859-1"); //$NON-NLS-1$
+		Charset cs6= Charset.forName("US-ASCII"); //$NON-NLS-1$
+		String result= cs1.toString();
+	}
+}
 				""",
 				"""
-						package test1;
+package test1;
 
-						import java.io.ByteArrayOutputStream;
-						import java.io.InputStreamReader;
-						import java.io.FileInputStream;
-						import java.io.FileReader;
-						import java.io.Reader;
-						import java.nio.charset.Charset;
-						import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
 
-						public class E1 {
-						    void method(String filename) {
-						        Charset cs1= Charset.forName("UTF-8");
-						        Charset cs1b= Charset.forName("Utf-8");
-						        Charset cs2= Charset.forName("UTF-16");
-						        Charset cs3= Charset.forName("UTF-16BE");
-						        Charset cs4= Charset.forName("UTF-16LE");
-						        Charset cs5= Charset.forName("ISO-8859-1");
-						        Charset cs6= Charset.forName("US-ASCII");
-						        String result= cs1.toString();
-						       }
-						    }
-						}
+public class E1 {
+	@SuppressWarnings("unused")
+	void method(String filename) {
+		Charset cs1= Charset.forName("UTF-8"); //$NON-NLS-1$
+		Charset cs1b= Charset.forName("Utf-8"); //$NON-NLS-1$
+		Charset cs2= Charset.forName("UTF-16"); //$NON-NLS-1$
+		Charset cs3= Charset.forName("UTF-16BE"); //$NON-NLS-1$
+		Charset cs4= Charset.forName("UTF-16LE"); //$NON-NLS-1$
+		Charset cs5= Charset.forName("ISO-8859-1"); //$NON-NLS-1$
+		Charset cs6= Charset.forName("US-ASCII"); //$NON-NLS-1$
+		String result= cs1.toString();
+	}
+}
 						"""),
 		BYTEARRAYOUTSTREAM("""
 				package test1;
