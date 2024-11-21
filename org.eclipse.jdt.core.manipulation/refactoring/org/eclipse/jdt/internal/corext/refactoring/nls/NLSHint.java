@@ -60,11 +60,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class NLSHint {
 
 	/**
-	 * A text block begins with three double-quote characters followed by a line terminator. A text
-	 * block cannot be on a single line, nor can the contents of the text block follow the three opening
-	 * double-quotes immediately without a line terminator.
+	 * A text block begins with three double-quote characters followed by zero or more white spaces followed by
+	 * a line terminator. A text block cannot be on a single line, nor can the contents of the text block follow
+	 * the three opening double-quotes (and maybe whitespace) immediately without a line terminator.
 	 */
-	private static final Pattern TEXT_BLOCK_START_PATTERN = Pattern.compile("^\"\"\"\r?\n"); //$NON-NLS-1$
+	private static final Pattern TEXT_BLOCK_START_PATTERN = Pattern.compile("^\"\"\"\\s*\r?\n"); //$NON-NLS-1$
 
 	private String fAccessorName;
 	private IPackageFragment fAccessorPackage;
