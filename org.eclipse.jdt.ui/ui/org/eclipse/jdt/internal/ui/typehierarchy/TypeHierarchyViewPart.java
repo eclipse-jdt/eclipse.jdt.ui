@@ -642,10 +642,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		setMemberFilter(null);
 		internalSelectType(null, false); // clear selection
 		fIsEnableMemberFilter= false;
-		updateHierarchyViewer(true);
 		IType root= getSelectableType(fInputElements);
 		internalSelectType(root, true);
 		updateMethodViewer(root);
+		updateHierarchyViewer(true);
 		updateToolbarButtons();
 		updateToolTipAndDescription();
 		showMembersInHierarchy(false);
