@@ -81,6 +81,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	private static final Key PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES);
 
+	private static final Key PREF_SHOW_ONE_PARAMETER= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG);
+
 	private static final String SETTINGS_SECTION_NAME= "JavaEditorCodeMiningConfigurationBlock"; //$NON-NLS-1$
 
 	private static final String[] TRUE_FALSE= new String[] { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -101,7 +104,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	public static Key[] getAllKeys() {
 		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_TYPES, PREF_SHOW_REFERENCES_ON_FIELDS,
 				PREF_SHOW_REFERENCES_ON_METHODS,
-				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES, PREF_FILTER_IMPLIED_PARAMETER_NAMES, PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES };
+				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES, PREF_IGNORE_INEXACT_MATCHES, PREF_FILTER_IMPLIED_PARAMETER_NAMES, PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES, PREF_SHOW_ONE_PARAMETER };
 	}
 
 	@Override
@@ -227,6 +230,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_defaultFilterForParameterNames_label,
 				PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES, TRUE_FALSE, extraIndent, section);
 
+		fFilteredPrefTree.addCheckBox(inner,
+				PreferencesMessages.JavaEditorCodeMiningShowOneParameter_label,
+				PREF_SHOW_ONE_PARAMETER, TRUE_FALSE, extraIndent, section);
 	}
 
 	private void updateEnableStates() {
@@ -244,8 +250,11 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			// Show implementations checkboxes
 			getCheckBox(PREF_SHOW_IMPLEMENTATIONS).getSelection();
 			boolean showParameterNames= getCheckBox(PREF_SHOW_PARAMETER_NAMES).getSelection();
+
 			getCheckBox(PREF_FILTER_IMPLIED_PARAMETER_NAMES).setEnabled(showParameterNames);
 			getCheckBox(PREF_DEFAULT_FILTER_FOR_PARAMETER_NAMES).setEnabled(showParameterNames);
+			getCheckBox(PREF_SHOW_ONE_PARAMETER).setEnabled(showParameterNames);
+
 		} else {
 			atLeastOneCheckBox.setEnabled(false);
 			ignoreInexactReferenceMatches.setEnabled(false);

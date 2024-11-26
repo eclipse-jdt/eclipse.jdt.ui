@@ -3940,6 +3940,17 @@ public class PreferenceConstants {
 	public static final String EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES = "java.codemining.defalt.filter.for.parameterNames"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that stores the value if a method with one parameter should be shown with code minings or if the code minings are
+	 * only shown for 2+ parameters
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG = "java.codemining.show.one.parameter"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the value for "Filter matching parameter names" when showing parameter names
 	 * in codemining.  This will filter out parameter names when the passed parameter name implies the parameter name.
 	 * For example, if the parameter name is "format" and the parameter passed is "stringFormat".
@@ -4374,6 +4385,7 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES, true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG, true);
 
 		// Javadoc hover & view
 		JavaElementLinks.initDefaultPreferences(store);
