@@ -165,11 +165,15 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method) {
-		return method.getNumberOfParameters() <= 1;
+		boolean showNamesOfSingleArguments= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG);
+		return !showNamesOfSingleArguments && method.getNumberOfParameters() == 1
+				|| method.getNumberOfParameters() == 0;
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethodBinding methodBinding) {
-		return methodBinding.getParameterNames().length <= 1;
+		boolean showNamesOfSingleArguments= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG);
+		return !showNamesOfSingleArguments && methodBinding.getParameterNames().length == 1
+				|| methodBinding.getParameterNames().length == 0;
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method, String[] parameterNames) {
