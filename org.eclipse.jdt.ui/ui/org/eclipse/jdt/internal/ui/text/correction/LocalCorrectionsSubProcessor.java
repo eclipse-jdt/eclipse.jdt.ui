@@ -23,9 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.swt.graphics.Image;
@@ -51,12 +53,14 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -97,6 +101,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -117,6 +122,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -141,6 +147,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -2317,6 +2324,205 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_MISSING_DEFAULT_CASE, image);
 			proposals.add(proposal);
 		}
+	}
+
+	public static void addPermittedTypesProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof Expression expression) {
+			StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+			ASTNode parent= selectedNode.getParent();
+			List<Statement> statements;
+
+			if (locationInParent == SwitchStatement.EXPRESSION_PROPERTY) {
+				statements= ((SwitchStatement) parent).statements();
+			} else if (locationInParent == SwitchExpression.EXPRESSION_PROPERTY) {
+				statements= ((SwitchExpression) parent).statements();
+			} else {
+				return;
+			}
+
+			if (statements.size() != 0) {
+				return;
+			}
+			ITypeBinding typeBinding= expression.resolveTypeBinding();
+			if (typeBinding == null) {
+				return;
+			}
+			IType type= (IType) typeBinding.getJavaElement();
+			try {
+				if (type.getPermittedSubtypeNames().length == 0) {
+					return;
+				}
+			} catch (JavaModelException e) {
+				return;
+			}
+
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			createPermittedTypeCasesProposal(context, parent, image, proposals);
+		}
+	}
+
+	private static void createPermittedTypeCasesProposal(IInvocationContext context, ASTNode parent, Image image, Collection<ICommandAccess> proposals) {
+		Expression expression;
+		if (parent instanceof SwitchStatement) {
+			SwitchStatement switchStatement= (SwitchStatement) parent;
+			expression= switchStatement.getExpression();
+		} else if (parent instanceof SwitchExpression) {
+			SwitchExpression switchExpression= (SwitchExpression) parent;
+			expression= switchExpression.getExpression();
+		} else {
+			return;
+		}
+		AST ast= parent.getAST();
+		ASTRewrite astRewrite= ASTRewrite.create(ast);
+		ListRewrite listRewrite;
+		String caseCode= "{}"; //$NON-NLS-1$
+		if (parent instanceof SwitchStatement) {
+			listRewrite= astRewrite.getListRewrite(parent, SwitchStatement.STATEMENTS_PROPERTY);
+		} else {
+			SwitchExpression switchExpression= (SwitchExpression)parent;
+			ASTNode swExpParent= switchExpression.getParent();
+			ITypeBinding swExpTypeBinding= null;
+			if (swExpParent instanceof VariableDeclarationFragment fragment) {
+				IVariableBinding varBinding= fragment.resolveBinding();
+				if (varBinding != null) {
+					swExpTypeBinding= varBinding.getType();
+				}
+			} else if (swExpParent instanceof ReturnStatement retStatement) {
+				MethodDeclaration methodDecl= ASTNodes.getFirstAncestorOrNull(retStatement, MethodDeclaration.class);
+				if (methodDecl != null) {
+					Type t= methodDecl.getReturnType2();
+					if (t != null) {
+						swExpTypeBinding= t.resolveBinding();
+					}
+				}
+			}
+			if (swExpTypeBinding == null) {
+				return;
+			}
+			if (swExpTypeBinding.isPrimitive()) {
+				if (swExpTypeBinding.getName().equals("boolean")) { //$NON-NLS-1$
+					caseCode= "false;"; //$NON-NLS-1$
+				} else {
+					caseCode= "0;"; //$NON-NLS-1$
+				}
+			} else {
+				caseCode= "null"; //$NON-NLS-1$
+			}
+			listRewrite= astRewrite.getListRewrite(parent, SwitchExpression.STATEMENTS_PROPERTY);
+		}
+		ITypeBinding binding= expression.resolveTypeBinding();
+		IType sealedType= (IType)binding.getJavaElement();
+		Set<String> excludedNames= new HashSet<>();
+		CompilationUnit cu= context.getASTRoot();
+		PackageDeclaration pkg= cu.getPackage();
+		String pkgName= ""; //$NON-NLS-1$
+		if (pkg != null) {
+			pkgName= pkg.getName().getFullyQualifiedName();
+		}
+		try {
+			excludedNames.addAll(List.of(computeReservedIdentifiers(parent, cu)));
+		} catch (JavaModelException e) {
+			return;
+		}
+		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_permitted_types_description;
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_PERMITTED_TYPES, image);
+		ImportRewrite importRewriter= proposal.createImportRewrite(cu);
+		String[] permittedTypeNames;
+		try {
+			permittedTypeNames= sealedType.getPermittedSubtypeNames();
+			for (String permittedTypeName : permittedTypeNames) {
+				boolean needImport= false;
+				String importName= ""; //$NON-NLS-1$
+				String[][] resolvedName= sealedType.resolveType(permittedTypeName);
+				for (int i= 0; i < resolvedName.length; ++i) {
+					String[] inner= resolvedName[i];
+					if (!inner[0].isEmpty() && !inner[0].equals(pkgName)) {
+						needImport= true;
+						importName= inner[0] + "." + inner[1]; //$NON-NLS-1$
+					}
+					if (permittedTypeName.startsWith(sealedType.getTypeQualifiedName('.'))) {
+						needImport= false;
+						String name= permittedTypeName.substring(sealedType.getTypeQualifiedName('.').length() + 1);
+						IType innerType= sealedType.getType(name);
+						if (innerType.exists()) {
+							permittedTypeName= sealedType.getElementName() + "." + name; //$NON-NLS-1$
+							if (innerType.isRecord()) {
+								permittedTypeName += "("; //$NON-NLS-1$
+								String separator= ""; //$NON-NLS-1$
+								for (IField field : innerType.getRecordComponents()) {
+									permittedTypeName += separator + Signature.toString(field.getTypeSignature());
+									separator= ","; //$NON-NLS-1$
+									permittedTypeName += " " + field.getElementName(); //$NON-NLS-1$
+								}
+								permittedTypeName += ")"; //$NON-NLS-1$
+							} else {
+								String patternName= permittedTypeName.substring(0, 1).toLowerCase();
+								String nameToUse= patternName;
+								int count= 1;
+								while (excludedNames.contains(nameToUse)) {
+									nameToUse= patternName + (++count);
+								}
+								excludedNames.add(nameToUse);
+								permittedTypeName += " " + nameToUse; //$NON-NLS-1$
+							}
+						}
+					} else {
+						permittedTypeName= inner[1];
+						String patternName= permittedTypeName.substring(0, 1).toLowerCase();
+						String nameToUse= patternName;
+						int count= 1;
+						while (excludedNames.contains(nameToUse)) {
+							nameToUse= patternName + (++count);
+						}
+						excludedNames.add(nameToUse);
+						permittedTypeName += " " + nameToUse; //$NON-NLS-1$
+					}
+				}
+				String caseName= "case " + permittedTypeName + " -> " + caseCode; //$NON-NLS-1$ //$NON-NLS-2$
+				SwitchCase newSwitchCase= (SwitchCase) astRewrite.createStringPlaceholder(caseName, ASTNode.SWITCH_CASE);
+				listRewrite.insertLast(newSwitchCase, null);
+				if (needImport) {
+					importRewriter.addImport(importName);
+				}
+			}
+			SwitchCase newNullCase= (SwitchCase) astRewrite.createStringPlaceholder("case null -> " + caseCode, ASTNode.SWITCH_CASE); //$NON-NLS-1$
+			listRewrite.insertLast(newNullCase, null);
+			SwitchCase defaultCase= (SwitchCase) astRewrite.createStringPlaceholder("default -> " + caseCode, ASTNode.SWITCH_CASE); //$NON-NLS-1$
+			listRewrite.insertLast(defaultCase, null);
+			proposals.add(proposal);
+		} catch (JavaModelException e) {
+			// should never occur
+		}
+	}
+
+	/**
+	 * Returns the reserved identifiers in the method to move.
+	 *
+	 * @param node - node to find previous variable names to exclude
+	 * @return the reserved identifiers
+	 * @throws JavaModelException
+	 *             if the method declaration could not be found
+	 */
+	static private String[] computeReservedIdentifiers(ASTNode node, CompilationUnit cu) throws JavaModelException {
+		final List<String> names= new ArrayList<>();
+		final MethodDeclaration declaration= ASTNodes.getFirstAncestorOrNull(node, MethodDeclaration.class);
+		if (declaration != null) {
+			final List<SingleVariableDeclaration> parameters= declaration.parameters();
+			VariableDeclaration variable= null;
+			for (SingleVariableDeclaration parameter : parameters) {
+				variable= parameter;
+				names.add(variable.getName().getIdentifier());
+			}
+			final Block body= declaration.getBody();
+			if (body != null) {
+				for (IBinding binding : new ScopeAnalyzer(cu).getDeclarationsAfter(body.getStartPosition(), ScopeAnalyzer.VARIABLES))
+					names.add(binding.getName());
+			}
+		}
+		final String[] result= new String[names.size()];
+		names.toArray(result);
+		return result;
 	}
 
 	public static void addMissingDefaultCaseProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
