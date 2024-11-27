@@ -2452,7 +2452,7 @@ public class LocalCorrectionsSubProcessor {
 								String separator= ""; //$NON-NLS-1$
 								for (IField field : innerType.getRecordComponents()) {
 									permittedTypeName += separator + Signature.toString(field.getTypeSignature());
-									separator= ","; //$NON-NLS-1$
+									separator= ", "; //$NON-NLS-1$
 									permittedTypeName += " " + field.getElementName(); //$NON-NLS-1$
 								}
 								permittedTypeName += ")"; //$NON-NLS-1$
