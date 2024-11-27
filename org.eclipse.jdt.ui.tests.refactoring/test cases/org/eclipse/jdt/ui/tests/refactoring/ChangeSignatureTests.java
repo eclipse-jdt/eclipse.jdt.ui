@@ -608,6 +608,12 @@ public class ChangeSignatureTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void testFailIssue1750() throws Exception {
+		String[] signature= {"QLong;"};
+		helperRenameMethodFail(signature, "k", RefactoringStatus.ERROR, false, true, "A_testFailIssue1750");
+	}
+
+	@Test
 	public void testFailIssue1751() throws Exception {
 		String[] signature= {};
 		helperRenameMethodFail(signature, "k", RefactoringStatus.FATAL, false, true, "A_testFailIssue1751");

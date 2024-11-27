@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -96,6 +97,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -116,6 +118,7 @@ import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
@@ -127,6 +130,7 @@ import org.eclipse.jdt.internal.corext.SourceRangeFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -426,6 +430,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		if (result.hasFatalError())
 			return result;
 		checkShadowing(result);
+		if (!result.hasError())
+			checkShadowing2(result);
 		if (result.hasFatalError())
 			return result;
 		checkParameterNamesAndValues(result);
@@ -494,6 +500,99 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 	}
 
+	private class ShadowedMethodVisitor extends ASTVisitor {
+		private MethodInvocation fMethodInvocation;
+
+		public MethodInvocation getMethod() {
+			return fMethodInvocation;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			if (node.getName().getFullyQualifiedName().equals(fMethodName) &&
+					node.getExpression() == null) {
+				IMethodBinding binding= node.resolveMethodBinding();
+				if (binding.getParameterTypes().length == fParameterInfos.size()) {
+					for (int i= 0; i < binding.getParameterTypes().length; ++i) {
+						String simpleName= binding.getParameterTypes()[0].getName();
+						String newTypeName= fParameterInfos.get(i).getNewTypeName();
+						if (!simpleName.equals(newTypeName) && isKnownIncompatible(simpleName, newTypeName)) {
+							return true;
+						}
+					}
+					fMethodInvocation= node;
+					throw new AbortSearchException();
+				}
+			}
+			return true;
+		}
+	}
+
+	private void checkShadowing2(RefactoringStatus result) {
+		try {
+			if (!fMethodName.equals(fMethod.getElementName())) {
+				ICompilationUnit icu= fMethod.getCompilationUnit();
+				CompilationUnit cu= Checks.convertICUtoCU(icu);
+				if (cu == null) {
+					return;
+				}
+				ShadowedMethodVisitor visitor= new ShadowedMethodVisitor();
+				try {
+					AbstractTypeDeclaration methodTypeDecl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fMethod.getDeclaringType(), cu);
+					if (methodTypeDecl != null) {
+						methodTypeDecl.accept(visitor);
+					}
+				} catch (AbortSearchException e) {
+					MethodInvocation method= visitor.getMethod();
+					RefactoringStatusContext context= JavaStatusContext.create(icu, new SourceRange(method.getStartPosition(), method.getLength()));
+					String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow2, new Object[] {fMethod.getElementName(), fMethodName});
+					if (fMethod.getParameterNames().length == 0) {
+						result.addFatalError(msg, context);
+					} else {
+						result.addError(msg, context);
+					}
+					return;
+				}
+				if (!Modifier.isPrivate(fMethod.getFlags())) {
+					SearchResultGroup[] matches= findImplementors(fMethod.getDeclaringType(), new NullProgressMonitor());
+					for (SearchResultGroup match : matches) {
+						icu= match.getCompilationUnit();
+						cu= Checks.convertICUtoCU(icu);
+						if (cu == null) {
+							return;
+						}
+						for (SearchMatch matchResult : match.getSearchResults()) {
+							if (matchResult instanceof TypeReferenceMatch typeMatch && typeMatch.getElement() instanceof IType type) {
+								final TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(type, cu);
+								if (typeDecl != null) {
+									ITypeBinding typeBinding= typeDecl.resolveBinding();
+									if (Modifier.isPublic(fMethod.getFlags()) || Modifier.isProtected(fMethod.getFlags()) ||
+											typeBinding != null && typeBinding.getPackage().getName().equals(fMethod.getDeclaringType().getPackageFragment().getElementName())) {
+										visitor= new ShadowedMethodVisitor();
+										try {
+											typeDecl.accept(visitor);
+										} catch (AbortSearchException e) {
+											MethodInvocation method= visitor.getMethod();
+											RefactoringStatusContext context= JavaStatusContext.create(icu, new SourceRange(method.getStartPosition(), method.getLength()));
+											String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_method_name_will_shadow2, new Object[] {fMethod.getElementName(), fMethodName});
+											if (fMethod.getParameterNames().length == 0) {
+												result.addFatalError(msg, context);
+											} else {
+												result.addError(msg, context);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore and exit
+		}
+	}
+
 	private boolean recursiveShadowCheck(ITypeBinding typeBinding, String origPackage, boolean allowPrivate) {
 		if (typeBinding == null) {
 			return false;
@@ -503,6 +602,13 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			if (method.getName().equals(fMethodName) && method.getParameterNames().length == fParameterInfos.size() &&
 					(allowPrivate || Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())
 							|| !Modifier.isPrivate(method.getModifiers()) && typeBinding.getPackage().getName().equals(origPackage))) {
+				for (int i= 0; i < method.getParameterTypes().length; ++i) {
+					String simpleName= method.getParameterTypes()[0].getName();
+					String newTypeName= fParameterInfos.get(i).getNewTypeName();
+					if (!simpleName.equals(newTypeName) && isKnownIncompatible(simpleName, newTypeName)) {
+						return false;
+					}
+				}
 				return true;
 			}
 		}
@@ -521,6 +627,78 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			}
 		}
 		return false;
+	}
+
+	private Set<String> fIntSet= new HashSet<>(List.of("char", "int", "long", "short", "Integer", "Long", "Short")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+	private Set<String> fFloatSet= new HashSet<>(List.of("float", "double", "Float", "Double")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //
+	private Set<String> fBooleanSet= new HashSet<>(List.of("boolean", "Boolean")); //$NON-NLS-1$ //$NON-NLS-2$ //
+	private Set<String> fWellUsedSet= new HashSet<>(List.of(
+			"Date", //$NON-NLS-1$
+			"String", //$NON-NLS-1$
+			"Integer", //$NON-NLS-1$
+			"Long", //$NON-NLS-1$
+			"Short", //$NON-NLS-1$
+			"Character", //$NON-NLS-1$
+			"Float", //$NON-NLS-1$
+			"Double", //$NON-NLS-1$
+			"Boolean", //$NON-NLS-1$
+			"List", //$NON-NLS-1$
+			"Map", //$NON-NLS-1$
+			"Set", //$NON-NLS-1$
+			"Iterable", //$NON-NLS-1$
+			"Byte", //$NON-NLS-1$
+			"int", //$NON-NLS-1$
+			"long", //$NON-NLS-1$
+			"short", //$NON-NLS-1$
+			"float", //$NON-NLS-1$
+			"double", //$NON-NLS-1$
+			"boolean", //$NON-NLS-1$
+			"char" //$NON-NLS-1$
+			));
+
+
+	private boolean isKnownIncompatible(String simpleName, String newTypeName) {
+		if (simpleName.isEmpty() || newTypeName.isEmpty()) {
+			return true;
+		}
+		if (simpleName.endsWith("[]") || newTypeName.endsWith("[]")) { //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		}
+		if (simpleName.indexOf('<') >= 0) {
+			simpleName= simpleName.substring(0, simpleName.indexOf('<'));
+		}
+		if (newTypeName.indexOf('<') >= 0) {
+			newTypeName= newTypeName.substring(0, newTypeName.indexOf('<'));
+		}
+		if (fIntSet.contains(simpleName) && fIntSet.contains(newTypeName)) {
+			return false;
+		}
+		if (fFloatSet.contains(simpleName) && fFloatSet.contains(newTypeName)) {
+			return false;
+		}
+		if (fBooleanSet.contains(simpleName) && fBooleanSet.contains(newTypeName)) {
+			return false;
+		}
+		if (fWellUsedSet.contains(simpleName) && fWellUsedSet.contains(newTypeName)) {
+			return true;
+		}
+		if (Character.isLowerCase(simpleName.charAt(0)) != Character.isLowerCase(newTypeName.charAt(0))) {
+			return true;
+		}
+		return false;
+	}
+
+	private SearchResultGroup[] findImplementors(final IType type, final IProgressMonitor monitor) throws JavaModelException {
+		SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.IMPLEMENTORS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return new SearchResultGroup[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
+		engine.setOwner(fOwner);
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(type));
+		engine.searchPattern(monitor);
+		return (SearchResultGroup[]) engine.getResults();
 	}
 
 	private SearchResultGroup[] findReferences(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
