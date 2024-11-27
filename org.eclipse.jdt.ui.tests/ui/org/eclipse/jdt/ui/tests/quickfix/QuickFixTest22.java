@@ -173,4 +173,161 @@ public class QuickFixTest22 extends QuickFixTest {
 		assertEqualString(preview1, expected1);
 	}
 
+	@Test
+	public void testRenameToUnnamedProposal3() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set22CompilerOptions(fJProject1);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= """
+			package test;
+
+			public class Unused {
+
+			    public static void main(String[] args) {
+					for (String arg : args) {
+						System.out.println("abc");
+					}
+				}
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Unused.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal1);
+
+		String expected1= """
+			package test;
+
+			public class Unused {
+
+			    public static void main(String[] args) {
+					for (String _ : args) {
+						System.out.println("abc");
+					}
+				}
+			}
+			""";
+
+		assertEqualString(preview1, expected1);
+	}
+
+	@Test
+	public void testRenameToUnnamedProposal4() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set22CompilerOptions(fJProject1);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= """
+			package test;
+			import java.io.FileInputStream;
+
+			public class Unused {
+
+			    public static void main(String[] args) {
+					try (FileInputStream x = new FileInputStream("a.b")) {
+						System.out.println("abc");
+					} catch (Exception e) {
+					}
+				}
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Unused.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal1);
+
+		String expected1= """
+			package test;
+			import java.io.FileInputStream;
+
+			public class Unused {
+
+			    public static void main(String[] args) {
+					try (FileInputStream _ = new FileInputStream("a.b")) {
+						System.out.println("abc");
+					} catch (Exception e) {
+					}
+				}
+			}
+			""";
+
+		assertEqualString(preview1, expected1);
+	}
+
+	@Test
+	public void testRenameToUnnamedProposal5() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set22CompilerOptions(fJProject1);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= """
+			package test;
+
+			public class Unused {
+
+				private static int x = 1;
+
+				private static int sideEffect() {
+					return ++x;
+				}
+
+			    public static void main(String[] args) {
+					for (int i = 0, se = sideEffect(); i < 9; ++i) {
+						System.out.println("abc");
+					}
+				}
+			}
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("Unused.java", test, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal1);
+
+		String expected1= """
+			package test;
+
+			public class Unused {
+
+				private static int x = 1;
+
+				private static int sideEffect() {
+					return ++x;
+				}
+
+			    public static void main(String[] args) {
+					for (int i = 0, _ = sideEffect(); i < 9; ++i) {
+						System.out.println("abc");
+					}
+				}
+			}
+			""";
+
+		assertEqualString(preview1, expected1);
+	}
+
 }

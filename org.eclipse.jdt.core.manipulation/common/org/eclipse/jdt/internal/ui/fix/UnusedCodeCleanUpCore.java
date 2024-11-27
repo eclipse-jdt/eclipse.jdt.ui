@@ -26,13 +26,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.RenameUnusedVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -277,9 +275,7 @@ public class UnusedCodeCleanUpCore extends AbstractMultiFix {
 				if (id == IProblem.LocalVariableIsNeverUsed) {
 					ProblemLocation location= new ProblemLocation(problem);
 					SimpleName name= UnusedCodeFixCore.getUnusedName(compilationUnit, location);
-					if (!JavaModelUtil.is22OrHigher(compilationUnit.getJavaElement().getJavaProject()) ||
-							!(name.getParent() instanceof SingleVariableDeclaration nameParent) ||
-							!(nameParent.getParent() instanceof Pattern)) {
+					if (!RenameUnusedVariableFixCore.canRenameToUnnamedVariable(compilationUnit, name)) {
 						result++;
 					}
 				}

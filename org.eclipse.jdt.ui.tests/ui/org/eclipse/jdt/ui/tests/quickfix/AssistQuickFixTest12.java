@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -126,7 +126,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 	public void testSplitSwitchCaseLabelRuleStatement() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		fJProject1.setRawClasspath(projectSetup.getDefaultClasspath(), null);
-		JavaProjectHelper.set12CompilerOptions(fJProject1, true);
+		JavaProjectHelper.set14CompilerOptions(fJProject1, true);
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		String str= """

@@ -58,6 +58,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 
 /**
@@ -75,7 +76,6 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	private static IRegion fLastWordRegion;
 
 	private static IJavaElement[] fLastElements;
-
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
@@ -99,14 +99,13 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 		if (input == null)
 			return null;
 
+		IDocumentProvider documentProvider= textEditor.getDocumentProvider();
+		IEditorInput editorInput= textEditor.getEditorInput();
+		IDocument document= documentProvider.getDocument(editorInput);
+		IRegion wordRegion= JavaWordFinder.findWord(document, offset);
+		if (wordRegion == null || wordRegion.getLength() == 0)
+			return null;
 		try {
-			IDocumentProvider documentProvider= textEditor.getDocumentProvider();
-			IEditorInput editorInput= textEditor.getEditorInput();
-			IDocument document= documentProvider.getDocument(editorInput);
-			IRegion wordRegion= JavaWordFinder.findWord(document, offset);
-			if (wordRegion == null || wordRegion.getLength() == 0)
-				return null;
-
 			if (isInheritDoc(document, wordRegion) && getClass() != JavaElementHyperlinkDetector.class)
 				return null;
 
@@ -143,7 +142,9 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 				return null;
 
 			return CollectionsUtil.toArray(links, IHyperlink.class);
-
+		} catch (RuntimeException e) {
+			SelectionUtil.logException("computing hyperlink", e, textEditor.getTitle(), document, offset); //$NON-NLS-1$
+			return null;
 		} catch (JavaModelException e) {
 			return null;
 		}
