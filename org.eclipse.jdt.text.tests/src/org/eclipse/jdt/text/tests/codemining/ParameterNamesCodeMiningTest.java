@@ -381,6 +381,27 @@ public class ParameterNamesCodeMiningTest {
 	}
 
 	@Test
+	public void testRecordConstructorOneParameter() throws Exception {
+		String contents= """
+				public class Ant {
+			record Ca (int size){
+
+			}
+
+			Ca c = new Ca(0);
+
+		}
+		""";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Ant.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
+		assertEquals(0, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
+
+	@Test
 	public void testRecordConstructorOK() throws Exception {
 		String contents= "import java.util.Map;\n"
 				+ "public record Edge(int fromNodeId,\n"

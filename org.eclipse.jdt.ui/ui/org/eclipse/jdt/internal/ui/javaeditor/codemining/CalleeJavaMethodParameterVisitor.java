@@ -129,7 +129,7 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 
 	protected void collectParameterNamesCodeMinings(IMethodBinding mbinding, List<?> arguments, boolean isVarArgs) {
 		// synthetic method of a record
-		if (mbinding.getDeclaringClass().isRecord()) {
+		if (mbinding.getDeclaringClass().isRecord() && !skipParameterNamesCodeMinings(mbinding)) {
 			String[] parameterNames= mbinding.getParameterNames();
 			for (int i= 0; i < Math.min(arguments.size(), parameterNames.length); i++) {
 				if (!skipParameterNameCodeMining(parameterNames, arguments, i)) {
@@ -166,6 +166,10 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 
 	private boolean skipParameterNamesCodeMinings(IMethod method) {
 		return method.getNumberOfParameters() <= 1;
+	}
+
+	private boolean skipParameterNamesCodeMinings(IMethodBinding methodBinding) {
+		return methodBinding.getParameterNames().length <= 1;
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method, String[] parameterNames) {
