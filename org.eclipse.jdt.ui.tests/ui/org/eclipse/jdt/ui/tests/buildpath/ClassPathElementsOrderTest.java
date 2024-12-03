@@ -13,14 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.core.runtime.CoreException;
@@ -52,7 +52,7 @@ public class ClassPathElementsOrderTest {
 
 	private static final String NEW_JAR_PATH= "/data/test.jar";
 
-	@Before
+	@BeforeEach
 	public void setUp() throws CoreException, BackingStoreException {
 		IWorkspaceRoot wsRoot= ResourcesPlugin.getWorkspace().getRoot();
 		IProject genProj= wsRoot.getProject("java proj");
@@ -94,14 +94,14 @@ public class ClassPathElementsOrderTest {
 		LibrariesWorkbookPage page= new LibrariesWorkbookPage(classPathList, null);
 		page.init(javaProject);
 		CPListElement cpElement= new CPListElement(javaProject, IClasspathEntry.CPE_LIBRARY, new Path(NEW_JAR_PATH), null);
-		assertEquals("There should be 2 classpath elements before adding class path element", 2, classPathList.getElements().size());
-		assertEquals("java container should be at the top", cont1, classPathList.getElements().get(0));
-		assertEquals("src should be at position 1", src1, classPathList.getElements().get(1));
+		assertEquals(2, classPathList.getElements().size(), "There should be 2 classpath elements before adding class path element");
+		assertEquals(cont1, classPathList.getElements().get(0), "java container should be at the top");
+		assertEquals(src1, classPathList.getElements().get(1), "src should be at position 1");
 		page.addElement(cpElement);
-		assertEquals("There should be 3 classpath elements after adding class path element", 3, classPathList.getElements().size());
-		assertEquals("java container should be at the top", cont1, classPathList.getElements().get(0));
-		assertEquals("src should be at position 1", src1, classPathList.getElements().get(1));
-		assertEquals("newly added class path entry must be at the end of the list", NEW_JAR_PATH, classPathList.getElements().get(2).getPath().toString());
+		assertEquals(3, classPathList.getElements().size(), "There should be 3 classpath elements after adding class path element");
+		assertEquals(cont1, classPathList.getElements().get(0), "java container should be at the top");
+		assertEquals(src1, classPathList.getElements().get(1), "src should be at position 1");
+		assertEquals(NEW_JAR_PATH, classPathList.getElements().get(2).getPath().toString(), "newly added class path entry must be at the end of the list");
 	}
 
 	/**
@@ -131,14 +131,14 @@ public class ClassPathElementsOrderTest {
 		classPathList.setElements(elements);
 		TestableLibrariesWorkBookPage page= new TestableLibrariesWorkBookPage(classPathList, null);
 		page.init(javaProject);
-		assertEquals("There should be 6 classpath elements before adding external jar", 6, classPathList.getElements().size());
-		assertEquals("java container should be at the top", cont1, classPathList.getElements().get(0));
-		assertEquals("src should be at position 2", src1, classPathList.getElements().get(2));
+		assertEquals(6, classPathList.getElements().size(), "There should be 6 classpath elements before adding external jar");
+		assertEquals(cont1, classPathList.getElements().get(0), "java container should be at the top");
+		assertEquals(src1, classPathList.getElements().get(2), "src should be at position 2");
 		page.addExternalJar();
-		assertEquals("There should be 7 classpath elements after adding external jar", 7, classPathList.getElements().size());
-		assertEquals("java container should be at the top", cont1, classPathList.getElements().get(0));
-		assertEquals("src should be at position 2", src1, classPathList.getElements().get(2));
-		assertEquals("newly added jar must be at the end of the list", NEW_JAR_PATH, classPathList.getElements().get(6).getPath().toString());
+		assertEquals(7, classPathList.getElements().size(), "There should be 7 classpath elements after adding external jar");
+		assertEquals(cont1, classPathList.getElements().get(0), "java container should be at the top");
+		assertEquals(src1, classPathList.getElements().get(2), "src should be at position 2");
+		assertEquals(NEW_JAR_PATH, classPathList.getElements().get(6).getPath().toString(), "newly added jar must be at the end of the list");
 	}
 
 	public class TestableLibrariesWorkBookPage extends LibrariesWorkbookPage {

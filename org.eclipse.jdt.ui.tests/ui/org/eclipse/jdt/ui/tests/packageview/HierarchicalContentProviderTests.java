@@ -20,10 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -46,7 +48,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
 public class HierarchicalContentProviderTests {
 
-	private static class MyTestSetup extends ExternalResource {
+	private static class MyTestSetup implements BeforeEachCallback, AfterEachCallback {
 
 		public static IJavaProject fJProject;
 		public static IPackageFragmentRoot fJAR;
@@ -55,7 +57,7 @@ public class HierarchicalContentProviderTests {
 		public static List<String> fExpectedInJAR, fExpectedInCF;
 
 		@Override
-		protected void before() throws Exception {
+		public void beforeEach(ExtensionContext context) throws Exception {
 			fJProject= JavaProjectHelper.createJavaProject("Testing", "bin");
 			JavaProjectHelper.addRTJar(fJProject);
 
@@ -80,7 +82,7 @@ public class HierarchicalContentProviderTests {
 		}
 
 		@Override
-		protected void after() {
+		public void afterEach(ExtensionContext context) {
 			try {
 				JavaProjectHelper.delete(fJProject);
 			} catch (CoreException e) {
@@ -93,7 +95,7 @@ public class HierarchicalContentProviderTests {
 	}
 
 
-	@Rule
+	@RegisterExtension
 	public MyTestSetup mytestsetup=new MyTestSetup();
 
 	private static void testAndAdd(Object curr, List<String> res) {
@@ -131,7 +133,7 @@ public class HierarchicalContentProviderTests {
 
 
 	private void assertEquals(List<String> expected, List<String> current) {
-		Assert.assertEquals(getString(expected), getString(current));
+		Assertions.assertEquals(getString(expected), getString(current));
 	}
 
 

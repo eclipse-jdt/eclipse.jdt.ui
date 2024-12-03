@@ -13,13 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
@@ -79,7 +79,7 @@ public class CPUserLibraryTest {
 			String result = Arrays.stream(sortedChildren)
 					.map(e -> ((CPUserLibraryElement)e).getName())
 					.collect(Collectors.joining(":"));
-			assertEquals("Unexpected element", "ALIB:BLIB:CLIB", result);
+			assertEquals("ALIB:BLIB:CLIB", result, "Unexpected element");
 		} finally {
 			parent.dispose();
 		}

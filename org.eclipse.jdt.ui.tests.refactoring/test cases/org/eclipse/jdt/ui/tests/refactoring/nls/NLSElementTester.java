@@ -13,13 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.nls;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 
@@ -28,7 +28,7 @@ public class NLSElementTester{
 	private int fOff, fLen;
 	private String fVal;
 
-	@Before
+	@BeforeEach
 	public void setUp(){
 		fOff= 3;
 		fLen= 5;
@@ -38,40 +38,40 @@ public class NLSElementTester{
 
 	@Test
 	public void test0() {
-		assertEquals("Position offset", fOff, fEl.getPosition().getOffset()); //$NON-NLS-1$
+		assertEquals(fOff, fEl.getPosition().getOffset(), "Position offset"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test1() {
-		assertEquals("Position length", fLen, fEl.getPosition().getLength()); //$NON-NLS-1$
+		assertEquals(fLen, fEl.getPosition().getLength(), "Position length"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test2() {
-		assertEquals("value", fVal, fEl.getValue()); //$NON-NLS-1$
+		assertEquals(fVal, fEl.getValue(), "value"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test3() {
-		assertNull("tagposition", fEl.getTagPosition()); //$NON-NLS-1$
+		assertNull(fEl.getTagPosition(), "tagposition"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test3a() {
 		fEl.setTagPosition(1, 2);
-		assertEquals("tagposition.length", 2, fEl.getTagPosition().getLength()); //$NON-NLS-1$
-		assertEquals("tagposition.offset", 1, fEl.getTagPosition().getOffset()); //$NON-NLS-1$
+		assertEquals(2, fEl.getTagPosition().getLength(), "tagposition.length"); //$NON-NLS-1$
+		assertEquals(1, fEl.getTagPosition().getOffset(), "tagposition.offset"); //$NON-NLS-1$
 	}
 
 
 	@Test
 	public void test4() {
-		assertFalse("hastag", fEl.hasTag()); //$NON-NLS-1$
+		assertFalse(fEl.hasTag(), "hastag"); //$NON-NLS-1$
 	}
 
 	@Test
 	public void test4a() {
 		fEl.setTagPosition(1, 2);
-		assertTrue("hastag", fEl.hasTag()); //$NON-NLS-1$
+		assertTrue(fEl.hasTag(), "hastag"); //$NON-NLS-1$
 	}
 }

@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,9 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -59,7 +59,7 @@ public class PackageCacheTest {
 	private PackageCache packageCache;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		IProgressMonitor monitor= new NullProgressMonitor();
@@ -81,7 +81,7 @@ public class PackageCacheTest {
 		packageCache= new PackageCache(src);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		testProject.getProject().delete(true, false, new NullProgressMonitor());
 	}
@@ -107,8 +107,8 @@ public class PackageCacheTest {
 		expectedChildren.put(package_f, Arrays.asList(package_f_g));
 		expectedChildren.put(package_f_g, Collections.emptyList());
 
-		assertEquals("method returned wrong results",
-				expectedChildren, actualChildren);
+		assertEquals(expectedChildren,
+				actualChildren, "method returned wrong results");
 	}
 
 	@Test
@@ -116,8 +116,8 @@ public class PackageCacheTest {
 		Map<IPackageFragment, IPackageFragment> actualSingleChildren= actualSingleChildren();
 		Map<IPackageFragment, IPackageFragment> expectedSingleChildren= expectedSingleChildren();
 
-		assertEquals("method returned wrong results",
-				expectedSingleChildren, actualSingleChildren);
+		assertEquals(expectedSingleChildren,
+				actualSingleChildren, "method returned wrong results");
 	}
 
 	@Test
@@ -133,8 +133,8 @@ public class PackageCacheTest {
 			}
 		}
 
-		assertEquals("method returned wrong results",
-				expectedSingleChildren, actualSingleChildren);
+		assertEquals(expectedSingleChildren,
+				actualSingleChildren, "method returned wrong results");
 	}
 
 	@Test
@@ -142,8 +142,8 @@ public class PackageCacheTest {
 		List<IPackageFragment> actualPackagesWithSingleChild= actualPackagesWithSingleChild();
 		List<IPackageFragment> expectedPackagesWithSingleChild= expectedPackagesWithSingleChild();
 
-		assertEquals("method returned wrong results",
-				expectedPackagesWithSingleChild, actualPackagesWithSingleChild);
+		assertEquals(expectedPackagesWithSingleChild,
+				actualPackagesWithSingleChild, "method returned wrong results");
 	}
 
 	@Test
@@ -159,8 +159,8 @@ public class PackageCacheTest {
 			}
 		}
 
-		assertEquals("method returned wrong results",
-				expectedPackagesWithSingleChild, actualPackagesWithSingleChild);
+		assertEquals(expectedPackagesWithSingleChild,
+				actualPackagesWithSingleChild, "method returned wrong results");
 	}
 
 	private Map<IPackageFragment, IPackageFragment> actualSingleChildren() throws Exception {

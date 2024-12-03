@@ -20,8 +20,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -47,7 +47,7 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 
 	private IJavaProject fJavaProject;
 
-	@After
+	@AfterEach
 	public void deleteProject() throws CoreException {
 		if (fJavaProject != null) {
 			JavaProjectHelper.delete(fJavaProject);
