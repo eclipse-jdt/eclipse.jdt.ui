@@ -133,6 +133,13 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -2362,7 +2369,23 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+
 	private static void createPermittedTypeCasesProposal(IInvocationContext context, ASTNode parent, Image image, Collection<ICommandAccess> proposals) {
+		class TypeExtendsSearchRequestor extends SearchRequestor {
+			public List<SearchMatch> results= new ArrayList<>();
+
+			public List<SearchMatch> getResults() {
+				return results;
+			}
+
+			@Override
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+					results.add(match);
+				}
+			}
+		}
+
 		Expression expression;
 		if (parent instanceof SwitchStatement) {
 			SwitchStatement switchStatement= (SwitchStatement) parent;
@@ -2428,6 +2451,7 @@ public class LocalCorrectionsSubProcessor {
 		String label= CorrectionMessages.LocalCorrectionsSubProcessor_add_permitted_types_description;
 		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_PERMITTED_TYPES, image);
 		ImportRewrite importRewriter= proposal.createImportRewrite(cu);
+
 		String[] permittedTypeNames;
 		try {
 			permittedTypeNames= sealedType.getPermittedSubtypeNames();
@@ -2468,15 +2492,48 @@ public class LocalCorrectionsSubProcessor {
 							}
 						}
 					} else {
-						permittedTypeName= inner[1];
-						String patternName= permittedTypeName.substring(0, 1).toLowerCase();
-						String nameToUse= patternName;
-						int count= 1;
-						while (excludedNames.contains(nameToUse)) {
-							nameToUse= patternName + (++count);
+						SearchPattern pattern = SearchPattern.createPattern(importName, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+						if (pattern == null) {
+							return;
 						}
-						excludedNames.add(nameToUse);
-						permittedTypeName += " " + nameToUse; //$NON-NLS-1$
+						TypeExtendsSearchRequestor requestor= new TypeExtendsSearchRequestor();
+						try {
+							search(pattern, SearchEngine.createJavaSearchScope(new IJavaElement[] {sealedType.getJavaProject()}), requestor);
+						} catch (CoreException e) {
+							return;
+						}
+						List<SearchMatch> results= requestor.getResults();
+						for (SearchMatch result : results) {
+							Object obj= result.getElement();
+							if (obj instanceof IType resultType) {
+								try {
+									if (resultType.exists() && resultType.isRecord()) {
+										permittedTypeName= inner[1];
+										permittedTypeName += "("; //$NON-NLS-1$
+										String separator= ""; //$NON-NLS-1$
+										for (IField field : resultType.getRecordComponents()) {
+											permittedTypeName += separator + Signature.toString(field.getTypeSignature());
+											separator= ", "; //$NON-NLS-1$
+											permittedTypeName += " " + field.getElementName(); //$NON-NLS-1$
+										}
+										permittedTypeName += ")"; //$NON-NLS-1$
+									} else {
+										permittedTypeName= inner[1];
+										String patternName= permittedTypeName.substring(0, 1).toLowerCase();
+										String nameToUse= patternName;
+										int count= 1;
+										while (excludedNames.contains(nameToUse)) {
+											nameToUse= patternName + (++count);
+										}
+										excludedNames.add(nameToUse);
+										permittedTypeName += " " + nameToUse; //$NON-NLS-1$
+									}
+								} catch (JavaModelException e) {
+									// do nothing
+								}
+							}
+						}
+
 					}
 				}
 				String caseName= "case " + permittedTypeName + " -> " + caseCode; //$NON-NLS-1$ //$NON-NLS-2$
@@ -2494,6 +2551,15 @@ public class LocalCorrectionsSubProcessor {
 		} catch (JavaModelException e) {
 			// should never occur
 		}
+	}
+
+	private static void search(SearchPattern searchPattern, IJavaSearchScope scope, SearchRequestor requestor) throws CoreException {
+		new SearchEngine().search(
+			searchPattern,
+			new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()},
+			scope,
+			requestor,
+			null);
 	}
 
 	/**
