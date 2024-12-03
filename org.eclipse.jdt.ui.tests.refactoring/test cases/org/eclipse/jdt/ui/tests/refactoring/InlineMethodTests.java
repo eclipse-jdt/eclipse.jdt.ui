@@ -956,6 +956,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	@Test
+	public void testQualifiedAnonymousReceiver() throws Exception {
+		performReceiverTest();
+	}
+
+	@Test
 	public void testThisReceiver() throws Exception {
 		performReceiverTestInlineMethod();
 	}
