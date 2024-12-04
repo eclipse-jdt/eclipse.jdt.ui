@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IResource;
 
@@ -130,6 +131,12 @@ public class SelectionUtil {
 	private static String lastErrorMsg;
 
 	public static void logException(String action, RuntimeException e, String title, IDocument document, int offset) {
+		if (e instanceof OperationCanceledException ) {
+			//  Be silent if operation is canceled see
+			//  https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1827
+			return;
+		}
+
 		// log error and keep going
 		String errorMsg= e.getClass().getSimpleName() + " " + action; //$NON-NLS-1$
 		if (title != null) {
