@@ -828,9 +828,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SwitchExpressionsYieldMissingEnumConstantCase:
 				LocalCorrectionsSubProcessor.getMissingEnumConstantCaseProposals(context, problem, proposals);
 				break;
-			case IProblem.MissingDefaultCase:
-			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
 			case IProblem.EnhancedSwitchMissingDefault:
+			case IProblem.SwitchExpressionsYieldMissingDefaultCase:
+				LocalCorrectionsSubProcessor.addPermittedTypesProposal(context, problem, proposals);
+				//$FALL-THROUGH$
+			case IProblem.MissingDefaultCase:
 				LocalCorrectionsSubProcessor.addMissingDefaultCaseProposal(context, problem, proposals);
 				break;
 			case IProblem.IllegalTotalPatternWithDefault:
