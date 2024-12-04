@@ -101,6 +101,7 @@ import org.eclipse.ui.part.PluginTransfer;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.views.WorkbenchViewerSetup;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -757,6 +758,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fEmptyTypesViewer= new Label(fViewerbook, SWT.TOP | SWT.LEFT | SWT.WRAP);
 
 		for (TypeHierarchyViewer viewer : fAllViewers) {
+			WorkbenchViewerSetup.setupViewer(viewer);
 			viewer.setInput(viewer);
 		}
 
