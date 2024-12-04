@@ -2357,7 +2357,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			IType type= (IType) typeBinding.getJavaElement();
 			try {
-				if (type.getPermittedSubtypeNames().length == 0) {
+				if (type == null || type.getPermittedSubtypeNames().length == 0) {
 					return;
 				}
 			} catch (JavaModelException e) {
