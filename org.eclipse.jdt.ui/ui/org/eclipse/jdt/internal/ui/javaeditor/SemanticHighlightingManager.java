@@ -56,17 +56,17 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		/** Enabled state */
 		private boolean fIsEnabled;
 		/** Preference Key */
-		private String fKey;
+		private final String fPreferenceKey;
 
 		/**
 		 * Initialize with the given text attribute.
 		 * @param textAttribute The text attribute
 		 * @param isEnabled the enabled state
 		 */
-		public Highlighting(String key, TextAttribute textAttribute, boolean isEnabled) {
+		public Highlighting(String preferenceKey, TextAttribute textAttribute, boolean isEnabled) {
 			setTextAttribute(textAttribute);
 			setEnabled(isEnabled);
-			this.fKey = key;
+			this.fPreferenceKey = preferenceKey;
 		}
 
 		/**
@@ -97,8 +97,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			fIsEnabled= isEnabled;
 		}
 
-		public String getKey() {
-			return fKey;
+		public String getPreferenceKey() {
+			return fPreferenceKey;
 		}
 
 	}
@@ -384,10 +384,9 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @return the corresponding highlighting
 	 */
 	private Highlighting getHighlighting(String key) {
-		for (int i= 0; i < fHighlightings.length; i++) {
-			Highlighting highlighting= fHighlightings[i];
-			if (key.equals(highlighting.getKey()))
-				return fHighlightings[i];
+		for (Highlighting highlighting : fHighlightings) {
+			if (key.equals(highlighting.getPreferenceKey()))
+				return highlighting;
 		}
 		return null;
 	}
@@ -456,10 +455,10 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		}
 
 		SyntaxColorHighlighting[] syntaxHighlightings= SyntaxColorHighlighting.getSyntaxColorHighlightings();
-		fSyntaxHighlightings = new Highlighting[syntaxHighlightings.length];
-		for (int i = 0; i < syntaxHighlightings.length; i++) {
-			SyntaxColorHighlighting h = syntaxHighlightings[i];
-			fSyntaxHighlightings[i] = createHighlightingFromPereferences(h.preferenceKey(), true, h.preferenceKey(), h.getBoldPreferenceKey(), h.getItalicPreferenceKey(), h.getStrikethroughPreferenceKey(), h.getUnderlinePreferenceKey());
+		fSyntaxHighlightings= new Highlighting[syntaxHighlightings.length];
+		for (int i= 0; i < syntaxHighlightings.length; i++) {
+			SyntaxColorHighlighting h= syntaxHighlightings[i];
+			fSyntaxHighlightings[i]= createHighlightingFromPereferences(h.preferenceKey(), true, h.preferenceKey(), h.getBoldPreferenceKey(), h.getItalicPreferenceKey(), h.getStrikethroughPreferenceKey(), h.getUnderlinePreferenceKey());
 		}
 	}
 
@@ -484,10 +483,12 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * Dispose the semantic highlightings.
 	 */
 	private void disposeHighlightings() {
-		for (SemanticHighlighting fSemanticHighlighting : fSemanticHighlightings)
+		for (SemanticHighlighting fSemanticHighlighting : fSemanticHighlightings) {
 			removeColor(SemanticHighlightings.getColorPreferenceKey(fSemanticHighlighting));
-		for (Highlighting h : fSyntaxHighlightings)
-			removeColor(h.getKey());
+		}
+		for (Highlighting h : fSyntaxHighlightings) {
+			removeColor(h.getPreferenceKey());
+		}
 
 		fSemanticHighlightings= null;
 		fHighlightings= null;

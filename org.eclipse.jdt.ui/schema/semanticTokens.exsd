@@ -84,7 +84,17 @@
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         [Enter extension point usage example here.]
+         The following is an example of a Semantic Tokens Provider contribution:
+
+&lt;p&gt;
+&lt;pre&gt;
+   &lt;extension point=&quot;org.eclipse.jdt.ui.semanticTokens&quot;&gt;
+      &lt;provider
+            class=&quot;org.eclipse.example.jdt.ExampleJavaSemanticTokensProvider&quot;&gt;
+      &lt;/provider&gt;
+   &lt;/extension&gt;
+&lt;/pre&gt;
+&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -93,7 +103,7 @@
          <meta.section type="apiinfo"/>
       </appInfo>
       <documentation>
-         [Enter API information here.]
+         The contributed class must implement &lt;code&gt;org.eclipse.jdt.ui.text.java.ISemanticTokensProvider&lt;/code&gt;
       </documentation>
    </annotation>
 
@@ -102,7 +112,7 @@
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         [Enter information about supplied implementation of this extension point.]
+         Allows contributing &lt;code&gt;org.eclipse.jdt.ui.text.java.ISemanticTokensProvide&lt;/code&gt; which will colour the code with colours allowed in the Java Editor. This is useful for languages embedded into Java via annotation parameters for example such as SQL queries, Spring Expression Language snippets etc. The contributions are not sorted. It is recommneded therefore not to override semantic tokens between providers. This extension is experimental and only used by LSP4E project at the moment.
       </documentation>
    </annotation>
 

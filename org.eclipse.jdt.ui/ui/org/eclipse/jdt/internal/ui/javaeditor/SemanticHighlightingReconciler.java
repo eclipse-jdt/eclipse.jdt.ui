@@ -335,6 +335,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	}
 
 	private static final String JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT= "org.eclipse.jdt.ui.semanticTokens"; //$NON-NLS-1$
+	private static final String ATTR_CLASS = "class"; //$NON-NLS-1$
 
 	private static ISemanticTokensProvider[] fSemanticTokensProviders;
 
@@ -399,20 +400,18 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		// Do nothing
 	}
 
-	private static ISemanticTokensProvider[] getContributedSemanticTokensProviders() {
+	private static synchronized ISemanticTokensProvider[] getContributedSemanticTokensProviders() {
 		if (fSemanticTokensProviders == null) {
-			synchronized(SemanticHighlightingReconciler.class) {
-				IExtensionRegistry registry= Platform.getExtensionRegistry();
-				IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT);
-				fSemanticTokensProviders = Arrays.stream(elements).map(ce -> {
-					try {
-						return (ISemanticTokensProvider) ce.createExecutableExtension("class"); //$NON-NLS-1$
-					} catch (Exception e) {
-						JavaPlugin.getDefault().getLog().error("Cannot instatiate semantic tokens provider", e); //$NON-NLS-1$
-						return null;
-					}
-				}).filter(Objects::nonNull).toArray(ISemanticTokensProvider[]::new);
-			}
+			IExtensionRegistry registry= Platform.getExtensionRegistry();
+			IConfigurationElement[] elements= registry.getConfigurationElementsFor(JAVA_EDITOR_SEMANTIC_TOKENS_EXTENSION_POINT);
+			fSemanticTokensProviders = Arrays.stream(elements).map(ce -> {
+				try {
+					return (ISemanticTokensProvider) ce.createExecutableExtension(ATTR_CLASS);
+				} catch (Exception e) {
+					JavaPlugin.getDefault().getLog().error("Cannot instatiate semantic tokens provider '%s' contributed by '%s'".formatted(ce.getAttribute(ATTR_CLASS), ce.getContributor().getName()), e); //$NON-NLS-1$
+					return null;
+				}
+			}).filter(Objects::nonNull).toArray(ISemanticTokensProvider[]::new);
 		}
 		return fSemanticTokensProviders;
 	}
@@ -538,95 +537,95 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	}
 
 	private Highlighting fromSemanticTokenType(ISemanticTokensProvider.TokenType type) {
-		if (type != null) {
-			switch (type) {
-				case OPERATOR:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR);
-				case SINGLE_LINE_COMMENT:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR);
-				case KEYWORD:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR);
-				case BRACKET:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR);
-				case MULTI_LINE_COMMENT:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR);
-				case STRING:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_STRING_COLOR);
-				case METHOD:
-					return findSemanticHighlighting(SemanticHighlightings.METHOD);
-				case ABSTRACT_CLASS:
-					return findSemanticHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
-				case ABSTRACT_METHOD_INVOCATION:
-					return findSemanticHighlighting(SemanticHighlightings.ABSTRACT_METHOD_INVOCATION);
-				case ANNOTATION:
-					return findSemanticHighlighting(SemanticHighlightings.ANNOTATION);
-				case ANNOTATION_ELEMENT_REFERENCE:
-					return findSemanticHighlighting(SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE);
-				case AUTOBOXING:
-					return findSemanticHighlighting(SemanticHighlightings.AUTOBOXING);
-				case CLASS:
-					return findSemanticHighlighting(SemanticHighlightings.CLASS);
-				case DEPRECATED_MEMBER:
-					return findSemanticHighlighting(SemanticHighlightings.DEPRECATED_MEMBER);
-				case ENUM:
-					return findSemanticHighlighting(SemanticHighlightings.ENUM);
-				case FIELD:
-					return findSemanticHighlighting(SemanticHighlightings.FIELD);
-				case INHERITED_FIELD:
-					return findSemanticHighlighting(SemanticHighlightings.INHERITED_FIELD);
-				case INHERITED_METHOD_INVOCATION:
-					return findSemanticHighlighting(SemanticHighlightings.INHERITED_METHOD_INVOCATION);
-				case INTERFACE:
-					return findSemanticHighlighting(SemanticHighlightings.INTERFACE);
-				case LOCAL_VARIABLE:
-					return findSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
-				case LOCAL_VARIABLE_DECLARATION:
-					return findSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION);
-				case METHOD_DECLARATION:
-					return findSemanticHighlighting(SemanticHighlightings.METHOD_DECLARATION);
-				case NUMBER:
-					return findSemanticHighlighting(SemanticHighlightings.NUMBER);
-				case PARAMETER_VARIABLE:
-					return findSemanticHighlighting(SemanticHighlightings.PARAMETER_VARIABLE);
-				case STATIC_FIELD:
-					return findSemanticHighlighting(SemanticHighlightings.STATIC_FIELD);
-				case STATIC_FINAL_FIELD:
-					return findSemanticHighlighting(SemanticHighlightings.STATIC_FINAL_FIELD);
-				case STATIC_METHOD_INVOCATION:
-					return findSemanticHighlighting(SemanticHighlightings.STATIC_METHOD_INVOCATION);
-				case TYPE_ARGUMENT:
-					return findSemanticHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
-				case TYPE_VARIABLE:
-					return findSemanticHighlighting(SemanticHighlightings.TYPE_VARIABLE);
-				case RESTRICTED_IDENTIFIER:
-					return findSemanticHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
-				case DEFAULT:
-				default:
-					return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR);
-			}
+		if (type == null) {
+			return null;
 		}
-		return null;
+		switch (type) {
+			case OPERATOR:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR);
+			case SINGLE_LINE_COMMENT:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR);
+			case KEYWORD:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR);
+			case BRACKET:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR);
+			case MULTI_LINE_COMMENT:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR);
+			case STRING:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_STRING_COLOR);
+			case METHOD:
+				return findSemanticHighlighting(SemanticHighlightings.METHOD);
+			case ABSTRACT_CLASS:
+				return findSemanticHighlighting(SemanticHighlightings.ABSTRACT_CLASS);
+			case ABSTRACT_METHOD_INVOCATION:
+				return findSemanticHighlighting(SemanticHighlightings.ABSTRACT_METHOD_INVOCATION);
+			case ANNOTATION:
+				return findSemanticHighlighting(SemanticHighlightings.ANNOTATION);
+			case ANNOTATION_ELEMENT_REFERENCE:
+				return findSemanticHighlighting(SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE);
+			case AUTOBOXING:
+				return findSemanticHighlighting(SemanticHighlightings.AUTOBOXING);
+			case CLASS:
+				return findSemanticHighlighting(SemanticHighlightings.CLASS);
+			case DEPRECATED_MEMBER:
+				return findSemanticHighlighting(SemanticHighlightings.DEPRECATED_MEMBER);
+			case ENUM:
+				return findSemanticHighlighting(SemanticHighlightings.ENUM);
+			case FIELD:
+				return findSemanticHighlighting(SemanticHighlightings.FIELD);
+			case INHERITED_FIELD:
+				return findSemanticHighlighting(SemanticHighlightings.INHERITED_FIELD);
+			case INHERITED_METHOD_INVOCATION:
+				return findSemanticHighlighting(SemanticHighlightings.INHERITED_METHOD_INVOCATION);
+			case INTERFACE:
+				return findSemanticHighlighting(SemanticHighlightings.INTERFACE);
+			case LOCAL_VARIABLE:
+				return findSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE);
+			case LOCAL_VARIABLE_DECLARATION:
+				return findSemanticHighlighting(SemanticHighlightings.LOCAL_VARIABLE_DECLARATION);
+			case METHOD_DECLARATION:
+				return findSemanticHighlighting(SemanticHighlightings.METHOD_DECLARATION);
+			case NUMBER:
+				return findSemanticHighlighting(SemanticHighlightings.NUMBER);
+			case PARAMETER_VARIABLE:
+				return findSemanticHighlighting(SemanticHighlightings.PARAMETER_VARIABLE);
+			case STATIC_FIELD:
+				return findSemanticHighlighting(SemanticHighlightings.STATIC_FIELD);
+			case STATIC_FINAL_FIELD:
+				return findSemanticHighlighting(SemanticHighlightings.STATIC_FINAL_FIELD);
+			case STATIC_METHOD_INVOCATION:
+				return findSemanticHighlighting(SemanticHighlightings.STATIC_METHOD_INVOCATION);
+			case TYPE_ARGUMENT:
+				return findSemanticHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
+			case TYPE_VARIABLE:
+				return findSemanticHighlighting(SemanticHighlightings.TYPE_VARIABLE);
+			case RESTRICTED_IDENTIFIER:
+				return findSemanticHighlighting(SemanticHighlightingsCore.RESTRICTED_KEYWORDS);
+			case DEFAULT:
+			default:
+				return findSyntaxHighlighting(PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR);
+		}
 	}
 
 	private Highlighting findSemanticHighlighting(String preferenceKey) {
-		for (int i = 0; i < fJobHighlightings.length; i++) {
-			if (Objects.equals(preferenceKey, fJobHighlightings[i].getKey())) {
-				if (!fJobHighlightings[i].isEnabled()) {
+		for (Highlighting h : fJobHighlightings) {
+			if (Objects.equals(preferenceKey, h.getPreferenceKey())) {
+				if (!h.isEnabled()) {
 					break;
 				}
-				return fJobHighlightings[i];
+				return h;
 			}
 		}
 		return null;
 	}
 
 	private Highlighting findSyntaxHighlighting(String key) {
-		for (int i = 0; i < fJobSyntaxHighlightings.length; i++) {
-			if (Objects.equals(key, fJobSyntaxHighlightings[i].getKey())) {
-				if (!fJobSyntaxHighlightings[i].isEnabled()) {
+		for (Highlighting h : fJobSyntaxHighlightings) {
+			if (Objects.equals(key, h.getPreferenceKey())) {
+				if (!h.isEnabled()) {
 					break;
 				}
-				return fJobSyntaxHighlightings[i];
+				return h;
 			}
 		}
 		return null;
