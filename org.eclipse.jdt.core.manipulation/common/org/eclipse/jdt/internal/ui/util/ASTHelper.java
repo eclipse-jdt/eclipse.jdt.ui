@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -39,6 +43,7 @@ public class ASTHelper {
 	public static final int JLS21 = AST.JLS21;
 	public static final int JLS22 = AST.JLS22;
 	public static final int JLS23 = AST.JLS23;
+	public static final int JLS24 = AST.JLS24;
 
 	private static boolean isNodeTypeSupportedInAST(AST ast, int nodeType) {
 		switch (nodeType) {
