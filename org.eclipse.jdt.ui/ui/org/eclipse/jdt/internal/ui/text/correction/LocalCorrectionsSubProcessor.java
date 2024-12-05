@@ -989,7 +989,7 @@ public class LocalCorrectionsSubProcessor {
 
 	private static void addRenameProposal(IInvocationContext context, Collection<ICommandAccess> proposals, final RenameUnusedVariableFixCore fix) {
 		if (fix != null) {
-			Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_REDO);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LINKED_RENAME);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), IProposalRelevance.UNUSED_MEMBER, image, context);
 			proposals.add(proposal);
 		}
