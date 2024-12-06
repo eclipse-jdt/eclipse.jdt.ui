@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *  - Alex Boyko (Broadcom Inc.) - Initial implementation
+ *    Alex Boyko (Broadcom Inc.) - Initial implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -58,6 +58,5 @@ public record SyntaxColorHighlighting(String label, String preferenceKey) {
 	public String getUnderlinePreferenceKey() {
 		return preferenceKey + UNDERLINE;
 	}
-
 
 }
