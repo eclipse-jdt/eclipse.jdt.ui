@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *  - Alex Boyko (Broadcom Inc.) - Initial implementation
+ *    Alex Boyko (Broadcom Inc.) - Initial implementation
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.semantictokens;
 
@@ -29,12 +29,14 @@ import org.eclipse.jdt.core.dom.TextBlock;
 import org.eclipse.jdt.ui.text.java.ISemanticTokensProvider;
 
 /**
- * Semantic tokens are computed for strig literals or text blocks starting with "SQL:" prefix.
- * - SELECT, WHERE, IN, FROM are KEYWORD
- * - *, <, >, ==, != etc are OPEARATOR
- * - Words starting from capital are CLASS
- * - Numbers are NUMBER
- * - all other lower case starting words are LOCAL_VARIABLE
+ * Semantic tokens are computed for string literals or text blocks starting with "SQL:" prefix.
+ * <ul>
+ * <li>SELECT, WHERE, IN, FROM are KEYWORD</li>
+ * <li>*, &lt;, &gt;, ==, != etc are OPEARATOR</li>
+ * <li>Words starting from capital are CLASS</li>
+ * <li>Numbers are NUMBER</li>
+ * <li>all other lower case starting words are LOCAL_VARIABLE</li>
+ * </ul>
  */
 public class SampleSqlSemanticTokensProvider implements ISemanticTokensProvider {
 

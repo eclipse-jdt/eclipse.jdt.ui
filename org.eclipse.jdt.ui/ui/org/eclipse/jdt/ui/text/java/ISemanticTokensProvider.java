@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *  - Alex Boyko (Broadcom Inc.) - Initial implementation
+ *    Alex Boyko (Broadcom Inc.) - Initial implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
