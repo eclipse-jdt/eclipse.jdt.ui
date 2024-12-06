@@ -80,6 +80,8 @@ import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -92,6 +94,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -211,6 +214,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 	private final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
+	@SuppressWarnings({ "deprecation" })
 	public void collectVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection<T> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -450,44 +454,90 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		String name= simpleName.getIdentifier();
 		String nameLabel= BasicElementLabels.getJavaElementName(name);
 		String label;
+		boolean createEnumProposal= false;
 		if (senderDeclBinding.isEnum() && !isWriteAccess) {
-			label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createenum_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) });
-			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10, false);
-			T p1= newVariableCorrectionProposalToT(core, NewFieldForTypeProposal1);
-			if (p1 != null)
-				proposals.add(p1);
-		} else {
-			if (!mustBeConst) {
-				int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_FIELD_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_FIELD;
-				int uid;
-				if (binding == null) {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_description, nameLabel);
-					uid= NewFieldForTypeProposal2;
-				} else {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
-					uid= NewFieldForTypeProposal3;
+			createEnumProposal= true;
+			if (simpleName.getParent() instanceof ReturnStatement retStmt) {
+				createEnumProposal= false;
+				MethodDeclaration methodDecl= ASTNodes.getFirstAncestorOrNull(retStmt, MethodDeclaration.class);
+				if (methodDecl != null) {
+					IMethodBinding methodBinding= methodDecl.resolveBinding();
+					ITypeBinding retTypeBinding= methodBinding.getReturnType();
+					if (senderDeclBinding.isEqualTo(retTypeBinding)) {
+						createEnumProposal= true;
+					}
 				}
-				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance, false);
-				T prop= newVariableCorrectionProposalToT(core, uid);
-				if (prop != null)
-					proposals.add(prop);
+			} else if (simpleName.getParent() instanceof InfixExpression infix) {
+				createEnumProposal= false;
+				if (infix.getOperator() == Operator.EQUALS || infix.getOperator() == Operator.NOT_EQUALS) {
+					Expression otherExp= null;
+					if (infix.getLeftOperand() == simpleName) {
+						otherExp= infix.getRightOperand();
+					} else {
+						otherExp= infix.getLeftOperand();
+					}
+					if (otherExp instanceof SimpleName otherIdent) {
+						IBinding otherBinding= otherIdent.resolveBinding();
+						if (otherBinding instanceof IVariableBinding varBinding) {
+							if (!varBinding.isEnumConstant() && senderDeclBinding.isEqualTo(varBinding.getType())) {
+								createEnumProposal= true;
+							}
+						}
+					}
+				}
+			} else if (simpleName.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				createEnumProposal= false;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)simpleName.getParent();
+				IVariableBinding fragBinding= fragment.resolveBinding();
+				if (fragBinding != null && senderDeclBinding.isEqualTo(fragBinding.getType())) {
+					createEnumProposal= true;
+				}
+			} else if (simpleName.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+				createEnumProposal= false;
+				Assignment assignment= (Assignment) simpleName.getParent();
+				Expression leftOperand= assignment.getLeftHandSide();
+				if (senderDeclBinding.isEqualTo(leftOperand.resolveTypeBinding())) {
+					createEnumProposal= true;
+				}
 			}
+			if (createEnumProposal) {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createenum_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) });
+				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10, false);
+				T p1= newVariableCorrectionProposalToT(core, NewFieldForTypeProposal1);
+				if (p1 != null)
+					proposals.add(p1);
+			}
+		}
+		if (!createEnumProposal && !mustBeConst) {
+			int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_FIELD_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_FIELD;
+			int uid;
+			if (binding == null) {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_description, nameLabel);
+				uid= NewFieldForTypeProposal2;
+			} else {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
+				uid= NewFieldForTypeProposal3;
+			}
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance, false);
+			T prop= newVariableCorrectionProposalToT(core, uid);
+			if (prop != null)
+				proposals.add(prop);
+		}
 
-			if (!isWriteAccess && !senderDeclBinding.isAnonymous()) {
-				int uid;
-				if (binding == null) {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_description, nameLabel);
-					uid= NewFieldForTypeProposal4;
-				} else {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
-					uid= NewFieldForTypeProposal5;
-				}
-				int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_CONSTANT_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_CONSTANT;
-				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, false);
-				T prop= newVariableCorrectionProposalToT(core, uid);
-				if (prop != null)
-					proposals.add(prop);
+		if (!createEnumProposal && !isWriteAccess && !senderDeclBinding.isAnonymous()) {
+			int uid;
+			if (binding == null) {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_description, nameLabel);
+				uid= NewFieldForTypeProposal4;
+			} else {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
+				uid= NewFieldForTypeProposal5;
 			}
+			int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_CONSTANT_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_CONSTANT;
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, false);
+			T prop= newVariableCorrectionProposalToT(core, uid);
+			if (prop != null)
+				proposals.add(prop);
 		}
 	}
 
