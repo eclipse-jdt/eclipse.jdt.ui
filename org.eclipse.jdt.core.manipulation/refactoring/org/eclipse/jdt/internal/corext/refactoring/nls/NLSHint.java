@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -51,13 +52,19 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-
 /**
  * calculates hints for the nls-refactoring out of a compilation unit.
  * - package fragments of the accessor class and the resource bundle
  * - accessor class name, resource bundle name
  */
 public class NLSHint {
+
+	/**
+	 * A text block begins with three double-quote characters followed by zero or more white spaces followed by
+	 * a line terminator. A text block cannot be on a single line, nor can the contents of the text block follow
+	 * the three opening double-quotes (and maybe whitespace) immediately without a line terminator.
+	 */
+	private static final Pattern TEXT_BLOCK_START_PATTERN = Pattern.compile("^\"\"\"\\s*\r?\n"); //$NON-NLS-1$
 
 	private String fAccessorName;
 	private IPackageFragment fAccessorPackage;
@@ -159,7 +166,7 @@ public class NLSHint {
 						}
 						SimpleName name= node.getName();
 						NLSElement element= new NLSElement(node.getName().getIdentifier(), name.getStartPosition(),
-				                name.getLength(), nlsLine.size() - 1, true);
+						    name.getLength(), nlsLine.size() - 1, true);
 						nlsLine.add(element);
 						String bundleName;
 						ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT);
@@ -261,10 +268,11 @@ public class NLSHint {
 	}
 
 	public static String stripQuotes(String str, IJavaProject project) {
-		if (JavaModelUtil.is15OrHigher(project)) {
-			if (str.startsWith("\"\"\"") && str.endsWith("\"\"\"")) { //$NON-NLS-1$ //$NON-NLS-2$
-				return getTextBlock(str.substring(3, str.length() - 3));
-			}
+		// Test if the given string is a text block and start with the "cheapest" check
+		if (str.endsWith("\"\"\"") //$NON-NLS-1$
+				&& TEXT_BLOCK_START_PATTERN.matcher(str).find()
+				&& JavaModelUtil.is15OrHigher(project)) {
+					return getTextBlock(str.substring(3, str.length() - 3));
 		}
 		return str.substring(1, str.length() - 1);
 	}
@@ -277,14 +285,9 @@ public class NLSHint {
 		}
 	}
 
-
 	public String getAccessorClassName() {
 		return fAccessorName;
 	}
-
-//	public boolean isEclipseNLS() {
-//		return fIsEclipseNLS;
-//	}
 
 	public IPackageFragment getAccessorClassPackage() {
 		return fAccessorPackage;
@@ -559,5 +562,4 @@ public class NLSHint {
 				return -1;
 		}
 	}
-
 }
