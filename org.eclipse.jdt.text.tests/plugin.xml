@@ -47,4 +47,10 @@
 			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
+ <extension
+       point="org.eclipse.jdt.ui.semanticTokens">
+    <provider
+          class="org.eclipse.jdt.text.tests.semantictokens.SampleSqlSemanticTokensProvider">
+    </provider>
+ </extension>
 </plugin>
