@@ -165,7 +165,7 @@ public class CalleeJavaMethodParameterVisitor extends HierarchicalASTVisitor {
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethod method) {
-		return method.getNumberOfParameters() <= 1;
+		return false;
 	}
 
 	private boolean skipParameterNamesCodeMinings(IMethodBinding methodBinding) {
