@@ -146,6 +146,34 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 	}
 
 	@Test
+	public void runTestsInSourceFolderHandlesPackagesWithCompilationUnitsWithoutTopLevelClassCorrectly() throws Exception {
+		String projectName= "JUnitLaunchConfigurationDelegate-TestProject-NoTopLevelClassInPackage";
+		fJavaProject= JavaProjectHelper.createJavaProject(projectName, "bin");
+		String firstTestSrcFolder= "test-src1";
+		IPackageFragmentRoot testSrc1= JavaProjectHelper.addSourceContainer(fJavaProject, firstTestSrcFolder);
+		String testPackage= "p1";
+		IPackageFragment packageTestSrc1= testSrc1.createPackageFragment(testPackage, true, null);
+		String contentsTestSrc1Test= """
+				public class FirstTest {
+				@org.junit.jupiter.api.Test
+				public void myTest() { }
+				}
+				""";
+		String secondTestPackage= "p2";
+		packageTestSrc1.createCompilationUnit("package-info.java", contentsTestSrc1Test, true, null);
+		IPackageFragment packageTestSrc2= testSrc1.createPackageFragment(secondTestPackage, true, null);
+		String contentsTestSrc2Test= """
+				/** This is a package-info.java and thus does not have a top-level type */
+				package p2;
+				""";
+		packageTestSrc2.createCompilationUnit("SecondTest.java", contentsTestSrc2Test, true, null);
+
+		List<String> fileLines= showCommandLineAndExtractContentOfTestNameFile(projectName, fJavaProject, testSrc1);
+		String lineForFirstTest= "p1.FirstTest";
+		assertThat(fileLines).contains(lineForFirstTest).size().isEqualTo(1);
+	}
+
+	@Test
 	public void runTestsInSourceFolderOnlyUsesTopLevelClasses() throws Exception {
 		String projectName= "JUnitLaunchConfigurationDelegate-TestProject-OnlyTopLevelClasses";
 		fJavaProject= JavaProjectHelper.createJavaProject(projectName, "bin");
