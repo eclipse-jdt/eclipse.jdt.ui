@@ -212,7 +212,7 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		}
 	}
 
-	protected void removeNLSComment(CompilationUnitRewrite cuRewrite, ASTNode node, TextEditGroup group, ASTRewrite rewrite) {
+	protected void removeNLSComment(CompilationUnitRewrite cuRewrite, ASTNode node, TextEditGroup group) {
 		CompilationUnit unit= cuRewrite.getRoot();
 		ICompilationUnit icu= (ICompilationUnit) cuRewrite.getRoot().getJavaElement();
 
