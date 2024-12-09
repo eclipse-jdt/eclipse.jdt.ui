@@ -65,7 +65,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			module test {
 			}
 			""";
-		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		IPackageFragment def= fSourceFolder.createPackageFragment("test", false, null);
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
@@ -82,7 +82,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -113,7 +113,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        }
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -133,7 +133,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			module test {
 			}
 			""";
-		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		IPackageFragment def= fSourceFolder.createPackageFragment("test", false, null);
 		def.createCompilationUnit("module-info.java", str, false, null);
 
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
@@ -148,7 +148,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        };
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
@@ -173,7 +173,7 @@ public class AssistQuickFixTest12 extends QuickFixTest {
 			        };
 			    }
 			}
-			
+
 			enum Day {
 			    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
 			}
