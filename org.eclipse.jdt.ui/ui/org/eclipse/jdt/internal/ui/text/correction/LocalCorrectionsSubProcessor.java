@@ -2461,9 +2461,13 @@ public class LocalCorrectionsSubProcessor {
 				String[][] resolvedName= sealedType.resolveType(permittedTypeName);
 				for (int i= 0; i < resolvedName.length; ++i) {
 					String[] inner= resolvedName[i];
-					if (!inner[0].isEmpty() && !inner[0].equals(pkgName)) {
-						needImport= true;
+					if (!inner[0].isEmpty()) {
 						importName= inner[0] + "." + inner[1]; //$NON-NLS-1$
+						if (!inner[0].equals(pkgName)) {
+							needImport= true;
+						}
+					} else {
+						importName= inner[1];
 					}
 					if (permittedTypeName.startsWith(sealedType.getTypeQualifiedName('.'))) {
 						needImport= false;
