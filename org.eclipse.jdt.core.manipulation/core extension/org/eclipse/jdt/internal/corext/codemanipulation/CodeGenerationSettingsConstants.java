@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,15 @@ public class CodeGenerationSettingsConstants {
 	 * </p>
 	 */
 	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
+
+	/**
+	 * A named preferences that controls if types that start with a lower case letters get added by the
+	 * "Organize Import" operation.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_PRESERVESTARIMPORTS= "org.eclipse.jdt.ui.preservestarimports"; //$NON-NLS-1$
 
 	private CodeGenerationSettingsConstants() {
 	}
