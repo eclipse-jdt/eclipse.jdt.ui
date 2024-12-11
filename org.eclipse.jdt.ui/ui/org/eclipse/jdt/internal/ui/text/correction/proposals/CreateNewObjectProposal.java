@@ -47,6 +47,10 @@ public class CreateNewObjectProposal extends LinkedCorrectionProposal {
 		super("", cu, null, relevance, null, new CreateNewObjectProposalCore(cu, variableDeclarationFragment, variableBinding, relevance)); //$NON-NLS-1$
 	}
 
+	public CreateNewObjectProposal(CreateNewObjectProposalCore core) {
+		super("", core.getCompilationUnit(), null, core.getRelevance(), null, core); //$NON-NLS-1$
+	}
+
 	@Override
 	public Image getImage() {
 		return JavaPlugin.getImageDescriptorRegistry().get(

@@ -25,4 +25,9 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		super(CorrectionMessages.MissingAnnotationAttributesProposal_add_missing_attributes_label, cu, null, relevance,
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new MissingAnnotationAttributesProposalCore(cu, annotation, relevance));
 	}
+
+	public MissingAnnotationAttributesProposal(MissingAnnotationAttributesProposalCore core) {
+		super(CorrectionMessages.MissingAnnotationAttributesProposal_add_missing_attributes_label, core.getCompilationUnit(), null, core.getRelevance(),
+				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), core);
+	}
 }
