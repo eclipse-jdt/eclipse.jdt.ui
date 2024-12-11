@@ -98,6 +98,18 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal implements IC
 	}
 
 
+	/**
+	 * Constructs a correction proposal based on a core proposal and an image
+	 *
+	 * @param core the core proposal
+	 * @param image the image to use
+	 * @throws CoreException if obtaining text change has issue
+	 * @since 3.34
+	 *
+	 */
+	public CUCorrectionProposal(CUCorrectionProposalCore core, Image image) throws CoreException {
+		this(core.getName(), core.getCompilationUnit(), core.getTextChange(), core.getRelevance(), image);
+	}
 
 	/**
 	 * Constructs a correction proposal working on a compilation unit.

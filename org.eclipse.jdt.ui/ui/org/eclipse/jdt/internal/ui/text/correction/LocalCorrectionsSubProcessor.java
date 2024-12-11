@@ -1409,13 +1409,17 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 
 	@Override
 	protected ICommandAccess cuCorrectionProposalToT(CUCorrectionProposalCore core, int uid) {
-		JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 		switch (uid) {
 			case ADD_PERMITTED_TYPE, ADD_SEALED_SUPERTYPE -> {
-				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 			}
 		}
-		return null;
+		try {
+			return new CUCorrectionProposal(core, image);
+		} catch (CoreException e) {
+			return null;
+		}
 	}
 
 
