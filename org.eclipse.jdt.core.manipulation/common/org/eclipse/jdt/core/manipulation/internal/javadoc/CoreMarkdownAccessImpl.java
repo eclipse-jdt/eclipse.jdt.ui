@@ -16,6 +16,7 @@ package org.eclipse.jdt.core.manipulation.internal.javadoc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
@@ -52,12 +53,17 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 		fRenderer= HtmlRenderer.builder().extensions(extensions).build();
 	}
 
+	final static Pattern UnicodePattern= Pattern.compile("\\\\u([0-9A-Fa-f]{4})"); //$NON-NLS-1$
+
 	@Override
 	protected String removeDocLineIntros(String textWithSlashes) {
+		// replace unicode characters
+		String content= UnicodePattern.matcher(textWithSlashes).replaceAll(s -> String.valueOf((char)Integer.parseInt(s.group(1), 16)));
+
 		String lineBreakGroup= "(\\r\\n?|\\n)"; //$NON-NLS-1$
 		String noBreakSpace= "[^\r\n&&\\s]"; //$NON-NLS-1$
 		// in the markdown case relevant leading whitespace is contained in TextElements, no need to preserve blanks *between* elements
-		return textWithSlashes.replaceAll(lineBreakGroup + noBreakSpace + "*///" + noBreakSpace + '*', "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+		return content.replaceAll(lineBreakGroup + noBreakSpace + "*///" + noBreakSpace + '*', "$1"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override
