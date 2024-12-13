@@ -7851,4 +7851,18 @@
            file-extensions="class without source">
      </file-association>
   </extension>
+  <extension
+         point="org.eclipse.ui.editors.stickyLinesProviders">
+      <stickyLinesProvider
+            class="org.eclipse.jdt.internal.ui.javaeditor.StickyLinesProviderJava"
+            id="org.eclipse.jdt.internal.ui.StickyLinesProviderJava">
+         <enabledWhen>
+            <and>
+               <with variable="editor">
+                  <instanceof value="org.eclipse.jdt.internal.ui.javaeditor.JavaEditor"/>
+               </with>
+            </and>
+         </enabledWhen>
+      </stickyLinesProvider>
+   </extension>
 </plugin>
