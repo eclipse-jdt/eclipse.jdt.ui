@@ -53,17 +53,23 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 		fRenderer= HtmlRenderer.builder().extensions(extensions).build();
 	}
 
-	final static Pattern UnicodePattern= Pattern.compile("\\\\u([0-9A-Fa-f]{4})"); //$NON-NLS-1$
+	final static String PatternCommon= "[^\r\n&&\\s]*?///[^\r\n&&\\s]*?"; //$NON-NLS-1$
+	final static Pattern UnicodePattern= Pattern.compile("(\\\\u000[d,D]\\\\u000[a,A]|\\\\u000[a,A]|\\\\u000[d,D])" + PatternCommon); //$NON-NLS-1$
+	final static Pattern Pattern1= Pattern.compile("(\\r\\n?|\\n)" + PatternCommon); //$NON-NLS-1$
 
 	@Override
 	protected String removeDocLineIntros(String textWithSlashes) {
-		// replace unicode characters
-		String content= UnicodePattern.matcher(textWithSlashes).replaceAll(s -> String.valueOf((char)Integer.parseInt(s.group(1), 16)));
-
-		String lineBreakGroup= "(\\r\\n?|\\n)"; //$NON-NLS-1$
-		String noBreakSpace= "[^\r\n&&\\s]"; //$NON-NLS-1$
 		// in the markdown case relevant leading whitespace is contained in TextElements, no need to preserve blanks *between* elements
-		return content.replaceAll(lineBreakGroup + noBreakSpace + "*///" + noBreakSpace + '*', "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+		String content= Pattern1.matcher(textWithSlashes).replaceAll(r -> "$1"); //$NON-NLS-1$
+		// handle unicode
+		content= UnicodePattern.matcher(content).replaceAll(r -> {
+				return switch(r.group(1)) {
+				case "\\u000a", "\\u000A" -> "\n"; //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+				case "\\u000d", "\\u000D" -> "\r"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				default -> "\r\n"; //$NON-NLS-1$
+				};
+			});
+		return content;
 	}
 
 	@Override
