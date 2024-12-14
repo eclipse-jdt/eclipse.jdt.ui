@@ -1250,6 +1250,18 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			return true;
 		}
 
+		@Override
+		public boolean visit(ThisExpression node) {
+			if (node.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				ITypeBinding typeBinding= node.resolveTypeBinding();
+				if (isChildTypeMember(typeBinding, fSourceType) && !isChildTypeMember(typeBinding, fTargetType)) {
+					fConflictBinding= typeBinding;
+					throw new AbortSearchException();
+				}
+			}
+			return super.visit(node);
+		}
+
 		private boolean isChildTypeMember(ITypeBinding parentTypeBinding, IType type) {
 			if (parentTypeBinding.getQualifiedName().equals(type.getFullyQualifiedName('.'))) {
 				return true;
