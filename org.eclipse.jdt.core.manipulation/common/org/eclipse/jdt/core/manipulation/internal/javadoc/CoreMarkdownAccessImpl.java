@@ -53,9 +53,8 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 		fRenderer= HtmlRenderer.builder().extensions(extensions).build();
 	}
 
-	final static String PatternCommon= "[^\r\n&&\\s]*?///[^\r\n&&\\s]*?"; //$NON-NLS-1$
-	final static Pattern UnicodePattern= Pattern.compile("(\\\\u000[d,D]\\\\u000[a,A]|\\\\u000[a,A]|\\\\u000[d,D])" + PatternCommon); //$NON-NLS-1$
-	final static Pattern Pattern1= Pattern.compile("(\\r\\n?|\\n)" + PatternCommon); //$NON-NLS-1$
+	final static Pattern UnicodePattern= Pattern.compile("(\\\\u000[d,D]\\\\u000[a,A]|\\\\u000[a,A]|\\\\u000[d,D])[^\r\n&&\\s]*?///[^\r\n&&\\s]*?"); //$NON-NLS-1$
+	final static Pattern Pattern1= Pattern.compile("(\\r\\n?|\\n)[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
 
 	@Override
 	protected String removeDocLineIntros(String textWithSlashes) {
