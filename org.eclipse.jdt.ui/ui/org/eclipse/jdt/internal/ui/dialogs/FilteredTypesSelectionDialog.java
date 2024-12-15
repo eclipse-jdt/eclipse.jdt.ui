@@ -810,7 +810,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void processVMInstallType(IVMInstallType installType, List<IPath> locations, List<String> labels) {
 			if (installType != null) {
-				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
+				boolean isMac= Platform.OS.isMac();
 				for (IVMInstall install : installType.getVMInstalls()) {
 					String label= getFormattedLabel(install.getName());
 					LibraryLocation[] libLocations = install.getLibraryLocations();
@@ -1116,7 +1116,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void processVMInstallType(IVMInstallType installType, List<String> locations, List<String> labels) {
 			if (installType != null) {
-				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
+				boolean isMac= Platform.OS.isMac();
 				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
 				for (IVMInstall install : installType.getVMInstalls()) {
 					String label = getFormattedLabel(install.getName());

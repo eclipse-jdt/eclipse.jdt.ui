@@ -200,7 +200,7 @@ public class AdvancedJUnitLaunchConfigurationDelegateTest {
 
 	private String extractPathForArgumentFile(String showCommandLine, String firstSearchStr, int indexTestNameFile) {
 		String filePath= showCommandLine.substring(indexTestNameFile + firstSearchStr.length() + 1);
-		if (Platform.OS_WIN32.equals(Platform.getOS())) {
+		if (Platform.OS.isWindows()) {
 			filePath = removeQuotationMarks(filePath);
 		}
 		return filePath;
