@@ -26156,10 +26156,24 @@ public class CleanUpTest extends CleanUpTestCase {
 			        return 0;
 			    }
 
+			    public int collapseIfStatementsWithLineComment(boolean isActive, boolean isValid) {
+			        // Keep this comment
+			        if (isActive) { // line comment
+			            // Keep this comment too
+			            if (isValid) {
+			                // Keep this comment also
+			                return 1;
+			            }
+			        }
+
+			        return 0;
+			    }
+
 			    public int collapseInnerLoneIf(boolean isActive, boolean isValid) {
 			        // Keep this comment
-			        if (isActive) {
+			        if (isActive) { // line comment
 			            if (isValid)
+				            // Keep this comment also
 			                return 1;
 			        }
 
@@ -26235,10 +26249,23 @@ public class CleanUpTest extends CleanUpTestCase {
 			        return 0;
 			    }
 
+			    public int collapseIfStatementsWithLineComment(boolean isActive, boolean isValid) {
+			        // Keep this comment
+			        // Keep this comment too
+			        if (isActive && isValid) { // line comment
+			            // Keep this comment also
+			            return 1;
+			        }
+
+			        return 0;
+			    }
+
 			    public int collapseInnerLoneIf(boolean isActive, boolean isValid) {
 			        // Keep this comment
-			        if (isActive && isValid)
+			        if (isActive && isValid) { // line comment
+			            // Keep this comment also
 			            return 1;
+			        }
 
 			        return 0;
 			    }
