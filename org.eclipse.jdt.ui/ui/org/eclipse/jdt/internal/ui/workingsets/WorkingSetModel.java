@@ -449,7 +449,9 @@ public class WorkingSetModel {
 	 * @param workingSets the active working sets to be set
 	 */
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
+		List<IWorkingSet> backup= fAllWorkingSets;  // modified by getAllWorkingSets, see gh#1863:
 		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(workingSets)));
+		fAllWorkingSets= backup;
 		if (fIsSortingEnabled) {
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}
