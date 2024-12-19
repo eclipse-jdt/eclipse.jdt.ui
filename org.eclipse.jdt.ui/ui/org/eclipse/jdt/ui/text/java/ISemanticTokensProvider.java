@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.text.java;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
@@ -58,7 +60,7 @@ public interface ISemanticTokensProvider {
 		KEYWORD,
 	}
 
-	Collection<SemanticToken> computeSemanticTokens(CompilationUnit ast);
+	@NonNull Collection<SemanticToken> computeSemanticTokens(@NonNull CompilationUnit ast);
 
 }
 
