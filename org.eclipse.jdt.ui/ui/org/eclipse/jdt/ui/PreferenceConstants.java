@@ -3472,6 +3472,36 @@ public class PreferenceConstants {
 	public static final String EDITOR_FOLDING_HEADERS= "editor_folding_default_headers"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that stores the value for custom region folding for the default folding provider.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_FOLDING_CUSTOM_REGIONS= "editor_folding_custom_regions"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for the start indicator of custom folding regions for the default folding provider.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_FOLDING_CUSTOM_REGION_START= "editor_folding_custom_region_start"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for the end indicator of custom folding regions for the default folding provider.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_FOLDING_CUSTOM_REGION_END= "editor_folding_custom_region_end"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that holds the methods or types whose methods are by default expanded with
 	 * constructors in the Call Hierarchy.
 	 * <p>
@@ -4299,6 +4329,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_METHODS, false);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_IMPORTS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FOLDING_HEADERS, true);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS, false);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START, "#region"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END, "#endregion"); //$NON-NLS-1$
 
 		// properties file editor
 		store.setDefault(PreferenceConstants.PROPERTIES_FILE_COLORING_KEY_BOLD, false);
