@@ -127,6 +127,13 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		customRegionGroup.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_custom_region_title);
 		addStringInput(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_CustomRegionStart, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
 		addStringInput(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_CustomRegionEnd, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
+
+		Label customRegionInfo = new Label(customRegionGroup, SWT.NONE);
+		customRegionInfo.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_CustomRegionInfo);
+		GridData customRegionInfoGridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		customRegionInfoGridData.horizontalSpan=2;
+		customRegionInfo.setLayoutData(customRegionInfoGridData);
+
 		return outer;
 	}
 
