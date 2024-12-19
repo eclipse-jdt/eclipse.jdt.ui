@@ -28,6 +28,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.swt.dnd.DND;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFolder;
 
@@ -60,10 +62,11 @@ public class WorkingSetDropAdapterTest {
 	private PackageExplorerPart fPackageExplorer;
 	private Accessor fPackageExplorerPartAccessor;
 	private WorkingSetDropAdapter fAdapter;
-
+	private ILogListener expectNoLogging= (status, plugin) -> {throw new AssertionError(status.getMessage(), status.getException());};
 
 	@BeforeEach
 	public void setUp() throws Exception {
+		Platform.addLogListener(expectNoLogging);
 		fProject= JavaProjectHelper.createJavaProject("Test", "bin");
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		fPackageExplorer= (PackageExplorerPart)activePage.showView(JavaUI.ID_PACKAGES);
@@ -77,6 +80,7 @@ public class WorkingSetDropAdapterTest {
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		activePage.hideView(fPackageExplorer);
 		assertTrue(fPackageExplorer.getTreeViewer().getTree().isDisposed());
+		Platform.removeLogListener(expectNoLogging);
 	}
 
 	@Test
