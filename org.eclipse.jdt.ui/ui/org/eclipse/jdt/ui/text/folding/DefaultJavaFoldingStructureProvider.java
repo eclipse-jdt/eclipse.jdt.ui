@@ -752,8 +752,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private boolean fCollapseCustomRegions= false;
 
 	private boolean fCustomFoldingRegionsEnabled= true;
-	private String fCustomFoldingRegionBegin="#region"; //$NON-NLS-1$
-	private String fCustomFoldingRegionEnd="#endregion"; //$NON-NLS-1$
+	private String fCustomFoldingRegionBegin;
+	private String fCustomFoldingRegionEnd;
 
 	/* filters */
 	/** Member filter, matches nested members (but not top-level types). */
@@ -1192,12 +1192,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
 							int end= scanner.getCurrentTokenEndPosition() + 1;
 							regions.add(new Region(start, end - start));
+							checkCustomFolding(ctx, regions, scanner, start, regions.size());
+							continue;
 						}
-						//$FALL-THROUGH$
 						case ITerminalSymbols.TokenNameCOMMENT_LINE: {
-							if (fCustomFoldingRegionsEnabled) {
-								checkCustomFolding(ctx, regions, scanner, start, regions.size());
-							}
+							checkCustomFolding(ctx, regions, scanner, start, regions.size());
 							continue;
 						}
 					}
@@ -1208,6 +1207,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				regions.add(new Region(start, shift + range.getLength() - start));
 
 				if (fCustomFoldingRegionsEnabled) {
+					if (reference instanceof IParent parent && !parent.hasChildren()) {
+						checkCustomFoldingUntilScannerEnd(ctx, regions, scanner);
+					}
 					if (reference instanceof IJavaElement javaElement && javaElement.getParent() != null && javaElement.getParent() instanceof IParent parent) {
 						IJavaElement[] siblings= parent.getChildren();
 						if (javaElement == siblings[siblings.length-1] && parent instanceof ISourceReference parentSourceReference) {
@@ -1215,18 +1217,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 							ISourceRange parentRange= parentSourceReference.getSourceRange();
 							int regionEnd = parentRange.getOffset() + parentRange.getLength();
 							scanner.resetTo(regionStart, regionEnd);
-							for(int token = scanner.getNextToken(); token != ITerminalSymbols.TokenNameEOF; token=scanner.getNextToken()) {
-								if(isCommentToken(token)) {
-									checkCustomFolding(ctx, regions, scanner, scanner.getCurrentTokenStartPosition(), regions.size() - 1);
-								}
-							}
-						}
-					}
-					if (reference instanceof IParent parent && !parent.hasChildren()) {
-						for(int token = scanner.getNextToken(); token != ITerminalSymbols.TokenNameEOF; token=scanner.getNextToken()) {
-							if(isCommentToken(token)) {
-								checkCustomFolding(ctx, regions, scanner, scanner.getCurrentTokenStartPosition(), regions.size() - 1);
-							}
+							checkCustomFoldingUntilScannerEnd(ctx, regions, scanner);
 						}
 					}
 				}
@@ -1240,21 +1231,31 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		return new IRegion[0];
 	}
 
+	private void checkCustomFoldingUntilScannerEnd(FoldingStructureComputationContext ctx, List<IRegion> regions, IScanner scanner) throws InvalidInputException {
+		for(int token = scanner.getNextToken(); token != ITerminalSymbols.TokenNameEOF; token=scanner.getNextToken()) {
+			if(isCommentToken(token)) {
+				checkCustomFolding(ctx, regions, scanner, scanner.getCurrentTokenStartPosition(), regions.size() - 1);
+			}
+		}
+	}
+
 	private boolean isCommentToken(int token) {
 		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || token == ITerminalSymbols.TokenNameCOMMENT_MARKDOWN || token == ITerminalSymbols.TokenNameCOMMENT_LINE;
 	}
 
 	private void checkCustomFolding(FoldingStructureComputationContext ctx, List<IRegion> regions, IScanner scanner, int start, int regionArrayIndex) {
-		String currentTokenSource= new String(scanner.getCurrentTokenSource());
-		if (currentTokenSource.contains(fCustomFoldingRegionBegin)) {
-			ctx.fOpenCustomRegionStartPositions.add(start);
-		}
-		if (currentTokenSource.contains(fCustomFoldingRegionEnd) && !ctx.fOpenCustomRegionStartPositions.isEmpty()) {
-				int end= scanner.getCurrentTokenEndPosition() + 1;
+		if (fCustomFoldingRegionsEnabled) {
+			String currentTokenSource= new String(scanner.getCurrentTokenSource());
+			if (currentTokenSource.contains(fCustomFoldingRegionBegin)) {
+				ctx.fOpenCustomRegionStartPositions.add(start);
+			}
+			if (currentTokenSource.contains(fCustomFoldingRegionEnd) && !ctx.fOpenCustomRegionStartPositions.isEmpty()) {
+				int end= scanner.getCurrentTokenStartPosition() + 1;
 				Integer regionStart= ctx.fOpenCustomRegionStartPositions.removeLast();
 				Region region= new Region(regionStart, end - regionStart);
 				regions.add(regionArrayIndex, region);
 				ctx.fCurrentCustomRegions.add(region);
+			}
 		}
 	}
 
