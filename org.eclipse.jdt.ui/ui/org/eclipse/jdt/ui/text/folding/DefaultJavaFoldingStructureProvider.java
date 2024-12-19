@@ -1244,18 +1244,19 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void checkCustomFolding(FoldingStructureComputationContext ctx, List<IRegion> regions, IScanner scanner, int start, int regionArrayIndex) {
-		if (fCustomFoldingRegionsEnabled) {
-			String currentTokenSource= new String(scanner.getCurrentTokenSource());
-			if (currentTokenSource.contains(fCustomFoldingRegionBegin)) {
-				ctx.fOpenCustomRegionStartPositions.add(start);
-			}
-			if (currentTokenSource.contains(fCustomFoldingRegionEnd) && !ctx.fOpenCustomRegionStartPositions.isEmpty()) {
-				int end= scanner.getCurrentTokenStartPosition() + 1;
-				Integer regionStart= ctx.fOpenCustomRegionStartPositions.removeLast();
-				Region region= new Region(regionStart, end - regionStart);
-				regions.add(regionArrayIndex, region);
-				ctx.fCurrentCustomRegions.add(region);
-			}
+		if (!fCustomFoldingRegionsEnabled) {
+			return;
+		}
+		String currentTokenSource= new String(scanner.getCurrentTokenSource());
+		if (currentTokenSource.contains(fCustomFoldingRegionBegin)) {
+			ctx.fOpenCustomRegionStartPositions.add(start);
+		}
+		if (currentTokenSource.contains(fCustomFoldingRegionEnd) && !ctx.fOpenCustomRegionStartPositions.isEmpty()) {
+			int end= scanner.getCurrentTokenStartPosition() + 1;
+			Integer regionStart= ctx.fOpenCustomRegionStartPositions.removeLast();
+			Region region= new Region(regionStart, end - regionStart);
+			regions.add(regionArrayIndex, region);
+			ctx.fCurrentCustomRegions.add(region);
 		}
 	}
 
