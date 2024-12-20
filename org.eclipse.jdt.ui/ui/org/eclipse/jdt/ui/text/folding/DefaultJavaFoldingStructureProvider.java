@@ -1024,6 +1024,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private boolean fCollapseInnerTypes= true;
 	private boolean fCollapseMembers= false;
 	private boolean fCollapseHeaderComments= true;
+	private boolean fNewFolding;
 
 	/* filters */
 	/** Member filter, matches nested members (but not top-level types). */
@@ -1195,6 +1196,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		fCollapseJavadoc= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
 		fCollapseMembers= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
 		fCollapseHeaderComments= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
+		fNewFolding = store.getBoolean(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
 	private void update(FoldingStructureComputationContext ctx) {
@@ -1279,12 +1281,12 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
-	    if (fInput instanceof ICompilationUnit) {
+	    if (fNewFolding && fInput instanceof ICompilationUnit) {
 	        processCompilationUnit((ICompilationUnit) fInput, ctx);
-	    } else if (fInput instanceof ISourceReference) {
+	        processComments(ctx);
+	    } else {
 	        processSourceReference((ISourceReference) fInput, ctx);
 	    }
-	    processComments(ctx);
 	}
 
 	private void processCompilationUnit(ICompilationUnit unit, FoldingStructureComputationContext ctx) {
