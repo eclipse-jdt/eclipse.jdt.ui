@@ -75,7 +75,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_METHODS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_IMPORTS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_HEADERS));
-
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED));
 		return overlayKeys.toArray(new OverlayKey[overlayKeys.size()]);
 	}
 
@@ -102,6 +102,12 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_methods, PreferenceConstants.EDITOR_FOLDING_METHODS, 0);
 		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_imports, PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0);
 
+		Label label2= new Label(inner, SWT.LEFT);
+		label2.setText(""); //$NON-NLS-1$
+		Label label1= new Label(inner, SWT.LEFT);
+		label1.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_New_Setting_Title);
+
+		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_New, PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED, 0);
 		return inner;
 	}
 
