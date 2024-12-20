@@ -752,8 +752,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private boolean fCollapseCustomRegions= false;
 
 	private boolean fCustomFoldingRegionsEnabled= true;
-	private String fCustomFoldingRegionBegin;
-	private String fCustomFoldingRegionEnd;
+	private char[] fCustomFoldingRegionBegin;
+	private char[] fCustomFoldingRegionEnd;
 
 	/* filters */
 	/** Member filter, matches nested members (but not top-level types). */
@@ -928,10 +928,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		fCollapseMembers= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
 		fCollapseHeaderComments= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
 		fCollapseCustomRegions= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS);
-		fCustomFoldingRegionBegin=store.getString(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
-		fCustomFoldingRegionEnd=store.getString(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
-		fCustomFoldingRegionsEnabled = !fCustomFoldingRegionBegin.isEmpty() && !fCustomFoldingRegionEnd.isEmpty() &&
-				!fCustomFoldingRegionBegin.contains(fCustomFoldingRegionEnd) && !fCustomFoldingRegionEnd.contains(fCustomFoldingRegionBegin);
+
+		String customFoldingRegionBegin= store.getString(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
+		String customFoldingRegionEnd= store.getString(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
+		fCustomFoldingRegionBegin=customFoldingRegionBegin.toCharArray();
+		fCustomFoldingRegionEnd=customFoldingRegionEnd.toCharArray();
+		fCustomFoldingRegionsEnabled = !customFoldingRegionBegin.isEmpty() && !customFoldingRegionEnd.isEmpty() &&
+				!customFoldingRegionBegin.contains(customFoldingRegionEnd) && !customFoldingRegionEnd.contains(customFoldingRegionBegin);
 	}
 
 	private void update(FoldingStructureComputationContext ctx) {
@@ -1195,11 +1198,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
 							int end= scanner.getCurrentTokenEndPosition() + 1;
 							regions.add(new Region(start, end - start));
-							checkCustomFolding(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner, start, regions.size());
+							checkCustomFolding(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner, token, regions.size());
 							continue;
 						}
 						case ITerminalSymbols.TokenNameCOMMENT_LINE: {
-							checkCustomFolding(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner, start, regions.size());
+							checkCustomFolding(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner, token, regions.size());
 							continue;
 						}
 					}
@@ -1237,7 +1240,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private void checkCustomFoldingUntilScannerEnd(FoldingStructureComputationContext ctx, List<IRegion> regions, Deque<Integer> openCustomRegionStartPositions, IScanner scanner) throws InvalidInputException {
 		for(int token = scanner.getNextToken(); token != ITerminalSymbols.TokenNameEOF; token=scanner.getNextToken()) {
 			if(isCommentToken(token)) {
-				checkCustomFolding(ctx, regions, openCustomRegionStartPositions, scanner, scanner.getCurrentTokenStartPosition(), regions.size() - 1);
+				checkCustomFolding(ctx, regions, openCustomRegionStartPositions, scanner, token, regions.size() - 1);
 			}
 		}
 	}
@@ -1246,21 +1249,46 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		return token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || token == ITerminalSymbols.TokenNameCOMMENT_MARKDOWN || token == ITerminalSymbols.TokenNameCOMMENT_LINE;
 	}
 
-	private void checkCustomFolding(FoldingStructureComputationContext ctx, List<IRegion> regions, Deque<Integer> openCustomRegionStartPositions, IScanner scanner, int start, int regionArrayIndex) {
+	private void checkCustomFolding(FoldingStructureComputationContext ctx, List<IRegion> regions, Deque<Integer> openCustomRegionStartPositions, IScanner scanner, int token, int regionArrayIndex) {
 		if (!fCustomFoldingRegionsEnabled) {
 			return;
 		}
-		String currentTokenSource= new String(scanner.getCurrentTokenSource());
-		if (currentTokenSource.contains(fCustomFoldingRegionBegin)) {
+		int start = findPossibleRegionCommentStart(scanner, token);
+
+		if (startsWith(scanner.getSource(), start, scanner.getCurrentTokenEndPosition() - start, fCustomFoldingRegionBegin)) {
 			openCustomRegionStartPositions.add(start);
 		}
-		if (currentTokenSource.contains(fCustomFoldingRegionEnd) && !openCustomRegionStartPositions.isEmpty()) {
+		if (startsWith(scanner.getSource(), start, scanner.getCurrentTokenEndPosition() - start, fCustomFoldingRegionEnd) && !openCustomRegionStartPositions.isEmpty()) {
 			int end= scanner.getCurrentTokenStartPosition() + 1;
 			Integer regionStart= openCustomRegionStartPositions.removeLast();
 			Region region= new Region(regionStart, end - regionStart);
 			regions.add(regionArrayIndex, region);
 			ctx.fCurrentCustomRegions.add(region);
 		}
+	}
+
+	private int findPossibleRegionCommentStart(IScanner scanner, int token) {
+		char[] source= scanner.getSource();
+		int start = scanner.getCurrentTokenStartPosition();
+		int skip = switch(token) {
+			case ITerminalSymbols.TokenNameCOMMENT_LINE, ITerminalSymbols.TokenNameCOMMENT_BLOCK -> 2;
+			case ITerminalSymbols.TokenNameCOMMENT_JAVADOC, ITerminalSymbols.TokenNameCOMMENT_MARKDOWN -> 3;
+			default -> 0;
+		};
+		int newStart=start+skip;
+		while(Character.isWhitespace(source[newStart])) {
+			newStart++;
+		}
+		return newStart;
+	}
+	
+	private boolean startsWith(char[] source, int offset, int length, char[] prefix) {
+		for(int i=0;i<Math.min(length, prefix.length);i++) {
+			if (source[offset+i] != prefix[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private IRegion computeHeaderComment(FoldingStructureComputationContext ctx) throws JavaModelException {
