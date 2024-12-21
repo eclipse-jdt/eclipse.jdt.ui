@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -36,7 +35,6 @@ import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
@@ -62,11 +60,7 @@ public class StandardComparisonFixCore extends CompilationUnitRewriteOperationsF
 				if (literalValue != null
 						&& literalValue.compareTo(0L) != 0
 						&& comparisonMI.getExpression() != null
-						&& !ASTNodes.is(comparisonMI.getExpression(), ThisExpression.class)
-						&& (ASTNodes.usesGivenSignature(comparisonMI, Comparable.class.getCanonicalName(), "compareTo", Object.class.getCanonicalName()) //$NON-NLS-1$
-						|| ASTNodes.usesGivenSignature(comparisonMI, Comparator.class.getCanonicalName(), "compare", Object.class.getCanonicalName(), Object.class.getCanonicalName()) //$NON-NLS-1$
-						|| JavaModelUtil.is1d2OrHigher(((CompilationUnit) visited.getRoot()).getJavaElement().getJavaProject())
-						&& ASTNodes.usesGivenSignature(comparisonMI, String.class.getCanonicalName(), "compareToIgnoreCase", String.class.getCanonicalName()))) { //$NON-NLS-1$
+						&& !ASTNodes.is(comparisonMI.getExpression(), ThisExpression.class)) {
 					if (literalValue.compareTo(0L) < 0) {
 						if (InfixExpression.Operator.EQUALS.equals(orderedCondition.getOperator())) {
 							fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.LESS));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -47,7 +46,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.InterruptibleVisitor;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisitor {
 	protected List<CompilationUnitRewriteOperation> fResult;
@@ -187,7 +185,7 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 							varOccurrenceVisitor.getToStringMethods(),
 							varOccurrenceVisitor.getCompareToMethods(),
 							varOccurrenceVisitor.getPrimitiveValueMethods(),
-							getParsingMethodName(getWrapperFullyQualifiedName(), (CompilationUnit) visited.getRoot())));
+							getParsingMethodName(getWrapperFullyQualifiedName())));
 					return false;
 				}
 			}
@@ -259,7 +257,7 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 
 		if (methodInvocation != null) {
 			return ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", getPrimitiveTypeName()) //$NON-NLS-1$
-					|| getParsingMethodName(getWrapperFullyQualifiedName(), (CompilationUnit) expression.getRoot()) != null
+					|| getParsingMethodName(getWrapperFullyQualifiedName()) != null
 					&& (
 							ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", String.class.getCanonicalName()) //$NON-NLS-1$
 							|| ASTNodes.usesGivenSignature(methodInvocation, getWrapperFullyQualifiedName(), "valueOf", String.class.getCanonicalName(), int.class.getSimpleName()) //$NON-NLS-1$
@@ -280,8 +278,8 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 		return false;
 	}
 
-	private String getParsingMethodName(final String wrapperFullyQualifiedName, final CompilationUnit compilationUnit) {
-		if (Boolean.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+	private String getParsingMethodName(final String wrapperFullyQualifiedName) {
+		if (Boolean.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
 			return "parseBoolean"; //$NON-NLS-1$
 		}
 
@@ -293,11 +291,11 @@ public abstract class AbstractPrimitiveRatherThanWrapperFinder extends ASTVisito
 			return "parseLong"; //$NON-NLS-1$
 		}
 
-		if (Double.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is1d2OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+		if (Double.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
 			return "parseDouble"; //$NON-NLS-1$
 		}
 
-		if (Float.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is1d2OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
+		if (Float.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
 			return "parseFloat"; //$NON-NLS-1$
 		}
 
