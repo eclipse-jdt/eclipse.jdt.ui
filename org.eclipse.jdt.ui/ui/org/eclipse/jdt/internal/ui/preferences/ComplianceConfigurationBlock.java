@@ -1239,7 +1239,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private void setDefaultCompilerComplianceValues() {
 		IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
 		if (defaultVMInstall instanceof IVMInstall2) {
-			String complianceLevel= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVMInstall, JavaCore.VERSION_1_4);
+			String complianceLevel= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVMInstall, JavaCore.VERSION_1_8);
 			if (isOriginalDefaultCompliance(complianceLevel)) {
 				Map<String, String> complianceOptions= new HashMap<>();
 				JavaModelUtil.setComplianceOptions(complianceOptions, complianceLevel);

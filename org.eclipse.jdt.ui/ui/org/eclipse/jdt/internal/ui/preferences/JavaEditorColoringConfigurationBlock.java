@@ -782,8 +782,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.H_SCROLL | SWT.BORDER, store);
 		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		fPreviewViewer.configure(configuration);
-		// fake 1.5 source to get 1.5 features right.
-		configuration.handlePropertyChangeEvent(new PropertyChangeEvent(this, JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5));
+		// 1.8 source to get 1.8 features right.
+		configuration.handlePropertyChangeEvent(new PropertyChangeEvent(this, JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8));
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);

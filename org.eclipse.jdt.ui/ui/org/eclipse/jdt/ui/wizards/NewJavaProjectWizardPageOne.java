@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -544,9 +544,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					selectionIndex= i;
 				}
 				if (fInstalledJVMs[i] instanceof IVMInstall2) {
-					fJRECompliance[i]= JavaModelUtil.getCompilerCompliance((IVMInstall2) fInstalledJVMs[i], JavaCore.VERSION_1_4);
+					fJRECompliance[i]= JavaModelUtil.getCompilerCompliance((IVMInstall2) fInstalledJVMs[i], JavaCore.VERSION_1_8);
 				} else {
-					fJRECompliance[i]= JavaCore.VERSION_1_4;
+					fJRECompliance[i]= JavaCore.VERSION_1_8;
 				}
 			}
 			comboField.setItems(jreLabels);
@@ -852,7 +852,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		public String getCompliance() {
 			String compilerCompliance= fJREGroup.getSelectedCompilerCompliance();
 			if (compilerCompliance == null) {
-				compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) JavaRuntime.getDefaultVMInstall(), JavaCore.VERSION_1_4);
+				compilerCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) JavaRuntime.getDefaultVMInstall(), JavaCore.VERSION_1_8);
 			}
 			return compilerCompliance;
 		}
@@ -1068,9 +1068,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			if (selectedJVM == null) {
 				selectedJVM= JavaRuntime.getDefaultVMInstall();
 			}
-			String jvmCompliance= JavaCore.VERSION_1_4;
+			String jvmCompliance= JavaCore.VERSION_1_8;
 			if (selectedJVM instanceof IVMInstall2) {
-				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) selectedJVM, JavaCore.VERSION_1_4);
+				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) selectedJVM, JavaCore.VERSION_1_8);
 			}
 			if (!selectedCompliance.equals(jvmCompliance) && (JavaModelUtil.is50OrHigher(selectedCompliance) || JavaModelUtil.is50OrHigher(jvmCompliance))) {
 				fHintText.setText(Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_DetectGroup_jre_message, new String[] {BasicElementLabels.getVersionName(selectedCompliance), BasicElementLabels.getVersionName(jvmCompliance)}));
