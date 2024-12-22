@@ -111,6 +111,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		private Deque<Integer> fOpenCustomRegionStartPositions = new ArrayDeque<>();
 		private Set<Region> fCurrentCustomRegions = new HashSet<>();
+		private int fLastScannedIndex;
 
 		private FoldingStructureComputationContext(IDocument document, ProjectionAnnotationModel model, boolean allowCollapsing, IScanner scanner) {
 			Assert.isNotNull(document);
@@ -1183,6 +1184,20 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 				final int shift= range.getOffset();
 				IScanner scanner= ctx.getScanner();
+
+				if (fCustomFoldingRegionsEnabled &&
+						reference instanceof IJavaElement javaElement && javaElement.getParent() != null &&
+							javaElement.getParent() instanceof IParent parent && parent instanceof ISourceReference parentSourceReference) {
+						// check tokens between the last sibling (or the parent) and start of current sibling
+						ISourceRange parentSourceRange= parentSourceReference.getSourceRange();
+						if (ctx.fLastScannedIndex >= parentSourceRange.getOffset() && ctx.fLastScannedIndex < parentSourceRange.getOffset() + parentSourceRange.getLength()
+								&& ctx.fLastScannedIndex < range.getOffset()) {
+							scanner.resetTo(ctx.fLastScannedIndex, range.getOffset());
+							checkCustomFoldingUntilScannerEnd(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner);
+						}
+					}
+
+
 				scanner.resetTo(shift, shift + range.getLength());
 
 				int start= shift;
@@ -1193,9 +1208,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					start= scanner.getCurrentTokenStartPosition();
 
 					switch (token) {
-						case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
-						case ITerminalSymbols.TokenNameCOMMENT_MARKDOWN:
-						case ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
+						case ITerminalSymbols.TokenNameCOMMENT_JAVADOC, ITerminalSymbols.TokenNameCOMMENT_MARKDOWN, ITerminalSymbols.TokenNameCOMMENT_BLOCK: {
 							int end= scanner.getCurrentTokenEndPosition() + 1;
 							regions.add(new Region(start, end - start));
 							checkCustomFolding(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner, token, regions.size());
@@ -1214,18 +1227,23 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 				if (fCustomFoldingRegionsEnabled) {
 					if (reference instanceof IParent parent && !parent.hasChildren()) {
+						// if the element has no children, check content for custom folding region markers
 						checkCustomFoldingUntilScannerEnd(ctx, regions, new ArrayDeque<>(), scanner);
 					}
-					if (reference instanceof IJavaElement javaElement && javaElement.getParent() != null && javaElement.getParent() instanceof IParent parent) {
-						IJavaElement[] siblings= parent.getChildren();
-						if (javaElement == siblings[siblings.length-1] && parent instanceof ISourceReference parentSourceReference) {
-							int regionStart = range.getOffset() + range.getLength();
-							ISourceRange parentRange= parentSourceReference.getSourceRange();
-							int regionEnd = parentRange.getOffset() + parentRange.getLength();
-							scanner.resetTo(regionStart, regionEnd);
-							checkCustomFoldingUntilScannerEnd(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner);
+					ctx.fLastScannedIndex= scanner.getCurrentTokenEndPosition();
+					if (reference instanceof IJavaElement javaElement && javaElement.getParent() != null &&
+							javaElement.getParent() instanceof IParent parent && parent instanceof ISourceReference parentSourceReference) {
+							IJavaElement[] siblings= parent.getChildren();
+							if (javaElement == siblings[siblings.length - 1]) {
+								// if the current element is the last sibling
+								// tokens after the current element and before the end of the parent are checked for custom folding region markers
+								int regionStart= range.getOffset() + range.getLength();
+								ISourceRange parentRange= parentSourceReference.getSourceRange();
+								int regionEnd= parentRange.getOffset() + parentRange.getLength();
+								scanner.resetTo(regionStart, regionEnd);
+								checkCustomFoldingUntilScannerEnd(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner);
+							}
 						}
-					}
 				}
 
 				IRegion[] result= new IRegion[regions.size()];
@@ -1281,7 +1299,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 		return newStart;
 	}
-	
+
 	private boolean startsWith(char[] source, int offset, int length, char[] prefix) {
 		for(int i=0;i<Math.min(length, prefix.length);i++) {
 			if (source[offset+i] != prefix[i]) {
