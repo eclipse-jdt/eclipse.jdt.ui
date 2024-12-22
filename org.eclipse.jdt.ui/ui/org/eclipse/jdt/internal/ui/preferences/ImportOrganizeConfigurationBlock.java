@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -72,6 +72,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static final Key PREF_IMPORTORDER= getJDTUIKey(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
 	private static final Key PREF_ONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 	private static final Key PREF_IGNORELOWERCASE= getJDTUIKey(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
+	private static final Key PREF_PRESERVESTARIMPORTS= getJDTUIKey(PreferenceConstants.ORGIMPORTS_PRESERVESTARIMPORTS);
 	private static final Key PREF_STATICONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD);
 
 	private static final String DIALOGSETTING_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
@@ -79,7 +80,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
-			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_STATICONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE
+			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_STATICONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE, PREF_PRESERVESTARIMPORTS,
 		};
 	}
 
@@ -177,6 +178,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private StringDialogField fThresholdField;
 	private StringDialogField fStaticThresholdField;
 	private SelectionButtonDialogField fIgnoreLowerCaseTypesField;
+	private SelectionButtonDialogField fPreserveStarImportsField;
 	private SelectionButtonDialogField fExportButton;
 	private SelectionButtonDialogField fImportButton;
 
@@ -226,6 +228,10 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fIgnoreLowerCaseTypesField.setDialogFieldListener(adapter);
 		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label);
 
+		fPreserveStarImportsField= new SelectionButtonDialogField(SWT.CHECK);
+		fPreserveStarImportsField.setDialogFieldListener(adapter);
+		fPreserveStarImportsField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_preserveStarImports);
+
 		updateControls();
 	}
 
@@ -266,6 +272,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		((GridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
 		fStaticThresholdField.doFillIntoGrid(composite, 2);
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
+		fPreserveStarImportsField.doFillIntoGrid(composite, 2);
 
 		Dialog.applyDialogFont(composite);
 
@@ -418,6 +425,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		int threshold= getImportNumberThreshold(PREF_ONDEMANDTHRESHOLD);
 		int staticThreshold= getImportNumberThreshold(PREF_STATICONDEMANDTHRESHOLD);
 		boolean ignoreLowerCase= Boolean.parseBoolean(getValue(PREF_IGNORELOWERCASE));
+		boolean preserveStarImports= Boolean.parseBoolean(getValue(PREF_PRESERVESTARIMPORTS));
 
 		fOrderListField.removeAllElements();
 		for (ImportOrderEntry i : importOrder) {
@@ -426,6 +434,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField.setText(String.valueOf(threshold));
 		fStaticThresholdField.setText(String.valueOf(staticThreshold));
 		fIgnoreLowerCaseTypesField.setSelection(ignoreLowerCase);
+		fPreserveStarImportsField.setSelection(preserveStarImports);
 	}
 
 
@@ -443,6 +452,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	  		}
 		} else if (field == fIgnoreLowerCaseTypesField) {
 	  		setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
+		} else if (field == fPreserveStarImportsField) {
+			setValue(PREF_PRESERVESTARIMPORTS, fPreserveStarImportsField.isSelected());
 		} else if (field == fImportButton) {
 			List<ImportOrderEntry> order= loadImportOrder();
 			if (order != null) {

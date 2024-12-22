@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ public class JavaPreferencesSettings  {
 		res.useKeywordThis= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_KEYWORD_THIS, project));
 		res.overrideAnnotation= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, project));
 		res.importIgnoreLowercase= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE, project));
+		res.preserveStarImports= Boolean.parseBoolean(JavaManipulation.getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_PRESERVESTARIMPORTS, project));
 		res.tabWidth= CodeFormatterUtil.getTabWidth(project);
 		res.indentWidth= CodeFormatterUtil.getIndentWidth(project);
 		return res;
@@ -42,6 +43,7 @@ public class JavaPreferencesSettings  {
 		res.useKeywordThis= Boolean.parseBoolean(getPreference(CodeGenerationSettingsConstants.CODEGEN_KEYWORD_THIS, cu));
 		res.overrideAnnotation= Boolean.parseBoolean(getPreference(CodeGenerationSettingsConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, cu));
 		res.importIgnoreLowercase= Boolean.parseBoolean(getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE, cu));
+		res.preserveStarImports= Boolean.parseBoolean(getPreference(CodeGenerationSettingsConstants.ORGIMPORTS_PRESERVESTARIMPORTS, cu));
 		res.tabWidth= CodeFormatterUtil.getTabWidth(cu);
 		res.indentWidth= CodeFormatterUtil.getIndentWidth(cu);
 		return res;
