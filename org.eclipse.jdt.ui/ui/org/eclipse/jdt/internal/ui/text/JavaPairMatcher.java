@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,21 +20,12 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 /**
  * Helper class for match pairs of characters.
  */
 public final class JavaPairMatcher extends DefaultCharacterPairMatcher implements ISourceVersionDependent {
-
-	/**
-	 * Stores the source version state.
-	 * @since 3.1
-	 */
-	private boolean fHighlightAngularBrackets= false;
-
 
 	public JavaPairMatcher(char[] pairs) {
 		super(pairs, IJavaPartitions.JAVA_PARTITIONING, true);
@@ -68,8 +59,6 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 			currChar= document.getChar(offset);
 		}
 
-		if ((prevChar == '<' || currChar == '>') && !fHighlightAngularBrackets)
-			return null;
 		if (prevChar == '<' && isLessThanOperator(document, offset - 1))
 			return null;
 		final IRegion region= super.match(document, offset);
@@ -221,10 +210,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	 */
 	@Override
 	public void setSourceVersion(String version) {
-		if (JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, version) <= 0)
-			fHighlightAngularBrackets= true;
-		else
-			fHighlightAngularBrackets= false;
+		// nothing to do
 	}
 
 	/*
