@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -192,7 +192,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 					}
 				}
 				String name= prefix ? val + "x" : "x" + val; //$NON-NLS-2$ //$NON-NLS-1$
-				IStatus status= JavaConventions.validateIdentifier(name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+				IStatus status= JavaConventions.validateIdentifier(name, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8);
 				if (status.matches(IStatus.ERROR)) {
 					if (prefix) {
 						return new StatusInfo(IStatus.ERROR, Messages.format(PreferencesMessages.NameConventionConfigurationBlock_error_invalidprefix, val));
@@ -446,7 +446,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			setValue(PREF_EXCEPTION_NAME, name);
 
 			// validation
-			IStatus status = JavaConventions.validateIdentifier(name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+			IStatus status = JavaConventions.validateIdentifier(name, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8);
 			if (!status.isOK()) {
 				fContext.statusChanged(status);
 			} else {

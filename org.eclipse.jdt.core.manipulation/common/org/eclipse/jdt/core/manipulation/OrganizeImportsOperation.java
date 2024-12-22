@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
@@ -74,9 +73,9 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 
 
 
@@ -233,7 +232,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private IPackageFragment fCurrPackage;
 
 		private ScopeAnalyzer fAnalyzer;
-		private boolean fAllowDefaultPackageImports;
 
 		private Map<String, UnresolvedTypeData> fUnresolvedTypes;
 		private Set<String> fImportsAdded;
@@ -258,8 +256,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fAnalyzer= new ScopeAnalyzer(root);
 
 			fCurrPackage= (IPackageFragment) cu.getParent();
-
-			fAllowDefaultPackageImports= JavaCore.VERSION_1_3.equals(cu.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true));
 
 			fImportsAdded= new HashSet<>();
 			fUnresolvedTypes= new HashMap<>();
@@ -369,7 +365,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				for (TypeNameMatch curr : typesFound) {
 					UnresolvedTypeData data= fUnresolvedTypes.get(curr.getSimpleTypeName());
 					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
-						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
+						if (curr.getPackageName().length() > 0) {
 							data.addInfo(curr);
 						}
 					}

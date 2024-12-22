@@ -859,14 +859,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private static IStatus validateJavaTypeName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {
-			return JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
+			return JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8, null);
 		}
 		return JavaConventionsUtil.validateJavaTypeName(text, project);
 	}
 
 	private static IStatus validatePackageName(String text, IJavaProject project) {
 		if (project == null || !project.exists()) {
-			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8);
 		}
 		return JavaConventionsUtil.validatePackageName(text, project);
 	}

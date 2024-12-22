@@ -255,7 +255,7 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 
 		private boolean isRequiredOrGreaterVMInstall(IVMInstall install) {
 			if (install instanceof IVMInstall2) {
-				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_3);
+				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_8);
 				return !JavaModelUtil.isVersionLessThan(compliance, fRequiredVersion);
 			}
 			return false;

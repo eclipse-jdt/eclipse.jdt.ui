@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -329,7 +329,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			String curr= properties.getProperty(String.valueOf(i));
 			if (curr != null) {
 				ImportOrderEntry entry= ImportOrderEntry.fromSerialized(curr);
-				if (entry.name.length() == 0 || !JavaConventions.validatePackageName(entry.name, JavaCore.VERSION_1_3, JavaCore.VERSION_1_5).matches(IStatus.ERROR)) {
+				if (entry.name.length() == 0 || !JavaConventions.validatePackageName(entry.name, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8).matches(IStatus.ERROR)) {
 					res.add(entry);
 				} else {
 					return null;
