@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -329,7 +329,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 	private IStatus validatePackageName(String text) {
 		IJavaProject project= getJavaProject();
 		if (project == null || !project.exists()) {
-			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+			return JavaConventions.validatePackageName(text, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8);
 		}
 		return JavaConventionsUtil.validatePackageName(text, project);
 	}

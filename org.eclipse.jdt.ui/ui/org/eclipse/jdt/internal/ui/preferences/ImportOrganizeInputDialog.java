@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -224,7 +224,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_entryExists);
 				}
 			} else {
-				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
+				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8, null);
 				if (val.matches(IStatus.ERROR)) {
 					status.setError(PreferencesMessages.ImportOrganizeInputDialog_error_invalidName);
 				} else {

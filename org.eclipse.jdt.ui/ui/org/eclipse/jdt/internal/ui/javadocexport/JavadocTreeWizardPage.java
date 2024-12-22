@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -594,7 +594,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					if (doclet.length() == 0) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_nodocletname_error);
 
-					} else if (JavaConventions.validateJavaTypeName(doclet, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null).matches(IStatus.ERROR)) {
+					} else if (JavaConventions.validateJavaTypeName(doclet, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8, null).matches(IStatus.ERROR)) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletname_error);
 					} else if ((docletPath.length() == 0) || !validDocletPath(docletPath)) {
 						fDocletStatus.setError(JavadocExportMessages.JavadocTreeWizardPage_invaliddocletpath_error);
