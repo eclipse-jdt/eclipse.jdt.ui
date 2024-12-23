@@ -28,8 +28,6 @@ import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.tests.AbstractPairMatcherTest;
 
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
@@ -167,7 +165,6 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 	@Test
 	public void testAngleBrackets1_5() {
 		final JavaPairMatcher matcher= (JavaPairMatcher) createMatcher("(){}[]<>");
-		matcher.setSourceVersion(JavaCore.VERSION_1_5);
 		performMatch(matcher, " #< %> ");
 		performMatch(matcher, " <%># ");
 		performMatch(matcher, " 2 < 3 || 4 >% 5 ");

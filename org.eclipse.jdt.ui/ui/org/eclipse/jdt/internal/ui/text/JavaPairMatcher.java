@@ -25,7 +25,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 /**
  * Helper class for match pairs of characters.
  */
-public final class JavaPairMatcher extends DefaultCharacterPairMatcher implements ISourceVersionDependent {
+public final class JavaPairMatcher extends DefaultCharacterPairMatcher {
 
 	public JavaPairMatcher(char[] pairs) {
 		super(pairs, IJavaPartitions.JAVA_PARTITIONING, true);
@@ -203,14 +203,6 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 						|| identifier.startsWith("public") //$NON-NLS-1$
 						|| identifier.startsWith("protected") //$NON-NLS-1$
 						|| identifier.startsWith("private")); //$NON-NLS-1$
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
-	 */
-	@Override
-	public void setSourceVersion(String version) {
-		// nothing to do
 	}
 
 	/*
