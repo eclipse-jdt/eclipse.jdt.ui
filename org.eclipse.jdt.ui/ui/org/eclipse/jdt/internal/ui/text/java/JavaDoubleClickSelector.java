@@ -13,6 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import static java.lang.Character.isJavaIdentifierPart;
+import static java.lang.Character.isJavaIdentifierStart;
+import static java.lang.Character.isWhitespace;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IDocument;
@@ -28,7 +32,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 
 	/**
 	 * Detects java words depending on the source level. In 1.4 mode, detects
-	 * <code>[[:ID:]]*</code>. In 1.5 mode, it also detects
+	 * <code>[[:ID:]]*</code> and
 	 * <code>@\s*[[:IDS:]][[:ID:]]*</code>.
 	 *
 	 * Character class definitions:
@@ -87,18 +91,6 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 			return c == '@';
 		}
 
-		private boolean isIdentifierStart(char c) {
-			return Character.isJavaIdentifierStart(c);
-		}
-
-		private boolean isIdentifierPart(char c) {
-			return Character.isJavaIdentifierPart(c);
-		}
-
-		private boolean isWhitespace(char c) {
-			return Character.isWhitespace(c);
-		}
-
 		/**
 		 * Try to add a character to the word going backward. Only call after
 		 * forward calls!
@@ -121,24 +113,24 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 						fState= WS;
 						return true;
 					}
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fStart= offset;
 						fState= IDS;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fStart= offset;
 						fState= ID;
 						return true;
 					}
 					return false;
 				case ID:
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fStart= offset;
 						fState= IDS;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fStart= offset;
 						fState= ID;
 						return true;
@@ -185,7 +177,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 						fState= WS;
 						return true;
 					}
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fEnd= offset;
 						fState= IDS;
 						return true;
@@ -193,25 +185,25 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 					return false;
 				case IDS:
 				case ID:
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fEnd= offset;
 						fState= IDS;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fEnd= offset;
 						fState= ID;
 						return true;
 					}
 					return false;
 				case UNKNOWN:
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fEnd= offset;
 						fState= IDS;
 						fAnchorState= fState;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fEnd= offset;
 						fState= ID;
 						fAnchorState= fState;
