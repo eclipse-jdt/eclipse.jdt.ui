@@ -351,16 +351,14 @@ public class CustomFoldingRegionTest {
 		endLineEnd= getLengthIfNotFound(input, endLineEnd);
 
 		for (IRegion region : projectionRanges) {
-			int regionEndIndex= region.getOffset() + region.getLength();
-			if (region.getOffset() > startLineBegin && region.getOffset() < startLineEnd &&
-					regionEndIndex > endLineBegin && regionEndIndex <= endLineEnd + 1) {
+			if (region.getOffset() == startLineBegin + 1 && region.getOffset() + region.getLength() == endLineEnd + 1) {
 				return;
 			}
 		}
 
 		fail(
-				"missing region, expected region from line " + getLineDebugInfo(input, startLine, startLineBegin, startLineEnd) +
-						" to " + getLineDebugInfo(input, endLine, endLineBegin, endLineEnd) +
+				"missing region from line " + startLine + "(index " + (startLineBegin + 1) + ") " +
+						"to line " + endLine + "(index " + (endLineEnd + 1) + ")" +
 						", actual regions: " + projectionRanges
 		);
 	}
