@@ -343,8 +343,6 @@ public class CustomFoldingRegionTest {
 	private void assertContainsRegionUsingStartAndEndLine(List<IRegion> projectionRanges, String input, int startLine, int endLine) {
 		assertTrue(startLine <= endLine, "start line must be smaller or equal to end line");
 		int startLineBegin= findLineStartIndex(input, startLine);
-		int startLineEnd= findNextLineStart(input, startLineBegin);
-		startLineEnd= getLengthIfNotFound(input, startLineEnd);
 
 		int endLineBegin= findLineStartIndex(input, endLine);
 		int endLineEnd= findNextLineStart(input, endLineBegin);
