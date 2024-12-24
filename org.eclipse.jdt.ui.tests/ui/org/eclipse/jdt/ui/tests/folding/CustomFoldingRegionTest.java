@@ -364,11 +364,6 @@ public class CustomFoldingRegionTest {
 	}
 
 
-	private String getLineDebugInfo(String input, int lineIndex, int lineBegin, int lineEnd) {
-		return lineIndex + " (index=(" + lineBegin + "," + lineEnd + "), text=\"" + input.substring(lineBegin + 1, lineEnd) + "\")";
-	}
-
-
 	private int getLengthIfNotFound(String input, int startLineEnd) {
 		if (startLineEnd == -1) {
 			startLineEnd= input.length();
