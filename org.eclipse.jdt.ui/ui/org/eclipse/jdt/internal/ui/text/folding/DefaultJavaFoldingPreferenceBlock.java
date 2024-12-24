@@ -15,10 +15,10 @@ package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -26,7 +26,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -59,6 +61,12 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 			fOverlayStore.setValue(fCheckBoxes.get(button), button.getSelection());
 		}
 	};
+	private Map<Text, String> fStringInputs= new HashMap<>();
+	private ModifyListener fModifyListener = e -> {
+		Text text = (Text)e.widget;
+		fOverlayStore.setValue(fStringInputs.get(text), text.getText());
+	};
+
 
 
 	public DefaultJavaFoldingPreferenceBlock() {
@@ -75,6 +83,9 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_METHODS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_IMPORTS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_HEADERS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END));
 
 		return overlayKeys.toArray(new OverlayKey[overlayKeys.size()]);
 	}
@@ -87,22 +98,43 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		fOverlayStore.load();
 		fOverlayStore.start();
 
-		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout(1, true);
 		layout.verticalSpacing= 3;
 		layout.marginWidth= 0;
-		inner.setLayout(layout);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
-		Label label= new Label(inner, SWT.LEFT);
-		label.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_title);
+		Composite outer= new Composite(composite, SWT.NONE);
+		outer.setLayout(layout);
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_comments, PreferenceConstants.EDITOR_FOLDING_JAVADOC, 0);
-		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_headers, PreferenceConstants.EDITOR_FOLDING_HEADERS, 0);
-		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_innerTypes, PreferenceConstants.EDITOR_FOLDING_INNERTYPES, 0);
-		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_methods, PreferenceConstants.EDITOR_FOLDING_METHODS, 0);
-		addCheckBox(inner, FoldingMessages.DefaultJavaFoldingPreferenceBlock_imports, PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0);
+		Group initialFoldingGroup= new Group(outer, SWT.NONE);
+		initialFoldingGroup.setLayout(layout);
+		initialFoldingGroup.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_title);
+		initialFoldingGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		return inner;
+		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_comments, PreferenceConstants.EDITOR_FOLDING_JAVADOC, 0);
+		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_headers, PreferenceConstants.EDITOR_FOLDING_HEADERS, 0);
+		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_innerTypes, PreferenceConstants.EDITOR_FOLDING_INNERTYPES, 0);
+		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_methods, PreferenceConstants.EDITOR_FOLDING_METHODS, 0);
+		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_imports, PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0);
+		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegions, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS, 0);
+
+		Group customRegionGroup= new Group(outer, SWT.NONE);
+		customRegionGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		GridLayout customRegionLayout= new GridLayout(2, false);
+		customRegionGroup.setLayout(customRegionLayout);
+		customRegionGroup.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_custom_region_title);
+		addStringInput(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_CustomRegionStart, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
+		addStringInput(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_CustomRegionEnd, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
+
+		Label customRegionInfo = new Label(customRegionGroup, SWT.NONE);
+		customRegionInfo.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_CustomRegionInfo);
+		GridData customRegionInfoGridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		customRegionInfoGridData.horizontalSpan=2;
+		customRegionInfo.setLayoutData(customRegionInfoGridData);
+
+		return outer;
 	}
 
 	private Button addCheckBox(Composite parent, String label, String key, int indentation) {
@@ -121,13 +153,29 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		return checkBox;
 	}
 
+	private void addStringInput(Composite parent, String label, String key) {
+		Label labelElement = new Label(parent, SWT.LEFT);
+		labelElement.setText(label);
+		GridData labelGridData= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		labelGridData.horizontalSpan= 1;
+		labelGridData.grabExcessVerticalSpace= false;
+		labelElement.setLayoutData(labelGridData);
+
+		Text textInput = new Text(parent, SWT.SINGLE | SWT.BORDER);
+		textInput.setText(label);
+		textInput.addModifyListener(fModifyListener);
+
+		GridData textGridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		textGridData.horizontalSpan= 1;
+		textGridData.grabExcessVerticalSpace= true;
+		textInput.setLayoutData(textGridData);
+
+		fStringInputs.put(textInput, key);
+	}
+
 	private void initializeFields() {
-		Iterator<Button> it= fCheckBoxes.keySet().iterator();
-		while (it.hasNext()) {
-			Button b= it.next();
-			String key= fCheckBoxes.get(b);
-			b.setSelection(fOverlayStore.getBoolean(key));
-		}
+		fCheckBoxes.forEach((b, key) -> b.setSelection(fOverlayStore.getBoolean(key)));
+		fStringInputs.forEach((text, key) -> text.setText(fOverlayStore.getString(key)));
 	}
 
 	/*
