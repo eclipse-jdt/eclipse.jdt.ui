@@ -61,9 +61,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
 
-import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 /**
@@ -1071,31 +1069,6 @@ public final class JavaModelUtil {
 
 	public static boolean isLatestOrHigherJavaVersion(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.latestSupportedJavaVersion());
-	}
-
-	/**
-	 * Checks if the JRE of the given project or workspace default JRE have source compliance 1.5 or
-	 * greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace JRE
-	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have
-	 *         source compliance 1.5 or greater.
-	 * @throws CoreException if unable to determine the project's VM install
-	 */
-	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
-		IVMInstall vmInstall;
-		if (project == null) {
-			vmInstall= JavaRuntime.getDefaultVMInstall();
-		} else {
-			vmInstall= JavaRuntime.getVMInstall(project);
-		}
-		if (!(vmInstall instanceof IVMInstall2))
-			return true; // assume 1.5.
-
-		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
-		if (compliance == null)
-			return true; // assume 1.5
-		return is50OrHigher(compliance);
 	}
 
 	public static String getCompilerCompliance(IVMInstall2 vMInstall, String defaultCompliance) {
