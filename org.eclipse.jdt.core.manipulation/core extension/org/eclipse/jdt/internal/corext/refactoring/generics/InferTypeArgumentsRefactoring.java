@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -273,20 +273,13 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		return result;
 	}
 
-	private RefactoringStatus check15() throws CoreException {
+	private RefactoringStatus check15() {
 		RefactoringStatus result= new RefactoringStatus();
 		HashSet<IJavaProject> checkedProjects= new HashSet<>();
 
 		for (IJavaElement element : fElements) {
 			IJavaProject javaProject= element.getJavaProject();
 			if (! checkedProjects.contains(javaProject)) {
-				if (! JavaModelUtil.is50OrHigher(javaProject)) {
-					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50, BasicElementLabels.getJavaElementName(javaProject.getElementName()));
-					result.addFatalError(message);
-				} else if (! JavaModelUtil.is50OrHigherJRE(javaProject)) {
-					String message= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_not50Library, BasicElementLabels.getJavaElementName(javaProject.getElementName()));
-					result.addFatalError(message);
-				}
 				checkedProjects.add(javaProject);
 			}
 		}
