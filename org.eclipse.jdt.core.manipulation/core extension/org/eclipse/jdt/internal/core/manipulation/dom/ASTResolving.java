@@ -1127,15 +1127,7 @@ public class ASTResolving {
 		return (CompilationUnit) astParser.createAST(monitor);
 	}
 
-	public static int getPossibleTypeKinds(ASTNode node, boolean is50OrHigher) {
-		int kinds= internalGetPossibleTypeKinds(node);
-		if (!is50OrHigher) {
-			kinds &= (TypeKinds.INTERFACES | TypeKinds.CLASSES);
-		}
-		return kinds;
-	}
-
-	private static int internalGetPossibleTypeKinds(ASTNode node) {
+	public static int getPossibleTypeKinds(ASTNode node) {
 		int kind= TypeKinds.ALL_TYPES;
 
 		int mask= TypeKinds.ALL_TYPES | TypeKinds.VOIDTYPE;

@@ -706,12 +706,6 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		return false;
 	}
 
-	private int evauateTypeKind(ASTNode node, IJavaProject project) {
-		int kind= ASTResolving.getPossibleTypeKinds(node, JavaModelUtil.is50OrHigher(project));
-		return kind;
-	}
-
-
 	public void collectTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -725,7 +719,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		}
 
 		IJavaProject javaProject= cu.getJavaProject();
-		int kind= evauateTypeKind(selectedNode, javaProject);
+		int kind= ASTResolving.getPossibleTypeKinds(selectedNode);
 
 		if (kind == TypeKinds.REF_TYPES) {
 			SimpleName s= addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
@@ -830,7 +824,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		}
 
 		if (selectedNode != node) {
-			kind= evauateTypeKind(node, javaProject);
+			kind= ASTResolving.getPossibleTypeKinds(node);
 		}
 		if ((kind & (TypeKinds.CLASSES | TypeKinds.INTERFACES)) != 0) {
 			kind &= ~TypeKinds.ANNOTATIONS; // only propose annotations when there are no other suggestions
