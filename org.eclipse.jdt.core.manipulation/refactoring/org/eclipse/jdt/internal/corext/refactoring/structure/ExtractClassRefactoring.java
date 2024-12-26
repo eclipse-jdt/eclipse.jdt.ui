@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -618,12 +618,11 @@ public class ExtractClassRefactoring extends Refactoring {
 
 	private Expression getAssignedValue(ParameterObjectFactory pof, String parameterName, IJavaProject javaProject, RefactoringStatus status, ASTRewrite rewrite, ParameterInfo pi, boolean useSuper, ITypeBinding typeBinding, Expression qualifier, ASTNode replaceNode, ITypeRoot typeRoot) {
 		AST ast= rewrite.getAST();
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(javaProject);
 		Expression assignedValue= handleSimpleNameAssignment(replaceNode, pof, parameterName, ast, javaProject, useSuper);
 		if (assignedValue == null) {
 			NullLiteral marker= qualifier == null ? null : ast.newNullLiteral();
 			Expression fieldReadAccess= pof.createFieldReadAccess(pi, parameterName, ast, javaProject, useSuper, marker);
-			assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding, is50OrHigher);
+			assignedValue= GetterSetterUtil.getAssignedValue(replaceNode, rewrite, fieldReadAccess, typeBinding);
 			boolean markerReplaced= replaceMarker(rewrite, qualifier, assignedValue, marker);
 			if (markerReplaced && qualifier != null) {
 				switch (qualifier.getNodeType()) {
