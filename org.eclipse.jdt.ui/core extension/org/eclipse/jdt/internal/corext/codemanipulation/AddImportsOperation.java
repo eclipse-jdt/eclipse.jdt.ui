@@ -272,7 +272,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						return null;
 					}
 					return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
-				} else if (JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject()) && (binding instanceof IVariableBinding || binding instanceof IMethodBinding)) {
+				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
 					boolean isField= binding instanceof IVariableBinding;
 					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();
 					if (declaringClass == null) {
@@ -447,11 +447,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * Finds a type by the simple name.
 	 */
 	private TypeNameMatch[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) throws JavaModelException {
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject());
-
 		int typeKinds= TypeKinds.ALL_TYPES;
 		if (nameNode != null) {
-			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
+			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode);
 		}
 
 		ArrayList<TypeNameMatch> typeInfos= new ArrayList<>();
@@ -463,7 +461,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
 			TypeNameMatch curr= typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
-				if (isOfKind(curr, typeKinds, is50OrHigher) && isVisible(curr)) {
+				if (isOfKind(curr, typeKinds) && isVisible(curr)) {
 					typeRefsFound.add(curr);
 				}
 			}
@@ -471,13 +469,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return typeRefsFound.toArray(new TypeNameMatch[typeRefsFound.size()]);
 	}
 
-	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
+	private boolean isOfKind(TypeNameMatch curr, int typeKinds) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
-			return is50OrHigher && (typeKinds & TypeKinds.ANNOTATIONS) != 0;
+			return (typeKinds & TypeKinds.ANNOTATIONS) != 0;
 		}
 		if (Flags.isEnum(flags)) {
-			return is50OrHigher && (typeKinds & TypeKinds.ENUMS) != 0;
+			return (typeKinds & TypeKinds.ENUMS) != 0;
 		}
 		if (Flags.isInterface(flags)) {
 			return (typeKinds & TypeKinds.INTERFACES) != 0;
