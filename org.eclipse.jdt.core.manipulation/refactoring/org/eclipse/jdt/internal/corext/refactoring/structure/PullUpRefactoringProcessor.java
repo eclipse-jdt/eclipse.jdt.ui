@@ -1190,7 +1190,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (result.hasFatalError())
 				return result;
 			fCompilationUnitRewrites= new HashMap<>(3);
-			result.merge(checkProjectCompliance(getCompilationUnitRewrite(fCompilationUnitRewrites, getDeclaringType().getCompilationUnit()), getDestinationType(), fMembersToMove));
+			result.merge(checkProjectCompliance());
 			fChangeManager= createChangeManager(subMonitor.newChild(1), result);
 
 			Checks.addModifiedFilesToChecker(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), context);
