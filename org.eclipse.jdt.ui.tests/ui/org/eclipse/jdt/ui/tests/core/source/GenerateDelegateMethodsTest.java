@@ -110,42 +110,45 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test01() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	\r\n" +
-				"	public void foo_b() {}\r\n" +
-				"	public void bar_b() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				\r
+				public void foo_b() {}\r
+				public void bar_b() {}\r
+			\r
+			}\r
+			""", true, null);
 
 		IMethod foo_b= b.getType("B").getMethod("foo_b", new String[0]);
 		IMethod bar_b= b.getType("B").getMethod("bar_b", new String[0]);
 
-		ICompilationUnit c= fPackageP.createCompilationUnit("C.java", "package p;\r\n" +
-				"\r\n" +
-				"public class C {\r\n" +
-				"	\r\n" +
-				"	public void foo_c() {}\r\n" +
-				"	public void bar_c() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit c= fPackageP.createCompilationUnit("C.java", """
+			package p;\r
+			\r
+			public class C {\r
+				\r
+				public void foo_c() {}\r
+				public void bar_c() {}\r
+			\r
+			}\r
+			""", true, null);
 
 		IMethod foo_c= c.getType("C").getMethod("foo_c", new String[0]);
 		IMethod bar_c= c.getType("C").getMethod("bar_c", new String[0]);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"\r\n" +
-				"	B b1;\r\n" +
-				"	B b2;\r\n" +
-				"	C c1;\r\n" +
-				"	C c2;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				B b1;\r
+				B b2;\r
+				C c1;\r
+				C c2;\r
+			}\r
+			""", true, null);
 
 		IField b1= a.getType("A").getField("b1");
 		IField b2= a.getType("A").getField("b2");
@@ -198,46 +201,49 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test02() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	\r\n" +
-				"	public void foo_b() {}\r\n" +
-				"	public void bar_b() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				\r
+				public void foo_b() {}\r
+				public void bar_b() {}\r
+			\r
+			}\r
+			""", true, null);
 
 		IMethod foo_b= b.getType("B").getMethod("foo_b", new String[0]);
 		IMethod bar_b= b.getType("B").getMethod("bar_b", new String[0]);
 
-		ICompilationUnit c= fPackageP.createCompilationUnit("C.java", "package p;\r\n" +
-				"\r\n" +
-				"public class C {\r\n" +
-				"	\r\n" +
-				"	public void foo_c() {}\r\n" +
-				"	public void bar_c() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit c= fPackageP.createCompilationUnit("C.java", """
+			package p;\r
+			\r
+			public class C {\r
+				\r
+				public void foo_c() {}\r
+				public void bar_c() {}\r
+			\r
+			}\r
+			""", true, null);
 
 		IMethod foo_c= c.getType("C").getMethod("foo_c", new String[0]);
 		IMethod bar_c= c.getType("C").getMethod("bar_c", new String[0]);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"\r\n" +
-				"	B b1;\r\n" +
-				"	B b2;\r\n" +
-				"	C c1;\r\n" +
-				"	C c2;\r\n" +
-				"	\r\n" +
-				"	public void foo2() {}\r\n" +
-				"	\r\n" +
-				"	public void foo3() {}\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				B b1;\r
+				B b2;\r
+				C c1;\r
+				C c2;\r
+				\r
+				public void foo2() {}\r
+				\r
+				public void foo3() {}\r
+			}\r
+			""", true, null);
 
 		IField b1= a.getType("A").getField("b1");
 		IField b2= a.getType("A").getField("b2");
@@ -248,48 +254,49 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), new IField[] { b1, b2, c1, c2 }, new IMethod[] { foo_b, bar_b, foo_c, bar_c } , insertBefore, true);
 
-		String expected= "package p;\r\n" +
-		"\r\n" +
-		"public class A {\r\n" +
-		"\r\n" +
-		"	B b1;\r\n" +
-		"	B b2;\r\n" +
-		"	C c1;\r\n" +
-		"	C c2;\r\n" +
-		"	\r\n" +
-		"	public void foo2() {}\r\n" +
-		"	\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.B#foo_b()\r\n" +
-		"	 */\r\n" +
-		"	public void foo_b() {\r\n" +
-		"		b1.foo_b();\r\n" +
-		"	}\r\n" +
-		"\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.B#bar_b()\r\n" +
-		"	 */\r\n" +
-		"	public void bar_b() {\r\n" +
-		"		b2.bar_b();\r\n" +
-		"	}\r\n" +
-		"\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.C#foo_c()\r\n" +
-		"	 */\r\n" +
-		"	public void foo_c() {\r\n" +
-		"		c1.foo_c();\r\n" +
-		"	}\r\n" +
-		"\r\n" +
-		"	/* (non-Javadoc)\r\n" +
-		"	 * @see p.C#bar_c()\r\n" +
-		"	 */\r\n" +
-		"	public void bar_c() {\r\n" +
-		"		c2.bar_c();\r\n" +
-		"	}\r\n" +
-		"\r\n" +
-		"	public void foo3() {}\r\n" +
-		"}\r\n" +
-		"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				B b1;\r
+				B b2;\r
+				C c1;\r
+				C c2;\r
+				\r
+				public void foo2() {}\r
+				\r
+				/* (non-Javadoc)\r
+				 * @see p.B#foo_b()\r
+				 */\r
+				public void foo_b() {\r
+					b1.foo_b();\r
+				}\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#bar_b()\r
+				 */\r
+				public void bar_b() {\r
+					b2.bar_b();\r
+				}\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.C#foo_c()\r
+				 */\r
+				public void foo_c() {\r
+					c1.foo_c();\r
+				}\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.C#bar_c()\r
+				 */\r
+				public void bar_c() {\r
+					c2.bar_c();\r
+				}\r
+			\r
+				public void foo3() {}\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -301,55 +308,59 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	public void test03() throws Exception {
 
 		IPackageFragment packageSomeOtherPackage= fRoot.createPackageFragment("someOtherPackage", true, null);
-		packageSomeOtherPackage.createCompilationUnit("OtherClass.java", "package someOtherPackage;\r\n" +
-				"\r\n" +
-				"public class OtherClass {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		packageSomeOtherPackage.createCompilationUnit("OtherClass.java", """
+			package someOtherPackage;\r
+			\r
+			public class OtherClass {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"import someOtherPackage.OtherClass;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	\r\n" +
-				"	public OtherClass returnOtherClass() {\r\n" +
-				"		return null;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			import someOtherPackage.OtherClass;\r
+			\r
+			public class B {\r
+				\r
+				public OtherClass returnOtherClass() {\r
+					return null;\r
+				}\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B b;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				B b;\r
+			}\r
+			""", true, null);
 
 		IField field1= a.getType("A").getField("b");
 		IMethod method1= b.getType("B").getMethod("returnOtherClass", new String[0]);
 
 		runOperation(a.getType("A"), new IField[] { field1 }, new IMethod[] { method1 });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"import someOtherPackage.OtherClass;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B b;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.B#returnOtherClass()\r\n" +
-				"	 */\r\n" +
-				"	public OtherClass returnOtherClass() {\r\n" +
-				"		return b.returnOtherClass();\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			import someOtherPackage.OtherClass;\r
+			\r
+			public class A {\r
+				\r
+				B b;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#returnOtherClass()\r
+				 */\r
+				public OtherClass returnOtherClass() {\r
+					return b.returnOtherClass();\r
+				}\r
+			}\r
+			""", a.getSource());
 	}
 
 	/**
@@ -358,19 +369,20 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test04() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B<E> {\r\n" +
-				"	\r\n" +
-				"	public E get() {\r\n" +
-				"		return null;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	public void set(E e) {\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B<E> {\r
+				\r
+				public E get() {\r
+					return null;\r
+				}\r
+			\r
+				public void set(E e) {\r
+				}\r
+			\r
+			}\r
+			""", true, null);
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
 			package p;\r
@@ -417,44 +429,47 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test05() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	\r\n" +
-				"	public <E> E getSome(E e) {\r\n" +
-				"		return e;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				\r
+				public <E> E getSome(E e) {\r
+					return e;\r
+				}\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B someField;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				B someField;\r
+			}\r
+			""", true, null);
 
 		IField field= a.getType("A").getField("someField");
 		IMethod sMethod= b.getType("B").getMethod("getSome", new String[] { "QE;" });
 
 		runOperation(a.getType("A"), new IField[] { field } , new IMethod[] { sMethod });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B someField;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.B#getSome(java.lang.Object)\r\n" +
-				"	 */\r\n" +
-				"	public <E> E getSome(E e) {\r\n" +
-				"		return someField.getSome(e);\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				B someField;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.B#getSome(java.lang.Object)\r
+				 */\r
+				public <E> E getSome(E e) {\r
+					return someField.getSome(e);\r
+				}\r
+			}\r
+			""", a.getSource());
 	}
 
 	/**
@@ -464,25 +479,27 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test06() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	\r\n" +
-				"	static enum SomeEnum { X, Y };\r\n" +
-				"	\r\n" +
-				"	public SomeEnum getIt() {\r\n" +
-				"		return SomeEnum.X;\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				\r
+				static enum SomeEnum { X, Y };\r
+				\r
+				public SomeEnum getIt() {\r
+					return SomeEnum.X;\r
+				}\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	B someField;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				B someField;\r
+			}\r
+			""", true, null);
 
 		IField field= a.getType("A").getField("someField");
 		IMethod sMethod= b.getType("B").getMethod("getIt", new String[0]);
@@ -533,26 +550,27 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(a.getType("A").getType("C"), new IField[] { fieldSome }, new IMethod[] { method });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"\r\n" +
-				"	class C {\r\n" +
-				"		\r\n" +
-				"		A some;\r\n" +
-				"\r\n" +
-				"		/* (non-Javadoc)\r\n" +
-				"		 * @see p.A#foo()\r\n" +
-				"		 */\r\n" +
-				"		public void foo() {\r\n" +
-				"			some.foo();\r\n" +
-				"		}\r\n" +
-				"	}\r\n" +
-				"	\r\n" +
-				"	public void foo() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				class C {\r
+					\r
+					A some;\r
+			\r
+					/* (non-Javadoc)\r
+					 * @see p.A#foo()\r
+					 */\r
+					public void foo() {\r
+						some.foo();\r
+					}\r
+				}\r
+				\r
+				public void foo() {}\r
+			\r
+			}\r
+			""", a.getSource());
 	}
 
 	/**
@@ -605,14 +623,15 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test09() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	\r\n" +
-				"	public void foo() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				\r
+				public void foo() {}\r
+			\r
+			}\r
+			""", true, null);
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
 			package p;\r
@@ -652,16 +671,17 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test10() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public void foo() {}\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"class SecondaryClass {\r\n" +
-				"	A someField;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				public void foo() {}\r
+			}\r
+			\r
+			class SecondaryClass {\r
+				A someField;\r
+			}\r
+			""", true, null);
 
 		IType secondaryType= (IType)a.getElementAt(70);
 		IField someField= secondaryType.getField("someField");
@@ -669,23 +689,24 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(secondaryType, new IField[] { someField }, new IMethod[] { theMethod });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public void foo() {}\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"class SecondaryClass {\r\n" +
-				"	A someField;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.A#foo()\r\n" +
-				"	 */\r\n" +
-				"	public void foo() {\r\n" +
-				"		someField.foo();\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A {\r
+				public void foo() {}\r
+			}\r
+			\r
+			class SecondaryClass {\r
+				A someField;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.A#foo()\r
+				 */\r
+				public void foo() {\r
+					someField.foo();\r
+				}\r
+			}\r
+			""", a.getSource());
 	}
 
 	/**
@@ -694,19 +715,20 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 	@Test
 	public void test11() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public void foo() {\r\n" +
-				"	}\r\n" +
-				"	public final void bar() {\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"class SecondardClass {\r\n" +
-				"	A someField;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				public void foo() {\r
+				}\r
+				public final void bar() {\r
+				}\r
+			}\r
+			\r
+			class SecondardClass {\r
+				A someField;\r
+			}\r
+			""", true, null);
 
 		IType secondaryType= (IType)a.getElementAt(110);
 		IField someField= secondaryType.getField("someField");
@@ -715,33 +737,34 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 
 		runOperation(secondaryType, new IField[] { someField, someField }, new IMethod[] { firstMethod, secondMethod });
 
-		compareSource("package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public void foo() {\r\n" +
-				"	}\r\n" +
-				"	public final void bar() {\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"class SecondardClass {\r\n" +
-				"	A someField;\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.A#foo()\r\n" +
-				"	 */\r\n" +
-				"	public void foo() {\r\n" +
-				"		someField.foo();\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	/* (non-Javadoc)\r\n" +
-				"	 * @see p.A#bar()\r\n" +
-				"	 */\r\n" +
-				"	public final void bar() {\r\n" +
-				"		someField.bar();\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", a.getSource());
+		compareSource("""
+			package p;\r
+			\r
+			public class A {\r
+				public void foo() {\r
+				}\r
+				public final void bar() {\r
+				}\r
+			}\r
+			\r
+			class SecondardClass {\r
+				A someField;\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.A#foo()\r
+				 */\r
+				public void foo() {\r
+					someField.foo();\r
+				}\r
+			\r
+				/* (non-Javadoc)\r
+				 * @see p.A#bar()\r
+				 */\r
+				public final void bar() {\r
+					someField.bar();\r
+				}\r
+			}\r
+			""", a.getSource());
 	}
 
 	/**

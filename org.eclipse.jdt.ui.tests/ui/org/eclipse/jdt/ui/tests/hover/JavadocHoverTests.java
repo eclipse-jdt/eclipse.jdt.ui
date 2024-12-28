@@ -124,17 +124,18 @@ public class JavadocHoverTests extends CoreTests {
 
 	@Test
 	public void testEnumWithAnonymousClass() throws Exception {
-		String myEnumSource = "package test;\n"
-				+ "public enum MyEnum {\n"
-				+ "	ENUM1 {\n"
-				+ "		@Override\n"
-				+ "		public String get() {\n"
-				+ "			return \"ENUM1\";\n"
-				+ "		}\n"
-				+ "	};\n"
-				+ "	public abstract String get();\n"
-				+ "}\n"
-				+ "";
+		String myEnumSource = """
+			package test;
+			public enum MyEnum {
+				ENUM1 {
+					@Override
+					public String get() {
+						return "ENUM1";
+					}
+				};
+				public abstract String get();
+			}
+			""";
 		ICompilationUnit myEnumCu= getWorkingCopy("/TestSetupProject/src/test/MyEnum.java", myEnumSource, null);
 		assertNotNull("MyEnum.java", myEnumCu);
 

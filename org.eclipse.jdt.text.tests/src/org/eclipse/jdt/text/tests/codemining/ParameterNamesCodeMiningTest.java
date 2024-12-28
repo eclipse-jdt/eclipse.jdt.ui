@@ -310,20 +310,21 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testBug547232() throws Exception {
-		String contents= "public class Test {\n" +
-				"    public final Object object;\n" +
-				"    public final String string;\n" +
-				"\n" +
-				"    Test(Object object, String string) {\n" +
-				"        this.object = object;\n" +
-				"        this.string = string;\n" +
-				"    }\n" +
-				"\n" +
-				"    void f() {\n" +
-				"        new Test(null, \"test\");\n" +
-				"    }\n" +
-				"}\n" +
-				"";
+		String contents= """
+			public class Test {
+			    public final Object object;
+			    public final String string;
+			
+			    Test(Object object, String string) {
+			        this.object = object;
+			        this.string = string;
+			    }
+			
+			    void f() {
+			        new Test(null, "test");
+			    }
+			}
+			""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Test.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -335,22 +336,23 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testBug549023() throws Exception {
-		String contents= "class Base {\n" +
-				"    public final Object object;\n" +
-				"    public final String string;\n" +
-				"\n" +
-				"    Base(Object object, String string) {\n" +
-				"        this.object = object;\n" +
-				"        this.string = string;\n" +
-				"    }\n" +
-				"}\n" +
-				"\n" +
-				"public class Test extends Base {\n" +
-				"    Test() {\n" +
-				"        super(null, \"\");\n" +
-				"    }\n" +
-				"}\n" +
-				"";
+		String contents= """
+			class Base {
+			    public final Object object;
+			    public final String string;
+			
+			    Base(Object object, String string) {
+			        this.object = object;
+			        this.string = string;
+			    }
+			}
+			
+			public class Test extends Base {
+			    Test() {
+			        super(null, "");
+			    }
+			}
+			""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Test.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -362,18 +364,19 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testBug549126() throws Exception {
-		String contents= "public enum TestEnum {\n" +
-				"    A(\"bla\", null);\n" +
-				"\n" +
-				"    public final String string;\n" +
-				"    public final Object object;\n" +
-				"\n" +
-				"    TestEnum(String string, Object object) {\n" +
-				"        this.string = string;\n" +
-				"        this.object = object;\n" +
-				"    }\n" +
-				"}\n" +
-				"";
+		String contents= """
+			public enum TestEnum {
+			    A("bla", null);
+			
+			    public final String string;
+			    public final Object object;
+			
+			    TestEnum(String string, Object object) {
+			        this.string = string;
+			        this.object = object;
+			    }
+			}
+			""";
 		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("TestEnum.java", contents, true, new NullProgressMonitor());
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
 		fParameterNameCodeMiningProvider.setContext(editor);
@@ -416,15 +419,16 @@ public class ParameterNamesCodeMiningTest {
 
 	@Test
 	public void testRecordConstructorOK() throws Exception {
-		String contents= "import java.util.Map;\n"
-				+ "public record Edge(int fromNodeId,\n"
-				+ "        int toNodeId,\n"
-				+ "        Map.Entry<Integer, Integer> fromPoint,\n"
-				+ "        Map.Entry<Integer, Integer> toPoint,\n"
-				+ "        double length,\n"
-				+ "        String profile) {\n"
-				+ "}\n"
-				+ "";
+		String contents= """
+			import java.util.Map;
+			public record Edge(int fromNodeId,
+			        int toNodeId,
+			        Map.Entry<Integer, Integer> fromPoint,
+			        Map.Entry<Integer, Integer> toPoint,
+			        double length,
+			        String profile) {
+			}
+			""";
 		fPackage.createCompilationUnit("Edge.java", contents, true, new NullProgressMonitor());
 
 		contents = """

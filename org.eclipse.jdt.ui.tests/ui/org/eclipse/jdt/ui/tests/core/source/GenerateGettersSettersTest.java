@@ -703,13 +703,14 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 	@Test
 	public void test10() throws Exception {
 
-		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"	private float c, d, e = 0;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit b= fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+				private float c, d, e = 0;\r
+			}\r
+			""", true, null);
 
 		IType classB= b.getType("B");
 		IField field1= classB.getField("d");

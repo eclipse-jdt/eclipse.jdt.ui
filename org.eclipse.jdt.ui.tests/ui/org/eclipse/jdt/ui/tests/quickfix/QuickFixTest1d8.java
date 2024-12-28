@@ -1794,17 +1794,18 @@ public class QuickFixTest1d8 extends QuickFixTest {
 
 		JavaProjectHelper.addLibrary(fJProject1, new Path(Java1d8ProjectTestSetup.getJdtAnnotations20Path()));
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("@NonNullByDefault\n");
-		buf.append("public class E {\n");
-		buf.append("    @NonNull Object f=new Object();\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package test1;
+			import org.eclipse.jdt.annotation.*;
+			@NonNullByDefault
+			public class E {
+			    @NonNull Object f=new Object();
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		int offset= buf.indexOf("Object f");
+		int offset= str1.indexOf("Object f");
 		AssistContext context= new AssistContext(cu, offset, 0);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, context);
 		assertNumberOfProposals(proposals, 3);

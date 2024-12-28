@@ -65,24 +65,25 @@ public class MethodOverrideTest1d8 extends MethodOverrideTest {
 	@Test
 	public void overrideLambda1() throws Exception {
 		IPackageFragment pack1= fSrc.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("public interface MyFunction<T, R> {\n");
-		buf.append("    R apply(T t);\n");
-		buf.append("    default <V> MyFunction<V, R> compose(MyFunction<? super V, ? extends T> before) {\n");
-		buf.append("        return (V v) -> apply(before.apply(v));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("MyFunction.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			public interface MyFunction<T, R> {
+			    R apply(T t);
+			    default <V> MyFunction<V, R> compose(MyFunction<? super V, ? extends T> before) {
+			        return (V v) -> apply(before.apply(v));
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("MyFunction.java", str, false, null);
 
 		CompilationUnit root= assertNoCompilationError(cu);
 		IType focusType= cu.getTypes()[0];
 
-		int vStart= buf.indexOf("v))");
+		int vStart= str.indexOf("v))");
 		ILocalVariable v= (ILocalVariable) cu.codeSelect(vStart, 1)[0];
 		IType overridingType= v.getDeclaringMember().getDeclaringType();
 
-		LambdaExpression lambda= (LambdaExpression) NodeFinder.perform(root, buf.indexOf("->"), 2);
+		LambdaExpression lambda= (LambdaExpression) NodeFinder.perform(root, str.indexOf("->"), 2);
 		ITypeBinding overridingTypeBinding= lambda.resolveTypeBinding();
 
 		IType overriddenType= focusType;

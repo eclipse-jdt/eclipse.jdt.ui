@@ -3660,68 +3660,66 @@ public class ImportOrganizeTest extends CoreTests {
 
 	@Test
 	public void testPreserveUnresolvableTypeSingleImports() throws Exception {
-		StringBuilder classContents= new StringBuilder();
-		classContents.append("NotFound1 nf1;");
-		classContents.append("Inner1 i1;");
-
-		StringBuilder resultantImports= new StringBuilder();
-		resultantImports.append("import com.notfound.NotFound1;\n");
-		resultantImports.append("import com.notfound.OuterClass.Inner1;\n");
-
-		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+		String str= """
+			NotFound1 nf1;\
+			Inner1 i1;""";
+		String str1= """
+			import com.notfound.NotFound1;
+			import com.notfound.OuterClass.Inner1;
+			""";
+		expectUnresolvableImportsArePreserved(str, str1);
 	}
 
 	@Test
 	public void testPreserveUnresolvableTypeOnDemandImports() throws Exception {
-		StringBuilder classContents= new StringBuilder();
-		classContents.append("NotFound3 nf3;");
-
-		StringBuilder resultantImports= new StringBuilder();
-		resultantImports.append("import com.notfound.*;\n");
-		resultantImports.append("import com.notfound.OuterClass.*;\n");
-
-		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+		String str= """
+			NotFound3 nf3;""";
+		String str1= """
+			import com.notfound.*;
+			import com.notfound.OuterClass.*;
+			""";
+		expectUnresolvableImportsArePreserved(str, str1);
 	}
 
 	@Test
 	public void testPreserveUnresolvableStaticSingleImports() throws Exception {
-		StringBuilder classContents= new StringBuilder();
-		classContents.append("{\n");
-		classContents.append("    int a= FIELD1;\n");
-		classContents.append("    method1();\n");
-		classContents.append("}\n");
-
-		StringBuilder resultantImports= new StringBuilder();
-		resultantImports.append("import static com.notfound.Type.FIELD1;\n");
-		resultantImports.append("import static com.notfound.Type.method1;\n");
-
-		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+		String str= """
+			{
+			    int a= FIELD1;
+			    method1();
+			}
+			""";
+		String str1= """
+			import static com.notfound.Type.FIELD1;
+			import static com.notfound.Type.method1;
+			""";
+		expectUnresolvableImportsArePreserved(str, str1);
 	}
 
 	@Test
 	public void testPreserveUnresolvableStaticOnDemandImportDueToFieldReference() throws Exception {
-		StringBuilder classContents= new StringBuilder();
-		classContents.append("{\n");
-		classContents.append("    int a= FIELD3;\n");
-		classContents.append("}\n");
-
-		StringBuilder resultantImports= new StringBuilder();
-		resultantImports.append("import static com.notfound.Type.*;\n");
-
-		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+		String str= """
+			{
+			    int a= FIELD3;
+			}
+			""";
+		String str1= """
+			import static com.notfound.Type.*;
+			""";
+		expectUnresolvableImportsArePreserved(str, str1);
 	}
 
 	@Test
 	public void testPreserveUnresolvableStaticOnDemandImportDueToMethodReference() throws Exception {
-		StringBuilder classContents= new StringBuilder();
-		classContents.append("{\n");
-		classContents.append("    method3();\n");
-		classContents.append("}\n");
-
-		StringBuilder resultantImports= new StringBuilder();
-		resultantImports.append("import static com.notfound.Type.*;\n");
-
-		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+		String str= """
+			{
+			    method3();
+			}
+			""";
+		String str1= """
+			import static com.notfound.Type.*;
+			""";
+		expectUnresolvableImportsArePreserved(str, str1);
 	}
 
 	@Test

@@ -119,64 +119,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "anEnum" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	java.lang.annotation.ElementType anEnum;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" +
-				"		result = prime * result + aByte;\r\n" +
-				"		result = prime * result + aChar;\r\n" +
-				"		result = prime * result + anInt;\r\n" +
-				"		long temp;\r\n" +
-				"		temp = Double.doubleToLongBits(aDouble);\r\n" +
-				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-				"		result = prime * result + Float.floatToIntBits(aFloat);\r\n" +
-				"		result = prime * result + (int) (aLong ^ (aLong >>> 32));\r\n" +
-				"		result = prime * result + ((anEnum == null) ? 0 : anEnum.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (aBool != other.aBool)\r\n" +
-				"			return false;\r\n" +
-				"		if (aByte != other.aByte)\r\n" +
-				"			return false;\r\n" +
-				"		if (aChar != other.aChar)\r\n" +
-				"			return false;\r\n" +
-				"		if (anInt != other.anInt)\r\n" +
-				"			return false;\r\n" +
-				"		if (Double.doubleToLongBits(aDouble) != Double.doubleToLongBits(other.aDouble))\r\n" +
-				"			return false;\r\n" +
-				"		if (Float.floatToIntBits(aFloat) != Float.floatToIntBits(other.aFloat))\r\n" +
-				"			return false;\r\n" +
-				"		if (aLong != other.aLong)\r\n" +
-				"			return false;\r\n" +
-				"		if (anEnum != other.anEnum)\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				java.lang.annotation.ElementType anEnum;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + (aBool ? 1231 : 1237);\r
+					result = prime * result + aByte;\r
+					result = prime * result + aChar;\r
+					result = prime * result + anInt;\r
+					long temp;\r
+					temp = Double.doubleToLongBits(aDouble);\r
+					result = prime * result + (int) (temp ^ (temp >>> 32));\r
+					result = prime * result + Float.floatToIntBits(aFloat);\r
+					result = prime * result + (int) (aLong ^ (aLong >>> 32));\r
+					result = prime * result + ((anEnum == null) ? 0 : anEnum.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (aBool != other.aBool)\r
+						return false;\r
+					if (aByte != other.aByte)\r
+						return false;\r
+					if (aChar != other.aChar)\r
+						return false;\r
+					if (anInt != other.anInt)\r
+						return false;\r
+					if (Double.doubleToLongBits(aDouble) != Double.doubleToLongBits(other.aDouble))\r
+						return false;\r
+					if (Float.floatToIntBits(aFloat) != Float.floatToIntBits(other.aFloat))\r
+						return false;\r
+					if (aLong != other.aLong)\r
+						return false;\r
+					if (anEnum != other.anEnum)\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -187,55 +188,58 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test02() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A extends B {\r
+				\r
+				boolean aBool;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (aBool != other.aBool)\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A extends B {\r
+				\r
+				boolean aBool;\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + (aBool ? 1231 : 1237);\r
+					return result;\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (aBool != other.aBool)\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -246,64 +250,67 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test03() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A anA;\r
+				B aB;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" +
-				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (anA == null) {\r\n" +
-				"			if (other.anA != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!anA.equals(other.anA))\r\n" +
-				"			return false;\r\n" +
-				"		if (aB == null) {\r\n" +
-				"			if (other.aB != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!aB.equals(other.aB))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A anA;\r
+				B aB;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r
+					result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (anA == null) {\r
+						if (other.anA != null)\r
+							return false;\r
+					} else if (!anA.equals(other.anA))\r
+						return false;\r
+					if (aB == null) {\r
+						if (other.aB != null)\r
+							return false;\r
+					} else if (!aB.equals(other.aB))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -314,64 +321,67 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test04() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A extends B {\r
+				\r
+				A anA;\r
+				B aB;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" +
-				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (anA == null) {\r\n" +
-				"			if (other.anA != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!anA.equals(other.anA))\r\n" +
-				"			return false;\r\n" +
-				"		if (aB == null) {\r\n" +
-				"			if (other.aB != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!aB.equals(other.aB))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A extends B {\r
+				\r
+				A anA;\r
+				B aB;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r
+					result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (anA == null) {\r
+						if (other.anA != null)\r
+							return false;\r
+					} else if (!anA.equals(other.anA))\r
+						return false;\r
+					if (aB == null) {\r
+						if (other.aB != null)\r
+							return false;\r
+					} else if (!aB.equals(other.aB))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -382,53 +392,55 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test05() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A[] someAs;\r\n" +
-				"	int[] someInts;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A[] someAs;\r
+				int[] someInts;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"someAs", "someInts" });
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A[] someAs;\r\n" +
-				"	int[] someInts;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.hashCode(someAs);\r\n" +
-				"		result = prime * result + Arrays.hashCode(someInts);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (!Arrays.equals(someAs, other.someAs))\r\n" +
-				"			return false;\r\n" +
-				"		if (!Arrays.equals(someInts, other.someInts))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+				\r
+				A[] someAs;\r
+				int[] someInts;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.hashCode(someAs);\r
+					result = prime * result + Arrays.hashCode(someInts);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (!Arrays.equals(someAs, other.someAs))\r
+						return false;\r
+					if (!Arrays.equals(someInts, other.someInts))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -439,52 +451,54 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test06() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	int someInt;\r\n" +
-				"	\r\n" +
-				"	public void foo() {}\r\n" +
-				"	public void bar() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				int someInt;\r
+				\r
+				public void foo() {}\r
+				public void bar() {}\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"someInt" });
 		runOperation(a.getType("A"), fields, a.getType("A").getMethod("bar", new String[0]), true, false, false, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	int someInt;\r\n" +
-				"	\r\n" +
-				"	public void foo() {}\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + someInt;\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (someInt != other.someInt)\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"	public void bar() {}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				int someInt;\r
+				\r
+				public void foo() {}\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + someInt;\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (someInt != other.someInt)\r
+						return false;\r
+					return true;\r
+				}\r
+				public void bar() {}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -709,58 +723,59 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong" });
 		runOperation(a.getType("A"), fields, true, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" +
-				"		result = prime * result + aByte;\r\n" +
-				"		result = prime * result + aChar;\r\n" +
-				"		result = prime * result + anInt;\r\n" +
-				"		long temp;\r\n" +
-				"		temp = Double.doubleToLongBits(aDouble);\r\n" +
-				"		result = prime * result + (int) (temp ^ (temp >>> 32));\r\n" +
-				"		result = prime * result + Float.floatToIntBits(aFloat);\r\n" +
-				"		result = prime * result + (int) (aLong ^ (aLong >>> 32));\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!(obj instanceof A))\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (aBool != other.aBool)\r\n" +
-				"			return false;\r\n" +
-				"		if (aByte != other.aByte)\r\n" +
-				"			return false;\r\n" +
-				"		if (aChar != other.aChar)\r\n" +
-				"			return false;\r\n" +
-				"		if (anInt != other.anInt)\r\n" +
-				"			return false;\r\n" +
-				"		if (Double.doubleToLongBits(aDouble) != Double.doubleToLongBits(other.aDouble))\r\n" +
-				"			return false;\r\n" +
-				"		if (Float.floatToIntBits(aFloat) != Float.floatToIntBits(other.aFloat))\r\n" +
-				"			return false;\r\n" +
-				"		if (aLong != other.aLong)\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + (aBool ? 1231 : 1237);\r
+					result = prime * result + aByte;\r
+					result = prime * result + aChar;\r
+					result = prime * result + anInt;\r
+					long temp;\r
+					temp = Double.doubleToLongBits(aDouble);\r
+					result = prime * result + (int) (temp ^ (temp >>> 32));\r
+					result = prime * result + Float.floatToIntBits(aFloat);\r
+					result = prime * result + (int) (aLong ^ (aLong >>> 32));\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!(obj instanceof A))\r
+						return false;\r
+					A other = (A) obj;\r
+					if (aBool != other.aBool)\r
+						return false;\r
+					if (aByte != other.aByte)\r
+						return false;\r
+					if (aChar != other.aChar)\r
+						return false;\r
+					if (anInt != other.anInt)\r
+						return false;\r
+					if (Double.doubleToLongBits(aDouble) != Double.doubleToLongBits(other.aDouble))\r
+						return false;\r
+					if (Float.floatToIntBits(aFloat) != Float.floatToIntBits(other.aFloat))\r
+						return false;\r
+					if (aLong != other.aLong)\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -771,53 +786,56 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test11() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A extends B {\r
+				\r
+				boolean aBool;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool" });
 		runOperation(a.getType("A"), fields, true, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!(obj instanceof A))\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (aBool != other.aBool)\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A extends B {\r
+				\r
+				boolean aBool;\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + (aBool ? 1231 : 1237);\r
+					return result;\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!(obj instanceof A))\r
+						return false;\r
+					A other = (A) obj;\r
+					if (aBool != other.aBool)\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -828,62 +846,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test12() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A anA;\r
+				B aB;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, true, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" +
-				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!(obj instanceof A))\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (anA == null) {\r\n" +
-				"			if (other.anA != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!anA.equals(other.anA))\r\n" +
-				"			return false;\r\n" +
-				"		if (aB == null) {\r\n" +
-				"			if (other.aB != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!aB.equals(other.aB))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A anA;\r
+				B aB;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r
+					result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!(obj instanceof A))\r
+						return false;\r
+					A other = (A) obj;\r
+					if (anA == null) {\r
+						if (other.anA != null)\r
+							return false;\r
+					} else if (!anA.equals(other.anA))\r
+						return false;\r
+					if (aB == null) {\r
+						if (other.aB != null)\r
+							return false;\r
+					} else if (!aB.equals(other.aB))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -895,62 +916,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void test13() throws Exception {
 
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A anA;\r
+				B aB;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"anA", "aB" });
 		runOperation(a.getType("A"), fields, true, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	A anA;\r\n" +
-				"	B aB;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r\n" +
-				"		result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!(obj instanceof A))\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (anA == null) {\r\n" +
-				"			if (other.anA != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!anA.equals(other.anA))\r\n" +
-				"			return false;\r\n" +
-				"		if (aB == null) {\r\n" +
-				"			if (other.aB != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!aB.equals(other.aB))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				A anA;\r
+				B aB;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + ((anA == null) ? 0 : anA.hashCode());\r
+					result = prime * result + ((aB == null) ? 0 : aB.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!(obj instanceof A))\r
+						return false;\r
+					A other = (A) obj;\r
+					if (anA == null) {\r
+						if (other.anA != null)\r
+							return false;\r
+					} else if (!anA.equals(other.anA))\r
+						return false;\r
+					if (aB == null) {\r
+						if (other.aB != null)\r
+							return false;\r
+					} else if (!aB.equals(other.aB))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 
@@ -965,61 +989,62 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.lang.annotation.ElementType;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	ElementType anEnum;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			import java.lang.annotation.ElementType;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				ElementType anEnum;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anEnum" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"import java.lang.annotation.ElementType;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	ElementType anEnum;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings, anEnum);\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && anEnum == other.anEnum;\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			import java.lang.annotation.ElementType;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				ElementType anEnum;\r
+				@Override\r
+				public int hashCode() {\r
+					return Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings, anEnum);\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && anEnum == other.anEnum;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1031,42 +1056,44 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsUniqueFieldIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"public class A {\r\n" +
-				"	String aString;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			public class A {\r
+				String aString;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aString" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Objects;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	String aString;\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return Objects.hash(aString);\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return Objects.equals(aString, other.aString);\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Objects;\r
+			\r
+			public class A {\r
+				String aString;\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					return Objects.hash(aString);\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return Objects.equals(aString, other.aString);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1078,55 +1105,56 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsInstanceOfIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings" });
 		runJ7Operation(a.getType("A"), fields, true);
 
-		String expected= "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!(obj instanceof A))\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				@Override\r
+				public int hashCode() {\r
+					return Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!(obj instanceof A))\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1138,64 +1166,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsArrayIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	int[] anArrayOfInts;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				int[] anArrayOfInts;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfInts" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	int[] anArrayOfInts;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.equals(anArrayOfInts, other.anArrayOfInts);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.Arrays;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				int[] anArrayOfInts;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.hashCode(anArrayOfInts);\r
+					result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.equals(anArrayOfInts, other.anArrayOfInts);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1207,64 +1236,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsCloneableArrayIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	Cloneable[] anArrayOfCloneables;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				Cloneable[] anArrayOfCloneables;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfCloneables" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	Cloneable[] anArrayOfCloneables;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfCloneables);\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfCloneables, other.anArrayOfCloneables);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.Arrays;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				Cloneable[] anArrayOfCloneables;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfCloneables);\r
+					result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfCloneables, other.anArrayOfCloneables);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1276,66 +1306,67 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsSerializableArrayIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.io.Serializable;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	Serializable[] anArrayOfSerializables;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			import java.io.Serializable;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				Serializable[] anArrayOfSerializables;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfSerializables" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"import java.io.Serializable;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	Serializable[] anArrayOfSerializables;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfSerializables);\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfSerializables, other.anArrayOfSerializables);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.Arrays;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			import java.io.Serializable;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				Serializable[] anArrayOfSerializables;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfSerializables);\r
+					result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfSerializables, other.anArrayOfSerializables);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1347,64 +1378,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsObjectArrayIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	Object[] anArrayOfObjects;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				Object[] anArrayOfObjects;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfObjects" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	Object[] anArrayOfObjects;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfObjects);\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfObjects, other.anArrayOfObjects);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.Arrays;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				Object[] anArrayOfObjects;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfObjects);\r
+					result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfObjects, other.anArrayOfObjects);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1416,47 +1448,48 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsTypeVariableArrayIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.io.Serializable;\r\n" +
-				"public class A <S extends Serializable, N extends Number> {\r\n" +
-				"	S[] anArrayOfS;\r\n" +
-				"	N[] anArrayOfN;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.io.Serializable;\r
+			public class A <S extends Serializable, N extends Number> {\r
+				S[] anArrayOfS;\r
+				N[] anArrayOfN;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "anArrayOfS", "anArrayOfN" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.io.Serializable;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"public class A <S extends Serializable, N extends Number> {\r\n" +
-				"	S[] anArrayOfS;\r\n" +
-				"	N[] anArrayOfN;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfS);\r\n" +
-				"		result = prime * result + Arrays.hashCode(anArrayOfN);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return Arrays.deepEquals(anArrayOfS, other.anArrayOfS) && Arrays.equals(anArrayOfN, other.anArrayOfN);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.io.Serializable;\r
+			import java.util.Arrays;\r
+			public class A <S extends Serializable, N extends Number> {\r
+				S[] anArrayOfS;\r
+				N[] anArrayOfN;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfS);\r
+					result = prime * result + Arrays.hashCode(anArrayOfN);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return Arrays.deepEquals(anArrayOfS, other.anArrayOfS) && Arrays.equals(anArrayOfN, other.anArrayOfN);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1468,64 +1501,65 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsMultiArrayIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	int[][] anArrayOfInts;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				int[][] anArrayOfInts;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfInts" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	int[][] anArrayOfInts;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfInts);\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfInts, other.anArrayOfInts);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.Arrays;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				int[][] anArrayOfInts;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfInts);\r
+					result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfInts, other.anArrayOfInts);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1537,67 +1571,68 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsVariousArraysIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"import java.util.List;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	int[] anArrayOfInts;\r\n" +
-				"	String[][] anArrayOfStrings;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			import java.util.List;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				int[] anArrayOfInts;\r
+				String[][] anArrayOfStrings;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfInts", "anArrayOfStrings" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"import java.util.List;\r\n" +
-				"import java.util.Objects;\r\n" +
-				"public class A {\r\n" +
-				"	boolean aBool;\r\n" +
-				"	byte aByte;\r\n" +
-				"	char aChar;\r\n" +
-				"	int anInt;\r\n" +
-				"	double aDouble;\r\n" +
-				"	float aFloat;\r\n" +
-				"	long aLong;\r\n" +
-				"	String aString;\r\n" +
-				"	List<String> aListOfStrings;\r\n" +
-				"	int[] anArrayOfInts;\r\n" +
-				"	String[][] anArrayOfStrings;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.equals(anArrayOfInts, other.anArrayOfInts) && Arrays.deepEquals(anArrayOfStrings, other.anArrayOfStrings);\r\n"
-				+
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			import java.util.Arrays;\r
+			import java.util.List;\r
+			import java.util.Objects;\r
+			public class A {\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				String aString;\r
+				List<String> aListOfStrings;\r
+				int[] anArrayOfInts;\r
+				String[][] anArrayOfStrings;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.hashCode(anArrayOfInts);\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r
+					result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.equals(anArrayOfInts, other.anArrayOfInts) && Arrays.deepEquals(anArrayOfStrings, other.anArrayOfStrings);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1609,46 +1644,48 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void hashCodeEqualsOnlyArraysIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"public class A {\r\n" +
-				"	int[] anArrayOfInts;\r\n" +
-				"	String[][] anArrayOfStrings;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			public class A {\r
+				int[] anArrayOfInts;\r
+				String[][] anArrayOfStrings;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "anArrayOfInts", "anArrayOfStrings" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	int[] anArrayOfInts;\r\n" +
-				"	String[][] anArrayOfStrings;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return Arrays.equals(anArrayOfInts, other.anArrayOfInts) && Arrays.deepEquals(anArrayOfStrings, other.anArrayOfStrings);\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+				int[] anArrayOfInts;\r
+				String[][] anArrayOfStrings;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.hashCode(anArrayOfInts);\r
+					result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return Arrays.equals(anArrayOfInts, other.anArrayOfInts) && Arrays.deepEquals(anArrayOfStrings, other.anArrayOfStrings);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1659,54 +1696,56 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void enclosingInstance() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public class Inner {\r\n" +
-				"		int x;\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				public class Inner {\r
+					int x;\r
+				}\r
+			}\r
+			""", true, null);
 
 		IType type= a.getType("A").getType("Inner");
 		IField[] fields= getFields(type, new String[] {"x" });
 		runOperation(type, fields, true, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public class Inner {\r\n" +
-				"		int x;\r\n" +
-				"\r\n" +
-				"		@Override\r\n" +
-				"		public int hashCode() {\r\n" +
-				"			final int prime = 31;\r\n" +
-				"			int result = 1;\r\n" +
-				"			result = prime * result + getEnclosingInstance().hashCode();\r\n" +
-				"			result = prime * result + x;\r\n" +
-				"			return result;\r\n" +
-				"		}\r\n" +
-				"\r\n" +
-				"		@Override\r\n" +
-				"		public boolean equals(Object obj) {\r\n" +
-				"			if (this == obj)\r\n" +
-				"				return true;\r\n" +
-				"			if (!(obj instanceof Inner))\r\n" +
-				"				return false;\r\n" +
-				"			Inner other = (Inner) obj;\r\n" +
-				"			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))\r\n" +
-				"				return false;\r\n" +
-				"			if (x != other.x)\r\n" +
-				"				return false;\r\n" +
-				"			return true;\r\n" +
-				"		}\r\n" +
-				"\r\n" +
-				"		private A getEnclosingInstance() {\r\n" +
-				"			return A.this;\r\n" +
-				"		}\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				public class Inner {\r
+					int x;\r
+			\r
+					@Override\r
+					public int hashCode() {\r
+						final int prime = 31;\r
+						int result = 1;\r
+						result = prime * result + getEnclosingInstance().hashCode();\r
+						result = prime * result + x;\r
+						return result;\r
+					}\r
+			\r
+					@Override\r
+					public boolean equals(Object obj) {\r
+						if (this == obj)\r
+							return true;\r
+						if (!(obj instanceof Inner))\r
+							return false;\r
+						Inner other = (Inner) obj;\r
+						if (!getEnclosingInstance().equals(other.getEnclosingInstance()))\r
+							return false;\r
+						if (x != other.x)\r
+							return false;\r
+						return true;\r
+					}\r
+			\r
+					private A getEnclosingInstance() {\r
+						return A.this;\r
+					}\r
+				}\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1717,56 +1756,58 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void enclosingInstanceIn17() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public class Inner {\r\n" +
-				"		int x;\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				public class Inner {\r
+					int x;\r
+				}\r
+			}\r
+			""", true, null);
 
 		IType type= a.getType("A").getType("Inner");
 		IField[] fields= getFields(type, new String[] { "x" });
 		runJ7Operation(type, fields, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Objects;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	public class Inner {\r\n" +
-				"		int x;\r\n" +
-				"\r\n" +
-				"		@Override\r\n" +
-				"		public int hashCode() {\r\n" +
-				"			final int prime = 31;\r\n" +
-				"			int result = 1;\r\n" +
-				"			result = prime * result + getEnclosingInstance().hashCode();\r\n" +
-				"			result = prime * result + Objects.hash(x);\r\n" +
-				"			return result;\r\n" +
-				"		}\r\n" +
-				"\r\n" +
-				"		@Override\r\n" +
-				"		public boolean equals(Object obj) {\r\n" +
-				"			if (this == obj)\r\n" +
-				"				return true;\r\n" +
-				"			if (obj == null)\r\n" +
-				"				return false;\r\n" +
-				"			if (getClass() != obj.getClass())\r\n" +
-				"				return false;\r\n" +
-				"			Inner other = (Inner) obj;\r\n" +
-				"			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))\r\n" +
-				"				return false;\r\n" +
-				"			return x == other.x;\r\n" +
-				"		}\r\n" +
-				"\r\n" +
-				"		private A getEnclosingInstance() {\r\n" +
-				"			return A.this;\r\n" +
-				"		}\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Objects;\r
+			\r
+			public class A {\r
+				public class Inner {\r
+					int x;\r
+			\r
+					@Override\r
+					public int hashCode() {\r
+						final int prime = 31;\r
+						int result = 1;\r
+						result = prime * result + getEnclosingInstance().hashCode();\r
+						result = prime * result + Objects.hash(x);\r
+						return result;\r
+					}\r
+			\r
+					@Override\r
+					public boolean equals(Object obj) {\r
+						if (this == obj)\r
+							return true;\r
+						if (obj == null)\r
+							return false;\r
+						if (getClass() != obj.getClass())\r
+							return false;\r
+						Inner other = (Inner) obj;\r
+						if (!getEnclosingInstance().equals(other.getEnclosingInstance()))\r
+							return false;\r
+						return x == other.x;\r
+					}\r
+			\r
+					private A getEnclosingInstance() {\r
+						return A.this;\r
+					}\r
+				}\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1790,47 +1831,48 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "obj" });
 		runOperation(a.getType("A"), fields, null, true, false, false, true, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	\r\n" +
-				"	boolean aBool;\r\n" +
-				"	Object obj;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + (aBool ? 1231 : 1237);\r\n" +
-				"		result = prime * result + ((obj == null) ? 0 : obj.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj) {\r\n" +
-				"			return true;\r\n" +
-				"		}\r\n" +
-				"		if (obj == null) {\r\n" +
-				"			return false;\r\n" +
-				"		}\r\n" +
-				"		if (getClass() != obj.getClass()) {\r\n" +
-				"			return false;\r\n" +
-				"		}\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (aBool != other.aBool) {\r\n" +
-				"			return false;\r\n" +
-				"		}\r\n" +
-				"		if (this.obj == null) {\r\n" +
-				"			if (other.obj != null) {\r\n" +
-				"				return false;\r\n" +
-				"			}\r\n" +
-				"		} else if (!this.obj.equals(other.obj)) {\r\n" +
-				"			return false;\r\n" +
-				"		}\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				Object obj;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + (aBool ? 1231 : 1237);\r
+					result = prime * result + ((obj == null) ? 0 : obj.hashCode());\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj) {\r
+						return true;\r
+					}\r
+					if (obj == null) {\r
+						return false;\r
+					}\r
+					if (getClass() != obj.getClass()) {\r
+						return false;\r
+					}\r
+					A other = (A) obj;\r
+					if (aBool != other.aBool) {\r
+						return false;\r
+					}\r
+					if (this.obj == null) {\r
+						if (other.obj != null) {\r
+							return false;\r
+						}\r
+					} else if (!this.obj.equals(other.obj)) {\r
+						return false;\r
+					}\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1840,66 +1882,69 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	@Test
 	public void subTypeAndArraysIn14() throws Exception {
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return 1;\r\n" +
-				"	}\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		return obj instanceof B;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				public int hashCode() {\r
+					return 1;\r
+				}\r
+				public boolean equals(Object obj) {\r
+					return obj instanceof B;\r
+				}\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"\r\n" +
-				"	A[] anArray;\r\n" +
-				"	double[] anDArray;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A extends B {\r
+			\r
+				A[] anArray;\r
+				double[] anDArray;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"anArray", "anDArray"});
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"\r\n" +
-				"	A[] anArray;\r\n" +
-				"	double[] anDArray;\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = super.hashCode();\r\n" +
-				"		result = prime * result + Arrays.hashCode(anArray);\r\n" +
-				"		result = prime * result + Arrays.hashCode(anDArray);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!super.equals(obj))\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (!Arrays.equals(anArray, other.anArray))\r\n" +
-				"			return false;\r\n" +
-				"		if (!Arrays.equals(anDArray, other.anDArray))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A extends B {\r
+			\r
+				A[] anArray;\r
+				double[] anDArray;\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = super.hashCode();\r
+					result = prime * result + Arrays.hashCode(anArray);\r
+					result = prime * result + Arrays.hashCode(anDArray);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!super.equals(obj))\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (!Arrays.equals(anArray, other.anArray))\r
+						return false;\r
+					if (!Arrays.equals(anDArray, other.anDArray))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1909,61 +1954,64 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	@Test
 	public void subTypeIn17() throws Exception {
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return 1;\r\n" +
-				"	}\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		return obj instanceof B;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				public int hashCode() {\r
+					return 1;\r
+				}\r
+				public boolean equals(Object obj) {\r
+					return obj instanceof B;\r
+				}\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"\r\n" +
-				"	String aString;\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A extends B {\r
+			\r
+				String aString;\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "aString" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Objects;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"\r\n" +
-				"	String aString;\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = super.hashCode();\r\n" +
-				"		result = prime * result + Objects.hash(aString);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!super.equals(obj))\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return Objects.equals(aString, other.aString);\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Objects;\r
+			\r
+			public class A extends B {\r
+			\r
+				String aString;\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = super.hashCode();\r
+					result = prime * result + Objects.hash(aString);\r
+					return result;\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!super.equals(obj))\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return Objects.equals(aString, other.aString);\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -1973,41 +2021,43 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 * (https://bugs.eclipse.org/bugs/show_bug.cgi?id=561517)
 	 */
 	public void otherFieldIn17() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	private String other;\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+				private String other;\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] { "other" });
 		runJ7Operation(a.getType("A"), fields, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Objects;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"	private String other;\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return Objects.hash(other);\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		return Objects.equals(this.other, other.other);\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Objects;\r
+			\r
+			public class A {\r
+				private String other;\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					return Objects.hash(other);\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					return Objects.equals(this.other, other.other);\r
+				}\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -2017,48 +2067,51 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	@Test
 	public void subTypeNoFields() throws Exception {
-		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
-				"\r\n" +
-				"public class B {\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return 1;\r\n" +
-				"	}\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		return obj instanceof B;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		fPackageP.createCompilationUnit("B.java", """
+			package p;\r
+			\r
+			public class B {\r
+				public int hashCode() {\r
+					return 1;\r
+				}\r
+				public boolean equals(Object obj) {\r
+					return obj instanceof B;\r
+				}\r
+			\r
+			}\r
+			""", true, null);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A extends B {\r
+			}\r
+			""", true, null);
 
 		runOperation(a.getType("A"), new IField[0], false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"public class A extends B {\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		return super.hashCode();\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (!super.equals(obj))\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"}\r\n" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			public class A extends B {\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					return super.hashCode();\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (!super.equals(obj))\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					return true;\r
+				}\r
+			}\r
+			""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -2126,57 +2179,57 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	@Test
 	public void abstractSuperMethods() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"abstract class Super {\r\n" +
-				"	public abstract int hashCode();\r\n" +
-				"	public abstract boolean equals(Object other);\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"class Sub extends Super {\r\n" +
-				"	String name;\r\n" +
-				"}" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			abstract class Super {\r
+				public abstract int hashCode();\r
+				public abstract boolean equals(Object other);\r
+			}\r
+			\r
+			class Sub extends Super {\r
+				String name;\r
+			}""", true, null);
 
 		IField[] fields= getFields(a.getType("Sub"), new String[] {"name" });
 		runOperation(a.getType("Sub"), fields, null, false, false, false, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"abstract class Super {\r\n" +
-				"	public abstract int hashCode();\r\n" +
-				"	public abstract boolean equals(Object other);\r\n" +
-				"}\r\n" +
-				"\r\n" +
-				"class Sub extends Super {\r\n" +
-				"	String name;\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + ((name == null) ? 0 : name.hashCode());\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		Sub other = (Sub) obj;\r\n" +
-				"		if (name == null) {\r\n" +
-				"			if (other.name != null)\r\n" +
-				"				return false;\r\n" +
-				"		} else if (!name.equals(other.name))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"}" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			abstract class Super {\r
+				public abstract int hashCode();\r
+				public abstract boolean equals(Object other);\r
+			}\r
+			\r
+			class Sub extends Super {\r
+				String name;\r
+			\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + ((name == null) ? 0 : name.hashCode());\r
+					return result;\r
+				}\r
+			\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					Sub other = (Sub) obj;\r
+					if (name == null) {\r
+						if (other.name != null)\r
+							return false;\r
+					} else if (!name.equals(other.name))\r
+						return false;\r
+					return true;\r
+				}\r
+			}""";
 
 		compareSource(expected, a.getSource());
 	}
@@ -2189,53 +2242,54 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	@Test
 	public void arraysDeepEqualsIn15() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"\r\n" +
-				"	 int[][][] a = new int[][][] {{null}};\r\n" +
-				"	 int[][][] b = new int[][][] {{null}};\r\n" +
-				"\r\n" +
-				"}\r\n" +
-				"", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				 int[][][] a = new int[][][] {{null}};\r
+				 int[][][] b = new int[][][] {{null}};\r
+			\r
+			}\r
+			""", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"a", "b"});
 		runOperation(a.getType("A"), fields, false, false);
 
-		String expected= "package p;\r\n" +
-				"\r\n" +
-				"import java.util.Arrays;\r\n" +
-				"\r\n" +
-				"public class A {\r\n" +
-				"\r\n" +
-				"	 int[][][] a = new int[][][] {{null}};\r\n" +
-				"	 int[][][] b = new int[][][] {{null}};\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
-				"		final int prime = 31;\r\n" +
-				"		int result = 1;\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(a);\r\n" +
-				"		result = prime * result + Arrays.deepHashCode(b);\r\n" +
-				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
-				"		if (this == obj)\r\n" +
-				"			return true;\r\n" +
-				"		if (obj == null)\r\n" +
-				"			return false;\r\n" +
-				"		if (getClass() != obj.getClass())\r\n" +
-				"			return false;\r\n" +
-				"		A other = (A) obj;\r\n" +
-				"		if (!Arrays.deepEquals(a, other.a))\r\n" +
-				"			return false;\r\n" +
-				"		if (!Arrays.deepEquals(b, other.b))\r\n" +
-				"			return false;\r\n" +
-				"		return true;\r\n" +
-				"	}\r\n" +
-				"\r\n" +
-				"}" +
-				"";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+			\r
+				 int[][][] a = new int[][][] {{null}};\r
+				 int[][][] b = new int[][][] {{null}};\r
+				@Override\r
+				public int hashCode() {\r
+					final int prime = 31;\r
+					int result = 1;\r
+					result = prime * result + Arrays.deepHashCode(a);\r
+					result = prime * result + Arrays.deepHashCode(b);\r
+					return result;\r
+				}\r
+				@Override\r
+				public boolean equals(Object obj) {\r
+					if (this == obj)\r
+						return true;\r
+					if (obj == null)\r
+						return false;\r
+					if (getClass() != obj.getClass())\r
+						return false;\r
+					A other = (A) obj;\r
+					if (!Arrays.deepEquals(a, other.a))\r
+						return false;\r
+					if (!Arrays.deepEquals(b, other.b))\r
+						return false;\r
+					return true;\r
+				}\r
+			\r
+			}""";
 		compareSource(expected, a.getSource());
 	}
 

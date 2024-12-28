@@ -221,27 +221,31 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.createComments= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "	\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	byte aByte;\r\n"
-				+ "	char aChar;\r\n"
-				+ "	int anInt;\r\n"
-				+ "	double aDouble;\r\n"
-				+ "	float aFloat;\r\n"
-				+ "	long aLong;\r\n"
-				+ "	int aFloatMethod() {\r\n"
-				+ "		return 3.3;\r\n"
-				+ "	}\r\n"
-				+ "	int aStringMethod() {\r\n"
-				+ "		return \"\";\r\n"
-				+ "	}\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return \"A [aBool=\" + aBool + \", aByte=\" + aByte + \", aChar=\" + aChar + \", anInt=\" + anInt + \", aDouble=\" + aDouble + \", aFloat=\" + aFloat + \", aLong=\" + aLong + \", aFloatMethod()=\" + aFloatMethod() + \", aStringMethod()=\" + aStringMethod() + \"]\";\r\n"
-				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			public class A {\r
+				\r
+				boolean aBool;\r
+				byte aByte;\r
+				char aChar;\r
+				int anInt;\r
+				double aDouble;\r
+				float aFloat;\r
+				long aLong;\r
+				int aFloatMethod() {\r
+					return 3.3;\r
+				}\r
+				int aStringMethod() {\r
+					return "";\r
+				}\r
+				@Override\r
+				public String toString() {\r
+					return "A [aBool=" + aBool + ", aByte=" + aByte + ", aChar=" + aChar + ", anInt=" + anInt + ", aDouble=" + aDouble + ", aFloat=" + aFloat + ", aLong=" + aLong + ", aFloatMethod()=" + aFloatMethod() + ", aStringMethod()=" + aStringMethod() + "]";\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -315,36 +319,56 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArray() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+			\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
 		fSettings2.customArrayToString= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] anArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return \"A [AArray=\" + Arrays.toString(AArray) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + Arrays.toString(floatArray) + \", intArray=\" + Arrays.toString(intArray) + \", list=\" + list + \", object=\" + object + \", stringArray=\" + Arrays.toString(stringArray) + \", anArrayMethod()=\" + Arrays.toString(anArrayMethod()) + \"]\";\r\n"
-				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+				@Override\r
+				public String toString() {\r
+					return "A [AArray=" + Arrays.toString(AArray) + ", aBool=" + aBool + ", anA=" + anA + ", floatArray=" + Arrays.toString(floatArray) + ", intArray=" + Arrays.toString(intArray) + ", list=" + list + ", object=" + object + ", stringArray=" + Arrays.toString(stringArray) + ", anArrayMethod()=" + Arrays.toString(anArrayMethod()) + "]";\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -356,11 +380,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -368,39 +416,54 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [AArray=\" + AArray + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + floatArray + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + \", intArray=\" + intArray + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + \", list=\" + (list != null ? toString(list, maxLen) : null) + \", object=\" + object + \", stringArray=\" + stringArray + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + \", charArrayMethod()=\" + charArrayMethod() + \", floatArrayMethod()=\" + floatArrayMethod() + \"]\";\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
-				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [AArray=" + AArray + ", aBool=" + aBool + ", anA=" + anA + ", floatArray=" + floatArray + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + ", intArray=" + intArray + ", integerCollection=" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + ", list=" + (list != null ? toString(list, maxLen) : null) + ", object=" + object + ", stringArray=" + stringArray + ", wildCollection=" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + ", charArrayMethod()=" + charArrayMethod() + ", floatArrayMethod()=" + floatArrayMethod() + "]";\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -412,11 +475,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArrayLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -425,41 +512,56 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [AArray=\" + (AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + (floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + \", intArray=\" + (intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + \", list=\" + (list != null ? toString(list, maxLen) : null) + \", object=\" + object + \", stringArray=\" + (stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + \", charArrayMethod()=\"\r\n"
-				+ "				+ (charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null) + \", floatArrayMethod()=\" + (floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null) + \"]\";\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
-				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [AArray=" + (AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null) + ", aBool=" + aBool + ", anA=" + anA + ", floatArray=" + (floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null) + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + ", intArray=" + (intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null) + ", integerCollection=" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + ", list=" + (list != null ? toString(list, maxLen) : null) + ", object=" + object + ", stringArray=" + (stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null) + ", wildCollection=" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + ", charArrayMethod()="\r
+							+ (charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null) + ", floatArrayMethod()=" + (floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null) + "]";\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -472,10 +574,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatArrayLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				\r
+			}\r
+			""",
 				true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
@@ -485,45 +612,79 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [AArray=\" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + \", intArray=\" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + \", list=\" + (list != null ? toString(list, maxLen) : null) + \", object=\" + object + \", stringArray=\" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + \", charArrayMethod()=\" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + \", floatArrayMethod()=\"\r\n"
-				+ "				+ (floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null) + \"]\";\r\n" + "	}\r\n" + "	private String toString(Collection collection, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		buffer.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n" + "			}\r\n"
-				+ "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n"
-				+ "	private String arrayToString(Object array, int len, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		len = Math.min(len, maxLen);\r\n"
-				+ "		buffer.append(\"[\");\r\n" + "		for (int i = 0; i < len; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array instanceof float[]) {\r\n" + "				buffer.append(((float[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof int[]) {\r\n"
-				+ "				buffer.append(((int[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof char[]) {\r\n" + "				buffer.append(((char[]) array)[i]);\r\n" + "			}\r\n"
-				+ "			if (array instanceof Object[]) {\r\n" + "				buffer.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n"
-				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [AArray=" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null) + ", aBool=" + aBool + ", anA=" + anA + ", floatArray=" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + ", intArray=" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null) + ", integerCollection=" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + ", list=" + (list != null ? toString(list, maxLen) : null) + ", object=" + object + ", stringArray=" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null) + ", wildCollection=" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + ", charArrayMethod()=" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + ", floatArrayMethod()="\r
+							+ (floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null) + "]";\r
+				}\r
+				private String toString(Collection collection, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					buffer.append("[");\r
+					int i = 0;\r
+					for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						buffer.append(iterator.next());\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				private String arrayToString(Object array, int len, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					len = Math.min(len, maxLen);\r
+					buffer.append("[");\r
+					for (int i = 0; i < len; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						if (array instanceof float[]) {\r
+							buffer.append(((float[]) array)[i]);\r
+						}\r
+						if (array instanceof int[]) {\r
+							buffer.append(((int[]) array)[i]);\r
+						}\r
+						if (array instanceof char[]) {\r
+							buffer.append(((char[]) array)[i]);\r
+						}\r
+						if (array instanceof Object[]) {\r
+							buffer.append(((Object[]) array)[i]);\r
+						}\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -537,10 +698,31 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatArrayLimit1_4Unique() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
@@ -549,40 +731,68 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	Object builder;\r\n"
-				+ "	Object buffer;\r\n"
-				+ "	Object maxLen;\r\n"
-				+ "	Object len;\r\n"
-				+ "	Object collection;\r\n"
-				+ "	Object array;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen2 = 10;\r\n"
-				+ "		return \"A [aBool=\" + aBool + \", intArray=\" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null) + \", stringArray=\" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null) + \", AArray=\" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null) + \", list=\" + (list != null ? toString(list, maxLen2) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen2) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen2) : null) + \", builder=\" + builder + \", buffer=\" + buffer + \", maxLen=\" + maxLen + \", len=\" + len + \", collection=\" + collection + \", array=\" + array + \"]\";\r\n"
-				+ "	}\r\n" + "	private String toString(Collection collection2, int maxLen2) {\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n" + "		buffer2.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer2.append(\", \");\r\n"
-				+ "			}\r\n" + "			buffer2.append(iterator.next());\r\n" + "		}\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n"
-				+ "	private String arrayToString(Object array2, int len2, int maxLen2) {\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n" + "		len2 = Math.min(len2, maxLen2);\r\n"
-				+ "		buffer2.append(\"[\");\r\n" + "		for (int i = 0; i < len2; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer2.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array2 instanceof int[]) {\r\n" + "				buffer2.append(((int[]) array2)[i]);\r\n" + "			}\r\n" + "			if (array2 instanceof Object[]) {\r\n"
-				+ "				buffer2.append(((Object[]) array2)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen2 = 10;\r
+					return "A [aBool=" + aBool + ", intArray=" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null) + ", stringArray=" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null) + ", AArray=" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null) + ", list=" + (list != null ? toString(list, maxLen2) : null) + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null) + ", wildCollection=" + (wildCollection != null ? toString(wildCollection, maxLen2) : null) + ", integerCollection=" + (integerCollection != null ? toString(integerCollection, maxLen2) : null) + ", builder=" + builder + ", buffer=" + buffer + ", maxLen=" + maxLen + ", len=" + len + ", collection=" + collection + ", array=" + array + "]";\r
+				}\r
+				private String toString(Collection collection2, int maxLen2) {\r
+					StringBuffer buffer2 = new StringBuffer();\r
+					buffer2.append("[");\r
+					int i = 0;\r
+					for (Iterator iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r
+						if (i > 0) {\r
+							buffer2.append(", ");\r
+						}\r
+						buffer2.append(iterator.next());\r
+					}\r
+					buffer2.append("]");\r
+					return buffer2.toString();\r
+				}\r
+				private String arrayToString(Object array2, int len2, int maxLen2) {\r
+					StringBuffer buffer2 = new StringBuffer();\r
+					len2 = Math.min(len2, maxLen2);\r
+					buffer2.append("[");\r
+					for (int i = 0; i < len2; i++) {\r
+						if (i > 0) {\r
+							buffer2.append(", ");\r
+						}\r
+						if (array2 instanceof int[]) {\r
+							buffer2.append(((int[]) array2)[i]);\r
+						}\r
+						if (array2 instanceof Object[]) {\r
+							buffer2.append(((Object[]) array2)[i]);\r
+						}\r
+					}\r
+					buffer2.append("]");\r
+					return buffer2.toString();\r
+				}\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -595,10 +805,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatArrayLimit1_5() throws Exception {
 		setCompilerLevels(true, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				\r
+			}\r
+			""",
 				true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
@@ -608,46 +843,79 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [AArray=\" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + \", intArray=\" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + \", list=\" + (list != null ? toString(list, maxLen) : null) + \", object=\" + object + \", stringArray=\" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + \", charArrayMethod()=\" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + \", floatArrayMethod()=\"\r\n"
-				+ "				+ (floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null) + \"]\";\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
-				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n"
-				+ "	private String arrayToString(Object array, int len, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		len = Math.min(len, maxLen);\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		for (int i = 0; i < len; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array instanceof float[]) {\r\n" + "				builder.append(((float[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof int[]) {\r\n"
-				+ "				builder.append(((int[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof char[]) {\r\n" + "				builder.append(((char[]) array)[i]);\r\n" + "			}\r\n"
-				+ "			if (array instanceof Object[]) {\r\n" + "				builder.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [AArray=" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null) + ", aBool=" + aBool + ", anA=" + anA + ", floatArray=" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + ", intArray=" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null) + ", integerCollection=" + (integerCollection != null ? toString(integerCollection, maxLen) : null) + ", list=" + (list != null ? toString(list, maxLen) : null) + ", object=" + object + ", stringArray=" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null) + ", wildCollection=" + (wildCollection != null ? toString(wildCollection, maxLen) : null) + ", charArrayMethod()=" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + ", floatArrayMethod()="\r
+							+ (floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null) + "]";\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String arrayToString(Object array, int len, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					len = Math.min(len, maxLen);\r
+					builder.append("[");\r
+					for (int i = 0; i < len; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						if (array instanceof float[]) {\r
+							builder.append(((float[]) array)[i]);\r
+						}\r
+						if (array instanceof int[]) {\r
+							builder.append(((int[]) array)[i]);\r
+						}\r
+						if (array instanceof char[]) {\r
+							builder.append(((char[]) array)[i]);\r
+						}\r
+						if (array instanceof Object[]) {\r
+							builder.append(((Object[]) array)[i]);\r
+						}\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -661,10 +929,31 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void concatArrayLimit1_5Unique() throws Exception {
 		setCompilerLevels(true, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
@@ -673,40 +962,68 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	Object builder;\r\n"
-				+ "	Object buffer;\r\n"
-				+ "	Object maxLen;\r\n"
-				+ "	Object len;\r\n"
-				+ "	Object collection;\r\n"
-				+ "	Object array;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen2 = 10;\r\n"
-				+ "		return \"A [aBool=\" + aBool + \", intArray=\" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null) + \", stringArray=\" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null) + \", AArray=\" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null) + \", list=\" + (list != null ? toString(list, maxLen2) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null) + \", wildCollection=\" + (wildCollection != null ? toString(wildCollection, maxLen2) : null) + \", integerCollection=\" + (integerCollection != null ? toString(integerCollection, maxLen2) : null) + \", builder=\" + builder + \", buffer=\" + buffer + \", maxLen=\" + maxLen + \", len=\" + len + \", collection=\" + collection + \", array=\" + array + \"]\";\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection2, int maxLen2) {\r\n" + "		StringBuilder builder2 = new StringBuilder();\r\n" + "		builder2.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				builder2.append(\", \");\r\n" + "			}\r\n" + "			builder2.append(iterator.next());\r\n" + "		}\r\n" + "		builder2.append(\"]\");\r\n" + "		return builder2.toString();\r\n"
-				+ "	}\r\n" + "	private String arrayToString(Object array2, int len2, int maxLen2) {\r\n" + "		StringBuilder builder2 = new StringBuilder();\r\n"
-				+ "		len2 = Math.min(len2, maxLen2);\r\n" + "		builder2.append(\"[\");\r\n" + "		for (int i = 0; i < len2; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder2.append(\", \");\r\n"
-				+ "			}\r\n" + "			if (array2 instanceof int[]) {\r\n" + "				builder2.append(((int[]) array2)[i]);\r\n" + "			}\r\n" + "			if (array2 instanceof Object[]) {\r\n"
-				+ "				builder2.append(((Object[]) array2)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		builder2.append(\"]\");\r\n" + "		return builder2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen2 = 10;\r
+					return "A [aBool=" + aBool + ", intArray=" + (intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null) + ", stringArray=" + (stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null) + ", AArray=" + (AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null) + ", list=" + (list != null ? toString(list, maxLen2) : null) + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null) + ", wildCollection=" + (wildCollection != null ? toString(wildCollection, maxLen2) : null) + ", integerCollection=" + (integerCollection != null ? toString(integerCollection, maxLen2) : null) + ", builder=" + builder + ", buffer=" + buffer + ", maxLen=" + maxLen + ", len=" + len + ", collection=" + collection + ", array=" + array + "]";\r
+				}\r
+				private String toString(Collection<?> collection2, int maxLen2) {\r
+					StringBuilder builder2 = new StringBuilder();\r
+					builder2.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r
+						if (i > 0) {\r
+							builder2.append(", ");\r
+						}\r
+						builder2.append(iterator.next());\r
+					}\r
+					builder2.append("]");\r
+					return builder2.toString();\r
+				}\r
+				private String arrayToString(Object array2, int len2, int maxLen2) {\r
+					StringBuilder builder2 = new StringBuilder();\r
+					len2 = Math.min(len2, maxLen2);\r
+					builder2.append("[");\r
+					for (int i = 0; i < len2; i++) {\r
+						if (i > 0) {\r
+							builder2.append(", ");\r
+						}\r
+						if (array2 instanceof int[]) {\r
+							builder2.append(((int[]) array2)[i]);\r
+						}\r
+						if (array2 instanceof Object[]) {\r
+							builder2.append(((Object[]) array2)[i]);\r
+						}\r
+					}\r
+					builder2.append("]");\r
+					return builder2.toString();\r
+				}\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -718,10 +1035,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArrayLimitZero() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				\r
+			}\r
+			""",
 				true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
@@ -732,35 +1074,39 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitValue= 0;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return \"A [AArray=\" + (AArray != null ? \"[]\" : null) + \", aBool=\" + aBool + \", anA=\" + anA + \", floatArray=\" + (floatArray != null ? \"[]\" : null) + \", hashMap=\" + (hashMap != null ? \"[]\" : null) + \", intArray=\" + (intArray != null ? \"[]\" : null) + \", integerCollection=\" + (integerCollection != null ? \"[]\" : null) + \", list=\" + (list != null ? \"[]\" : null) + \", object=\" + object + \", stringArray=\" + (stringArray != null ? \"[]\" : null) + \", wildCollection=\" + (wildCollection != null ? \"[]\" : null) + \", charArrayMethod()=\" + (charArrayMethod() != null ? \"[]\" : null) + \", floatArrayMethod()=\" + (floatArrayMethod() != null ? \"[]\" : null) + \"]\";\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					return "A [AArray=" + (AArray != null ? "[]" : null) + ", aBool=" + aBool + ", anA=" + anA + ", floatArray=" + (floatArray != null ? "[]" : null) + ", hashMap=" + (hashMap != null ? "[]" : null) + ", intArray=" + (intArray != null ? "[]" : null) + ", integerCollection=" + (integerCollection != null ? "[]" : null) + ", list=" + (list != null ? "[]" : null) + ", object=" + object + ", stringArray=" + (stringArray != null ? "[]" : null) + ", wildCollection=" + (wildCollection != null ? "[]" : null) + ", charArrayMethod()=" + (charArrayMethod() != null ? "[]" : null) + ", floatArrayMethod()=" + (floatArrayMethod() != null ? "[]" : null) + "]";\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -772,10 +1118,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArrayLimitZeroNulls() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				\r
+			}\r
+			""",
 				true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
@@ -787,35 +1158,39 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.skipNulls= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return \"A [\" + (AArray != null ? \"AArray=[], \" : \"\") + \"aBool=\" + aBool + \", \" + (anA != null ? \"anA=\" + anA + \", \" : \"\") + (floatArray != null ? \"floatArray=[], \" : \"\") + (hashMap != null ? \"hashMap=[], \" : \"\") + (intArray != null ? \"intArray=[], \" : \"\") + (integerCollection != null ? \"integerCollection=[], \" : \"\") + (list != null ? \"list=[], \" : \"\") + (object != null ? \"object=\" + object + \", \" : \"\") + (stringArray != null ? \"stringArray=[], \" : \"\") + (wildCollection != null ? \"wildCollection=[], \" : \"\") + (charArrayMethod() != null ? \"charArrayMethod()=[], \" : \"\") + (floatArrayMethod() != null ? \"floatArrayMethod()=[]\" : \"\") + \"]\";\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					return "A [" + (AArray != null ? "AArray=[], " : "") + "aBool=" + aBool + ", " + (anA != null ? "anA=" + anA + ", " : "") + (floatArray != null ? "floatArray=[], " : "") + (hashMap != null ? "hashMap=[], " : "") + (intArray != null ? "intArray=[], " : "") + (integerCollection != null ? "integerCollection=[], " : "") + (list != null ? "list=[], " : "") + (object != null ? "object=" + object + ", " : "") + (stringArray != null ? "stringArray=[], " : "") + (wildCollection != null ? "wildCollection=[], " : "") + (charArrayMethod() != null ? "charArrayMethod()=[], " : "") + (floatArrayMethod() != null ? "floatArrayMethod()=[]" : "") + "]";\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -827,11 +1202,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArrayLimitThisNoBlock() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -843,41 +1242,55 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [AArray=\" + (this.AArray != null ? Arrays.asList(this.AArray).subList(0, Math.min(this.AArray.length, maxLen)) : null) + \", aBool=\" + this.aBool + \", anA=\" + this.anA + \", floatArray=\" + (this.floatArray != null ? Arrays.toString(Arrays.copyOf(this.floatArray, Math.min(this.floatArray.length, maxLen))) : null) + \", hashMap=\" + (this.hashMap != null ? this.toString(this.hashMap.entrySet(), maxLen) : null) + \", intArray=\" + (this.intArray != null ? Arrays.toString(Arrays.copyOf(this.intArray, Math.min(this.intArray.length, maxLen))) : null) + \", integerCollection=\" + (this.integerCollection != null ? this.toString(this.integerCollection, maxLen) : null) + \", list=\" + (this.list != null ? this.toString(this.list, maxLen) : null) + \", object=\" + this.object + \", stringArray=\" + (this.stringArray != null ? Arrays.asList(this.stringArray).subList(0, Math.min(this.stringArray.length, maxLen)) : null) + \", wildCollection=\"\r\n"
-				+ "				+ (this.wildCollection != null ? this.toString(this.wildCollection, maxLen) : null) + \", charArrayMethod()=\" + (this.charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(this.charArrayMethod(), Math.min(this.charArrayMethod().length, maxLen))) : null) + \", floatArrayMethod()=\" + (this.floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(this.floatArrayMethod(), Math.min(this.floatArrayMethod().length, maxLen))) : null) + \"]\";\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0)\r\n" + "				builder.append(\", \");\r\n"
-				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [AArray=" + (this.AArray != null ? Arrays.asList(this.AArray).subList(0, Math.min(this.AArray.length, maxLen)) : null) + ", aBool=" + this.aBool + ", anA=" + this.anA + ", floatArray=" + (this.floatArray != null ? Arrays.toString(Arrays.copyOf(this.floatArray, Math.min(this.floatArray.length, maxLen))) : null) + ", hashMap=" + (this.hashMap != null ? this.toString(this.hashMap.entrySet(), maxLen) : null) + ", intArray=" + (this.intArray != null ? Arrays.toString(Arrays.copyOf(this.intArray, Math.min(this.intArray.length, maxLen))) : null) + ", integerCollection=" + (this.integerCollection != null ? this.toString(this.integerCollection, maxLen) : null) + ", list=" + (this.list != null ? this.toString(this.list, maxLen) : null) + ", object=" + this.object + ", stringArray=" + (this.stringArray != null ? Arrays.asList(this.stringArray).subList(0, Math.min(this.stringArray.length, maxLen)) : null) + ", wildCollection="\r
+							+ (this.wildCollection != null ? this.toString(this.wildCollection, maxLen) : null) + ", charArrayMethod()=" + (this.charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(this.charArrayMethod(), Math.min(this.charArrayMethod().length, maxLen))) : null) + ", floatArrayMethod()=" + (this.floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(this.floatArrayMethod(), Math.min(this.floatArrayMethod().length, maxLen))) : null) + "]";\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0)\r
+							builder.append(", ");\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -889,11 +1302,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArrayLimitNulls() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -904,42 +1342,57 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ " int anInt;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [\" + (AArray != null ? \"AArray=\" + Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) + \", \" : \"\") + \"aBool=\" + aBool + \", anInt=\" + anInt + \", \" + (anA != null ? \"anA=\" + anA + \", \" : \"\") + (floatArray != null ? \"floatArray=\" + Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) + \", \" : \"\") + (hashMap != null ? \"hashMap=\" + toString(hashMap.entrySet(), maxLen) + \", \" : \"\") + (intArray != null ? \"intArray=\" + Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) + \", \" : \"\") + (integerCollection != null ? \"integerCollection=\" + toString(integerCollection, maxLen) + \", \" : \"\") + (list != null ? \"list=\" + toString(list, maxLen) + \", \" : \"\") + (object != null ? \"object=\" + object + \", \" : \"\") + (stringArray != null ? \"stringArray=\" + Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) + \", \" : \"\")\r\n"
-				+ "				+ (wildCollection != null ? \"wildCollection=\" + toString(wildCollection, maxLen) + \", \" : \"\") + (charArrayMethod() != null ? \"charArrayMethod()=\" + Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) + \", \" : \"\") + (floatArrayMethod() != null ? \"floatArrayMethod()=\" + Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : \"\") + \"]\";\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
-				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [" + (AArray != null ? "AArray=" + Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) + ", " : "") + "aBool=" + aBool + ", anInt=" + anInt + ", " + (anA != null ? "anA=" + anA + ", " : "") + (floatArray != null ? "floatArray=" + Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) + ", " : "") + (hashMap != null ? "hashMap=" + toString(hashMap.entrySet(), maxLen) + ", " : "") + (intArray != null ? "intArray=" + Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) + ", " : "") + (integerCollection != null ? "integerCollection=" + toString(integerCollection, maxLen) + ", " : "") + (list != null ? "list=" + toString(list, maxLen) + ", " : "") + (object != null ? "object=" + object + ", " : "") + (stringArray != null ? "stringArray=" + Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) + ", " : "")\r
+							+ (wildCollection != null ? "wildCollection=" + toString(wildCollection, maxLen) + ", " : "") + (charArrayMethod() != null ? "charArrayMethod()=" + Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) + ", " : "") + (floatArrayMethod() != null ? "floatArrayMethod()=" + Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : "") + "]";\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -951,11 +1404,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void concatArrayLimitNoHelpers() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "intArray", "list", "object", "stringArray", "charArrayMethod",
@@ -966,39 +1444,43 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ " int anInt;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [\" + (AArray != null ? \"AArray=\" + Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) + \", \" : \"\") + \"aBool=\" + aBool + \", anInt=\" + anInt + \", \" + (anA != null ? \"anA=\" + anA + \", \" : \"\") + (floatArray != null ? \"floatArray=\" + Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) + \", \" : \"\") + (intArray != null ? \"intArray=\" + Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) + \", \" : \"\") + (list != null ? \"list=\" + list.subList(0, Math.min(list.size(), maxLen)) + \", \" : \"\") + (object != null ? \"object=\" + object + \", \" : \"\") + (stringArray != null ? \"stringArray=\" + Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) + \", \" : \"\") + (charArrayMethod() != null ? \"charArrayMethod()=\" + Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) + \", \" : \"\")\r\n"
-				+ "				+ (floatArrayMethod() != null ? \"floatArrayMethod()=\" + Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : \"\") + \"]\";\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [" + (AArray != null ? "AArray=" + Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) + ", " : "") + "aBool=" + aBool + ", anInt=" + anInt + ", " + (anA != null ? "anA=" + anA + ", " : "") + (floatArray != null ? "floatArray=" + Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) + ", " : "") + (intArray != null ? "intArray=" + Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) + ", " : "") + (list != null ? "list=" + list.subList(0, Math.min(list.size(), maxLen)) + ", " : "") + (object != null ? "object=" + object + ", " : "") + (stringArray != null ? "stringArray=" + Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) + ", " : "") + (charArrayMethod() != null ? "charArrayMethod()=" + Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) + ", " : "")\r
+							+ (floatArrayMethod() != null ? "floatArrayMethod()=" + Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : "") + "]";\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1075,12 +1557,38 @@ public class GenerateToStringTest extends SourceTestCase {
 	public void concatReplace() throws Exception {
 		setCompilerLevels(true, false);
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	A anA;\r\n" + "	float[] floatArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		return \"A []\";\r\n" + "	}\r\n" + "	private String arrayToString(Object array, int len, int maxLen) {\r\n"
-				+ "		return array[0].toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		return collection.toString();\r\n" + "	}\r\n" + "	\r\n"
-				+ "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				A anA;\r
+				float[] floatArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				@Override\r
+				public String toString() {\r
+					return "A []";\r
+				}\r
+				private String arrayToString(Object array, int len, int maxLen) {\r
+					return array[0].toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					return collection.toString();\r
+				}\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "anA", "floatArray", "hashMap", "list", "charArrayMethod", "floatArrayMethod" });
@@ -1088,34 +1596,55 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.limitElements= true;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	A anA;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return \"A [anA=\" + anA + \", floatArray=\" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + \", hashMap=\" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + \", list=\" + (list != null ? toString(list, maxLen) : null) + \", charArrayMethod()=\" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + \", floatArrayMethod()=\" + (floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null) + \"]\";\r\n"
-				+ "	}\r\n" + "	private String arrayToString(Object array, int len, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		len = Math.min(len, maxLen);\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		for (int i = 0; i < len; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array instanceof float[]) {\r\n" + "				builder.append(((float[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof char[]) {\r\n"
-				+ "				builder.append(((char[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n"
-				+ "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		return collection.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				A anA;\r
+				float[] floatArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return "A [anA=" + anA + ", floatArray=" + (floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null) + ", hashMap=" + (hashMap != null ? toString(hashMap.entrySet(), maxLen) : null) + ", list=" + (list != null ? toString(list, maxLen) : null) + ", charArrayMethod()=" + (charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null) + ", floatArrayMethod()=" + (floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null) + "]";\r
+				}\r
+				private String arrayToString(Object array, int len, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					len = Math.min(len, maxLen);\r
+					builder.append("[");\r
+					for (int i = 0; i < len; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						if (array instanceof float[]) {\r
+							builder.append(((float[]) array)[i]);\r
+						}\r
+						if (array instanceof char[]) {\r
+							builder.append(((char[]) array)[i]);\r
+						}\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					return collection.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1216,9 +1745,25 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArray() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+			\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
@@ -1226,15 +1771,51 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"A [AArray=\");\r\n" + "		builder.append(Arrays.toString(AArray));\r\n" + "		builder.append(\", aBool=\");\r\n" + "		builder.append(aBool);\r\n"
-				+ "		builder.append(\", anA=\");\r\n" + "		builder.append(anA);\r\n" + "		builder.append(\", floatArray=\");\r\n" + "		builder.append(Arrays.toString(floatArray));\r\n"
-				+ "		builder.append(\", intArray=\");\r\n" + "		builder.append(Arrays.toString(intArray));\r\n" + "		builder.append(\", list=\");\r\n" + "		builder.append(list);\r\n"
-				+ "		builder.append(\", object=\");\r\n" + "		builder.append(object);\r\n" + "		builder.append(\", stringArray=\");\r\n" + "		builder.append(Arrays.toString(stringArray));\r\n"
-				+ "		builder.append(\", anArrayMethod()=\");\r\n" + "		builder.append(Arrays.toString(anArrayMethod()));\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
-				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [AArray=");\r
+					builder.append(Arrays.toString(AArray));\r
+					builder.append(", aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anA=");\r
+					builder.append(anA);\r
+					builder.append(", floatArray=");\r
+					builder.append(Arrays.toString(floatArray));\r
+					builder.append(", intArray=");\r
+					builder.append(Arrays.toString(intArray));\r
+					builder.append(", list=");\r
+					builder.append(list);\r
+					builder.append(", object=");\r
+					builder.append(object);\r
+					builder.append(", stringArray=");\r
+					builder.append(Arrays.toString(stringArray));\r
+					builder.append(", anArrayMethod()=");\r
+					builder.append(Arrays.toString(anArrayMethod()));\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1246,11 +1827,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1259,23 +1864,82 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n"
-				+ "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A [AArray=\");\r\n"
-				+ "		builder.append(AArray);\r\n" + "		builder.append(\", aBool=\");\r\n" + "		builder.append(aBool);\r\n" + "		builder.append(\", anA=\");\r\n" + "		builder.append(anA);\r\n"
-				+ "		builder.append(\", floatArray=\");\r\n" + "		builder.append(floatArray);\r\n" + "		builder.append(\", hashMap=\");\r\n"
-				+ "		builder.append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r\n" + "		builder.append(\", intArray=\");\r\n" + "		builder.append(intArray);\r\n"
-				+ "		builder.append(\", integerCollection=\");\r\n" + "		builder.append(integerCollection != null ? toString(integerCollection, maxLen) : null);\r\n"
-				+ "		builder.append(\", list=\");\r\n" + "		builder.append(list != null ? toString(list, maxLen) : null);\r\n" + "		builder.append(\", object=\");\r\n"
-				+ "		builder.append(object);\r\n" + "		builder.append(\", stringArray=\");\r\n" + "		builder.append(stringArray);\r\n" + "		builder.append(\", wildCollection=\");\r\n"
-				+ "		builder.append(wildCollection != null ? toString(wildCollection, maxLen) : null);\r\n" + "		builder.append(\", charArrayMethod()=\");\r\n"
-				+ "		builder.append(charArrayMethod());\r\n" + "		builder.append(\", floatArrayMethod()=\");\r\n" + "		builder.append(floatArrayMethod());\r\n" + "		builder.append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [AArray=");\r
+					builder.append(AArray);\r
+					builder.append(", aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anA=");\r
+					builder.append(anA);\r
+					builder.append(", floatArray=");\r
+					builder.append(floatArray);\r
+					builder.append(", hashMap=");\r
+					builder.append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r
+					builder.append(", intArray=");\r
+					builder.append(intArray);\r
+					builder.append(", integerCollection=");\r
+					builder.append(integerCollection != null ? toString(integerCollection, maxLen) : null);\r
+					builder.append(", list=");\r
+					builder.append(list != null ? toString(list, maxLen) : null);\r
+					builder.append(", object=");\r
+					builder.append(object);\r
+					builder.append(", stringArray=");\r
+					builder.append(stringArray);\r
+					builder.append(", wildCollection=");\r
+					builder.append(wildCollection != null ? toString(wildCollection, maxLen) : null);\r
+					builder.append(", charArrayMethod()=");\r
+					builder.append(charArrayMethod());\r
+					builder.append(", floatArrayMethod()=");\r
+					builder.append(floatArrayMethod());\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1287,11 +1951,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArrayLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1301,29 +1989,83 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A [AArray=\");\r\n"
-				+ "		builder.append(AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null);\r\n" + "		builder.append(\", aBool=\");\r\n"
-				+ "		builder.append(aBool);\r\n" + "		builder.append(\", anA=\");\r\n" + "		builder.append(anA);\r\n" + "		builder.append(\", floatArray=\");\r\n"
-				+ "		builder.append(floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null);\r\n" + "		builder.append(\", hashMap=\");\r\n"
-				+ "		builder.append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r\n" + "		builder.append(\", intArray=\");\r\n"
-				+ "		builder.append(intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null);\r\n" + "		builder.append(\", integerCollection=\");\r\n"
-				+ "		builder.append(integerCollection != null ? toString(integerCollection, maxLen) : null);\r\n" + "		builder.append(\", list=\");\r\n"
-				+ "		builder.append(list != null ? toString(list, maxLen) : null);\r\n" + "		builder.append(\", object=\");\r\n" + "		builder.append(object);\r\n"
-				+ "		builder.append(\", stringArray=\");\r\n" + "		builder.append(stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r\n"
-				+ "		builder.append(\", wildCollection=\");\r\n" + "		builder.append(wildCollection != null ? toString(wildCollection, maxLen) : null);\r\n"
-				+ "		builder.append(\", charArrayMethod()=\");\r\n"
-				+ "		builder.append(charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null);\r\n"
-				+ "		builder.append(\", floatArrayMethod()=\");\r\n"
-				+ "		builder.append(floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
-				+ "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
-				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [AArray=");\r
+					builder.append(AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null);\r
+					builder.append(", aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anA=");\r
+					builder.append(anA);\r
+					builder.append(", floatArray=");\r
+					builder.append(floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null);\r
+					builder.append(", hashMap=");\r
+					builder.append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r
+					builder.append(", intArray=");\r
+					builder.append(intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null);\r
+					builder.append(", integerCollection=");\r
+					builder.append(integerCollection != null ? toString(integerCollection, maxLen) : null);\r
+					builder.append(", list=");\r
+					builder.append(list != null ? toString(list, maxLen) : null);\r
+					builder.append(", object=");\r
+					builder.append(object);\r
+					builder.append(", stringArray=");\r
+					builder.append(stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r
+					builder.append(", wildCollection=");\r
+					builder.append(wildCollection != null ? toString(wildCollection, maxLen) : null);\r
+					builder.append(", charArrayMethod()=");\r
+					builder.append(charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null);\r
+					builder.append(", floatArrayMethod()=");\r
+					builder.append(floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1336,10 +2078,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void builderArrayLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				\r
+			}\r
+			""",
 				true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
@@ -1350,34 +2117,106 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n"
-				+ "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		buffer.append(\"A [AArray=\");\r\n"
-				+ "		buffer.append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null);\r\n" + "		buffer.append(\", aBool=\");\r\n" + "		buffer.append(aBool);\r\n"
-				+ "		buffer.append(\", anA=\");\r\n" + "		buffer.append(anA);\r\n" + "		buffer.append(\", floatArray=\");\r\n"
-				+ "		buffer.append(floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null);\r\n" + "		buffer.append(\", hashMap=\");\r\n"
-				+ "		buffer.append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r\n" + "		buffer.append(\", intArray=\");\r\n"
-				+ "		buffer.append(intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null);\r\n" + "		buffer.append(\", integerCollection=\");\r\n"
-				+ "		buffer.append(integerCollection != null ? toString(integerCollection, maxLen) : null);\r\n" + "		buffer.append(\", list=\");\r\n"
-				+ "		buffer.append(list != null ? toString(list, maxLen) : null);\r\n" + "		buffer.append(\", object=\");\r\n" + "		buffer.append(object);\r\n"
-				+ "		buffer.append(\", stringArray=\");\r\n" + "		buffer.append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null);\r\n"
-				+ "		buffer.append(\", wildCollection=\");\r\n" + "		buffer.append(wildCollection != null ? toString(wildCollection, maxLen) : null);\r\n"
-				+ "		buffer.append(\", charArrayMethod()=\");\r\n" + "		buffer.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null);\r\n"
-				+ "		buffer.append(\", floatArrayMethod()=\");\r\n" + "		buffer.append(floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null);\r\n"
-				+ "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n" + "	private String toString(Collection collection, int maxLen) {\r\n"
-				+ "		StringBuffer buffer = new StringBuffer();\r\n" + "		buffer.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n" + "			}\r\n"
-				+ "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n"
-				+ "	private String arrayToString(Object array, int len, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		len = Math.min(len, maxLen);\r\n"
-				+ "		buffer.append(\"[\");\r\n" + "		for (int i = 0; i < len; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array instanceof float[]) {\r\n" + "				buffer.append(((float[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof int[]) {\r\n"
-				+ "				buffer.append(((int[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof char[]) {\r\n" + "				buffer.append(((char[]) array)[i]);\r\n" + "			}\r\n"
-				+ "			if (array instanceof Object[]) {\r\n" + "				buffer.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n"
-				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuffer buffer = new StringBuffer();\r
+					buffer.append("A [AArray=");\r
+					buffer.append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null);\r
+					buffer.append(", aBool=");\r
+					buffer.append(aBool);\r
+					buffer.append(", anA=");\r
+					buffer.append(anA);\r
+					buffer.append(", floatArray=");\r
+					buffer.append(floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null);\r
+					buffer.append(", hashMap=");\r
+					buffer.append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r
+					buffer.append(", intArray=");\r
+					buffer.append(intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null);\r
+					buffer.append(", integerCollection=");\r
+					buffer.append(integerCollection != null ? toString(integerCollection, maxLen) : null);\r
+					buffer.append(", list=");\r
+					buffer.append(list != null ? toString(list, maxLen) : null);\r
+					buffer.append(", object=");\r
+					buffer.append(object);\r
+					buffer.append(", stringArray=");\r
+					buffer.append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null);\r
+					buffer.append(", wildCollection=");\r
+					buffer.append(wildCollection != null ? toString(wildCollection, maxLen) : null);\r
+					buffer.append(", charArrayMethod()=");\r
+					buffer.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null);\r
+					buffer.append(", floatArrayMethod()=");\r
+					buffer.append(floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null);\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				private String toString(Collection collection, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					buffer.append("[");\r
+					int i = 0;\r
+					for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						buffer.append(iterator.next());\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				private String arrayToString(Object array, int len, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					len = Math.min(len, maxLen);\r
+					buffer.append("[");\r
+					for (int i = 0; i < len; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						if (array instanceof float[]) {\r
+							buffer.append(((float[]) array)[i]);\r
+						}\r
+						if (array instanceof int[]) {\r
+							buffer.append(((int[]) array)[i]);\r
+						}\r
+						if (array instanceof char[]) {\r
+							buffer.append(((char[]) array)[i]);\r
+						}\r
+						if (array instanceof Object[]) {\r
+							buffer.append(((Object[]) array)[i]);\r
+						}\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1391,10 +2230,31 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void builderArrayLimit1_4Unique() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
@@ -1404,30 +2264,98 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 1;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n" + "	Object len;\r\n"
-				+ "	Object collection;\r\n" + "	Object array;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		final int maxLen2 = 10;\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n"
-				+ "		buffer2.append(\"A [aBool=\");\r\n" + "		buffer2.append(aBool);\r\n" + "		buffer2.append(\", intArray=\");\r\n"
-				+ "		buffer2.append(intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null);\r\n" + "		buffer2.append(\", stringArray=\");\r\n"
-				+ "		buffer2.append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null);\r\n" + "		buffer2.append(\", AArray=\");\r\n"
-				+ "		buffer2.append(AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null);\r\n" + "		buffer2.append(\", list=\");\r\n"
-				+ "		buffer2.append(list != null ? toString(list, maxLen2) : null);\r\n" + "		buffer2.append(\", hashMap=\");\r\n"
-				+ "		buffer2.append(hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null);\r\n" + "		buffer2.append(\", wildCollection=\");\r\n"
-				+ "		buffer2.append(wildCollection != null ? toString(wildCollection, maxLen2) : null);\r\n" + "		buffer2.append(\", integerCollection=\");\r\n"
-				+ "		buffer2.append(integerCollection != null ? toString(integerCollection, maxLen2) : null);\r\n" + "		buffer2.append(\", builder=\");\r\n" + "		buffer2.append(builder);\r\n"
-				+ "		buffer2.append(\", buffer=\");\r\n" + "		buffer2.append(buffer);\r\n" + "		buffer2.append(\", maxLen=\");\r\n" + "		buffer2.append(maxLen);\r\n"
-				+ "		buffer2.append(\", len=\");\r\n" + "		buffer2.append(len);\r\n" + "		buffer2.append(\", collection=\");\r\n" + "		buffer2.append(collection);\r\n"
-				+ "		buffer2.append(\", array=\");\r\n" + "		buffer2.append(array);\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n"
-				+ "	private String toString(Collection collection2, int maxLen2) {\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n" + "		buffer2.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer2.append(\", \");\r\n" + "			}\r\n"
-				+ "			buffer2.append(iterator.next());\r\n" + "		}\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n"
-				+ "	private String arrayToString(Object array2, int len2, int maxLen2) {\r\n" + "		StringBuffer buffer2 = new StringBuffer();\r\n" + "		len2 = Math.min(len2, maxLen2);\r\n"
-				+ "		buffer2.append(\"[\");\r\n" + "		for (int i = 0; i < len2; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer2.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array2 instanceof int[]) {\r\n" + "				buffer2.append(((int[]) array2)[i]);\r\n" + "			}\r\n" + "			if (array2 instanceof Object[]) {\r\n"
-				+ "				buffer2.append(((Object[]) array2)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer2.append(\"]\");\r\n" + "		return buffer2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen2 = 10;\r
+					StringBuffer buffer2 = new StringBuffer();\r
+					buffer2.append("A [aBool=");\r
+					buffer2.append(aBool);\r
+					buffer2.append(", intArray=");\r
+					buffer2.append(intArray != null ? arrayToString(intArray, intArray.length, maxLen2) : null);\r
+					buffer2.append(", stringArray=");\r
+					buffer2.append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen2) : null);\r
+					buffer2.append(", AArray=");\r
+					buffer2.append(AArray != null ? arrayToString(AArray, AArray.length, maxLen2) : null);\r
+					buffer2.append(", list=");\r
+					buffer2.append(list != null ? toString(list, maxLen2) : null);\r
+					buffer2.append(", hashMap=");\r
+					buffer2.append(hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null);\r
+					buffer2.append(", wildCollection=");\r
+					buffer2.append(wildCollection != null ? toString(wildCollection, maxLen2) : null);\r
+					buffer2.append(", integerCollection=");\r
+					buffer2.append(integerCollection != null ? toString(integerCollection, maxLen2) : null);\r
+					buffer2.append(", builder=");\r
+					buffer2.append(builder);\r
+					buffer2.append(", buffer=");\r
+					buffer2.append(buffer);\r
+					buffer2.append(", maxLen=");\r
+					buffer2.append(maxLen);\r
+					buffer2.append(", len=");\r
+					buffer2.append(len);\r
+					buffer2.append(", collection=");\r
+					buffer2.append(collection);\r
+					buffer2.append(", array=");\r
+					buffer2.append(array);\r
+					buffer2.append("]");\r
+					return buffer2.toString();\r
+				}\r
+				private String toString(Collection collection2, int maxLen2) {\r
+					StringBuffer buffer2 = new StringBuffer();\r
+					buffer2.append("[");\r
+					int i = 0;\r
+					for (Iterator iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r
+						if (i > 0) {\r
+							buffer2.append(", ");\r
+						}\r
+						buffer2.append(iterator.next());\r
+					}\r
+					buffer2.append("]");\r
+					return buffer2.toString();\r
+				}\r
+				private String arrayToString(Object array2, int len2, int maxLen2) {\r
+					StringBuffer buffer2 = new StringBuffer();\r
+					len2 = Math.min(len2, maxLen2);\r
+					buffer2.append("[");\r
+					for (int i = 0; i < len2; i++) {\r
+						if (i > 0) {\r
+							buffer2.append(", ");\r
+						}\r
+						if (array2 instanceof int[]) {\r
+							buffer2.append(((int[]) array2)[i]);\r
+						}\r
+						if (array2 instanceof Object[]) {\r
+							buffer2.append(((Object[]) array2)[i]);\r
+						}\r
+					}\r
+					buffer2.append("]");\r
+					return buffer2.toString();\r
+				}\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1440,11 +2368,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArrayLimitNullsThisNoBlocks() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1459,30 +2411,105 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A[ \");\r\n" + "		if (this.AArray != null) {\r\n"
-				+ "			builder.append(Arrays.asList(this.AArray).subList(0, Math.min(this.AArray.length, maxLen)));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		builder.append(this.aBool);\r\n" + "		builder.append(\", \");\r\n" + "		if (this.anA != null) {\r\n" + "			builder.append(this.anA);\r\n" + "			builder.append(\", \");\r\n"
-				+ "		}\r\n" + "		if (this.floatArray != null) {\r\n" + "			builder.append(Arrays.toString(Arrays.copyOf(this.floatArray, Math.min(this.floatArray.length, maxLen))));\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (this.hashMap != null) {\r\n" + "			builder.append(this.toString(this.hashMap.entrySet(), maxLen));\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (this.intArray != null) {\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(this.intArray, Math.min(this.intArray.length, maxLen))));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (this.integerCollection != null) {\r\n" + "			builder.append(this.toString(this.integerCollection, maxLen));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (this.list != null) {\r\n" + "			builder.append(this.toString(this.list, maxLen));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (this.object != null) {\r\n"
-				+ "			builder.append(this.object);\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (this.stringArray != null) {\r\n"
-				+ "			builder.append(Arrays.asList(this.stringArray).subList(0, Math.min(this.stringArray.length, maxLen)));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (this.wildCollection != null) {\r\n" + "			builder.append(this.toString(this.wildCollection, maxLen));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (this.charArrayMethod() != null) {\r\n" + "			builder.append(Arrays.toString(Arrays.copyOf(this.charArrayMethod(), Math.min(this.charArrayMethod().length, maxLen))));\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (this.floatArrayMethod() != null)\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(this.floatArrayMethod(), Math.min(this.floatArrayMethod().length, maxLen))));\r\n" + "		builder.append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0)\r\n"
-				+ "				builder.append(\", \");\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n"
-				+ "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A[ ");\r
+					if (this.AArray != null) {\r
+						builder.append(Arrays.asList(this.AArray).subList(0, Math.min(this.AArray.length, maxLen)));\r
+						builder.append(", ");\r
+					}\r
+					builder.append(this.aBool);\r
+					builder.append(", ");\r
+					if (this.anA != null) {\r
+						builder.append(this.anA);\r
+						builder.append(", ");\r
+					}\r
+					if (this.floatArray != null) {\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.floatArray, Math.min(this.floatArray.length, maxLen))));\r
+						builder.append(", ");\r
+					}\r
+					if (this.hashMap != null) {\r
+						builder.append(this.toString(this.hashMap.entrySet(), maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (this.intArray != null) {\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.intArray, Math.min(this.intArray.length, maxLen))));\r
+						builder.append(", ");\r
+					}\r
+					if (this.integerCollection != null) {\r
+						builder.append(this.toString(this.integerCollection, maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (this.list != null) {\r
+						builder.append(this.toString(this.list, maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (this.object != null) {\r
+						builder.append(this.object);\r
+						builder.append(", ");\r
+					}\r
+					if (this.stringArray != null) {\r
+						builder.append(Arrays.asList(this.stringArray).subList(0, Math.min(this.stringArray.length, maxLen)));\r
+						builder.append(", ");\r
+					}\r
+					if (this.wildCollection != null) {\r
+						builder.append(this.toString(this.wildCollection, maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (this.charArrayMethod() != null) {\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.charArrayMethod(), Math.min(this.charArrayMethod().length, maxLen))));\r
+						builder.append(", ");\r
+					}\r
+					if (this.floatArrayMethod() != null)\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.floatArrayMethod(), Math.min(this.floatArrayMethod().length, maxLen))));\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0)\r
+							builder.append(", ");\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1494,11 +2521,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArrayLimitNulls() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1510,33 +2562,123 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A [\");\r\n" + "		if (AArray != null) {\r\n" + "			builder.append(\"AArray=\");\r\n"
-				+ "			builder.append(Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		builder.append(\"aBool=\");\r\n"
-				+ "		builder.append(aBool);\r\n" + "		builder.append(\", anInt=\");\r\n" + "		builder.append(anInt);\r\n" + "		builder.append(\", \");\r\n" + "		if (anA != null) {\r\n"
-				+ "			builder.append(\"anA=\");\r\n" + "			builder.append(anA);\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (floatArray != null) {\r\n"
-				+ "			builder.append(\"floatArray=\");\r\n" + "			builder.append(Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))));\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (hashMap != null) {\r\n" + "			builder.append(\"hashMap=\");\r\n"
-				+ "			builder.append(toString(hashMap.entrySet(), maxLen));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (intArray != null) {\r\n"
-				+ "			builder.append(\"intArray=\");\r\n" + "			builder.append(Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))));\r\n" + "			builder.append(\", \");\r\n"
-				+ "		}\r\n" + "		if (integerCollection != null) {\r\n" + "			builder.append(\"integerCollection=\");\r\n" + "			builder.append(toString(integerCollection, maxLen));\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (list != null) {\r\n" + "			builder.append(\"list=\");\r\n" + "			builder.append(toString(list, maxLen));\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (object != null) {\r\n" + "			builder.append(\"object=\");\r\n" + "			builder.append(object);\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (stringArray != null) {\r\n" + "			builder.append(\"stringArray=\");\r\n"
-				+ "			builder.append(Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (wildCollection != null) {\r\n" + "			builder.append(\"wildCollection=\");\r\n" + "			builder.append(toString(wildCollection, maxLen));\r\n" + "			builder.append(\", \");\r\n"
-				+ "		}\r\n" + "		if (charArrayMethod() != null) {\r\n" + "			builder.append(\"charArrayMethod()=\");\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))));\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (floatArrayMethod() != null) {\r\n" + "			builder.append(\"floatArrayMethod()=\");\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))));\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [");\r
+					if (AArray != null) {\r
+						builder.append("AArray=");\r
+						builder.append(Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)));\r
+						builder.append(", ");\r
+					}\r
+					builder.append("aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anInt=");\r
+					builder.append(anInt);\r
+					builder.append(", ");\r
+					if (anA != null) {\r
+						builder.append("anA=");\r
+						builder.append(anA);\r
+						builder.append(", ");\r
+					}\r
+					if (floatArray != null) {\r
+						builder.append("floatArray=");\r
+						builder.append(Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))));\r
+						builder.append(", ");\r
+					}\r
+					if (hashMap != null) {\r
+						builder.append("hashMap=");\r
+						builder.append(toString(hashMap.entrySet(), maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (intArray != null) {\r
+						builder.append("intArray=");\r
+						builder.append(Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))));\r
+						builder.append(", ");\r
+					}\r
+					if (integerCollection != null) {\r
+						builder.append("integerCollection=");\r
+						builder.append(toString(integerCollection, maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (list != null) {\r
+						builder.append("list=");\r
+						builder.append(toString(list, maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (object != null) {\r
+						builder.append("object=");\r
+						builder.append(object);\r
+						builder.append(", ");\r
+					}\r
+					if (stringArray != null) {\r
+						builder.append("stringArray=");\r
+						builder.append(Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)));\r
+						builder.append(", ");\r
+					}\r
+					if (wildCollection != null) {\r
+						builder.append("wildCollection=");\r
+						builder.append(toString(wildCollection, maxLen));\r
+						builder.append(", ");\r
+					}\r
+					if (charArrayMethod() != null) {\r
+						builder.append("charArrayMethod()=");\r
+						builder.append(Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))));\r
+						builder.append(", ");\r
+					}\r
+					if (floatArrayMethod() != null) {\r
+						builder.append("floatArrayMethod()=");\r
+						builder.append(Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))));\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1548,11 +2690,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArrayLimitNoHelpers() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "intArray", "list", "object", "stringArray", "charArrayMethod",
@@ -1563,23 +2730,66 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A [AArray=\");\r\n"
-				+ "		builder.append(AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null);\r\n" + "		builder.append(\", aBool=\");\r\n"
-				+ "		builder.append(aBool);\r\n" + "		builder.append(\", anInt=\");\r\n" + "		builder.append(anInt);\r\n" + "		builder.append(\", anA=\");\r\n" + "		builder.append(anA);\r\n"
-				+ "		builder.append(\", floatArray=\");\r\n" + "		builder.append(floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null);\r\n"
-				+ "		builder.append(\", intArray=\");\r\n" + "		builder.append(intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null);\r\n"
-				+ "		builder.append(\", list=\");\r\n" + "		builder.append(list != null ? list.subList(0, Math.min(list.size(), maxLen)) : null);\r\n" + "		builder.append(\", object=\");\r\n"
-				+ "		builder.append(object);\r\n" + "		builder.append(\", stringArray=\");\r\n"
-				+ "		builder.append(stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r\n" + "		builder.append(\", charArrayMethod()=\");\r\n"
-				+ "		builder.append(charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null);\r\n"
-				+ "		builder.append(\", floatArrayMethod()=\");\r\n"
-				+ "		builder.append(floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
-				+ "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [AArray=");\r
+					builder.append(AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null);\r
+					builder.append(", aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anInt=");\r
+					builder.append(anInt);\r
+					builder.append(", anA=");\r
+					builder.append(anA);\r
+					builder.append(", floatArray=");\r
+					builder.append(floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null);\r
+					builder.append(", intArray=");\r
+					builder.append(intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null);\r
+					builder.append(", list=");\r
+					builder.append(list != null ? list.subList(0, Math.min(list.size(), maxLen)) : null);\r
+					builder.append(", object=");\r
+					builder.append(object);\r
+					builder.append(", stringArray=");\r
+					builder.append(stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r
+					builder.append(", charArrayMethod()=");\r
+					builder.append(charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null);\r
+					builder.append(", floatArrayMethod()=");\r
+					builder.append(floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1591,11 +2801,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArrayLimitZero() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1607,20 +2842,70 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n"
-				+ "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n"
-				+ "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A [AArray=\");\r\n"
-				+ "		builder.append(AArray != null ? \"[]\" : null);\r\n" + "		builder.append(\", aBool=\");\r\n" + "		builder.append(aBool);\r\n" + "		builder.append(\", anInt=\");\r\n"
-				+ "		builder.append(anInt);\r\n" + "		builder.append(\", anA=\");\r\n" + "		builder.append(anA);\r\n" + "		builder.append(\", floatArray=\");\r\n"
-				+ "		builder.append(floatArray != null ? \"[]\" : null);\r\n" + "		builder.append(\", hashMap=\");\r\n" + "		builder.append(hashMap != null ? \"[]\" : null);\r\n"
-				+ "		builder.append(\", intArray=\");\r\n" + "		builder.append(intArray != null ? \"[]\" : null);\r\n" + "		builder.append(\", integerCollection=\");\r\n"
-				+ "		builder.append(integerCollection != null ? \"[]\" : null);\r\n" + "		builder.append(\", list=\");\r\n" + "		builder.append(list != null ? \"[]\" : null);\r\n"
-				+ "		builder.append(\", object=\");\r\n" + "		builder.append(object);\r\n" + "		builder.append(\", stringArray=\");\r\n" + "		builder.append(stringArray != null ? \"[]\" : null);\r\n"
-				+ "		builder.append(\", wildCollection=\");\r\n" + "		builder.append(wildCollection != null ? \"[]\" : null);\r\n" + "		builder.append(\", charArrayMethod()=\");\r\n"
-				+ "		builder.append(charArrayMethod() != null ? \"[]\" : null);\r\n" + "		builder.append(\", floatArrayMethod()=\");\r\n"
-				+ "		builder.append(floatArrayMethod() != null ? \"[]\" : null);\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [AArray=");\r
+					builder.append(AArray != null ? "[]" : null);\r
+					builder.append(", aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anInt=");\r
+					builder.append(anInt);\r
+					builder.append(", anA=");\r
+					builder.append(anA);\r
+					builder.append(", floatArray=");\r
+					builder.append(floatArray != null ? "[]" : null);\r
+					builder.append(", hashMap=");\r
+					builder.append(hashMap != null ? "[]" : null);\r
+					builder.append(", intArray=");\r
+					builder.append(intArray != null ? "[]" : null);\r
+					builder.append(", integerCollection=");\r
+					builder.append(integerCollection != null ? "[]" : null);\r
+					builder.append(", list=");\r
+					builder.append(list != null ? "[]" : null);\r
+					builder.append(", object=");\r
+					builder.append(object);\r
+					builder.append(", stringArray=");\r
+					builder.append(stringArray != null ? "[]" : null);\r
+					builder.append(", wildCollection=");\r
+					builder.append(wildCollection != null ? "[]" : null);\r
+					builder.append(", charArrayMethod()=");\r
+					builder.append(charArrayMethod() != null ? "[]" : null);\r
+					builder.append(", floatArrayMethod()=");\r
+					builder.append(floatArrayMethod() != null ? "[]" : null);\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1632,11 +2917,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void builderArrayLimitZeroNulls() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1649,21 +2959,88 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n"
-				+ "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n"
-				+ "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A [\");\r\n" + "		if (AArray != null) {\r\n"
-				+ "			builder.append(\"AArray=[], \");\r\n" + "		}\r\n" + "		builder.append(\"aBool=\");\r\n" + "		builder.append(aBool);\r\n" + "		builder.append(\", anInt=\");\r\n"
-				+ "		builder.append(anInt);\r\n" + "		builder.append(\", \");\r\n" + "		if (anA != null) {\r\n" + "			builder.append(\"anA=\");\r\n" + "			builder.append(anA);\r\n"
-				+ "			builder.append(\", \");\r\n" + "		}\r\n" + "		if (floatArray != null) {\r\n" + "			builder.append(\"floatArray=[], \");\r\n" + "		}\r\n" + "		if (hashMap != null) {\r\n"
-				+ "			builder.append(\"hashMap=[], \");\r\n" + "		}\r\n" + "		if (intArray != null) {\r\n" + "			builder.append(\"intArray=[], \");\r\n" + "		}\r\n"
-				+ "		if (integerCollection != null) {\r\n" + "			builder.append(\"integerCollection=[], \");\r\n" + "		}\r\n" + "		if (list != null) {\r\n" + "			builder.append(\"list=[], \");\r\n"
-				+ "		}\r\n" + "		if (object != null) {\r\n" + "			builder.append(\"object=\");\r\n" + "			builder.append(object);\r\n" + "			builder.append(\", \");\r\n" + "		}\r\n"
-				+ "		if (stringArray != null) {\r\n" + "			builder.append(\"stringArray=[], \");\r\n" + "		}\r\n" + "		if (wildCollection != null) {\r\n"
-				+ "			builder.append(\"wildCollection=[], \");\r\n" + "		}\r\n" + "		if (charArrayMethod() != null) {\r\n" + "			builder.append(\"charArrayMethod()=[], \");\r\n" + "		}\r\n"
-				+ "		if (floatArrayMethod() != null) {\r\n" + "			builder.append(\"floatArrayMethod()=[]\");\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [");\r
+					if (AArray != null) {\r
+						builder.append("AArray=[], ");\r
+					}\r
+					builder.append("aBool=");\r
+					builder.append(aBool);\r
+					builder.append(", anInt=");\r
+					builder.append(anInt);\r
+					builder.append(", ");\r
+					if (anA != null) {\r
+						builder.append("anA=");\r
+						builder.append(anA);\r
+						builder.append(", ");\r
+					}\r
+					if (floatArray != null) {\r
+						builder.append("floatArray=[], ");\r
+					}\r
+					if (hashMap != null) {\r
+						builder.append("hashMap=[], ");\r
+					}\r
+					if (intArray != null) {\r
+						builder.append("intArray=[], ");\r
+					}\r
+					if (integerCollection != null) {\r
+						builder.append("integerCollection=[], ");\r
+					}\r
+					if (list != null) {\r
+						builder.append("list=[], ");\r
+					}\r
+					if (object != null) {\r
+						builder.append("object=");\r
+						builder.append(object);\r
+						builder.append(", ");\r
+					}\r
+					if (stringArray != null) {\r
+						builder.append("stringArray=[], ");\r
+					}\r
+					if (wildCollection != null) {\r
+						builder.append("wildCollection=[], ");\r
+					}\r
+					if (charArrayMethod() != null) {\r
+						builder.append("charArrayMethod()=[], ");\r
+					}\r
+					if (floatArrayMethod() != null) {\r
+						builder.append("floatArrayMethod()=[]");\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1752,9 +3129,25 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void chainedBuilderArray() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+			\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
@@ -1762,28 +3155,33 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 2;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] anArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"A [AArray=\").append(Arrays.toString(AArray)).append(\", aBool=\").append(aBool).append(\", anA=\").append(anA).append(\", floatArray=\").append(Arrays.toString(floatArray)).append(\", intArray=\").append(Arrays.toString(intArray)).append(\", list=\").append(list).append(\", object=\").append(object).append(\", stringArray=\").append(Arrays.toString(stringArray)).append(\", anArrayMethod()=\").append(Arrays.toString(anArrayMethod())).append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A [AArray=").append(Arrays.toString(AArray)).append(", aBool=").append(aBool).append(", anA=").append(anA).append(", floatArray=").append(Arrays.toString(floatArray)).append(", intArray=").append(Arrays.toString(intArray)).append(", list=").append(list).append(", object=").append(object).append(", stringArray=").append(Arrays.toString(stringArray)).append(", anArrayMethod()=").append(Arrays.toString(anArrayMethod())).append("]");\r
+					return builder.toString();\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1796,10 +3194,31 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void chainedBuilderArrayUnique() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
@@ -1808,34 +3227,38 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 2;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	Object builder;\r\n"
-				+ "	Object buffer;\r\n"
-				+ "	Object maxLen;\r\n"
-				+ "	Object len;\r\n"
-				+ "	Object collection;\r\n"
-				+ "	Object array;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		StringBuilder builder2 = new StringBuilder();\r\n"
-				+ "		builder2.append(\"A [aBool=\").append(aBool).append(\", intArray=\").append(Arrays.toString(intArray)).append(\", stringArray=\").append(Arrays.toString(stringArray)).append(\", AArray=\").append(Arrays.toString(AArray)).append(\", list=\").append(list).append(\", hashMap=\").append(hashMap).append(\", wildCollection=\").append(wildCollection).append(\", integerCollection=\").append(integerCollection).append(\", builder=\").append(builder).append(\", buffer=\").append(buffer).append(\", maxLen=\").append(maxLen).append(\", len=\").append(len).append(\", collection=\").append(collection).append(\", array=\").append(array).append(\"]\");\r\n"
-				+ "		return builder2.toString();\r\n" + "	}\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder2 = new StringBuilder();\r
+					builder2.append("A [aBool=").append(aBool).append(", intArray=").append(Arrays.toString(intArray)).append(", stringArray=").append(Arrays.toString(stringArray)).append(", AArray=").append(Arrays.toString(AArray)).append(", list=").append(list).append(", hashMap=").append(hashMap).append(", wildCollection=").append(wildCollection).append(", integerCollection=").append(integerCollection).append(", builder=").append(builder).append(", buffer=").append(buffer).append(", maxLen=").append(maxLen).append(", len=").append(len).append(", collection=").append(collection).append(", array=").append(array).append("]");\r
+					return builder2.toString();\r
+				}\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1849,10 +3272,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedBuilderArrayLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	\r\n" + "}\r\n" + "",
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				\r
+			}\r
+			""",
 				true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
@@ -1863,47 +3311,81 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 2;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		StringBuffer buffer = new StringBuffer();\r\n"
-				+ "		buffer.append(\"A [AArray=\").append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null).append(\", aBool=\").append(aBool).append(\", anA=\").append(anA).append(\", floatArray=\").append(floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null).append(\", hashMap=\").append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null).append(\", intArray=\").append(intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null).append(\", integerCollection=\").append(integerCollection != null ? toString(integerCollection, maxLen) : null).append(\", list=\").append(list != null ? toString(list, maxLen) : null).append(\", object=\").append(object).append(\", stringArray=\").append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null).append(\", wildCollection=\").append(wildCollection != null ? toString(wildCollection, maxLen) : null).append(\", charArrayMethod()=\")\r\n"
-				+ "				.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null).append(\", floatArrayMethod()=\").append(floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null).append(\"]\");\r\n"
-				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	private String toString(Collection collection, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n"
-				+ "		buffer.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				buffer.append(\", \");\r\n" + "			}\r\n" + "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n"
-				+ "	private String arrayToString(Object array, int len, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		len = Math.min(len, maxLen);\r\n"
-				+ "		buffer.append(\"[\");\r\n" + "		for (int i = 0; i < len; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n" + "			}\r\n"
-				+ "			if (array instanceof float[]) {\r\n" + "				buffer.append(((float[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof int[]) {\r\n"
-				+ "				buffer.append(((int[]) array)[i]);\r\n" + "			}\r\n" + "			if (array instanceof char[]) {\r\n" + "				buffer.append(((char[]) array)[i]);\r\n" + "			}\r\n"
-				+ "			if (array instanceof Object[]) {\r\n" + "				buffer.append(((Object[]) array)[i]);\r\n" + "			}\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n"
-				+ "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuffer buffer = new StringBuffer();\r
+					buffer.append("A [AArray=").append(AArray != null ? arrayToString(AArray, AArray.length, maxLen) : null).append(", aBool=").append(aBool).append(", anA=").append(anA).append(", floatArray=").append(floatArray != null ? arrayToString(floatArray, floatArray.length, maxLen) : null).append(", hashMap=").append(hashMap != null ? toString(hashMap.entrySet(), maxLen) : null).append(", intArray=").append(intArray != null ? arrayToString(intArray, intArray.length, maxLen) : null).append(", integerCollection=").append(integerCollection != null ? toString(integerCollection, maxLen) : null).append(", list=").append(list != null ? toString(list, maxLen) : null).append(", object=").append(object).append(", stringArray=").append(stringArray != null ? arrayToString(stringArray, stringArray.length, maxLen) : null).append(", wildCollection=").append(wildCollection != null ? toString(wildCollection, maxLen) : null).append(", charArrayMethod()=")\r
+							.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, maxLen) : null).append(", floatArrayMethod()=").append(floatArrayMethod() != null ? arrayToString(floatArrayMethod(), floatArrayMethod().length, maxLen) : null).append("]");\r
+					return buffer.toString();\r
+				}\r
+				private String toString(Collection collection, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					buffer.append("[");\r
+					int i = 0;\r
+					for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						buffer.append(iterator.next());\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				private String arrayToString(Object array, int len, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					len = Math.min(len, maxLen);\r
+					buffer.append("[");\r
+					for (int i = 0; i < len; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						if (array instanceof float[]) {\r
+							buffer.append(((float[]) array)[i]);\r
+						}\r
+						if (array instanceof int[]) {\r
+							buffer.append(((int[]) array)[i]);\r
+						}\r
+						if (array instanceof char[]) {\r
+							buffer.append(((char[]) array)[i]);\r
+						}\r
+						if (array instanceof Object[]) {\r
+							buffer.append(((Object[]) array)[i]);\r
+						}\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1917,11 +3399,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void chainedBuilderArray1_5() throws Exception {
 		setCompilerLevels(true, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1932,37 +3438,42 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"A[ \").append(Arrays.toString(AArray)).append(\", \").append(aBool).append(\", \").append(anA).append(\", \").append(Arrays.toString(floatArray)).append(\", \").append(hashMap).append(\", \").append(Arrays.toString(intArray)).append(\", \").append(integerCollection).append(\", \").append(list).append(\", \").append(object).append(\", \").append(Arrays.toString(stringArray)).append(\", \").append(wildCollection).append(\", \").append(Arrays.toString(charArrayMethod())).append(\", \").append(Arrays.toString(floatArrayMethod())).append(\"]\");\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A[ ").append(Arrays.toString(AArray)).append(", ").append(aBool).append(", ").append(anA).append(", ").append(Arrays.toString(floatArray)).append(", ").append(hashMap).append(", ").append(Arrays.toString(intArray)).append(", ").append(integerCollection).append(", ").append(list).append(", ").append(object).append(", ").append(Arrays.toString(stringArray)).append(", ").append(wildCollection).append(", ").append(Arrays.toString(charArrayMethod())).append(", ").append(Arrays.toString(floatArrayMethod())).append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -1975,11 +3486,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void chainedBuilderArrayLimitNullsThisNoBlocks() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -1994,27 +3529,82 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"A[ \");\r\n" + "		if (this.AArray != null)\r\n"
-				+ "			builder.append(Arrays.asList(this.AArray).subList(0, Math.min(this.AArray.length, maxLen))).append(\", \");\r\n" + "		builder.append(this.aBool).append(\", \");\r\n"
-				+ "		if (this.anA != null)\r\n" + "			builder.append(this.anA).append(\", \");\r\n" + "		if (this.floatArray != null)\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(this.floatArray, Math.min(this.floatArray.length, maxLen)))).append(\", \");\r\n" + "		if (this.hashMap != null)\r\n"
-				+ "			builder.append(this.toString(this.hashMap.entrySet(), maxLen)).append(\", \");\r\n" + "		if (this.intArray != null)\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(this.intArray, Math.min(this.intArray.length, maxLen)))).append(\", \");\r\n" + "		if (this.integerCollection != null)\r\n"
-				+ "			builder.append(this.toString(this.integerCollection, maxLen)).append(\", \");\r\n" + "		if (this.list != null)\r\n"
-				+ "			builder.append(this.toString(this.list, maxLen)).append(\", \");\r\n" + "		if (this.object != null)\r\n" + "			builder.append(this.object).append(\", \");\r\n"
-				+ "		if (this.stringArray != null)\r\n" + "			builder.append(Arrays.asList(this.stringArray).subList(0, Math.min(this.stringArray.length, maxLen))).append(\", \");\r\n"
-				+ "		if (this.wildCollection != null)\r\n" + "			builder.append(this.toString(this.wildCollection, maxLen)).append(\", \");\r\n" + "		if (this.charArrayMethod() != null)\r\n"
-				+ "			builder.append(Arrays.toString(Arrays.copyOf(this.charArrayMethod(), Math.min(this.charArrayMethod().length, maxLen)))).append(\", \");\r\n"
-				+ "		if (this.floatArrayMethod() != null)\r\n" + "			builder.append(Arrays.toString(Arrays.copyOf(this.floatArrayMethod(), Math.min(this.floatArrayMethod().length, maxLen))));\r\n"
-				+ "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n"
-				+ "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0)\r\n" + "				builder.append(\", \");\r\n"
-				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("A[ ");\r
+					if (this.AArray != null)\r
+						builder.append(Arrays.asList(this.AArray).subList(0, Math.min(this.AArray.length, maxLen))).append(", ");\r
+					builder.append(this.aBool).append(", ");\r
+					if (this.anA != null)\r
+						builder.append(this.anA).append(", ");\r
+					if (this.floatArray != null)\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.floatArray, Math.min(this.floatArray.length, maxLen)))).append(", ");\r
+					if (this.hashMap != null)\r
+						builder.append(this.toString(this.hashMap.entrySet(), maxLen)).append(", ");\r
+					if (this.intArray != null)\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.intArray, Math.min(this.intArray.length, maxLen)))).append(", ");\r
+					if (this.integerCollection != null)\r
+						builder.append(this.toString(this.integerCollection, maxLen)).append(", ");\r
+					if (this.list != null)\r
+						builder.append(this.toString(this.list, maxLen)).append(", ");\r
+					if (this.object != null)\r
+						builder.append(this.object).append(", ");\r
+					if (this.stringArray != null)\r
+						builder.append(Arrays.asList(this.stringArray).subList(0, Math.min(this.stringArray.length, maxLen))).append(", ");\r
+					if (this.wildCollection != null)\r
+						builder.append(this.toString(this.wildCollection, maxLen)).append(", ");\r
+					if (this.charArrayMethod() != null)\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.charArrayMethod(), Math.min(this.charArrayMethod().length, maxLen)))).append(", ");\r
+					if (this.floatArrayMethod() != null)\r
+						builder.append(Arrays.toString(Arrays.copyOf(this.floatArrayMethod(), Math.min(this.floatArrayMethod().length, maxLen))));\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0)\r
+							builder.append(", ");\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2088,9 +3678,25 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void formatArray() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+			\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
@@ -2098,27 +3704,31 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 3;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] anArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, intArray=%s, list=%s, object=%s, stringArray=%s, anArrayMethod()=%s]\", Arrays.toString(AArray), aBool, anA, Arrays.toString(floatArray), Arrays.toString(intArray), list, object, Arrays.toString(stringArray), Arrays.toString(anArrayMethod()));\r\n"
-				+ "	}\r\n" + "\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+				@Override\r
+				public String toString() {\r
+					return String.format("A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, intArray=%s, list=%s, object=%s, stringArray=%s, anArrayMethod()=%s]", Arrays.toString(AArray), aBool, anA, Arrays.toString(floatArray), Arrays.toString(intArray), list, object, Arrays.toString(stringArray), Arrays.toString(anArrayMethod()));\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2130,11 +3740,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void formatLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2143,39 +3777,54 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 3;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", AArray, aBool, anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod());\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
-				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return String.format("A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]", AArray, aBool, anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod());\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2187,11 +3836,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void formatArrayLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2201,41 +3874,56 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 3;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null, wildCollection != null ? toString(wildCollection, maxLen) : null,\r\n"
-				+ "				charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null, floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
-				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return String.format("A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null, wildCollection != null ? toString(wildCollection, maxLen) : null,\r
+							charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null, floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2248,11 +3936,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void formatArrayLimit1_5NoHelpers() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "list", "object", "stringArray" });
@@ -2261,37 +3973,41 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 3;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Arrays;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, list=%s, object=%s, stringArray=%s]\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, list != null ? list.subList(0, Math.min(list.size(), maxLen)) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return String.format("A [AArray=%s, aBool=%s, anA=%s, list=%s, object=%s, stringArray=%s]", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null, aBool, anA, list != null ? list.subList(0, Math.min(list.size(), maxLen)) : null, object, stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2303,11 +4019,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void formatArrayLimitZero() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2318,35 +4058,39 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 3;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", AArray != null ? \"[]\" : null, aBool, anA, floatArray != null ? \"[]\" : null, hashMap != null ? \"[]\" : null, intArray != null ? \"[]\" : null, integerCollection != null ? \"[]\" : null, list != null ? \"[]\" : null, object, stringArray != null ? \"[]\" : null, wildCollection != null ? \"[]\" : null, charArrayMethod() != null ? \"[]\" : null, floatArrayMethod() != null ? \"[]\" : null);\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					return String.format("A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]", AArray != null ? "[]" : null, aBool, anA, floatArray != null ? "[]" : null, hashMap != null ? "[]" : null, intArray != null ? "[]" : null, integerCollection != null ? "[]" : null, list != null ? "[]" : null, object, stringArray != null ? "[]" : null, wildCollection != null ? "[]" : null, charArrayMethod() != null ? "[]" : null, floatArrayMethod() != null ? "[]" : null);\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2358,11 +4102,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void formatLimitThis() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2373,39 +4141,54 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return String.format(\"A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]\", this.AArray, this.aBool, this.anA, this.floatArray, this.hashMap != null ? this.toString(this.hashMap.entrySet(), maxLen) : null, this.intArray, this.integerCollection != null ? this.toString(this.integerCollection, maxLen) : null, this.list != null ? this.toString(this.list, maxLen) : null, this.object, this.stringArray, this.wildCollection != null ? this.toString(this.wildCollection, maxLen) : null, this.charArrayMethod(), this.floatArrayMethod());\r\n"
-				+ "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n"
-				+ "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return String.format("A [AArray=%s, aBool=%s, anA=%s, floatArray=%s, hashMap=%s, intArray=%s, integerCollection=%s, list=%s, object=%s, stringArray=%s, wildCollection=%s, charArrayMethod()=%s, floatArrayMethod()=%s]", this.AArray, this.aBool, this.anA, this.floatArray, this.hashMap != null ? this.toString(this.hashMap.entrySet(), maxLen) : null, this.intArray, this.integerCollection != null ? this.toString(this.integerCollection, maxLen) : null, this.list != null ? this.toString(this.list, maxLen) : null, this.object, this.stringArray, this.wildCollection != null ? this.toString(this.wildCollection, maxLen) : null, this.charArrayMethod(), this.floatArrayMethod());\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2418,11 +4201,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void formatLimit1_4() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2432,40 +4239,55 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.text.MessageFormat;\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	Object object;\r\n"
-				+ "	A anA;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int maxLen = 10;\r\n"
-				+ "		return MessageFormat.format(\"A [AArray={0}, aBool={1}, anA={2}, floatArray={3}, hashMap={4}, intArray={5}, integerCollection={6}, list={7}, object={8}, stringArray={9}, wildCollection={10}, charArrayMethod()={11}, floatArrayMethod()={12}]\", new Object[]{AArray, new Boolean(aBool), anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod()});\r\n"
-				+ "	}\r\n" + "	private String toString(Collection collection, int maxLen) {\r\n" + "		StringBuffer buffer = new StringBuffer();\r\n" + "		buffer.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				buffer.append(\", \");\r\n"
-				+ "			}\r\n" + "			buffer.append(iterator.next());\r\n" + "		}\r\n" + "		buffer.append(\"]\");\r\n" + "		return buffer.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.text.MessageFormat;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					return MessageFormat.format("A [AArray={0}, aBool={1}, anA={2}, floatArray={3}, hashMap={4}, intArray={5}, integerCollection={6}, list={7}, object={8}, stringArray={9}, wildCollection={10}, charArrayMethod()={11}, floatArrayMethod()={12}]", new Object[]{AArray, new Boolean(aBool), anA, floatArray, hashMap != null ? toString(hashMap.entrySet(), maxLen) : null, intArray, integerCollection != null ? toString(integerCollection, maxLen) : null, list != null ? toString(list, maxLen) : null, object, stringArray, wildCollection != null ? toString(wildCollection, maxLen) : null, charArrayMethod(), floatArrayMethod()});\r
+				}\r
+				private String toString(Collection collection, int maxLen) {\r
+					StringBuffer buffer = new StringBuffer();\r
+					buffer.append("[");\r
+					int i = 0;\r
+					for (Iterator iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							buffer.append(", ");\r
+						}\r
+						buffer.append(iterator.next());\r
+					}\r
+					buffer.append("]");\r
+					return buffer.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2626,9 +4448,25 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void customBuilderArray() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	java.util.List<Boolean> list;\r\n" + "\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+			\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "intArray", "list", "object", "stringArray", "anArrayMethod" });
@@ -2636,13 +4474,43 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n"
-				+ "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n"
-				+ "	char[] anArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	java.util.List<Boolean> list;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		builder.append(\"AArray\", Arrays.toString(AArray));\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
-				+ "		builder.append(\"anA\", anA);\r\n" + "		builder.append(\"floatArray\", Arrays.toString(floatArray));\r\n" + "		builder.append(\"intArray\", Arrays.toString(intArray));\r\n"
-				+ "		builder.append(\"list\", list);\r\n" + "		builder.append(\"object\", object);\r\n" + "		builder.append(\"stringArray\", Arrays.toString(stringArray));\r\n"
-				+ "		builder.append(\"anArrayMethod()\", Arrays.toString(anArrayMethod()));\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] anArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				java.util.List<Boolean> list;\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					builder.append("AArray", Arrays.toString(AArray));\r
+					builder.append("aBool", aBool);\r
+					builder.append("anA", anA);\r
+					builder.append("floatArray", Arrays.toString(floatArray));\r
+					builder.append("intArray", Arrays.toString(intArray));\r
+					builder.append("list", list);\r
+					builder.append("object", object);\r
+					builder.append("stringArray", Arrays.toString(stringArray));\r
+					builder.append("anArrayMethod()", Arrays.toString(anArrayMethod()));\r
+					return builder.toString();\r
+				}\r
+			\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2654,11 +4522,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void customBuilderLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2667,21 +4559,70 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n"
-				+ "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		builder.append(\"AArray\", AArray);\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
-				+ "		builder.append(\"anA\", anA);\r\n" + "		builder.append(\"floatArray\", floatArray);\r\n"
-				+ "		builder.append(\"hashMap\", hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r\n" + "		builder.append(\"intArray\", intArray);\r\n"
-				+ "		builder.append(\"integerCollection\", integerCollection != null ? toString(integerCollection, maxLen) : null);\r\n"
-				+ "		builder.append(\"list\", list != null ? toString(list, maxLen) : null);\r\n" + "		builder.append(\"object\", object);\r\n" + "		builder.append(\"stringArray\", stringArray);\r\n"
-				+ "		builder.append(\"wildCollection\", wildCollection != null ? toString(wildCollection, maxLen) : null);\r\n" + "		builder.append(\"charArrayMethod()\", charArrayMethod());\r\n"
-				+ "		builder.append(\"floatArrayMethod()\", floatArrayMethod());\r\n" + "		return builder.toString();\r\n" + "	}\r\n"
-				+ "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n" + "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n"
-				+ "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n" + "				builder.append(\", \");\r\n" + "			}\r\n"
-				+ "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					builder.append("AArray", AArray);\r
+					builder.append("aBool", aBool);\r
+					builder.append("anA", anA);\r
+					builder.append("floatArray", floatArray);\r
+					builder.append("hashMap", hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r
+					builder.append("intArray", intArray);\r
+					builder.append("integerCollection", integerCollection != null ? toString(integerCollection, maxLen) : null);\r
+					builder.append("list", list != null ? toString(list, maxLen) : null);\r
+					builder.append("object", object);\r
+					builder.append("stringArray", stringArray);\r
+					builder.append("wildCollection", wildCollection != null ? toString(wildCollection, maxLen) : null);\r
+					builder.append("charArrayMethod()", charArrayMethod());\r
+					builder.append("floatArrayMethod()", floatArrayMethod());\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2694,11 +4635,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void customBuilderArrayLimit() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2708,27 +4673,71 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
-				+ "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n" + "		ToStringBuilder builder = new ToStringBuilder(this);\r\n"
-				+ "		builder.append(\"AArray\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null);\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
-				+ "		builder.append(\"anA\", anA);\r\n"
-				+ "		builder.append(\"floatArray\", floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null);\r\n"
-				+ "		builder.append(\"hashMap\", hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r\n"
-				+ "		builder.append(\"intArray\", intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null);\r\n"
-				+ "		builder.append(\"integerCollection\", integerCollection != null ? toString(integerCollection, maxLen) : null);\r\n"
-				+ "		builder.append(\"list\", list != null ? toString(list, maxLen) : null);\r\n" + "		builder.append(\"object\", object);\r\n"
-				+ "		builder.append(\"stringArray\", stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r\n"
-				+ "		builder.append(\"wildCollection\", wildCollection != null ? toString(wildCollection, maxLen) : null);\r\n"
-				+ "		builder.append(\"charArrayMethod()\", charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null);\r\n"
-				+ "		builder.append(\"floatArrayMethod()\", floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					builder.append("AArray", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)) : null);\r
+					builder.append("aBool", aBool);\r
+					builder.append("anA", anA);\r
+					builder.append("floatArray", floatArray != null ? Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))) : null);\r
+					builder.append("hashMap", hashMap != null ? toString(hashMap.entrySet(), maxLen) : null);\r
+					builder.append("intArray", intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))) : null);\r
+					builder.append("integerCollection", integerCollection != null ? toString(integerCollection, maxLen) : null);\r
+					builder.append("list", list != null ? toString(list, maxLen) : null);\r
+					builder.append("object", object);\r
+					builder.append("stringArray", stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)) : null);\r
+					builder.append("wildCollection", wildCollection != null ? toString(wildCollection, maxLen) : null);\r
+					builder.append("charArrayMethod()", charArrayMethod() != null ? Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))) : null);\r
+					builder.append("floatArrayMethod()", floatArrayMethod() != null ? Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))) : null);\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2740,10 +4749,31 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void customBuilderArrayLimitUnique() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
@@ -2753,25 +4783,68 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.toStringStyle= 4;
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
-				+ "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n" + "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n" + "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n"
-				+ "	@Override\r\n" + "	public String toString() {\r\n" + "		final int maxLen2 = 10;\r\n" + "		ToStringBuilder builder2 = new ToStringBuilder(this);\r\n"
-				+ "		builder2.append(\"aBool\", aBool);\r\n"
-				+ "		builder2.append(\"intArray\", intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen2))) : null);\r\n"
-				+ "		builder2.append(\"stringArray\", stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen2)) : null);\r\n"
-				+ "		builder2.append(\"AArray\", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen2)) : null);\r\n"
-				+ "		builder2.append(\"list\", list != null ? toString(list, maxLen2) : null);\r\n"
-				+ "		builder2.append(\"hashMap\", hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null);\r\n"
-				+ "		builder2.append(\"wildCollection\", wildCollection != null ? toString(wildCollection, maxLen2) : null);\r\n"
-				+ "		builder2.append(\"integerCollection\", integerCollection != null ? toString(integerCollection, maxLen2) : null);\r\n" + "		builder2.append(\"builder\", builder);\r\n"
-				+ "		builder2.append(\"buffer\", buffer);\r\n" + "		builder2.append(\"maxLen\", maxLen);\r\n" + "		builder2.append(\"len\", len);\r\n"
-				+ "		builder2.append(\"collection\", collection);\r\n" + "		builder2.append(\"array\", array);\r\n" + "		return builder2.toString();\r\n" + "	}\r\n"
-				+ "	private String toString(Collection<?> collection2, int maxLen2) {\r\n" + "		StringBuilder builder2 = new StringBuilder();\r\n" + "		builder2.append(\"[\");\r\n"
-				+ "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				builder2.append(\", \");\r\n" + "			}\r\n" + "			builder2.append(iterator.next());\r\n" + "		}\r\n" + "		builder2.append(\"]\");\r\n" + "		return builder2.toString();\r\n"
-				+ "	}\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen2 = 10;\r
+					ToStringBuilder builder2 = new ToStringBuilder(this);\r
+					builder2.append("aBool", aBool);\r
+					builder2.append("intArray", intArray != null ? Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen2))) : null);\r
+					builder2.append("stringArray", stringArray != null ? Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen2)) : null);\r
+					builder2.append("AArray", AArray != null ? Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen2)) : null);\r
+					builder2.append("list", list != null ? toString(list, maxLen2) : null);\r
+					builder2.append("hashMap", hashMap != null ? toString(hashMap.entrySet(), maxLen2) : null);\r
+					builder2.append("wildCollection", wildCollection != null ? toString(wildCollection, maxLen2) : null);\r
+					builder2.append("integerCollection", integerCollection != null ? toString(integerCollection, maxLen2) : null);\r
+					builder2.append("builder", builder);\r
+					builder2.append("buffer", buffer);\r
+					builder2.append("maxLen", maxLen);\r
+					builder2.append("len", len);\r
+					builder2.append("collection", collection);\r
+					builder2.append("array", array);\r
+					return builder2.toString();\r
+				}\r
+				private String toString(Collection<?> collection2, int maxLen2) {\r
+					StringBuilder builder2 = new StringBuilder();\r
+					builder2.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection2.iterator(); iterator.hasNext() && i < maxLen2; i++) {\r
+						if (i > 0) {\r
+							builder2.append(", ");\r
+						}\r
+						builder2.append(iterator.next());\r
+					}\r
+					builder2.append("]");\r
+					return builder2.toString();\r
+				}\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2783,11 +4856,35 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void customBuilderNullsThisNoBlocks() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2799,19 +4896,67 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n" + "\r\n"
-				+ "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	Object object;\r\n" + "	A anA;\r\n"
-				+ "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n"
-				+ "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n" + "	public String toString() {\r\n" + "		ToStringBuilder builder = new ToStringBuilder(this);\r\n"
-				+ "		if (this.AArray != null)\r\n" + "			builder.append(\"AArray\", this.AArray);\r\n" + "		builder.append(\"aBool\", this.aBool);\r\n" + "		if (this.anA != null)\r\n"
-				+ "			builder.append(\"anA\", this.anA);\r\n" + "		if (this.floatArray != null)\r\n" + "			builder.append(\"floatArray\", this.floatArray);\r\n" + "		if (this.hashMap != null)\r\n"
-				+ "			builder.append(\"hashMap\", this.hashMap);\r\n" + "		if (this.intArray != null)\r\n" + "			builder.append(\"intArray\", this.intArray);\r\n"
-				+ "		if (this.integerCollection != null)\r\n" + "			builder.append(\"integerCollection\", this.integerCollection);\r\n" + "		if (this.list != null)\r\n"
-				+ "			builder.append(\"list\", this.list);\r\n" + "		if (this.object != null)\r\n" + "			builder.append(\"object\", this.object);\r\n" + "		if (this.stringArray != null)\r\n"
-				+ "			builder.append(\"stringArray\", this.stringArray);\r\n" + "		if (this.wildCollection != null)\r\n" + "			builder.append(\"wildCollection\", this.wildCollection);\r\n"
-				+ "		if (this.charArrayMethod() != null)\r\n" + "			builder.append(\"charArrayMethod()\", this.charArrayMethod());\r\n" + "		if (this.floatArrayMethod() != null)\r\n"
-				+ "			builder.append(\"floatArrayMethod()\", this.floatArrayMethod());\r\n" + "		return builder.toString();\r\n" + "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					if (this.AArray != null)\r
+						builder.append("AArray", this.AArray);\r
+					builder.append("aBool", this.aBool);\r
+					if (this.anA != null)\r
+						builder.append("anA", this.anA);\r
+					if (this.floatArray != null)\r
+						builder.append("floatArray", this.floatArray);\r
+					if (this.hashMap != null)\r
+						builder.append("hashMap", this.hashMap);\r
+					if (this.intArray != null)\r
+						builder.append("intArray", this.intArray);\r
+					if (this.integerCollection != null)\r
+						builder.append("integerCollection", this.integerCollection);\r
+					if (this.list != null)\r
+						builder.append("list", this.list);\r
+					if (this.object != null)\r
+						builder.append("object", this.object);\r
+					if (this.stringArray != null)\r
+						builder.append("stringArray", this.stringArray);\r
+					if (this.wildCollection != null)\r
+						builder.append("wildCollection", this.wildCollection);\r
+					if (this.charArrayMethod() != null)\r
+						builder.append("charArrayMethod()", this.charArrayMethod());\r
+					if (this.floatArrayMethod() != null)\r
+						builder.append("floatArrayMethod()", this.floatArrayMethod());\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -2823,11 +4968,36 @@ public class GenerateToStringTest extends SourceTestCase {
 	 */
 	@Test
 	public void customBuilderArrayLimitNulls() throws Exception {
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n"
-				+ "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n"
-				+ "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n" + "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "aBool", "anInt", "anA", "floatArray", "hashMap", "intArray", "integerCollection", "list", "object", "stringArray",
@@ -2839,28 +5009,97 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n" + "\r\n" + "import java.util.Arrays;\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n" + "\r\n" + "import com.pack.ToStringBuilder;\r\n" + "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n"
-				+ " int anInt;\r\n" + "	Object object;\r\n" + "	A anA;\r\n" + "	int[] intArray;\r\n" + "	float[] floatArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	float[] floatArrayMethod() {\r\n" + "		return null;\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	@Override\r\n"
-				+ "	public String toString() {\r\n" + "		final int maxLen = 10;\r\n" + "		ToStringBuilder builder = new ToStringBuilder(this);\r\n" + "		if (AArray != null) {\r\n"
-				+ "			builder.append(\"AArray\", Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)));\r\n" + "		}\r\n" + "		builder.append(\"aBool\", aBool);\r\n"
-				+ "		builder.append(\"anInt\", anInt);\r\n" + "		if (anA != null) {\r\n" + "			builder.append(\"anA\", anA);\r\n" + "		}\r\n" + "		if (floatArray != null) {\r\n"
-				+ "			builder.append(\"floatArray\", Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))));\r\n" + "		}\r\n" + "		if (hashMap != null) {\r\n"
-				+ "			builder.append(\"hashMap\", toString(hashMap.entrySet(), maxLen));\r\n" + "		}\r\n" + "		if (intArray != null) {\r\n"
-				+ "			builder.append(\"intArray\", Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))));\r\n" + "		}\r\n" + "		if (integerCollection != null) {\r\n"
-				+ "			builder.append(\"integerCollection\", toString(integerCollection, maxLen));\r\n" + "		}\r\n" + "		if (list != null) {\r\n"
-				+ "			builder.append(\"list\", toString(list, maxLen));\r\n" + "		}\r\n" + "		if (object != null) {\r\n" + "			builder.append(\"object\", object);\r\n" + "		}\r\n"
-				+ "		if (stringArray != null) {\r\n" + "			builder.append(\"stringArray\", Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)));\r\n" + "		}\r\n"
-				+ "		if (wildCollection != null) {\r\n" + "			builder.append(\"wildCollection\", toString(wildCollection, maxLen));\r\n" + "		}\r\n" + "		if (charArrayMethod() != null) {\r\n"
-				+ "			builder.append(\"charArrayMethod()\", Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))));\r\n" + "		}\r\n"
-				+ "		if (floatArrayMethod() != null) {\r\n"
-				+ "			builder.append(\"floatArrayMethod()\", Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))));\r\n" + "		}\r\n"
-				+ "		return builder.toString();\r\n" + "	}\r\n" + "	private String toString(Collection<?> collection, int maxLen) {\r\n" + "		StringBuilder builder = new StringBuilder();\r\n"
-				+ "		builder.append(\"[\");\r\n" + "		int i = 0;\r\n" + "		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r\n" + "			if (i > 0) {\r\n"
-				+ "				builder.append(\", \");\r\n" + "			}\r\n" + "			builder.append(iterator.next());\r\n" + "		}\r\n" + "		builder.append(\"]\");\r\n" + "		return builder.toString();\r\n"
-				+ "	}\r\n" + "	\r\n" + "}\r\n" + "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Arrays;\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			import com.pack.ToStringBuilder;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+			 int anInt;\r
+				Object object;\r
+				A anA;\r
+				int[] intArray;\r
+				float[] floatArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				float[] floatArrayMethod() {\r
+					return null;\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int maxLen = 10;\r
+					ToStringBuilder builder = new ToStringBuilder(this);\r
+					if (AArray != null) {\r
+						builder.append("AArray", Arrays.asList(AArray).subList(0, Math.min(AArray.length, maxLen)));\r
+					}\r
+					builder.append("aBool", aBool);\r
+					builder.append("anInt", anInt);\r
+					if (anA != null) {\r
+						builder.append("anA", anA);\r
+					}\r
+					if (floatArray != null) {\r
+						builder.append("floatArray", Arrays.toString(Arrays.copyOf(floatArray, Math.min(floatArray.length, maxLen))));\r
+					}\r
+					if (hashMap != null) {\r
+						builder.append("hashMap", toString(hashMap.entrySet(), maxLen));\r
+					}\r
+					if (intArray != null) {\r
+						builder.append("intArray", Arrays.toString(Arrays.copyOf(intArray, Math.min(intArray.length, maxLen))));\r
+					}\r
+					if (integerCollection != null) {\r
+						builder.append("integerCollection", toString(integerCollection, maxLen));\r
+					}\r
+					if (list != null) {\r
+						builder.append("list", toString(list, maxLen));\r
+					}\r
+					if (object != null) {\r
+						builder.append("object", object);\r
+					}\r
+					if (stringArray != null) {\r
+						builder.append("stringArray", Arrays.asList(stringArray).subList(0, Math.min(stringArray.length, maxLen)));\r
+					}\r
+					if (wildCollection != null) {\r
+						builder.append("wildCollection", toString(wildCollection, maxLen));\r
+					}\r
+					if (charArrayMethod() != null) {\r
+						builder.append("charArrayMethod()", Arrays.toString(Arrays.copyOf(charArrayMethod(), Math.min(charArrayMethod().length, maxLen))));\r
+					}\r
+					if (floatArrayMethod() != null) {\r
+						builder.append("floatArrayMethod()", Arrays.toString(Arrays.copyOf(floatArrayMethod(), Math.min(floatArrayMethod().length, maxLen))));\r
+					}\r
+					return builder.toString();\r
+				}\r
+				private String toString(Collection<?> collection, int maxLen) {\r
+					StringBuilder builder = new StringBuilder();\r
+					builder.append("[");\r
+					int i = 0;\r
+					for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {\r
+						if (i > 0) {\r
+							builder.append(", ");\r
+						}\r
+						builder.append(iterator.next());\r
+					}\r
+					builder.append("]");\r
+					return builder.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -3161,10 +5400,32 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void alternativeCustomBuilderUnique() throws Exception {
 
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	boolean aBool;\r\n" + "	int[] intArray;\r\n" + "	String[] stringArray;\r\n" + "	A[] AArray;\r\n" + "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n" + "	Collection wildCollection;\r\n" + "	Collection integerCollection;\r\n" + "	Object builder;\r\n" + "	Object buffer;\r\n" + "	Object maxLen;\r\n"
-				+ "	Object len;\r\n" + "	Object collection;\r\n" + "	Object array;\r\n" + "	Object creator;\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				Object creator;\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "aBool", "intArray", "stringArray", "AArray", "list", "hashMap", "wildCollection", "integerCollection", "builder", "buffer",
@@ -3176,53 +5437,54 @@ public class GenerateToStringTest extends SourceTestCase {
 		fSettings2.customBuilderSettings.resultMethod= "getResult";
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "import org.another.pack.AnotherToStringCreator;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	boolean aBool;\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	String[] stringArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	List list;\r\n"
-				+ "	HashMap hashMap;\r\n"
-				+ "	Collection wildCollection;\r\n"
-				+ "	Collection integerCollection;\r\n"
-				+ "	Object builder;\r\n"
-				+ "	Object buffer;\r\n"
-				+ "	Object maxLen;\r\n"
-				+ "	Object len;\r\n"
-				+ "	Object collection;\r\n"
-				+ "	Object array;\r\n"
-				+ "	Object creator;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		AnotherToStringCreator creator2 = new AnotherToStringCreator(this);\r\n"
-				+ "		creator2.addSth(aBool, \"aBool\");\r\n"
-				+ "		creator2.addSth(intArray, \"intArray\");\r\n"
-				+ "		creator2.addSth(stringArray, \"stringArray\");\r\n"
-				+ "		creator2.addSth(AArray, \"AArray\");\r\n"
-				+ "		creator2.addSth(list, \"list\");\r\n"
-				+ "		creator2.addSth(hashMap, \"hashMap\");\r\n"
-				+ "		creator2.addSth(wildCollection, \"wildCollection\");\r\n"
-				+ "		creator2.addSth(integerCollection, \"integerCollection\");\r\n"
-				+ "		creator2.addSth(builder, \"builder\");\r\n"
-				+ "		creator2.addSth(buffer, \"buffer\");\r\n"
-				+ "		creator2.addSth(maxLen, \"maxLen\");\r\n"
-				+ "		creator2.addSth(len, \"len\");\r\n"
-				+ "		creator2.addSth(collection, \"collection\");\r\n"
-				+ "		creator2.addSth(array, \"array\");\r\n"
-				+ "		creator2.addSth(creator, \"creator\");\r\n"
-				+ "		return creator2.getResult();\r\n"
-				+ "	}\r\n"
-				+ "}\r\n"
-				+ "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			import org.another.pack.AnotherToStringCreator;\r
+			\r
+			public class A {\r
+			\r
+				boolean aBool;\r
+				int[] intArray;\r
+				String[] stringArray;\r
+				A[] AArray;\r
+				List list;\r
+				HashMap hashMap;\r
+				Collection wildCollection;\r
+				Collection integerCollection;\r
+				Object builder;\r
+				Object buffer;\r
+				Object maxLen;\r
+				Object len;\r
+				Object collection;\r
+				Object array;\r
+				Object creator;\r
+				@Override\r
+				public String toString() {\r
+					AnotherToStringCreator creator2 = new AnotherToStringCreator(this);\r
+					creator2.addSth(aBool, "aBool");\r
+					creator2.addSth(intArray, "intArray");\r
+					creator2.addSth(stringArray, "stringArray");\r
+					creator2.addSth(AArray, "AArray");\r
+					creator2.addSth(list, "list");\r
+					creator2.addSth(hashMap, "hashMap");\r
+					creator2.addSth(wildCollection, "wildCollection");\r
+					creator2.addSth(integerCollection, "integerCollection");\r
+					creator2.addSth(builder, "builder");\r
+					creator2.addSth(buffer, "buffer");\r
+					creator2.addSth(maxLen, "maxLen");\r
+					creator2.addSth(len, "len");\r
+					creator2.addSth(collection, "collection");\r
+					creator2.addSth(array, "array");\r
+					creator2.addSth(creator, "creator");\r
+					return creator2.getResult();\r
+				}\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}
@@ -3389,10 +5651,27 @@ public class GenerateToStringTest extends SourceTestCase {
 	@Test
 	public void builderArrayLimit1_4Prefixes() throws Exception {
 		setCompilerLevels(false, false);
-		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" + "\r\n" + "import java.util.Collection;\r\n" + "import java.util.HashMap;\r\n" + "import java.util.List;\r\n"
-				+ "\r\n" + "public class A {\r\n" + "\r\n" + "	int[] intArray;\r\n"
-				+ "	A[] AArray;\r\n" + "	char[] charArrayMethod() {\r\n" + "		return new char[0];\r\n" + "	}\r\n" + "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n" + "	Collection<?> wildCollection;\r\n" + "	Collection<Integer> integerCollection;\r\n" + "	\r\n" + "}\r\n" + "", true, null);
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				int[] intArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				\r
+			}\r
+			""", true, null);
 		CompilationUnit oldCUNode= getCUNode(a);
 
 		IMember[] members= getMembers(a.getType("A"), new String[] { "AArray", "hashMap", "intArray", "integerCollection", "list", "wildCollection", "charArrayMethod"});
@@ -3408,82 +5687,83 @@ public class GenerateToStringTest extends SourceTestCase {
 
 		runOperation(a.getType("A"), members, null);
 
-		String expected= "package p;\r\n"
-				+ "\r\n"
-				+ "import java.util.Collection;\r\n"
-				+ "import java.util.HashMap;\r\n"
-				+ "import java.util.Iterator;\r\n"
-				+ "import java.util.List;\r\n"
-				+ "\r\n"
-				+ "public class A {\r\n"
-				+ "\r\n"
-				+ "	int[] intArray;\r\n"
-				+ "	A[] AArray;\r\n"
-				+ "	char[] charArrayMethod() {\r\n"
-				+ "		return new char[0];\r\n"
-				+ "	}\r\n"
-				+ "	List<Boolean> list;\r\n"
-				+ "	HashMap<Integer, String> hashMap;\r\n"
-				+ "	Collection<?> wildCollection;\r\n"
-				+ "	Collection<Integer> integerCollection;\r\n"
-				+ "	@Override\r\n"
-				+ "	public String toString() {\r\n"
-				+ "		final int l_maxLen_l = 10;\r\n"
-				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"
-				+ "		l_buffer_l.append(\"A [AArray=\");\r\n"
-				+ "		l_buffer_l.append(AArray != null ? arrayToString(AArray, AArray.length, l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\", hashMap=\");\r\n"
-				+ "		l_buffer_l.append(hashMap != null ? toString(hashMap.entrySet(), l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\", intArray=\");\r\n"
-				+ "		l_buffer_l.append(intArray != null ? arrayToString(intArray, intArray.length, l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\", integerCollection=\");\r\n"
-				+ "		l_buffer_l.append(integerCollection != null ? toString(integerCollection, l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\", list=\");\r\n"
-				+ "		l_buffer_l.append(list != null ? toString(list, l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\", wildCollection=\");\r\n"
-				+ "		l_buffer_l.append(wildCollection != null ? toString(wildCollection, l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\", charArrayMethod()=\");\r\n"
-				+ "		l_buffer_l.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, l_maxLen_l) : null);\r\n"
-				+ "		l_buffer_l.append(\"]\");\r\n"
-				+ "		return l_buffer_l.toString();\r\n"
-				+ "	}\r\n"
-				+ "	private String toString(Collection a_collection_a, int a_maxLen_a) {\r\n"
-				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"
-				+ "		l_buffer_l.append(\"[\");\r\n"
-				+ "		int l_i_l = 0;\r\n"
-				+ "		for (Iterator l_iterator_l = a_collection_a.iterator(); l_iterator_l.hasNext() && l_i_l < a_maxLen_a; l_i_l++) {\r\n"
-				+ "			if (l_i_l > 0) {\r\n"
-				+ "				l_buffer_l.append(\", \");\r\n"
-				+ "			}\r\n"
-				+ "			l_buffer_l.append(l_iterator_l.next());\r\n"
-				+ "		}\r\n"
-				+ "		l_buffer_l.append(\"]\");\r\n"
-				+ "		return l_buffer_l.toString();\r\n"
-				+ "	}\r\n"
-				+ "	private String arrayToString(Object a_array_a, int a_len_a, int a_maxLen_a) {\r\n"
-				+ "		StringBuffer l_buffer_l = new StringBuffer();\r\n"
-				+ "		a_len_a = Math.min(a_len_a, a_maxLen_a);\r\n"
-				+ "		l_buffer_l.append(\"[\");\r\n"
-				+ "		for (int l_i_l = 0; l_i_l < a_len_a; l_i_l++) {\r\n"
-				+ "			if (l_i_l > 0) {\r\n"
-				+ "				l_buffer_l.append(\", \");\r\n"
-				+ "			}\r\n"
-				+ "			if (a_array_a instanceof int[]) {\r\n"
-				+ "				l_buffer_l.append(((int[]) a_array_a)[l_i_l]);\r\n"
-				+ "			}\r\n"
-				+ "			if (a_array_a instanceof char[]) {\r\n"
-				+ "				l_buffer_l.append(((char[]) a_array_a)[l_i_l]);\r\n"
-				+ "			}\r\n"
-				+ "			if (a_array_a instanceof Object[]) {\r\n"
-				+ "				l_buffer_l.append(((Object[]) a_array_a)[l_i_l]);\r\n"
-				+ "			}\r\n"
-				+ "		}\r\n"
-				+ "		l_buffer_l.append(\"]\");\r\n"
-				+ "		return l_buffer_l.toString();\r\n"
-				+ "	}\r\n"
-				+ "	\r\n"
-				+ "}\r\n"
-				+ "";
+		String expected= """
+			package p;\r
+			\r
+			import java.util.Collection;\r
+			import java.util.HashMap;\r
+			import java.util.Iterator;\r
+			import java.util.List;\r
+			\r
+			public class A {\r
+			\r
+				int[] intArray;\r
+				A[] AArray;\r
+				char[] charArrayMethod() {\r
+					return new char[0];\r
+				}\r
+				List<Boolean> list;\r
+				HashMap<Integer, String> hashMap;\r
+				Collection<?> wildCollection;\r
+				Collection<Integer> integerCollection;\r
+				@Override\r
+				public String toString() {\r
+					final int l_maxLen_l = 10;\r
+					StringBuffer l_buffer_l = new StringBuffer();\r
+					l_buffer_l.append("A [AArray=");\r
+					l_buffer_l.append(AArray != null ? arrayToString(AArray, AArray.length, l_maxLen_l) : null);\r
+					l_buffer_l.append(", hashMap=");\r
+					l_buffer_l.append(hashMap != null ? toString(hashMap.entrySet(), l_maxLen_l) : null);\r
+					l_buffer_l.append(", intArray=");\r
+					l_buffer_l.append(intArray != null ? arrayToString(intArray, intArray.length, l_maxLen_l) : null);\r
+					l_buffer_l.append(", integerCollection=");\r
+					l_buffer_l.append(integerCollection != null ? toString(integerCollection, l_maxLen_l) : null);\r
+					l_buffer_l.append(", list=");\r
+					l_buffer_l.append(list != null ? toString(list, l_maxLen_l) : null);\r
+					l_buffer_l.append(", wildCollection=");\r
+					l_buffer_l.append(wildCollection != null ? toString(wildCollection, l_maxLen_l) : null);\r
+					l_buffer_l.append(", charArrayMethod()=");\r
+					l_buffer_l.append(charArrayMethod() != null ? arrayToString(charArrayMethod(), charArrayMethod().length, l_maxLen_l) : null);\r
+					l_buffer_l.append("]");\r
+					return l_buffer_l.toString();\r
+				}\r
+				private String toString(Collection a_collection_a, int a_maxLen_a) {\r
+					StringBuffer l_buffer_l = new StringBuffer();\r
+					l_buffer_l.append("[");\r
+					int l_i_l = 0;\r
+					for (Iterator l_iterator_l = a_collection_a.iterator(); l_iterator_l.hasNext() && l_i_l < a_maxLen_a; l_i_l++) {\r
+						if (l_i_l > 0) {\r
+							l_buffer_l.append(", ");\r
+						}\r
+						l_buffer_l.append(l_iterator_l.next());\r
+					}\r
+					l_buffer_l.append("]");\r
+					return l_buffer_l.toString();\r
+				}\r
+				private String arrayToString(Object a_array_a, int a_len_a, int a_maxLen_a) {\r
+					StringBuffer l_buffer_l = new StringBuffer();\r
+					a_len_a = Math.min(a_len_a, a_maxLen_a);\r
+					l_buffer_l.append("[");\r
+					for (int l_i_l = 0; l_i_l < a_len_a; l_i_l++) {\r
+						if (l_i_l > 0) {\r
+							l_buffer_l.append(", ");\r
+						}\r
+						if (a_array_a instanceof int[]) {\r
+							l_buffer_l.append(((int[]) a_array_a)[l_i_l]);\r
+						}\r
+						if (a_array_a instanceof char[]) {\r
+							l_buffer_l.append(((char[]) a_array_a)[l_i_l]);\r
+						}\r
+						if (a_array_a instanceof Object[]) {\r
+							l_buffer_l.append(((Object[]) a_array_a)[l_i_l]);\r
+						}\r
+					}\r
+					l_buffer_l.append("]");\r
+					return l_buffer_l.toString();\r
+				}\r
+				\r
+			}\r
+			""";
 
 		compareSourceAssertCompilation(expected, a, oldCUNode);
 	}

@@ -1355,25 +1355,26 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testUncaughtExceptionExtendedSelection() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test1;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("public class E {\n");
-		buf.append("    public String goo(int i) throws IOException {\n");
-		buf.append("        return null;\n");
-		buf.append("    }\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        System.out.println(goo(1));\n");
-		buf.append("        System.out.println(goo(2));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str= """
+			package test1;
+			import java.io.IOException;
+			public class E {
+			    public String goo(int i) throws IOException {
+			        return null;
+			    }
+			    public void foo() {
+			        System.out.println(goo(1));
+			        System.out.println(goo(2));
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		String begin= "goo(1)", end= "goo(2));";
 
-		int offset= buf.indexOf(begin);
-		int length= buf.indexOf(end) + end.length() - offset;
+		int offset= str.indexOf(begin);
+		int length= str.indexOf(end) + end.length() - offset;
 		AssistContext context= getCorrectionContext(cu, offset, length);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, context);
 		assertNumberOfProposals(proposals, 2);

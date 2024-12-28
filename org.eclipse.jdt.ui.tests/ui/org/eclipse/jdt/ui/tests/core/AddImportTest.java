@@ -540,19 +540,20 @@ public class AddImportTest extends CoreTests {
 		pack1.createCompilationUnit("TSub.java", str1, false, null);
 
 		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package test2;\n");
-		buf.append("\n");
-		buf.append("import test1.TSub;\n");
-		buf.append("public class S {\n");
-		buf.append("    public S() {\n");
-		buf.append("        TSub.foo();\n");
-		buf.append("        TSub.foo();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+		String str3= """
+			package test2;
+			
+			import test1.TSub;
+			public class S {
+			    public S() {
+			        TSub.foo();
+			        TSub.foo();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", str3, false, null);
 
-		int selOffset= buf.indexOf("foo");
+		int selOffset= str3.indexOf("foo");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -655,15 +656,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        getClass();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class E {
+			    public void foo() {
+			        getClass();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(cu);
@@ -671,7 +673,7 @@ public class AddImportTest extends CoreTests {
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
 		String str= "getClass()";
-		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, str1.indexOf(str), str.length());
 		ITypeBinding binding= inv.resolveTypeBinding();
 
 		ImportRewrite rewrite= newImportsRewrite(astRoot, new String[0], 99, 99, true);
@@ -693,16 +695,17 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class E<X> {\n");
-		buf.append("    public static <T> E<T> bar(T t) { return null; }\n");
-		buf.append("    public void foo(E<?> e) {\n");
-		buf.append("        bar(e);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class E<X> {
+			    public static <T> E<T> bar(T t) { return null; }
+			    public void foo(E<?> e) {
+			        bar(e);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(cu);
@@ -710,7 +713,7 @@ public class AddImportTest extends CoreTests {
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
 		String str= "bar(e)";
-		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, str1.indexOf(str), str.length());
 		ITypeBinding binding= inv.resolveTypeBinding();
 
 		ImportRewrite rewrite= newImportsRewrite(astRoot, new String[0], 99, 99, true);
@@ -732,16 +735,17 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class E<X> {\n");
-		buf.append("    public static <T> E<? extends T> bar(T t) { return null; }\n");
-		buf.append("    public void foo(E<?> e) {\n");
-		buf.append("        bar(e);\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class E<X> {
+			    public static <T> E<? extends T> bar(T t) { return null; }
+			    public void foo(E<?> e) {
+			        bar(e);
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str1, false, null);
 
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(cu);
@@ -749,7 +753,7 @@ public class AddImportTest extends CoreTests {
 		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 
 		String str= "bar(e)";
-		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, str1.indexOf(str), str.length());
 		ITypeBinding binding= inv.resolveTypeBinding();
 
 		ImportRewrite rewrite= newImportsRewrite(astRoot, new String[0], 99, 99, true);
@@ -906,17 +910,18 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Vector c= null;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    java.util.Vector c= null;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Vector");
+		int selOffset= str1.indexOf("Vector");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -939,17 +944,18 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    Vector c= null;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    Vector c= null;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Vector");
+		int selOffset= str1.indexOf("Vector");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -972,17 +978,18 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    Vector c= null\n"); // missing semicolon
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    Vector c= null
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Vector");
+		int selOffset= str1.indexOf("Vector");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1005,17 +1012,18 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Vector c= null\n"); // missing semicolon
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    java.util.Vector c= null
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Vector");
+		int selOffset= str1.indexOf("Vector");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1038,28 +1046,29 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.io.Serializable;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    private static class Serializable { }\n");
-		buf.append("    public void bar() {\n");
-		buf.append("        java.io.Serializable ser= null;\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		buf.append("class Secondary {\n");
-		buf.append("    Serializable s;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package pack1;
+			
+			import java.io.Serializable;
+			
+			public class C {
+			    private static class Serializable { }
+			    public void bar() {
+			        java.io.Serializable ser= null;
+			    }
+			}
+			class Secondary {
+			    Serializable s;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
-		int selOffset= buf.indexOf("ser=") - 2;
+		int selOffset= str.indexOf("ser=") - 2;
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.io.Serializable;\n");
@@ -1200,21 +1209,22 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package p;\n");
-		buf.append("\n");
-		buf.append("class SnippetY {\n");
-		buf.append("    static class Test {\n");
-		buf.append("        static void bar() {}\n");
-		buf.append("    }\n");
-		buf.append("\n");
-		buf.append("    void foo() {\n");
-		buf.append("        Test.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str1= """
+			package p;
+			
+			class SnippetY {
+			    static class Test {
+			        static void bar() {}
+			    }
+			
+			    void foo() {
+			        Test.bar();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str1, false, null);
 
-		int selOffset= buf.indexOf("bar();");
+		int selOffset= str1.indexOf("bar();");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
 		op.run(null);
@@ -1242,21 +1252,22 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package organize.imports.pvtStaticMembers.bug409594;\n");
-		buf.append("\n");
-		buf.append("class SnippetY {    \n");
-		buf.append("    private static class Test {\n");
-		buf.append("        static void bar() {}        \n");
-		buf.append("    }\n");
-		buf.append("    \n");
-		buf.append("    void foo() {\n");
-		buf.append("         Test.bar();\n");
-		buf.append("     }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		String str= """
+			package organize.imports.pvtStaticMembers.bug409594;
+			
+			class SnippetY {   \s
+			    private static class Test {
+			        static void bar() {}       \s
+			    }
+			   \s
+			    void foo() {
+			         Test.bar();
+			     }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", str, false, null);
 
-		int selOffset= buf.indexOf("bar();");
+		int selOffset= str.indexOf("bar();");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
 		op.run(null);
@@ -1278,16 +1289,17 @@ public class AddImportTest extends CoreTests {
 				}
 			}""";
 		String inputB=
-				"package p;\n" +
-						"\n" +
-						"import q.A;\n" +
-						"\n" +
-						"class B extends A {\n" +
-						"	void foo() {\n" +
-						"		A.bar();\n" +
-						"	}\n" +
-						"}\n" +
-						"";
+				"""
+			package p;
+			
+			import q.A;
+			
+			class B extends A {
+				void foo() {
+					A.bar();
+				}
+			}
+			""";
 		pack1.createCompilationUnit("A.java", inputA, false, null);
 		ICompilationUnit cuB= pack1.createCompilationUnit("B.java", inputB, false, null);
 
@@ -1297,16 +1309,17 @@ public class AddImportTest extends CoreTests {
 		op.run(null);
 
 		String expected=
-				"package p;\n" +
-						"\n" +
-						"import q.A;\n" +
-						"\n" +
-						"class B extends A {\n" +
-						"	void foo() {\n" +
-						"		bar();\n" +
-						"	}\n" +
-						"}\n" +
-						"";
+				"""
+			package p;
+			
+			import q.A;
+			
+			class B extends A {
+				void foo() {
+					bar();
+				}
+			}
+			""";
 		assertEqualString(cuB.getSource(), expected);
 	}
 
@@ -1315,22 +1328,23 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Vector.class x;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    java.util.Vector.class x;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str, false, null);
 
-		int selOffset= buf.indexOf("Vector.class") + "Vector.class".length();
+		int selOffset= str.indexOf("Vector.class") + "Vector.class".length();
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
 
-		buf= new StringBuilder();
+		StringBuilder buf= new StringBuilder();
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.lang.System;\n");
@@ -1346,17 +1360,18 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    String str= java.io.File.separator;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    String str= java.io.File.separator;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("separator");
+		int selOffset= str1.indexOf("separator");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1382,17 +1397,18 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.System;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    String str= java.io.File.separator;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.System;
+			
+			public class C {
+			    String str= java.io.File.separator;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("separator");
+		int selOffset= str1.indexOf("separator");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1416,15 +1432,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.lang.Thread.State s;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class C {
+			    java.lang.Thread.State s;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Thread");
+		int selOffset= str1.indexOf("Thread");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1444,15 +1461,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.lang.Thread.State s;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class C {
+			    java.lang.Thread.State s;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("State");
+		int selOffset= str1.indexOf("State");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1474,15 +1492,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Map<String, Integer> m;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class C {
+			    java.util.Map<String, Integer> m;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Map");
+		int selOffset= str1.indexOf("Map");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1504,15 +1523,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Map.Entry e;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class C {
+			    java.util.Map.Entry e;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Entry");
+		int selOffset= str1.indexOf("Entry");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1534,15 +1554,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Map.Entry<String, Object> e;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class C {
+			    java.util.Map.Entry<String, Object> e;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Map");
+		int selOffset= str1.indexOf("Map");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1564,15 +1585,16 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.util.Map.Entry<String, Object> e;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			public class C {
+			    java.util.Map.Entry<String, Object> e;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Entry");
+		int selOffset= str1.indexOf("Entry");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1607,15 +1629,16 @@ public class AddImportTest extends CoreTests {
 		pack2.createCompilationUnit("Outer.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    pack2.Outer.Middle<String>.Inner<Integer> i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str2= """
+			package pack1;
+			
+			public class C {
+			    pack2.Outer.Middle<String>.Inner<Integer> i;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str2, false, null);
 
-		int selOffset= buf.indexOf("Middle");
+		int selOffset= str2.indexOf("Middle");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1651,15 +1674,16 @@ public class AddImportTest extends CoreTests {
 		pack2.createCompilationUnit("Outer.java", str, false, null);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    pack2.Outer.Middle<String>.Inner<Integer> i;\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str2= """
+			package pack1;
+			
+			public class C {
+			    pack2.Outer.Middle<String>.Inner<Integer> i;
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str2, false, null);
 
-		int selOffset= buf.indexOf("Inner");
+		int selOffset= str2.indexOf("Inner");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1679,19 +1703,20 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.text.@A Format.@A Field f;\n");
-		buf.append("}\n");
-		buf.append("@Target(ElementType.TYPE_USE) @interface A {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			public class C {
+			    java.text.@A Format.@A Field f;
+			}
+			@Target(ElementType.TYPE_USE) @interface A {}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Format");
+		int selOffset= str1.indexOf("Format");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
@@ -1717,19 +1742,20 @@ public class AddImportTest extends CoreTests {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
-		StringBuilder buf= new StringBuilder();
-		buf.append("package pack1;\n");
-		buf.append("\n");
-		buf.append("import java.lang.annotation.ElementType;\n");
-		buf.append("import java.lang.annotation.Target;\n");
-		buf.append("\n");
-		buf.append("public class C {\n");
-		buf.append("    java.text.@A Format.@A Field f;\n");
-		buf.append("}\n");
-		buf.append("@Target(ElementType.TYPE_USE) @interface A {}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		String str1= """
+			package pack1;
+			
+			import java.lang.annotation.ElementType;
+			import java.lang.annotation.Target;
+			
+			public class C {
+			    java.text.@A Format.@A Field f;
+			}
+			@Target(ElementType.TYPE_USE) @interface A {}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", str1, false, null);
 
-		int selOffset= buf.indexOf("Field");
+		int selOffset= str1.indexOf("Field");
 
 		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
 		op.run(null);
