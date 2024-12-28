@@ -598,28 +598,13 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private Statement createAddArrayHashCode(IVariableBinding binding) {
 		MethodInvocation invoc= fAst.newMethodInvocation();
-		if (JavaModelUtil.is50OrHigher(fRewrite.getCu().getJavaProject())) {
-			if (needsDeepMethod(binding.getType())) {
-				invoc.setName(fAst.newSimpleName(METHODNAME_DEEP_HASH_CODE));
-			} else {
-				invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
-			}
-			invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
-			invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
+		if (needsDeepMethod(binding.getType())) {
+			invoc.setName(fAst.newSimpleName(METHODNAME_DEEP_HASH_CODE));
 		} else {
 			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
-			final IJavaElement element= fType.getJavaElement();
-			if (element != null && !"".equals(element.getElementName())) //$NON-NLS-1$
-				invoc.setExpression(fAst.newSimpleName(element.getElementName()));
-			invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
-			ITypeBinding type= binding.getType().getElementType();
-			if (!Bindings.isVoidType(type)) {
-				if (!type.isPrimitive() || binding.getType().getDimensions() >= 2)
-					type= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
-				if (!fCustomHashCodeTypes.contains(type))
-					fCustomHashCodeTypes.add(type);
-			}
 		}
+		invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
+		invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
 		return prepareAssignment(invoc);
 	}
 
@@ -923,8 +908,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				if (type.isPrimitive() || type.isEnum())
 					body.statements().add(createSimpleComparison(field));
 				else if (type.isArray()) {
-					IJavaProject project= fUnit.getJavaElement().getJavaProject();
-					if (needsDeepMethod(type) && JavaModelUtil.is50OrHigher(project)) {
+					if (needsDeepMethod(type)) {
 						body.statements().add(createMultiArrayComparison(field.getName()));
 					} else {
 						body.statements().add(createArrayComparison(field.getName()));

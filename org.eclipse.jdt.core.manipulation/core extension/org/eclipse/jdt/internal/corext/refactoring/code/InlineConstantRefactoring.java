@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -126,7 +126,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.util.Progress;
@@ -459,7 +458,6 @@ public class InlineConstantRefactoring extends Refactoring {
 		private final CompilationUnitRewrite fCuRewrite;
 		private final TightSourceRangeComputer fSourceRangeComputer;
 		private final HashSet<SimpleName> fStaticImportsInInitializer;
-		private final boolean fIs15;
 
 		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, Name[] references, InlineConstantRefactoring refactoring, HashSet<SimpleName> staticImportsInInitializer) {
 			fInitializer= refactoring.getInitializer();
@@ -479,8 +477,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			for (int i= 0; i < references.length; i++)
 				fReferences[i]= getQualifiedReference(references[i]);
 
-			fIs15= JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject());
-			fStaticImportsInInitializer= fIs15 ? staticImportsInInitializer : new HashSet<>(0);
+			fStaticImportsInInitializer= staticImportsInInitializer;
 		}
 
 		private static Expression getQualifiedReference(Name fieldName) {
@@ -579,8 +576,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		private String prepareInitializerForLocation(Expression location) throws CoreException {
 			HashSet<SimpleName> staticImportsInReference= new HashSet<>();
 			final IJavaProject project= fCuRewrite.getCu().getJavaProject();
-			if (fIs15)
-				ImportReferencesCollector.collect(location, project, null, new ArrayList<>(), staticImportsInReference);
+			ImportReferencesCollector.collect(location, project, null, new ArrayList<>(), staticImportsInReference);
 
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();

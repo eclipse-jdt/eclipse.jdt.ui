@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Gayan Perera and others.
+ * Copyright (c) 2023, 2024 Gayan Perera and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,13 +16,13 @@ package org.eclipse.jdt.internal.corext.fix;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsFixCore {
@@ -117,7 +119,6 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 		IfStatement ifStatement= null;
 		Expression thenExpression= null;
 		Expression elseExpression= null;
-		ITypeBinding exprBinding= null;
 
 		ASTNode assignParentParent= assignParent.getParent();
 		if (assignParentParent instanceof IfStatement
@@ -145,7 +146,6 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 						IBinding bind1= ((Name) left1).resolveBinding();
 						IBinding bind2= ((Name) left2).resolveBinding();
 						if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
-							exprBinding= ((IVariableBinding) bind1).getType();
 							thenExpression= assign1.getRightHandSide();
 							elseExpression= assign2.getRightHandSide();
 						}
@@ -174,7 +174,7 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 
 		return new JoinVariableFixCore(CorrectionMessages.QuickAssistProcessor_joindeclaration_description, compilationUnit,
 				new CompilationUnitRewriteOperation[] {
-						new JoinVariableProposalOperation(statement, ifStatement, assignParent, thenExpression, elseExpression, exprBinding, fragment, onFirstAccess, assignment) });
+						new JoinVariableProposalOperation(statement, ifStatement, assignParent, thenExpression, elseExpression, fragment, onFirstAccess, assignment) });
 	}
 
 	private static Statement getSingleStatement(Statement statement) {
@@ -199,8 +199,6 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 
 		private Expression elseExpression;
 
-		private ITypeBinding exprBinding;
-
 		private VariableDeclarationFragment fragment;
 
 		private boolean onFirstAccess;
@@ -208,13 +206,12 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 		private Assignment assignment;
 
 		public JoinVariableProposalOperation(VariableDeclarationStatement statement, IfStatement ifStatement, ExpressionStatement assignParent, Expression thenExpression, Expression elseExpression,
-				ITypeBinding exprBinding, VariableDeclarationFragment fragment, boolean onFirstAccess, Assignment assignment) {
+				VariableDeclarationFragment fragment, boolean onFirstAccess, Assignment assignment) {
 			this.statement= statement;
 			this.ifStatement= ifStatement;
 			this.assignParent= assignParent;
 			this.thenExpression= thenExpression;
 			this.elseExpression= elseExpression;
-			this.exprBinding= exprBinding;
 			this.fragment= fragment;
 			this.onFirstAccess= onFirstAccess;
 			this.assignment= assignment;
@@ -239,18 +236,7 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 				Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
 				Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
 
-				if (!JavaModelUtil.is50OrHigher(project)) {
-					ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
-					ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
-					if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
-						CastExpression castException= ast.newCastExpression();
-						ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-						ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(cup, importRewrite);
-						castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext, TypeLocation.CAST));
-						castException.setExpression(elseCopy);
-						elseCopy= castException;
-					}
-				} else if (JavaModelUtil.is1d7OrHigher(project)) {
+				if (JavaModelUtil.is1d7OrHigher(project)) {
 					addExplicitTypeArgumentsIfNecessary(rewrite, cuRewrite, thenExpression);
 					addExplicitTypeArgumentsIfNecessary(rewrite, cuRewrite, elseExpression);
 				}

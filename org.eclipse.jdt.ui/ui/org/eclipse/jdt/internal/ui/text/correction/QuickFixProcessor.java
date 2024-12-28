@@ -49,7 +49,6 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.InlineMethodFixCore;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -980,9 +979,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			default:
 		}
-		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
-			SuppressWarningsSubProcessor.addSuppressWarningsProposals(context, problem, proposals);
-		}
+		SuppressWarningsSubProcessor.addSuppressWarningsProposals(context, problem, proposals);
 		ConfigureProblemSeveritySubProcessor.addConfigureProblemSeverityProposal(context, problem, proposals);
 	}
 }
