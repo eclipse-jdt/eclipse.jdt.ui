@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Till Brychcy and others.
+ * Copyright (c) 2020, 2024 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -169,7 +169,7 @@ public class BuildpathProblemQuickFixTest {
 
 	@Test
 	public void test3RequiredBinaryLevel() throws CoreException, IOException {
-		IPath container= new Path("org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7");
+		IPath container= new Path("org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8");
 		@SuppressWarnings("restriction")
 		IVMInstall vm= org.eclipse.jdt.internal.launching.JREContainerInitializer.resolveVM(container);
 		if (vm == null) {
@@ -177,8 +177,8 @@ public class BuildpathProblemQuickFixTest {
 		}
 		if (vm instanceof IVMInstall2) {
 			String version= ((IVMInstall2) vm).getJavaVersion();
-			if (version == null || !version.startsWith(JavaCore.VERSION_1_7)) {
-				// higher version instead of JavaSE 1.7 not found:
+			if (version == null || !version.startsWith(JavaCore.VERSION_1_8)) {
+				// higher version instead of JavaSE 1.8 not found:
 				// skip test as error against vm's class files would be reported
 				return;
 			}
@@ -194,7 +194,7 @@ public class BuildpathProblemQuickFixTest {
 		String classpath= """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<classpath>
-				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+				<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 				<classpathentry kind="src" path="src"/>
 				<classpathentry combineaccessrules="false" kind="src" path="/3_JDKLevelHigh"/>
 				<classpathentry kind="output" path="bin"/>
@@ -202,9 +202,9 @@ public class BuildpathProblemQuickFixTest {
 			""";
 		addFile(fJavaProject1.getPath(), ".classpath", classpath);
 		addFile(src1.getFullPath(), "LowClass.java", "public class LowClass{HighClass x;}");
-		fJavaProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
-		fJavaProject1.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_7);
-		fJavaProject1.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_7);
+		fJavaProject1.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		fJavaProject1.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		fJavaProject1.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
 		fJavaProject1.setOption(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL, JavaCore.ERROR);
 
 
@@ -222,15 +222,15 @@ public class BuildpathProblemQuickFixTest {
 			""";
 		addFile(fJavaProject2.getPath(), ".classpath", classpath2);
 		addFile(src2.getFullPath(), "HighClass.java", "public class HighClass{}");
-		fJavaProject2.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		fJavaProject2.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
-		fJavaProject2.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		fJavaProject2.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_11);
+		fJavaProject2.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_11);
+		fJavaProject2.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_11);
 
 		fJavaProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		IMarker[] markers= fJavaProject1.getResource().findMarkers("org.eclipse.jdt.core.buildpath_problem", true, IResource.DEPTH_INFINITE);
 		assertEquals(
-				"Incompatible .class files version in required binaries. Project '3_JDKLevelLow' is targeting a 1.7 runtime, but is compiled against '3_JDKLevelHigh' which requires a 1.8 runtime",
+				"Incompatible .class files version in required binaries. Project '3_JDKLevelLow' is targeting a 1.8 runtime, but is compiled against '3_JDKLevelHigh' which requires a 11 runtime",
 				markers[0].getAttribute(IMarker.MESSAGE));
 		assertEquals(1, markers.length);
 		IMarkerResolution[] resolutions= sortResolutions(IDE.getMarkerHelpRegistry().getResolutions(markers[0]));
