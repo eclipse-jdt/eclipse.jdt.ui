@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class ConvertForLoopOperation extends ConvertLoopOperation {
 	private static final String LENGTH_QUERY= "length"; //$NON-NLS-1$
@@ -108,9 +107,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 
 		IJavaElement javaElement= ast.getJavaElement();
 		if (javaElement == null)
-			return ERROR_STATUS;
-
-		if (!JavaModelUtil.is50OrHigher(javaElement.getJavaProject()))
 			return ERROR_STATUS;
 
 		if (!validateInitializers(statement))

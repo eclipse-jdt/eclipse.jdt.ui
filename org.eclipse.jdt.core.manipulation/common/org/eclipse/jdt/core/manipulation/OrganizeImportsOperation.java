@@ -360,11 +360,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
 				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
-				boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
-
 				for (TypeNameMatch curr : typesFound) {
 					UnresolvedTypeData data= fUnresolvedTypes.get(curr.getSimpleTypeName());
-					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
+					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds)) {
 						if (curr.getPackageName().length() > 0) {
 							data.addInfo(curr);
 						}
@@ -443,13 +441,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 
-		private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
+		private boolean isOfKind(TypeNameMatch curr, int typeKinds) {
 			int flags= curr.getModifiers();
 			if (Flags.isAnnotation(flags)) {
-				return is50OrHigher && (typeKinds & TypeKinds.ANNOTATIONS) != 0;
+				return (typeKinds & TypeKinds.ANNOTATIONS) != 0;
 			}
 			if (Flags.isEnum(flags)) {
-				return is50OrHigher && (typeKinds & TypeKinds.ENUMS) != 0;
+				return (typeKinds & TypeKinds.ENUMS) != 0;
 			}
 			if (Flags.isInterface(flags)) {
 				return (typeKinds & TypeKinds.INTERFACES) != 0;

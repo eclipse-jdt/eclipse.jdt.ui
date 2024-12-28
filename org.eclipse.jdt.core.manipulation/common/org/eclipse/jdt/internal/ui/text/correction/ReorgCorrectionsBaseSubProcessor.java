@@ -301,9 +301,8 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 			if (importDeclaration.isStatic() && name.isQualifiedName()) {
 				name= ((QualifiedName) name).getQualifier();
 			}
-			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? TypeKinds.REF_TYPES : TypeKinds.CLASSES | TypeKinds.INTERFACES;
 			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
-			unresolvedElements.collectNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
+			unresolvedElements.collectNewTypeProposals(cu, name, TypeKinds.REF_TYPES, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
 		} else {
 			Name name= importDeclaration.getName();
 			unresolvedElements.collectRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
