@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 IBM Corporation and others.
+ * Copyright (c) 2014, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,11 +55,11 @@ public abstract class AbstractForLoopJavaContextTest {
 
 	private static final String CU_PREFIX= """
 		package test;
-		
+
 		import java.io.Serializable;
 		import java.util.Collection;
 		import java.util.List;
-		
+
 		public class A<E extends Number> {
 		""";
 
@@ -84,13 +84,13 @@ public abstract class AbstractForLoopJavaContextTest {
 			//			options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, "4");
 			JavaCore.setOptions(options);
 		}
-		setUpProject(JavaCore.VERSION_1_5);
+		setUpProject();
 	}
 
-	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
+	private void setUpProject() throws CoreException, JavaModelException {
 		fProject= JavaProjectHelper.createJavaProject(PROJECT, "bin");
 		JavaProjectHelper.addRTJar(fProject);
-		fProject.setOption(JavaCore.COMPILER_SOURCE, sourceLevel);
+		fProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 		IPackageFragmentRoot fragmentRoot= JavaProjectHelper.addSourceContainer(fProject, SRC);
 		IPackageFragment fragment= fragmentRoot.createPackageFragment("test", true, new NullProgressMonitor());
 		fCU= fragment.createCompilationUnit(CU_NAME, "", true, new NullProgressMonitor());
