@@ -87,19 +87,19 @@ public class UtilitiesTest extends QuickFixTest {
 			import java.util.ArrayList;
 			import java.util.HashMap;
 			public class E<T> {
-			
+
 			    public class F<U> {}
 			    X[] x1= new String[0];
 			    X[][] x2= new String[][0];
 			    X[][] x3= new String[][][0];
-			
+
 			    ArrayList<X> x4= new ArrayList<String>();
 			    X<String> x5= new ArrayList<String>();
 			    HashMap<ArrayList<String>, X> x6= new HashMap<ArrayList<String>, Number>();
 			    HashMap<ArrayList<X>, Number> x7= new HashMap<ArrayList<String>, Number>();
-			
+
 			    HashMap<? extends X, Number> x8= new HashMap<? extends Number, Number>();
-			
+
 			    E<String>.F<X> x9 = new E<String>().new F<Number>();
 			    E<String>.X<Number> x10 = new E<String>().new F<Number>();
 			    X<String>.F<Number> x11 = new E<String>().new F<Number>();
@@ -117,7 +117,7 @@ public class UtilitiesTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		FieldDeclaration[] fields= ((TypeDeclaration) astRoot.types().get(0)).getFields();
 		for (int i= 0; i < fields.length; i++) {
-			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X"), 1);
+			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X", fields[i].getStartPosition()), 1);
 			ITypeBinding actualBinding= ASTResolving.guessBindingForTypeReference(node);
 			String actual= actualBinding != null ? actualBinding.getQualifiedName() : "null";
 			if (!actual.equals(expected[i])) {
@@ -155,7 +155,7 @@ public class UtilitiesTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		MethodDeclaration[] methods= ((TypeDeclaration) astRoot.types().get(0)).getMethods();
 		for (int i= 0; i < methods.length; i++) {
-			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X"), 1);
+			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X", methods[i].getStartPosition()), 1);
 			ITypeBinding actualBinding= ASTResolving.guessBindingForTypeReference(node);
 			String actual= actualBinding != null ? actualBinding.getQualifiedName() : "null";
 			if (!actual.equals(expected[i])) {
@@ -178,13 +178,13 @@ public class UtilitiesTest extends QuickFixTest {
 			    X<String> x3;
 			    ArrayList<X> x4;
 			    ArrayList<? extends X> x5;
-			
+
 			    E<String>.X x6;
 			    X<String>.A x7;
 			    Object x8= new X();
 			    Object x9= new X() { };
 			    Object x10= (X) x1;
-			
+
 			    X.A x11;
 			    Object x12= X.class;
 			}
@@ -211,7 +211,7 @@ public class UtilitiesTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		FieldDeclaration[] fields= ((TypeDeclaration) astRoot.types().get(0)).getFields();
 		for (int i= 0; i < fields.length; i++) {
-			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X"), 1);
+			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X",fields[i].getStartPosition()), 1);
 			int kinds= ASTResolving.getPossibleTypeKinds(node);
 			if (kinds != expected[i]) {
 				assertEquals("Guessing failed for " + fields[i].toString(), expected[i], kinds);
@@ -240,7 +240,7 @@ public class UtilitiesTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		for (int i = 0; i < astRoot.types().size(); i++) {
 			TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(i);
-			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X"), 1);
+			ASTNode node= NodeFinder.perform(astRoot, str.indexOf("X", typeDecl.getStartPosition()), 1);
 			int kinds= ASTResolving.getPossibleTypeKinds(node);
 			assertEquals("Guessing failed for " + node.toString(), expected[i], kinds);
 		}
