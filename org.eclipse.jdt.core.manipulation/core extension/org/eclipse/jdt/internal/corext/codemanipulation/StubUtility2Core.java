@@ -1095,9 +1095,6 @@ public final class StubUtility2Core {
 	public static void addOverrideAnnotation(CodeGenerationSettings settings, IJavaProject project, ASTRewrite rewrite, ImportRewrite imports, MethodDeclaration methodDecl,
 			boolean isDeclaringTypeInterface, TextEditGroup group) {
 		if (isDeclaringTypeInterface) {
-			String version= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			if (JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6))
-				return; // not allowed in 1.5
 			if (JavaCore.DISABLED.equals(project.getOption(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION, true)))
 				return; // user doesn't want to use 1.6 style
 		}

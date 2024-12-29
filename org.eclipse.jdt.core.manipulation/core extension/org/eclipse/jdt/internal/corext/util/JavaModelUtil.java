@@ -792,10 +792,6 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
 
-	public static boolean is1d6OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_6);
-	}
-
 	public static boolean is1d7OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
 	}

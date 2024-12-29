@@ -15,10 +15,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
@@ -44,12 +40,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -70,20 +63,15 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -465,11 +453,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 			IPackageFragment pack= root.getPackageFragment(getPackageText());
 			IResource packRes= pack.getResource();
 			if (isCreatePackageDocumentation()) {
-				if (JavaModelUtil.is50OrHigher(getJavaProject())) {
-					return pack.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME).getResource();
-				} else if (packRes instanceof IFolder){
-					return ((IFolder) packRes).getFile(PACKAGE_HTML_FILENAME);
-				}
+				return pack.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME).getResource();
 			}
 
 			return packRes;
@@ -531,11 +515,7 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 		}
 
 		if (isCreatePackageDocumentation()) {
-			if (JavaModelUtil.is50OrHigher(getJavaProject())) {
-				createPackageInfoJava(monitor);
-			} else {
-				createPackageHtml(root, monitor);
-			}
+			createPackageInfoJava(monitor);
 		}
 
 		// save whether package documentation should be created
@@ -561,89 +541,4 @@ public class NewPackageWizardPage extends NewTypeWizardPage {
 
 		InfoFilesUtil.createInfoJavaFile(PACKAGE_INFO_JAVA_FILENAME, fileContent.toString(), fCreatedPackageFragment,this.isAddComments(), monitor);
 	}
-
-	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IFolder createdPackage= workspace.getRoot().getFolder(fCreatedPackageFragment.getPath());
-		IFile packageHtml= createdPackage.getFile(PACKAGE_HTML_FILENAME);
-		String charset= packageHtml.getCharset();
-		String content= buildPackageHtmlContent(root, charset);
-		try {
-			packageHtml.create(new ByteArrayInputStream(content.getBytes(charset)), false, monitor);
-		} catch (UnsupportedEncodingException e) {
-			String message= "charset " + charset + " not supported by platform"; //$NON-NLS-1$ //$NON-NLS-2$
-			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, message, e));
-		}
-	}
-
-	private String buildPackageHtmlContent(IPackageFragmentRoot root, String charset) throws CoreException {
-		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
-		StringBuilder content = new StringBuilder();
-		String fileComment= InfoFilesUtil.getFileComment(PACKAGE_INFO_JAVA_FILENAME, fCreatedPackageFragment, lineDelimiter);
-		String typeComment= InfoFilesUtil.getTypeComment(PACKAGE_INFO_JAVA_FILENAME, fCreatedPackageFragment, lineDelimiter);
-
-		content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		if (fileComment != null) {
-			content.append("<!--"); //$NON-NLS-1$
-			content.append(lineDelimiter);
-			content.append(stripJavaComments(fileComment));
-			content.append(lineDelimiter);
-			content.append("-->"); //$NON-NLS-1$
-			content.append(lineDelimiter);
-		}
-		content.append("<html>"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		content.append("<head>"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		content.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=");  //$NON-NLS-1$
-		content.append(charset);
-		content.append("\">"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		content.append("<title>"); //$NON-NLS-1$
-		content.append(fCreatedPackageFragment.getElementName());
-		content.append("</title>"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		content.append("</head>"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		content.append("<body>"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-
-		if (typeComment != null) {
-			content.append(stripJavaComments(typeComment));
-			content.append(lineDelimiter);
-		}
-
-		content.append("</body>"); //$NON-NLS-1$
-		content.append(lineDelimiter);
-		content.append("</html>"); //$NON-NLS-1$
-
-		return content.toString();
-	}
-
-	private String stripJavaComments(String comment) {
-		DocumentAdapter documentAdapter= new DocumentAdapter(null, fCreatedPackageFragment.getPath());
-		documentAdapter.setContents(comment);
-		try (JavaDoc2HTMLTextReader reader= new JavaDoc2HTMLTextReader(new JavaDocCommentReader(documentAdapter, 0, comment.length()))) {
-			return getString(reader);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			documentAdapter.close();
-		}
-	}
-
-	private static String getString(Reader reader) {
-		StringBuilder buf= new StringBuilder();
-		char[] buffer= new char[1024];
-		int count;
-		try {
-			while ((count= reader.read(buffer)) != -1)
-				buf.append(buffer, 0, count);
-		} catch (IOException e) {
-			return null;
-		}
-		return buf.toString();
-	}
-
 }

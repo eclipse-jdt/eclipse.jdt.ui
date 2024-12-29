@@ -649,7 +649,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 						args[1]= getVersionLabel(version);
 					}
 					if (JavaModelUtil.is9OrHigher(compilerCompliance)) {
-						if (!JavaModelUtil.is1d6OrHigher(compliance) || !fCompilerReleaseCheck.getSelection()) {
+						if (!fCompilerReleaseCheck.getSelection()) {
 							if (fProject == null) {
 								fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info, args));
 							} else {
@@ -748,7 +748,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				if (!compilerCompliance.equals(compliance)) { // Discourage using compiler with version other than compliance
 					if (JavaModelUtil.is9OrHigher(compilerCompliance)) {
 						if (!JavaModelUtil.isVersionLessThan(compliance, compilerCompliance)
-								|| !JavaModelUtil.is1d6OrHigher(compliance)
 								|| ( JavaModelUtil.is12OrHigher(compilerCompliance))
 								&& !JavaModelUtil.is1d7OrHigher(compliance)) {
 							fCompilerReleaseCheck.setEnabled(false);
@@ -773,7 +772,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					setValue(PREF_RELEASE, JavaCore.DISABLED);
 				} else {
 					if (fProject == null
-							|| (isJREUnsupportedAndGreater && JavaModelUtil.is1d6OrHigher(compliance))
+							|| isJREUnsupportedAndGreater
 							|| JavaModelUtil.is9OrHigher(compliance)) {
 						fCompilerReleaseCheck.setEnabled(true);
 					}
@@ -921,7 +920,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			String complianceFollowsEE= getValue(INTR_COMPLIANCE_FOLLOWS_EE);
 			enableComplianceControls= hasProjectSpecificOptions && !DEFAULT_CONF.equals(complianceFollowsEE); // is disabled or user
 		}
-		boolean enableBasedOnRelease= !fCompilerReleaseCheck.getSelection() || !JavaModelUtil.is1d6OrHigher(getValue(PREF_COMPLIANCE));
+		boolean enableBasedOnRelease= !fCompilerReleaseCheck.getSelection();
 		boolean enableComplianceChildren= enableComplianceControls && checkValue(INTR_DEFAULT_COMPLIANCE, USER_CONF) && enableBasedOnRelease;
 		for (int i= fComplianceChildControls.size() - 1; i >= 0; i--) {
 			Control curr= fComplianceChildControls.get(i);
@@ -1055,7 +1054,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		boolean isDefault= checkValue(INTR_DEFAULT_COMPLIANCE, DEFAULT_CONF);
 		boolean isFollowEE= checkValue(INTR_COMPLIANCE_FOLLOWS_EE, DEFAULT_CONF);
 		String complianceLevel= getValue(PREF_COMPLIANCE);
-		boolean isRelease= checkValue(PREF_RELEASE, JavaCore.ENABLED) && JavaModelUtil.is1d6OrHigher(complianceLevel) && !isDefault;
+		boolean isRelease= checkValue(PREF_RELEASE, JavaCore.ENABLED) && !isDefault;
 
 		if (isDefault || isFollowEE || isRelease) {
 			if (rememberOld) {
@@ -1139,7 +1138,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private void updateComplianceReleaseSettings() {
 		String compliance= getValue(PREF_COMPLIANCE);
-		boolean isRelease= checkValue(PREF_RELEASE, JavaCore.ENABLED) && JavaModelUtil.is1d6OrHigher(compliance);
+		boolean isRelease= checkValue(PREF_RELEASE, JavaCore.ENABLED);
 		if (isRelease) {
 			setValue(PREF_SOURCE_COMPATIBILITY, compliance);
 			setValue(PREF_CODEGEN_TARGET_PLATFORM, compliance);
