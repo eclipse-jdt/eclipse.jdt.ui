@@ -1230,8 +1230,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 					for (IJavaProject project : keySet) {
-						if (level == 3 && !JavaModelUtil.is50OrHigher(project))
-							level= 2;
 						Collection<ICompilationUnit> cuCollection= secondPass.get(project);
 						if (cuCollection != null) {
 							parser.setWorkingCopyOwner(fOwner);
