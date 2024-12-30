@@ -2471,8 +2471,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String TypeContextChecker_invalid_type_syntax;
 
-	public static String TypeContextChecker_no_vararg_below_50;
-
 	public static String TypeContextChecker_not_unique;
 
 	public static String TypeContextChecker_parameter_type;
