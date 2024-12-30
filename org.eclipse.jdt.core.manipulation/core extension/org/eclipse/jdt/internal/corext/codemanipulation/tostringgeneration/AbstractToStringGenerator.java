@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 Mateusz Matela and others.
+ * Copyright (c) 2008, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -254,16 +254,9 @@ public abstract class AbstractToStringGenerator {
 		final String lengthParamName= createNameSuggestion("len", NamingConventions.VK_PARAMETER); //$NON-NLS-1$
 		final String maxLenParamName= createNameSuggestion(MAX_LEN_VARIABLE_NAME, NamingConventions.VK_PARAMETER);
 		String paramName;
-		String stringBuilderName;
-		String stringBuilderTypeName;
 
-		if (fContext.is50orHigher()) {
-			stringBuilderTypeName= "java.lang.StringBuilder"; //$NON-NLS-1$
-			stringBuilderName= createNameSuggestion("builder", NamingConventions.VK_LOCAL); //$NON-NLS-1$
-		} else {
-			stringBuilderTypeName= "java.lang.StringBuffer"; //$NON-NLS-1$
-			stringBuilderName= createNameSuggestion("buffer", NamingConventions.VK_LOCAL); //$NON-NLS-1$
-		}
+		String stringBuilderTypeName= "java.lang.StringBuilder"; //$NON-NLS-1$
+		String stringBuilderName= createNameSuggestion("builder", NamingConventions.VK_LOCAL); //$NON-NLS-1$
 
 		//private arrayToString() {
 		MethodDeclaration arrayToStringMethod= fAst.newMethodDeclaration();
@@ -288,13 +281,9 @@ public abstract class AbstractToStringGenerator {
 			paramName= createNameSuggestion("collection", NamingConventions.VK_PARAMETER); //$NON-NLS-1$
 			SingleVariableDeclaration param= fAst.newSingleVariableDeclaration();
 			Type collectionType= fAst.newSimpleType(addImport("java.util.Collection")); //$NON-NLS-1$
-			if (fContext.is50orHigher()) {
-				ParameterizedType genericType= fAst.newParameterizedType(collectionType);
-				genericType.typeArguments().add(fAst.newWildcardType());
-				param.setType(genericType);
-			} else {
-				param.setType(collectionType);
-			}
+			ParameterizedType genericType= fAst.newParameterizedType(collectionType);
+			genericType.typeArguments().add(fAst.newWildcardType());
+			param.setType(genericType);
 			param.setName(fAst.newSimpleName(paramName));
 			arrayToStringMethod.parameters().add(param);
 		}
@@ -406,13 +395,9 @@ public abstract class AbstractToStringGenerator {
 			fragment.setInitializer(createMethodInvocation(paramName, "iterator", null)); //$NON-NLS-1$
 			VariableDeclarationExpression vExpression= fAst.newVariableDeclarationExpression(fragment);
 			SimpleType iteratorType= fAst.newSimpleType(addImport("java.util.Iterator")); //$NON-NLS-1$
-			if (fContext.is50orHigher()) {
-				ParameterizedType pType= fAst.newParameterizedType(iteratorType);
-				pType.typeArguments().add(fAst.newWildcardType());
-				vExpression.setType(pType);
-			} else {
-				vExpression.setType(iteratorType);
-			}
+			ParameterizedType pType= fAst.newParameterizedType(iteratorType);
+			pType.typeArguments().add(fAst.newWildcardType());
+			vExpression.setType(pType);
 
 			forStatement.initializers().add(vExpression);
 
@@ -501,7 +486,7 @@ public abstract class AbstractToStringGenerator {
 			}
 			if (fContext.isCustomArray() && memberType.isArray()) {
 				ITypeBinding componentType= memberType.getComponentType();
-				if (componentType.isPrimitive() && (!fContext.is50orHigher() || (!fContext.is60orHigher() && fContext.isLimitItems()))) {
+				if (componentType.isPrimitive() && (!fContext.is60orHigher() && fContext.isLimitItems())) {
 					if (!typesThatNeedArrayToStringMethod.contains(componentType))
 						typesThatNeedArrayToStringMethod.add(componentType);
 				} else if (!componentType.isPrimitive())
@@ -758,28 +743,8 @@ public abstract class AbstractToStringGenerator {
 					}
 				} else {
 					if (isArray && fContext.isCustomArray()) {
-						if (fContext.is50orHigher()) {
-							// Arrays.toString(member)
-							return createMethodInvocation(addImport("java.util.Arrays"), METHODNAME_TO_STRING, createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
-						} else {
-							ITypeBinding arrayComponentType= memberType.getComponentType();
-							if (!arrayComponentType.isPrimitive() && typesThatNeedArrayToStringMethod.isEmpty()) {
-								// Arrays.asList(member)
-								accessExpression= createMethodInvocation(addImport("java.util.Arrays"), "asList", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$ //$NON-NLS-2$
-							} else {
-								// arrayToString(member, member.length, maxLen)
-								FieldAccess lengthAccess= fAst.newFieldAccess();
-								lengthAccess.setExpression(createMemberAccessExpression(member, true, true));
-								lengthAccess.setName(fAst.newSimpleName("length")); //$NON-NLS-1$
-								MethodInvocation arrayToStringInvocation= fAst.newMethodInvocation();
-								if (fContext.isKeywordThis())
-									arrayToStringInvocation.setExpression(fAst.newThisExpression());
-								arrayToStringInvocation.setName(fAst.newSimpleName(HELPER_ARRAYTOSTRING_METHOD_NAME));
-								arrayToStringInvocation.arguments().add(createMemberAccessExpression(member, true, true));
-								arrayToStringInvocation.arguments().add(lengthAccess);
-								accessExpression= arrayToStringInvocation;
-							}
-						}
+						// Arrays.toString(member)
+						return createMethodInvocation(addImport("java.util.Arrays"), METHODNAME_TO_STRING, createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
 					}
 				}
 				if (accessExpression != null) {

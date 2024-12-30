@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 Mateusz Matela and others.
+ * Copyright (c) 2008, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -188,7 +188,6 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		settings.createComments= dialog.getGenerateComment();
 		settings.useBlocks= useBlocks(type.getJavaProject());
 		String version= fUnit.getJavaElement().getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
-		settings.is50orHigher= !JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_5);
 		settings.is60orHigher= !JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6);
 		return settings;
 	}

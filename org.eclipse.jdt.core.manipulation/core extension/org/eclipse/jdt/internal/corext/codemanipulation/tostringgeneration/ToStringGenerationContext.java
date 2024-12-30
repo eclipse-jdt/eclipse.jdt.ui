@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 Mateusz Matela and others.
+ * Copyright (c) 2008, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -79,10 +79,6 @@ class ToStringGenerationContext {
 
 	public ITypeBinding getTypeBinding() {
 		return fType;
-	}
-
-	public boolean is50orHigher() {
-		return fSettings.is50orHigher;
 	}
 
 	public boolean is60orHigher() {

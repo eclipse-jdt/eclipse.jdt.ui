@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
@@ -97,7 +96,6 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			return null;
 		}
 
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(compilationUnit.getTypeRoot().getJavaProject());
 		// collect operands
 		List<Expression> operands= new ArrayList<>();
 		collectInfixPlusOperands(oldInfixExpression, operands);
@@ -108,12 +106,6 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 		// we need to loop through all to exclude any null binding scenarios.
 		for (Expression operand : operands) {
 			if (!(operand instanceof StringLiteral)) {
-				if (!is50OrHigher) {
-					ITypeBinding binding= operand.resolveTypeBinding();
-					if (binding == null) {
-						return null;
-					}
-				}
 				foundNoneLiteralOperand= true;
 			} else {
 				// ensure either all string literals are nls-tagged or none are
@@ -218,9 +210,7 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 			final List<String> fLiterals= new ArrayList<>();
 			String fIndent= ""; //$NON-NLS-1$
 			ICompilationUnit cu= cuRewrite.getCu();
-			boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
 			boolean is15OrHigher= JavaModelUtil.is15OrHigher(cu.getJavaProject());
-			AST fAst= cuRewrite.getAST();
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			CompilationUnit root= cuRewrite.getRoot();
@@ -280,26 +270,9 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 					fLiterals.add("\"{" + Integer.toString(i) + "}\""); //$NON-NLS-1$ //$NON-NLS-2$
 					formatString.append("{").append(i).append("}"); //$NON-NLS-1$ //$NON-NLS-2$
 
-					String argument;
-					if (is50OrHigher) {
-						int origStart= root.getExtendedStartPosition(operand);
-						int origLength= root.getExtendedLength(operand);
-						argument= cuContents.substring(origStart, origStart + origLength);
-					} else {
-						ITypeBinding binding= operand.resolveTypeBinding();
-						int origStart= root.getExtendedStartPosition(operand);
-						int origLength= root.getExtendedLength(operand);
-						argument= cuContents.substring(origStart, origStart + origLength);
-
-						if (binding.isPrimitive()) {
-							ITypeBinding boxedBinding= Bindings.getBoxedTypeBinding(binding, fAst);
-							if (boxedBinding != binding) {
-								importRewrite.addImport(boxedBinding, fAst, importContext);
-								String cic= "new " + boxedBinding.getName() + "(" + argument + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-								argument= cic;
-							}
-						}
-					}
+					int origStart= root.getExtendedStartPosition(operand);
+					int origLength= root.getExtendedLength(operand);
+					String argument= cuContents.substring(origStart, origStart + origLength);
 
 					formatArguments.add(argument);
 					i++;
@@ -370,19 +343,8 @@ public class ConvertToMessageFormatFixCore extends CompilationUnitRewriteOperati
 				buffer.append("\"" + formatString.toString().replaceAll("\"", "\\\"") + "\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 
-			if (is50OrHigher) {
-				for (String formatArgument : formatArguments) {
-					buffer.append(", " + formatArgument); //$NON-NLS-1$
-				}
-			} else {
-				buffer.append(", new Object[]{"); //$NON-NLS-1$
-				if (formatArguments.size() > 0) {
-					buffer.append(formatArguments.get(0));
-				}
-				for (int i1= 1; i1 < formatArguments.size(); ++i1) {
-					buffer.append(", " + formatArguments.get(i1)); //$NON-NLS-1$
-				}
-				buffer.append("}"); //$NON-NLS-1$
+			for (String formatArgument : formatArguments) {
+				buffer.append(", " + formatArgument); //$NON-NLS-1$
 			}
 			buffer.append(")"); //$NON-NLS-1$
 
