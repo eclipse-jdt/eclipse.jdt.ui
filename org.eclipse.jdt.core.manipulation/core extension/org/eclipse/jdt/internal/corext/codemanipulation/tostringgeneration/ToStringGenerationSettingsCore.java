@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Mateusz Matela and others.
+ * Copyright (c) 2019, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -98,9 +98,6 @@ public class ToStringGenerationSettingsCore extends CodeGenerationSettings {
 
 	/** should blocks be forced in if/for/while statements? */
 	public boolean useBlocks;
-
-	/** can generated code use jdk 1.5 API? **/
-	public boolean is50orHigher;
 
 	/** can generated code use jdk 1.6 API? **/
 	public boolean is60orHigher;
