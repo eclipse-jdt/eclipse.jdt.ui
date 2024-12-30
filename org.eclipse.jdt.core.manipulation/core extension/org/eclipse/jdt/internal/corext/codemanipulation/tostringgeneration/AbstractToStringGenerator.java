@@ -486,10 +486,7 @@ public abstract class AbstractToStringGenerator {
 			}
 			if (fContext.isCustomArray() && memberType.isArray()) {
 				ITypeBinding componentType= memberType.getComponentType();
-				if (componentType.isPrimitive() && (!fContext.is60orHigher() && fContext.isLimitItems())) {
-					if (!typesThatNeedArrayToStringMethod.contains(componentType))
-						typesThatNeedArrayToStringMethod.add(componentType);
-				} else if (!componentType.isPrimitive())
+				if (!componentType.isPrimitive())
 					isNonPrimitive= true;
 			}
 		}
@@ -716,28 +713,15 @@ public abstract class AbstractToStringGenerator {
 								MethodInvocation asListInvocation= createMethodInvocation(addImport("java.util.Arrays"), "asList", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$ //$NON-NLS-2$
 								accessExpression= createSubListInvocation(asListInvocation, lengthAccess);
 							} else {
-								if (fContext.is60orHigher()) {
-									// Arrays.toString( Arrays.copyOf ( member, Math.min (maxLen, member.length) )
-									Name arraysImport= addImport("java.util.Arrays"); //$NON-NLS-1$
-									MethodInvocation minInvocation= createMethodInvocation(addImport("java.lang.Math"), "min", lengthAccess); //$NON-NLS-1$ //$NON-NLS-2$
-									minInvocation.arguments().add(fAst.newSimpleName(fMaxLenVariableName));
-									needMaxLenVariable= true;
-									MethodInvocation copyOfInvocation= createMethodInvocation(arraysImport, "copyOf", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
-									copyOfInvocation.arguments().add(minInvocation);
-									Name arraysImportCopy= (Name)ASTNode.copySubtree(fAst, arraysImport);
-									accessExpression= createMethodInvocation(arraysImportCopy, METHODNAME_TO_STRING, copyOfInvocation);
-								} else {
-									// arrayToString(member, member.length, maxLen)
-									MethodInvocation arrayToStringInvocation= fAst.newMethodInvocation();
-									if (fContext.isKeywordThis())
-										arrayToStringInvocation.setExpression(fAst.newThisExpression());
-									arrayToStringInvocation.setName(fAst.newSimpleName(HELPER_ARRAYTOSTRING_METHOD_NAME));
-									arrayToStringInvocation.arguments().add(createMemberAccessExpression(member, true, true));
-									arrayToStringInvocation.arguments().add(lengthAccess);
-									arrayToStringInvocation.arguments().add(fAst.newSimpleName(fMaxLenVariableName));
-									needMaxLenVariable= true;
-									accessExpression= arrayToStringInvocation;
-								}
+								// Arrays.toString( Arrays.copyOf ( member, Math.min (maxLen, member.length) )
+								Name arraysImport= addImport("java.util.Arrays"); //$NON-NLS-1$
+								MethodInvocation minInvocation= createMethodInvocation(addImport("java.lang.Math"), "min", lengthAccess); //$NON-NLS-1$ //$NON-NLS-2$
+								minInvocation.arguments().add(fAst.newSimpleName(fMaxLenVariableName));
+								needMaxLenVariable= true;
+								MethodInvocation copyOfInvocation= createMethodInvocation(arraysImport, "copyOf", createMemberAccessExpression(member, true, true)); //$NON-NLS-1$
+								copyOfInvocation.arguments().add(minInvocation);
+								Name arraysImportCopy= (Name)ASTNode.copySubtree(fAst, arraysImport);
+								accessExpression= createMethodInvocation(arraysImportCopy, METHODNAME_TO_STRING, copyOfInvocation);
 							}
 						}
 					}

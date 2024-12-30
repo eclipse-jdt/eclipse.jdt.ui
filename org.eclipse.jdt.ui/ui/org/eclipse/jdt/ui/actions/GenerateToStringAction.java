@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -44,7 +43,6 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.GenerateToStringOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -187,8 +185,6 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		super.createSettings(type, dialog).setSettings(settings);
 		settings.createComments= dialog.getGenerateComment();
 		settings.useBlocks= useBlocks(type.getJavaProject());
-		String version= fUnit.getJavaElement().getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
-		settings.is60orHigher= !JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6);
 		return settings;
 	}
 
