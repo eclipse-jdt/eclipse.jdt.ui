@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -490,11 +490,6 @@ public class TypeContextChecker {
 
 		if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
 			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, typeLabel);
-			return RefactoringStatus.createFatalErrorStatus(msg);
-		}
-
-		if (ParameterInfo.isVarargs(type) && ! JavaModelUtil.is50OrHigher(project)) {
-			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_no_vararg_below_50, typeLabel);
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
 
