@@ -81,10 +81,6 @@ class ToStringGenerationContext {
 		return fType;
 	}
 
-	public boolean is60orHigher() {
-		return fSettings.is60orHigher;
-	}
-
 	public boolean isCreateComments() {
 		return fSettings.createComments;
 	}

@@ -99,9 +99,6 @@ public class ToStringGenerationSettingsCore extends CodeGenerationSettings {
 	/** should blocks be forced in if/for/while statements? */
 	public boolean useBlocks;
 
-	/** can generated code use jdk 1.6 API? **/
-	public boolean is60orHigher;
-
 	/** settings specific for custom builder code style **/
 	public CustomBuilderSettings customBuilderSettings;
 
