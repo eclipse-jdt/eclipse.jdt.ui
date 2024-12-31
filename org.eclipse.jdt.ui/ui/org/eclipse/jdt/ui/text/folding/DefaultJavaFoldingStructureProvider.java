@@ -30,6 +30,9 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -44,6 +47,8 @@ import org.eclipse.jface.text.source.projection.IProjectionPosition;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
+
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -72,6 +77,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -922,7 +928,17 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void initializePreferences() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		IProject project= EditorUtility.getJavaProject(fEditor).getProject();
+		IPreferenceStore store = null;
+		if (project != null) {
+			ProjectScope scope= new ProjectScope(project);
+			if (scope.getNode(JavaUI.ID_PLUGIN).get(PreferenceConstants.EDITOR_FOLDING_ENABLED, null) != null) {
+				store= new ScopedPreferenceStore(scope, JavaUI.ID_PLUGIN);
+			}
+		}
+		if (store == null){
+			store= JavaPlugin.getDefault().getPreferenceStore();
+		}
 		fCollapseInnerTypes= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
 		fCollapseImportContainer= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_IMPORTS);
 		fCollapseJavadoc= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
@@ -1306,7 +1322,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private boolean startsWith(char[] source, int offset, int length, char[] prefix) {
-		for(int i=0;i<Math.min(length, prefix.length);i++) {
+		if (length < prefix.length) {
+			return false;
+		}
+		for(int i=0;i<prefix.length;i++) {
 			if (source[offset+i] != prefix[i]) {
 				return false;
 			}

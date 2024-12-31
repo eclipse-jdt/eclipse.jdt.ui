@@ -15,8 +15,14 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -24,44 +30,70 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * The page for setting the editor options.
  */
-public final class FoldingPreferencePage extends AbstractConfigurationBlockPreferencePage {
+public final class FoldingPreferencePage extends AbstractConfigurationBlockPreferenceAndPropertyPage {
+
+	public static final String PROPERTY_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.FoldingPreferencePage"; //$NON-NLS-1$
+	public static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.FoldingPreferencePage"; //$NON-NLS-1$
+	private OverlayPreferenceStore fOverlayStore;
+
+
+	public FoldingPreferencePage() {
+		setDescription(PreferencesMessages.JavaEditorPreferencePage_folding_title);
+	}
 
 	/*
-	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#getHelpId()
+	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigurationBlockPreferenceAndPropertyPage#getHelpId()
 	 */
 	@Override
 	protected String getHelpId() {
 		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
 
-	/*
-	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setDescription()
-	 */
 	@Override
-	protected void setDescription() {
-		String description= PreferencesMessages.JavaEditorPreferencePage_folding_title;
-		setDescription(description);
+	protected IPreferenceAndPropertyConfigurationBlock createConfigurationBlock(IScopeContext context) {
+		ScopedPreferenceStore scopedStore= new ScopedPreferenceStore(context, JavaUI.ID_PLUGIN);
+		fOverlayStore= new OverlayPreferenceStore(
+				scopedStore,
+				new OverlayPreferenceStore.OverlayKey[] {});
+		FoldingConfigurationBlock foldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore, context, isProjectPreferencePage());
+		fOverlayStore.load();
+		fOverlayStore.start();
+		return foldingConfigurationBlock;
 	}
 
-	/*
-	 * @see org.org.eclipse.ui.internal.editors.text.AbstractConfigurationBlockPreferencePage#setPreferenceStore()
-	 */
 	@Override
-	protected void setPreferenceStore() {
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return JavaPlugin.getDefault().getFoldingStructureProviderRegistry().hasProjectSpecificOptions(new ProjectScope(project));
 	}
 
-
 	@Override
-	protected Label createDescriptionLabel(Composite parent) {
-		return null; // no description for new look.
+	protected String getPreferencePageID() {
+		return PREFERENCE_PAGE_ID;
 	}
 
-	/*
-	 * @see org.eclipse.ui.internal.editors.text.AbstractConfigureationBlockPreferencePage#createConfigurationBlock(org.eclipse.ui.internal.editors.text.OverlayPreferenceStore)
-	 */
 	@Override
-	protected IPreferenceConfigurationBlock createConfigurationBlock(OverlayPreferenceStore overlayPreferenceStore) {
-		return new FoldingConfigurationBlock(overlayPreferenceStore);
+	protected String getPropertyPageID() {
+		return PROPERTY_PAGE_ID;
 	}
+
+	@Override
+	public boolean performOk() {
+		boolean result= super.performOk();
+		fOverlayStore.propagate();
+		return result;
+	}
+
+	@Override
+	public void performDefaults() {
+		fOverlayStore.loadDefaults();
+		super.performDefaults();
+
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		fOverlayStore.stop();
+	}
+
 }
