@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1584,9 +1584,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getConvertToMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-			return false;
-
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(covering, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;
@@ -1673,9 +1670,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getUnrollMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-			return false;
-
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(covering, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;

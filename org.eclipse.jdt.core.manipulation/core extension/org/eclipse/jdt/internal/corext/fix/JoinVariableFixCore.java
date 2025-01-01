@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Gayan Perera and others.
+ * Copyright (c) 2023, 2025 Gayan Perera and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -52,7 +51,6 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
@@ -220,9 +218,7 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			final CompilationUnit cup= (CompilationUnit) statement.getRoot();
 			final AST ast= cuRewrite.getAST();
-			final IJavaProject project= cup.getTypeRoot().getJavaProject();
 
 			TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
 			sourceRangeComputer.addTightSourceNode(ifStatement != null ? ifStatement : assignParent);
@@ -236,10 +232,8 @@ public final class JoinVariableFixCore extends CompilationUnitRewriteOperationsF
 				Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
 				Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
 
-				if (JavaModelUtil.is1d7OrHigher(project)) {
-					addExplicitTypeArgumentsIfNecessary(rewrite, cuRewrite, thenExpression);
-					addExplicitTypeArgumentsIfNecessary(rewrite, cuRewrite, elseExpression);
-				}
+				addExplicitTypeArgumentsIfNecessary(rewrite, cuRewrite, thenExpression);
+				addExplicitTypeArgumentsIfNecessary(rewrite, cuRewrite, elseExpression);
 				conditionalExpression.setThenExpression(thenCopy);
 				conditionalExpression.setElseExpression(elseCopy);
 				rewrite.set(fragment, VariableDeclarationFragment.INITIALIZER_PROPERTY, conditionalExpression, null);
