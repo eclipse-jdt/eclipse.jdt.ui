@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2021 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,21 +11,23 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring.all;
+package org.eclipse.jdt.ui.tests.refactoring;
 
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectClasses({
-	org.eclipse.jdt.ui.tests.refactoring.actions.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.nls.NLSTestSuite.class,
-	org.eclipse.jdt.ui.tests.refactoring.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.extensions.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.changes.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.ccp.AllTests.class,
-	org.eclipse.jdt.ui.tests.refactoring.typeconstraints.AllTests.class
+	AllRefactoringTests.class,
+	AllChangeTests.class,
+	UndoManagerTests.class,
+	PathTransformationTests.class,
+	RefactoringScannerTests.class,
+	SurroundWithTests.class,
+	SurroundWithTests1d7.class,
+	SurroundWithTests1d8.class,
+	SurroundWithTests16.class,
+	SurroundWithResourcesTests1d8.class,
 })
-public class AllAllRefactoringTests {
+public class RefactoringTestSuite {
 }
-
