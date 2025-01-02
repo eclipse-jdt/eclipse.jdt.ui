@@ -24,9 +24,12 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -142,55 +145,102 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 				IfStatement ifStatement= (IfStatement) currentNode.getParent();
 
+				ResultCollector collector = new ResultCollector(visited);
 				if (isPositiveCaseToAnalyze) {
-					return maybeMatchPattern(visited, ifStatement.getThenStatement());
+					collector.collect(ifStatement.getThenStatement());
+				} else if (ifStatement.getElseStatement() != null) {
+					collector.collect(ifStatement.getElseStatement());
+				} else if (ASTNodes.fallsThrough(ifStatement.getThenStatement())) {
+					collector.collect(ASTNodes.getNextSibling(ifStatement));
 				}
 
-				if (ifStatement.getElseStatement() != null) {
-					return maybeMatchPattern(visited, ifStatement.getElseStatement());
+				if (collector.hasResult()) {
+					fResult.add(collector.build());
+					return false;
 				}
-
-				if (ASTNodes.fallsThrough(ifStatement.getThenStatement())) {
-					return maybeMatchPattern(visited, ASTNodes.getNextSibling(ifStatement));
-				}
-
 				return true;
 			}
 
-			private boolean maybeMatchPattern(final InstanceofExpression visited, final Statement conditionalStatements) {
-				List<Statement> statements= ASTNodes.asList(conditionalStatements);
+			static class ResultCollector {
+				final InstanceofExpression visited;
+				SimpleName variableName;
+				final List<VariableDeclarationStatement> statementsToRemove = new ArrayList<>();
 
-				if (!statements.isEmpty()) {
-					VariableDeclarationStatement variableDeclarationExpression= ASTNodes.as(statements.get(0), VariableDeclarationStatement.class);
-					VariableDeclarationFragment variableDeclarationFragment= ASTNodes.getUniqueFragment(variableDeclarationExpression);
+				ResultCollector(InstanceofExpression visited) {
+					this.visited = visited;
+				}
 
-					if (variableDeclarationFragment != null
-							&& Objects.equals(visited.getRightOperand().resolveBinding(), variableDeclarationExpression.getType().resolveBinding())) {
-						CastExpression castExpression= ASTNodes.as(variableDeclarationFragment.getInitializer(), CastExpression.class);
+				public PatternMatchingForInstanceofFixOperation build() {
+					return new PatternMatchingForInstanceofFixOperation(visited, statementsToRemove, variableName);
+				}
 
-						if (castExpression != null
-								&& Objects.equals(visited.getRightOperand().resolveBinding(), castExpression.getType().resolveBinding())
-								&& ASTNodes.match(visited.getLeftOperand(), castExpression.getExpression())
-								&& ASTNodes.isPassive(visited.getLeftOperand())) {
-							fResult.add(new PatternMatchingForInstanceofFixOperation(visited, variableDeclarationExpression, variableDeclarationFragment.getName()));
-							return false;
+				private String getIdentifierName(Expression expression) {
+					if (expression instanceof SimpleName simpleName) {
+						return simpleName.getIdentifier();
+					}
+					return null;
+				}
+
+				boolean hasResult() {
+					return variableName != null && !statementsToRemove.isEmpty();
+				}
+
+				void addMatching(final VariableDeclarationStatement statementToRemove, final SimpleName expressionToMove) {
+					if (this.variableName == null || this.variableName.getIdentifier().equals(expressionToMove.getIdentifier())) {
+						this.variableName = expressionToMove;
+						this.statementsToRemove.add(statementToRemove);
+					}
+				}
+
+				void collect(final Statement conditionalStatements) {
+					List<Statement> statements= ASTNodes.asList(conditionalStatements);
+
+					if (!statements.isEmpty()) {
+						for (Statement statement : statements) {
+							if (statement instanceof ExpressionStatement expressionStatement) {
+								Assignment assignment = ASTNodes.as(expressionStatement.getExpression(), Assignment.class);
+								if (assignment != null && Objects.equals(getIdentifierName(visited.getLeftOperand()), getIdentifierName(assignment.getLeftHandSide()))) {
+									// The same variable is assigned, this can't be handled further.
+									return;
+								}
+							}
+							if (statement instanceof VariableDeclarationStatement variableDeclarationExpression) {
+								VariableDeclarationFragment variableDeclarationFragment= ASTNodes.getUniqueFragment(variableDeclarationExpression);
+								if (variableDeclarationFragment != null
+										&& Objects.equals(visited.getRightOperand().resolveBinding(), variableDeclarationExpression.getType().resolveBinding())) {
+									CastExpression castExpression= ASTNodes.as(variableDeclarationFragment.getInitializer(), CastExpression.class);
+
+									if (castExpression != null
+											&& Objects.equals(visited.getRightOperand().resolveBinding(), castExpression.getType().resolveBinding())
+											&& ASTNodes.match(visited.getLeftOperand(), castExpression.getExpression())
+											&& ASTNodes.isPassive(visited.getLeftOperand())) {
+										addMatching(variableDeclarationExpression, variableDeclarationFragment.getName());
+									}
+								}
+							}
+							if (statement instanceof IfStatement innerIf) {
+								collect(innerIf.getThenStatement());
+								if (innerIf.getElseStatement() != null) {
+									collect(innerIf.getElseStatement());
+								}
+							}
 						}
 					}
 				}
 
-				return true;
 			}
+
 		}
 	}
 
 	public static class PatternMatchingForInstanceofFixOperation extends CompilationUnitRewriteOperation {
 		private final InstanceofExpression nodeToComplete;
-		private final VariableDeclarationStatement statementToRemove;
+		private final List<VariableDeclarationStatement> statementsToRemove;
 		private final SimpleName expressionToMove;
 
-		public PatternMatchingForInstanceofFixOperation(final InstanceofExpression nodeToComplete, final VariableDeclarationStatement statementToRemove, final SimpleName expressionToMove) {
+		public PatternMatchingForInstanceofFixOperation(final InstanceofExpression nodeToComplete, final List<VariableDeclarationStatement> statementsToRemove, final SimpleName expressionToMove) {
 			this.nodeToComplete= nodeToComplete;
-			this.statementToRemove= statementToRemove;
+			this.statementsToRemove= statementsToRemove;
 			this.expressionToMove= expressionToMove;
 		}
 
@@ -216,7 +266,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			SingleVariableDeclaration newSVDecl= ast.newSingleVariableDeclaration();
 			newSVDecl.setName(ASTNodes.createMoveTarget(rewrite, expressionToMove));
 			newSVDecl.setType(ASTNodes.createMoveTarget(rewrite, nodeToComplete.getRightOperand()));
-			if (Modifier.isFinal(statementToRemove.getModifiers())) {
+			if (statementsToRemove.stream().allMatch(varDec -> Modifier.isFinal(varDec.getModifiers()))) {
 				newSVDecl.modifiers().add(ast.newModifier(ModifierKeyword.fromFlagValue(Modifier.FINAL)));
 			}
 			if ((ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled()) || ast.apiLevel() > AST.JLS20) {
@@ -229,12 +279,14 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 			ASTNodes.replaceButKeepComment(rewrite, nodeToComplete, newInstanceof, group);
 
-			if (ASTNodes.canHaveSiblings(statementToRemove) || statementToRemove.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
-				ASTNodes.removeButKeepComment(rewrite, statementToRemove, group);
-			} else {
-				ASTNodes.replaceButKeepComment(rewrite, statementToRemove, ast.newBlock(), group);
+			for (var statementToRemove : statementsToRemove) {
+				if (ASTNodes.canHaveSiblings(statementToRemove) || statementToRemove.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+					ASTNodes.removeButKeepComment(rewrite, statementToRemove, group);
+				} else {
+					ASTNodes.replaceButKeepComment(rewrite, statementToRemove, ast.newBlock(), group);
+				}
+				importRemover.registerRemovedNode(statementToRemove);
 			}
-			importRemover.registerRemovedNode(statementToRemove);
 		}
 	}
 
