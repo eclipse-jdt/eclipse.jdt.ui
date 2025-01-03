@@ -11,17 +11,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring.actions;
+package org.eclipse.jdt.ui.tests.refactoring.changes;
 
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectClasses({
-	StructureSelectionActionTests.class,
-	GoToNextPreviousMemberActionTests.class
+	TrackPositionTest.class,
+	TextDiffContentTest.class
 })
-public class AllTests {
+public class RefactoringChangesTestSuite {
 }
-
-

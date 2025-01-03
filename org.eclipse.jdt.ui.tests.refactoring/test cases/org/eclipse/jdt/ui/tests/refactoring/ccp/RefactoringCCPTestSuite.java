@@ -11,14 +11,21 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.refactoring.extensions;
+package org.eclipse.jdt.ui.tests.refactoring.ccp;
 
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
 @SelectClasses({
-	ExtensionPointTests.class
+	DeleteTest.class,
+	CopyToClipboardActionTest.class,
+	PasteActionTest.class,
+	CopyTest.class,
+	MoveTest.class,
+	MultiMoveTest.class,
+	//------old reorg tests
+	CopyResourcesToClipboardActionTest.class
 })
-public class AllTests {
+public class RefactoringCCPTestSuite {
 }
