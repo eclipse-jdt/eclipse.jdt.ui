@@ -14,6 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,6 +34,7 @@ import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchyFilterOptions;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -38,11 +42,10 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 class FiltersDialog extends StatusDialog {
     private Label fNamesHelpText;
     private Button fFilterOnNames;
+    private static final String KEY_CALL_HIERARCHY_FILTER_OPTION= "callHierarchyFilterOption"; //$NON-NLS-1$
     private Text fNames;
     private Text fMaxCallDepth;
-    private Button fShowAll;
-    private Button fHideTest;
-    private Button fShowTest;
+    private List<Button> buttons = new ArrayList<>(CallHierarchyFilterOptions.values().length); //important what comes when
 
     protected FiltersDialog(Shell parentShell) {
         super(parentShell);
@@ -118,28 +121,27 @@ class FiltersDialog extends StatusDialog {
 		layout.numColumns= 1;
 		radioGroup.setLayout(layout);
 
-		fShowAll= new Button(radioGroup, SWT.RADIO);
-		fShowAll.setText(CallHierarchyMessages.FiltersDialog_ShowAllCode);
+		for (CallHierarchyFilterOptions op : CallHierarchyFilterOptions.values()) {
+			Button b= new Button(radioGroup, SWT.RADIO);
+			b.setText(op.getText());
+			b.setData(KEY_CALL_HIERARCHY_FILTER_OPTION, op);
+			buttons.add(b);
+		}
 
-		fHideTest= new Button(radioGroup, SWT.RADIO);
-		fHideTest.setText(CallHierarchyMessages.FiltersDialog_HideTestCode);
-
-		fShowTest= new Button(radioGroup, SWT.RADIO);
-		fShowTest.setText(CallHierarchyMessages.FiltersDialog_TestCodeOnly);
 		setSelection();
 
 		GridData gridData= new GridData();
 		gridData.horizontalIndent= 0;
-		fShowAll.setLayoutData(gridData);
-		fHideTest.setLayoutData(gridData);
-		fShowTest.setLayoutData(gridData);
+
+		for (Button button : buttons) {
+			button.setLayoutData(gridData);
+		}
 	}
 
     private void setSelection() {
-		fShowAll.setSelection(CallHierarchy.getDefault().isShowAll());
-		fHideTest.setSelection(CallHierarchy.getDefault().isHideTestCode());
-		fShowTest.setSelection(CallHierarchy.getDefault().isShowTestCode());
-
+    	for (Button button : buttons) {
+			button.setSelection(CallHierarchy.getDefault().getActiveFilter() == getFilterOptions(button));
+		}
     }
 
     /**
@@ -191,9 +193,13 @@ class FiltersDialog extends StatusDialog {
 		CallHierarchy.getDefault().setFilters(fNames.getText());
 		CallHierarchy.getDefault().setFilterEnabled(fFilterOnNames.getSelection());
 
-		CallHierarchy.getDefault().setShowAll(fShowAll.getSelection());
-		CallHierarchy.getDefault().setHideTestCode(fHideTest.getSelection());
-		CallHierarchy.getDefault().setShowTestCode(fShowTest.getSelection());
+		CallHierarchyFilterOptions activeFilter = null;
+		for (Button button : buttons) {
+			if(button.getSelection()) {
+				activeFilter = getFilterOptions(button);
+			}
+		}
+		CallHierarchy.getDefault().setActiveFilter(activeFilter);
 	}
 
 	/**
@@ -205,10 +211,12 @@ class FiltersDialog extends StatusDialog {
 		fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
 
 		setSelection();
-		
 		updateEnabledState();
 	}
 
+	private CallHierarchyFilterOptions getFilterOptions(Button b) {
+		return (CallHierarchyFilterOptions) b.getData(KEY_CALL_HIERARCHY_FILTER_OPTION);
+	}
 
 	/**
      * Updates the filter from the UI state.
