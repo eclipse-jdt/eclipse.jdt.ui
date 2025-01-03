@@ -424,7 +424,7 @@ public class JUnitRemoteTestRunnerClient extends RemoteTestRunnerClient {
 			}
 
 			int index6 = scanTestName(fixedTreeEntry, index5 + 1, displayNameBuffer);
-			displayName = displayNameBuffer.toString().trim();
+			displayName = displayNameBuffer.toString().replace('\0', ' ').trim();
 			if (displayName.equals(testName)) {
 				displayName = null;
 			}

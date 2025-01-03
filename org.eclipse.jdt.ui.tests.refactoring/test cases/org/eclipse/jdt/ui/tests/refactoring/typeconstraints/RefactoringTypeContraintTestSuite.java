@@ -21,5 +21,5 @@ import org.junit.platform.suite.api.Suite;
 	TypeConstraintTests.class,
 	TypeEnvironmentTests.class
 })
-public class AllTests {
+public class RefactoringTypeContraintTestSuite {
 }

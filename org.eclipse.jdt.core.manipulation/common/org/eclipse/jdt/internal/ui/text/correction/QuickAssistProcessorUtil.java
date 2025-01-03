@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -708,6 +709,28 @@ public class QuickAssistProcessorUtil {
 			return null;
 		}
 		return compilationUnit;
+	}
+
+	public static ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement, boolean toControlStatementBody) {
+		if (statement.getNodeType() == ASTNode.BLOCK) {
+			Block block= (Block) statement;
+			List<Statement> innerStatements= block.statements();
+			int nStatements= innerStatements.size();
+			if (nStatements == 1) {
+				return rewrite.createCopyTarget(innerStatements.get(0));
+			} else if (nStatements > 1) {
+				if (toControlStatementBody) {
+					return rewrite.createCopyTarget(block);
+				}
+				ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+				ASTNode first= innerStatements.get(0);
+				ASTNode last= innerStatements.get(nStatements - 1);
+				return listRewrite.createCopyTarget(first, last);
+			}
+			return null;
+		} else {
+			return rewrite.createCopyTarget(statement);
+		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 IBM Corporation and others.
+ * Copyright (c) 2018, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -74,8 +74,8 @@ public class ClasspathVMUtil {
 	}
 
 	public static String getVMInstallCompliance(IVMInstall install, boolean allowNullCompliance) {
-		String defCompliance1= JavaCore.VERSION_1_1;
-		String defCompliance2= JavaCore.VERSION_1_3;
+		String defCompliance1= JavaCore.VERSION_1_8;
+		String defCompliance2= JavaCore.VERSION_1_8;
 		if (allowNullCompliance) {
 			defCompliance1= null;
 			defCompliance2= null;

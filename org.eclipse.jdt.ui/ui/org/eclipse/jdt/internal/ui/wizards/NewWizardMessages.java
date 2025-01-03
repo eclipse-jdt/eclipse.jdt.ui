@@ -115,7 +115,6 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_PackageNameEmptyForModule;
 	public static String NewTypeWizardPage_warning_DiscouragedPackageName;
 	public static String NewTypeWizardPage_warning_DefaultPackageDiscouraged;
-	public static String NewTypeWizardPage_warning_NotJDKCompliant;
 	public static String NewTypeWizardPage_warning_NotJDKCompliant2;
 	public static String NewTypeWizardPage_warning_EnumClassNotFound;
 	public static String NewTypeWizardPage_warning_RecordClassNotFound;
@@ -158,13 +157,10 @@ public final class NewWizardMessages extends NLS {
 	public static String NewTypeWizardPage_error_QualifiedName;
 	public static String NewTypeWizardPage_info_FileExtensionNotRequired;
 	public static String NewTypeWizardPage_warning_TypeNameDiscouraged;
-	public static String NewTypeWizardPage_error_TypeParameters;
 	public static String NewTypeWizardPage_error_InvalidSuperClassName;
 	public static String NewTypeWizardPage_error_InvalidSuperClassRecord;
 	public static String NewTypeWizardPage_error_InvalidFinalSuperClass;
-	public static String NewTypeWizardPage_error_SuperClassNotParameterized;
 	public static String NewTypeWizardPage_error_InvalidSuperInterfaceName;
-	public static String NewTypeWizardPage_error_SuperInterfaceNotParameterized;
 	public static String NewTypeWizardPage_error_ModifiersFinalAndAbstract;
 	public static String NewTypeWizardPage_error_TypeNameFiltered;
 	public static String NewTypeWizardPage_error_PackageNameFiltered;

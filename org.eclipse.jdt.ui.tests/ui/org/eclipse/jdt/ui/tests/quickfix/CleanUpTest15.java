@@ -409,10 +409,17 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf11.append("mnop\\n");
 			        int index = buf11.indexOf("fg");
 			        System.out.println(buf11.toString());
+			        StringBuffer buf12 = new StringBuffer("abcd\\n");
+			        buf12.append("efgh\\n");
+			        buf12.append("ijkl\\n");
+			        buf12.append("mnopq\\n");
+			        bufFunc(buf12);
 			    }
 			    private void write(CharSequence c) {
 			        System.out.println(c);
 			    }
+			    private void bufFunc(StringBuffer buf) {
+				}
 			}""";
 
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
@@ -538,10 +545,19 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            \""";
 			        int index = str9.indexOf("fg");
 			        System.out.println(str9);
+			        StringBuffer buf12 = new StringBuffer(\"""
+			            abcd
+			            efgh
+			            ijkl
+			            mnopq
+			            \""");
+			        bufFunc(buf12);
 			    }
 			    private void write(CharSequence c) {
 			        System.out.println(c);
 			    }
+			    private void bufFunc(StringBuffer buf) {
+				}
 			}""";
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);

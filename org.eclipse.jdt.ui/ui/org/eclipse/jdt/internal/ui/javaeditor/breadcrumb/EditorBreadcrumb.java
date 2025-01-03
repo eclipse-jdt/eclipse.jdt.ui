@@ -282,7 +282,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				if (menu != null
 						&& !menu.isDisposed()
 						&& menu.getDisplay() != null
-						&& Platform.OS_WIN32.equals(Platform.getOS())) {
+						&& Platform.OS.isWindows()) {
 					menu.getDisplay().readAndDispatch();
 				}
 				actionGroup.dispose();

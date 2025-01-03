@@ -2947,12 +2947,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 
-			if (JavaCore.COMPILER_SOURCE.equals(property)) {
-				if (event.getNewValue() instanceof String)
-					fBracketMatcher.setSourceVersion((String) event.getNewValue());
-				// fall through as others are interested in source change as well.
-			}
-
 			((JavaSourceViewerConfiguration)getSourceViewerConfiguration()).handlePropertyChangeEvent(event);
 
 			if (affectsOverrideIndicatorAnnotations(event)) {
@@ -3128,7 +3122,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	@Override
 	protected void configureSourceViewerDecorationSupport(SourceViewerDecorationSupport support) {
 
-		fBracketMatcher.setSourceVersion(getPreferenceStore().getString(JavaCore.COMPILER_SOURCE));
 		support.setCharacterPairMatcher(fBracketMatcher);
 		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR, HIGHLIGHT_BRACKET_AT_CARET_LOCATION, ENCLOSING_BRACKETS);
 

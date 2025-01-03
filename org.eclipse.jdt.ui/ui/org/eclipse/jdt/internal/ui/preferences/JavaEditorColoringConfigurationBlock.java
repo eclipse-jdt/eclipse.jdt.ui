@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -289,43 +289,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		}
 	}
 
-	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
-	/**
-	 * Preference key suffix for italic preferences.
-	 * @since  3.0
-	 */
-	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
-	/**
-	 * Preference key suffix for strikethrough preferences.
-	 * @since  3.1
-	 */
-	private static final String STRIKETHROUGH= PreferenceConstants.EDITOR_STRIKETHROUGH_SUFFIX;
-	/**
-	 * Preference key suffix for underline preferences.
-	 * @since  3.1
-	 */
-	private static final String UNDERLINE= PreferenceConstants.EDITOR_UNDERLINE_SUFFIX;
-
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/**
 	 * The keys of the overlay store.
 	 */
-	private final String[][] fSyntaxColorListModel= new String[][] {
-			{ PreferencesMessages.JavaEditorPreferencePage_javaDocKeywords, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_javaDocHtmlTags, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_javaDocLinks, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_javaDocOthers, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_multiLineComment, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_singleLineComment, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_javaCommentTaskTags, PreferenceConstants.EDITOR_TASK_TAG_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_keywords, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_returnKeyword, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_operators, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_brackets, PreferenceConstants.EDITOR_JAVA_BRACKET_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR },
-			{ PreferencesMessages.JavaEditorPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR },
-	};
-
 	private final String fJavaCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_java;
 	private final String fJavadocCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_javadoc;
 	private final String fCommentsCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_comments;
@@ -385,8 +352,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 		fColorManager= new JavaColorManager();
 
-		for (String[] syntaxColor : fSyntaxColorListModel)
-			fListModel.add(new HighlightingColorListItem (syntaxColor[0], syntaxColor[1], syntaxColor[1] + BOLD, syntaxColor[1] + ITALIC, syntaxColor[1] + STRIKETHROUGH, syntaxColor[1] + UNDERLINE));
+		for (SyntaxColorHighlighting syntaxColor : SyntaxColorHighlighting.getSyntaxColorHighlightings())
+			fListModel.add(new HighlightingColorListItem (syntaxColor.label(), syntaxColor.preferenceKey(), syntaxColor.getBoldPreferenceKey(), syntaxColor.getItalicPreferenceKey(), syntaxColor.getStrikethroughPreferenceKey(), syntaxColor.getUnderlinePreferenceKey()));
 
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (SemanticHighlighting semanticHighlighting : semanticHighlightings)
@@ -815,8 +782,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.H_SCROLL | SWT.BORDER, store);
 		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		fPreviewViewer.configure(configuration);
-		// fake 1.5 source to get 1.5 features right.
-		configuration.handlePropertyChangeEvent(new PropertyChangeEvent(this, JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5));
+		// 1.8 source to get 1.8 features right.
+		configuration.handlePropertyChangeEvent(new PropertyChangeEvent(this, JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8));
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new JavaSourcePreviewerUpdater(fPreviewViewer, configuration, store);

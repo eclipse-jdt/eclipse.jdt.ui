@@ -94,11 +94,6 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 			return null;
 		}
 
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(compilationUnit.getTypeRoot().getJavaProject());
-		if (!is50OrHigher) {
-			return null;
-		}
-
 		// collect operands
 		List<Expression> operands= new ArrayList<>();
 		collectInfixPlusOperands(oldInfixExpression, operands);
@@ -109,12 +104,6 @@ public class ConvertToStringFormatFixCore extends CompilationUnitRewriteOperatio
 		// we need to loop through all to exclude any null binding scenarios.
 		for (Expression operand : operands) {
 			if (!(operand instanceof StringLiteral)) {
-				if (!is50OrHigher) {
-					ITypeBinding binding= operand.resolveTypeBinding();
-					if (binding == null) {
-						return null;
-					}
-				}
 				foundNoneLiteralOperand= true;
 			} else {
 				// ensure either all string literals are nls-tagged or none are

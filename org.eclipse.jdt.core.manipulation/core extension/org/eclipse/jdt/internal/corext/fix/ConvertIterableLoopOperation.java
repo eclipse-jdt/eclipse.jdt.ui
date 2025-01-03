@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
@@ -417,71 +416,68 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	 */
 	@Override
 	public IStatus satisfiesPreconditions() {
-		IStatus resultStatus= StatusInfo.OK_STATUS;
-		if (JavaModelUtil.is50OrHigher(getJavaProject())) {
-			resultStatus= checkExpressionCondition();
-			if (resultStatus.getSeverity() == IStatus.ERROR)
-				return resultStatus;
+		IStatus resultStatus= checkExpressionCondition();
+		if (resultStatus.getSeverity() == IStatus.ERROR)
+			return resultStatus;
 
-			List<Expression> updateExpressions= getForStatement().updaters();
-			if (updateExpressions.size() == 1) {
-				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, BasicElementLabels.getJavaCodeString(updateExpressions.get(0).toString())));
-			} else if (updateExpressions.size() > 1) {
-				resultStatus= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning);
-			}
+		List<Expression> updateExpressions= getForStatement().updaters();
+		if (updateExpressions.size() == 1) {
+			resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, BasicElementLabels.getJavaCodeString(updateExpressions.get(0).toString())));
+		} else if (updateExpressions.size() > 1) {
+			resultStatus= new StatusInfo(IStatus.WARNING, FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpressions_Warning);
+		}
 
-			for (final Object outer : getForStatement().initializers()) {
-				if (outer instanceof VariableDeclarationExpression) {
-					VariableDeclarationExpression declaration= (VariableDeclarationExpression) outer;
-					List<VariableDeclarationFragment> fragments= declaration.fragments();
-					if (fragments.size() != 1) {
-						return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-					}
-					VariableDeclarationFragment fragment= fragments.get(0);
-					IVariableBinding binding= fragment.resolveBinding();
-					if (binding != null) {
-						ITypeBinding type= binding.getType();
-						if (type != null) {
-							ITypeBinding iterator= getSuperType(type, Iterator.class.getCanonicalName());
+		for (final Object outer : getForStatement().initializers()) {
+			if (outer instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression declaration= (VariableDeclarationExpression) outer;
+				List<VariableDeclarationFragment> fragments= declaration.fragments();
+				if (fragments.size() != 1) {
+					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
+				}
+				VariableDeclarationFragment fragment= fragments.get(0);
+				IVariableBinding binding= fragment.resolveBinding();
+				if (binding != null) {
+					ITypeBinding type= binding.getType();
+					if (type != null) {
+						ITypeBinding iterator= getSuperType(type, Iterator.class.getCanonicalName());
 
-							if (iterator == null) {
-								iterator= getSuperType(type, Enumeration.class.getCanonicalName());
-							}
+						if (iterator == null) {
+							iterator= getSuperType(type, Enumeration.class.getCanonicalName());
+						}
 
-							if (iterator != null) {
-								fIteratorVariable= binding;
+						if (iterator != null) {
+							fIteratorVariable= binding;
 
-								MethodInvocation method= ASTNodes.as(fragment.getInitializer(), MethodInvocation.class);
-								if (method != null && method.resolveMethodBinding() != null) {
-									IMethodBinding methodBinding= method.resolveMethodBinding();
-									ITypeBinding returnType= methodBinding.getReturnType();
-									if (returnType != null) {
-										String qualified= returnType.getErasure().getQualifiedName();
-										ITypeBinding returnElementType= getElementType(returnType);
-										ITypeBinding variableElementType= getElementType(fIteratorVariable.getType());
+							MethodInvocation method= ASTNodes.as(fragment.getInitializer(), MethodInvocation.class);
+							if (method != null && method.resolveMethodBinding() != null) {
+								IMethodBinding methodBinding= method.resolveMethodBinding();
+								ITypeBinding returnType= methodBinding.getReturnType();
+								if (returnType != null) {
+									String qualified= returnType.getErasure().getQualifiedName();
+									ITypeBinding returnElementType= getElementType(returnType);
+									ITypeBinding variableElementType= getElementType(fIteratorVariable.getType());
 
-										if (returnElementType != null
-												&& variableElementType != null
-												&& returnElementType.isAssignmentCompatible(variableElementType)
-												&& ("java.util.Iterator".equals(qualified) || "java.util.Enumeration".equals(qualified))) { //$NON-NLS-1$ //$NON-NLS-2$
-											Expression qualifier= method.getExpression();
-											if (qualifier != null) {
-												ITypeBinding resolved= qualifier.resolveTypeBinding();
-												if (resolved != null) {
-													ITypeBinding iterable= getSuperType(resolved, Iterable.class.getCanonicalName());
-													if (iterable != null) {
-														fExpression= qualifier;
-														fIterable= resolved;
-													}
+									if (returnElementType != null
+											&& variableElementType != null
+											&& returnElementType.isAssignmentCompatible(variableElementType)
+											&& ("java.util.Iterator".equals(qualified) || "java.util.Enumeration".equals(qualified))) { //$NON-NLS-1$ //$NON-NLS-2$
+										Expression qualifier= method.getExpression();
+										if (qualifier != null) {
+											ITypeBinding resolved= qualifier.resolveTypeBinding();
+											if (resolved != null) {
+												ITypeBinding iterable= getSuperType(resolved, Iterable.class.getCanonicalName());
+												if (iterable != null) {
+													fExpression= qualifier;
+													fIterable= resolved;
 												}
-											} else {
-												ITypeBinding declaring= methodBinding.getDeclaringClass();
-												if (declaring != null) {
-													ITypeBinding superBinding= getSuperType(declaring, Iterable.class.getCanonicalName());
-													if (superBinding != null) {
-														fIterable= superBinding;
-														fThis= true;
-													}
+											}
+										} else {
+											ITypeBinding declaring= methodBinding.getDeclaringClass();
+											if (declaring != null) {
+												ITypeBinding superBinding= getSuperType(declaring, Iterable.class.getCanonicalName());
+												if (superBinding != null) {
+													fIterable= superBinding;
+													fThis= true;
 												}
 											}
 										}

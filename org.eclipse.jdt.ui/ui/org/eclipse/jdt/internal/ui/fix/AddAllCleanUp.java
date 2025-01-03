@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,7 +58,6 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -297,8 +296,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.AddAllCleanup_description, cuRewrite);
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 
-			if (JavaModelUtil.is50OrHigher(((CompilationUnit) toReplace.getRoot()).getJavaElement().getJavaProject())
-					&& affectedCollection.resolveTypeBinding() != null
+			if (affectedCollection.resolveTypeBinding() != null
 					&& affectedCollection.resolveTypeBinding().isRawType()) {
 				String arraysNameText= importRewrite.addImport(Arrays.class.getCanonicalName());
 

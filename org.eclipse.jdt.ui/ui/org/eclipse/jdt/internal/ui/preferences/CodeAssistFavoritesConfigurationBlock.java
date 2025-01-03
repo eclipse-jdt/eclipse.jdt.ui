@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -208,7 +208,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			if (newText.length() == 0) {
 				status.setError(""); //$NON-NLS-1$
 			} else {
-				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null);
+				IStatus val= JavaConventions.validateJavaTypeName(newText, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8, null);
 				if (val.matches(IStatus.ERROR)) {
 					if (fIsEditingMember)
 						status.setError(PreferencesMessages.FavoriteStaticMemberInputDialog_error_invalidMemberName);

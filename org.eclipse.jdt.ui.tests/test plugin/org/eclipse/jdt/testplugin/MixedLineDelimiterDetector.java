@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import org.eclipse.core.resources.IResource;
 
@@ -169,7 +169,7 @@ public class MixedLineDelimiterDetector  {
 	}
 	public static void assertNoMixedLineDelimiters(IResource resource) {
 		IResource[] mixedResources= findFilesWithMixedLineDelimiters(resource);
-		Assert.assertTrue(mixedResources == null || mixedResources.length == 0);
+		Assertions.assertTrue(mixedResources == null || mixedResources.length == 0);
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class MixedLineDelimiterDetector  {
 //		engine.search(scope, false, collector, new LineDelimiterLocator(MIXED_LD));
 //		return (IResource[])result.toArray(new IResource[result.size()]);
 
-		Assert.fail("support currently disabled");
+		Assertions.fail("support currently disabled");
 
 		return new IResource[0];
 	}

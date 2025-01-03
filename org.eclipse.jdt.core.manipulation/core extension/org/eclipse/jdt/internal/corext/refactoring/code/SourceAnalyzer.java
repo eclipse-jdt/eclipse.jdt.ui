@@ -268,7 +268,7 @@ class SourceAnalyzer  {
 			if (fTypeCounter == 0) {
 				Expression receiver= node.getExpression();
 				if (receiver == null) {
-					if (node.resolveTypeBinding().isLocal())
+					if (node.resolveTypeBinding().isLocal() && !node.resolveTypeBinding().isAnonymous())
 						fImplicitReceivers.add(node);
 				}
 			}
@@ -326,6 +326,12 @@ class SourceAnalyzer  {
 		public boolean visit(ThisExpression node) {
 			if (fTypeCounter == 0) {
 				fImplicitReceivers.add(node);
+			}
+			if (node.getQualifier() instanceof Name qualifier) {
+				IBinding binding= qualifier.resolveBinding();
+				if (binding instanceof ITypeBinding) {
+					fImplicitReceivers.add(node);
+				}
 			}
 			return true;
 		}

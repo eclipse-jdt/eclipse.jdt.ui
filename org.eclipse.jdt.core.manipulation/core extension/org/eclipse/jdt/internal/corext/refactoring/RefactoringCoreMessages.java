@@ -107,6 +107,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ChangeSignatureRefactoring_method_name_will_shadow;
 
+	public static String ChangeSignatureRefactoring_method_name_will_shadow2;
+
 	public static String ChangeSignatureRefactoring_method_name_not_empty;
 
 	public static String ChangeSignatureRefactoring_modify_Parameters;
@@ -776,10 +778,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InferTypeArgumentsRefactoring_leave_unconstrained;
 
 	public static String InferTypeArgumentsRefactoring_name;
-
-	public static String InferTypeArgumentsRefactoring_not50;
-
-	public static String InferTypeArgumentsRefactoring_not50Library;
 
 	public static String InferTypeArgumentsRefactoring_original_elements;
 
@@ -2472,8 +2470,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String TypeContextChecker_invalid_type_name;
 
 	public static String TypeContextChecker_invalid_type_syntax;
-
-	public static String TypeContextChecker_no_vararg_below_50;
 
 	public static String TypeContextChecker_not_unique;
 

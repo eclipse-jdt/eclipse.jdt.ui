@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2263,6 +2263,324 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 			""";
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	@Test
+	public void testVarInEnumMethodReturn1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo() {
+					return BLUE;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Colors.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			public enum Colors {
+				RED, BLUE;
+				public Colors foo() {
+					return BLUE;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo() {
+					return RED;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		String expected3= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo() {
+					Colors BLUE;
+			        return BLUE;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		String expected4= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo(Colors BLUE) {
+					return BLUE;
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+	}
+
+	@Test
+	public void testVarInEnumMethodReturn2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public enum Colors {
+				RED;
+				public int foo() {
+					return BLUE;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Colors.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			public enum Colors {
+				RED;
+				private int BLUE;
+
+			    public int foo() {
+					return BLUE;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= """
+			package test1;
+			public enum Colors {
+				RED;
+				private static final int BLUE = 0;
+
+			    public int foo() {
+					return BLUE;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		String expected3= """
+			package test1;
+			public enum Colors {
+				RED;
+				public int foo() {
+					int BLUE;
+			        return BLUE;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		String expected4= """
+			package test1;
+			public enum Colors {
+				RED;
+				public int foo(int BLUE) {
+					return BLUE;
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+	}
+
+	@Test
+	public void testVarInEnumMethod1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo() {
+					Colors k = BLUE;
+					return k;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Colors.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			public enum Colors {
+				RED, BLUE;
+				public Colors foo() {
+					Colors k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo() {
+					Colors BLUE;
+			        Colors k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		String expected3= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo() {
+					Colors k = RED;
+					return k;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		String expected4= """
+			package test1;
+			public enum Colors {
+				RED;
+				public Colors foo(Colors BLUE) {
+					Colors k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
+	}
+
+	@Test
+	public void testVarInEnumMethod2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			public enum Colors {
+				RED;
+				public int foo() {
+					int k = BLUE;
+					return k;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("Colors.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		String expected1= """
+			package test1;
+			public enum Colors {
+				RED;
+				private int BLUE;
+
+			    public int foo() {
+					int k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		String expected2= """
+			package test1;
+			public enum Colors {
+				RED;
+				private static final int BLUE = 0;
+
+			    public int foo() {
+					int k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		String expected3= """
+			package test1;
+			public enum Colors {
+				RED;
+				public int foo() {
+					int BLUE;
+			        int k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		String expected4= """
+			package test1;
+			public enum Colors {
+				RED;
+				public int foo(int BLUE) {
+					int k = BLUE;
+					return k;
+				}
+			}
+			""";
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
 	@Test

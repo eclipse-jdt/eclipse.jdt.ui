@@ -39,11 +39,13 @@ import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 
 public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 	private final static class CompletionSelectionTracker implements ICompletionListener {
-		private ICompletionProposal fSelectedProposal;
+		private AbstractJavaCompletionProposal fSelectedProposal;
 
 		@Override
 		public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
-			this.fSelectedProposal= proposal;
+			if (proposal instanceof AbstractJavaCompletionProposal p) {
+				this.setSelectedProposal(p);
+			}
 		}
 
 		@Override
@@ -56,8 +58,12 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 			// not used
 		}
 
-		public AbstractJavaCompletionProposal getSelectedProposal() {
-			return (AbstractJavaCompletionProposal) this.fSelectedProposal;
+		public synchronized AbstractJavaCompletionProposal getSelectedProposal() {
+			return this.fSelectedProposal;
+		}
+
+		public synchronized void setSelectedProposal(AbstractJavaCompletionProposal selectedProposal) {
+			fSelectedProposal = selectedProposal;
 		}
 	}
 
@@ -84,11 +90,23 @@ public class ContinuousTypingCompletionTest extends AbstractCompletionTest {
 		CompletionSelectionTracker selectionTracker= new CompletionSelectionTracker();
 		((JavaSourceViewer) fEditor.getViewer()).getContentAssistantFacade().addCompletionListener(selectionTracker);
 		fEditor.getAction(ITextEditorActionConstants.CONTENT_ASSIST).run();
+		new DisplayHelper() {
+			@Override
+			public boolean condition() {
+				return selectionTracker.getSelectedProposal()!=null;
+			}
+		}.waitForCondition(display, 10000);
 		assertEquals("ab", selectionTracker.getSelectedProposal().getJavaElement().getElementName());
 		IDocument document= fEditor.getViewer().getDocument();
 		document.replace(completionOffset, 0, "b");
+		selectionTracker.setSelectedProposal(null);
 		fEditor.getViewer().setSelectedRange(completionOffset + 1, 0);
-		DisplayHelper.sleep(display, 500);
+		new DisplayHelper() {
+			@Override
+			public boolean condition() {
+				return selectionTracker.getSelectedProposal()!=null;
+			}
+		}.waitForCondition(display, 10000);
 		assertEquals("ba", selectionTracker.getSelectedProposal().getJavaElement().getElementName());
 	}
 

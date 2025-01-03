@@ -58,7 +58,6 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
@@ -99,14 +98,9 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 			return null;
 		}
 
-		String bufferOrBuilderName;
 		SimpleName existingBuffer= getEnclosingAppendBuffer(oldInfixExpression);
-		if (JavaModelUtil.is50OrHigher(compilationUnit.getTypeRoot().getJavaProject())) {
-			bufferOrBuilderName= "StringBuilder"; //$NON-NLS-1$
-		} else {
-			bufferOrBuilderName= "StringBuffer"; //$NON-NLS-1$
-		}
-		var mechanismName= BasicElementLabels.getJavaElementName(existingBuffer == null ? bufferOrBuilderName : existingBuffer.getIdentifier());
+		String builderName= "StringBuilder"; //$NON-NLS-1$
+		var mechanismName= BasicElementLabels.getJavaElementName(existingBuffer == null ? builderName : existingBuffer.getIdentifier());
 		var label= Messages.format(CorrectionMessages.QuickAssistProcessor_convert_to_string_buffer_description, mechanismName);
 		return new ConvertToStringBufferFixCore(label, compilationUnit, new ConvertToStringBufferProposalOperation(oldInfixExpression));
 
@@ -178,14 +172,9 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
-			String bufferOrBuilderName;
 			ICompilationUnit cu= cuRewrite.getCu();
 			AST ast= cuRewrite.getAST();
-			if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-				bufferOrBuilderName= "StringBuilder"; //$NON-NLS-1$
-			} else {
-				bufferOrBuilderName= "StringBuffer"; //$NON-NLS-1$
-			}
+			String builderName= "StringBuilder"; //$NON-NLS-1$
 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
@@ -218,10 +207,10 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 				// check if name is already in use and provide alternative
 				List<String> fExcludedVariableNames= Arrays.asList(ASTResolving.getUsedVariableNames(oldInfixExpression));
 
-				SimpleType bufferType= ast.newSimpleType(ast.newName(bufferOrBuilderName));
+				SimpleType bufferType= ast.newSimpleType(ast.newName(builderName));
 				ClassInstanceCreation newBufferExpression= ast.newClassInstanceCreation();
 
-				String[] newBufferNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), bufferOrBuilderName, 0, fExcludedVariableNames, true);
+				String[] newBufferNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, cu.getJavaProject(), builderName, 0, fExcludedVariableNames, true);
 				bufferName= newBufferNames[0];
 
 				SimpleName bufferNameDeclaration= ast.newSimpleName(bufferName);
@@ -239,7 +228,7 @@ public class ConvertToStringBufferFixCore extends CompilationUnitRewriteOperatio
 
 
 				VariableDeclarationStatement bufferDeclaration= ast.newVariableDeclarationStatement(frag);
-				bufferDeclaration.setType(ast.newSimpleType(ast.newName(bufferOrBuilderName)));
+				bufferDeclaration.setType(ast.newSimpleType(ast.newName(builderName)));
 				insertAfter= bufferDeclaration;
 
 				Statement statement= ASTResolving.findParentStatement(oldInfixExpression);

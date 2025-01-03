@@ -209,7 +209,7 @@ public class UtilitiesTest extends QuickFixTest {
 		FieldDeclaration[] fields= ((TypeDeclaration) astRoot.types().get(0)).getFields();
 		for (int i= 0; i < fields.length; i++) {
 			ASTNode node= NodeFinder.perform(astRoot, buf.indexOf("X", fields[i].getStartPosition()), 1);
-			int kinds= ASTResolving.getPossibleTypeKinds(node, true);
+			int kinds= ASTResolving.getPossibleTypeKinds(node);
 			if (kinds != expected[i]) {
 				assertEquals("Guessing failed for " + fields[i].toString(), expected[i], kinds);
 			}
@@ -237,7 +237,7 @@ public class UtilitiesTest extends QuickFixTest {
 		for (int i = 0; i < astRoot.types().size(); i++) {
 			TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(i);
 			ASTNode node= NodeFinder.perform(astRoot, buf.indexOf("X", typeDecl.getStartPosition()), 1);
-			int kinds= ASTResolving.getPossibleTypeKinds(node, true);
+			int kinds= ASTResolving.getPossibleTypeKinds(node);
 			assertEquals("Guessing failed for " + node.toString(), expected[i], kinds);
 		}
 	}

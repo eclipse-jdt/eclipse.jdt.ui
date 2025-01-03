@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2022 IBM Corporation and others.
+ * Copyright (c) 2005, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,9 +26,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -124,35 +122,9 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		proposal.setReplaceRange(context.getInvocationOffset(), context.getInvocationOffset());
 		proposal.setSignature(Signature.createTypeSignature(fullyQualifiedType, true).toCharArray());
 
-		if (shouldProposeGenerics(context.getProject())) {
-			LazyGenericTypeProposal p= new LazyGenericTypeProposal(proposal, context);
-			p.setRelevance(relevance);
-			return p;
-		} else {
-			LazyJavaTypeCompletionProposal p= new LazyJavaTypeCompletionProposal(proposal, context);
-			p.setRelevance(relevance);
-			return p;
-		}
-	}
-
-	/**
-	 * Returns <code>true</code> if generic proposals should be allowed,
-	 * <code>false</code> if not. Note that even though code (in a library)
-	 * may be referenced that uses generics, it is still possible that the
-	 * current source does not allow generics.
-	 *
-	 * @param project the Java project
-	 * @return <code>true</code> if the generic proposals should be allowed,
-	 *         <code>false</code> if not
-	 */
-	protected final boolean shouldProposeGenerics(IJavaProject project) {
-		String sourceVersion;
-		if (project != null)
-			sourceVersion= project.getOption(JavaCore.COMPILER_SOURCE, true);
-		else
-			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
-
-		return sourceVersion != null && JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, sourceVersion) <= 0;
+		LazyGenericTypeProposal p= new LazyGenericTypeProposal(proposal, context);
+		p.setRelevance(relevance);
+		return p;
 	}
 
 	@Override

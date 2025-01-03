@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2023 IBM Corporation and others.
+ * Copyright (c) 2018, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -125,12 +125,7 @@ public final class StubUtility2Core {
 		ITypeBinding bindingReturnType= binding.getReturnType();
 		bindingReturnType = StubUtility2Core.replaceWildcardsAndCaptures(bindingReturnType);
 
-		if (JavaModelUtil.is50OrHigher(javaProject)) {
-			StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
-
-		} else {
-			bindingReturnType= bindingReturnType.getErasure();
-		}
+		StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
 
 		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context, TypeLocation.RETURN_TYPE));
 
@@ -467,12 +462,7 @@ public final class StubUtility2Core {
 		ITypeBinding bindingReturnType= binding.getReturnType();
 		bindingReturnType= StubUtility2Core.replaceWildcardsAndCaptures(bindingReturnType);
 
-		if (JavaModelUtil.is50OrHigher(javaProject)) {
-			StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
-
-		} else {
-			bindingReturnType= bindingReturnType.getErasure();
-		}
+		StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
 
 		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context, TypeLocation.RETURN_TYPE));
 
@@ -597,7 +587,6 @@ public final class StubUtility2Core {
 	}
 	public static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast,
 			IMethodBinding binding, String[] paramNames, MethodDeclaration decl, EnumSet<TypeLocation> nullnessDefault) {
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 		List<SingleVariableDeclaration> parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		if (paramNames == null || paramNames.length < params.length) {
@@ -607,10 +596,7 @@ public final class StubUtility2Core {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			ITypeBinding type= params[i];
 			type=replaceWildcardsAndCaptures(type);
-			if (!is50OrHigher) {
-				type= type.getErasure();
-				var.setType(imports.addImport(type, ast, context, TypeLocation.PARAMETER));
-			} else if (binding.isVarargs() && type.isArray() && i == params.length - 1) {
+			if (binding.isVarargs() && type.isArray() && i == params.length - 1) {
 				var.setVarargs(true);
 				/*
 				 * Varargs annotations are special.
@@ -1108,13 +1094,7 @@ public final class StubUtility2Core {
 	 */
 	public static void addOverrideAnnotation(CodeGenerationSettings settings, IJavaProject project, ASTRewrite rewrite, ImportRewrite imports, MethodDeclaration methodDecl,
 			boolean isDeclaringTypeInterface, TextEditGroup group) {
-		if (!JavaModelUtil.is50OrHigher(project)) {
-			return;
-		}
 		if (isDeclaringTypeInterface) {
-			String version= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-			if (JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6))
-				return; // not allowed in 1.5
 			if (JavaCore.DISABLED.equals(project.getOption(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION, true)))
 				return; // user doesn't want to use 1.6 style
 		}

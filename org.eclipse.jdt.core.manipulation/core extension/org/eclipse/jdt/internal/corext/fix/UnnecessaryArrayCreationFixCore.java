@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
@@ -135,9 +134,6 @@ public class UnnecessaryArrayCreationFixCore extends CompilationUnitRewriteOpera
 	}
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean removeUnnecessaryArrayCreation) {
-		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
-			return null;
-
 		if (!removeUnnecessaryArrayCreation)
 			return null;
 
@@ -153,9 +149,6 @@ public class UnnecessaryArrayCreationFixCore extends CompilationUnitRewriteOpera
 	}
 
 	public static UnnecessaryArrayCreationFixCore createUnnecessaryArrayCreationFix(CompilationUnit compilationUnit, Expression methodInvocation) {
-		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
-			return null;
-
 		List<CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder finder= new UnnecessaryArrayCreationFixCore.UnnecessaryArrayCreationFinder(true, operations);
 		methodInvocation.accept(finder);

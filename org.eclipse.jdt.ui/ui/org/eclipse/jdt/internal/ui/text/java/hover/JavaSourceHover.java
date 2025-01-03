@@ -613,7 +613,11 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			}
 			return source;
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
+			/*
+			 * This code runs in a separate thread which can
+			 * lead to text offsets being out of bounds when
+			 * computing the hover info (see bug 32848).
+			 */
 			return null;
 		}
 	}

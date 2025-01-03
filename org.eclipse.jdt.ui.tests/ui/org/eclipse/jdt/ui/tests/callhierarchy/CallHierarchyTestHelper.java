@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -332,8 +332,8 @@ public class CallHierarchyTestHelper {
 		cu.createImport("java.util.function.Function", fType1, null);
 		fMethod1= fType1.getMethod("x", EMPTY);
 		fMethod2= fType1.getMethod("transform", new String[] { "QString;" });
-		Assert.assertNotNull(fMethod1);
-		Assert.assertNotNull(fMethod2);
+		Assertions.assertNotNull(fMethod1);
+		Assertions.assertNotNull(fMethod2);
 		assertBuildWithoutErrors(fPack1);
 	}
 
@@ -593,7 +593,7 @@ public class CallHierarchyTestHelper {
      */
     protected void assertBuildWithoutErrors(IJavaElement element) throws Exception {
     	IResource resource= element.getResource();
-    	Assert.assertNotNull("Given element has no resource: " + element, resource);
+    	Assertions.assertNotNull(resource, "Given element has no resource: " + element);
     	resource.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		assertNoErrorMarkers(resource);
     }
@@ -607,8 +607,8 @@ public class CallHierarchyTestHelper {
     protected void assertNoErrorMarkers(IResource resource) throws Exception {
         List<IMarker> errorMarkers = getErrorMarkers(resource);
         List<String> messages = convertMarkers(errorMarkers.toArray(new IMarker[errorMarkers.size()]));
-        Assert.assertEquals("No error marker expected, but found markers with messages: " + messages.toString(), 0,
-                errorMarkers.size());
+        Assertions.assertEquals(0, errorMarkers.size(),
+                "No error marker expected, but found markers with messages: " + messages.toString());
     }
 
     /**
@@ -621,8 +621,8 @@ public class CallHierarchyTestHelper {
 			foundMembers.add(element.getMember());
 		}
 
-        Assert.assertEquals("Wrong number of calls", expectedMembers.size(), calls.size());
-        Assert.assertTrue("One or more members not found", foundMembers.containsAll(expectedMembers));
+        Assertions.assertEquals(expectedMembers.size(), calls.size(), "Wrong number of calls");
+        Assertions.assertTrue(foundMembers.containsAll(expectedMembers), "One or more members not found");
     }
 
     /**

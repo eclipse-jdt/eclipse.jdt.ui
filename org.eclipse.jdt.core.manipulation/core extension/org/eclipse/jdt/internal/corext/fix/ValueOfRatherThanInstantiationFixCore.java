@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
@@ -82,11 +81,8 @@ public class ValueOfRatherThanInstantiationFixCore extends CompilationUnitRewrit
 						return false;
 					}
 
-					if (JavaModelUtil.is50OrHigher(((CompilationUnit) visited.getRoot()).getJavaElement().getJavaProject())
-							|| ASTNodes.hasType(typeBinding, String.class.getCanonicalName())) {
-						fResult.add(new ValueOfRatherThanInstantiationWithValueOfFixOperation(visited, typeBinding, arg0));
-						return false;
-					}
+					fResult.add(new ValueOfRatherThanInstantiationWithValueOfFixOperation(visited, typeBinding, arg0));
+					return false;
 				}
 			}
 

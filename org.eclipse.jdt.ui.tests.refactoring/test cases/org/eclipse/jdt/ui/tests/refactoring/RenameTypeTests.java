@@ -299,7 +299,7 @@ public class RenameTypeTests extends GenericRefactoringTest {
 
 	@Test
 	public void testIllegalTypeName9() throws Exception {
-		if (Platform.OS_WIN32.equals(Platform.getOS()))
+		if (Platform.OS.isWindows())
 			helper1_0("A", "aux");
 	}
 

@@ -30,4 +30,7 @@ public class RefactoringCorrectionProposal extends LinkedCorrectionProposal {
 		super(name, cu, null, relevance, image, delegate);
 	}
 
+	public RefactoringCorrectionProposal(RefactoringCorrectionProposalCore core, Image image) {
+		super(core, image);
+	}
 }

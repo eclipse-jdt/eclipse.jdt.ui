@@ -13,17 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -90,7 +90,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertFalse("No add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasAddHappened(), "No add happened"); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -111,7 +111,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertFalse("No add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasAddHappened(), "No add happened"); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -133,7 +133,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertFalse("No remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRemoveHappened(), "No remove happened"); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -155,7 +155,7 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertFalse("No remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertFalse(fMyPart.hasRemoveHappened(), "No remove happened"); //$NON-NLS-1$
 		assertions();
 	}
 
@@ -175,21 +175,21 @@ public class ContentProviderTests6 {
 		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
 		}
 
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertFalse("Project not refreshed", fMyPart.wasObjectRefreshed(fJProject)); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertFalse(fMyPart.wasObjectRefreshed(fJProject), "Project not refreshed"); //$NON-NLS-1$
 	}
 
 	private void assertions() {
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("LibraryContainer Refreshed", fMyPart.wasObjectRefreshed(new LibraryContainer(fJProject))); //$NON-NLS-1$
-		assertTrue("Resource Refreshed", fMyPart.wasObjectRefreshed(classFolder.getResource())); //$NON-NLS-1$
-		assertEquals("Number of refreshed objects", 2, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
+		assertTrue(fMyPart.wasObjectRefreshed(new LibraryContainer(fJProject)), "LibraryContainer Refreshed"); //$NON-NLS-1$
+		assertTrue(fMyPart.wasObjectRefreshed(classFolder.getResource()), "Resource Refreshed"); //$NON-NLS-1$
+		assertEquals(2, fMyPart.getRefreshedObject().size(), "Number of refreshed objects"); //$NON-NLS-1$
 	}
 
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		IWorkspaceDescription workspaceDesc= ResourcesPlugin.getWorkspace().getDescription();
 		fEnableAutoBuildAfterTesting= workspaceDesc.isAutoBuilding();
@@ -197,11 +197,11 @@ public class ContentProviderTests6 {
 			CoreUtility.setAutoBuilding(false);
 
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");//$NON-NLS-1$//$NON-NLS-2$
-		assertNotNull("project null", fJProject);//$NON-NLS-1$
+		assertNotNull(fJProject, "project null");//$NON-NLS-1$
 
 		//set up project : Add classFolder
 		classFolder= JavaProjectHelper.addClassFolder(fJProject, "classFolder", null, null); //$NON-NLS-1$
-		assertNotNull("class folder null", classFolder); //$NON-NLS-1$
+		assertNotNull(classFolder, "class folder null"); //$NON-NLS-1$
 
 		//set up the mock view
 		setUpMockView();
@@ -223,7 +223,7 @@ public class ContentProviderTests6 {
 		assertNotNull(fProvider);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 		if (fEnableAutoBuildAfterTesting)

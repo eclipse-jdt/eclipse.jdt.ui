@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -869,21 +869,14 @@ public class ModifierCorrectionSubProcessor {
 		if (!(selectedNode instanceof MethodDeclaration)) {
 			return;
 		}
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(cu.getJavaProject());
 		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
 		AST ast= methodDecl.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		if (is50OrHigher) {
-			Annotation annot= ast.newMarkerAnnotation();
-			annot.setTypeName(ast.newName("Deprecated")); //$NON-NLS-1$
-			rewrite.getListRewrite(methodDecl, methodDecl.getModifiersProperty()).insertFirst(annot, null);
-		}
+		Annotation annot= ast.newMarkerAnnotation();
+		annot.setTypeName(ast.newName("Deprecated")); //$NON-NLS-1$
+		rewrite.getListRewrite(methodDecl, methodDecl.getModifiersProperty()).insertFirst(annot, null);
 		Javadoc javadoc= methodDecl.getJavadoc();
-		if (javadoc != null || !is50OrHigher) {
-			if (!is50OrHigher) {
-				javadoc= ast.newJavadoc();
-				rewrite.set(methodDecl, MethodDeclaration.JAVADOC_PROPERTY, javadoc, null);
-			}
+		if (javadoc != null) {
 			TagElement newTag= ast.newTagElement();
 			newTag.setTagName(TagElement.TAG_DEPRECATED);
 			JavadocTagsSubProcessor.insertTag(rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY), newTag, null);

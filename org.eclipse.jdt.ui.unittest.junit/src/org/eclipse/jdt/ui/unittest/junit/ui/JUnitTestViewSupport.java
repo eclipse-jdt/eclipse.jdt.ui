@@ -89,7 +89,7 @@ public class JUnitTestViewSupport implements ITestViewSupport {
 		int index = testName.indexOf('(');
 		// test factory method
 		if (index > 0) {
-			return new OpenTestAction(shell, testSuite.getTestName(), testName.substring(0, index),
+			return new OpenTestAction(shell, getClassName(testSuite), testName.substring(0, index),
 					getParameterTypes(testSuite), true, testSuite.getTestRunSession());
 		}
 
@@ -259,18 +259,32 @@ public class JUnitTestViewSupport implements ITestViewSupport {
 	 * @return a parameter type array
 	 */
 	private String[] getParameterTypes(ITestElement test) {
-		String testName = test.getDisplayName();
+		final String testName = test.getDisplayName();
 		if (testName != null) {
-			int index = testName.lastIndexOf("method:"); //$NON-NLS-1$
+			final int index = testName.lastIndexOf("method:"); //$NON-NLS-1$
 			if (index != -1) {
-				index = testName.indexOf('(', index);
-				if (index > 0) {
-					int closeIndex = testName.indexOf(')', index);
-					if (closeIndex > 0) {
-						String params = testName.substring(index + 1, closeIndex);
-						return params.split(","); //$NON-NLS-1$
-					}
+				String[] result = extractParameters(testName, index);
+				if (result != null) {
+					return result;
 				}
+			}
+		}
+		final String testUniqData = test.getData();
+		if (testUniqData != null) {
+			final int testTemplateIdx = testUniqData.indexOf("test-template:"); //$NON-NLS-1$
+			if (testTemplateIdx >= 0) {
+				return extractParameters(testUniqData, testTemplateIdx);
+			}
+		}
+		return null;
+	}
+
+	private String[] extractParameters(String testDescription, int startIndex) {
+		final int index = testDescription.indexOf('(', startIndex);
+		if (index > 0) {
+			final int closeIndex = testDescription.indexOf(')', index);
+			if (closeIndex > 0) {
+				return testDescription.substring(index + 1, closeIndex).split(","); //$NON-NLS-1$
 			}
 		}
 		return null;

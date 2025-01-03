@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -40,7 +39,6 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -124,7 +122,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 							return false;
 						}
 
-						String parsingMethodName= getParsingMethodName(canonicalName, wrapperClass.getSimpleName(), visited);
+						String parsingMethodName= getParsingMethodName(canonicalName, wrapperClass.getSimpleName());
 
 						if (parsingMethodName != null
 								&& isValueOfString(visited, canonicalName)) {
@@ -139,7 +137,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 				if (typeBinding != null
 						&& visited.arguments().isEmpty()) {
 					String primitiveValueMethodName= getPrimitiveValueMethodName(typeBinding.getQualifiedName());
-					String parsingMethodName= getParsingMethodName(typeBinding.getQualifiedName(), typeBinding.getName(), visited);
+					String parsingMethodName= getParsingMethodName(typeBinding.getQualifiedName(), typeBinding.getName());
 
 					if (primitiveValueMethodName != null
 							&& primitiveValueMethodName.equals(methodName)
@@ -185,17 +183,15 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 				return null;
 			}
 
-			private String getParsingMethodName(final String wrapperFullyQualifiedName, final String wrapperSimpleName, final MethodInvocation visited) {
+			private String getParsingMethodName(final String wrapperFullyQualifiedName, final String wrapperSimpleName) {
 				if (Integer.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
 					return "parseInt"; //$NON-NLS-1$
 				}
 
-				IJavaProject javaProject= ((CompilationUnit) visited.getRoot()).getJavaElement().getJavaProject();
-
-				if ((Boolean.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is50OrHigher(javaProject))
+				if (Boolean.class.getCanonicalName().equals(wrapperFullyQualifiedName)
 						|| Long.class.getCanonicalName().equals(wrapperFullyQualifiedName)
-						|| (Double.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is1d2OrHigher(javaProject))
-						|| (Float.class.getCanonicalName().equals(wrapperFullyQualifiedName) && JavaModelUtil.is1d2OrHigher(javaProject))
+						|| Double.class.getCanonicalName().equals(wrapperFullyQualifiedName)
+						|| Float.class.getCanonicalName().equals(wrapperFullyQualifiedName)
 						|| Short.class.getCanonicalName().equals(wrapperFullyQualifiedName)
 						|| Byte.class.getCanonicalName().equals(wrapperFullyQualifiedName)) {
 					return "parse" + wrapperSimpleName; //$NON-NLS-1$

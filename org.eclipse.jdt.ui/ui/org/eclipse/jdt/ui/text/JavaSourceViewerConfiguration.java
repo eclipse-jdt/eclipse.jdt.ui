@@ -571,7 +571,6 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		}
 		if (fJavaDoubleClickSelector == null) {
 			fJavaDoubleClickSelector= new JavaDoubleClickSelector();
-			fJavaDoubleClickSelector.setSourceVersion(fPreferenceStore.getString(JavaCore.COMPILER_SOURCE));
 		}
 		return fJavaDoubleClickSelector;
 	}
@@ -967,9 +966,6 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		if (fJavaDocScanner.affectsBehavior(event))
 			fJavaDocScanner.adaptToPreferenceChange(event);
 		if (JavaCore.COMPILER_SOURCE.equals(event.getProperty()) && event.getNewValue() instanceof String) {
-			if (fJavaDoubleClickSelector != null) {
-				fJavaDoubleClickSelector.setSourceVersion((String) event.getNewValue());
-			}
 			if (fJavaStringDoubleClickStrategy != null) {
 				fJavaStringDoubleClickStrategy.setSourceVersion((String) event.getNewValue());
 			}

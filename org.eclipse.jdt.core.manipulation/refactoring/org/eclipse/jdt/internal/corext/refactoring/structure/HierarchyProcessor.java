@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2023 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +97,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTy
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -174,37 +172,8 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		return declarationNodes.containsAll(declaration.fragments());
 	}
 
-	protected static RefactoringStatus checkProjectCompliance(CompilationUnitRewrite sourceRewriter, IType destination, IMember[] members) {
+	protected static RefactoringStatus checkProjectCompliance() {
 		RefactoringStatus status= new RefactoringStatus();
-		if (!JavaModelUtil.is50OrHigher(destination.getJavaProject())) {
-			for (IMember member : members) {
-				try {
-					BodyDeclaration decl= ASTNodeSearchUtil.getBodyDeclarationNode(member, sourceRewriter.getRoot());
-					if (decl != null) {
-						for (final Iterator<IExtendedModifier> iterator= decl.modifiers().iterator(); iterator.hasNext();) {
-							boolean reported= false;
-							final IExtendedModifier modifier= iterator.next();
-							if (!reported && modifier.isAnnotation()) {
-								status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_langauge_constructs, new String[]{JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getTextLabel(destination, JavaElementLabelsCore.ALL_DEFAULT)}), JavaStatusContext.create(member)));
-								reported= true;
-							}
-						}
-					}
-				} catch (JavaModelException exception) {
-					JavaManipulationPlugin.log(exception);
-				}
-				if (member instanceof IMethod) {
-					final IMethod method= (IMethod) member;
-					try {
-						if (Flags.isVarargs(method.getFlags())) {
-							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_incompatible_language_constructs1, new String[]{JavaElementLabelsCore.getTextLabel(member, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), JavaElementLabelsCore.getTextLabel(destination, JavaElementLabelsCore.ALL_DEFAULT)}), JavaStatusContext.create(member)));
-						}
-					} catch (JavaModelException exception) {
-						JavaManipulationPlugin.log(exception);
-					}
-				}
-			}
-		}
 		return status;
 	}
 

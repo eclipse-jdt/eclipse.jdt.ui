@@ -38,6 +38,10 @@ public class CreateVariableReferenceProposal extends LinkedCorrectionProposal {
 		super("", cu, null, relevance, null, new CreateVariableReferenceProposalCore(cu, selectedNode, typeNode, relevance)); //$NON-NLS-1$
 	}
 
+	public CreateVariableReferenceProposal(CreateVariableReferenceProposalCore core) {
+		super("", core.getCompilationUnit(), null, core.getRelevance(), null, core); //$NON-NLS-1$
+	}
+
 	@Override
 	public Image getImage() {
 		return JavaPlugin.getImageDescriptorRegistry().get(

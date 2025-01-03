@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -246,10 +246,9 @@ public class GetterSetterUtil {
 	 * @param astRewrite the astRewrite to use
 	 * @param getterExpression the expression to insert for read accesses or <code>null</code> if such an expression does not exist
 	 * @param variableType the type of the variable that the result will be assigned to
-	 * @param is50OrHigher <code>true</code> if a 5.0 or higher environment can be used
 	 * @return an expression that can be assigned to the type variableType with node being replaced by a equivalent expression using the getter
 	 */
-	public static Expression getAssignedValue(ASTNode node, ASTRewrite astRewrite, Expression getterExpression, ITypeBinding variableType, boolean is50OrHigher) {
+	public static Expression getAssignedValue(ASTNode node, ASTRewrite astRewrite, Expression getterExpression, ITypeBinding variableType) {
 		InfixExpression.Operator op= null;
 		AST ast= astRewrite.getAST();
 		if (isNotInBlock(node))
@@ -260,7 +259,7 @@ public class GetterSetterUtil {
 			Expression copiedRightOp= (Expression) astRewrite.createCopyTarget(rightHandSide);
 			if (assignment.getOperator() == Operator.ASSIGN) {
 				ITypeBinding rightHandSideType= rightHandSide.resolveTypeBinding();
-				copiedRightOp= createNarrowCastIfNessecary(copiedRightOp, rightHandSideType, ast, variableType, is50OrHigher);
+				copiedRightOp= createNarrowCastIfNessecary(copiedRightOp, rightHandSideType, ast, variableType);
 				return copiedRightOp;
 			}
 			if (getterExpression != null) {
@@ -274,7 +273,7 @@ public class GetterSetterUtil {
 					copiedRightOp= p;
 				}
 				infix.setRightOperand(copiedRightOp);
-				return createNarrowCastIfNessecary(infix, infixType, ast, variableType, is50OrHigher);
+				return createNarrowCastIfNessecary(infix, infixType, ast, variableType);
 			}
 		} else if (node.getNodeType() == ASTNode.POSTFIX_EXPRESSION) {
 			PostfixExpression po= (PostfixExpression) node;
@@ -290,7 +289,7 @@ public class GetterSetterUtil {
 				op= InfixExpression.Operator.MINUS;
 		}
 		if (op != null && getterExpression != null) {
-			return createInfixInvocationFromPostPrefixExpression(op, getterExpression, ast, variableType, is50OrHigher);
+			return createInfixInvocationFromPostPrefixExpression(op, getterExpression, ast, variableType);
 		}
 		return null;
 	}
@@ -307,7 +306,7 @@ public class GetterSetterUtil {
 		return isStatement || (!isBlock && !isControlStatemenBody);
 	}
 
-	private static Expression createInfixInvocationFromPostPrefixExpression(InfixExpression.Operator operator, Expression getterExpression, AST ast, ITypeBinding variableType, boolean is50OrHigher) {
+	private static Expression createInfixInvocationFromPostPrefixExpression(InfixExpression.Operator operator, Expression getterExpression, AST ast, ITypeBinding variableType) {
 		InfixExpression infix= ast.newInfixExpression();
 		infix.setLeftOperand(getterExpression);
 		infix.setOperator(operator);
@@ -315,7 +314,7 @@ public class GetterSetterUtil {
 		number.setToken("1"); //$NON-NLS-1$
 		infix.setRightOperand(number);
 		ITypeBinding infixType= infix.resolveTypeBinding();
-		return createNarrowCastIfNessecary(infix, infixType, ast, variableType, is50OrHigher);
+		return createNarrowCastIfNessecary(infix, infixType, ast, variableType);
 	}
 
 	/**
@@ -325,21 +324,18 @@ public class GetterSetterUtil {
 	 * @param expressionType the type of the right hand-side. Can be null
 	 * @param ast the AST
 	 * @param variableType the Type of the variable the expression will be assigned to
-	 * @param is50OrHigher if <code>true</code> java 5.0 code will be assumed
 	 * @return the casted expression if necessary
 	 */
-	private static Expression createNarrowCastIfNessecary(Expression expression, ITypeBinding expressionType, AST ast, ITypeBinding variableType, boolean is50OrHigher) {
+	private static Expression createNarrowCastIfNessecary(Expression expression, ITypeBinding expressionType, AST ast, ITypeBinding variableType) {
 		PrimitiveType castTo= null;
 		if (variableType.isEqualTo(expressionType))
 			return expression; //no cast for same type
-		if (is50OrHigher) {
-			if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(variableType)) //$NON-NLS-1$
-				castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
-			if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(variableType)) //$NON-NLS-1$
-				castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
-			if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(variableType)) //$NON-NLS-1$
-				castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
-		}
+		if (ast.resolveWellKnownType("java.lang.Character").isEqualTo(variableType)) //$NON-NLS-1$
+			castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
+		if (ast.resolveWellKnownType("java.lang.Byte").isEqualTo(variableType)) //$NON-NLS-1$
+			castTo= ast.newPrimitiveType(PrimitiveType.BYTE);
+		if (ast.resolveWellKnownType("java.lang.Short").isEqualTo(variableType)) //$NON-NLS-1$
+			castTo= ast.newPrimitiveType(PrimitiveType.SHORT);
 		if (ast.resolveWellKnownType("char").isEqualTo(variableType)) //$NON-NLS-1$
 			castTo= ast.newPrimitiveType(PrimitiveType.CHAR);
 		if (ast.resolveWellKnownType("byte").isEqualTo(variableType)) //$NON-NLS-1$

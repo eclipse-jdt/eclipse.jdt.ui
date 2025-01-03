@@ -31,7 +31,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -59,7 +58,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -339,15 +337,13 @@ public abstract class GetterSetterCorrectionBaseSubProcessor<T> {
 	private static Expression getAssignedValue(ProposalParameter context) {
 		ASTNode parent= context.accessNode.getParent();
 		ASTRewrite astRewrite= context.astRewrite;
-		IJavaProject javaProject= context.compilationUnit.getJavaProject();
 		IMethodBinding getter= findGetter(context);
 		Expression getterExpression= null;
 		if (getter != null) {
 			getterExpression= astRewrite.getAST().newSimpleName("placeholder"); //$NON-NLS-1$
 		}
 		ITypeBinding type= context.variableBinding.getType();
-		boolean is50OrHigher= JavaModelUtil.is50OrHigher(javaProject);
-		Expression result= GetterSetterUtil.getAssignedValue(parent, astRewrite, getterExpression, type, is50OrHigher);
+		Expression result= GetterSetterUtil.getAssignedValue(parent, astRewrite, getterExpression, type);
 		if (result != null && getterExpression != null && getterExpression.getParent() != null) {
 			getterExpression.getParent().setStructuralProperty(getterExpression.getLocationInParent(), createMethodInvocation(context, getter, null));
 		}

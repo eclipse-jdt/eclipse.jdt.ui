@@ -1862,6 +1862,48 @@ public class PullUpTests extends GenericRefactoringTest {
 		helper2(new String[] { "method" }, new String[][] { new String[0] }, true, false, 0);
 	}
 
+	@Test
+	public void testFail36() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IJavaElement element= cu.getElementAt(322);
+		assertTrue("element is method", element instanceof IMethod);
+		IMethod[] methods= new IMethod[] { (IMethod)element };
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		assertTrue("activation", ref.checkInitialConditions(testMonitor).isOK());
+		testMonitor.assertUsedUp();
+		testMonitor.prepare();
+		setTargetClass(processor, 0);
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(testMonitor);
+		testMonitor.assertUsedUp();
+		testMonitor.prepare();
+		assertFalse("precondition was supposed to fail", checkInputResult.isOK());
+	}
+	@Test
+	public void testFail37() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IJavaElement element= cu.getElementAt(409);
+		assertTrue("element is method", element instanceof IMethod);
+		IMethod[] methods= new IMethod[] { (IMethod)element };
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		assertTrue("activation", ref.checkInitialConditions(testMonitor).isOK());
+		testMonitor.assertUsedUp();
+		testMonitor.prepare();
+		setTargetClass(processor, 0);
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(testMonitor);
+		testMonitor.assertUsedUp();
+		testMonitor.prepare();
+		assertFalse("precondition was supposed to fail", checkInputResult.isOK());
+	}
 	//----------------------------------------------------------
 	@Test
 	public void testField0() throws Exception {

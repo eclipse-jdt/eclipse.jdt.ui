@@ -386,15 +386,19 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		fLoader = newInstance;
 	}
 
-	private void readPackageNames(String pkgNameFile) throws IOException {
-		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), StandardCharsets.UTF_8))) {
+	private String[] readLines(String fileName) throws IOException {
+		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName)), StandardCharsets.UTF_8))) {
 			String line;
 			Vector<String> list= new Vector<>();
 			while ((line= br.readLine()) != null) {
 				list.add(line);
 			}
-			fPackageNames= list.toArray(new String[list.size()]);
+			return list.toArray(new String[list.size()]);
 		}
+	}
+
+	private void readPackageNames(String pkgNameFile) throws IOException {
+		fPackageNames= readLines(pkgNameFile);
 		if (fDebugMode) {
 			System.out.println("Packages:"); //$NON-NLS-1$
 			for (String fPackageName : fPackageNames) {
@@ -404,14 +408,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readTestNames(String testNameFile) throws IOException {
-		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), StandardCharsets.UTF_8))) {
-			String line;
-			Vector<String> list= new Vector<>();
-			while ((line= br.readLine()) != null) {
-				list.add(line);
-			}
-			fTestClassNames= list.toArray(new String[list.size()]);
-		}
+		fTestClassNames= readLines(testNameFile);
 		if (fDebugMode) {
 			System.out.println("Tests:"); //$NON-NLS-1$
 			for (String fTestClassName : fTestClassNames) {
@@ -421,14 +418,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private void readFailureNames(String testFailureFile) throws IOException {
-		try(BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testFailureFile)), StandardCharsets.UTF_8))) {
-			String line;
-			Vector<String> list= new Vector<>();
-			while ((line= br.readLine()) != null) {
-				list.add(line);
-			}
-			fFailureNames= list.toArray(new String[list.size()]);
-		}
+		fFailureNames = readLines(testFailureFile);
 		if (fDebugMode) {
 			System.out.println("Failures:"); //$NON-NLS-1$
 			for (String fFailureName : fFailureNames) {
@@ -510,7 +500,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @param testName individual method to be run
 	 * @param execution executor
 	 */
-	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
+	private void runTests(String[] testClassNames, String testName, TestExecution execution) {
 		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fIncludeExcludeTags, fUniqueId, this);
 
 		// count all testMethods and inform ITestRunListeners
@@ -754,7 +744,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	    fWriter.flush();
 	}
 
-	public void runTests(TestExecution execution) {
+	private void runTests(TestExecution execution) {
 		runTests(fTestClassNames, fTestName, execution);
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
@@ -195,9 +194,6 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 
 	public static String getNameWithTypeParameters(IType type) {
 		String superName= type.getFullyQualifiedName('.');
-		if (!JavaModelUtil.is50OrHigher(type.getJavaProject())) {
-			return superName;
-		}
 		try {
 			ITypeParameter[] typeParameters= type.getTypeParameters();
 			if (typeParameters.length > 0) {

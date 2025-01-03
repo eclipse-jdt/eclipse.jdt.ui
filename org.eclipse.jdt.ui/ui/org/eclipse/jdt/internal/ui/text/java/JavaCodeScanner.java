@@ -348,11 +348,11 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	private static final String SOURCE_VERSION= JavaCore.COMPILER_SOURCE;
 
 	static String[] fgKeywords= {
-		"abstract", //$NON-NLS-1$
+		"abstract", "assert", //$NON-NLS-1$ //$NON-NLS-2$
 		"break", //$NON-NLS-1$
 		"case", "catch", "class", "const", "continue", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		"default", "do", //$NON-NLS-2$ //$NON-NLS-1$
-		"else", "extends", //$NON-NLS-2$ //$NON-NLS-1$
+		"else", "enum", "extends", //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
 		"final", "finally", "for", //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		"goto", //$NON-NLS-1$
 		"if", "implements", "import", "instanceof", "interface", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
@@ -366,8 +366,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	private static final String INTERFACE= "interface";  //$NON-NLS-1$
 	private static final String RETURN= "return"; //$NON-NLS-1$
-	private static String[] fgJava1d4Keywords= { "assert" }; //$NON-NLS-1$
-	private static String[] fgJava1d5Keywords= { "enum" }; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "record" }; //$NON-NLS-1$
 	private static String[] fgJava16Keywords= { "sealed", "permits" }; //$NON-NLS-1$ //$NON-NLS-2$
 	private static String[] fgJava9ModuleInfoKeywords= { "module", "requires", "exports", "to", "provides", "with", "uses", "open", "opens", "transitive", "import", "static" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$
@@ -451,26 +449,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for new keywords, see bug 4077
 		JavaWordDetector wordDetector= new JavaWordDetector();
 		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, defaultToken);
-
-		VersionedWordMatcher j1d4Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_4, version);
-
-		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (String fgJava1d4Keyword : fgJava1d4Keywords) {
-			j1d4Matcher.addWord(fgJava1d4Keyword, token);
-		}
-
-		combinedWordRule.addWordMatcher(j1d4Matcher);
-		fVersionDependentRules.add(j1d4Matcher);
-
-		VersionedWordMatcher j1d5Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_5, version);
-
-		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (String fgJava1d5Keyword : fgJava1d5Keywords) {
-			j1d5Matcher.addWord(fgJava1d5Keyword, token);
-		}
-
-		combinedWordRule.addWordMatcher(j1d5Matcher);
-		fVersionDependentRules.add(j1d5Matcher);
 
 		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_14, version);
 

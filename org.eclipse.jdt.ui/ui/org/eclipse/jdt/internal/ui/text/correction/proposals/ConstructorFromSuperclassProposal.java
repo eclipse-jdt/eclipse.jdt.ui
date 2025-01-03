@@ -39,6 +39,10 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		super("", cu, null, relevance, getProposalImage(), new ConstructorFromSuperclassProposalCore(cu, typeNode, superConstructor, relevance)); //$NON-NLS-1$
 	}
 
+	public ConstructorFromSuperclassProposal(ConstructorFromSuperclassProposalCore core) {
+		super("", core.getCompilationUnit(), null, core.getRelevance(), getProposalImage(), core); //$NON-NLS-1$
+	}
+
 	@Override
 	public String getName() {
 		return ((ConstructorFromSuperclassProposalCore) getDelegate()).getName();

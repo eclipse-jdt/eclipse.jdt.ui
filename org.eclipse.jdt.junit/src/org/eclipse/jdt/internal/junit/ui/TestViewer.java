@@ -450,14 +450,14 @@ public class TestViewer {
 
 		if (children.length > 0 && children[0] instanceof TestCaseElement tce && tce.isDynamicTest()) {
 			// a group of parameterized tests
-			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0], null);
+			return new OpenTestAction(fTestRunnerPart, tce, tce.getParameterTypes());
 		}
 		if (children.length == 0) {
 			// check if we have applied the workaround for: https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/945
 			TestCaseElement child= testSuite.getSingleDynamicChild();
 			if (child != null) {
 				// a parameterized test that ran only one test
-				return new OpenTestAction(fTestRunnerPart, child, null);
+				return new OpenTestAction(fTestRunnerPart, child, child.getParameterTypes());
 			}
 		}
 

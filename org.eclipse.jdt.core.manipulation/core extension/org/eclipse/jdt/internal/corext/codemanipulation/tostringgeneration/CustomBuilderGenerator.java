@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 Mateusz Matela and others.
+ * Copyright (c) 2008, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -273,19 +273,11 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 		ITypeBinding memberType= getMemberType(member);
 		String memberTypeName= memberType.getQualifiedName();
 
-		Expression memberAccessExpression= null;
-
 		AppendMethodInformation ami= appendMethodSpecificTypes.get(memberTypeName);
 		if (ami == null && memberType.isPrimitive()) {
 			memberTypeName= wrapperTypes[primitiveTypes.indexOf(memberTypeName)];
 			memberType= fAst.resolveWellKnownType(memberTypeName);
 			ami= appendMethodSpecificTypes.get(memberTypeName);
-			if (!getContext().is50orHigher()) {
-				ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-				classInstance.setType(fAst.newSimpleType(addImport(memberTypeName)));
-				classInstance.arguments().add(createMemberAccessExpression(member, true, true));
-				memberAccessExpression= classInstance;
-			}
 		}
 		while (ami == null) {
 			ITypeBinding oldMemberType= memberType;
@@ -297,9 +289,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 			ami= appendMethodSpecificTypes.get(memberTypeName);
 		}
 
-		if (memberAccessExpression == null) {
-			memberAccessExpression= createMemberAccessExpression(member, false, getContext().isSkipNulls());
-		}
+		Expression memberAccessExpression= createMemberAccessExpression(member, false, getContext().isSkipNulls());
 
 		MethodInvocation appendInvocation= fAst.newMethodInvocation();
 		appendInvocation.setName(fAst.newSimpleName(getContext().getCustomBuilderAppendMethod()));

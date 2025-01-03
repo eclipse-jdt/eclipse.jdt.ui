@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -81,14 +81,14 @@ public class BracketInserterTest {
 	private static final String CU_NAME= "PR75423.java";
 	private static final String CU_CONTENTS= """
 		package com.example.bugs;
-		
+
 		import java.lang.String;
 		import java.lang.Integer;
-		
+
 		public class PR75423 {
 		    String string;
 		    Integer integer;
-		
+
 		    public static void main(String[] args) {
 		       \s
 		    }
@@ -119,6 +119,8 @@ public class BracketInserterTest {
 	public void setUp() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
+		setUpProject(JavaCore.VERSION_1_8);
+		setUpEditor();
 	}
 
 	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
@@ -147,7 +149,7 @@ public class BracketInserterTest {
 		try {
 			return (JavaEditor)EditorTestHelper.openInEditor(file, true);
 		} catch (PartInitException e) {
-			fail();
+			fail(e.getMessage());
 			return null;
 		}
 	}
@@ -167,8 +169,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testInsertClosingParenthesis() throws BadLocationException, JavaModelException, CoreException, JavaModelException, CoreException {
-		use14();
+	public void testInsertClosingParenthesis() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type('(');
 
@@ -177,8 +178,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testDeletingParenthesis() throws JavaModelException, CoreException {
-		use14();
+	public void testDeletingParenthesis() {
 		setCaret(BODY_OFFSET);
 		type('(');
 		type(SWT.BS);
@@ -188,8 +188,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testMultipleParenthesisInsertion() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testMultipleParenthesisInsertion() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("((((");
 
@@ -200,8 +199,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testDeletingMultipleParenthesisInertion() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testDeletingMultipleParenthesisInertion() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("((((");
 
@@ -227,8 +225,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testNoInsertInsideText() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testNoInsertInsideText() throws BadLocationException {
 		setCaret(ARGS_OFFSET);
 		type('(');
 
@@ -238,8 +235,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testInsertInsideBrackets() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testInsertInsideBrackets() throws BadLocationException {
 		setCaret(BRACKETS_OFFSET);
 		type('(');
 
@@ -248,8 +244,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testPeerEntry() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testPeerEntry() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("()");
 
@@ -259,17 +254,8 @@ public class BracketInserterTest {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 
-//	public void testLoop() throws Exception {
-//		for (int i= 0; i < 50; i++) {
-//			setUp();
-//			testExitOnTab();
-//			tearDown();
-//		}
-//	}
-//
 	@Test
-	public void testMultiplePeerEntry() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testMultiplePeerEntry() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("((((");
 
@@ -293,8 +279,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testExitOnTab() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testExitOnTab() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("((((");
 		linkedType('\t', true, ILinkedModeListener.NONE);
@@ -317,8 +302,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testExitOnReturn() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testExitOnReturn() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("((((");
 		linkedType(SWT.CR, true, ILinkedModeListener.UPDATE_CARET | ILinkedModeListener.EXIT_ALL);
@@ -330,8 +314,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testExitOnEsc() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testExitOnEsc() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type("((((");
 		linkedType(SWT.ESC, true, ILinkedModeListener.EXIT_ALL);
@@ -343,8 +326,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testInsertClosingQuote() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testInsertClosingQuote() throws BadLocationException {
 		setCaret(BODY_OFFSET);
 		type('"');
 
@@ -354,8 +336,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testPreferences() throws BadLocationException, JavaModelException, CoreException {
-		use14();
+	public void testPreferences() throws BadLocationException {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, false);
 
@@ -370,7 +351,6 @@ public class BracketInserterTest {
 
 	@Test
 	public void testAngleBracketsAsOperator() throws Exception {
-		use15();
 		setCaret(BODY_OFFSET);
 		type("test<");
 
@@ -382,22 +362,7 @@ public class BracketInserterTest {
 	}
 
 	@Test
-	public void testAngleBracketsIn14Project() throws BadLocationException, JavaModelException, CoreException {
-		use14();
-		setCaret(BODY_OFFSET);
-		type("Test<");
-
-		assertEquals("Test<", fDocument.get(BODY_OFFSET, 5));
-		assertNotEquals(">", fDocument.get(BODY_OFFSET + 5, 1));
-		assertEquals(BODY_OFFSET + 5, getCaret());
-
-		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
-	}
-
-	@Test
 	public void testAngleBracketsIn15Project() throws Exception {
-		use15();
-
 		setCaret(BODY_OFFSET);
 		type("Test<");
 
@@ -407,8 +372,6 @@ public class BracketInserterTest {
 
 	@Test
 	public void testAngleBracketsInFieldDecl15() throws Exception {
-		use15();
-
 		setCaret(FIELD_OFFSET);
 		type('<');
 
@@ -418,8 +381,6 @@ public class BracketInserterTest {
 
 	@Test
 	public void testAngleBracketsInsideMethodDecl15() throws Exception {
-		use15();
-
 		setCaret(MAIN_VOID_OFFSET);
 		type('<');
 
@@ -429,8 +390,6 @@ public class BracketInserterTest {
 
 	@Test
 	public void testAngleBracketsBeforeMethodDecl15() throws Exception {
-		use15();
-
 		setCaret(FOO_VOID_OFFSET);
 
 		type('<');
@@ -441,8 +400,6 @@ public class BracketInserterTest {
 
 	@Test
 	public void testAngleBracketsBeforeTypeArgument15() throws Exception {
-		use15();
-
 		String PRE= "new ArrayList";
 		String POST= "String>();";
 
@@ -457,8 +414,6 @@ public class BracketInserterTest {
 
 	@Test
 	public void testAngleBracketsBeforeWildcard15() throws Exception {
-		use15();
-
 		String PRE= "new ArrayList";
 		String POST= "? extends Number>();";
 
@@ -474,8 +429,6 @@ public class BracketInserterTest {
 	@Test
 	public void testAngleBracketsAfterIdentifierOnFirstColumn1_15() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
-		use15();
-
 		String PRE= "x";
 
 		fDocument.replace(FIRST_COLUMN_OFFSET, 0, PRE);
@@ -490,8 +443,6 @@ public class BracketInserterTest {
 	@Test
 	public void testAngleBracketsAfterIdentifierOnFirstColumn2_15() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=347734
-		use15();
-
 		String PRE= "List";
 
 		fDocument.replace(FIRST_COLUMN_OFFSET, 0, PRE);
@@ -512,16 +463,6 @@ public class BracketInserterTest {
 		assertNotNull(position);
 		assertEquals(offset, position.getOffset());
 		assertEquals(0, position.getLength());
-	}
-
-	private void use15() throws CoreException, JavaModelException {
-		setUpProject(JavaCore.VERSION_1_5);
-		setUpEditor();
-	}
-
-	private void use14() throws CoreException, JavaModelException {
-		setUpProject(JavaCore.VERSION_1_4);
-		setUpEditor();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -38,8 +38,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
@@ -240,7 +238,7 @@ public class ParameterGuesser {
 		if (code != null) {
 			return code;
 		}
-		if (fEnclosingElement != null && JavaModelUtil.is50OrHigher(fEnclosingElement.getJavaProject())) {
+		if (fEnclosingElement != null) {
 			if (code == PrimitiveType.SHORT) {
 				if ("java.lang.Short".equals(type)) { //$NON-NLS-1$
 					return code;

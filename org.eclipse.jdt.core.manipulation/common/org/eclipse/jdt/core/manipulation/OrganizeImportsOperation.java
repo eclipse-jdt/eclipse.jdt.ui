@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
@@ -74,9 +73,9 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.StaticImportFavoritesCompletionInvoker;
 
 
 
@@ -204,7 +203,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			public UnresolvedTypeData(SimpleName ref) {
 				this.ref= ref;
-				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref, true);
+				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref);
 				this.foundInfos= new ArrayList<>(3);
 			}
 
@@ -233,7 +232,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private IPackageFragment fCurrPackage;
 
 		private ScopeAnalyzer fAnalyzer;
-		private boolean fAllowDefaultPackageImports;
 
 		private Map<String, UnresolvedTypeData> fUnresolvedTypes;
 		private Set<String> fImportsAdded;
@@ -258,8 +256,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fAnalyzer= new ScopeAnalyzer(root);
 
 			fCurrPackage= (IPackageFragment) cu.getParent();
-
-			fAllowDefaultPackageImports= JavaCore.VERSION_1_3.equals(cu.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true));
 
 			fImportsAdded= new HashSet<>();
 			fUnresolvedTypes= new HashMap<>();
@@ -364,12 +360,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
 				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
-				boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
-
 				for (TypeNameMatch curr : typesFound) {
 					UnresolvedTypeData data= fUnresolvedTypes.get(curr.getSimpleTypeName());
-					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
-						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
+					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds)) {
+						if (curr.getPackageName().length() > 0) {
 							data.addInfo(curr);
 						}
 					}
@@ -447,13 +441,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 
-		private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
+		private boolean isOfKind(TypeNameMatch curr, int typeKinds) {
 			int flags= curr.getModifiers();
 			if (Flags.isAnnotation(flags)) {
-				return is50OrHigher && (typeKinds & TypeKinds.ANNOTATIONS) != 0;
+				return (typeKinds & TypeKinds.ANNOTATIONS) != 0;
 			}
 			if (Flags.isEnum(flags)) {
-				return is50OrHigher && (typeKinds & TypeKinds.ENUMS) != 0;
+				return (typeKinds & TypeKinds.ENUMS) != 0;
 			}
 			if (Flags.isInterface(flags)) {
 				return (typeKinds & TypeKinds.INTERFACES) != 0;

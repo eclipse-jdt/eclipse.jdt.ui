@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 Mateusz Matela and others.
+ * Copyright (c) 2008, 2024 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -74,12 +74,12 @@ public class StringBuilderGenerator extends AbstractToStringGenerator {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		fBuilderVariableName= createNameSuggestion(getContext().is50orHigher() ? "builder" : "buffer", NamingConventions.VK_LOCAL); //$NON-NLS-1$ //$NON-NLS-2$
+		fBuilderVariableName= createNameSuggestion("builder", NamingConventions.VK_LOCAL); //$NON-NLS-1$
 		fBuffer= new StringBuffer();
 		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
 		fragment.setName(fAst.newSimpleName(fBuilderVariableName));
 		ClassInstanceCreation classInstance= fAst.newClassInstanceCreation();
-		Name typeName= addImport(getContext().is50orHigher() ? "java.lang.StringBuilder" : "java.lang.StringBuffer"); //$NON-NLS-1$ //$NON-NLS-2$
+		Name typeName= addImport("java.lang.StringBuilder"); //$NON-NLS-1$
 		classInstance.setType(fAst.newSimpleType(typeName));
 		fragment.setInitializer(classInstance);
 		VariableDeclarationStatement vStatement= fAst.newVariableDeclarationStatement(fragment);

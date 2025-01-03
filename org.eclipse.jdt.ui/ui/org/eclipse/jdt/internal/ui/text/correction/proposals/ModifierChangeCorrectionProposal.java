@@ -25,4 +25,8 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 	public ModifierChangeCorrectionProposal(String label, ICompilationUnit targetCU, IBinding binding, ASTNode node, int includedModifiers, int excludedModifiers, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image, new ModifierChangeCorrectionProposalCore(label, targetCU, binding, node, includedModifiers, excludedModifiers, relevance));
 	}
+
+	public ModifierChangeCorrectionProposal(ModifierChangeCorrectionProposalCore core, Image image) {
+		super(core.getName(), core.getCompilationUnit(), null, core.getRelevance(), image, core);
+	}
 }

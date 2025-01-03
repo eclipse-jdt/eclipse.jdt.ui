@@ -13,17 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -72,7 +72,7 @@ public class IsCompletelySelectedTest  {
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		IProgressMonitor monitor= new NullProgressMonitor();
@@ -90,7 +90,7 @@ public class IsCompletelySelectedTest  {
 		package_a_b_e= src.createPackageFragment("a.b.e", force, monitor);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		testProject.getProject().delete(true, false, new NullProgressMonitor());
 	}
@@ -159,8 +159,8 @@ public class IsCompletelySelectedTest  {
 			}
 		}
 
-		assertEquals("wrong set of completely selected packages",
-				new LinkedHashSet<>(Arrays.asList(expectedCompletelySelectedPackages)), actualCompletelySelectedPackages);
+		assertEquals(new LinkedHashSet<>(Arrays.asList(expectedCompletelySelectedPackages)),
+				actualCompletelySelectedPackages, "wrong set of completely selected packages");
 	}
 
 	private IPackageFragment[] allPackages() {

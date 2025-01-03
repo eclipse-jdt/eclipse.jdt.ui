@@ -109,4 +109,12 @@ public class NLSHintStripQuotesTest {
     	String expected= "   abc\ndef\n";
     	assertEquals(expected, y);
     }
+
+	@Test
+	public void test09() throws Exception {
+		String x = "\"\"\"";
+		String y = NLSHint.stripQuotes(x, javaProject15.getJavaProject());
+		String expected = "\"";
+		assertEquals(expected, y);
+	}
 }

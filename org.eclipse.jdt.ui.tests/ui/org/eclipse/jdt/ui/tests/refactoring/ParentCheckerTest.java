@@ -13,14 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -53,7 +53,7 @@ public class ParentCheckerTest {
 	private IResource classD2;
 
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		/*
@@ -92,7 +92,7 @@ public class ParentCheckerTest {
 		classD2= createClass(package_a_b_d, "D2");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		testProject.getProject().delete(true, true, null);
 	}
@@ -207,10 +207,10 @@ public class ParentCheckerTest {
 		IJavaElement[] actualRemainingPackages= checker.getJavaElements();
 		IResource[] actualRemainingResources= checker.getResources();
 
-		assertEquals("wrong folders remained after removing packages with ancestors",
-				asLinkedHashSet(expectedRemainingFolders), asLinkedHashSet(actualRemainingPackages));
-		assertEquals("wrong resources remain after removing resources with ancestors",
-				asLinkedHashSet(expectedRemainingResources), asLinkedHashSet(actualRemainingResources));
+		assertEquals(asLinkedHashSet(expectedRemainingFolders),
+				asLinkedHashSet(actualRemainingPackages), "wrong folders remained after removing packages with ancestors");
+		assertEquals(asLinkedHashSet(expectedRemainingResources),
+				asLinkedHashSet(actualRemainingResources), "wrong resources remain after removing resources with ancestors");
 	}
 
 	private static <T> LinkedHashSet<T> asLinkedHashSet(T[] elements) {

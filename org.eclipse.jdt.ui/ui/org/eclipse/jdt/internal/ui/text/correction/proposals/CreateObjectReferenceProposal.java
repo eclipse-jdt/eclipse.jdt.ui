@@ -38,6 +38,10 @@ public class CreateObjectReferenceProposal extends LinkedCorrectionProposal {
 		super("", cu, null, relevance, null, new CreateObjectReferenceProposalCore(cu, selectedNode, typeNode, relevance)); //$NON-NLS-1$
 	}
 
+	public CreateObjectReferenceProposal(CreateObjectReferenceProposalCore core) {
+		super("", core.getCompilationUnit(), null, core.getRelevance(), null, core); //$NON-NLS-1$
+	}
+
 	@Override
 	public Image getImage() {
 		return JavaPlugin.getImageDescriptorRegistry().get(

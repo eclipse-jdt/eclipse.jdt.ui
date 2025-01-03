@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 IBM Corporation and others.
+ * Copyright (c) 2019, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ForStatement;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
@@ -122,9 +121,6 @@ public class ConvertLoopFixCore extends CompilationUnitRewriteOperationsFixCore 
 
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean convertForLoops, boolean convertIterableForLoops,
 			boolean makeFinal, boolean checkIfLoopVarUsed) {
-		if (!JavaModelUtil.is50OrHigher(compilationUnit.getJavaElement().getJavaProject()))
-			return null;
-
 		if (!convertForLoops && !convertIterableForLoops)
 			return null;
 

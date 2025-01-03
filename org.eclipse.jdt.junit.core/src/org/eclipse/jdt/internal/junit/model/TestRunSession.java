@@ -482,7 +482,7 @@ public class TestRunSession implements ITestRunSession {
 		int index0= treeEntry.indexOf(',');
 		String id= treeEntry.substring(0, index0);
 
-		StringBuffer testNameBuffer= new StringBuffer(100);
+		StringBuilder testNameBuffer= new StringBuilder(100);
 		int index1= scanTestName(treeEntry, index0 + 1, testNameBuffer);
 		String testName= testNameBuffer.toString().trim();
 
@@ -493,11 +493,11 @@ public class TestRunSession implements ITestRunSession {
 		boolean isDynamicTest;
 		String parentId;
 		String displayName;
-		StringBuffer displayNameBuffer= new StringBuffer(100);
+		StringBuilder displayNameBuffer= new StringBuilder(100);
 		String[] parameterTypes;
-		StringBuffer parameterTypesBuffer= new StringBuffer(200);
+		StringBuilder parameterTypesBuffer= new StringBuilder(200);
 		String uniqueId;
-		StringBuffer uniqueIdBuffer= new StringBuffer(200);
+		StringBuilder uniqueIdBuffer= new StringBuilder(200);
 		int index3= treeEntry.indexOf(',', index2 + 1);
 		if (index3 == -1) {
 			testCount= Integer.parseInt(treeEntry.substring(index2 + 1));
@@ -519,7 +519,7 @@ public class TestRunSession implements ITestRunSession {
 			}
 
 			int index6= scanTestName(treeEntry, index5 + 1, displayNameBuffer);
-			displayName= displayNameBuffer.toString().trim();
+			displayName= displayNameBuffer.toString().replace('\0', ' ').trim();
 			if (displayName.equals(testName)) {
 				displayName= null;
 			}
@@ -592,7 +592,7 @@ public class TestRunSession implements ITestRunSession {
 	 *
 	 * @return the index of the next ','
 	 */
-	private int scanTestName(String s, int start, StringBuffer testName) {
+	private int scanTestName(String s, int start, StringBuilder testName) {
 		boolean inQuote= false;
 		int i= start;
 		for (; i < s.length(); i++) {

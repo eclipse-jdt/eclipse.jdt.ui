@@ -113,6 +113,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_surroundwith_trymulticatch_var_description;
 	public static String LocalCorrectionsSubProcessor_add_default_case_description;
 	public static String LocalCorrectionsSubProcessor_add_default_case_label_description;
+	public static String LocalCorrectionsSubProcessor_add_permitted_types_description;
 	public static String LocalCorrectionsSubProcessor_remove_default_case_description;
 	public static String LocalCorrectionsSubProcessor_add_missing_cases_description;
 	public static String LocalCorrectionsSubProcessor_addthrows_description;
@@ -350,6 +351,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_invertequals_description;
 	public static String QuickAssistProcessor_typetoarrayInitializer_description;
 	public static String QuickAssistProcessor_createmethodinsuper_description;
+	public static String QuickAssistProcessor_create_permitted_switch_cases_desc;
 	public static String LinkedNamesAssistProposal_proposalinfo;
 	public static String LinkedNamesAssistProposal_description;
 	public static String QuickTemplateProcessor_surround_label;

@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -177,7 +176,7 @@ public abstract class TypeMismatchBaseSubProcessor<T> {
 			ITypeBinding castFixType= null;
 			if (currBinding == null || castTypeBinding.isCastCompatible(currBinding) || nodeToCast instanceof CastExpression) {
 				castFixType= castTypeBinding;
-			} else if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+			} else {
 				ITypeBinding boxUnboxedTypeBinding= boxOrUnboxPrimitives(castTypeBinding, currBinding, ast);
 				if (boxUnboxedTypeBinding != castTypeBinding && boxUnboxedTypeBinding.isCastCompatible(currBinding)) {
 					castFixType= boxUnboxedTypeBinding;

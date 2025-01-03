@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -589,7 +589,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(replacements);
 		if (fMembers.length > 0) {
 			IJavaProject project= fSubType.getJavaProject();
-			boolean annotations= fAnnotations && !JavaModelUtil.isVersionLessThan(project.getOption(JavaCore.COMPILER_SOURCE, true), JavaCore.VERSION_1_6);
 			boolean inheritNullAnnotations= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, true));
 			boolean javadoc= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true));
 			for (IMember member : fMembers) {
@@ -619,7 +618,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 							}
 						}
 					}
-					if (annotations) {
+					if (fAnnotations) {
 						StubUtility2Core.createOverrideAnnotation(sourceRewrite.getASTRewrite(), sourceRewrite.getImportRewrite(), declaration, null);
 					}
 					if (fComments)

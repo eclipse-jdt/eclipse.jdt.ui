@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2023 IBM Corporation and others.
+ * Copyright (c) 2006, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -125,7 +125,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdj
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -859,7 +858,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 						adjustor.adjustVisibility(subMon.newChild(1));
 						adjustments.remove(member);
 						adjustors.add(adjustor);
-						status.merge(checkProjectCompliance(getCompilationUnitRewrite(rewrites, getDeclaringType().getCompilationUnit()), type, new IMember[] {infos[offset].getMember()}));
+						status.merge(checkProjectCompliance());
 						if (infos[offset].isFieldInfo()) {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldField != null) {
@@ -1131,8 +1130,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		copyExtraDimensions(oldMethod, newMethod);
 		if (info.copyJavadocToCopiesInSubclasses())
 			copyJavadocNode(rewrite, oldMethod, newMethod);
-		final IJavaProject project= rewriter.getCu().getJavaProject();
-		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(project) && JavaPreferencesSettings.getCodeGenerationSettings(rewriter.getCu()).overrideAnnotation) {
+		if (info.isNewMethodToBeDeclaredAbstract() && JavaPreferencesSettings.getCodeGenerationSettings(rewriter.getCu()).overrideAnnotation) {
 			final MarkerAnnotation annotation= ast.newMarkerAnnotation();
 			annotation.setTypeName(ast.newSimpleName("Override")); //$NON-NLS-1$
 			newMethod.modifiers().add(annotation);

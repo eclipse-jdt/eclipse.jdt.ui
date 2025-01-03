@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.TryWithResourceFixCore;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -66,8 +65,8 @@ public class TryWithResourceCleanUp extends AbstractMultiFix implements ICleanUp
 				try (inputStream) {
 				    System.out.println(inputStream.read());
 				}
-				
-				
+
+
 				"""; //$NON-NLS-1$
 		}
 
@@ -83,7 +82,7 @@ public class TryWithResourceCleanUp extends AbstractMultiFix implements ICleanUp
 
 	@Override
 	protected ICleanUpFix createFix(final CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.TRY_WITH_RESOURCE) || !JavaModelUtil.is1d7OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.TRY_WITH_RESOURCE)) {
 			return null;
 		}
 

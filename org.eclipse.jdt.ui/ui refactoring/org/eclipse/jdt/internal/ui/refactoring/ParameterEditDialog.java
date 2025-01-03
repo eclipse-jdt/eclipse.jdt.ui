@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -45,7 +46,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class ParameterEditDialog extends StatusDialog {
 
@@ -193,7 +193,7 @@ public class ParameterEditDialog extends StatusDialog {
 			return createErrorStatus(RefactoringMessages.ParameterEditDialog_name_error);
 		IStatus status= fContext != null
 				? JavaConventionsUtil.validateFieldName(text, fContext.getCuHandle().getJavaProject())
-				: JavaConventions.validateFieldName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+				: JavaConventions.validateFieldName(text, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8);
 		if (status.matches(IStatus.ERROR))
 			return status;
 		if (! Checks.startsWithLowerCase(text))

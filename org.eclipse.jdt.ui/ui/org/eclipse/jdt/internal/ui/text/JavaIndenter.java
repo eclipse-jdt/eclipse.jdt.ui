@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -72,7 +72,6 @@ public final class JavaIndenter {
 		final boolean prefIndentBracesForMethods;
 		final boolean prefIndentBracesForTypes;
 		final int prefContinuationIndent;
-		final boolean prefHasGenerics;
 		final String prefTabChar;
 
 		private final IJavaProject fProject;
@@ -129,7 +128,6 @@ public final class JavaIndenter {
 				prefIndentBracesForArrays= false;
 				prefIndentBracesForMethods= false;
 				prefIndentBracesForTypes= false;
-				prefHasGenerics= false;
 				prefTabChar= JavaCore.TAB;
 			} else {
 				prefUseTabs= prefUseTabs();
@@ -158,7 +156,6 @@ public final class JavaIndenter {
 				prefIndentBracesForArrays= prefIndentBracesForArrays();
 				prefIndentBracesForMethods= prefIndentBracesForMethods();
 				prefIndentBracesForTypes= prefIndentBracesForTypes();
-				prefHasGenerics= hasGenerics();
 				prefTabChar= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
 			}
 		}
@@ -362,9 +359,6 @@ public final class JavaIndenter {
 			}
 
 			return 2; // sensible default
-		}
-		private boolean hasGenerics() {
-			return JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, getCoreFormatterOption(JavaCore.COMPILER_SOURCE)) <= 0;
 		}
 	}
 
@@ -1593,8 +1587,6 @@ public final class JavaIndenter {
 			case Symbols.TokenRBRACE:
 				return skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
 			case Symbols.TokenGREATERTHAN:
-				if (!fPrefs.prefHasGenerics)
-					return false;
 				int storedPosition= fPosition;
 				int storedToken= fToken;
 				nextToken();

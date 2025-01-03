@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 GK Software AG and others.
+ * Copyright (c) 2011, 2024 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.Chan
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.RemoveRedundantAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.TypeAnnotationRewriteOperations.MoveTypeAnnotationRewriteOperation;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -166,10 +165,6 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 
 	// Entry for NullAnnotationsCleanup:
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] locations, int problemID) {
-		ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
-		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
-			return null;
-
 		List<CompilationUnitRewriteOperationWithSourceRange> operations= new ArrayList<>();
 		if (locations == null) {
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();

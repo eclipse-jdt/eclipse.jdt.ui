@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 public enum UpdateProperty {
@@ -452,55 +451,29 @@ public enum UpdateProperty {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		AST ast= cuRewrite.getRoot().getAST();
 		ASTNode replace_with_Call;
-		if (JavaModelUtil.is1d7OrHigher(cuRewrite.getCu().getJavaProject())) {
 
-			/**
-			 * Add import
-			 */
-			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-			importRewrite.addImport(upp.cl.getCanonicalName());
-			/**
-			 * Add first method call
-			 */
-			MethodInvocation firstCall= ast.newMethodInvocation();
-			firstCall.setExpression(ASTNodeFactory.newName(ast, upp.cl.getSimpleName()));
-			firstCall.setName(ast.newSimpleName(upp.simplename));
+		/**
+		 * Add import
+		 */
+		ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+		importRewrite.addImport(upp.cl.getCanonicalName());
+		/**
+		 * Add first method call
+		 */
+		MethodInvocation firstCall= ast.newMethodInvocation();
+		firstCall.setExpression(ASTNodeFactory.newName(ast, upp.cl.getSimpleName()));
+		firstCall.setName(ast.newSimpleName(upp.simplename));
 
-			if(upp.simplename2==null) {
-				replace_with_Call= firstCall;
-			} else {
-				/**
-				 * Add second method call
-				 */
-				MethodInvocation secondCall= ast.newMethodInvocation();
-				secondCall.setExpression(firstCall);
-				secondCall.setName(ast.newSimpleName(upp.simplename2));
-				replace_with_Call= secondCall;
-			}
+		if(upp.simplename2==null) {
+			replace_with_Call= firstCall;
 		} else {
-			if(upp.alternativecl==null) {
-				/**
-				 * can be null for System.getProperty("file.encoding") on Java < 7
-				 */
-				return;
-			} else {
-				/**
-				 * fallback to File.pathSeparator for java < 7.0
-				 */
-
-				/**
-				 * Add import
-				 */
-				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-				importRewrite.addImport(upp.alternativecl.getCanonicalName());
-				/**
-				 * Add field access
-				 */
-				FieldAccess fieldaccess= ast.newFieldAccess();
-				fieldaccess.setExpression(ASTNodeFactory.newName(ast, upp.alternativecl.getSimpleName()));
-				fieldaccess.setName(ast.newSimpleName(upp.constant));
-				replace_with_Call= fieldaccess;
-			}
+			/**
+			 * Add second method call
+			 */
+			MethodInvocation secondCall= ast.newMethodInvocation();
+			secondCall.setExpression(firstCall);
+			secondCall.setName(ast.newSimpleName(upp.simplename2));
+			replace_with_Call= secondCall;
 		}
 		ASTNodes.replaceAndRemoveNLS(rewrite, visited, replace_with_Call, group, cuRewrite);
 	}

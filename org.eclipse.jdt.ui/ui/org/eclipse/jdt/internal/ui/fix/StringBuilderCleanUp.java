@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -70,7 +70,6 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -604,12 +603,7 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 			// StringBuilder builder = new StringBuilder().append(i).append("bar");
 			// StringBuilder builder = new StringBuilder("foo").append(i);
 
-			Class<?> builder;
-			if (JavaModelUtil.is50OrHigher(((CompilationUnit) type.getRoot()).getJavaElement().getJavaProject())) {
-				builder= StringBuilder.class;
-			} else {
-				builder= StringBuffer.class;
-			}
+			Class<?> builder= StringBuilder.class;
 
 			ASTNodes.replaceButKeepComment(rewrite, type, ast.newSimpleType(ASTNodeFactory.newName(ast, builder.getSimpleName())), group);
 

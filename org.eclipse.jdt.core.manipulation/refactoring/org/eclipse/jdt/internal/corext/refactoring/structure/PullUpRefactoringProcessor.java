@@ -1190,7 +1190,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			if (result.hasFatalError())
 				return result;
 			fCompilationUnitRewrites= new HashMap<>(3);
-			result.merge(checkProjectCompliance(getCompilationUnitRewrite(fCompilationUnitRewrites, getDeclaringType().getCompilationUnit()), getDestinationType(), fMembersToMove));
+			result.merge(checkProjectCompliance());
 			fChangeManager= createChangeManager(subMonitor.newChild(1), result);
 
 			Checks.addModifiedFilesToChecker(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), context);
@@ -1248,6 +1248,18 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				}
 			}
 			return true;
+		}
+
+		@Override
+		public boolean visit(ThisExpression node) {
+			if (node.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+				ITypeBinding typeBinding= node.resolveTypeBinding();
+				if (isChildTypeMember(typeBinding, fSourceType) && !isChildTypeMember(typeBinding, fTargetType)) {
+					fConflictBinding= typeBinding;
+					throw new AbortSearchException();
+				}
+			}
+			return super.visit(node);
 		}
 
 		private boolean isChildTypeMember(ITypeBinding parentTypeBinding, IType type) {
