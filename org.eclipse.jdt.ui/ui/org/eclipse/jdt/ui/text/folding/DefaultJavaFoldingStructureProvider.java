@@ -68,7 +68,29 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchExpression;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -76,7 +98,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 
 /**
  * Updates the projection model of a class file or compilation unit.
@@ -308,6 +329,389 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 	}
 
+	private class FoldingVisitor extends ASTVisitor {
+
+	    private FoldingStructureComputationContext ctx;
+
+	    public FoldingVisitor(FoldingStructureComputationContext ctx) {
+	        this.ctx = ctx;
+	    }
+
+	    @Override
+	    public boolean visit(CompilationUnit node) {
+	        List<ImportDeclaration> imports = node.imports();
+	        if (!imports.isEmpty() && imports.size() > 1) {
+	            int start = imports.get(0).getStartPosition();
+	            ImportDeclaration lastImport = imports.get(imports.size() - 1);
+	            int end = lastImport.getStartPosition() + lastImport.getLength();
+	            try {
+	                IDocument document = ctx.getDocument();
+	                int lastImportLine = document.getLineOfOffset(end);
+	                if (lastImportLine + 1 < document.getNumberOfLines()) {
+	                    end = document.getLineOffset(lastImportLine + 1);
+	                } else {
+	                    end = document.getLength();
+	                }
+	            } catch (BadLocationException e) {
+	            }
+
+	            IRegion region = new Region(start, end - start);
+	            IRegion aligned = alignRegion(region, ctx);
+
+	            if (aligned != null) {
+	                Position position = new Position(aligned.getOffset(), aligned.getLength());
+	                JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(ctx.collapseImportContainer(), null, false);
+	                ctx.addProjectionRange(annotation, position);
+	            }
+	        }
+	        return super.visit(node);
+	    }
+
+	    @Override
+	    public boolean visit(TypeDeclaration node) {
+	        boolean isInnerClass = node.isMemberTypeDeclaration();
+
+	        if (isInnerClass) {
+	            int start = node.getName().getStartPosition();
+	            int length = (node.getStartPosition() + node.getLength()) - start;
+
+	            if (length > 0) {
+	                IRegion region = new Region(start, length);
+	                IRegion aligned = alignRegion(region, ctx);
+
+	                if (aligned != null && isMultiline(aligned)) {
+	                    Position position = new Position(aligned.getOffset(), aligned.getLength());
+	                    JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(ctx.collapseInnerTypes(), null, false);
+	                    ctx.addProjectionRange(annotation, position);
+	                }
+	            }
+	        }
+	        return true;
+	    }
+
+
+
+	    @Override
+	    public boolean visit(MethodDeclaration node) {
+	        int start = node.getName().getStartPosition();
+	        int length = (node.getStartPosition() + node.getLength()) - start;
+
+	        if (length > 0) {
+	            IRegion region = new Region(start, length);
+	            IRegion aligned = alignRegion(region, ctx);
+
+	            if (aligned != null && isMultiline(aligned)) {
+	                Position position = new Position(aligned.getOffset(), aligned.getLength());
+	                JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(ctx.collapseMembers(), null, false);
+	                ctx.addProjectionRange(annotation, position);
+	            }
+	        }
+	        return true;
+	    }
+
+	    private void createFoldingRegionForStatement(ASTNode node) {
+	        int start = node.getStartPosition();
+	        int length = node.getLength();
+	        if (!(node instanceof Block)) {
+	            try {
+	                IDocument document = ctx.getDocument();
+	                int endLine = document.getLineOfOffset(start + length - 1);
+	                if (endLine + 1 < document.getNumberOfLines()) {
+	                    String currentIndent = getIndentOfLine(document, endLine);
+	                    String nextIndent = getIndentOfLine(document, endLine + 1);
+	                    if (nextIndent.length() > currentIndent.length()) {
+	                        int nextLineEndOffset = document.getLineOffset(endLine + 2) - 1;
+	                        length = nextLineEndOffset - start;
+	                    } else {
+	                        length = document.getLineOffset(endLine + 1) - start;
+	                    }
+	                } else {
+	                    length = document.getLength() - start;
+	                }
+	            } catch (BadLocationException e) {
+	            }
+	        }
+
+	        IRegion region = new Region(start, length);
+	        IRegion aligned = alignRegion(region, ctx);
+
+	        if (aligned != null && isMultiline(aligned)) {
+	            Position position = new Position(aligned.getOffset(), aligned.getLength());
+	            JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(ctx.collapseMembers(), null, false);
+	            ctx.addProjectionRange(annotation, position);
+	        }
+	    }
+
+	    private String getIndentOfLine(IDocument document, int line) throws BadLocationException {
+	        IRegion region = document.getLineInformation(line);
+	        int lineStart = region.getOffset();
+	        int lineLength = region.getLength();
+
+	        int whiteSpaceEnd = lineStart;
+	        while (whiteSpaceEnd < lineStart + lineLength) {
+	            char c = document.getChar(whiteSpaceEnd);
+	            if (!Character.isWhitespace(c)) {
+	                break;
+	            }
+	            whiteSpaceEnd++;
+	        }
+	        return document.get(lineStart, whiteSpaceEnd - lineStart);
+	    }
+
+	    @Override
+	    public boolean visit(IfStatement node) {
+	        createFoldingRegionForIfPart(node);
+	        node.getThenStatement().accept(this);
+	        if (node.getElseStatement() != null) {
+	            if (node.getElseStatement() instanceof IfStatement) {
+	                createFoldingRegionForElseIfPart(node.getElseStatement());
+	                node.getElseStatement().accept(this);
+	            } else {
+	                createFoldingRegionForElsePart(node);
+	                node.getElseStatement().accept(this);
+	            }
+	        }
+	        return false;
+	    }
+
+	    private void createFoldingRegionForIfPart(IfStatement node) {
+	        int start = node.getStartPosition();
+	        int end = getEndPosition(node.getThenStatement());
+	        createFoldingRegion(start, end, ctx.collapseMembers());
+	    }
+
+	    private void createFoldingRegionForElseIfPart(Statement elseIfStatement) {
+	        int start = findElseKeywordStart(elseIfStatement);
+	        int end = getEndPosition(((IfStatement) elseIfStatement).getThenStatement());
+	        createFoldingRegion(start, end, ctx.collapseMembers());
+	    }
+
+	    private void createFoldingRegionForElsePart(IfStatement node) {
+	        int start = findElseKeywordStart(node.getElseStatement());
+	        int end = getEndPosition(node.getElseStatement());
+	        createFoldingRegion(start, end, ctx.collapseMembers());
+	    }
+
+	    private int findElseKeywordStart(ASTNode node) {
+	        try {
+	            IDocument document = ctx.getDocument();
+	            int startSearch = node.getParent().getStartPosition();
+	            int endSearch = node.getStartPosition();
+
+	            String text = document.get(startSearch, endSearch - startSearch);
+	            int index = text.lastIndexOf("else"); //$NON-NLS-1$
+	            if (index >= 0) {
+	                return startSearch + index;
+	            }
+	        } catch (BadLocationException e) {
+	            e.printStackTrace();
+	        }
+	        return node.getStartPosition();
+	    }
+
+	    private int getEndPosition(Statement statement) {
+	        if (statement instanceof Block) {
+	            return statement.getStartPosition() + statement.getLength();
+	        } else {
+	            try {
+	                IDocument document = ctx.getDocument();
+	                int start = statement.getStartPosition();
+	                int line = document.getLineOfOffset(start);
+	                return document.getLineOffset(line + 1);
+	            } catch (BadLocationException e) {
+	                e.printStackTrace();
+	                return statement.getStartPosition() + statement.getLength();
+	            }
+	        }
+	    }
+
+	    @Override
+	    public boolean visit(TryStatement node) {
+	        createFoldingRegionForTryBlock(node);
+	        node.getBody().accept(this);
+	        for (Object obj : node.catchClauses()) {
+	            CatchClause catchClause = (CatchClause) obj;
+	            createFoldingRegionForCatchClause(catchClause);
+	            catchClause.accept(this);
+	        }
+	        if (node.getFinally() != null) {
+	            createFoldingRegionForFinallyBlock(node);
+	            node.getFinally().accept(this);
+	        }
+	        return false;
+	    }
+
+	    private void createFoldingRegionForTryBlock(TryStatement node) {
+	        int start = node.getStartPosition();
+	        int end = getEndPosition(node.getBody());
+
+	        createFoldingRegion(start, end, ctx.collapseMembers());
+	    }
+
+	    private void createFoldingRegionForCatchClause(CatchClause catchClause) {
+	        int start = catchClause.getStartPosition();
+	        int end = getEndPosition(catchClause.getBody());
+
+	        createFoldingRegion(start, end, ctx.collapseMembers());
+	    }
+
+	    private void createFoldingRegionForFinallyBlock(TryStatement node) {
+	        Block finallyBlock = node.getFinally();
+	        int start = findFinallyKeywordStart(node);
+	        int end = getEndPosition(finallyBlock);
+
+	        createFoldingRegion(start, end, ctx.collapseMembers());
+	    }
+
+	    private int findFinallyKeywordStart(TryStatement node) {
+	        try {
+	            IDocument document = ctx.getDocument();
+	            int startSearch = node.getStartPosition();
+	            int endSearch = node.getFinally().getStartPosition();
+
+	            String text = document.get(startSearch, endSearch - startSearch);
+	            int index = text.lastIndexOf("finally"); //$NON-NLS-1$
+	            if (index >= 0) {
+	                return startSearch + index;
+	            }
+	        } catch (BadLocationException e) {
+	            e.printStackTrace();
+	        }
+	        return node.getFinally().getStartPosition();
+	    }
+
+	    private void createFoldingRegion(int start, int end, boolean collapse) {
+	        if (end > start) {
+	            IRegion region = new Region(start, end - start);
+	            IRegion aligned = alignRegion(region, ctx);
+
+	            if (aligned != null && isMultiline(aligned)) {
+	                Position position = new Position(aligned.getOffset(), aligned.getLength());
+	                JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(collapse, null, false);
+	                ctx.addProjectionRange(annotation, position);
+	            }
+	        }
+	    }
+
+	    @Override
+	    public boolean visit(WhileStatement node) {
+	        createFoldingRegionForStatement(node);
+	        node.getBody().accept(this);
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(ForStatement node) {
+	        createFoldingRegionForStatement(node);
+	        node.getBody().accept(this);
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(EnhancedForStatement node) {
+	        createFoldingRegionForStatement(node);
+	        node.getBody().accept(this);
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(DoStatement node) {
+	        createFoldingRegionForStatement(node);
+	        node.getBody().accept(this);
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(SwitchExpression node) {
+	        createFoldingRegion(node, ctx.collapseMembers(), false);
+	        List<?> statements = node.statements();
+	        for (Object stmtObj : statements) {
+	            Statement stmt = (Statement) stmtObj;
+	            stmt.accept(this);
+	        }
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(SynchronizedStatement node) {
+	        createFoldingRegion(node, ctx.collapseMembers(), false);
+	        node.getBody().accept(this);
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(LambdaExpression node) {
+	        if (node.getBody() instanceof Block) {
+	            createFoldingRegion(node.getBody(), ctx.collapseMembers(), false);
+	            node.getBody().accept(this);
+	        }
+	        return false;
+	    }
+
+	    @Override
+	    public boolean visit(AnonymousClassDeclaration node) {
+	        createFoldingRegion(node, ctx.collapseMembers(), true);
+	        return true;
+	    }
+
+	    @Override
+	    public boolean visit(EnumDeclaration node) {
+	        createFoldingRegion(node, ctx.collapseMembers(), true);
+	        return true;
+	    }
+
+	    @Override
+	    public boolean visit(Initializer node) {
+	        createFoldingRegion(node, ctx.collapseMembers(), false);
+	        return true;
+	    }
+
+	    private void createFoldingRegion(ASTNode node, boolean collapse, boolean excludeLastLine) {
+	        int start = node.getStartPosition();
+	        int end = node.getStartPosition() + node.getLength();
+
+	        if (excludeLastLine) {
+	            end = adjustEndForControlStatements(end);
+	        }
+
+	        if (end <= start) {
+	            return;
+	        }
+	        int length = end - start;
+	        IRegion region = new Region(start, length);
+	        IRegion aligned = alignRegion(region, ctx);
+
+	        if (aligned != null && isMultiline(aligned)) {
+	            Position position = new Position(aligned.getOffset(), aligned.getLength());
+	            JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(collapse, null, false);
+	            ctx.addProjectionRange(annotation, position);
+	        }
+	    }
+
+
+	    private int adjustEndForControlStatements(int originalEnd) {
+	        try {
+	            IDocument document = ctx.getDocument();
+	            int endLine = document.getLineOfOffset(originalEnd);
+	            int endLineOffset = document.getLineOffset(endLine);
+	            return endLineOffset;
+	        } catch (BadLocationException e) {
+	            return originalEnd;
+	        }
+	    }
+
+	    private boolean isMultiline(IRegion region) {
+	        try {
+	            IDocument document = ctx.getDocument();
+	            int startLine = document.getLineOfOffset(region.getOffset());
+	            int endLine = document.getLineOfOffset(region.getOffset() + region.getLength());
+	            return endLine > startLine;
+	        } catch (BadLocationException e) {
+	            return false;
+	        }
+	    }
+}
+
 	/**
 	 * Filter for annotations.
 	 */
@@ -422,7 +826,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					IJavaElement elem= SelectionConverter.getElementAtOffset(ast.getTypeRoot(), new TextSelection(editor.getCachedSelectedRange().x, editor.getCachedSelectedRange().y));
 					if (!(elem instanceof IImportDeclaration))
 						return false;
-
 				}
 			} catch (JavaModelException e) {
 				return false; // can't compute
@@ -466,115 +869,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 
 			return null;
-		}
-	}
-
-	/**
-	 * Projection position that will return two foldable regions: one folding away
-	 * the region from after the '/**' to the beginning of the content, the other
-	 * from after the first content line until after the comment.
-	 */
-	private static final class CommentPosition extends Position implements IProjectionPosition {
-		CommentPosition(int offset, int length) {
-			super(offset, length);
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
-		 */
-		@Override
-		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
-			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
-			int prefixEnd= 0;
-			int contentStart= findFirstContent(sequence, prefixEnd);
-
-			int firstLine= document.getLineOfOffset(offset + prefixEnd);
-			int captionLine= document.getLineOfOffset(offset + contentStart);
-			int lastLine= document.getLineOfOffset(offset + length);
-
-			Assert.isTrue(firstLine <= captionLine, "first folded line is greater than the caption line"); //$NON-NLS-1$
-			Assert.isTrue(captionLine <= lastLine, "caption line is greater than the last folded line"); //$NON-NLS-1$
-
-			IRegion preRegion;
-			if (firstLine < captionLine) {
-//				preRegion= new Region(offset + prefixEnd, contentStart - prefixEnd);
-				int preOffset= document.getLineOffset(firstLine);
-				IRegion preEndLineInfo= document.getLineInformation(captionLine);
-				int preEnd= preEndLineInfo.getOffset();
-				preRegion= new Region(preOffset, preEnd - preOffset);
-			} else {
-				preRegion= null;
-			}
-
-			if (captionLine < lastLine) {
-				int postOffset= document.getLineOffset(captionLine + 1);
-				int postLength= offset + length - postOffset;
-				if (postLength > 0) {
-					IRegion postRegion= new Region(postOffset, postLength);
-					if (preRegion == null)
-						return new IRegion[] { postRegion };
-					return new IRegion[] { preRegion, postRegion };
-				}
-			}
-
-			if (preRegion != null)
-				return new IRegion[] { preRegion };
-
-			return null;
-		}
-
-		/**
-		 * Finds the offset of the first identifier part within <code>content</code>.
-		 * Returns 0 if none is found.
-		 *
-		 * @param content the content to search
-		 * @param prefixEnd the end of the prefix
-		 * @return the first index of a unicode identifier part, or zero if none can
-		 *         be found
-		 */
-		private int findFirstContent(final CharSequence content, int prefixEnd) {
-			int lenght= content.length();
-			for (int i= prefixEnd; i < lenght; i++) {
-				if (Character.isUnicodeIdentifierPart(content.charAt(i)))
-					return i;
-			}
-			return 0;
-		}
-
-//		/**
-//		 * Finds the offset of the first identifier part within <code>content</code>.
-//		 * Returns 0 if none is found.
-//		 *
-//		 * @param content the content to search
-//		 * @return the first index of a unicode identifier part, or zero if none can
-//		 *         be found
-//		 */
-//		private int findPrefixEnd(final CharSequence content) {
-//			// return the index after the leading '/*' or '/**'
-//			int len= content.length();
-//			int i= 0;
-//			while (i < len && isWhiteSpace(content.charAt(i)))
-//				i++;
-//			if (len >= i + 2 && content.charAt(i) == '/' && content.charAt(i + 1) == '*')
-//				if (len >= i + 3 && content.charAt(i + 2) == '*')
-//					return i + 3;
-//				else
-//					return i + 2;
-//			else
-//				return i;
-//		}
-//
-//		private boolean isWhiteSpace(char c) {
-//			return c == ' ' || c == '\t';
-//		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
-		 */
-		@Override
-		public int computeCaptionOffset(IDocument document) throws BadLocationException {
-			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
-			return findFirstContent(sequence, 0);
 		}
 	}
 
@@ -650,10 +944,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 					return new IRegion[] { preRegion, postRegion };
 				}
 			}
-
 			if (preRegion != null)
 				return new IRegion[] { preRegion };
-
 			return null;
 		}
 
@@ -671,7 +963,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			} catch (JavaModelException e) {
 				// ignore and use default
 			}
-
 			return nameStart - offset;
 		}
 
@@ -733,6 +1024,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private boolean fCollapseInnerTypes= true;
 	private boolean fCollapseMembers= false;
 	private boolean fCollapseHeaderComments= true;
+	private boolean fNewFolding;
 
 	/* filters */
 	/** Member filter, matches nested members (but not top-level types). */
@@ -872,7 +1164,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		fInput= getInputElement();
 		if (fInput == null)
 			return null;
-
 		return createContext(true);
 	}
 
@@ -889,7 +1180,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		IScanner scanner= null;
 		if (fUpdatingCount == 1)
 			scanner= fSharedScanner; // reuse scanner
-
 		return new FoldingStructureComputationContext(doc, model, allowCollapse, scanner);
 	}
 
@@ -906,6 +1196,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		fCollapseJavadoc= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
 		fCollapseMembers= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
 		fCollapseHeaderComments= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_HEADERS);
+		fNewFolding = store.getBoolean(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
 	private void update(FoldingStructureComputationContext ctx) {
@@ -935,7 +1226,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			 * position update and keep the old range, in order to keep the folding structure
 			 * stable.
 			 */
-			boolean isMalformedAnonymousType= newPosition.getOffset() == 0 && element.getElementType() == IJavaElement.TYPE && isInnerType((IType) element);
+			boolean isMalformedAnonymousType= newPosition.getOffset() == 0 && element != null && element.getElementType() == IJavaElement.TYPE && isInnerType((IType) element);
 			List<Tuple> annotations= oldStructure.get(element);
 			if (annotations == null) {
 				if (!isMalformedAnonymousType)
@@ -990,30 +1281,184 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void computeFoldingStructure(FoldingStructureComputationContext ctx) {
-		IParent parent= (IParent) fInput;
-		try {
-			if (!(fInput instanceof ISourceReference))
-				return;
-			String source= ((ISourceReference)fInput).getSource();
-			if (source == null)
-				return;
+	    if (fNewFolding && fInput instanceof ICompilationUnit) {
+	        processCompilationUnit((ICompilationUnit) fInput, ctx);
+	        processComments(ctx);
+	    } else {
+	        processSourceReference((ISourceReference) fInput, ctx);
+	    }
+	}
 
-			ctx.getScanner().setSource(source.toCharArray());
-			computeFoldingStructure(parent.getChildren(), ctx);
-		} catch (JavaModelException x) {
-		}
+	private void processCompilationUnit(ICompilationUnit unit, FoldingStructureComputationContext ctx) {
+	    try {
+	        String source = unit.getSource();
+	        if (source == null) return;
+
+	        ctx.getScanner().setSource(source.toCharArray());
+	        ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+	        parser.setBindingsRecovery(true);
+	        parser.setStatementsRecovery(true);
+	        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+	        parser.setResolveBindings(true);
+	        parser.setUnitName(unit.getElementName());
+	        parser.setProject(unit.getJavaProject());
+	        parser.setSource(unit);
+	        Map<String, String> options = unit.getJavaProject().getOptions(true);
+		    options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_23);
+		    options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_23);
+		    options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_23);
+		    options.put(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, JavaCore.ENABLED);
+	        parser.setCompilerOptions(options);
+
+	        CompilationUnit ast = (CompilationUnit) parser.createAST(null);
+	        ast.accept(new FoldingVisitor(ctx));
+	    } catch (JavaModelException | IllegalStateException e) {
+	    	e.printStackTrace();
+	    }
+	}
+
+	private void processComments(FoldingStructureComputationContext ctx) {
+	    try {
+	        IDocument document = ctx.getDocument();
+	        String source = document.get();
+	        IScanner scanner = ctx.getScanner();
+	        scanner.setSource(source.toCharArray());
+	        scanner.resetTo(0, source.length() - 1);
+
+	        int token;
+	        while ((token = scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+	            if (token == ITerminalSymbols.TokenNameCOMMENT_BLOCK || token == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
+	                int start = scanner.getCurrentTokenStartPosition();
+	                int end = scanner.getCurrentTokenEndPosition() + 1;
+	                try {
+	                    int endLine = document.getLineOfOffset(end);
+	                    int lineOffset = document.getLineOffset(endLine);
+	                    int lineLength = document.getLineLength(endLine);
+	                    String lineText = document.get(lineOffset, lineLength);
+	                    int commentEndInLine = end - lineOffset;
+	                    String afterComment = lineText.substring(commentEndInLine);
+
+	                    if (afterComment.trim().length() > 0) {
+	                        end = lineOffset;
+	                    } else {
+	                        if (endLine + 1 < document.getNumberOfLines()) {
+	                            end = document.getLineOffset(endLine + 1);
+	                        } else {
+	                            end = document.getLength();
+	                        }
+	                    }
+	                } catch (BadLocationException e) {
+	                    e.printStackTrace();
+	                }
+
+	                IRegion region = new Region(start, end - start);
+	                IRegion aligned = alignRegion(region, ctx);
+
+	                if (aligned != null && isMultiline(aligned, ctx)) {
+	                    Position position = createCommentPosition(aligned);
+	                    JavaProjectionAnnotation annotation = new JavaProjectionAnnotation(ctx.collapseJavadoc(), null, true);
+	                    ctx.addProjectionRange(annotation, position);
+	                }
+	            }
+	        }
+	    } catch (InvalidInputException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+
+	private boolean isMultiline(IRegion region, FoldingStructureComputationContext ctx) {
+	    try {
+	        IDocument document = ctx.getDocument();
+	        int startLine = document.getLineOfOffset(region.getOffset());
+	        int endLine = document.getLineOfOffset(region.getOffset() + region.getLength() - 1);
+	        return endLine > startLine;
+	    } catch (BadLocationException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
+
+	private void processSourceReference(ISourceReference sourceRef, FoldingStructureComputationContext ctx) {
+	    try {
+	        String source = sourceRef.getSource();
+	        if (source == null) return;
+
+	        ctx.getScanner().setSource(source.toCharArray());
+	        if (fInput instanceof IParent) {
+	            IParent parent = (IParent) fInput;
+	            computeFoldingStructure(parent.getChildren(), ctx);
+	        } else {
+	            computeFoldingStructure(fInput, ctx);
+	        }
+	    } catch (JavaModelException e) {
+	    }
+	}
+
+	/**
+	 * Aligns <code>region</code> to start and end at a line offset. The region's start is
+	 * decreased to the next line offset, and the end offset increased to the next line start or the
+	 * end of the document. <code>null</code> is returned if <code>region</code> is
+	 * <code>null</code> itself or does not comprise at least one line delimiter, as a single line
+	 * cannot be folded.
+	 *
+	 * @param region the region to align, may be <code>null</code>
+	 * @param ctx the folding context
+	 * @return a region equal or greater than <code>region</code> that is aligned with line
+	 *         offsets, <code>null</code> if the region is too small to be foldable (e.g. covers
+	 *         only one line)
+	 */
+	protected IRegion alignRegion(IRegion region, FoldingStructureComputationContext ctx) {
+	    if (region == null) {
+	        return null;
+	    }
+
+	    IDocument document = ctx.getDocument();
+
+	    try {
+	        int startOffset = region.getOffset();
+	        int endOffset = region.getOffset() + region.getLength();
+	        int startLine = document.getLineOfOffset(startOffset);
+	        int endLine = document.getLineOfOffset(endOffset - 1);
+
+	        if (startLine > endLine) {
+	            return null;
+	        }
+
+	        int alignedStartOffset = document.getLineOffset(startLine);
+	        int alignedEndOffset = endOffset;
+
+	        return new Region(alignedStartOffset, alignedEndOffset - alignedStartOffset);
+	    } catch (BadLocationException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+	/**
+	 * Creates a comment folding position from an
+	 * {@link #alignRegion(IRegion, DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext) aligned}
+	 * region.
+	 *
+	 * @param aligned an aligned region
+	 * @return a folding position corresponding to <code>aligned</code>
+	 */
+	protected Position createCommentPosition(IRegion aligned) {
+	    return new Position(aligned.getOffset(), aligned.getLength());
 	}
 
 	private void computeFoldingStructure(IJavaElement[] elements, FoldingStructureComputationContext ctx) throws JavaModelException {
-		for (IJavaElement element : elements) {
-			computeFoldingStructure(element, ctx);
+	    for (IJavaElement element : elements) {
+	        computeFoldingStructure(element, ctx);
 
-			if (element instanceof IParent) {
-				IParent parent= (IParent) element;
-				computeFoldingStructure(parent.getChildren(), ctx);
-			}
-		}
+	        if (element instanceof IParent) {
+	            IParent parent = (IParent) element;
+	            computeFoldingStructure(parent.getChildren(), ctx);
+	        }
+	    }
 	}
+
 
 	/**
 	 * Computes the folding structure for a given {@link IJavaElement java element}. Computed
@@ -1178,7 +1623,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				return result;
 		} catch (JavaModelException | InvalidInputException e) {
 		}
-
 		return new IRegion[0];
 	}
 
@@ -1235,18 +1679,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	/**
-	 * Creates a comment folding position from an
-	 * {@link #alignRegion(IRegion, DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext) aligned}
-	 * region.
-	 *
-	 * @param aligned an aligned region
-	 * @return a folding position corresponding to <code>aligned</code>
-	 */
-	protected final Position createCommentPosition(IRegion aligned) {
-		return new CommentPosition(aligned.getOffset(), aligned.getLength());
-	}
-
-	/**
 	 * Creates a folding position that remembers its member from an
 	 * {@link #alignRegion(IRegion, DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext) aligned}
 	 * region.
@@ -1257,47 +1689,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 */
 	protected final Position createMemberPosition(IRegion aligned, IMember member) {
 		return new JavaElementPosition(aligned.getOffset(), aligned.getLength(), member);
-	}
-
-	/**
-	 * Aligns <code>region</code> to start and end at a line offset. The region's start is
-	 * decreased to the next line offset, and the end offset increased to the next line start or the
-	 * end of the document. <code>null</code> is returned if <code>region</code> is
-	 * <code>null</code> itself or does not comprise at least one line delimiter, as a single line
-	 * cannot be folded.
-	 *
-	 * @param region the region to align, may be <code>null</code>
-	 * @param ctx the folding context
-	 * @return a region equal or greater than <code>region</code> that is aligned with line
-	 *         offsets, <code>null</code> if the region is too small to be foldable (e.g. covers
-	 *         only one line)
-	 */
-	protected final IRegion alignRegion(IRegion region, FoldingStructureComputationContext ctx) {
-		if (region == null)
-			return null;
-
-		IDocument document= ctx.getDocument();
-
-		try {
-
-			int start= document.getLineOfOffset(region.getOffset());
-			int end= document.getLineOfOffset(region.getOffset() + region.getLength());
-			if (start >= end)
-				return null;
-
-			int offset= document.getLineOffset(start);
-			int endOffset;
-			if (document.getNumberOfLines() > end + 1)
-				endOffset= document.getLineOffset(end + 1);
-			else
-				endOffset= document.getLineOffset(end) + document.getLineLength(end);
-
-			return new Region(offset, endOffset - offset);
-
-		} catch (BadLocationException x) {
-			// concurrent modification
-			return null;
-		}
 	}
 
 	private ProjectionAnnotationModel getModel() {
