@@ -403,7 +403,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		private boolean fCloseBrackets= true;
 		private boolean fCloseStrings= true;
-		private boolean fCloseAngularBrackets= true;
 		private final String CATEGORY= toString();
 		private final IPositionUpdater fUpdater= new ExclusivePositionUpdater(CATEGORY);
 		private final Stack<BracketLevel> fBracketLevelStack= new Stack<>();
@@ -414,10 +413,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		public void setCloseStringsEnabled(boolean enabled) {
 			fCloseStrings= enabled;
-		}
-
-		public void setCloseAngularBracketsEnabled(boolean enabled) {
-			fCloseAngularBrackets= enabled;
 		}
 
 		private boolean isTypeArgumentStart(String identifier) {
@@ -495,7 +490,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						break;
 
 					case '<':
-						if (!fCloseAngularBrackets || !fCloseBrackets
+						if (!fCloseBrackets
 								|| nextToken == Symbols.TokenLESSTHAN
 								|| nextToken == Symbols.TokenQUESTIONMARK
 								|| nextToken == Symbols.TokenIDENT && isTypeArgumentStart(next)
@@ -1528,11 +1523,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
-		boolean closeAngularBrackets= JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, preferenceStore.getString(JavaCore.COMPILER_SOURCE)) <= 0;
 
 		fBracketInserter.setCloseBracketsEnabled(closeBrackets);
 		fBracketInserter.setCloseStringsEnabled(closeStrings);
-		fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
 
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer instanceof ITextViewerExtension)
@@ -1608,10 +1601,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 							else
 								uninstallTabsToSpacesConverter();
 							return;
-						case JavaCore.COMPILER_SOURCE:
-							boolean closeAngularBrackets= JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, getPreferenceStore().getString(p)) <= 0;
-							fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
-							break;
 						case PreferenceConstants.EDITOR_SMART_TAB:
 							if (getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TAB)) {
 								setActionActivationCode("IndentOnTab", '\t', -1, SWT.NONE); //$NON-NLS-1$

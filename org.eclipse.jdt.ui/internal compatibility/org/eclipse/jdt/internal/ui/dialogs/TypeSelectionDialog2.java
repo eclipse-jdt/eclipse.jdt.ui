@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -233,7 +233,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 					String text= ((ITextSelection)selection).getText();
 					if (text != null) {
 						text= text.trim();
-						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null).isOK()) {
+						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8, null).isOK()) {
 							fInitialFilter= text;
 							fSelectionMode= FULL_SELECTION;
 						}

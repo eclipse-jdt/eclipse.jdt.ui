@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1137,9 +1137,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				ICompilationUnit current= null;
 				final Map<ICompilationUnit, SearchResultGroup> groups= new HashMap<>();
 				for (Map.Entry<IJavaProject, Set<SearchResultGroup>> entry : firstPass.entrySet()) {
-					IJavaProject project = entry.getKey();
-					if (level == 3 && !JavaModelUtil.is50OrHigher(project))
-						level= 2;
 					collection= entry.getValue();
 					if (collection != null) {
 						for (SearchResultGroup group : collection) {
@@ -1233,8 +1230,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					subMonitor.beginTask("", keySet.size() * 100); //$NON-NLS-1$
 					subMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 					for (IJavaProject project : keySet) {
-						if (level == 3 && !JavaModelUtil.is50OrHigher(project))
-							level= 2;
 						Collection<ICompilationUnit> cuCollection= secondPass.get(project);
 						if (cuCollection != null) {
 							parser.setWorkingCopyOwner(fOwner);

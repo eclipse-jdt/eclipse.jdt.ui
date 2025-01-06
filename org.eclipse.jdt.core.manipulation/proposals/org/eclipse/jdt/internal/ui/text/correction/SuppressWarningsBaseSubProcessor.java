@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -68,7 +67,7 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 	static final String ADD_SUPPRESSWARNINGS_ID= "org.eclipse.jdt.ui.correction.addSuppressWarnings"; //$NON-NLS-1$
 
 	public static final boolean hasSuppressWarningsProposal(IJavaProject javaProject, int problemId) {
-		if (CorrectionEngine.getWarningToken(problemId) != null && JavaModelUtil.is50OrHigher(javaProject)) {
+		if (CorrectionEngine.getWarningToken(problemId) != null) {
 			String optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
 			if (optionId != null) {
 				String optionValue= javaProject.getOption(optionId, true);

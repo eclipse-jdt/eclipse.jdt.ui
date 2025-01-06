@@ -242,7 +242,7 @@ public class TypeInfoViewer {
 		}
 		private void processVMInstallType(IVMInstallType installType, List locations, List labels) {
 			if (installType != null) {
-				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
+				boolean isMac= Platform.OS.isMac();
 				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
 				for (IVMInstall install : installType.getVMInstalls()) {
 					String label= getFormattedLabel(install.getName());

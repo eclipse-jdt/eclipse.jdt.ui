@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -509,6 +510,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			private List<MethodInvocation> toStringList= new ArrayList<>();
 			private List<MethodInvocation> indexOfList= new ArrayList<>();
 			private List<SimpleName> argList= new ArrayList<>();
+			private boolean passedAsArgument= false;
 
 			public CheckValidityVisitor(int lastStatementEnd, IBinding varBinding) {
 				this.lastStatementEnd= lastStatementEnd;
@@ -517,6 +519,10 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 
 			public boolean isValid() {
 				return valid;
+			}
+
+			public boolean isPassedAsArgument() {
+				return passedAsArgument;
 			}
 
 			public ExpressionStatement getNextAssignment() {
@@ -581,8 +587,11 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 										paramType.getQualifiedName().equals("java.lang.CharSequence")) { //$NON-NLS-1$
 									argList.add(name);
 									valid= true;
+									return true;
 								} else {
-									valid= false;
+									passedAsArgument= true;
+									valid= true;
+									return true;
 								}
 							}
 						} else {
@@ -739,9 +748,22 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			} catch (AbortSearchException e) {
 				// do nothing
 			}
-			if (!checkValidityVisitor.isValid() || (checkValidityVisitor.getToStringList().isEmpty() && checkValidityVisitor.getArgList().isEmpty())) {
+
+			if (!checkValidityVisitor.isValid()) {
+				return failure();
+			} else if (checkValidityVisitor.isPassedAsArgument()) {
+				List<Statement> statements= new ArrayList<>(statementList);
+				List<StringLiteral> literals= new ArrayList<>(fLiterals);
+				ModifyStringBufferToUseTextBlock operation= new ModifyStringBufferToUseTextBlock(node, statements,
+						literals);
+				fOperations.add(operation);
+				statementList.clear();
+				fLiterals.clear();
+				return false;
+			} else if (checkValidityVisitor.getToStringList().isEmpty() && checkValidityVisitor.getArgList().isEmpty()) {
 				return failure();
 			}
+
 			ExpressionStatement assignmentToConvert= checkValidityVisitor.getNextAssignment();
 			List<Statement> statements= new ArrayList<>(statementList);
 			List<StringLiteral> literals= new ArrayList<>(fLiterals);
@@ -884,6 +906,47 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		return hasNLS;
 	}
 
+	public static class ModifyStringBufferToUseTextBlock extends CompilationUnitRewriteOperation {
+
+		private final List<Statement> fStatements;
+		private final List<StringLiteral> fLiterals;
+		private final ClassInstanceCreation fConstructor;
+
+		public ModifyStringBufferToUseTextBlock(final ClassInstanceCreation constructor, final List<Statement> statements, final List<StringLiteral> literals) {
+			fStatements= statements;
+			fLiterals= literals;
+			fConstructor= constructor;
+		}
+
+		@Override
+		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			TextEditGroup group= createTextEditGroup(MultiFixMessages.StringConcatToTextBlockCleanUp_description, cuRewrite);
+			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+				@Override
+				public SourceRange computeSourceRange(final ASTNode nodeWithComment) {
+					if (Boolean.TRUE.equals(nodeWithComment.getProperty(ASTNodes.UNTOUCH_COMMENT))) {
+						return new SourceRange(nodeWithComment.getStartPosition(), nodeWithComment.getLength());
+					}
+
+					return super.computeSourceRange(nodeWithComment);
+				}
+			});
+
+			StringBuilder buf= createTextBlockBuffer(fLiterals, cuRewrite);
+			TextBlock textBlock= (TextBlock) rewrite.createStringPlaceholder(buf.toString(), ASTNode.TEXT_BLOCK);
+			ListRewrite argList= rewrite.getListRewrite(fConstructor, ClassInstanceCreation.ARGUMENTS_PROPERTY);
+			List<ASTNode> original= argList.getOriginalList();
+			for (ASTNode node : original) {
+				rewrite.remove(node, group);
+			}
+			argList.insertFirst(textBlock, group);
+			for (int i= 1; i < fStatements.size(); ++i) {
+				rewrite.remove(fStatements.get(i), group);
+			}
+		}
+	}
+
 	public static class ChangeStringBufferToTextBlock extends CompilationUnitRewriteOperation {
 
 		private final List<MethodInvocation> fToStringList;
@@ -891,7 +954,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 		private final List<SimpleName> fArgList;
 		private final List<Statement> fStatements;
 		private final List<StringLiteral> fLiterals;
-		private String fIndent;
 		private final Set<String> fExcludedNames;
 		private final BodyDeclaration fLastBodyDecl;
 		private final boolean fNonNLS;
@@ -905,7 +967,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			this.fStatements= statements;
 			this.fLiterals= literals;
 			this.fAssignmentToConvert= assignmentToConvert;
-			this.fIndent= "\t"; //$NON-NLS-1$
 			this.fExcludedNames= excludedNames;
 			this.fLastBodyDecl= lastBodyDecl;
 			this.fNonNLS= nonNLS;
@@ -927,19 +988,6 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				fExcludedNames.clear();
 			}
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			IJavaElement root= cuRewrite.getRoot().getJavaElement();
-			if (root != null) {
-				IJavaProject project= root.getJavaProject();
-				if (project != null) {
-					String tab_option= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
-					if (JavaCore.SPACE.equals(tab_option)) {
-						fIndent= ""; //$NON-NLS-1$
-						for (int i= 0; i < CodeFormatterUtil.getTabWidth(project); ++i) {
-							fIndent += " "; //$NON-NLS-1$
-						}
-					}
-				}
-			}
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.StringConcatToTextBlockCleanUp_description, cuRewrite);
 			rewrite.setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
 				@Override
@@ -952,53 +1000,7 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 				}
 			});
 
-			StringBuilder buf= new StringBuilder();
-
-			List<String> parts= new ArrayList<>();
-			fLiterals.stream().forEach((t) -> { String value= t.getEscapedValue(); parts.addAll(unescapeBlock(value.substring(1, value.length() - 1))); });
-
-
-			buf.append("\"\"\"\n"); //$NON-NLS-1$
-			boolean newLine= false;
-			boolean allWhiteSpaceStart= true;
-			boolean allEmpty= true;
-			for (String part : parts) {
-				if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
-					if (!newLine) {
-						// no line terminator in this part: merge the line by emitting a line continuation escape
-						buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
-					}
-				}
-				newLine= part.endsWith(System.lineSeparator());
-				allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
-				allEmpty= allEmpty && part.isEmpty();
-				buf.append(fIndent).append(part);
-			}
-
-			if (newLine || allEmpty) {
-				buf.append(fIndent);
-			} else if (allWhiteSpaceStart) {
-				buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
-				buf.append(fIndent);
-			} else {
-				// Replace trailing un-escaped quotes with escaped quotes before adding text block end
-				int readIndex= buf.length() - 1;
-				int count= 0;
-				while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
-					--readIndex;
-					++count;
-				}
-				if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
-					--count;
-				}
-				for (int i= count; i > 0; --i) {
-					buf.deleteCharAt(buf.length() - 1);
-				}
-				for (int i= count; i > 0; --i) {
-					buf.append("\\\""); //$NON-NLS-1$
-				}
-			}
-			buf.append("\"\"\""); //$NON-NLS-1$
+			StringBuilder buf= createTextBlockBuffer(fLiterals, cuRewrite);
 			AST ast= fStatements.get(0).getAST();
 			if (fToStringList.size() == 1 &&
 					fIndexOfList.isEmpty() &&
@@ -1144,6 +1146,71 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			return null;
 		}
 		return new StringConcatToTextBlockFixCore(FixMessages.StringConcatToTextBlockFix_convert_msg, root, new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] { operations.get(0) });
+	}
+
+	private static StringBuilder createTextBlockBuffer(List<StringLiteral> literals, CompilationUnitRewrite cuRewrite) {
+		IJavaElement root= cuRewrite.getRoot().getJavaElement();
+		String fIndent= "\t"; //$NON-NLS-1$
+		if (root != null) {
+			IJavaProject project= root.getJavaProject();
+			if (project != null) {
+				String tab_option= project.getOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, true);
+				if (JavaCore.SPACE.equals(tab_option)) {
+					fIndent= ""; //$NON-NLS-1$
+					for (int i= 0; i < CodeFormatterUtil.getTabWidth(project); ++i) {
+						fIndent += " "; //$NON-NLS-1$
+					}
+				}
+			}
+		}
+
+		StringBuilder buf= new StringBuilder();
+
+		List<String> parts= new ArrayList<>();
+		literals.stream().forEach((t) -> { String value= t.getEscapedValue(); parts.addAll(unescapeBlock(value.substring(1, value.length() - 1))); });
+
+		buf.append("\"\"\"\n"); //$NON-NLS-1$
+		boolean newLine= false;
+		boolean allWhiteSpaceStart= true;
+		boolean allEmpty= true;
+		for (String part : parts) {
+			if (buf.length() > 4) {// the first part has been added after the text block delimiter and newline
+				if (!newLine) {
+					// no line terminator in this part: merge the line by emitting a line continuation escape
+					buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
+				}
+			}
+			newLine= part.endsWith(System.lineSeparator());
+			allWhiteSpaceStart= allWhiteSpaceStart && (part.isEmpty() || Character.isWhitespace(part.charAt(0)));
+			allEmpty= allEmpty && part.isEmpty();
+			buf.append(fIndent).append(part);
+		}
+
+		if (newLine || allEmpty) {
+			buf.append(fIndent);
+		} else if (allWhiteSpaceStart) {
+			buf.append("\\").append(System.lineSeparator()); //$NON-NLS-1$
+			buf.append(fIndent);
+		} else {
+			// Replace trailing un-escaped quotes with escaped quotes before adding text block end
+			int readIndex= buf.length() - 1;
+			int count= 0;
+			while (readIndex >= 0 && buf.charAt(readIndex) == '"' && count <= 3) {
+				--readIndex;
+				++count;
+			}
+			if (readIndex >= 0 && buf.charAt(readIndex) == '\\') {
+				--count;
+			}
+			for (int i= count; i > 0; --i) {
+				buf.deleteCharAt(buf.length() - 1);
+			}
+			for (int i= count; i > 0; --i) {
+				buf.append("\\\""); //$NON-NLS-1$
+			}
+		}
+		buf.append("\"\"\""); //$NON-NLS-1$
+		return buf;
 	}
 
 	protected StringConcatToTextBlockFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {

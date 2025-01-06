@@ -80,6 +80,8 @@ import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -92,6 +94,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -211,6 +214,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 	private final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
+	@SuppressWarnings({ "deprecation" })
 	public void collectVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection<T> proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -330,10 +334,6 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 
 		// add type proposals
 		if (typeKind != 0) {
-			if (!JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-				typeKind &= ~(TypeKinds.ANNOTATIONS | TypeKinds.ENUMS | TypeKinds.VARIABLES);
-			}
-
 			int relevance= Character.isUpperCase(ASTNodes.getSimpleNameIdentifier(node).charAt(0)) ? IProposalRelevance.VARIABLE_TYPE_PROPOSAL_1 : IProposalRelevance.VARIABLE_TYPE_PROPOSAL_2;
 			addSimilarTypeProposals(typeKind, cu, node, relevance + 1, proposals);
 
@@ -450,44 +450,90 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		String name= simpleName.getIdentifier();
 		String nameLabel= BasicElementLabels.getJavaElementName(name);
 		String label;
+		boolean createEnumProposal= false;
 		if (senderDeclBinding.isEnum() && !isWriteAccess) {
-			label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createenum_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) });
-			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10, false);
-			T p1= newVariableCorrectionProposalToT(core, NewFieldForTypeProposal1);
-			if (p1 != null)
-				proposals.add(p1);
-		} else {
-			if (!mustBeConst) {
-				int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_FIELD_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_FIELD;
-				int uid;
-				if (binding == null) {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_description, nameLabel);
-					uid= NewFieldForTypeProposal2;
-				} else {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
-					uid= NewFieldForTypeProposal3;
+			createEnumProposal= true;
+			if (simpleName.getParent() instanceof ReturnStatement retStmt) {
+				createEnumProposal= false;
+				MethodDeclaration methodDecl= ASTNodes.getFirstAncestorOrNull(retStmt, MethodDeclaration.class);
+				if (methodDecl != null) {
+					IMethodBinding methodBinding= methodDecl.resolveBinding();
+					ITypeBinding retTypeBinding= methodBinding.getReturnType();
+					if (senderDeclBinding.isEqualTo(retTypeBinding)) {
+						createEnumProposal= true;
+					}
 				}
-				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance, false);
-				T prop= newVariableCorrectionProposalToT(core, uid);
-				if (prop != null)
-					proposals.add(prop);
+			} else if (simpleName.getParent() instanceof InfixExpression infix) {
+				createEnumProposal= false;
+				if (infix.getOperator() == Operator.EQUALS || infix.getOperator() == Operator.NOT_EQUALS) {
+					Expression otherExp= null;
+					if (infix.getLeftOperand() == simpleName) {
+						otherExp= infix.getRightOperand();
+					} else {
+						otherExp= infix.getLeftOperand();
+					}
+					if (otherExp instanceof SimpleName otherIdent) {
+						IBinding otherBinding= otherIdent.resolveBinding();
+						if (otherBinding instanceof IVariableBinding varBinding) {
+							if (!varBinding.isEnumConstant() && senderDeclBinding.isEqualTo(varBinding.getType())) {
+								createEnumProposal= true;
+							}
+						}
+					}
+				}
+			} else if (simpleName.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				createEnumProposal= false;
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)simpleName.getParent();
+				IVariableBinding fragBinding= fragment.resolveBinding();
+				if (fragBinding != null && senderDeclBinding.isEqualTo(fragBinding.getType())) {
+					createEnumProposal= true;
+				}
+			} else if (simpleName.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+				createEnumProposal= false;
+				Assignment assignment= (Assignment) simpleName.getParent();
+				Expression leftOperand= assignment.getLeftHandSide();
+				if (senderDeclBinding.isEqualTo(leftOperand.resolveTypeBinding())) {
+					createEnumProposal= true;
+				}
 			}
+			if (createEnumProposal) {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createenum_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) });
+				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.ENUM_CONST, simpleName, senderDeclBinding, 10, false);
+				T p1= newVariableCorrectionProposalToT(core, NewFieldForTypeProposal1);
+				if (p1 != null)
+					proposals.add(p1);
+			}
+		}
+		if (!createEnumProposal && !mustBeConst) {
+			int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_FIELD_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_FIELD;
+			int uid;
+			if (binding == null) {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_description, nameLabel);
+				uid= NewFieldForTypeProposal2;
+			} else {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
+				uid= NewFieldForTypeProposal3;
+			}
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.FIELD, simpleName, senderDeclBinding, fieldRelevance, false);
+			T prop= newVariableCorrectionProposalToT(core, uid);
+			if (prop != null)
+				proposals.add(prop);
+		}
 
-			if (!isWriteAccess && !senderDeclBinding.isAnonymous()) {
-				int uid;
-				if (binding == null) {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_description, nameLabel);
-					uid= NewFieldForTypeProposal4;
-				} else {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
-					uid= NewFieldForTypeProposal5;
-				}
-				int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_CONSTANT_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_CONSTANT;
-				NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, false);
-				T prop= newVariableCorrectionProposalToT(core, uid);
-				if (prop != null)
-					proposals.add(prop);
+		if (!createEnumProposal && !isWriteAccess && !senderDeclBinding.isAnonymous()) {
+			int uid;
+			if (binding == null) {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_description, nameLabel);
+				uid= NewFieldForTypeProposal4;
+			} else {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconst_other_description, new Object[] { nameLabel, ASTResolving.getTypeSignature(senderDeclBinding) } );
+				uid= NewFieldForTypeProposal5;
 			}
+			int constRelevance= StubUtility.hasConstantName(targetCU.getJavaProject(), name) ? IProposalRelevance.CREATE_CONSTANT_PREFIX_OR_SUFFIX_MATCH : IProposalRelevance.CREATE_CONSTANT;
+			NewVariableCorrectionProposalCore core= new NewVariableCorrectionProposalCore(label, targetCU, NewVariableCorrectionProposalCore.CONST_FIELD, simpleName, senderDeclBinding, constRelevance, false);
+			T prop= newVariableCorrectionProposalToT(core, uid);
+			if (prop != null)
+				proposals.add(prop);
 		}
 	}
 
@@ -656,12 +702,6 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		return false;
 	}
 
-	private int evauateTypeKind(ASTNode node, IJavaProject project) {
-		int kind= ASTResolving.getPossibleTypeKinds(node, JavaModelUtil.is50OrHigher(project));
-		return kind;
-	}
-
-
 	public void collectTypeProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -675,7 +715,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		}
 
 		IJavaProject javaProject= cu.getJavaProject();
-		int kind= evauateTypeKind(selectedNode, javaProject);
+		int kind= ASTResolving.getPossibleTypeKinds(selectedNode);
 
 		if (kind == TypeKinds.REF_TYPES) {
 			SimpleName s= addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
@@ -780,7 +820,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 		}
 
 		if (selectedNode != node) {
-			kind= evauateTypeKind(node, javaProject);
+			kind= ASTResolving.getPossibleTypeKinds(node);
 		}
 		if ((kind & (TypeKinds.CLASSES | TypeKinds.INTERFACES)) != 0) {
 			kind &= ~TypeKinds.ANNOTATIONS; // only propose annotations when there are no other suggestions
@@ -1470,46 +1510,44 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 	// 1300
 	private void addStaticImportFavoriteProposals(IInvocationContext context, SimpleName node, boolean isMethod, Collection<T> proposals) throws JavaModelException {
 		IJavaProject project= context.getCompilationUnit().getJavaProject();
-		if (JavaModelUtil.is50OrHigher(project)) {
-			String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
-			if (pref == null  || pref.isBlank()) {
-				return;
+		String pref= JavaManipulation.getPreference(JavaManipulationPlugin.CODEASSIST_FAVORITE_STATIC_MEMBERS, project);
+		if (pref == null  || pref.isBlank()) {
+			return;
+		}
+		String[] favourites= pref.split(";"); //$NON-NLS-1$
+		if (favourites.length == 0) {
+			return;
+		}
+
+		CompilationUnit root= context.getASTRoot();
+		AST ast= root.getAST();
+
+		String name= node.getIdentifier();
+		for (String curr : JavaModelUtil.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites)) {
+			ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
+			ASTRewrite astRewrite= ASTRewrite.create(ast);
+
+			String label;
+			String qualifiedTypeName= Signature.getQualifier(Signature.getTypeErasure(curr));
+			String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
+
+			String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
+			int dot= res.lastIndexOf('.');
+			if (dot != -1) {
+				String usedTypeName= importRewrite.addImport(qualifiedTypeName);
+				Name newName= ast.newQualifiedName(ast.newName(usedTypeName), ast.newSimpleName(name));
+				astRewrite.replace(node, newName, null);
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_to_static_import_description, elementLabel);
+			} else {
+				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_static_import_description, elementLabel);
 			}
-			String[] favourites= pref.split(";"); //$NON-NLS-1$
-			if (favourites.length == 0) {
-				return;
-			}
 
-			CompilationUnit root= context.getASTRoot();
-			AST ast= root.getAST();
-
-			String name= node.getIdentifier();
-			for (String curr : JavaModelUtil.getStaticImportFavorites(context.getCompilationUnit(), name, isMethod, favourites)) {
-				ImportRewrite importRewrite= StubUtility.createImportRewrite(root, true);
-				ASTRewrite astRewrite= ASTRewrite.create(ast);
-
-				String label;
-				String qualifiedTypeName= Signature.getQualifier(Signature.getTypeErasure(curr));
-				String elementLabel= BasicElementLabels.getJavaElementName(JavaModelUtil.concatenateName(Signature.getSimpleName(qualifiedTypeName), name));
-
-				String res= importRewrite.addStaticImport(qualifiedTypeName, name, isMethod, new ContextSensitiveImportRewriteContext(root, node.getStartPosition(), importRewrite));
-				int dot= res.lastIndexOf('.');
-				if (dot != -1) {
-					String usedTypeName= importRewrite.addImport(qualifiedTypeName);
-					Name newName= ast.newQualifiedName(ast.newName(usedTypeName), ast.newSimpleName(name));
-					astRewrite.replace(node, newName, null);
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_to_static_import_description, elementLabel);
-				} else {
-					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_static_import_description, elementLabel);
-				}
-
-				//Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
-				ASTRewriteCorrectionProposalCore proposal= new ASTRewriteCorrectionProposalCore(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_STATIC_IMPORT);
-				proposal.setImportRewrite(importRewrite);
-				T t= rewriteProposalToT(proposal, StaticImportFavoriteProposal1);
-				if (t != null)
-					proposals.add(t);
-			}
+			//Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
+			ASTRewriteCorrectionProposalCore proposal= new ASTRewriteCorrectionProposalCore(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.ADD_STATIC_IMPORT);
+			proposal.setImportRewrite(importRewrite);
+			T t= rewriteProposalToT(proposal, StaticImportFavoriteProposal1);
+			if (t != null)
+				proposals.add(t);
 		}
 	}
 
@@ -1992,7 +2030,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 				ITypeBinding castFixType= null;
 				if (binding == null || castType.isCastCompatible(binding)) {
 					castFixType= castType;
-				} else if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+				} else {
 					ITypeBinding boxUnboxedTypeBinding= TypeMismatchBaseSubProcessor.boxOrUnboxPrimitives(castType, binding, nodeToCast.getAST());
 					if (boxUnboxedTypeBinding != castType && boxUnboxedTypeBinding.isCastCompatible(binding)) {
 						castFixType= boxUnboxedTypeBinding;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,11 +18,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
@@ -91,10 +87,6 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 		if (cu == null || getContext() != null && getContext().isInJavadoc())
 			return super.createJavaCompletionProposal(typeProposal);
 
-		IJavaProject project= cu.getJavaProject();
-		if (!shouldProposeGenerics(project))
-			return super.createJavaCompletionProposal(typeProposal);
-
 		char[] completion= typeProposal.getCompletion();
 		// don't add parameters for import-completions nor for proposals with an empty completion (e.g. inside the type argument list)
 		if (completion.length > 0 && completion[completion.length - 1] == '.')
@@ -106,23 +98,4 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 		return newProposal;
 	}
 
-	/**
-	 * Returns <code>true</code> if generic proposals should be allowed,
-	 * <code>false</code> if not. Note that even though code (in a library)
-	 * may be referenced that uses generics, it is still possible that the
-	 * current source does not allow generics.
-	 *
-	 * @param project the Java project
-	 * @return <code>true</code> if the generic proposals should be allowed,
-	 *         <code>false</code> if not
-	 */
-	private boolean shouldProposeGenerics(IJavaProject project) {
-		String sourceVersion;
-		if (project != null)
-			sourceVersion= project.getOption(JavaCore.COMPILER_SOURCE, true);
-		else
-			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
-
-		return JavaModelUtil.is50OrHigher(sourceVersion);
-	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -148,7 +148,7 @@ class TypeFilterInputDialog extends StatusDialog {
 			status.setError(PreferencesMessages.TypeFilterInputDialog_error_enterName);
 		} else {
 			newText= newText.replace('*', 'X').replace('?', 'Y');
-			IStatus val= JavaConventions.validatePackageName(newText, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3);
+			IStatus val= JavaConventions.validatePackageName(newText, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8);
 			if (val.matches(IStatus.ERROR)) {
 				status.setError(Messages.format(PreferencesMessages.TypeFilterInputDialog_error_invalidName, val.getMessage()));
 			} else {

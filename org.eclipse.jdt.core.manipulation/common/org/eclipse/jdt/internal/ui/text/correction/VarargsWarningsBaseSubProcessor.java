@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -64,9 +63,6 @@ public abstract class VarargsWarningsBaseSubProcessor<T> {
 	}
 
 	public void createAddSafeVarargsToDeclarationProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals) {
-		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-			return;
-
 		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
 		IMethodBinding methodBinding;
 		if (coveringNode instanceof MethodInvocation) {

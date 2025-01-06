@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -114,7 +114,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		fTypeImports= resultingTypeImports;
 		fStaticImports= resultingStaticImports;
 		fSubRange= rangeLimit;
-		if (project == null || !JavaModelUtil.is50OrHigher(project)) {
+		if (project == null) {
 			fStaticImports= null; // do not collect
 		}
 		fASTRoot= astRoot; // can be null

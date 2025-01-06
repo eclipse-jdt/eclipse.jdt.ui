@@ -515,12 +515,6 @@ public class NullAnnotationsRewriteOperations {
 			fAnnotationToRemove= tmp;
 		}
 
-		public boolean is50OrHigher() {
-			CompilationUnit compilationUnit= fUnit;
-			ICompilationUnit cu= (ICompilationUnit) compilationUnit.getJavaElement();
-			return JavaModelUtil.is50OrHigher(cu.getJavaProject());
-		}
-
 		public ASTNode getCoveringNode() {
 			return fProblem.getCoveringNode(fUnit);
 		}
@@ -543,9 +537,6 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		private SignatureAnnotationRewriteOperation createAddAnnotationOperation(boolean changeTargetMethod, boolean thisUnitOnly) {
-			if (!is50OrHigher())
-				return null;
-
 			ASTNode selectedNode= getCoveringNode();
 			if (selectedNode == null)
 				return null;
@@ -681,9 +672,6 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		private SignatureAnnotationRewriteOperation createAddAnnotationToOverriddenOperation() {
-			if (!is50OrHigher())
-				return null;
-
 			ASTNode selectedNode= getCoveringNode();
 			if (selectedNode == null)
 				return null;

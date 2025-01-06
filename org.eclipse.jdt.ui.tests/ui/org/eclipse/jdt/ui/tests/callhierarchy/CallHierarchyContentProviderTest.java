@@ -14,14 +14,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.callhierarchy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -53,7 +53,7 @@ public class CallHierarchyContentProviderTest {
 
 	private int fOriginalMaxCallDepth;
 
-    @Before
+    @BeforeEach
 	public void setUp() throws Exception {
 		if (!welcomeClosed) {
 			closeIntro(PlatformUI.getWorkbench());
@@ -68,7 +68,7 @@ public class CallHierarchyContentProviderTest {
 		DisplayHelper.driveEventQueue(Display.getDefault());
     }
 
-    @After
+    @AfterEach
 	public void tearDown() throws Exception {
         helper.tearDown();
         helper= null;
@@ -84,29 +84,29 @@ public class CallHierarchyContentProviderTest {
 
         TreeRoot root= wrapCalleeRoot(helper.getMethod4());
         Object[] children= fProvider.getChildren(root);
-        assertEquals("Wrong number of children", 1, children.length);
+        assertEquals(1, children.length, "Wrong number of children");
         helper.assertCalls(new IMember[] { helper.getMethod4()}, children);
-        assertEquals("Wrong method", helper.getMethod4(), ((MethodWrapper) children[0]).getMember());
-        assertTrue("root's hasChildren", fProvider.hasChildren(root));
+        assertEquals(helper.getMethod4(), ((MethodWrapper) children[0]).getMember(), "Wrong method");
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
         Object[] secondLevelChildren= fProvider.getChildren(children[0]);
         helper.assertCalls(new IMember[] { helper.getMethod3()}, secondLevelChildren);
         assertCalleeMethodWrapperChildren(secondLevelChildren);
-        assertTrue("second level hasChildren", fProvider.hasChildren(children[0]));
+        assertTrue(fProvider.hasChildren(children[0]), "second level hasChildren");
 
         Object[] thirdLevelChildren= fProvider.getChildren(secondLevelChildren[0]);
         helper.assertCalls(new IMember[] { helper.getMethod1(), helper.getMethod2()}, thirdLevelChildren);
         assertCalleeMethodWrapperChildren(thirdLevelChildren);
-        assertTrue("third level hasChildren", fProvider.hasChildren(secondLevelChildren[0]));
+        assertTrue(fProvider.hasChildren(secondLevelChildren[0]), "third level hasChildren");
 
         MethodWrapper fourthLevelMethodWrapper= helper.findMethodWrapper(helper.getMethod1(), thirdLevelChildren);
-        assertNotNull("method1 not found", fourthLevelMethodWrapper);
+        assertNotNull(fourthLevelMethodWrapper, "method1 not found");
         assertEquals(
-            "Wrong number of fourth level children",
             0,
-            fProvider.getChildren(fourthLevelMethodWrapper).length);
+            fProvider.getChildren(fourthLevelMethodWrapper).length,
+            "Wrong number of fourth level children");
         // hasChildren should be true even if the node doesn't have children (for performance reasons)
-        assertTrue("fourth level hasChildren", fProvider.hasChildren(fourthLevelMethodWrapper));
+        assertTrue(fProvider.hasChildren(fourthLevelMethodWrapper), "fourth level hasChildren");
     }
 
     /*
@@ -119,23 +119,23 @@ public class CallHierarchyContentProviderTest {
         TreeRoot root= wrapCallerRoot(helper.getMethod1());
         Object[] children= fProvider.getChildren(root);
         helper.assertCalls(new IMember[] { helper.getMethod1()}, children);
-        assertTrue("root's hasChildren", fProvider.hasChildren(root));
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
         Object[] secondLevelChildren= fProvider.getChildren(children[0]);
         helper.assertCalls(new IMember[] { helper.getMethod2(), helper.getMethod3()}, secondLevelChildren);
         assertCallerMethodWrapperChildren(secondLevelChildren);
-        assertTrue("second level hasChildren", fProvider.hasChildren(children[0]));
+        assertTrue(fProvider.hasChildren(children[0]), "second level hasChildren");
 
         MethodWrapper thirdLevelMethodWrapper= helper.findMethodWrapper(helper.getMethod3(), secondLevelChildren);
-        assertNotNull("method3() not found", thirdLevelMethodWrapper);
+        assertNotNull(thirdLevelMethodWrapper, "method3() not found");
         Object[] thirdLevelChildren= fProvider.getChildren(thirdLevelMethodWrapper);
         helper.assertCalls(new IMember[] { helper.getMethod4()}, thirdLevelChildren);
         assertCallerMethodWrapperChildren(thirdLevelChildren);
-        assertTrue("third level hasChildren", fProvider.hasChildren(thirdLevelMethodWrapper));
+        assertTrue(fProvider.hasChildren(thirdLevelMethodWrapper), "third level hasChildren");
 
-        assertEquals("Wrong number of fourth level children", 0, fProvider.getChildren(thirdLevelChildren[0]).length);
+        assertEquals(0, fProvider.getChildren(thirdLevelChildren[0]).length, "Wrong number of fourth level children");
         // hasChildren should be true even if the node doesn't have children (for performance reasons)
-        assertTrue("fourth level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
+        assertTrue(fProvider.hasChildren(thirdLevelChildren[0]), "fourth level hasChildren");
     }
 
     /*
@@ -150,23 +150,23 @@ public class CallHierarchyContentProviderTest {
         TreeRoot root= wrapCallerRoot(helper.getMethod1());
         Object[] children= fProvider.getChildren(root);
         helper.assertCalls(new IMember[] { helper.getMethod1()}, children);
-        assertTrue("root's hasChildren", fProvider.hasChildren(root));
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
         Object[] secondLevelChildren= fProvider.getChildren(children[0]);
         helper.assertCalls(new IMember[] { helper.getMethod2(), helper.getMethod3()}, secondLevelChildren);
         assertCallerMethodWrapperChildren(secondLevelChildren);
-        assertTrue("second level hasChildren", fProvider.hasChildren(children[0]));
+        assertTrue(fProvider.hasChildren(children[0]), "second level hasChildren");
 
         MethodWrapper thirdLevelMethodWrapper= helper.findMethodWrapper(helper.getMethod3(), secondLevelChildren);
-        assertNotNull("method3() not found", thirdLevelMethodWrapper);
+        assertNotNull(thirdLevelMethodWrapper, "method3() not found");
         Object[] thirdLevelChildren= fProvider.getChildren(thirdLevelMethodWrapper);
         helper.assertCalls(new IMember[] { helper.getMethod4()}, thirdLevelChildren);
         assertCallerMethodWrapperChildren(thirdLevelChildren);
-        assertTrue("third level hasChildren", fProvider.hasChildren(thirdLevelMethodWrapper));
+        assertTrue(fProvider.hasChildren(thirdLevelMethodWrapper), "third level hasChildren");
 
-        assertEquals("Wrong number of fourth level children", 0, fProvider.getChildren(thirdLevelChildren[0]).length);
+        assertEquals(0, fProvider.getChildren(thirdLevelChildren[0]).length, "Wrong number of fourth level children");
         // hasChildren should be false since the maximum depth has been reached
-        assertFalse("fourth level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
+        assertFalse(fProvider.hasChildren(thirdLevelChildren[0]), "fourth level hasChildren");
     }
 
     /*
@@ -180,29 +180,29 @@ public class CallHierarchyContentProviderTest {
 
         TreeRoot root= wrapCalleeRoot(helper.getMethod4());
         Object[] children= fProvider.getChildren(root);
-        assertEquals("Wrong number of children", 1, children.length);
+        assertEquals(1, children.length, "Wrong number of children");
         helper.assertCalls(new IMember[] { helper.getMethod4()}, children);
-        assertEquals("Wrong method", helper.getMethod4(), ((MethodWrapper) children[0]).getMember());
-        assertTrue("root's hasChildren", fProvider.hasChildren(root));
+        assertEquals(helper.getMethod4(), ((MethodWrapper) children[0]).getMember(), "Wrong method");
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
         Object[] secondLevelChildren= fProvider.getChildren(children[0]);
         helper.assertCalls(new IMember[] { helper.getMethod3()}, secondLevelChildren);
         assertCalleeMethodWrapperChildren(secondLevelChildren);
-        assertTrue("second level hasChildren", fProvider.hasChildren(children[0]));
+        assertTrue(fProvider.hasChildren(children[0]), "second level hasChildren");
 
         Object[] thirdLevelChildren= fProvider.getChildren(secondLevelChildren[0]);
         helper.assertCalls(new IMember[] { helper.getMethod1(), helper.getMethod2()}, thirdLevelChildren);
         assertCalleeMethodWrapperChildren(thirdLevelChildren);
-        assertTrue("third level hasChildren", fProvider.hasChildren(secondLevelChildren[0]));
+        assertTrue(fProvider.hasChildren(secondLevelChildren[0]), "third level hasChildren");
 
         MethodWrapper fourthLevelMethodWrapper= helper.findMethodWrapper(helper.getMethod1(), thirdLevelChildren);
-        assertNotNull("method1 not found", fourthLevelMethodWrapper);
+        assertNotNull(fourthLevelMethodWrapper, "method1 not found");
         assertEquals(
-            "Wrong number of fourth level children",
             0,
-            fProvider.getChildren(fourthLevelMethodWrapper).length);
+            fProvider.getChildren(fourthLevelMethodWrapper).length,
+            "Wrong number of fourth level children");
         // hasChildren should be false since the maximum depth has been reached
-        assertFalse("fourth level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
+        assertFalse(fProvider.hasChildren(thirdLevelChildren[0]), "fourth level hasChildren");
     }
 
     /*
@@ -215,12 +215,12 @@ public class CallHierarchyContentProviderTest {
         TreeRoot root= wrapCalleeRoot(helper.getRecursiveMethod1());
         Object[] children= fProvider.getChildren(root);
         helper.assertCalls(new IMember[] { helper.getRecursiveMethod1()}, children);
-        assertTrue("root's hasChildren", fProvider.hasChildren(root));
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
         Object[] secondLevelChildren= fProvider.getChildren(children[0]);
         helper.assertCalls(new IMember[] { helper.getRecursiveMethod2()}, secondLevelChildren);
         assertCalleeMethodWrapperChildren(secondLevelChildren);
-        assertTrue("second level hasChildren", fProvider.hasChildren(children[0]));
+        assertTrue(fProvider.hasChildren(children[0]), "second level hasChildren");
 
         MethodWrapper thirdLevelMethodWrapper= (MethodWrapper) secondLevelChildren[0];
         Object[] thirdLevelChildren= fProvider.getChildren(thirdLevelMethodWrapper);
@@ -228,7 +228,7 @@ public class CallHierarchyContentProviderTest {
         assertCalleeMethodWrapperChildren(thirdLevelChildren);
 
         // A recursion should have occurred, resulting in hasChildren = false
-        assertFalse("third level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
+        assertFalse(fProvider.hasChildren(thirdLevelChildren[0]), "third level hasChildren");
     }
 
     /*
@@ -241,12 +241,12 @@ public class CallHierarchyContentProviderTest {
         TreeRoot root= wrapCallerRoot(helper.getRecursiveMethod1());
         Object[] children= fProvider.getChildren(root);
         helper.assertCalls(new IMember[] { helper.getRecursiveMethod1()}, children);
-        assertTrue("root's hasChildren", fProvider.hasChildren(root));
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
         Object[] secondLevelChildren= fProvider.getChildren(children[0]);
         helper.assertCalls(new IMember[] { helper.getRecursiveMethod2()}, secondLevelChildren);
         assertCallerMethodWrapperChildren(secondLevelChildren);
-        assertTrue("second level hasChildren", fProvider.hasChildren(children[0]));
+        assertTrue(fProvider.hasChildren(children[0]), "second level hasChildren");
 
         MethodWrapper thirdLevelMethodWrapper= (MethodWrapper) secondLevelChildren[0];
         Object[] thirdLevelChildren= fProvider.getChildren(thirdLevelMethodWrapper);
@@ -254,7 +254,7 @@ public class CallHierarchyContentProviderTest {
         assertCallerMethodWrapperChildren(thirdLevelChildren);
 
         // A recursion should have occurred, resulting in hasChildren = false
-        assertFalse("third level hasChildren", fProvider.hasChildren(thirdLevelChildren[0]));
+        assertFalse(fProvider.hasChildren(thirdLevelChildren[0]), "third level hasChildren");
     }
 
 	@Test
@@ -263,7 +263,7 @@ public class CallHierarchyContentProviderTest {
 		TreeRoot root= wrapCallerRoot(helper.getMethod1());
 		Object[] children= fProvider.getChildren(root);
 		helper.assertCalls(new IMember[] { helper.getMethod1() }, children);
-		assertTrue("root's hasChildren", fProvider.hasChildren(root));
+		assertTrue(fProvider.hasChildren(root), "root's hasChildren");
 
 		Object[] secondLevelChildren= fProvider.getChildren(children[0]);
 		helper.assertCalls(new IMember[] { helper.getMethod2() }, secondLevelChildren);
@@ -271,18 +271,18 @@ public class CallHierarchyContentProviderTest {
 		Object[] thirdLevelChildren= fProvider.getChildren(secondLevelChildren[0]);
 
 		assertEquals(
-				"Wrong number of third level children", 6, thirdLevelChildren.length);
+				6, thirdLevelChildren.length, "Wrong number of third level children");
 	}
 
     private void assertCalleeMethodWrapperChildren(Object[] children) {
     	for (Object child : children) {
-    		assertTrue("Wrong class returned", child.getClass().getName().endsWith(".CalleeMethodWrapper"));
+    		assertTrue(child.getClass().getName().endsWith(".CalleeMethodWrapper"), "Wrong class returned");
     	}
     }
 
     private void assertCallerMethodWrapperChildren(Object[] children) {
     	for (Object child : children) {
-    		assertTrue("Wrong class returned", child.getClass().getName().endsWith(".CallerMethodWrapper"));
+    		assertTrue(child.getClass().getName().endsWith(".CallerMethodWrapper"), "Wrong class returned");
     	}
     }
 

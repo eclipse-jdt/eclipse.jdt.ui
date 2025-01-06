@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -74,9 +74,9 @@ public class JavaModelOpCompundUndoTest {
 	private static final String CU_NAME= "Bug75423.java";
 	private static final String CU_CONTENTS= """
 		package com.example.bugs;
-		
+
 		public class Bug75423 {
-		
+
 		    void foo() {
 		       \s
 		    }
@@ -94,9 +94,9 @@ public class JavaModelOpCompundUndoTest {
 	private ICompilationUnit fCompilationUnit;
 	private IUndoManager fUndoManager;
 
-	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
+	private void setUpProject() throws CoreException, JavaModelException {
 		fProject= JavaProjectHelper.createJavaProject(tn.getMethodName(), "bin");
-		fProject.setOption(JavaCore.COMPILER_SOURCE, sourceLevel);
+		fProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 		JavaProjectHelper.addSourceContainer(fProject, SRC);
 		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + tn.getMethodName() + SEP + SRC));
 		fCompilationUnit= fragment.createCompilationUnit(CU_NAME, CU_CONTENTS, true, new NullProgressMonitor());
@@ -104,7 +104,7 @@ public class JavaModelOpCompundUndoTest {
 
 	@Before
 	public void setUp() throws Exception {
-		setUpProject(JavaCore.VERSION_1_5);
+		setUpProject();
 		setUpEditor();
 	}
 
@@ -161,9 +161,6 @@ public class JavaModelOpCompundUndoTest {
 
 	@Test
 	public void test2() throws Exception {
-		setUpProject(JavaCore.VERSION_1_5);
-		setUpEditor();
-
 		assertEquals(CU_CONTENTS, fDocument.get());
 		fUndoManager.beginCompoundChange();
 

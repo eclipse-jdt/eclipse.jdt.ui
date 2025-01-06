@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
+import org.eclipse.jdt.internal.ui.preferences.SyntaxColorHighlighting;
 import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
 
 /**
@@ -54,15 +55,18 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		private TextAttribute fTextAttribute;
 		/** Enabled state */
 		private boolean fIsEnabled;
+		/** Preference Key */
+		private final String fPreferenceKey;
 
 		/**
 		 * Initialize with the given text attribute.
 		 * @param textAttribute The text attribute
 		 * @param isEnabled the enabled state
 		 */
-		public Highlighting(TextAttribute textAttribute, boolean isEnabled) {
+		public Highlighting(String preferenceKey, TextAttribute textAttribute, boolean isEnabled) {
 			setTextAttribute(textAttribute);
 			setEnabled(isEnabled);
+			this.fPreferenceKey = preferenceKey;
 		}
 
 		/**
@@ -92,6 +96,11 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		public void setEnabled(boolean isEnabled) {
 			fIsEnabled= isEnabled;
 		}
+
+		public String getPreferenceKey() {
+			return fPreferenceKey;
+		}
+
 	}
 
 	/**
@@ -252,6 +261,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	private SemanticHighlighting[] fSemanticHighlightings;
 	/** Highlightings */
 	private Highlighting[] fHighlightings;
+	private Highlighting[] fSyntaxHighlightings;
 
 	/** The editor */
 	private JavaEditor fEditor;
@@ -338,7 +348,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 		if (fEditor != null) {
 			fReconciler= createSemanticHighlightingReconciler();
-			fReconciler.install(fEditor, fSourceViewer, fPresenter, fSemanticHighlightings, fHighlightings);
+			fReconciler.install(fEditor, fSourceViewer, fPresenter, fSemanticHighlightings, fHighlightings, fSyntaxHighlightings);
 		} else {
 			fPresenter.updatePresentation(null, createHardcodedPositions(), new HighlightedPosition[0]);
 		}
@@ -374,10 +384,9 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @return the corresponding highlighting
 	 */
 	private Highlighting getHighlighting(String key) {
-		for (int i= 0; i < fSemanticHighlightings.length; i++) {
-			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
-			if (key.equals(semanticHighlighting.getPreferenceKey()))
-				return fHighlightings[i];
+		for (Highlighting highlighting : fHighlightings) {
+			if (key.equals(highlighting.getPreferenceKey()))
+				return highlighting;
 		}
 		return null;
 	}
@@ -432,42 +441,58 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	private void initializeHighlightings() {
 		fSemanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		fHighlightings= new Highlighting[fSemanticHighlightings.length];
-
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
+
 			String colorKey= SemanticHighlightings.getColorPreferenceKey(semanticHighlighting);
-			addColor(colorKey);
-
 			String boldKey= SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting);
-			int style= fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL;
-
 			String italicKey= SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting);
-			if (fPreferenceStore.getBoolean(italicKey))
-				style |= SWT.ITALIC;
-
 			String strikethroughKey= SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting);
-			if (fPreferenceStore.getBoolean(strikethroughKey))
-				style |= TextAttribute.STRIKETHROUGH;
-
 			String underlineKey= SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting);
-			if (fPreferenceStore.getBoolean(underlineKey))
-				style |= TextAttribute.UNDERLINE;
-
 			boolean isEnabled= fPreferenceStore.getBoolean(SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting));
 
-			fHighlightings[i]= new Highlighting(new TextAttribute(fColorManager.getColor(PreferenceConverter.getColor(fPreferenceStore, colorKey)), null, style), isEnabled);
+			fHighlightings[i]= createHighlightingFromPereferences(semanticHighlighting.getPreferenceKey(), isEnabled, colorKey, boldKey, italicKey, strikethroughKey, underlineKey);
 		}
+
+		SyntaxColorHighlighting[] syntaxHighlightings= SyntaxColorHighlighting.getSyntaxColorHighlightings();
+		fSyntaxHighlightings= new Highlighting[syntaxHighlightings.length];
+		for (int i= 0; i < syntaxHighlightings.length; i++) {
+			SyntaxColorHighlighting h= syntaxHighlightings[i];
+			fSyntaxHighlightings[i]= createHighlightingFromPereferences(h.preferenceKey(), true, h.preferenceKey(), h.getBoldPreferenceKey(), h.getItalicPreferenceKey(), h.getStrikethroughPreferenceKey(), h.getUnderlinePreferenceKey());
+		}
+	}
+
+	private Highlighting createHighlightingFromPereferences(String key, boolean isEnabled, String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
+		addColor(colorKey);
+
+		int style= fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL;
+
+		if (fPreferenceStore.getBoolean(italicKey))
+			style |= SWT.ITALIC;
+
+		if (fPreferenceStore.getBoolean(strikethroughKey))
+			style |= TextAttribute.STRIKETHROUGH;
+
+		if (fPreferenceStore.getBoolean(underlineKey))
+			style |= TextAttribute.UNDERLINE;
+
+		return new Highlighting(key, new TextAttribute(fColorManager.getColor(PreferenceConverter.getColor(fPreferenceStore, colorKey)), null, style), isEnabled);
 	}
 
 	/**
 	 * Dispose the semantic highlightings.
 	 */
 	private void disposeHighlightings() {
-		for (SemanticHighlighting fSemanticHighlighting : fSemanticHighlightings)
+		for (SemanticHighlighting fSemanticHighlighting : fSemanticHighlightings) {
 			removeColor(SemanticHighlightings.getColorPreferenceKey(fSemanticHighlighting));
+		}
+		for (Highlighting h : fSyntaxHighlightings) {
+			removeColor(h.getPreferenceKey());
+		}
 
 		fSemanticHighlightings= null;
 		fHighlightings= null;
+		fSyntaxHighlightings= null;
 	}
 
 	/*
@@ -552,6 +577,52 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 				refreshNeeded= true;
 				continue;
 			}
+		}
+
+		SyntaxColorHighlighting[] editorHighlightings= SyntaxColorHighlighting.getSyntaxColorHighlightings();
+		for (int i= 0, n= editorHighlightings.length; i < n; i++) {
+			SyntaxColorHighlighting h= editorHighlightings[i];
+
+			String colorKey= h.preferenceKey();
+			if (colorKey.equals(event.getProperty())) {
+				adaptToTextForegroundChange(fSyntaxHighlightings[i], event);
+				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
+				refreshNeeded= true;
+				continue;
+			}
+
+			String boldKey= h.getBoldPreferenceKey();
+			if (boldKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fSyntaxHighlightings[i], event, SWT.BOLD);
+				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
+				refreshNeeded= true;
+				continue;
+			}
+
+			String italicKey= h.getItalicPreferenceKey();
+			if (italicKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fSyntaxHighlightings[i], event, SWT.ITALIC);
+				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
+				refreshNeeded= true;
+				continue;
+			}
+
+			String strikethroughKey= h.getStrikethroughPreferenceKey();
+			if (strikethroughKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fSyntaxHighlightings[i], event, TextAttribute.STRIKETHROUGH);
+				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
+				refreshNeeded= true;
+				continue;
+			}
+
+			String underlineKey= h.getUnderlinePreferenceKey();
+			if (underlineKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fSyntaxHighlightings[i], event, TextAttribute.UNDERLINE);
+				fPresenter.highlightingStyleChanged(fSyntaxHighlightings[i]);
+				refreshNeeded= true;
+				continue;
+			}
+
 		}
 
 		if (refreshNeeded && fReconciler != null)

@@ -13,17 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -78,7 +78,7 @@ public class ContentProviderTests5{
 	private IFile fDotProject;
 	private IPackageFragmentRoot jdk;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
@@ -112,7 +112,7 @@ public class ContentProviderTests5{
 
 		//add rt.jar
 		jdk= JavaProjectHelper.addVariableRTJar(fJProject, "JRE_LIB_TEST", null, null);
-		assertNotNull("jdk not found", jdk);
+		assertNotNull(jdk, "jdk not found");
 
 		setUpView();
 	}
@@ -140,7 +140,7 @@ public class ContentProviderTests5{
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 
@@ -266,7 +266,7 @@ public class ContentProviderTests5{
 	}
 
 	private void assertEqualElements(Object[] expected, Object[] actual) {
-		assertEquals("array length", expected.length, actual.length);
+		assertEquals(expected.length, actual.length, "array length");
 		exp: for (int i= 0; i < expected.length; i++) {
 			Object e= expected[i];
 			for (Object a : actual) {

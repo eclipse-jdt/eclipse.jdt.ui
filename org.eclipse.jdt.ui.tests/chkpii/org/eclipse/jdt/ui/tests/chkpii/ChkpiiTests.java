@@ -33,8 +33,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-import org.eclipse.osgi.service.environment.Constants;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -255,14 +253,7 @@ public class ChkpiiTests {
 	}
 
 	private String getExcludeErrors() {
-
-		String fileName;
-
-		if (Constants.OS_WIN32.equals(Platform.getOS()))
-			fileName= "ignoreErrorsWindows.txt"; //$NON-NLS-1$
-		else
-			fileName= "ignoreErrorsUnix.txt"; //$NON-NLS-1$
-
+		String fileName= Platform.OS.isWindows() ? "ignoreErrorsWindows.txt" : "ignoreErrorsUnix.txt"; //$NON-NLS-1$ //$NON-NLS-2$
 		return toLocation(getClass().getResource(fileName));
 	}
 

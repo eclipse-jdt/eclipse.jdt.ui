@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2024 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFixCore;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -71,7 +70,7 @@ public class UnnecessaryArrayCreationCleanUpCore extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION) || !JavaModelUtil.is50OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION)) {
 			return null;
 		}
 

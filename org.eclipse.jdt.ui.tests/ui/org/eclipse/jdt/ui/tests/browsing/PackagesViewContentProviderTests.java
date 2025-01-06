@@ -13,17 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.browsing;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -110,7 +110,7 @@ public class PackagesViewContentProviderTests {
 
 		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp};
 		Object[] children= fProvider.getChildren(fJProject2);
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(children, expectedChildren), "Wrong children found for project");//$NON-NLS-1$
 	}
 
 
@@ -121,14 +121,14 @@ public class PackagesViewContentProviderTests {
 
 		Object[] expectedChildren= new Object[]{fPack17};
 		Object[] actualChildren= fProvider.getChildren(fPack12);
-		assertTrue("Wrong children found for PackageFragment", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for PackageFragment");//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenBottomLevelFragment() throws Exception {
 		Object[] expectedChildren= new Object[]{};
 		Object[] actualChildren= fProvider.getChildren(fPack21);
-		assertTrue("Wrong children found for PackageFragment", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for PackageFragment");//$NON-NLS-1$
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class PackagesViewContentProviderTests {
 
 		Object[] expectedChildren= new Object[]{fPack81, childCp1, childCp2};
 		Object[] actualChildren= fProvider.getChildren(cp);
-		assertTrue("Wrong children found for project", compareArrays(actualChildren, expectedChildren)); //$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for project"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -173,7 +173,7 @@ public class PackagesViewContentProviderTests {
 
 		Object[] expectedChildren= new Object[]{fPack91, fInternalPack10};
 		Object[] actualChildren= fProvider.getChildren(cp);
-		assertTrue("Wrong children found for project", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for project");//$NON-NLS-1$
 	}
 
 	@Test
@@ -184,28 +184,28 @@ public class PackagesViewContentProviderTests {
 
 		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney};
 		Object[] actualChildren= fProvider.getChildren(fPackJunitSamples);
-		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Archive");//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception {
 		Object[] expectedChildren= new Object[]{};
 		Object[] actualChildren= fProvider.getChildren(fPackJunitSamplesMoney);
-		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(actualChildren, expectedChildren));	//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive");	//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenSourceFolder() throws Exception {
 		Object[] expectedChildren = new Object[] {fPack21, fPack31, fPackDefault1};
 		Object[] actualChildren = fProvider.getChildren(fRoot1);
-		assertTrue("Wrong children found for PackageFragmentRoot", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for PackageFragmentRoot");//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetChildrenArchive() {
 		Object[] expectedChildren= new Object[] {fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};//$NON-NLS-1$
 		Object[] actualChildren= fProvider.getChildren(fArchiveFragmentRoot);
-		assertTrue("Wrong child found for PackageFragmentRoot Archive", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong child found for PackageFragmentRoot Archive");//$NON-NLS-1$
 	}
 
 	//---------------Get Parent Tests-----------------------------
@@ -213,7 +213,7 @@ public class PackagesViewContentProviderTests {
 	@Test
 	public void testGetParentArchive() throws Exception {
 		Object actualParent= fProvider.getParent(fArchiveFragmentRoot);
-		assertNull("Wrong parent found for PackageFragmentRoot Archive", actualParent);//$NON-NLS-1$
+		assertNull(actualParent, "Wrong parent found for PackageFragmentRoot Archive");//$NON-NLS-1$
 	}
 
 	@Test
@@ -225,14 +225,14 @@ public class PackagesViewContentProviderTests {
 
 		Object expectedParent= fPackJunitSamples;
 		Object actualParent= fProvider.getParent(fPackJunitSamplesMoney);
-		assertEquals("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent, actualParent);//$NON-NLS-1$
+		assertEquals(expectedParent, actualParent, "Wrong parent found for a NON top level PackageFragment in an Archive");//$NON-NLS-1$
 	}
 
 	@Test
 	public void testGetParentTopLevelFragmentInArchive() throws Exception {
 		Object expectedParent= fPackJunit;
 		Object actualParent= fProvider.getParent(fPackJunitSamples);
-		assertEquals("Wrong parent found for a top level PackageFragment in an Archive", expectedParent, actualParent);	//$NON-NLS-1$
+		assertEquals(expectedParent, actualParent, "Wrong parent found for a top level PackageFragment in an Archive");	//$NON-NLS-1$
 	}
 
 	@Test
@@ -242,7 +242,7 @@ public class PackagesViewContentProviderTests {
 		cp.add(fInternalPack3);
 
 		Object actualParent= fProvider.getParent(cp);
-		assertEquals("Wrong parent found for a top level LogicalPackage", fJProject2, actualParent);//$NON-NLS-1$
+		assertEquals(fJProject2, actualParent, "Wrong parent found for a top level LogicalPackage");//$NON-NLS-1$
 	}
 
 	@Test
@@ -255,7 +255,7 @@ public class PackagesViewContentProviderTests {
 		fProvider.getChildren(fJProject2);
 
 		Object parent= fProvider.getParent(fPack81);
-		assertEquals("Wrong parent found for a top level LogicalPackage", cp, parent);//$NON-NLS-1$
+		assertEquals(cp, parent, "Wrong parent found for a top level LogicalPackage");//$NON-NLS-1$
 	}
 
 	@Test
@@ -272,7 +272,7 @@ public class PackagesViewContentProviderTests {
 		fProvider.getChildren(fJProject2);
 
 		Object parent= fProvider.getParent(cp);
-		assertEquals("Wrong parent found for a top level LogicalPackage", parentCp, parent);//$NON-NLS-1$
+		assertEquals(parentCp, parent, "Wrong parent found for a top level LogicalPackage");//$NON-NLS-1$
 	}
 
 //	public void testGetParentWithPFRootFocus(){
@@ -299,7 +299,7 @@ public class PackagesViewContentProviderTests {
 		cp.add(fInternalPack3);
 
 		Object parent= fProvider.getParent(fPack41);
-		assertEquals("Wrong parent found for a mid level Fragment with Root Focus", cp, parent);		//$NON-NLS-1$
+		assertEquals(cp, parent, "Wrong parent found for a mid level Fragment with Root Focus");		//$NON-NLS-1$
 	}
 
 	@Test
@@ -321,7 +321,7 @@ public class PackagesViewContentProviderTests {
 
 		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp};
 
-		assertTrue("expected children of project with focus", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "expected children of project with focus");//$NON-NLS-1$
 
 		//set up map with root focus
 		for (Object object : fProvider.getChildren(fRoot1)) {
@@ -335,7 +335,7 @@ public class PackagesViewContentProviderTests {
 	public void testGetParentTopLevelFragment() throws Exception {
 		Object actualParent= fProvider.getParent(fPack21);
 		Object expectedParent= fRoot1;
-		assertEquals("Wrong parent found for a top level PackageFragment", expectedParent, actualParent); //$NON-NLS-1$
+		assertEquals(expectedParent, actualParent, "Wrong parent found for a top level PackageFragment"); //$NON-NLS-1$
 
 	}
 
@@ -343,7 +343,7 @@ public class PackagesViewContentProviderTests {
 	public void testGetParentMidLevelFragment() throws Exception {
 		Object expectedParent= fPack12;
 		Object actualParent= fProvider.getParent(fPack17);
-		assertEquals("Wrong parent found for a NON top level PackageFragment", expectedParent, actualParent); //$NON-NLS-1$
+		assertEquals(expectedParent, actualParent, "Wrong parent found for a NON top level PackageFragment"); //$NON-NLS-1$
 
 	}
 
@@ -356,7 +356,7 @@ public class PackagesViewContentProviderTests {
 		fJProject2.setRawClasspath(new IClasspathEntry[] {rawClasspath[0], element.getClasspathEntry(), rawClasspath[2]}, null);
 		Object[] expectedChildren= new Object[]{fPack12.getResource(), fPack32.getResource()};
 		Object[] actualChildren= fProvider.getChildren(fRoot2);
-		assertTrue("Wrong children found for project", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for project");//$NON-NLS-1$
 	}
 
 	@Test
@@ -368,13 +368,13 @@ public class PackagesViewContentProviderTests {
 		fJProject2.setRawClasspath(new IClasspathEntry[] {rawClasspath[0], element.getClasspathEntry(), rawClasspath[2]}, null);
 		Object[] expectedChildren= new Object[]{fPack42.getResource(), fPack52};
 		Object[] actualChildren= fProvider.getChildren(fPack32.getResource());
-		assertTrue("Wrong children found for project", compareArrays(actualChildren, expectedChildren));//$NON-NLS-1$
+		assertTrue(compareArrays(actualChildren, expectedChildren), "Wrong children found for project");//$NON-NLS-1$
 	}
 
 	/*
 	 * @see TestCase#setUp()
 	 */
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fWorkspace= ResourcesPlugin.getWorkspace();
 		assertNotNull(fWorkspace);
@@ -387,22 +387,22 @@ public class PackagesViewContentProviderTests {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");//$NON-NLS-1$//$NON-NLS-2$
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");//$NON-NLS-1$//$NON-NLS-2$
 
-		assertNotNull("project1 null", fJProject1);//$NON-NLS-1$
-		assertNotNull("project2 null", fJProject2);//$NON-NLS-1$
+		assertNotNull(fJProject1, "project1 null");//$NON-NLS-1$
+		assertNotNull(fJProject2, "project2 null");//$NON-NLS-1$
 
 
 		//------------set up project #1 : External Jar and zip file-------
 
 		IPackageFragmentRoot jdk= JavaProjectHelper.addVariableRTJar(fJProject1, "JRE_LIB_TEST", null, null);//$NON-NLS-1$
-		assertNotNull("jdk not found", jdk);//$NON-NLS-1$
+		assertNotNull(jdk, "jdk not found");//$NON-NLS-1$
 
 
 		//---Create zip file-------------------
 
 		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 
-		assertNotNull("junit src not found", junitSrcArchive);//$NON-NLS-1$
-		assertTrue("junit src not found", junitSrcArchive.exists());//$NON-NLS-1$
+		assertNotNull(junitSrcArchive, "junit src not found");//$NON-NLS-1$
+		assertTrue(junitSrcArchive.exists(), "junit src not found");//$NON-NLS-1$
 
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);//$NON-NLS-1$
 
@@ -410,9 +410,9 @@ public class PackagesViewContentProviderTests {
 		fPackJunitSamples= fArchiveFragmentRoot.getPackageFragment("junit.samples");//$NON-NLS-1$
 		fPackJunitSamplesMoney= fArchiveFragmentRoot.getPackageFragment("junit.samples.money");//$NON-NLS-1$
 
-		assertNotNull("creating fPackJunit", fPackJunit);//$NON-NLS-1$
-		assertNotNull("creating fPackJunitSamples", fPackJunitSamples);//$NON-NLS-1$
-		assertNotNull("creating fPackJunitSamplesMoney",fPackJunitSamplesMoney);//$NON-NLS-1$
+		assertNotNull(fPackJunit, "creating fPackJunit");//$NON-NLS-1$
+		assertNotNull(fPackJunitSamples, "creating fPackJunitSamples");//$NON-NLS-1$
+		assertNotNull(fPackJunitSamplesMoney,"creating fPackJunitSamplesMoney");//$NON-NLS-1$
 
 		fPackJunitSamplesMoney.getCompilationUnit("IMoney.java");//$NON-NLS-1$
 		fPackJunitSamplesMoney.getCompilationUnit("Money.java");//$NON-NLS-1$
@@ -425,8 +425,8 @@ public class PackagesViewContentProviderTests {
 
 		//----------------Set up internal jar----------------------------
 		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
-		assertNotNull("lib not found", myInternalJar);//$NON-NLS-1$
-		assertTrue("lib not found", myInternalJar.exists());//$NON-NLS-1$
+		assertNotNull(myInternalJar, "lib not found");//$NON-NLS-1$
+		assertTrue(myInternalJar.exists(), "lib not found");//$NON-NLS-1$
 
 		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, Path.fromOSString(myInternalJar.getPath()), null, null);
 
@@ -500,7 +500,7 @@ public class PackagesViewContentProviderTests {
 	/*
 	 * @see TestCase#tearDown()
 	 */
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);

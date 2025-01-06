@@ -28,4 +28,5 @@ public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	public ReplaceCorrectionProposal(String name, ICompilationUnit cu, int offset, int length, String replacementString, int relevance) {
 		super(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE), new ReplaceCorrectionProposalCore(name, cu, offset, length, replacementString, relevance));
 	}
+
 }

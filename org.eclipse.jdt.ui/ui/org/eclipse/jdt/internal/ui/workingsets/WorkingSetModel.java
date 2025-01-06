@@ -425,8 +425,14 @@ public class WorkingSetModel {
 	 * @since 3.7
 	 */
 	public void setWorkingSets(IWorkingSet[] allWorkingSets, boolean isSortingEnabled, IWorkingSet[] activeWorkingSets) {
-		Assert.isLegal(Arrays.asList(allWorkingSets).containsAll(Arrays.asList(activeWorkingSets)));
-		Assert.isLegal(!isOrderDifferentInWorkingSetLists(Arrays.asList(allWorkingSets), Arrays.asList(activeWorkingSets)));
+		if (!Arrays.asList(allWorkingSets).containsAll(Arrays.asList(activeWorkingSets))) {
+			throw new IllegalArgumentException(
+					Arrays.stream(allWorkingSets).map(IWorkingSet::getName).sorted().toList() + " does not contain all " + Arrays.stream(activeWorkingSets).map(IWorkingSet::getName).sorted().toList()); //$NON-NLS-1$
+		}
+		if (isOrderDifferentInWorkingSetLists(Arrays.asList(allWorkingSets), Arrays.asList(activeWorkingSets))) {
+			throw new IllegalArgumentException(
+					Arrays.stream(allWorkingSets).map(IWorkingSet::getName).toList() + " has different order then " + Arrays.stream(activeWorkingSets).map(IWorkingSet::getName).toList()); //$NON-NLS-1$
+		}
 		if (isSortingEnabled)
 			Arrays.sort(allWorkingSets, new WorkingSetComparator(true));
 		fAllWorkingSets= new ArrayList<>(Arrays.asList(allWorkingSets));
@@ -443,7 +449,9 @@ public class WorkingSetModel {
 	 * @param workingSets the active working sets to be set
 	 */
 	public void setActiveWorkingSets(IWorkingSet[] workingSets) {
+		List<IWorkingSet> backup= fAllWorkingSets;  // modified by getAllWorkingSets, see gh#1863:
 		Assert.isLegal(Arrays.asList(getAllWorkingSets()).containsAll(Arrays.asList(workingSets)));
+		fAllWorkingSets= backup;
 		if (fIsSortingEnabled) {
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}

@@ -330,4 +330,244 @@ public class QuickFixTest22 extends QuickFixTest {
 		assertEqualString(preview1, expected1);
 	}
 
+	@Test
+	public void testAddPermittedTypesToSwitchStatement() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set22CompilerOptions(fJProject1);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= """
+			package test;
+
+			public class TestSwitch {
+
+				sealed interface Foo<T> {
+					record FooImpl_a(String x) implements Foo<String> {
+					}
+
+					record FooImpl_b(String y, String z) implements Foo<String> {
+					}
+
+					final class FooImpl_c implements Foo {}
+				}
+
+				public static void main(String[] args) {
+					Foo<String> foo = getFoo();
+					switch (foo) {
+					}
+				}
+
+				private static Foo<String> getFoo() {
+					return new Foo.FooImpl_b("a", "b");
+				}
+			}
+			""";
+
+			ICompilationUnit cu= pack1.createCompilationUnit("TestSwitch.java", test, false, null);
+
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal1);
+
+			String expected1= """
+			package test;
+
+			public class TestSwitch {
+
+				sealed interface Foo<T> {
+					record FooImpl_a(String x) implements Foo<String> {
+					}
+
+					record FooImpl_b(String y, String z) implements Foo<String> {
+					}
+
+					final class FooImpl_c implements Foo {}
+				}
+
+				public static void main(String[] args) {
+					Foo<String> foo = getFoo();
+					switch (foo) {
+						case Foo.FooImpl_a(String x) -> {}
+						case Foo.FooImpl_b(String y, String z) -> {}
+						case Foo.FooImpl_c f -> {}
+						case null -> {}
+						default -> {}
+					}
+				}
+
+				private static Foo<String> getFoo() {
+					return new Foo.FooImpl_b("a", "b");
+				}
+			}
+			""";
+
+			assertEqualString(preview1, expected1);
+	}
+
+	@Test
+	public void testAddPermittedTypesToSwitchStatement2() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set22CompilerOptions(fJProject1);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String shape= """
+			package test;
+			public sealed class Shape permits Circle, Square {
+			}
+			""";
+		pack1.createCompilationUnit("Shape.java", shape, false, null);
+
+		String circle= """
+				package test;
+				public final class Circle extends Shape {
+				}
+				""";
+		pack1.createCompilationUnit("Circle.java", circle, false, null);
+
+		String square= """
+				package test;
+				public final class Square extends Shape {
+				}
+				""";
+		pack1.createCompilationUnit("Square.java", square, false, null);
+
+		String test= """
+			package test;
+
+			public class TestSwitch {
+
+				public static void main(String[] args) {
+					Shape shape = getShape();
+					switch (shape) {
+					}
+				}
+
+				private static Shape getShape() {
+					return new Circle();
+				}
+			}
+			""";
+
+			ICompilationUnit cu= pack1.createCompilationUnit("TestSwitch.java", test, false, null);
+
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal1);
+
+			String expected1= """
+			package test;
+
+			public class TestSwitch {
+
+				public static void main(String[] args) {
+					Shape shape = getShape();
+					switch (shape) {
+						case Circle c -> {}
+						case Square s -> {}
+						case null -> {}
+						default -> {}
+					}
+				}
+
+				private static Shape getShape() {
+					return new Circle();
+				}
+			}
+			""";
+
+			assertEqualString(preview1, expected1);
+	}
+
+	@Test
+	public void testAddPermittedTypesToSwitchExpression() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1.setRawClasspath(projectsetup.getDefaultClasspath(), null);
+		JavaProjectHelper.set22CompilerOptions(fJProject1);
+
+		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+
+		String test= """
+			package test;
+
+			public class TestSwitch {
+
+				sealed interface Foo<T> {
+					record FooImpl_a(String x) implements Foo<String> {
+					}
+
+					record FooImpl_b(String y, String z) implements Foo<String> {
+					}
+
+					final class FooImpl_c implements Foo {}
+				}
+
+				public static void main(String[] args) {
+					Foo<String> foo = getFoo();
+					int i = switch (foo) {
+					};
+				}
+
+				private static Foo<String> getFoo() {
+					return new Foo.FooImpl_b("a", "b");
+				}
+			}
+			""";
+
+			ICompilationUnit cu= pack1.createCompilationUnit("TestSwitch.java", test, false, null);
+
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 1);
+			assertCorrectLabels(proposals);
+
+			CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+			String preview1= getPreviewContent(proposal1);
+
+			String expected1= """
+			package test;
+
+			public class TestSwitch {
+
+				sealed interface Foo<T> {
+					record FooImpl_a(String x) implements Foo<String> {
+					}
+
+					record FooImpl_b(String y, String z) implements Foo<String> {
+					}
+
+					final class FooImpl_c implements Foo {}
+				}
+
+				public static void main(String[] args) {
+					Foo<String> foo = getFoo();
+					int i = switch (foo) {
+						case Foo.FooImpl_a(String x) -> 0;
+						case Foo.FooImpl_b(String y, String z) -> 0;
+						case Foo.FooImpl_c f -> 0;
+						case null -> 0;
+						default -> 0;
+					};
+				}
+
+				private static Foo<String> getFoo() {
+					return new Foo.FooImpl_b("a", "b");
+				}
+			}
+			""";
+
+			assertEqualString(preview1, expected1);
+	}
+
 }

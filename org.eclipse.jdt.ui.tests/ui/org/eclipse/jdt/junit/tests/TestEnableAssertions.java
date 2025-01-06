@@ -14,10 +14,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.junit.tests;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.util.DialogCheck;
 
@@ -99,12 +99,12 @@ public class TestEnableAssertions {
 			ILaunchConfigurationWorkingCopy wcFalse= getNewConfigWorkingCopy();
 			testSubject.createTabs(null, null);
 			testSubject.setDefaults(wcFalse);
-			assertFalse("Enable assertions argument should not be enabled", getAssertArgEnabled(wcFalse));
+			assertFalse(getAssertArgEnabled(wcFalse), "Enable assertions argument should not be enabled");
 
 			AssertionVMArg.setEnableAssertionsPreference(true);
 			ILaunchConfigurationWorkingCopy wcTrue= getNewConfigWorkingCopy();
 			testSubject.setDefaults(wcTrue);
-			assertTrue("Enable assertions argument should be enabled", getAssertArgEnabled(wcTrue));
+			assertTrue(getAssertArgEnabled(wcTrue), "Enable assertions argument should be enabled");
 		} catch (CoreException err) {
 			throw new RuntimeException(err);
 		} finally {

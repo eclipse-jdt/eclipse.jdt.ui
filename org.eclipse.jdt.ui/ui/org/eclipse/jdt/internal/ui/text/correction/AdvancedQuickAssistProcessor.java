@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -115,7 +114,6 @@ import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -1837,7 +1835,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression thenExpression= null;
 		Expression elseExpression= null;
 
-		ITypeBinding exprBinding= null;
 		if (thenStatement instanceof ReturnStatement && elseStatement instanceof ReturnStatement) {
 			thenExpression= ((ReturnStatement) thenStatement).getExpression();
 			elseExpression= ((ReturnStatement) elseStatement).getExpression();
@@ -1845,7 +1842,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			if (declaration == null || declaration.isConstructor()) {
 				return false;
 			}
-			exprBinding= declaration.getReturnType2().resolveBinding();
 		} else if (thenStatement instanceof ExpressionStatement && elseStatement instanceof ExpressionStatement) {
 			Expression inner1= ((ExpressionStatement) thenStatement).getExpression();
 			Expression inner2= ((ExpressionStatement) elseStatement).getExpression();
@@ -1859,7 +1855,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					IBinding bind2= ((Name) left2).resolveBinding();
 					if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
 						assigned= left1;
-						exprBinding= ((IVariableBinding) bind1).getType();
 						thenExpression= assign1.getRightHandSide();
 						elseExpression= assign2.getRightHandSide();
 					}
@@ -1901,23 +1896,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression thenCopy= (Expression) rewrite.createCopyTarget(thenExpression);
 		Expression elseCopy= (Expression) rewrite.createCopyTarget(elseExpression);
 
-
-		IJavaProject project= context.getCompilationUnit().getJavaProject();
-		if (!JavaModelUtil.is50OrHigher(project)) {
-			ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
-			ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
-			if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
-				CastExpression castException= ast.newCastExpression();
-				ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
-				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
-				castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext, TypeLocation.CAST));
-				castException.setExpression(elseCopy);
-				elseCopy= castException;
-			}
-		} else if (JavaModelUtil.is1d7OrHigher(project)) {
-			addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
-			addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
-		}
+		addExplicitTypeArgumentsIfNecessary(rewrite, proposal, thenExpression);
+		addExplicitTypeArgumentsIfNecessary(rewrite, proposal, elseExpression);
 		conditionalExpression.setThenExpression(thenCopy);
 		conditionalExpression.setElseExpression(elseCopy);
 
@@ -2963,8 +2943,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 						if (leftBinding != null) {
 							if ("java.lang.String".equals(leftBinding.getQualifiedName())) { //$NON-NLS-1$
-								if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-									return false;
 							} else if (!leftBinding.isEnum()) {
 								return false;
 							}
@@ -2981,8 +2959,6 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 						if (rightBinding != null) {
 							if ("java.lang.String".equals(rightBinding.getQualifiedName())) { //$NON-NLS-1$
-								if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-									return false;
 							} else if (!rightBinding.isEnum()) {
 								return false;
 							}

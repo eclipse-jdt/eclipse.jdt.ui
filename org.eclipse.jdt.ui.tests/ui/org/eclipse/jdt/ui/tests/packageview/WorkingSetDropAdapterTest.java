@@ -13,21 +13,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.packageview;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.swt.dnd.DND;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFolder;
 
@@ -60,10 +62,11 @@ public class WorkingSetDropAdapterTest {
 	private PackageExplorerPart fPackageExplorer;
 	private Accessor fPackageExplorerPartAccessor;
 	private WorkingSetDropAdapter fAdapter;
+	private ILogListener expectNoLogging= (status, plugin) -> {throw new AssertionError(status.getMessage(), status.getException());};
 
-
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
+		Platform.addLogListener(expectNoLogging);
 		fProject= JavaProjectHelper.createJavaProject("Test", "bin");
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		fPackageExplorer= (PackageExplorerPart)activePage.showView(JavaUI.ID_PACKAGES);
@@ -71,12 +74,13 @@ public class WorkingSetDropAdapterTest {
 		fAdapter= new WorkingSetDropAdapter(fPackageExplorer);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		activePage.hideView(fPackageExplorer);
 		assertTrue(fPackageExplorer.getTreeViewer().getTree().isDisposed());
+		Platform.removeLogListener(expectNoLogging);
 	}
 
 	@Test

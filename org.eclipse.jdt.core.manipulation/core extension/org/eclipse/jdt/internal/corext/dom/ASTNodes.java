@@ -4276,6 +4276,27 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Return a list of trailing line comments for a specified node and an offset from the start
+	 * @param node - ASTNode in a CompilationUnit
+	 * @param offset - offset to add from start of node to start search from
+	 * @return list of Comment nodes
+	 */
+	public static List<Comment> getTrailingLineComments(ASTNode node, int offset) {
+		List<Comment> comments= new ArrayList<>();
+		CompilationUnit cu= (CompilationUnit)node.getRoot();
+		List<Comment> commentList= cu.getCommentList();
+		int nodeLine= cu.getLineNumber(node.getStartPosition() + offset);
+		for (Comment commentFromList : commentList) {
+			if (commentFromList.getStartPosition() >= (node.getStartPosition() + offset) &&
+			    cu.getLineNumber(commentFromList.getStartPosition()) == nodeLine) {
+				comments.add(commentFromList);
+			} else if (cu.getLineNumber(nodeLine) > nodeLine) {
+				break;
+			}
+		}
+		return comments;
+	}
+	/**
 	 * Return a list of trailing comments for a specified node
 	 *
 	 * @param node - ASTNode in a CompilationUnit

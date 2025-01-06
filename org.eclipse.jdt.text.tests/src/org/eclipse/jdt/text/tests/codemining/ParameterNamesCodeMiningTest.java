@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
@@ -46,6 +47,7 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.intro.IIntroManager;
 import org.eclipse.ui.intro.IIntroPart;
@@ -54,6 +56,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -378,6 +381,37 @@ public class ParameterNamesCodeMiningTest {
 		waitReconciled(viewer);
 
 		assertEquals(2, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
+	}
+
+	@Test
+	public void testRecordConstructorOneParameterPreferenceFalse() throws Exception {
+		assertParameterNamesShown(false, 0);
+	}
+
+	@Test
+	public void testRecordConstructorOneParameterPreferenceTrue() throws Exception {
+		assertParameterNamesShown(true, 1);
+	}
+
+	private void assertParameterNamesShown(boolean preferenceValue, int expectedShownNames) throws JavaModelException, PartInitException, InterruptedException, ExecutionException {
+		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG, preferenceValue);
+		String contents= """
+				public class Ant {
+			record Ca (int size){
+
+			}
+
+			Ca c = new Ca(0);
+
+		}
+		""";
+		ICompilationUnit compilationUnit= fPackage.createCompilationUnit("Ant.java", contents, true, new NullProgressMonitor());
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(compilationUnit);
+		fParameterNameCodeMiningProvider.setContext(editor);
+		JavaSourceViewer viewer= (JavaSourceViewer)editor.getViewer();
+		waitReconciled(viewer);
+
+		assertEquals(expectedShownNames, fParameterNameCodeMiningProvider.provideCodeMinings(viewer, new NullProgressMonitor()).get().size());
 	}
 
 	@Test

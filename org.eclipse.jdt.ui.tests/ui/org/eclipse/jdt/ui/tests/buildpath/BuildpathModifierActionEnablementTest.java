@@ -13,18 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.buildpath;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -107,7 +107,7 @@ public class BuildpathModifierActionEnablementTest {
 	 *        |- NormalFolder
 	 */
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fActions= createActions();
 		fProject= createProject();
@@ -138,7 +138,7 @@ public class BuildpathModifierActionEnablementTest {
 		};
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		fProject.getProject().delete(true, true, null);
 	}
@@ -146,9 +146,9 @@ public class BuildpathModifierActionEnablementTest {
 	private void assertOnlyEnabled(IAction[] enabledActions) {
 		for (BuildpathModifierAction action : fActions) {
 			if (action.isEnabled()) {
-				assertTrue(action.getText() + " is enabled but should not be.", contains(enabledActions, action));
+				assertTrue(contains(enabledActions, action), action.getText() + " is enabled but should not be.");
 			} else {
-				assertFalse(action.getText() + " is disabled but should not be.", contains(enabledActions, action));
+				assertFalse(contains(enabledActions, action), action.getText() + " is disabled but should not be.");
 			}
 		}
 	}
@@ -164,7 +164,7 @@ public class BuildpathModifierActionEnablementTest {
 
 	private void assertAllDisabled() {
 		for (BuildpathModifierAction action : fActions) {
-			assertFalse(action.getText() + " is enabled but should not be.", action.isEnabled());
+			assertFalse(action.isEnabled(), action.getText() + " is enabled but should not be.");
 		}
 	}
 

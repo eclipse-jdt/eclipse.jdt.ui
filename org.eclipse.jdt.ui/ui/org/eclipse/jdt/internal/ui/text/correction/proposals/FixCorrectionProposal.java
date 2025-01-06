@@ -79,6 +79,11 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		this.fCleanUp= cleanUp;
 	}
 
+	public FixCorrectionProposal(FixCorrectionProposalCore core, Image image) {
+		super(core, image);
+		this.fCleanUp= core.getCleanUp();
+	}
+
 	public void resolve(MultiFixTarget[] targets, final IProgressMonitor monitor) throws CoreException {
 		if (targets.length == 0)
 			return;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1584,9 +1584,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getConvertToMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-			return false;
-
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(covering, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;
@@ -1673,9 +1670,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getUnrollMultiCatchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		if (!JavaModelUtil.is1d7OrHigher(context.getCompilationUnit().getJavaProject()))
-			return false;
-
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(covering, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return false;
@@ -1858,28 +1852,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	public static ASTNode getCopyOfInner(ASTRewrite rewrite, ASTNode statement, boolean toControlStatementBody) {
-		if (statement.getNodeType() == ASTNode.BLOCK) {
-			Block block= (Block) statement;
-			List<Statement> innerStatements= block.statements();
-			int nStatements= innerStatements.size();
-			if (nStatements == 1) {
-				return rewrite.createCopyTarget(innerStatements.get(0));
-			} else if (nStatements > 1) {
-				if (toControlStatementBody) {
-					return rewrite.createCopyTarget(block);
-				}
-				ListRewrite listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				ASTNode first= innerStatements.get(0);
-				ASTNode last= innerStatements.get(nStatements - 1);
-				return listRewrite.createCopyTarget(first, last);
-			}
-			return null;
-		} else {
-			return rewrite.createCopyTarget(statement);
-		}
-	}
-
 
 	private static boolean getUnWrapProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		ASTNode outer= node;
@@ -1975,7 +1947,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		ASTRewrite rewrite= ASTRewrite.create(outer.getAST());
-		ASTNode inner= getCopyOfInner(rewrite, body, ASTNodes.isControlStatementBody(outer.getLocationInParent()));
+		ASTNode inner= QuickAssistProcessorUtil.getCopyOfInner(rewrite, body, ASTNodes.isControlStatementBody(outer.getLocationInParent()));
 		if (inner == null) {
 			return false;
 		}
@@ -3121,9 +3093,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-			resultingCollections.add(new GenerateForLoopAssistProposal(cu, expressionStatement, GenerateForLoopAssistProposal.GENERATE_FOREACH));
-		}
+		resultingCollections.add(new GenerateForLoopAssistProposal(cu, expressionStatement, GenerateForLoopAssistProposal.GENERATE_FOREACH));
 
 		return true;
 	}

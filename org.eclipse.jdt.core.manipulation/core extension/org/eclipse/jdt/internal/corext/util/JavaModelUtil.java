@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,9 +65,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
 
-import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 /**
@@ -793,23 +791,6 @@ public final class JavaModelUtil {
 		return JavaCore.compareJavaVersions(version1, version2) < 0;
 	}
 
-
-	public static boolean is1d2OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_2);
-	}
-
-	public static boolean is40OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_4);
-	}
-
-	public static boolean is50OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
-	}
-
-	public static boolean is1d6OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_6);
-	}
-
 	public static boolean is1d7OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
 	}
@@ -880,46 +861,6 @@ public final class JavaModelUtil {
 
 	public static boolean is24OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_24);
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 1.2 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.2 or greater.
-	 */
-	public static boolean is1d2OrHigher(IJavaProject project) {
-		return is1d2OrHigher(getSourceCompliance(project));
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 1.4 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.4 or greater.
-	 */
-	public static boolean is1d4OrHigher(IJavaProject project) {
-		return is40OrHigher(getSourceCompliance(project));
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 1.5 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.5 or greater.
-	 */
-	public static boolean is50OrHigher(IJavaProject project) {
-		return is50OrHigher(getSourceCompliance(project));
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 1.7 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.7 or greater.
-	 */
-	public static boolean is1d7OrHigher(IJavaProject project) {
-		return is1d7OrHigher(getSourceCompliance(project));
 	}
 
 	/**
@@ -1118,31 +1059,6 @@ public final class JavaModelUtil {
 
 	public static boolean isLatestOrHigherJavaVersion(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.latestSupportedJavaVersion());
-	}
-
-	/**
-	 * Checks if the JRE of the given project or workspace default JRE have source compliance 1.5 or
-	 * greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace JRE
-	 * @return <code>true</code> if the JRE of the given project or workspace default JRE have
-	 *         source compliance 1.5 or greater.
-	 * @throws CoreException if unable to determine the project's VM install
-	 */
-	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
-		IVMInstall vmInstall;
-		if (project == null) {
-			vmInstall= JavaRuntime.getDefaultVMInstall();
-		} else {
-			vmInstall= JavaRuntime.getVMInstall(project);
-		}
-		if (!(vmInstall instanceof IVMInstall2))
-			return true; // assume 1.5.
-
-		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
-		if (compliance == null)
-			return true; // assume 1.5
-		return is50OrHigher(compliance);
 	}
 
 	public static String getCompilerCompliance(IVMInstall2 vMInstall, String defaultCompliance) {

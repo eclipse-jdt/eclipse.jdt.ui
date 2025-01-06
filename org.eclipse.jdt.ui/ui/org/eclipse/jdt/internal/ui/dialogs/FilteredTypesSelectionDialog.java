@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -431,7 +431,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 					String text= ((ITextSelection) selection).getText();
 					if (text != null) {
 						text= text.trim();
-						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_3, JavaCore.VERSION_1_3, null).isOK()) {
+						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text, JavaCore.VERSION_1_8, JavaCore.VERSION_1_8, null).isOK()) {
 							setInitialPattern(text, FULL_SELECTION);
 						}
 					}
@@ -810,7 +810,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void processVMInstallType(IVMInstallType installType, List<IPath> locations, List<String> labels) {
 			if (installType != null) {
-				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
+				boolean isMac= Platform.OS.isMac();
 				for (IVMInstall install : installType.getVMInstalls()) {
 					String label= getFormattedLabel(install.getName());
 					LibraryLocation[] libLocations = install.getLibraryLocations();
@@ -1116,7 +1116,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private void processVMInstallType(IVMInstallType installType, List<String> locations, List<String> labels) {
 			if (installType != null) {
-				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
+				boolean isMac= Platform.OS.isMac();
 				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
 				for (IVMInstall install : installType.getVMInstalls()) {
 					String label = getFormattedLabel(install.getName());

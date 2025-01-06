@@ -18,9 +18,9 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 
+import org.junit.Rule;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2023 IBM Corporation and others.
+ * Copyright (c) 2012, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ public interface IProposalRelevance {
 	int CREATE_NON_STATIC_ACCESS_USING_DECLARING_TYPE= 12;
 	int CREATE_INDIRECT_ACCESS_TO_STATIC= 12;
 	int CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE= 11;
+	int ADD_PERMITTED_TYPES= 11;
 
 	int REMOVE_UNUSED_CAST= 10;
 	int ADD_UNIMPLEMENTED_METHODS= 10;

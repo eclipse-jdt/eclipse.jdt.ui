@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,27 +13,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import static java.lang.Character.isJavaIdentifierPart;
+import static java.lang.Character.isJavaIdentifierStart;
+import static java.lang.Character.isWhitespace;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultTextDoubleClickStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
-
-
 
 /**
  * Double click strategy aware of Java identifier syntax rules.
  */
-public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy implements ISourceVersionDependent {
+public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy {
 
 	/**
 	 * Detects java words depending on the source level. In 1.4 mode, detects
-	 * <code>[[:ID:]]*</code>. In 1.5 mode, it also detects
+	 * <code>[[:ID:]]*</code> and
 	 * <code>@\s*[[:IDS:]][[:ID:]]*</code>.
 	 *
 	 * Character class definitions:
@@ -46,9 +45,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 	 *
 	 * @since 3.1
 	 */
-	private static final class AtJavaIdentifierDetector implements ISourceVersionDependent {
-
-		private boolean fSelectAnnotations;
+	private static final class AtJavaIdentifierDetector {
 
 		private static final int UNKNOWN= -1;
 
@@ -91,30 +88,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 		}
 
 		private boolean isAt(char c) {
-			return fSelectAnnotations && c == '@';
-		}
-
-		private boolean isIdentifierStart(char c) {
-			return Character.isJavaIdentifierStart(c);
-		}
-
-		private boolean isIdentifierPart(char c) {
-			return Character.isJavaIdentifierPart(c);
-		}
-
-		private boolean isWhitespace(char c) {
-			return fSelectAnnotations && Character.isWhitespace(c);
-		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
-		 */
-		@Override
-		public void setSourceVersion(String version) {
-			if (JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, version) <= 0)
-				fSelectAnnotations= true;
-			else
-				fSelectAnnotations= false;
+			return c == '@';
 		}
 
 		/**
@@ -139,24 +113,24 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 						fState= WS;
 						return true;
 					}
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fStart= offset;
 						fState= IDS;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fStart= offset;
 						fState= ID;
 						return true;
 					}
 					return false;
 				case ID:
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fStart= offset;
 						fState= IDS;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fStart= offset;
 						fState= ID;
 						return true;
@@ -203,7 +177,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 						fState= WS;
 						return true;
 					}
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fEnd= offset;
 						fState= IDS;
 						return true;
@@ -211,25 +185,25 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 					return false;
 				case IDS:
 				case ID:
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fEnd= offset;
 						fState= IDS;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fEnd= offset;
 						fState= ID;
 						return true;
 					}
 					return false;
 				case UNKNOWN:
-					if (isIdentifierStart(c)) {
+					if (isJavaIdentifierStart(c)) {
 						fEnd= offset;
 						fState= IDS;
 						fAnchorState= fState;
 						return true;
 					}
-					if (isIdentifierPart(c)) {
+					if (isJavaIdentifierPart(c)) {
 						fEnd= offset;
 						fState= ID;
 						fAnchorState= fState;
@@ -324,15 +298,6 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 	@Override
 	protected IRegion findWord(IDocument document, int anchor) {
 		return fWordDetector.getWordSelection(document, anchor);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
-	 */
-	@Override
-	public void setSourceVersion(String version) {
-		fPairMatcher.setSourceVersion(version);
-		fWordDetector.setSourceVersion(version);
 	}
 
 	@Override

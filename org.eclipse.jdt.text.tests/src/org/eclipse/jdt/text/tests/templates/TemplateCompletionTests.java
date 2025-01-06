@@ -12,16 +12,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.templates;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -54,7 +54,7 @@ public class TemplateCompletionTests {
 
 	private IPackageFragment pkg;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fJProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
 		JavaProjectHelper.addRTJar18(fJProject);
@@ -62,7 +62,7 @@ public class TemplateCompletionTests {
 		pkg= javaSrc.createPackageFragment("test", false, null);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}
@@ -102,7 +102,7 @@ public class TemplateCompletionTests {
 		List<ICompletionProposal> proposals= computeCompletionProposals(cu, completionIndex);
 
 		boolean fail= proposals.stream().anyMatch(p -> "new_class - create new class".equals(p.getDisplayString()));
-		assertFalse("Proposal '" + propDisplay + "' should not exist", fail);
+		assertFalse(fail, "Proposal '" + propDisplay + "' should not exist");
 	}
 
 	@Test

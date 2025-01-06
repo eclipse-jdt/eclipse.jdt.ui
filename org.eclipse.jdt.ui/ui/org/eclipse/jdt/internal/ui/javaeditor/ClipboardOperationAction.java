@@ -73,7 +73,6 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -609,7 +608,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	private void addImports(final ICompilationUnit unit, ClipboardData data) throws CoreException {
 		final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
 		for (String type : data.getTypeImports()) {
-			if (type.indexOf('.') != -1 || JavaModelUtil.isVersionLessThan(unit.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true), JavaCore.VERSION_1_4)) {
+			if (type.indexOf('.') != -1) {
 				rewrite.addImport(type);
 			}
 		}
