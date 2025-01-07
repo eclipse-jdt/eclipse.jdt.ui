@@ -644,7 +644,7 @@ public class InlineTempRefactoring extends Refactoring {
 				if (isStatic) {
 					ans.add(createFullyQualifiedName(simpleNameInitializer, resolvedVariableBinding.getDeclaringClass(), false));
 					ans.add(createFullyQualifiedName(simpleNameInitializer, resolvedVariableBinding.getDeclaringClass(), true));
-				} else {
+				} else if (resolvedVariableBinding.isField()) {
 					AST ast= fASTRoot.getAST();
 					FieldAccess newFieldAccess= ast.newFieldAccess();
 					newFieldAccess.setExpression(ast.newThisExpression());
