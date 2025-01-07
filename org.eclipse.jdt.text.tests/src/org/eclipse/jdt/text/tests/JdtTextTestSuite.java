@@ -55,7 +55,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	SemanticHighlightingTest.class,
 	SemanticTokensProviderTest.class,
 	AutoboxingSemanticHighlightingTest.class,
-	Java23SemanticHighlightingTest.class,
+	Java24SemanticHighlightingTest.class,
 	NewForLoopJavaContextTest.class,
 	IteratorForLoopJavaContextTest.class,
 	ArrayWithTempVarForLoopJavaContextTest.class,
