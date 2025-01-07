@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -495,6 +495,12 @@ public class InlineTempTests extends GenericRefactoringTest {
 	public void test65() throws Exception {
 		//https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1705
 		helper1(6, 13, 6, 19);
+	}
+
+	@Test
+	public void test66() throws Exception {
+		//https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1859
+		helper1(18, 13, 18, 21);
 	}
 
 	//------
