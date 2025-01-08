@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -77,7 +77,6 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -108,7 +107,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class ExtractMethodAnalyzer extends CodeAnalyzer {
@@ -217,9 +215,7 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	//---- Activation checking ---------------------------------------------------------------------------
 
 	public boolean isValidDestination(ASTNode node) {
-		boolean isInterface= node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
-		return !(node instanceof AnnotationTypeDeclaration) &&
-				(!isInterface || JavaModelUtil.is1d8OrHigher(fCUnit.getJavaProject()));
+		return !(node instanceof AnnotationTypeDeclaration);
 	}
 
 	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {

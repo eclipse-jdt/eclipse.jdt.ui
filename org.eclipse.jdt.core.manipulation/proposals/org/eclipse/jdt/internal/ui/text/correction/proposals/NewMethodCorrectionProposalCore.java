@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 IBM Corporation and others.
+ * Copyright (c) 2023, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,7 +57,6 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessorCore;
@@ -102,10 +101,6 @@ public class NewMethodCorrectionProposalCore extends AbstractMethodCorrectionPro
 			return 0;
 		}
 		boolean isTargetInterface= getSenderBinding().isInterface();
-		if (isTargetInterface && !JavaModelUtil.is1d8OrHigher(getCompilationUnit().getJavaProject())) {
-			// only abstract methods are allowed for interface present in less than Java 1.8
-			return getInterfaceMethodModifiers(targetTypeDecl, true);
-		}
 		ASTNode invocationNode= getInvocationNode();
 		if (invocationNode instanceof MethodInvocation) {
 			int modifiers= 0;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -119,7 +119,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdj
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
@@ -340,9 +339,6 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_type_does_not_exist_error, BasicElementLabels.getJavaElementName(fullyQualifiedTypeName)));
 			if (target.isAnnotation())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_in_annotation);
-			if (target.isInterface()
-					&& (!JavaModelUtil.is1d8OrHigher(target.getJavaProject()) || !JavaModelUtil.is1d8OrHigher(getProject())))
-				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_on_interface);
 		} catch (JavaModelException e) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_unable_determine_declaring_type);
 		}
