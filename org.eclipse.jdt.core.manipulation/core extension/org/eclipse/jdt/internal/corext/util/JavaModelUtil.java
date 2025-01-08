@@ -787,14 +787,6 @@ public final class JavaModelUtil {
 		return JavaCore.compareJavaVersions(version1, version2) < 0;
 	}
 
-	public static boolean is1d7OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
-	}
-
-	public static boolean is1d8OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_8);
-	}
-
 	public static boolean is9OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_9);
 	}
@@ -853,17 +845,6 @@ public final class JavaModelUtil {
 
 	public static boolean is23OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_23);
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 1.8 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or
-	 *         greater.
-	 */
-	public static boolean is1d8OrHigher(IJavaProject project) {
-		return is1d8OrHigher(getSourceCompliance(project));
 	}
 
 	/**

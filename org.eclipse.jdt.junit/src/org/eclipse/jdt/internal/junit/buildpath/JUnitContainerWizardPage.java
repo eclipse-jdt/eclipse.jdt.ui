@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2017 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,12 +37,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
@@ -55,7 +53,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JUnitContainerWizardPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension {
 
-	private IJavaProject fProject;
 	private IClasspathEntry fContainerEntryResult;
 	private Combo fVersionCombo;
 	private Text fResolvedPath;
@@ -193,14 +190,6 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 
 		if (libEntry == null) {
 			status.setError(JUnitMessages.JUnitContainerWizardPage_error_version_not_available);
-		} else if (JUnitCore.JUNIT4_CONTAINER_PATH.equals(containerPath)) {
-			if (fProject != null && !JUnitStubUtility.is50OrHigher(fProject)) {
-				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java5_required);
-			}
-		} else if (JUnitCore.JUNIT5_CONTAINER_PATH.equals(containerPath)) {
-			if (fProject != null && !JavaModelUtil.is1d8OrHigher(fProject)) {
-				status.setWarning(JUnitMessages.JUnitContainerWizardPage_warning_java8_required);
-			}
 		}
 		fContainerEntryResult= JavaCore.newContainerEntry(containerPath);
 
@@ -231,7 +220,6 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 
 	@Override
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
-		fProject= project;
 	}
 
 }
