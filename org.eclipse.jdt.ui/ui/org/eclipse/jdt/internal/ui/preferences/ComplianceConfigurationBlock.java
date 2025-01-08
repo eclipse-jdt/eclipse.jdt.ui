@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -747,18 +747,10 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				boolean isJREUnsupportedAndGreater= isJREVersionUnsupportedAndGreater(version, compilerCompliance);
 				if (!compilerCompliance.equals(compliance)) { // Discourage using compiler with version other than compliance
 					if (JavaModelUtil.is9OrHigher(compilerCompliance)) {
-						if (!JavaModelUtil.isVersionLessThan(compliance, compilerCompliance)
-								|| ( JavaModelUtil.is12OrHigher(compilerCompliance))
-								&& !JavaModelUtil.is1d7OrHigher(compliance)) {
-							fCompilerReleaseCheck.setEnabled(false);
-							fCompilerReleaseCheck.setSelection(false);
-							setValue(PREF_RELEASE, DISABLED);
+						if (fProject != null) {
+							fCompilerReleaseCheck.setEnabled(checkValue(INTR_COMPLIANCE_FOLLOWS_EE, USER_CONF) || checkValue(INTR_COMPLIANCE_FOLLOWS_EE, DISABLED));
 						} else {
-							if (fProject != null) {
-								fCompilerReleaseCheck.setEnabled(checkValue(INTR_COMPLIANCE_FOLLOWS_EE, USER_CONF) || checkValue(INTR_COMPLIANCE_FOLLOWS_EE, DISABLED));
-							} else {
-								fCompilerReleaseCheck.setEnabled(true);
-							}
+							fCompilerReleaseCheck.setEnabled(true);
 						}
 						updateComplianceEnableSourceTargetState();
 					} else {
@@ -1015,8 +1007,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updateStoreMethodParamNamesEnableState() {
-		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
-		boolean enabled= JavaModelUtil.is1d8OrHigher(target);
+		boolean enabled= true;
 		Button checkBox= getCheckBox(PREF_CODEGEN_METHOD_PARAMETERS_ATTR);
 		boolean wasCheckBoxEnabled= checkBox.isEnabled();
 		checkBox.setEnabled(enabled);

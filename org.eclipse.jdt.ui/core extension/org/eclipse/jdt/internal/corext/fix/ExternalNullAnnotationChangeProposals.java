@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015, 2019 GK Software AG and others.
+ * Copyright (c) 2015, 2025 GK Software AG and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -79,7 +79,6 @@ import org.eclipse.jdt.core.util.ExternalAnnotationUtil;
 import org.eclipse.jdt.core.util.ExternalAnnotationUtil.MergeStrategy;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -467,13 +466,6 @@ public class ExternalNullAnnotationChangeProposals {
 			rendererNonNull.addDimension(i == outerExtraDims);
 			rendererNullable.addDimension(i == outerExtraDims);
 			rendererRemove.addDimension(i == outerExtraDims);
-		}
-		boolean useJava8= JavaModelUtil.is1d8OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
-		if (!useJava8 && (outer != inner || outerExtraDims > 0)) { // below 1.8 we can only annotate the top type (not type parameter)
-			// still need to handle ParameterizedType (outer) with SimpleType (inner)
-			if ((outer.getNodeType() != ASTNode.PARAMETERIZED_TYPE)
-					|| (inner.getParent() != outer))
-				return;
 		}
 		try {
 			if (outer instanceof Type) {
