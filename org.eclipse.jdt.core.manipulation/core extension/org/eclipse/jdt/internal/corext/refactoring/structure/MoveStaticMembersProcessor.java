@@ -564,16 +564,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	private RefactoringStatus checkMoveToInterface() throws JavaModelException {
 		//could be more clever and make field final if it is only written once...
-		boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(fDestinationType.getJavaProject());
 		RefactoringStatus result= new RefactoringStatus();
 		boolean declaringIsInterface= getDeclaringType().isInterface();
-		if (declaringIsInterface && is18OrHigher)
+		if (declaringIsInterface)
 			return result;
-		String moveMembersMsg= is18OrHigher ? RefactoringCoreMessages.MoveMembersRefactoring_only_public_static_18 : RefactoringCoreMessages.MoveMembersRefactoring_only_public_static;
+		String moveMembersMsg= RefactoringCoreMessages.MoveMembersRefactoring_only_public_static_18;
 		for (IMember memberToMove : fMembersToMove) {
-			if (declaringIsInterface && !(memberToMove instanceof IMethod) && !is18OrHigher) {
-				// moving from interface to interface is OK, unless method is moved to pre-18
-			} else if (!canMoveToInterface(memberToMove, is18OrHigher)) {
+			if (!canMoveToInterface(memberToMove)) {
 				result.addError(moveMembersMsg, JavaStatusContext.create(memberToMove));
 			} else if (!Flags.isPublic(memberToMove.getFlags()) && !declaringIsInterface) {
 				result.addWarning(RefactoringCoreMessages.MoveMembersRefactoring_member_will_be_public, JavaStatusContext.create(memberToMove));
@@ -582,7 +579,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return result;
 	}
 
-	private boolean canMoveToInterface(IMember member, boolean is18OrHigher) throws JavaModelException {
+	private boolean canMoveToInterface(IMember member) throws JavaModelException {
 		int flags= member.getFlags();
 		switch (member.getElementType()) {
 			case IJavaElement.FIELD:
@@ -601,7 +598,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				return Flags.isStatic(flags);
 			}
 			case IJavaElement.METHOD: {
-				return is18OrHigher && Flags.isStatic(flags);
+				return Flags.isStatic(flags);
 			}
 			default:
 				return false;

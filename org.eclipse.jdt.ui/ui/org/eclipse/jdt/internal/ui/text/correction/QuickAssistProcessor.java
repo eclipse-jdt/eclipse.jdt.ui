@@ -3715,7 +3715,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getSplitTryResourceProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
 		if (proposals == null) {
-			return SplitTryResourceFixCore.initialConditionsCheck(context.getCompilationUnit(), coveringNode);
+			return SplitTryResourceFixCore.initialConditionsCheck(coveringNode);
 		}
 		SplitTryResourceFixCore fix= SplitTryResourceFixCore.createSplitVariableFix(context.getASTRoot(), coveringNode);
 		if (fix != null) {
