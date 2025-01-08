@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -83,7 +83,6 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
@@ -245,10 +244,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, Initializer.class)
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, LambdaExpression.class)
 				&& !Checks.isDeclaredIn(fTempDeclarationNode, RecordDeclaration.class)) {
-			if (JavaModelUtil.is1d8OrHigher(fCu.getJavaProject()))
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_initializers_and_lambda);
-
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_and_initializers);
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameTempRefactoring_only_in_methods_initializers_and_lambda);
 		}
 
 		initNames();

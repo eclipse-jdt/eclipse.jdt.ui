@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1007,8 +1007,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_cannot_create_in_readonly;
 
-	public static String IntroduceIndirectionRefactoring_cannot_create_on_interface;
-
 	public static String IntroduceIndirectionRefactoring_cannot_run_without_intermediary_type;
 
 	public static String IntroduceIndirectionRefactoring_cannot_update_binary_target_visibility;
@@ -1930,8 +1928,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTempRefactoring_lowercase2;
 
 	public static String RenameTempRefactoring_must_select_local;
-
-	public static String RenameTempRefactoring_only_in_methods_and_initializers;
 
 	public static String RenameTempRefactoring_only_in_methods_initializers_and_lambda;
 
