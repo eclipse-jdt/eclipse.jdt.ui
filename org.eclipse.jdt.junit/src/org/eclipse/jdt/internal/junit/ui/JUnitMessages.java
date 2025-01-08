@@ -106,10 +106,6 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitLaunchConfigurationTab_error_invalidProjectName;
 
-	public static String JUnitLaunchConfigurationTab_error_JDK15_required;
-
-	public static String JUnitLaunchConfigurationTab_error_JDK18_required;
-
 	public static String JUnitLaunchConfigurationTab_error_noContainer;
 
 	public static String JUnitLaunchConfigurationTab_error_notJavaProject;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -293,11 +293,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				isJunit4= CoreTestSearchEngine.hasJUnit4TestAnnotation(project);
 				if (!isJunit4) {
 					if (!CoreTestSearchEngine.hasTestCaseType(project)) {
-						if (JUnitStubUtility.is18OrHigher(project)) {
-							isJunit5= true;
-						} else if (JUnitStubUtility.is50OrHigher(project)) {
-							isJunit4= true;
-						}
+						isJunit5= true;
 					}
 				}
 			}
@@ -708,28 +704,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			return;
 		}
 
-		String message= null;
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		if (root != null) {
-			IJavaProject project= root.getJavaProject();
-			if (project.exists()) {
-				if (fJUnitVersion == JUnitVersion.VERSION_4) {
-					if (!JUnitStubUtility.is50OrHigher(project)) {
-						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
-					}
-				} else if (fJUnitVersion == JUnitVersion.VERSION_5) {
-					if (!JUnitStubUtility.is18OrHigher(project)) {
-						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java8required;
-					}
-				}
-			}
-		}
-		fLink.setVisible(message != null);
-		fImage.setVisible(message != null);
+		fLink.setVisible(false);
+		fImage.setVisible(false);
 
-		if (message != null) {
-			fLink.setText(message);
-		}
 	}
 
 
@@ -1260,20 +1237,12 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					if (fJUnitVersion != null) {
 						switch (fJUnitVersion) {
 							case VERSION_5:
-								if (!JUnitStubUtility.is18OrHigher(project)) {
-									status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java8required);
-									return status;
-								}
 								if (project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME) == null) {
 									status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit5NotOnbuildpath);
 									return status;
 								}
 								break;
 							case VERSION_4:
-								if (!JUnitStubUtility.is50OrHigher(project)) {
-									status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
-									return status;
-								}
 								if (project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) == null) {
 									status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit4NotOnbuildpath);
 									return status;
