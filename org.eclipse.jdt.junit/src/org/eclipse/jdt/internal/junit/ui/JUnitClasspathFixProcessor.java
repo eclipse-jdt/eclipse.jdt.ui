@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.buildpath.BuildPathSupport;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
@@ -182,10 +181,10 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			}
 		if (res != 0) {
 			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<>();
-			if ((res & JUNIT5) != 0 && JUnitStubUtility.is18OrHigher(project)) {
+			if ((res & JUNIT5) != 0) {
 				proposals.add(new JUnitClasspathFixProposal(project, 5, 15));
 			}
-			if ((res & JUNIT4) != 0 && JUnitStubUtility.is50OrHigher(project)) {
+			if ((res & JUNIT4) != 0) {
 				proposals.add(new JUnitClasspathFixProposal(project, 4, 15));
 			}
 			if ((res & JUNIT3) != 0) {

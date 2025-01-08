@@ -17,4 +17,18 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="src/org/eclipse/jdt/ui/unittest/junit/launcher/Messages.java" type="org.eclipse.jdt.ui.unittest.junit.launcher.Messages">
+        <filter comment="Messages are not api" id="338755678">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.unittest.junit.launcher.Messages"/>
+                <message_argument value="JUnitLaunchConfigurationTab_error_JDK15_required"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Messages are not api" id="338755678">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.ui.unittest.junit.launcher.Messages"/>
+                <message_argument value="JUnitLaunchConfigurationTab_error_JDK18_required"/>
+            </message_arguments>
+        </filter>
+    </resource>
 </component>

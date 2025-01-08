@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,13 +26,9 @@ public final class WizardMessages extends NLS {
 
 	public static String NewTestCaseWizardPageOne__error_junit4NotOnbuildpath;
 	public static String NewTestCaseWizardPageOne__error_junit5NotOnbuildpath;
-	public static String NewTestCaseWizardPageOne_error_java5required;
-	public static String NewTestCaseWizardPageOne_error_java8required;
 	public static String NewTestCaseWizardPageOne_junit3_radio_label;
 	public static String NewTestCaseWizardPageOne_junit4_radio_label;
 	public static String NewTestCaseWizardPageOne_junit5_radio_label;
-	public static String NewTestCaseWizardPageOne_linkedtext_java5required;
-	public static String NewTestCaseWizardPageOne_linkedtext_java8required;
 	public static String NewTestCaseWizardPageOne_methodStub_setUpBeforeClass;
 	public static String NewTestCaseWizardPageOne_methodStub_tearDownAfterClass;
 	public static String NewTestCaseWizardPageOne_not_yet_implemented_string;
