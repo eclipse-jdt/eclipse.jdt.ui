@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -113,7 +113,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -885,8 +884,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private boolean isBindingToTemp(IVariableBinding variable) {
 		if (variable.isField())
-			return false;
-		if (!Modifier.isFinal(variable.getModifiers()) && !JavaModelUtil.is1d8OrHigher(fCu.getJavaProject()))
 			return false;
 		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(variable);
 		if (declaringNode == null)

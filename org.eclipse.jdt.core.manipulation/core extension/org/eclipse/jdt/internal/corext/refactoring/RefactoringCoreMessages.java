@@ -1449,8 +1449,6 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveMembersRefactoring_Object;
 
-	public static String MoveMembersRefactoring_only_public_static;
-
 	public static String MoveMembersRefactoring_only_public_static_18;
 
 	public static String MoveMembersRefactoring_override_ref;

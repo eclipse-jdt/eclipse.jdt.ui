@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Till Brychcy and others.
+ * Copyright (c) 2017, 2025 Till Brychcy and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,15 +23,12 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Rewrite helper for type annotations.
@@ -55,10 +52,6 @@ public class TypeAnnotationRewrite {
 	 *            ungrouped
 	 */
 	public static void removePureTypeAnnotations(ASTNode node, ChildListPropertyDescriptor childListProperty, ASTRewrite rewrite, TextEditGroup editGroup) {
-		CompilationUnit root= (CompilationUnit) node.getRoot();
-		if (!JavaModelUtil.is1d8OrHigher(root.getJavaElement().getJavaProject())) {
-			return;
-		}
 		ListRewrite listRewrite= rewrite.getListRewrite(node, childListProperty);
 		@SuppressWarnings("unchecked")
 		List<? extends ASTNode> children= (List<? extends ASTNode>) node.getStructuralProperty(childListProperty);
