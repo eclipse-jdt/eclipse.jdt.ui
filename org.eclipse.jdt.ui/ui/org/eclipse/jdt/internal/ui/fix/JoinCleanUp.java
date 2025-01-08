@@ -69,7 +69,6 @@ import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -111,15 +110,15 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return """
 				String concatenation= String.join(", ", texts);
 				return concatenation;
-				
-				
-				
-				
-				
-				
-				
-				
-				
+
+
+
+
+
+
+
+
+
 				"""; //$NON-NLS-1$
 		}
 
@@ -140,7 +139,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.JOIN) || !JavaModelUtil.is1d8OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.JOIN)) {
 			return null;
 		}
 
