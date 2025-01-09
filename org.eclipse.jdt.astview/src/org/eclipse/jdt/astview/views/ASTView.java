@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -137,7 +137,6 @@ import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
-	static final int JLS_LATEST= AST.getJLSLatest();
 	private static final int JLS23= ASTHelper.JLS23;
 	private static final int JLS22= ASTHelper.JLS22;
 	private static final int JLS21= ASTHelper.JLS21;
@@ -501,7 +500,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fBindingsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS_RECOVERY); // inverse so that default is use recovery
 		fIgnoreMethodBodies= fDialogSettings.getBoolean(SETTINGS_IGNORE_METHOD_BODIES);
-		fCurrentASTLevel= JLS_LATEST;
+		fCurrentASTLevel= AST.getJLSLatest();
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
 			switch (level) {

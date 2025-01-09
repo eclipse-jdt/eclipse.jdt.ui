@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -525,13 +525,13 @@ public class Binding extends ASTAttribute {
 	}
 
 	public static String getEscapedStringLiteral(String stringValue) {
-		StringLiteral stringLiteral= AST.newAST(ASTView.JLS_LATEST, false).newStringLiteral();
+		StringLiteral stringLiteral= AST.newAST(AST.getJLSLatest(), false).newStringLiteral();
 		stringLiteral.setLiteralValue(stringValue);
 		return stringLiteral.getEscapedValue();
 	}
 
 	public static String getEscapedCharLiteral(char charValue) {
-		CharacterLiteral charLiteral= AST.newAST(ASTView.JLS_LATEST, false).newCharacterLiteral();
+		CharacterLiteral charLiteral= AST.newAST(AST.getJLSLatest(), false).newCharacterLiteral();
 		charLiteral.setCharValue(charValue);
 		return charLiteral.getEscapedValue();
 	}
