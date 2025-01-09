@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -350,6 +350,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionLength= fAnalyzer.getSelection().getLength();
 
 		result.merge(fAnalyzer.checkInitialConditions(fImportRewriter));
+
+		if (fAnalyzer.isSelectionChanged()) {
+			fRoot.accept(fAnalyzer);
+			fSelectionStart= fAnalyzer.getSelection().getOffset();
+			fSelectionLength= fAnalyzer.getSelection().getLength();
+
+			result.merge(fAnalyzer.checkInitialConditions(fImportRewriter));
+		}
 		if (result.hasFatalError())
 			return result;
 		if (fVisibility == -1) {
