@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -147,6 +148,8 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	private boolean fIsLastStatementSelected;
 	private SimpleName fEnclosingLoopLabel;
 
+	private boolean fSelectionChanged;
+
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
 	}
@@ -212,6 +215,10 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		return fTypeVariables;
 	}
 
+	public boolean isSelectionChanged() {
+		return fSelectionChanged;
+	}
+
 	//---- Activation checking ---------------------------------------------------------------------------
 
 	public boolean isValidDestination(ASTNode node) {
@@ -248,15 +255,25 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 			returns++;
 		}
 		if (isExpressionSelected()) {
-			fReturnKind= EXPRESSION;
-			returns++;
+			if (returns == 0 || getFirstSelectedNode().getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+				fReturnKind= EXPRESSION;
+				returns++;
+			} else {
+				ASTNode firstParent= getFirstSelectedNode().getParent();
+				Selection newSelection= Selection.createFromStartEnd(getSelection().getOffset(),
+						firstParent.getStartPosition() + firstParent.getLength());
+				setSelection(newSelection);
+				reset();
+				fSelectionChanged= true;
+				return result;
+			}
 		}
-
 		if (returns > 1) {
 			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_ambiguous_return_value, JavaStatusContext.create(fCUnit, getSelection()));
 			fReturnKind= MULTIPLE;
 			return result;
 		}
+
 		initReturnType(rewriter);
 		return result;
 	}
@@ -883,8 +900,22 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 
 	//---- Special visitor methods ---------------------------------------------------------------------------
 
+//	@Override
+//	protected void handleFirstSelectedNode(ASTNode node) {
+//		if (node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+//			super.handleFirstSelectedNode(node.getParent());
+//		} else {
+//			super.handleFirstSelectedNode(node);
+//		}
+//	}
+//
 	@Override
 	protected void handleNextSelectedNode(ASTNode node) {
+//		if (node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+//			super.handleNextSelectedNode(node.getParent());
+//		} else {
+//			super.handleNextSelectedNode(node);
+//		}
 		super.handleNextSelectedNode(node);
 		checkParent(node);
 	}
@@ -1226,5 +1257,8 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	private boolean isResourceInTry(Expression node) {
 		return getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node && node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
+
+
+
 }
 
