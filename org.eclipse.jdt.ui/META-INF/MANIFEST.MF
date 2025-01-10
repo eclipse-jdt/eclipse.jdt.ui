@@ -121,4 +121,4 @@ Require-Bundle:
  org.eclipse.ui.navigator.resources;bundle-version="[3.4.0,4.0.0)",
  org.eclipse.jdt.core.manipulation;bundle-version="[1.15.200,2.0.0)",
  org.eclipse.equinox.bidi;bundle-version="[0.10.0,2.0.0)"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
