@@ -200,16 +200,22 @@ public class ContentProviderTests3{
 	public void testDeleteBottomLevelFragmentFolding() throws Exception {
 
 		//send a delta indicating fragment deleted
-		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack4, IJavaElementDelta.REMOVED);
-		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-
-		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch())
+		sendEvent(delta);
 
 		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
 		assertTrue(fMyPart.wasObjectRefreshed(fRoot1), "Correct Refresh"); //$NON-NLS-1$
 		assertEquals(1, fMyPart.getRefreshedObject().size(), "Single refresh"); //$NON-NLS-1$
+	}
+
+
+	protected void sendEvent(IJavaElementDelta delta) {
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+		}
 	}
 
 	@Test
@@ -217,13 +223,8 @@ public class ContentProviderTests3{
 		IPackageFragment test= fRoot1.createPackageFragment("test", true, null); //$NON-NLS-1$
 
 		//send a delta indicating fragment deleted
-		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(test, IJavaElementDelta.ADDED);
-		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-
-		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
-		}
+		sendEvent(delta);
 
 		assertFalse(fMyPart.hasAddHappened(), "No add happened"); //$NON-NLS-1$
 		assertTrue(fMyPart.hasRefreshHappened(), "Refresh happened"); //$NON-NLS-1$
@@ -234,13 +235,8 @@ public class ContentProviderTests3{
 	@Test
 	public void testChangedTopLevelPackageFragmentFolding() throws Exception {
 		//send a delta indicating fragment deleted
-		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack3, IJavaElementDelta.CHANGED);
-		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-
-		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
-		}
+		sendEvent(delta);
 
 		assertEquals(0, fMyPart.getRefreshedObject().size(), "No refreshs"); //$NON-NLS-1$
 	}
@@ -248,13 +244,8 @@ public class ContentProviderTests3{
 	@Test
 	public void testChangeBottomLevelPackageFragmentFolding() throws Exception {
 		//send a delta indicating fragment deleted
-		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
-		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-
-		//force events from dispaly
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
-		}
+		sendEvent(delta);
 
 		assertEquals(0,fMyPart.getRefreshedObject().size(),  "No refreshs"); //$NON-NLS-1$
 	}
@@ -263,13 +254,8 @@ public class ContentProviderTests3{
 	public void testRemoveCUsFromPackageFragment() throws Exception{
 
 		//send a delta indicating fragment deleted
-		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { fCU2, fCU3 }, fPack6, IJavaElementDelta.REMOVED);
-		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-
-		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
-		}
+		sendEvent(delta);
 
 		// removing more than one CU now results in a refresh.
 		assertEquals(1, fMyPart.getRefreshedObject().size(), "One refresh"); //$NON-NLS-1$
@@ -279,13 +265,8 @@ public class ContentProviderTests3{
 	public void testRemoveCUFromPackageFragment() throws Exception {
 
 		//send a delta indicating fragment deleted
-		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[]{fCU2}, fPack6, IJavaElementDelta.REMOVED);
-		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-
-		//force events from display
-		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
-		}
+		sendEvent(delta);
 
 		assertTrue(fMyPart.hasRemoveHappened(), "Remove happened"); //$NON-NLS-1$
 		assertTrue(fMyPart.getRemovedObjects().contains(fCU2), "Correct refresh"); //$NON-NLS-1$
