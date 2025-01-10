@@ -136,10 +136,12 @@ public class MethodOverrideTester {
 			return null;
 		}
 
+		Set<String> visited = new HashSet<>();
+
 		IType type= overriding.getDeclaringType();
 		IType superClass= fHierarchy.getSuperclass(type);
 		if (superClass != null) {
-			IMethod res= findOverriddenMethodInHierarchy(superClass, overriding);
+			IMethod res= findOverriddenMethodInHierarchy(superClass, overriding, visited);
 			if (res != null) {
 				if (!testVisibility || JavaModelUtil.isVisibleInHierarchy(res, type.getPackageFragment())) {
 					return res;
@@ -147,7 +149,7 @@ public class MethodOverrideTester {
 			}
 		}
 		for (IType intf : fHierarchy.getSuperInterfaces(type)) {
-			IMethod res= findOverriddenMethodInHierarchy(intf, overriding);
+			IMethod res= findOverriddenMethodInHierarchy(intf, overriding, visited);
 			if (res != null) {
 				return res; // methods from interfaces are always public and therefore visible
 			}
@@ -160,23 +162,29 @@ public class MethodOverrideTester {
 	 * With generics it is possible that 2 methods in the same type are overidden at the same time. In that case, the first overridden method found is returned.
 	 * 	@param type The type to find methods in
 	 * @param overriding The overriding method
+	 * @param visited The types that were visited already
 	 * @return The first overridden method or <code>null</code> if no method is overridden
 	 * @throws JavaModelException if a problem occurs
 	 */
-	public IMethod findOverriddenMethodInHierarchy(IType type, IMethod overriding) throws JavaModelException {
+	public IMethod findOverriddenMethodInHierarchy(IType type, IMethod overriding, Set<String> visited) throws JavaModelException {
+
+		if (!visited.add(type.getElementName())) {
+			return null;
+		}
+
 		IMethod method= findOverriddenMethodInType(type, overriding);
 		if (method != null) {
 			return method;
 		}
 		IType superClass= fHierarchy.getSuperclass(type);
 		if (superClass != null) {
-			IMethod res=  findOverriddenMethodInHierarchy(superClass, overriding);
+			IMethod res=  findOverriddenMethodInHierarchy(superClass, overriding, visited);
 			if (res != null) {
 				return res;
 			}
 		}
 		for (IType superInterface : fHierarchy.getSuperInterfaces(type)) {
-			IMethod res= findOverriddenMethodInHierarchy(superInterface, overriding);
+			IMethod res= findOverriddenMethodInHierarchy(superInterface, overriding, visited);
 			if (res != null) {
 				return res;
 			}

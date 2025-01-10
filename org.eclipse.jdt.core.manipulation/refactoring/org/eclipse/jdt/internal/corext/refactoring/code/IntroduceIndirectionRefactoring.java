@@ -19,6 +19,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -540,7 +541,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		IType actualTargetType= (IType) fIntermediaryFirstParameterType.getJavaElement();
 		if (!fTargetMethod.getDeclaringType().equals(actualTargetType)) {
-			IMethod actualTargetMethod= new MethodOverrideTester(actualTargetType, actualTargetType.newSupertypeHierarchy(null)).findOverriddenMethodInHierarchy(actualTargetType, fTargetMethod);
+			IMethod actualTargetMethod= new MethodOverrideTester(actualTargetType, actualTargetType.newSupertypeHierarchy(null)).findOverriddenMethodInHierarchy(actualTargetType, fTargetMethod, new HashSet<>());
 			fTargetMethod= actualTargetMethod;
 			fTargetMethodBinding= findMethodBindingInHierarchy(fIntermediaryFirstParameterType, actualTargetMethod);
 			Assert.isNotNull(fTargetMethodBinding);
