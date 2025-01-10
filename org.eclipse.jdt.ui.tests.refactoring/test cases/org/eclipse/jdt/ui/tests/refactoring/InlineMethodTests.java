@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -495,6 +495,11 @@ public class InlineMethodTests extends AbstractJunit4SelectionTestCase {
 	@Test
 	public void test_issue_1529_2() throws Exception {
 		performInvalidTest();
+	}
+
+	@Test
+	public void test_issue_1856_1() throws Exception {
+		performBugTest();
 	}
 
 	/* *********************** Argument Tests ******************************* */
