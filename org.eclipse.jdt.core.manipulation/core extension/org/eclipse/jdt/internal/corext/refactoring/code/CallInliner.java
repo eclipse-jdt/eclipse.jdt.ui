@@ -46,6 +46,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -659,6 +660,7 @@ public class CallInliner {
 			}
 		} else {
 			ASTNode node= null;
+			boolean needsMethodInvocation= true;
 			for (int i= 0; i < blocks.length - 1; i++) {
 				node= fRewrite.createStringPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
 				fListRewrite.insertAt(node, fInsertionIndex++, textEditGroup);
@@ -690,33 +692,63 @@ public class CallInliner {
 					status.addWarning(RefactoringCoreMessages.CallInliner_cannot_synchronize_error,
 							JavaStatusContext.create(fCUnit, fInvocation));
 				}
-				node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
-
-				// fixes bug #24941
-				if (needsExplicitCast(status)) {
-					AST ast= node.getAST();
-					CastExpression castExpression= ast.newCastExpression();
-					Type returnType= fImportRewrite.addImport(fSourceProvider.getReturnType(), ast);
-					castExpression.setType(returnType);
-
-					if (NecessaryParenthesesChecker.needsParentheses(fSourceProvider.getReturnExpressions().get(0), castExpression, CastExpression.EXPRESSION_PROPERTY)) {
-						ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
-						parenthesized.setExpression((Expression)node);
-						node= parenthesized;
+				String[] segments= block.split(";"); //$NON-NLS-1$
+				if (segments.length == 2 && !segments[1].trim().isEmpty()) {
+					Statement targetStatement= ASTNodes.getFirstAncestorOrNull(fTargetNode, Statement.class);
+					if (targetStatement != null) {
+						ASTNode root= fTargetNode.getRoot();
+						if (root instanceof CompilationUnit cu && cu.getJavaElement() instanceof ICompilationUnit icu) {
+							int start= targetStatement.getStartPosition();
+							int length= targetStatement.getLength();
+							String targetStatementString= null;
+							try {
+								IBuffer buffer= icu.getBuffer();
+								targetStatementString= buffer.getText(start, length);
+							} catch (JavaModelException e) {
+								// should never occur
+							}
+							if (targetStatementString != null) {
+								int expOffset= fTargetNode.getStartPosition() - start;
+								String newTargetStatement= targetStatementString.substring(0, expOffset);
+								newTargetStatement += segments[0];
+								newTargetStatement += targetStatementString.substring(expOffset + fTargetNode.getLength());
+								newTargetStatement += " " + segments[1].trim(); //$NON-NLS-1$
+								fTargetNode= targetStatement;
+								node= fRewrite.createStringPlaceholder(newTargetStatement, targetStatement.getNodeType());
+								needsMethodInvocation= false;
+							}
+						}
 					}
+				}
+				if (needsMethodInvocation) {
+					node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 
-					castExpression.setExpression((Expression)node);
-					node= castExpression;
+					// fixes bug #24941
+					if (needsExplicitCast(status)) {
+						AST ast= node.getAST();
+						CastExpression castExpression= ast.newCastExpression();
+						Type returnType= fImportRewrite.addImport(fSourceProvider.getReturnType(), ast);
+						castExpression.setType(returnType);
 
-					if (NecessaryParenthesesChecker.needsParentheses(castExpression, fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
-						ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
-						parenthesized.setExpression((Expression)node);
-						node= parenthesized;
+						if (NecessaryParenthesesChecker.needsParentheses(fSourceProvider.getReturnExpressions().get(0), castExpression, CastExpression.EXPRESSION_PROPERTY)) {
+							ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+							parenthesized.setExpression((Expression)node);
+							node= parenthesized;
+						}
+
+						castExpression.setExpression((Expression)node);
+						node= castExpression;
+
+						if (NecessaryParenthesesChecker.needsParentheses(castExpression, fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
+							ParenthesizedExpression parenthesized= ast.newParenthesizedExpression();
+							parenthesized.setExpression((Expression)node);
+							node= parenthesized;
+						}
+					} else if (fSourceProvider.needsReturnedExpressionParenthesis(fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
+						ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
+						pExp.setExpression((Expression)node);
+						node= pExp;
 					}
-				} else if (fSourceProvider.needsReturnedExpressionParenthesis(fTargetNode.getParent(), fTargetNode.getLocationInParent())) {
-					ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
-					pExp.setExpression((Expression)node);
-					node= pExp;
 				}
 			} else if (fContext.callMode == ASTNode.YIELD_STATEMENT) {
 				if (fBlock != null) {
@@ -733,6 +765,7 @@ public class CallInliner {
 					node= createSyncBlock(node, status);
 				}
 			}
+
 
 			// Now replace the target node with the source node
 			if (node != null) {
