@@ -13,10 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -180,6 +185,21 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
 	protected TypeHierarchyContentProvider getHierarchyContentProvider() {
 		return (TypeHierarchyContentProvider)getContentProvider();
+	}
+
+	@Override
+	protected Predicate<Widget> getShouldWidgetExpand() {
+		Set<Object> expanded= new HashSet<>();
+
+		// Expand every class/interface only once
+		return w -> {
+			if (w == null) {
+				return false;
+			}
+
+			Object data= w.getData();
+			return data == null || expanded.add(data);
+		};
 	}
 
 }
