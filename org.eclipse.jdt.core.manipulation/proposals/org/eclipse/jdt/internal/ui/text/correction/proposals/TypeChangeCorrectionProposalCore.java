@@ -449,18 +449,19 @@ public class TypeChangeCorrectionProposalCore extends LinkedCorrectionProposalCo
 
 		requestor.setAllowsRequiredProposals(CompletionProposal.CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
 
-		final ExecutorService executor= Executors.newSingleThreadExecutor();
-		try {
-			Future<?> future= executor.submit(() -> {
-				try {
-					fCompilationUnit.codeComplete(fNode.getStartPosition() + SKIP_NEW_KEYWORD, requestor, new CompletionTimeoutProgressMonitor());
-				} catch (JavaModelException e) {
-					// do nothing
-				}
-			});
-			future.get(1, TimeUnit.SECONDS);
-		} catch (final Exception e) {
-			executor.shutdownNow();
+		try (ExecutorService executor= Executors.newSingleThreadExecutor()) {
+			try {
+				Future<?> future= executor.submit(() -> {
+					try {
+						fCompilationUnit.codeComplete(fNode.getStartPosition() + SKIP_NEW_KEYWORD, requestor, new CompletionTimeoutProgressMonitor());
+					} catch (JavaModelException e) {
+						// do nothing
+					}
+				});
+				future.get(1, TimeUnit.SECONDS);
+			} catch (final Exception e) {
+				executor.shutdownNow();
+			}
 		}
 
 		IJavaProject project= fCompilationUnit.getJavaProject();
