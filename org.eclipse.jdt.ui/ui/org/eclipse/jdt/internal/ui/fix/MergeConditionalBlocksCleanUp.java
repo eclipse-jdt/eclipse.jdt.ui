@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -15,8 +15,10 @@ package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.core.runtime.CoreException;
@@ -31,7 +33,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Pattern;
+import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TypePattern;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -82,8 +88,8 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 				} else {
 				    System.out.println("Different");
 				}
-				
-				
+
+
 				"""; //$NON-NLS-1$
 		}
 
@@ -98,6 +104,113 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 			"""; //$NON-NLS-1$
 	}
 
+	private final class IfVisitor extends ASTVisitor {
+		final List<CompilationUnitRewriteOperationWithSourceRange> fRewriteOperations;
+
+		public IfVisitor(List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations) {
+			fRewriteOperations= rewriteOperations;
+		}
+
+		@Override
+		public boolean visit(final IfStatement visited) {
+			if (visited.getElseStatement() != null) {
+				IfStatement innerIf= ASTNodes.as(visited.getThenStatement(), IfStatement.class);
+
+				if (innerIf != null
+						&& innerIf.getElseStatement() != null
+						&& !ASTNodes.asList(visited.getElseStatement()).isEmpty()
+						&& ASTNodes.getNbOperands(visited.getExpression()) + ASTNodes.getNbOperands(innerIf.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
+					if (ASTNodes.match(visited.getElseStatement(), innerIf.getElseStatement())) {
+						fRewriteOperations.add(new InnerIfOperation(visited, innerIf, true));
+						return false;
+					}
+
+					if (ASTNodes.match(visited.getElseStatement(), innerIf.getThenStatement())) {
+						fRewriteOperations.add(new InnerIfOperation(visited, innerIf, false));
+						return false;
+					}
+				}
+
+				List<IfStatement> duplicateIfBlocks= new ArrayList<>(4);
+				Set<String> patternNames= new HashSet<>();
+				PatternNameVisitor visitor= new PatternNameVisitor();
+				visited.accept(visitor);
+				patternNames= visitor.getPatternNames();
+				List<Boolean> isThenStatement= new ArrayList<>(4);
+				AtomicInteger operandCount= new AtomicInteger(ASTNodes.getNbOperands(visited.getExpression()));
+				duplicateIfBlocks.add(visited);
+				isThenStatement.add(Boolean.TRUE);
+
+				while (addOneMoreIf(duplicateIfBlocks, isThenStatement, operandCount, patternNames)){
+					// OK continue
+				}
+
+				if (duplicateIfBlocks.size() > 1) {
+					fRewriteOperations.add(new MergeConditionalBlocksOperation(duplicateIfBlocks, isThenStatement));
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private class PatternNameVisitor extends ASTVisitor {
+			private Set<String> patternNames= new HashSet<>();
+
+			@Override
+			public boolean visit(PatternInstanceofExpression node) {
+				Pattern p= node.getPattern();
+				if (p instanceof TypePattern typePattern) {
+					SingleVariableDeclaration patternVariable= typePattern.getPatternVariable();
+					patternNames.add(patternVariable.getName().getFullyQualifiedName());
+				}
+				return true;
+			}
+
+			public Set<String> getPatternNames() {
+				return patternNames;
+			}
+		}
+
+		private boolean addOneMoreIf(final List<IfStatement> duplicateIfBlocks, final List<Boolean> isThenStatement, final AtomicInteger operandCount, Set<String> patternNames) {
+			IfStatement lastBlock= getLast(duplicateIfBlocks);
+			Statement previousStatement= getLast(isThenStatement) ? lastBlock.getThenStatement() : lastBlock.getElseStatement();
+			Statement nextStatement= getLast(isThenStatement) ? lastBlock.getElseStatement() : lastBlock.getThenStatement();
+
+			if (nextStatement != null) {
+				IfStatement nextElse= ASTNodes.as(nextStatement, IfStatement.class);
+
+				if (nextElse != null
+						&& operandCount.get() + ASTNodes.getNbOperands(nextElse.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
+					PatternNameVisitor visitor= new PatternNameVisitor();
+					nextElse.getExpression().accept(visitor);
+					Set<String> siblingPatternNames= visitor.getPatternNames();
+					for (String siblingPatternName : siblingPatternNames) {
+						if (!patternNames.add(siblingPatternName)) {
+							return false;
+						}
+					}
+					if (ASTNodes.match(previousStatement, nextElse.getThenStatement())) {
+						operandCount.addAndGet(ASTNodes.getNbOperands(nextElse.getExpression()));
+						duplicateIfBlocks.add(nextElse);
+						isThenStatement.add(Boolean.TRUE);
+						return true;
+					}
+
+					if (nextElse.getElseStatement() != null
+							&& ASTNodes.match(previousStatement, nextElse.getElseStatement())) {
+						operandCount.addAndGet(ASTNodes.getNbOperands(nextElse.getExpression()));
+						duplicateIfBlocks.add(nextElse);
+						isThenStatement.add(Boolean.FALSE);
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+	}
+
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
 		if (!isEnabled(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS)) {
@@ -106,76 +219,8 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 
 		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
-		unit.accept(new ASTVisitor() {
-			@Override
-			public boolean visit(final IfStatement visited) {
-				if (visited.getElseStatement() != null) {
-					IfStatement innerIf= ASTNodes.as(visited.getThenStatement(), IfStatement.class);
-
-					if (innerIf != null
-							&& innerIf.getElseStatement() != null
-							&& !ASTNodes.asList(visited.getElseStatement()).isEmpty()
-							&& ASTNodes.getNbOperands(visited.getExpression()) + ASTNodes.getNbOperands(innerIf.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
-						if (ASTNodes.match(visited.getElseStatement(), innerIf.getElseStatement())) {
-							rewriteOperations.add(new InnerIfOperation(visited, innerIf, true));
-							return false;
-						}
-
-						if (ASTNodes.match(visited.getElseStatement(), innerIf.getThenStatement())) {
-							rewriteOperations.add(new InnerIfOperation(visited, innerIf, false));
-							return false;
-						}
-					}
-
-					List<IfStatement> duplicateIfBlocks= new ArrayList<>(4);
-					List<Boolean> isThenStatement= new ArrayList<>(4);
-					AtomicInteger operandCount= new AtomicInteger(ASTNodes.getNbOperands(visited.getExpression()));
-					duplicateIfBlocks.add(visited);
-					isThenStatement.add(Boolean.TRUE);
-
-					while (addOneMoreIf(duplicateIfBlocks, isThenStatement, operandCount)) {
-						// OK continue
-					}
-
-					if (duplicateIfBlocks.size() > 1) {
-						rewriteOperations.add(new MergeConditionalBlocksOperation(duplicateIfBlocks, isThenStatement));
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			private boolean addOneMoreIf(final List<IfStatement> duplicateIfBlocks, final List<Boolean> isThenStatement, final AtomicInteger operandCount) {
-				IfStatement lastBlock= getLast(duplicateIfBlocks);
-				Statement previousStatement= getLast(isThenStatement) ? lastBlock.getThenStatement() : lastBlock.getElseStatement();
-				Statement nextStatement= getLast(isThenStatement) ? lastBlock.getElseStatement() : lastBlock.getThenStatement();
-
-				if (nextStatement != null) {
-					IfStatement nextElse= ASTNodes.as(nextStatement, IfStatement.class);
-
-					if (nextElse != null
-							&& operandCount.get() + ASTNodes.getNbOperands(nextElse.getExpression()) < ASTNodes.EXCESSIVE_OPERAND_NUMBER) {
-						if (ASTNodes.match(previousStatement, nextElse.getThenStatement())) {
-							operandCount.addAndGet(ASTNodes.getNbOperands(nextElse.getExpression()));
-							duplicateIfBlocks.add(nextElse);
-							isThenStatement.add(Boolean.TRUE);
-							return true;
-						}
-
-						if (nextElse.getElseStatement() != null
-								&& ASTNodes.match(previousStatement, nextElse.getElseStatement())) {
-							operandCount.addAndGet(ASTNodes.getNbOperands(nextElse.getExpression()));
-							duplicateIfBlocks.add(nextElse);
-							isThenStatement.add(Boolean.FALSE);
-							return true;
-						}
-					}
-				}
-
-				return false;
-			}
-		});
+		IfVisitor visitor= new IfVisitor(rewriteOperations);
+		unit.accept(visitor);
 
 		if (rewriteOperations.isEmpty()) {
 			return null;
