@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Eugene Kuleshov and others.
+ * Copyright (c) 2023, 2025 Eugene Kuleshov and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -186,7 +186,7 @@ public class BytecodeReferenceView extends ViewPart implements IPartListener2, I
 	}
 
 	private void shouDefaultEmptyPage() {
-		browser.setUrl(HelpUtils.getHelpIndex().toString());
+		browser.setUrl(HelpUtils.SPECS_HTML);
 	}
 
 }
