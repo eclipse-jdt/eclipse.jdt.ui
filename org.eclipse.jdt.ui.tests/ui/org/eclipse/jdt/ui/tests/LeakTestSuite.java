@@ -23,14 +23,12 @@ import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.ui.tests.leaks.JavaLeakTest;
 import org.eclipse.jdt.ui.tests.leaks.TextViewerUndoManagerLeakTest;
-import org.eclipse.jdt.ui.tests.leaks.UndoManagerLeakTest;
 import org.eclipse.jdt.ui.tests.search.SearchLeakTestWrapper;
 
 @Suite
 @SelectClasses({
 	JavaLeakTest.class,
 	SearchLeakTestWrapper.class,
-	UndoManagerLeakTest.class,
 	TextViewerUndoManagerLeakTest.class,
 })
 public class LeakTestSuite {
