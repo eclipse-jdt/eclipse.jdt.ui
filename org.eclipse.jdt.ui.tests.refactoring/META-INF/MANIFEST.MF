@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.ui.tests.refactoring
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.ui.tests.refactoring; singleton:=true
-Bundle-Version: 3.15.800.qualifier
+Bundle-Version: 3.16.0.qualifier
 Bundle-Activator: org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
@@ -42,7 +42,7 @@ Require-Bundle:
  org.junit,
  org.eclipse.core.tests.harness,
  junit-jupiter-api
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Eclipse-BundleShape: dir
 Import-Package: org.junit.jupiter.api,
  org.junit.jupiter.api.extension,

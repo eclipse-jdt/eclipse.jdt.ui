@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2022 IBM Corporation and others.
+ * Copyright (c) 2004, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -476,9 +475,8 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 
 		@Override
 		protected void updateAvailableButtons() {
-			boolean isJava8orHigher= JavaModelUtil.is1d8OrHigher(fJavaProject);
 			for (int index : fEnumValuesSinceJava8) {
-				fEnumButtons.enableSelectionButton(index, isJava8orHigher);
+				fEnumButtons.enableSelectionButton(index, true);
 			}
 		}
 

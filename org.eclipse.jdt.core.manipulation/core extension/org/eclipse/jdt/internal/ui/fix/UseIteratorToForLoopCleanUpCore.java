@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Carsten Hammer.
+ * Copyright (c) 2021, 2025 Carsten Hammer and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseIteratorToForLoopFixCore;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
@@ -64,9 +63,6 @@ public class UseIteratorToForLoopCleanUpCore extends AbstractCleanUp {
 		}
 		EnumSet<UseIteratorToForLoopFixCore> computeFixSet= computeFixSet();
 		if (!isEnabled(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED) || computeFixSet.isEmpty()) {
-			return null;
-		}
-		if (!JavaModelUtil.is1d8OrHigher(compilationUnit.getJavaElement().getJavaProject())) {
 			return null;
 		}
 		Set<CompilationUnitRewriteOperation> operations= new LinkedHashSet<>();

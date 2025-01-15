@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 IBM Corporation and others.
+ * Copyright (c) 2020, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,14 +33,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryWithResourcesRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -88,12 +84,6 @@ public class SurroundWithTryWithResourcesAction extends SelectionDispatchAction 
 
 		if (cu == null || !ElementValidator.checkValidateEdit(cu, getShell(), getDialogTitle()))
 			return;
-
-		if (!JavaModelUtil.is1d8OrHigher(cu.getJavaProject())) {
-			String message= Messages.format(RefactoringMessages.SurroundWithTryResourcesAction_not18, BasicElementLabels.getJavaElementName(cu.getJavaProject().getElementName()));
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), getDialogTitle(), message);
-			return;
-		}
 
 		SurroundWithTryWithResourcesRefactoring refactoring= createRefactoring(selection, cu);
 

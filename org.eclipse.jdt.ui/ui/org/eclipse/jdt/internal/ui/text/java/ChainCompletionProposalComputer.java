@@ -173,25 +173,26 @@ public class ChainCompletionProposalComputer implements IJavaCompletionProposalC
 
 		final List<ChainType> expectedTypes= ChainElementAnalyzer.resolveBindingsForExpectedTypes(ctx.getProject(), ctx.getCoreContext());
 		final ChainFinder finder= new ChainFinder(expectedTypes, Arrays.asList(excludedTypes), invocationType);
-		final ExecutorService executor= Executors.newSingleThreadExecutor();
-		try {
-			Future<?> future= executor.submit(() -> {
-				if (findEntrypoints()) {
-					finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth);
-				}
-			});
-
-			long timeout;
+		try (ExecutorService executor= Executors.newSingleThreadExecutor()) {
 			try {
-				timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
-			} catch (NumberFormatException e) {
-				timeout = 1;
+				Future<?> future= executor.submit(() -> {
+					if (findEntrypoints()) {
+						finder.startChainSearch(entrypoints, maxChains, minDepth, maxDepth);
+					}
+				});
+
+				long timeout;
+				try {
+					timeout= Long.parseLong(JavaManipulation.getPreference(PreferenceConstants.PREF_CHAIN_TIMEOUT, ctx.getProject()));
+				} catch (NumberFormatException e) {
+					timeout= 1;
+				}
+				future.get(timeout, TimeUnit.SECONDS);
+			} catch (final Exception e) {
+				finder.cancel();
+				executor.shutdownNow();
+				setError("Timeout during call chain computation."); //$NON-NLS-1$
 			}
-			future.get(timeout, TimeUnit.SECONDS);
-		} catch (final Exception e) {
-			finder.cancel();
-			executor.shutdownNow();
-			setError("Timeout during call chain computation."); //$NON-NLS-1$
 		}
 		return buildCompletionProposals(finder.getChains());
 	}

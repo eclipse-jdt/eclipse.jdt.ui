@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -2739,5 +2739,15 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	@Test
 	public void testIssue1758() throws Exception {
 		invalidSelectionTest();
+	}
+
+	@Test
+	public void testIssue1913_1() throws Exception {
+		validSelectionTestChecked();
+	}
+
+	@Test
+	public void testIssue1913_2() throws Exception {
+		validSelectionTestChecked();
 	}
 }

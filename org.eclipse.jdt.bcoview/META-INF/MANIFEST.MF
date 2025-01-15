@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.bcoview;singleton:=true
-Bundle-Version: 1.2.600.qualifier
+Bundle-Version: 1.3.0.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.eclipse.jdt.bcoview.BytecodeOutlinePlugin
 Bundle-Vendor: %providerName
@@ -24,6 +24,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.filesystem
 Eclipse-LazyStart: true
 Import-Package: org.objectweb.asm.tree.analysis;version="9.4.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.eclipse.jdt.bcoview

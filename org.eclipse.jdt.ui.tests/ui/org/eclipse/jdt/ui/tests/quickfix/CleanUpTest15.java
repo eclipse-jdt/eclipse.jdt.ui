@@ -397,6 +397,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        StringBuilder buf9 = new StringBuilder("abc\\n").append("def\\n").append("ghi");
 			        buf9.append("jkl\\n").append("mno");
 			        System.out.println(buf9.toString());
+			        int index2 = buf9.indexOf("ijk", 3); //$NON-NLS-1$
 			        StringBuilder buf10= new StringBuilder();
 			        buf10.append("    /** bar\\n");
 			        buf10.append("     * foo\\n");
@@ -531,6 +532,7 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            jkl
 			            mno\""";
 			        System.out.println(str7);
+			        int index2 = str7.indexOf("ijk", 3); //$NON-NLS-1$
 			        String str8 = \"""
 			                /** bar
 			                 * foo

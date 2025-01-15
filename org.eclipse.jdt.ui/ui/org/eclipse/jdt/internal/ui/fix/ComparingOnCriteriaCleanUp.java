@@ -68,7 +68,6 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.ControlWorkflowMatcher;
 import org.eclipse.jdt.internal.corext.util.ControlWorkflowMatcherRunnable;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.NodeMatcher;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
@@ -164,7 +163,7 @@ public class ComparingOnCriteriaCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(final CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.COMPARING_ON_CRITERIA) || !JavaModelUtil.is1d8OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.COMPARING_ON_CRITERIA)) {
 			return null;
 		}
 

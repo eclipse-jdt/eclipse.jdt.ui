@@ -50,6 +50,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -855,9 +857,34 @@ public class SourceProvider {
 		}
 		if (rs != null) {
 			Expression exp= rs.getExpression();
-			result.add(createRange(exp, exp));
+			if (!(exp instanceof LambdaExpression) && hasNLS(rs)) {
+				result.add(createRange(exp, rs));
+			} else {
+				result.add(createRange(exp, exp));
+			}
 		}
 		return result;
+	}
+
+	private boolean hasNLS(Statement s) {
+		ASTNode root= s.getRoot();
+		if (root instanceof CompilationUnit) {
+			CompilationUnit unit= (CompilationUnit)root;
+			int start= unit.getExtendedStartPosition(s);
+			int length = unit.getExtendedLength(s);
+			IJavaElement element= unit.getJavaElement();
+			if (element != null && element instanceof ICompilationUnit icu) {
+				try {
+					String statement= icu.getBuffer().getText(start, length);
+					if (statement.matches(".*?//\\s?\\$NON-NLS-\\d+\\$.*$")) { //$NON-NLS-1$
+						return true;
+					}
+				} catch (IndexOutOfBoundsException | JavaModelException e) {
+					// do nothing
+				}
+			}
+		}
+		return false;
 	}
 
 	private IRegion createRange(List<Statement> statements, int end) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -98,14 +98,10 @@ import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
-import org.eclipse.jdt.launching.AbstractVMInstall;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -1000,8 +996,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				JUnitPlugin.log(e);
 			}
 		}
-
-		validateTestLoaderJVM();
 	}
 
 	private void validateJavaProject(IJavaProject javaProject) {
@@ -1023,33 +1017,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			}
 		}
 
-	}
-
-	private void validateTestLoaderJVM() {
-		if (fLaunchConfiguration == null)
-			return;
-
-		TestKind testKind= getSelectedTestKind();
-		if (testKind == null || TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId()))
-			return;
-		try {
-			String path= fLaunchConfiguration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_JRE_CONTAINER_PATH, (String) null);
-			if (path != null) {
-				IVMInstall vm= JavaRuntime.getVMInstall(Path.fromPortableString(path));
-				if (vm instanceof AbstractVMInstall) {
-					String compliance= ((AbstractVMInstall) vm).getJavaVersion();
-					if (compliance != null) {
-						String testKindId= testKind.getId();
-						if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId) && !JUnitStubUtility.is50OrHigher(compliance)) {
-							setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK15_required);
-						} else if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) && !JUnitStubUtility.is18OrHigher(compliance)) {
-							setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK18_required);
-						}
-					}
-				}
-			}
-		} catch (CoreException e) {
-		}
 	}
 
 	private void setEnableContainerTestGroup(boolean enabled) {

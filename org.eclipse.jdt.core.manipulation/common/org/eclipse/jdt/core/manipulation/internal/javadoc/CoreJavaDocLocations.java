@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -404,7 +404,7 @@ public class CoreJavaDocLocations {
 				IVMInstall install= JavaRuntime.getVMInstall(javaProject);
 				if (install instanceof AbstractVMInstall) {
 					String vmver= ((AbstractVMInstall) install).getJavaVersion();
-					is1d8Or9= JavaModelUtil.is1d8OrHigher(vmver) && !JavaModelUtil.is10OrHigher(vmver);
+					is1d8Or9= !JavaModelUtil.is10OrHigher(vmver);
 				} else {
 					is1d8Or9= JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_1_8) == 0 || JavaCore.compareJavaVersions(compliance, JavaCore.VERSION_9) == 0;
 				}

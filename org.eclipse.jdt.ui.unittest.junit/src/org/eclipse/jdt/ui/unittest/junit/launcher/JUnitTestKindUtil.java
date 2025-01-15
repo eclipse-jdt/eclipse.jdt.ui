@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2020 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,18 +37,14 @@ class JUnitTestKindUtil {
 	public static String getContainerTestKindId(IJavaElement element) {
 		if (element != null) {
 			IJavaProject project = element.getJavaProject();
-			if (CoreTestSearchEngine.is50OrHigher(project)) {
-				if (CoreTestSearchEngine.is18OrHigher(project)) {
-					if (isRunWithJUnitPlatform(element)) {
-						return JUNIT4_TEST_KIND_ID;
-					}
-					if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
-						return JUNIT5_TEST_KIND_ID;
-					}
-				}
-				if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
-					return JUNIT4_TEST_KIND_ID;
-				}
+			if (isRunWithJUnitPlatform(element)) {
+				return JUNIT4_TEST_KIND_ID;
+			}
+			if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
+				return JUNIT5_TEST_KIND_ID;
+			}
+			if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
+				return JUNIT4_TEST_KIND_ID;
 			}
 		}
 		return JUNIT3_TEST_KIND_ID;

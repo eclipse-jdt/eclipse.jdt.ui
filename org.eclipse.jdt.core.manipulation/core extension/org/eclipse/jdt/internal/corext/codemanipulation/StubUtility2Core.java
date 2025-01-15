@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2024 IBM Corporation and others.
+ * Copyright (c) 2018, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -85,7 +85,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManagerCore;
 import org.eclipse.jdt.internal.ui.util.ASTHelper;
@@ -137,7 +136,7 @@ public final class StubUtility2Core {
 		int modifiers= binding.getModifiers();
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is1d8OrHigher(javaProject))) {
+		if (!inInterface || (declaringType != typeObject)) {
 			// generate a method body
 
 			Map<String, String> options= FormatterProfileManagerCore.getProjectSettings(javaProject);
@@ -474,7 +473,7 @@ public final class StubUtility2Core {
 		int modifiers= binding.getModifiers();
 		ITypeBinding declaringType= binding.getDeclaringClass();
 		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
-		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is1d8OrHigher(javaProject))) {
+		if (!inInterface || (declaringType != typeObject)) {
 			// generate a method body
 
 			Map<String, String> options= unit.getOptions(true);
@@ -685,7 +684,7 @@ public final class StubUtility2Core {
 		int modifiers= method.getModifiers();
 		if (inInterface) {
 			modifiers= modifiers & ~Modifier.PROTECTED & ~Modifier.PUBLIC;
-			if (Modifier.isAbstract(modifiers) && JavaModelUtil.is1d8OrHigher(javaProject)) {
+			if (Modifier.isAbstract(modifiers)) {
 				modifiers= modifiers | Modifier.DEFAULT;
 			}
 		} else {

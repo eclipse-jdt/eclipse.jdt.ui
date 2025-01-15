@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Andrey Loskutov and others.
+ * Copyright (c) 2023, 2025 Andrey Loskutov and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -29,7 +30,7 @@ import org.eclipse.jdt.core.dom.AST;
  * Fetches latest supported JLS spec and provides help for bytecode opcodes.
  */
 public class HelpUtils {
-	private static final String SPECS_HTML = "https://docs.oracle.com/javase/specs/jvms/se" + AST.getJLSLatest() + "/html/jvms-6.html"; //$NON-NLS-1$ //$NON-NLS-2$
+	static final String SPECS_HTML = "https://docs.oracle.com/javase/specs/jvms/se" + AST.getJLSLatest() + "/html/jvms-6.html"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static String fullSpec;
 
@@ -91,7 +92,7 @@ public class HelpUtils {
 
 	private static URL toUrl(String href) {
 		try {
-			return new URL(href);
+			return URI.create(href).toURL();
 		} catch (MalformedURLException e) {
 			return null;
 		}

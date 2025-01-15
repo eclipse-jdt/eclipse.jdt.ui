@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2022 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionAndMethodRefFixCore;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
@@ -85,7 +84,7 @@ public class LambdaExpressionAndMethodRefCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit unit) throws CoreException {
-		if (!isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF) || !JavaModelUtil.is1d8OrHigher(unit.getJavaElement().getJavaProject())) {
+		if (!isEnabled(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF)) {
 			return null;
 		}
 

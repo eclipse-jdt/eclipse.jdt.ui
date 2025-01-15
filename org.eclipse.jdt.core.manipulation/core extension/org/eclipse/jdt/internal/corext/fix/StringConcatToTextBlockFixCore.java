@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1058,7 +1058,9 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 					SimpleName caller= ast.newSimpleName(newVarName);
 					newCall.setExpression(caller);
 					List<Expression> arguments= indexOfCall.arguments();
-					newCall.arguments().add(rewrite.createCopyTarget(arguments.get(0)));
+					for (Expression argument : arguments) {
+						newCall.arguments().add(rewrite.createCopyTarget(argument));
+					}
 					rewrite.replace(indexOfCall, newCall, group);
 				}
 				for (SimpleName arg : fArgList) {

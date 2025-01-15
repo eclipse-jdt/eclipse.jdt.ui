@@ -119,14 +119,12 @@ import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.SealedClassFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
-import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer;
@@ -1134,31 +1132,7 @@ public abstract class LocalCorrectionsBaseSubProcessor<T> {
 						String qfn= importRewrite.addImport(methodName[0]);
 						method.setExpression(ast.newName(qfn));
 						method.setName(ast.newSimpleName(methodName[1]));
-						ASTNode parent= selectedNode.getParent();
 						ICompilationUnit cu= context.getCompilationUnit();
-						// add explicit type arguments if necessary (for 1.8 and later, we're optimistic that inference just works):
-						if (Invocations.isInvocationWithArguments(parent) && !JavaModelUtil.is1d8OrHigher(cu.getJavaProject())) {
-							IMethodBinding methodBinding= Invocations.resolveBinding(parent);
-							if (methodBinding != null) {
-								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
-								int i= Invocations.getArguments(parent).indexOf(selectedNode);
-								if (parameterTypes.length >= i && parameterTypes[i].isParameterizedType()) {
-									ITypeBinding[] typeArguments= parameterTypes[i].getTypeArguments();
-									for (ITypeBinding typeArgument : typeArguments) {
-										typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
-										if (!TypeRules.isJavaLangObject(typeArgument)) {
-											// add all type arguments if at least one is found to be necessary:
-											List<Type> typeArgumentsList= method.typeArguments();
-											for (ITypeBinding t : typeArguments) {
-												typeArgument= Bindings.normalizeForDeclarationUse(t, ast);
-												typeArgumentsList.add(importRewrite.addImport(typeArgument, ast));
-											}
-											break;
-										}
-									}
-								}
-							}
-						}
 
 						astRewrite.replace(selectedNode, method, null);
 
