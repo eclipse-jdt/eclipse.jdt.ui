@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation and others.
+ * Copyright (c) 2023, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,10 +91,9 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		if (warningToken == null) {
 			return;
 		}
-		for (T element : proposals) {
-			if (element instanceof SuppressWarningsProposalCore && warningToken.equals(((SuppressWarningsProposalCore) element).getWarningToken())) {
-				return; // only one at a time
-			}
+
+		if (alreadyHasProposal(proposals, warningToken)) {
+			return;
 		}
 
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
@@ -259,4 +258,6 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 	protected abstract T createASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance);
 
 	protected abstract T createFixCorrectionProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context);
+
+	protected abstract boolean alreadyHasProposal(Collection<T> proposals, String warningToken);
 }
