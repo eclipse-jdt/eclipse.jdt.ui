@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,18 +14,12 @@
 
 package org.eclipse.jdt.jeview;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.eclipse.jface.resource.ImageDescriptor;
 
 
 public class JEPluginImages {
 
-	private static URL fgIconBaseURL= null;
-	static {
-		fgIconBaseURL= JEViewPlugin.getDefault().getBundle().getEntry("/icons/c/"); //$NON-NLS-1$
-	}
+	private static final String fgIconBase= "/icons/c/";
 
 	public static final String CHILDREN= "children.png";
 	public static final String INFO= "info.png";
@@ -43,11 +37,7 @@ public class JEPluginImages {
 	public static final ImageDescriptor IMG_SET_FOCUS_CODE_SELECT= create(CODE_SELECT);
 
 	private static ImageDescriptor create(String name) {
-		try {
-			return ImageDescriptor.createFromURL(new URL(fgIconBaseURL, name));
-		} catch (MalformedURLException e) {
-			return ImageDescriptor.getMissingImageDescriptor();
-		}
+		return ImageDescriptor.createFromURL(JEViewPlugin.getDefault().getBundle().getEntry(fgIconBase+ name));
 	}
 
 	private JEPluginImages() {
