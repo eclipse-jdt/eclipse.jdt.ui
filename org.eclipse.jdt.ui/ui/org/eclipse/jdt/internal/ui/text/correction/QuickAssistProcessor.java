@@ -698,7 +698,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getDeprecatedProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> proposals) {
 		// don't add if already added as quick fix
-		if (containsMatchingProblem(locations, IProblem.UsingDeprecatedMethod))
+		if (containsMatchingProblem(locations, IProblem.UsingDeprecatedMethod) ||
+				containsMatchingProblem(locations, IProblem.UsingDeprecatedConstructor))
 			return false;
 
 		if (!(node instanceof MethodInvocation)) {

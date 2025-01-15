@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -49,6 +49,9 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new SuppressWarningsProposalCore(warningToken, label, cu, node, property, relevance));
 		}
+		public SuppressWarningsProposalCore getCoreDelegate() {
+			return (SuppressWarningsProposalCore) this.getDelegate();
+		}
 	}
 
 	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -90,6 +93,17 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 	}
 
 	SuppressWarningsSubProcessor() {
+	}
+
+
+	@Override
+	protected boolean alreadyHasProposal(Collection<ICommandAccess> proposals, String warningToken) {
+		for (ICommandAccess element : proposals) {
+			if (element instanceof SuppressWarningsProposal swp && warningToken.equals(swp.getCoreDelegate().getWarningToken())) {
+				return true; // only one at a time
+			}
+		}
+		return false;
 	}
 
 }
