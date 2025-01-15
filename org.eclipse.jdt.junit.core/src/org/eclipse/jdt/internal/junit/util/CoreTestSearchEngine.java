@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -268,49 +268,4 @@ public class CoreTestSearchEngine {
 		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
 		new SearchEngine().search(suitePattern, participants, scope, requestor, pm);
 	}
-
-
-// --- copied from org.eclipse.jdt.internal.corext.util.JavaModelUtil: ---
-	/**
-	 * @param version1 the first version
-	 * @param version2 the second version
-	 * @return <code>true</code> iff version1 is less than version2
-	 */
-	public static boolean isVersionLessThan(String version1, String version2) {
-		return JavaCore.compareJavaVersions(version1, version2) < 0;
-	}
-
-
-	public static boolean is50OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 5.0 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 5.0 or greater.
-	 */
-	public static boolean is50OrHigher(IJavaProject project) {
-		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
-		return is50OrHigher(source);
-	}
-
-	public static boolean is18OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_8);
-	}
-
-	/**
-	 * Checks if the given project or workspace has source compliance 1.8 or greater.
-	 *
-	 * @param project the project to test or <code>null</code> to test the workspace settings
-	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or
-	 *         greater.
-	 */
-	public static boolean is18OrHigher(IJavaProject project) {
-		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
-		return is18OrHigher(source);
-	}
-// ---
-
 }

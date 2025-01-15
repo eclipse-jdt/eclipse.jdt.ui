@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,6 @@ import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
-import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.ISharedImages;
@@ -214,10 +213,6 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	}
 
 	private boolean isInsideJUnit4Test(IInvocationContext context) {
-		if (!JUnitStubUtility.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
-			return false;
-		}
-
 		ASTNode node= context.getCoveringNode();
 		while (node != null && !(node instanceof BodyDeclaration)) {
 			node= node.getParent();

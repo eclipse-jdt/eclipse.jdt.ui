@@ -52,7 +52,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -73,7 +72,6 @@ import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -85,7 +83,7 @@ import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ColoredViewersManager;
-import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.FocusDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
@@ -584,11 +582,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		fInnerLabelProvider= new OutlineLabelProvider();
 		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
-		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
-		if (decoratorMgr.getEnabled("org.eclipse.jdt.ui.override.decorator")) //$NON-NLS-1$
-			fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
-
-		treeViewer.setLabelProvider(new ColoringLabelProvider(fInnerLabelProvider));
+		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fInnerLabelProvider));
 
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
 		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);

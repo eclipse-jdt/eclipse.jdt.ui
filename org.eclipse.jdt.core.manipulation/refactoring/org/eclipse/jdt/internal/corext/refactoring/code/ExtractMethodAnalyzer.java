@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -77,7 +78,6 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -108,7 +108,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class ExtractMethodAnalyzer extends CodeAnalyzer {
@@ -148,6 +147,8 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	private boolean fForceStatic;
 	private boolean fIsLastStatementSelected;
 	private SimpleName fEnclosingLoopLabel;
+
+	private boolean fSelectionChanged;
 
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws CoreException {
 		super(unit, selection, false);
@@ -214,12 +215,14 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 		return fTypeVariables;
 	}
 
+	public boolean isSelectionChanged() {
+		return fSelectionChanged;
+	}
+
 	//---- Activation checking ---------------------------------------------------------------------------
 
 	public boolean isValidDestination(ASTNode node) {
-		boolean isInterface= node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
-		return !(node instanceof AnnotationTypeDeclaration) &&
-				(!isInterface || JavaModelUtil.is1d8OrHigher(fCUnit.getJavaProject()));
+		return !(node instanceof AnnotationTypeDeclaration);
 	}
 
 	public RefactoringStatus checkInitialConditions(ImportRewrite rewriter) {
@@ -252,15 +255,25 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 			returns++;
 		}
 		if (isExpressionSelected()) {
-			fReturnKind= EXPRESSION;
-			returns++;
+			if (returns == 0 || getFirstSelectedNode().getLocationInParent() != ExpressionStatement.EXPRESSION_PROPERTY) {
+				fReturnKind= EXPRESSION;
+				returns++;
+			} else {
+				ASTNode firstParent= getFirstSelectedNode().getParent();
+				Selection newSelection= Selection.createFromStartEnd(getSelection().getOffset(),
+						firstParent.getStartPosition() + firstParent.getLength());
+				setSelection(newSelection);
+				reset();
+				fSelectionChanged= true;
+				return result;
+			}
 		}
-
 		if (returns > 1) {
 			result.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_ambiguous_return_value, JavaStatusContext.create(fCUnit, getSelection()));
 			fReturnKind= MULTIPLE;
 			return result;
 		}
+
 		initReturnType(rewriter);
 		return result;
 	}
@@ -887,8 +900,22 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 
 	//---- Special visitor methods ---------------------------------------------------------------------------
 
+//	@Override
+//	protected void handleFirstSelectedNode(ASTNode node) {
+//		if (node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+//			super.handleFirstSelectedNode(node.getParent());
+//		} else {
+//			super.handleFirstSelectedNode(node);
+//		}
+//	}
+//
 	@Override
 	protected void handleNextSelectedNode(ASTNode node) {
+//		if (node.getLocationInParent() == ExpressionStatement.EXPRESSION_PROPERTY) {
+//			super.handleNextSelectedNode(node.getParent());
+//		} else {
+//			super.handleNextSelectedNode(node);
+//		}
 		super.handleNextSelectedNode(node);
 		checkParent(node);
 	}
@@ -1230,5 +1257,8 @@ public class ExtractMethodAnalyzer extends CodeAnalyzer {
 	private boolean isResourceInTry(Expression node) {
 		return getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node && node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
+
+
+
 }
 

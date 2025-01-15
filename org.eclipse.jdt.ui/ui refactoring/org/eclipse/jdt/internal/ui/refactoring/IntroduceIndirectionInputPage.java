@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
@@ -190,8 +189,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		IJavaElement[] elements= new IJavaElement[] { proj };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
-		int elementKinds= JavaModelUtil.is1d8OrHigher(proj) ? IJavaSearchConstants.CLASS_AND_INTERFACE : IJavaSearchConstants.CLASS;
-		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false, getWizard().getContainer(), scope, elementKinds);
+		FilteredTypesSelectionDialog dialog= new FilteredTypesSelectionDialog(getShell(), false, getWizard().getContainer(), scope, IJavaSearchConstants.CLASS_AND_INTERFACE);
 
 		dialog.setTitle(RefactoringMessages.IntroduceIndirectionInputPage_dialog_choose_declaring_class);
 		dialog.setMessage(RefactoringMessages.IntroduceIndirectionInputPage_dialog_choose_declaring_class_long);

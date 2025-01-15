@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -249,11 +249,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 				if (locationInParent == ExpressionMethodReference.EXPRESSION_PROPERTY) {
 					typeKind= TypeKinds.REF_TYPES;
 				} else if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
-					if (JavaModelUtil.is1d8OrHigher(cu.getJavaProject())) {
-						typeKind= TypeKinds.CLASSES | TypeKinds.INTERFACES | TypeKinds.ENUMS;
-					} else {
-						typeKind= TypeKinds.CLASSES;
-					}
+					typeKind= TypeKinds.CLASSES | TypeKinds.INTERFACES | TypeKinds.ENUMS;
 				} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 					Expression expression= ((FieldAccess) parent).getExpression();
 					if (expression != null) {
@@ -879,8 +875,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			return;
 		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
 			return;
-		String version= JavaModelUtil.is1d8OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)"; //$NON-NLS-1$ //$NON-NLS-2$
-		Bundle[] annotationsBundles= JavaManipulationPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
+		Bundle[] annotationsBundles= JavaManipulationPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", "2"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (annotationsBundles == null)
 			return;
 
@@ -1573,7 +1568,6 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 				ITypeBinding[] parameterTypes= getParameterTypes(arguments);
 				if (parameterTypes != null) {
 					String sig= ASTResolving.getMethodSignature(methodName, parameterTypes, false);
-					boolean is18OrHigher= JavaModelUtil.is1d8OrHigher(targetCU.getJavaProject());
 					boolean isSenderTypeAbstractClass= (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0;
 					boolean isSenderBindingInterface= senderDeclBinding.isInterface();
 					int firstProposalUid= -1;
@@ -1591,16 +1585,14 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 						labelAbstract= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_abstract_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
 					}
 
-					boolean type1= is18OrHigher || !isSenderBindingInterface
-							|| (nodeParentType != senderDeclBinding && (!(sender instanceof SimpleName) || !((SimpleName) sender).getIdentifier().equals(senderDeclBinding.getName())));
-					if (type1) {
+					{
 						NewMethodCorrectionProposalCore core= new NewMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
 						T t= newMethodProposalToT(core, firstProposalUid);
 						if (t != null)
 							proposals.add(t);
 					}
 
-					if ( type1 && isSenderTypeAbstractClass ) {
+					if (isSenderTypeAbstractClass ) {
 						NewAbstractMethodCorrectionProposalCore core= new NewAbstractMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
 						T t= newMethodProposalToT(core, NewMethodProposal4);
 						if (t != null)
@@ -1615,26 +1607,24 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 							isSenderBindingInterface= senderDeclBinding.isInterface();
 							isSenderTypeAbstractClass= (senderDeclBinding.getModifiers() &  Modifier.ABSTRACT) > 0;
 							if (!senderDeclBinding.isAnonymous()) {
-								if (is18OrHigher || !isSenderBindingInterface) {
-									String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
-									label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
-									labelAbstract= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_abstract_other_description, args);
-									int nextUid;
-									if (isSenderBindingInterface) {
-										nextUid= NewMethodProposal5;
-									} else {
-										nextUid= NewMethodProposal6;
-									}
-									NewMethodCorrectionProposalCore core= new NewMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
-									T t= newMethodProposalToT(core, nextUid);
-									if (t != null)
-										proposals.add(t);
-									if ( isSenderTypeAbstractClass ) {
-										NewAbstractMethodCorrectionProposalCore c2= new NewAbstractMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
-										T t2= newMethodProposalToT(c2, NewMethodProposal7);
-										if (t2 != null)
-											proposals.add(t2);
-									}
+								String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
+								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
+								labelAbstract= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_abstract_other_description, args);
+								int nextUid;
+								if (isSenderBindingInterface) {
+									nextUid= NewMethodProposal5;
+								} else {
+									nextUid= NewMethodProposal6;
+								}
+								NewMethodCorrectionProposalCore core= new NewMethodCorrectionProposalCore(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
+								T t= newMethodProposalToT(core, nextUid);
+								if (t != null)
+									proposals.add(t);
+								if ( isSenderTypeAbstractClass ) {
+									NewAbstractMethodCorrectionProposalCore c2= new NewAbstractMethodCorrectionProposalCore(labelAbstract, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD);
+									T t2= newMethodProposalToT(c2, NewMethodProposal7);
+									if (t2 != null)
+										proposals.add(t2);
 								}
 							}
 						}

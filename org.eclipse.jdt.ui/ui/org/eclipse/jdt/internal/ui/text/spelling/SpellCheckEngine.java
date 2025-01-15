@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -103,11 +103,11 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 				String localeName= fileName.substring(0, localeEnd);
 				int languageEnd=localeName.indexOf('_');
 				if (languageEnd == -1)
-					localesWithInstalledDictionaries.add(new Locale(localeName));
+					localesWithInstalledDictionaries.add(Locale.of(localeName));
 				else if (languageEnd == 2 && localeName.length() == 5)
-					localesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3)));
+					localesWithInstalledDictionaries.add(Locale.of(localeName.substring(0, 2), localeName.substring(3)));
 				else if (localeName.length() > 6 && localeName.charAt(5) == '_')
-					localesWithInstalledDictionaries.add(new Locale(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
+					localesWithInstalledDictionaries.add(Locale.of(localeName.substring(0, 2), localeName.substring(3, 5), localeName.substring(6)));
 			}
 		}
 
@@ -342,15 +342,15 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 
 		int length= locale.length();
 		if (length >= 5)
-			return new Locale(locale.substring(0, 2), locale.substring(3, 5));
+			return Locale.of(locale.substring(0, 2), locale.substring(3, 5));
 
 		if (length == 2 && locale.indexOf('_') == -1)
-			return new Locale(locale);
+			return Locale.of(locale);
 
 		if (length == 3 && locale.charAt(0) == '_')
-			return new Locale("", locale.substring(1)); //$NON-NLS-1$
+			return Locale.of("", locale.substring(1)); //$NON-NLS-1$
 
-		return new Locale(""); //$NON-NLS-1$
+		return Locale.of(""); //$NON-NLS-1$
 	}
 
 	/*

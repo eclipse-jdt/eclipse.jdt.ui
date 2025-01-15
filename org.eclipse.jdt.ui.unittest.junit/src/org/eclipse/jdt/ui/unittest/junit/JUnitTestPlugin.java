@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -130,18 +130,14 @@ public class JUnitTestPlugin extends AbstractUIPlugin {
 	public static JUnitVersion getJUnitVersion(IJavaElement element) {
 		if (element != null) {
 			IJavaProject project = element.getJavaProject();
-			if (CoreTestSearchEngine.is50OrHigher(project)) {
-				if (CoreTestSearchEngine.is18OrHigher(project)) {
-					if (isRunWithJUnitPlatform(element)) {
-						return JUnitVersion.JUNIT4;
-					}
-					if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
-						return JUnitVersion.JUNIT5;
-					}
-				}
-				if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
-					return JUnitVersion.JUNIT4;
-				}
+			if (isRunWithJUnitPlatform(element)) {
+				return JUnitVersion.JUNIT4;
+			}
+			if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
+				return JUnitVersion.JUNIT5;
+			}
+			if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
+				return JUnitVersion.JUNIT4;
 			}
 		}
 		return JUnitVersion.JUNIT3;

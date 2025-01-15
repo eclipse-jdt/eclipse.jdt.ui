@@ -124,35 +124,36 @@ public class ChangedValueChecker extends AbstractChecker {
 	}
 
 	public boolean hasConflict() {
-		ExecutorService threadPool= new ThreadPoolExecutor(5, 10, 5, TimeUnit.SECONDS,
-				new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy());
-		try {
-			for (ASTNode node : fMiddleNodes) {
-				if (fConflict) {
-					break;
+		try (ExecutorService threadPool= new ThreadPoolExecutor(5, 10, 5, TimeUnit.SECONDS,
+				new ArrayBlockingQueue<>(10), new ThreadPoolExecutor.CallerRunsPolicy())) {
+			try {
+				for (ASTNode node : fMiddleNodes) {
+					if (fConflict) {
+						break;
+					}
+					Position pos= new Position(node.getStartPosition(), node.getLength());
+					if (fPosSet.add(pos)) {
+						threadPool.execute(() -> {
+							UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
+							node.accept(uv);
+							if (uv.hasConflict()) {
+								fConflict= true;
+							}
+						});
+					}
 				}
-				Position pos= new Position(node.getStartPosition(), node.getLength());
-				if (fPosSet.add(pos)) {
-					threadPool.execute(() -> {
-						UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
-						node.accept(uv);
-						if (uv.hasConflict()) {
-							fConflict= true;
-						}
-					});
+				if (!fConflict) {
+					threadPool.shutdown();
+					while (!threadPool.isTerminated() && !fConflict) {
+						threadPool.awaitTermination(10, TimeUnit.MILLISECONDS);
+					}
 				}
+			} catch (InterruptedException e) {
+			} finally {
+				threadPool.shutdownNow();
 			}
-			if (!fConflict) {
-				threadPool.shutdown();
-				while (!threadPool.isTerminated() && !fConflict) {
-					threadPool.awaitTermination(10, TimeUnit.MILLISECONDS);
-				}
-			}
-		} catch (InterruptedException e) {
-		} finally {
-			threadPool.shutdownNow();
+			return fConflict;
 		}
-		return fConflict;
 	}
 	private class FunctionSearchRequestor extends SearchRequestor {
 

@@ -1002,8 +1002,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String SurroundWithTryResourcesAction_exception;
 
-	public static String SurroundWithTryResourcesAction_not18;
-
 	public static String SurroundWithTryResourcesAction_dialog_title;
 
 	public static String UseSupertypeAction_to_activate;

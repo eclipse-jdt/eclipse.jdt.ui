@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,7 +57,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public record E(int width, int height) {
 			    public void foo() {
 			        String k = "bcd";
@@ -75,12 +75,12 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.util.regex.Pattern;
-			
+
 			public record E(int width, int height) {
 			    private static final Pattern k_pattern = Pattern.compile("bcd");
-			
+
 			    public void foo() {
 			        Pattern k = k_pattern;
 			        String m = "abcdef";
@@ -100,7 +100,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public record E(int width, int height) {
 			    public void foo() {
 			    }
@@ -112,7 +112,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public record E(int width, int height) {
 			    public void foo() {
 			    }
@@ -128,9 +128,9 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String given= """
 			package test1;
-			
+
 			import java.util.Date;
-			
+
 			public class E {
 			    public long matchPatternForInstanceof(Object object) {
 			        // Keep this comment
@@ -139,10 +139,10 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            Date date = (Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long matchPatternForInstanceofOnFinalVariable(Object object) {
 			        // Keep this comment
 			        if (object instanceof Date) {
@@ -150,20 +150,20 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            final Date date = (Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long matchPatternInConditionalAndExpression(Object object, boolean isValid) {
 			        if (isValid && object instanceof Date) {
 			            // Keep this comment
 			            Date date = (Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long matchPatternInElse(Object object) {
 			        if (!(object instanceof Date)) {
 			            return 0;
@@ -172,7 +172,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            return date.getTime();
 			        }
 			    }
-			
+
 			    public long matchPatternInConditionalOrExpression(Object object, boolean isValid) {
 			        if (!(object instanceof Date) || isValid) {
 			            return 0;
@@ -181,21 +181,21 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            return date.getTime();
 			        }
 			    }
-			
+
 			    public long matchPatternInElse(Object object) {
 			        if (!(object instanceof Date)) {
 			            return 0;
 			        }
-			
+
 			        Date date = (Date) object;
 			        return date.getTime();
 			    }
-			
+
 			    public int matchPatternOnLoneStatement(Object object) {
 			        // Keep this comment
 			        if (!(object instanceof Date)) object.toString();
 			        else {Date date = (Date) object;}
-			
+
 			        return 0;
 			    }
 			}
@@ -206,9 +206,9 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			import java.util.Date;
-			
+
 			public class E {
 			    public long matchPatternForInstanceof(Object object) {
 			        // Keep this comment
@@ -216,29 +216,29 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            // Keep this comment too
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long matchPatternForInstanceofOnFinalVariable(Object object) {
 			        // Keep this comment
 			        if (object instanceof final Date date) {
 			            // Keep this comment too
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long matchPatternInConditionalAndExpression(Object object, boolean isValid) {
 			        if (isValid && object instanceof Date date) {
 			            // Keep this comment
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long matchPatternInElse(Object object) {
 			        if (!(object instanceof Date date)) {
 			            return 0;
@@ -246,7 +246,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            return date.getTime();
 			        }
 			    }
-			
+
 			    public long matchPatternInConditionalOrExpression(Object object, boolean isValid) {
 			        if (!(object instanceof Date date) || isValid) {
 			            return 0;
@@ -254,20 +254,20 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            return date.getTime();
 			        }
 			    }
-			
+
 			    public long matchPatternInElse(Object object) {
 			        if (!(object instanceof Date date)) {
 			            return 0;
 			        }
-			
+
 			        return date.getTime();
 			    }
-			
+
 			    public int matchPatternOnLoneStatement(Object object) {
 			        // Keep this comment
 			        if (!(object instanceof Date date)) object.toString();
 			        else {}
-			
+
 			        return 0;
 			    }
 			}
@@ -283,7 +283,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			   \s
 			    static class InternalStaticClass {
@@ -297,16 +297,16 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            return k;
 			        }
 			    }
-			
+
 			}
 			"""; //
 		pack.createCompilationUnit("E1.java", sample, false, null);
 
 		sample= """
 			package test1;
-			
+
 			import test1.E1.InternalStaticClass;
-			
+
 			public class E {
 			   \s
 			    public void foo(Object x) {
@@ -316,7 +316,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            System.out.println(t.getK());
 			        }
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
@@ -325,7 +325,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
 			   \s
 			    public void foo(Object x) {
@@ -334,7 +334,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            System.out.println(t.getK());
 			        }
 			    }
-			
+
 			}
 			"""; //
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -346,11 +346,11 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
-			
+
 			    protected String getString(Number number) {
-			
+
 			        if (number instanceof Long n) {
 			            return n.toString();
 			        }
@@ -366,10 +366,10 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			        if (number instanceof Double m && m.isInfinite()) {
 			            return "Inf"; //$NON-NLS-1$
 			        }
-			
+
 			        return null;
 			    }
-			
+
 			}
 			"""; //
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
@@ -378,11 +378,11 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String expected= """
 			package test1;
-			
+
 			public class E {
-			
+
 			    protected String getString(Number number) {
-			
+
 			        if (number instanceof Long n) {
 			            return n.toString();
 			        }
@@ -395,10 +395,10 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			        if ((number instanceof Float n && n.isInfinite()) || (number instanceof Double m && m.isInfinite())) {
 			            return "Inf"; //$NON-NLS-1$
 			        }
-			
+
 			        return null;
 			    }
-			
+
 			}
 			"""; //
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
@@ -410,29 +410,29 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.util.Date;
 			import java.util.List;
-			
+
 			public class E {
 			    public long doNotMatchInOppositeCondition(Object object) {
 			        if (!(object instanceof Date)) {
 			            Date theDate = (Date) object;
 			            return theDate.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchWithBadOperator(Object object, boolean isEnabled) {
 			        if (object instanceof Date || isEnabled) {
 			            Date date = (Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchElseWithAndOperator(Object object, boolean isValid) {
 			        if (isValid && !(object instanceof Date)) {
 			            return 0;
@@ -441,79 +441,79 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            return date.getTime();
 			        }
 			    }
-			
+
 			    public long doNotMatchWrongObject(Object object, Object object2) {
 			        if (object instanceof Date) {
 			            Date date = (Date) object2;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchWrongType(Object object) {
 			        if (object instanceof Date) {
 			            java.sql.Date date = (java.sql.Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchActiveExpression(List<Object> objects) {
 			        if (objects.remove(0) instanceof Date) {
 			            Date date = (Date) objects.remove(0);
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchAlreadyMatchedInstanceof(Object object) {
 			        if (object instanceof Date anotherDate) {
 			            Date date = (Date) object;
 			            date = new Date();
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchReassignedObject(Object object, Object object2) {
 			        if (object instanceof Date) {
 			            object = object2;
 			            Date date = (Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchPatternInWhile(Object object) {
 			        while (object instanceof Date) {
 			            Date date = (Date) object;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public long doNotMatchMultiDeclaration(Object object) {
 			        if (object instanceof Date) {
 			            Date date = (Date) object, anotherDate = null;
 			            return date.getTime();
 			        }
-			
+
 			        return 0;
 			    }
-			
+
 			    public void doNotMatchOppositeStatements() {
 			        Object bah = 1;
 			        if (bah instanceof Integer) return;
 			        Integer i = (Integer) bah;
 			        System.out.println(i);
 			    }
-			
+
 			    public void doNotMatchBitWiseAnd(boolean useStrikethroughForCompleted, Object data) {
 			        if (data instanceof Long & useStrikethroughForCompleted) {
 			            Long task = (Long)data;
@@ -522,7 +522,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 			            }
 			        }
 			    }
-			
+
 			    public void doNotMatchBitWiseOr(boolean useStrikethroughForCompleted, Object data) {
 			        if (data instanceof Long | useStrikethroughForCompleted) {
 			            Long task = (Long)data;
@@ -545,7 +545,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public record E (String abc) {
 			}
 			""";
@@ -562,7 +562,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public static StringBuffer field0;
 			}""";
@@ -570,7 +570,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    private TestStringBuilderCleanup(){
 			    }
@@ -593,7 +593,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    private TestStringBuilderCleanup(){
 			    }
@@ -619,7 +619,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public static StringBuffer field0;
 			}""";
@@ -627,7 +627,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    public static StringBuffer field1;
 			    public record K(StringBuffer comp1) {
@@ -668,7 +668,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public static StringBuffer field0;
 			}""";
@@ -676,10 +676,10 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			import java.util.List;
 			import java.util.ArrayList;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    public static StringBuffer field1;
 			    public record K(StringBuffer comp1) {
@@ -715,17 +715,17 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String expected0= """
 			package test1;
-			
+
 			public class SuperClass {
 			    public static StringBuilder field0;
 			}""";
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.List;
 			import java.util.ArrayList;
-			
+
 			public class TestStringBuilderCleanup extends SuperClass {
 			    public static StringBuilder field1;
 			    public record K(StringBuilder comp1) {
@@ -764,7 +764,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 
 		String sample= """
 			package test1;
-			
+
 			public class TestParenthesesRemoval {
 			        public static void doNotChangeParenthesesForInstanceof(Object o) {
 			            if (!(o instanceof String)) {
@@ -783,6 +783,34 @@ public class CleanUpTest16 extends CleanUpTestCase {
 		ICompilationUnit cu1= pack1.createCompilationUnit("TestParenthesesRemoval.java", sample, false, null);
 
 		enable(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
+
+		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testDoNotMergeIfsForPatternInstanceof() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String sample= """
+			package test1;
+
+			public class TestInstanceOfMerge {
+
+				public String foo(Number number) {
+					if (number instanceof Long n) {
+						return n.toString();
+					} else if (number instanceof Float n) {
+						return n.toString();
+					} else if (number instanceof Double n) {
+						return n.toString();
+					}
+					return null;
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("TestInstanceOfMerge.java", sample, false, null);
+
+		enable(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}

@@ -2009,9 +2009,6 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	@SuppressWarnings({ "null" })
 	public static boolean getTryWithResourceProposals(IInvocationContext context, ASTNode node, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections)
 			throws IllegalArgumentException, CoreException {
-		if (!JavaModelUtil.is1d8OrHigher(context.getCompilationUnit().getJavaProject()))
-			return false;
-
 		ASTNode parentStatement= ASTResolving.findAncestor(node, ASTNode.VARIABLE_DECLARATION_STATEMENT);
 		if (!(parentStatement instanceof VariableDeclarationStatement) &&
 				!(parentStatement instanceof ExpressionStatement) &&
@@ -3718,7 +3715,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getSplitTryResourceProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> proposals) {
 		if (proposals == null) {
-			return SplitTryResourceFixCore.initialConditionsCheck(context.getCompilationUnit(), coveringNode);
+			return SplitTryResourceFixCore.initialConditionsCheck(coveringNode);
 		}
 		SplitTryResourceFixCore fix= SplitTryResourceFixCore.createSplitVariableFix(context.getASTRoot(), coveringNode);
 		if (fix != null) {
