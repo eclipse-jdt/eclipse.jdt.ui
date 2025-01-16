@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 IBM Corporation and others.
+ * Copyright (c) 2011, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -95,13 +95,12 @@ public class PropertiesFileQuickAssistTest {
 		JavaProjectHelper.addLibrary(fJProject, JavaProjectHelper.findRtJar(osgiJar)[0]);
 	}
 
-	@Deprecated
 	private void setPreferences() {
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 	}
 
 
