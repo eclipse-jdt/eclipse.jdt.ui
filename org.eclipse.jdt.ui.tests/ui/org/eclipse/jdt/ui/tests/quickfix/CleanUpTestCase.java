@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2020 IBM Corporation and others.
+ * Copyright (c) 2005, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IWorkspace;
@@ -106,11 +106,11 @@ public abstract class CleanUpTestCase extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/* comment */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, FIELD_COMMENT, null);
 
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(getProject(), "src");
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.core.tests.harness.FussyProgressMonitor;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -78,11 +78,11 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
 
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
 		fJProject1= projectSetup.getProject();
 

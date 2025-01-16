@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -655,12 +655,18 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 *
 	 * @return the Java Core plug-in preferences
 	 * @since 3.7
-	 * deprecated use getJavaCorePluginPreferencesNew
+	 * @deprecated Use {@link #getJavaCorePluginPreferencesNew()} instead.
 	 */
+	@Deprecated(forRemoval= true, since="2025-03")
 	public static org.eclipse.core.runtime.Preferences getJavaCorePluginPreferences() {
 		return JavaCore.getPlugin().getPluginPreferences();
 	}
 
+	/**
+	 * Returns the Java Core plug-in preferences.
+	 *
+	 * @return the Java Core plug-in preferences
+	 */
 	public static IEclipsePreferences getJavaCorePluginPreferencesNew() {
 		return InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 	}
