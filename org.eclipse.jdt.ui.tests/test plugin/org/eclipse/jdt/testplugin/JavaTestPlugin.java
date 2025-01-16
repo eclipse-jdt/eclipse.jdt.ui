@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,7 +48,7 @@ public class JavaTestPlugin extends AbstractUIPlugin {
 
 	public File getFileInPlugin(IPath path) throws CoreException {
 		try {
-			URL installURL= new URL(getBundle().getEntry("/"), path.toString());
+			URL installURL= getBundle().getEntry("/"+ path.toString());
 			URL localURL= FileLocator.toFileURL(installURL);
 			return new File(localURL.getFile());
 		} catch (IOException e) {
