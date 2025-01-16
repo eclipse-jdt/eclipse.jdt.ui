@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2020 IBM Corporation and others.
+ * Copyright (c) 2013, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 
 import org.junit.After;
 import org.junit.Before;
@@ -239,7 +239,7 @@ public class PackageJavadocTests extends CoreTests {
 		String connectionTestUrl= "https://docs.oracle.com/";
 		try {
 			// Trying to connect to the internet. Exception will be thrown if there is no net connection.
-			new URL(connectionTestUrl).openConnection().connect();
+			URI.create(connectionTestUrl).toURL().openConnection().connect();
 			assertTrue(actualHtmlContent, actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer"));
 		} catch (Exception e) {
 			System.out.println("PackageJavadocTests.testGetPackageAttacheddoc(): no internet connection to access docs at " + connectionTestUrl);
