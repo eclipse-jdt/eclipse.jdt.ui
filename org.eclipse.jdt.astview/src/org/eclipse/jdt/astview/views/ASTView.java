@@ -485,8 +485,6 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 
 	private IDialogSettings fDialogSettings;
 
-
-	@SuppressWarnings("incomplete-switch")
 	public ASTView() {
 		fSuperListener= null;
 		fDialogSettings= ASTViewPlugin.getDefault().getDialogSettings();
@@ -503,27 +501,8 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fCurrentASTLevel= AST.getJLSLatest();
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
-			switch (level) {
-				case JLS2:
-				case JLS3:
-				case JLS4:
-				case JLS8:
-				case JLS9:
-				case JLS10:
-				case JLS11:
-				case JLS12:
-				case JLS13:
-				case JLS14:
-				case JLS15:
-				case JLS16:
-				case JLS17:
-				case JLS18:
-				case JLS19:
-				case JLS20:
-				case JLS21:
-				case JLS22:
-				case JLS23:
-					fCurrentASTLevel= level;
+			if(AST.isSupportedVersion(level)) {
+				fCurrentASTLevel = level;
 			}
 		} catch (NumberFormatException e) {
 			// ignore
