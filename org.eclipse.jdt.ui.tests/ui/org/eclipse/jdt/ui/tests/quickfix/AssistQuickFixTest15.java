@@ -816,6 +816,13 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			        // comment 1
 			        int index = buf3.indexOf("null");
 			        bufFunc(buf3);
+   			        StringBuilder buf13 = new StringBuilder();
+			        bufFunc(buf13);
+			        StringBuilder buf14 = new StringBuilder("abcd\\n");
+			        bufFunc(buf14);
+			        StringBuilder buf15 = new StringBuilder("abcd\\n");
+			        buf15.append("efg");
+			        bufFunc(buf15);
 			       \s
 			    }
 			    public void bufFunc(StringBuilder x) {
@@ -842,6 +849,13 @@ public class AssistQuickFixTest15 extends QuickFixTest {
 			        // comment 1
 			        int index = buf3.indexOf("null");
 			        bufFunc(buf3);
+   			        StringBuilder buf13 = new StringBuilder();
+			        bufFunc(buf13);
+			        StringBuilder buf14 = new StringBuilder("abcd\\n");
+			        bufFunc(buf14);
+			        StringBuilder buf15 = new StringBuilder("abcd\\n");
+			        buf15.append("efg");
+			        bufFunc(buf15);
 			       \s
 			    }
 			    public void bufFunc(StringBuilder x) {
