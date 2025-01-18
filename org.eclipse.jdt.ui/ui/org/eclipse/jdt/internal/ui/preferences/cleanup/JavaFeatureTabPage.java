@@ -162,7 +162,5 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference unboxing= createCheckboxPref(java1d5Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_Unboxing, CleanUpConstants.USE_UNBOXING, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(unboxing);
-
-
 	}
 }
