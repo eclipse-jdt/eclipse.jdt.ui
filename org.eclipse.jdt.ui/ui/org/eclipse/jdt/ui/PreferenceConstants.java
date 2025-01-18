@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.action.Action;
@@ -3776,7 +3777,7 @@ public class PreferenceConstants {
 	 * Value is an XML encoded version of the history.
 	 * </p>
 	 *
-	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory#load(org.eclipse.core.runtime.Preferences, String)
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory#load(IEclipsePreferences, String)
 	 * @since 3.2
 	 */
 	public static final String CODEASSIST_LRU_HISTORY= "content_assist_lru_history"; //$NON-NLS-1$
