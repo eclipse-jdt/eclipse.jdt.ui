@@ -493,7 +493,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			}
 
 			if (fContentAssistHistory != null) {
-				ContentAssistHistory.store(fContentAssistHistory, getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
+				ContentAssistHistory.store(fContentAssistHistory, InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId()), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				fContentAssistHistory= null;
 			}
 
@@ -1045,7 +1045,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					return fContentAssistHistory;
 				}
 				try {
-					fContentAssistHistory= ContentAssistHistory.load(getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
+					fContentAssistHistory= ContentAssistHistory.load(InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId()), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				} catch (CoreException x) {
 					log(x);
 				}

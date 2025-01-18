@@ -51,7 +51,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
@@ -455,12 +455,12 @@ public final class ContentAssistHistory {
 	 * @param preferences the preferences to store the history into
 	 * @param key the key under which to store the history
 	 * @throws CoreException if serialization fails
-	 * @see #load(Preferences, String) on how to restore a history stored by this method
+	 * @see #load(IEclipsePreferences, String) on how to restore a history stored by this method
 	 */
-	public static void store(ContentAssistHistory history, Preferences preferences, String key) throws CoreException {
+	public static void store(ContentAssistHistory history, IEclipsePreferences preferences, String key) throws CoreException {
 		StringWriter writer= new StringWriter();
 		new ReaderWriter().store(history, new StreamResult(writer));
-		preferences.setValue(key, writer.toString());
+		preferences.put(key, writer.toString());
 	}
 
 	/**
@@ -471,11 +471,11 @@ public final class ContentAssistHistory {
 	 * @return the deserialized history, or <code>null</code> if there is nothing stored under the
 	 *         given key
 	 * @throws CoreException if deserialization fails
-	 * @see #store(ContentAssistHistory, Preferences, String) on how to store a history such that it
+	 * @see #store(ContentAssistHistory, IEclipsePreferences, String) on how to store a history such that it
 	 *      can be read by this method
 	 */
-	public static ContentAssistHistory load(Preferences preferences, String key) throws CoreException {
-		String value= preferences.getString(key);
+	public static ContentAssistHistory load(IEclipsePreferences preferences, String key) throws CoreException {
+		String value= preferences.get(key, ""); //$NON-NLS-1$
 		if (value != null && value.length() > 0) {
 			return new ReaderWriter().load(new InputSource(new StringReader(value)));
 		}
