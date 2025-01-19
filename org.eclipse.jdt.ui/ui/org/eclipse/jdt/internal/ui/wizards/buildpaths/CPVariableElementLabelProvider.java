@@ -25,13 +25,12 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 
@@ -49,7 +48,7 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 	public CPVariableElementLabelProvider(boolean highlightReadOnly) {
 		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
 		fJARImage= reg.get(JavaPluginImages.IMG_OBJS_EXTJAR);
-		fFolderImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+		fFolderImage= ISharedImages.get().getImage(ISharedImages.IMG_OBJ_FOLDER);
 
 		fDeprecatedJARImage= new DecorationOverlayIcon(fJARImage, JavaPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_LEFT).createImage();
 		fDeprecatedFolderImage= new DecorationOverlayIcon(fFolderImage, JavaPluginImages.DESC_OVR_DEPRECATED, IDecoration.TOP_LEFT).createImage();

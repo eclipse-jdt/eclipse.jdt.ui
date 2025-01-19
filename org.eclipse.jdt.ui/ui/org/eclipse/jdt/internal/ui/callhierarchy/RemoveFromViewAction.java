@@ -59,7 +59,7 @@ class RemoveFromViewAction extends Action{
 		setToolTipText(CallHierarchyMessages.RemoveFromViewAction_removeFromView_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REMOVE_FROM_VIEW_ACTION);
 
-		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
+		ISharedImages workbenchImages= ISharedImages.get();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));

@@ -20,7 +20,6 @@ import java.util.Collection;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -70,7 +69,7 @@ public class VarargsWarningsSubProcessor extends VarargsWarningsBaseSubProcessor
 
 	@Override
 	protected ICommandAccess createRemoveSafeVarargsProposal1(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int relevance) {
-		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		return new ASTRewriteCorrectionProposal(label, compilationUnit, rewrite, relevance, image);
 	}
 }

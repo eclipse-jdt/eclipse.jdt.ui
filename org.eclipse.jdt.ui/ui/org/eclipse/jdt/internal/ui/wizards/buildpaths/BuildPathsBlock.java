@@ -60,7 +60,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.WorkbenchContentProvider;
@@ -244,7 +244,7 @@ public class BuildPathsBlock {
         item.setData(fSourceContainerPage);
         item.setControl(fSourceContainerPage.getControl(folder));
 
-		Image projectImage= PlatformUI.getWorkbench().getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
+		Image projectImage= ISharedImages.get().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 
 		fProjectsPage= new ProjectsWorkbookPage(fClassPathList, fPageContainer);
 		item= new CTabItem(folder, SWT.NONE);

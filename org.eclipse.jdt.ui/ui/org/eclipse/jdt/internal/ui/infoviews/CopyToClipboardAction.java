@@ -44,7 +44,7 @@ class CopyToClipboardAction extends SelectionDispatchAction{
 		setToolTipText(InfoViewMessages.CopyAction_tooltip);
 		setDescription(InfoViewMessages.CopyAction_description);
 
-		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
+		ISharedImages workbenchImages= ISharedImages.get();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));

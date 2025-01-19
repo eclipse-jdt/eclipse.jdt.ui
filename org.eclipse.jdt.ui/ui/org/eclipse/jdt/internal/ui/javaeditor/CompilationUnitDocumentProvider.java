@@ -84,7 +84,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IURIEditorInput;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE.SharedImages;
 
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
@@ -277,7 +276,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 			fgQuickFixInfoImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_INFO);
 
-			ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
+			ISharedImages sharedImages= ISharedImages.get();
 			fgTaskImage= sharedImages.getImage(SharedImages.IMG_OBJS_TASK_TSK);
 			fgInfoImage= sharedImages.getImage(ISharedImages.IMG_OBJS_INFO_TSK);
 			fgWarningImage= sharedImages.getImage(ISharedImages.IMG_OBJS_WARN_TSK);
