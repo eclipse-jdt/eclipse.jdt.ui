@@ -192,7 +192,7 @@ public class PasteAction extends SelectionDispatchAction{
 		setText(ReorgMessages.PasteAction_4);
 		setDescription(ReorgMessages.PasteAction_5);
 
-		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
+		ISharedImages workbenchImages= ISharedImages.get();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE));
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_PASTE));

@@ -72,7 +72,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.editors.text.EditorsUI;
 
@@ -173,7 +172,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public BackAction(BrowserInformationControl infoControl) {
 			fInfoControl= infoControl;
 			setText(JavaHoverMessages.JavadocHover_back);
-			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
+			ISharedImages images= ISharedImages.get();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_DISABLED));
 
@@ -213,7 +212,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public ForwardAction(BrowserInformationControl infoControl) {
 			fInfoControl= infoControl;
 			setText(JavaHoverMessages.JavadocHover_forward);
-			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
+			ISharedImages images= ISharedImages.get();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
 

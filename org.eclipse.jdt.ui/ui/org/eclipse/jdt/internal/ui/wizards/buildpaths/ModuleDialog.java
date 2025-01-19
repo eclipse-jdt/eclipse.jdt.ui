@@ -60,6 +60,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -485,7 +486,7 @@ public class ModuleDialog extends StatusDialog {
 	}
 
 	private void createHorizontalButtons(Composite parent) {
-		org.eclipse.ui.ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
+		org.eclipse.ui.ISharedImages sharedImages= ISharedImages.get();
 
 		Composite box= new Composite(parent, SWT.NONE);
 		box.setLayout(new GridLayout(1, true));

@@ -25,7 +25,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -174,7 +173,7 @@ public class JavadocTagsSubProcessor extends JavadocTagsBaseSubProcessor<IComman
 
 	@Override
 	protected ICommandAccess createRemoveJavadocTagProposals(String label, ICompilationUnit compilationUnit, ASTRewrite rewrite, int removeTag) {
-		Image image= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		Image image= ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		return new ASTRewriteCorrectionProposal(label, compilationUnit, rewrite, IProposalRelevance.REMOVE_TAG, image);
 	}
 
@@ -182,7 +181,7 @@ public class JavadocTagsSubProcessor extends JavadocTagsBaseSubProcessor<IComman
 	protected ICommandAccess createRemoveDuplicateModuleJavadocTagProposal(String label, ICompilationUnit compilationUnit, int start, int length, String string, int removeTag) {
 		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, compilationUnit, start, length,
 				"", IProposalRelevance.REMOVE_TAG); //$NON-NLS-1$
-		proposal.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE));
+		proposal.setImage(ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE));
 		return proposal;
 	}
 

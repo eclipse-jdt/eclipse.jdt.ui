@@ -20,7 +20,6 @@ import java.util.Collection;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -75,7 +74,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		if(relevance == IProposalRelevance.FIX_SUPPRESS_TOKEN) {
 			image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		} else if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
-			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			image = ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		return new ASTRewriteCorrectionProposal(name, cu, rewrite, relevance, image);
 	}
@@ -85,7 +84,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		// Initialize as default image, though it should always trigger one of the two if statements below
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
-			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			image = ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, relevance, image, context);
 		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
