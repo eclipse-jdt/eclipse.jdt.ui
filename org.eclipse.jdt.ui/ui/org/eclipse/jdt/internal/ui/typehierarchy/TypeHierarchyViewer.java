@@ -13,10 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -41,6 +45,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
 	private HierarchyLabelProvider fLabelProvider;
+
+	private Set<Object> visited;
 
 
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, TypeHierarchyLifeCycle lifeCycle) {
@@ -182,4 +188,34 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		return (TypeHierarchyContentProvider)getContentProvider();
 	}
 
+	@Override
+	protected void inputChanged(Object input, Object oldInput) {
+		preUpdateContent();
+		super.inputChanged(input, oldInput);
+		postUpdateContent();
+	}
+
+	@Override
+	protected void internalExpandToLevel(Widget node, int level) {
+		if (!shouldExpand(node))
+			return;
+
+		super.internalExpandToLevel(node, level);
+	}
+
+	private boolean shouldExpand(Widget widget) {
+		if (widget == null) {
+			return false;
+		}
+		Object data= widget.getData();
+		return data == null || visited.add(data);
+	}
+
+	void preUpdateContent() {
+		visited= new HashSet<>();
+	}
+
+	void postUpdateContent() {
+		visited= null;
+	}
 }
