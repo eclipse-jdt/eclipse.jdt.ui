@@ -14,6 +14,8 @@
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -23,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.bindings.keys.KeySequence;
@@ -130,7 +133,32 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		gd.heightHint= tree.getItemHeight() * 12;
 		tree.setLayoutData(gd);
 
-		TreeViewer treeViewer= new TreeViewer(tree);
+		TreeViewer treeViewer= new TreeViewer(tree) {
+			private Set<Object> visited;
+
+			@Override
+			protected void inputChanged(Object input, Object oldInput) {
+				visited= new HashSet<>();
+				super.inputChanged(input, oldInput);
+				visited= null;
+			}
+
+			@Override
+			protected void internalExpandToLevel(Widget node, int level) {
+				if (!shouldExpand(node))
+					return;
+
+				super.internalExpandToLevel(node, level);
+			}
+
+			private boolean shouldExpand(Widget widget) {
+				if (widget == null) {
+					return false;
+				}
+				Object data= widget.getData();
+				return data == null || visited.add(data);
+			}
+		};
 		treeViewer.addFilter(new ViewerFilter() {
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
