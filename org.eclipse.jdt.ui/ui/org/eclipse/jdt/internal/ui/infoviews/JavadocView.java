@@ -792,7 +792,7 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		IWorkbenchPart part= null;
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page= window.getActivePage();
 			if (page != null) {

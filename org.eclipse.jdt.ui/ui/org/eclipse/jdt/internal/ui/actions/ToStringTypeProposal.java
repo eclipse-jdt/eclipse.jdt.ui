@@ -23,7 +23,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IType;
 
@@ -33,6 +32,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.actions.GenerateToStringAction;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
@@ -68,7 +68,7 @@ public class ToStringTypeProposal extends ChangeCorrectionProposal { // public f
 		Display.getDefault().syncExec(() -> {
 			try {
 				IStructuredSelection selection= new StructuredSelection(fType);
-				IWorkbenchSite site= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor().getSite();
+				IWorkbenchSite site= JavaPlugin.getActivePage().getActiveEditor().getSite();
 				new GenerateToStringAction(site).run(selection);
 			} catch (NullPointerException e) {
 				// do nothing

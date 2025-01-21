@@ -36,8 +36,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -109,6 +107,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringSaveModes;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.ui.refactoring.RenameSupport;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -249,7 +248,7 @@ public final class RefactoringExecutionStarter {
 			if (refactoring.getCleanUpTargetsSize() > 1) {
 				context= new ProgressMonitorDialog(shell);
 			} else {
-				context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				context= JavaPlugin.getActiveWorkbenchWindow();
 			}
 
 			RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, IRefactoringSaveModes.SAVE_REFACTORING, shell, context);

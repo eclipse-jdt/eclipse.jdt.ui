@@ -20,10 +20,10 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.SpecificContentAssistExecutor;
 
@@ -56,7 +56,7 @@ public final class JavaContentAssistHandler extends AbstractHandler {
 	}
 
 	private ITextEditor getActiveEditor() {
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page= window.getActivePage();
 			if (page != null) {

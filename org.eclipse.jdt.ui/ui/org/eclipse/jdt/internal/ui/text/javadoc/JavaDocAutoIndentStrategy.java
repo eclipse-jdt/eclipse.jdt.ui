@@ -28,7 +28,6 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
@@ -528,7 +527,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 */
 	private static ICompilationUnit getCompilationUnit() {
 
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window == null)
 			return null;
 

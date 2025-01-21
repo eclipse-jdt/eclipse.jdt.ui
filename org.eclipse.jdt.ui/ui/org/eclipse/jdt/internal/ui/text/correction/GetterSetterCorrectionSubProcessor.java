@@ -29,7 +29,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
@@ -105,7 +104,7 @@ public class GetterSetterCorrectionSubProcessor extends GetterSetterCorrectionBa
 					refactoring.setConsiderVisibility(false);//private field references are just searched in local file
 				});
 				if (fNoDialog) {
-					IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+					IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 					final RefactoringExecutionHelper helper= new RefactoringExecutionHelper(compositeRefactoring, RefactoringStatus.ERROR, IRefactoringSaveModes.SAVE_REFACTORING, JavaPlugin.getActiveWorkbenchShell(), window);
 					if (Display.getCurrent() != null) {
 						try {

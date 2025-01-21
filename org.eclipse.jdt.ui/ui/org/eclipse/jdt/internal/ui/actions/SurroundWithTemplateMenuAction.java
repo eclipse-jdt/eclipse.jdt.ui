@@ -22,7 +22,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -95,14 +94,11 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 
 		@Override
 		public void run() {
-			PreferenceDialog preferenceDialog= PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] { JAVA_TEMPLATE_PREFERENCE_PAGE_ID, CODE_TEMPLATE_PREFERENCE_PAGE_ID }, null);
+			PreferenceDialog preferenceDialog= PreferencesUtil.createPreferenceDialogOn(JavaPlugin.getActiveWorkbenchShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] { JAVA_TEMPLATE_PREFERENCE_PAGE_ID, CODE_TEMPLATE_PREFERENCE_PAGE_ID }, null);
 			preferenceDialog.getTreeViewer().expandAll();
 			preferenceDialog.open();
 		}
 
-		private Shell getShell() {
-			return JavaPlugin.getActiveWorkbenchWindow().getShell();
-		}
 	}
 
 	private static Action NONE_APPLICABLE_ACTION= new Action(ActionMessages.SurroundWithTemplateMenuAction_NoneApplicable) {

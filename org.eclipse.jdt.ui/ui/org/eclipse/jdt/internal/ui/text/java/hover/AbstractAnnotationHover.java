@@ -81,7 +81,6 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -656,7 +655,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 		 */
 		@Override
 		public void run() {
-			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 
 			Object data= null;
 			AnnotationPreference preference= getAnnotationPreference(fAnnotation);
