@@ -35,7 +35,6 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -290,7 +289,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
 					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, javaElement.getElementName()), e.getCause());
 			JavaPlugin.log(status);
-			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(),
 					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
 					JavaEditorMessages.JavaElementImplementationHyperlink_error_no_implementations_found_message, status);
 		} catch (InterruptedException e) {

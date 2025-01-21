@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -106,7 +105,7 @@ public class EnablePreviewFeaturesAction implements IObjectActionDelegate {
 				map.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 				fJavaProject.setOptions(map);
 
-				Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				Shell shell= JavaPlugin.getActiveWorkbenchShell();
 				Map<String, Object> data= new HashMap<>();
 				data.put(CompliancePreferencePage.DATA_SELECT_OPTION_KEY, JavaCore.COMPILER_PB_REPORT_PREVIEW_FEATURES);
 				data.put(CompliancePreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);

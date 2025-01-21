@@ -35,8 +35,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -108,7 +106,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 		IRunnableContext context= (fork, cancelable, runnable) -> runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
 
-		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		RefactoringExecutionHelper helper= new RefactoringExecutionHelper(refactoring, IStatus.INFO, IRefactoringSaveModes.SAVE_REFACTORING, shell, context);
 		try {
 			helper.perform(true, true);
@@ -208,7 +206,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			IRunnableContext context= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, IRefactoringSaveModes.SAVE_NOTHING, shell, context);
 			try {
 				executer.perform(true, true);

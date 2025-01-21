@@ -71,7 +71,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -474,7 +473,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		if (!status.hasError())
 			return Window.OK;
 
-		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 
 		Dialog dialog= RefactoringUI.createRefactoringStatusDialog(status, shell, "", false); //$NON-NLS-1$
 		return dialog.open();
@@ -674,7 +673,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 	private void showSlowCleanUpDialog(final StringBuilder cleanUpNames) {
 		if (OptionalMessageDialog.isDialogEnabled(SlowCleanUpWarningDialog.ID)) {
-			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			new SlowCleanUpWarningDialog(shell, FixMessages.CleanUpPostSaveListener_SlowCleanUpDialog_title, cleanUpNames.toString()).open();
 		}
 	}

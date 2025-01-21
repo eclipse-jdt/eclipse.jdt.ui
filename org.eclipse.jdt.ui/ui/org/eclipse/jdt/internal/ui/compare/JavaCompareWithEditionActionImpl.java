@@ -21,14 +21,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareUI;
 
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -67,7 +66,7 @@ class JavaCompareWithEditionActionImpl extends JavaHistoryActionImpl {
 			ci.setHelpContextId(IJavaHelpContextIds.COMPARE_ELEMENT_WITH_HISTORY_DIALOG);
 			CompareUI.openCompareDialog(ci);
 		} else {
-			TeamUI.showHistoryFor(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), input, pageSource);
+			TeamUI.showHistoryFor(JavaPlugin.getActivePage(), input, pageSource);
 		}
 	}
 }

@@ -25,7 +25,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.IInformationControl;
 
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,6 +33,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.preferences.ComplianceConfigurationBlock;
@@ -85,7 +85,7 @@ public class ConfigureProblemSeverityAction extends Action {
 	public void run() {
 		boolean showPropertyPage;
 
-		Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 
 		if (!hasProjectSpecificOptions()) {
 			String message= Messages.format(
