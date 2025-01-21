@@ -1212,12 +1212,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
 			if (getCurrentViewer().containsElements() != null) {
-				Runnable runnable= () -> JavaCore.runReadOnly(() -> {
-					TypeHierarchyViewer viewer= getCurrentViewer();
-					viewer.preUpdateContent();
-					viewer.updateContent(doExpand);
-					viewer.postUpdateContent();
-				});
+				Runnable runnable= () -> JavaCore.runReadOnly(() -> getCurrentViewer().updateContent(doExpand));
 				BusyIndicator.showWhile(getDisplay(), runnable);
 				if (!isChildVisible(fViewerbook, getCurrentViewer().getControl())) {
 					setViewerVisibility(true);
