@@ -3117,4 +3117,55 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
 	}
 
+	@Test
+	public void testIssue1940() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str1= """
+			package test1;
+
+			public class E {
+
+			 private static class A {
+			  void foo() {
+			  }
+			 }
+
+			 private static class B extends A {
+			  void foo() {
+			  }
+			 }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String expected1= """
+			package test1;
+
+			public class E {
+
+			 private static class A {
+			  void foo() {
+			  }
+			 }
+
+			 private static class B extends A {
+			  @Override
+			  void foo() {
+			  }
+			 }
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
 }
