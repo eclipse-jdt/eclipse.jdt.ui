@@ -172,7 +172,11 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	 * Updates the content of this viewer: refresh and expanding the tree in the way wanted.
 	 * @param doExpand if set, update should expand
 	 */
-	public abstract void updateContent(boolean doExpand);
+	final void updateContent(boolean doExpand) {
+		runUsingVisited(() -> this.hookUpdateContent(doExpand));
+	}
+
+	protected abstract void hookUpdateContent(boolean doExpand);
 
 	/*
 	 * @see StructuredViewer#setContentProvider
@@ -190,32 +194,31 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
-		preUpdateContent();
-		super.inputChanged(input, oldInput);
-		postUpdateContent();
+		runUsingVisited(() -> super.inputChanged(input, oldInput));
 	}
 
 	@Override
 	protected void internalExpandToLevel(Widget node, int level) {
-		if (!shouldExpand(node))
+		if (alreadyVisited(node))
 			return;
 
 		super.internalExpandToLevel(node, level);
 	}
 
-	private boolean shouldExpand(Widget widget) {
+	private boolean alreadyVisited(Widget widget) {
 		if (widget == null) {
 			return false;
 		}
 		Object data= widget.getData();
-		return data == null || visited.add(data);
+		return data != null && !visited.add(data);
 	}
 
-	void preUpdateContent() {
+	private void runUsingVisited(Runnable r) {
 		visited= new HashSet<>();
-	}
-
-	void postUpdateContent() {
-		visited= null;
+		try {
+			r.run();
+		} finally {
+			visited= null;
+		}
 	}
 }
