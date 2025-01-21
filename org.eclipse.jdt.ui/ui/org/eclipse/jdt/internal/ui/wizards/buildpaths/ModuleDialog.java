@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 GK Software SE, and others.
+ * Copyright (c) 2017, 2025 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -799,11 +799,18 @@ public class ModuleDialog extends StatusDialog {
 		if (fJavaElements != null) {
 			List<IPackageFragmentRoot> roots= new ArrayList<>();
 			for (IJavaElement element : fJavaElements) {
-				if (element instanceof IPackageFragmentRoot) {
-					roots.add((IPackageFragmentRoot) element);
+				if (element instanceof IPackageFragmentRoot el) {
+					roots.add(el);
 				}
 			}
-			return JavaCore.defaultRootModules(roots);
+			String release = fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_RELEASE, true);
+			if (release == null) {
+				release = fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true);
+			}
+			if (release == null) {
+				release = JavaCore.latestSupportedJavaVersion();
+			}
+			return JavaCore.defaultRootModules(roots, release);
 		}
 		return Collections.emptyList();
 	}
