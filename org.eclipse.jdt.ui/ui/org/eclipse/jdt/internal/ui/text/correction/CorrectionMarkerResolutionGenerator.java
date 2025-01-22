@@ -59,7 +59,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -112,12 +111,17 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			try {
 				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
 				if (part == null) {
-					part= JavaUI.openInEditor(fCompilationUnit, true, false);
-					if (part instanceof ITextEditor) {
-						((ITextEditor) part).selectAndReveal(fOffset, fLength);
-					}
-				}
-				if (part != null) {
+						IEditorInput input= EditorUtility.getEditorInput(fCompilationUnit);
+						IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);
+						fProposal.apply(doc);
+						if (fCompilationUnit.hasUnsavedChanges()) {
+							if (fCompilationUnit.isWorkingCopy()) {
+								fCompilationUnit.commitWorkingCopy(false, new NullProgressMonitor());
+							} else {
+								fCompilationUnit.save(new NullProgressMonitor(), true);
+							}
+						}
+				} else {
 					IEditorInput input= part.getEditorInput();
 					IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);
 					fProposal.apply(doc);
