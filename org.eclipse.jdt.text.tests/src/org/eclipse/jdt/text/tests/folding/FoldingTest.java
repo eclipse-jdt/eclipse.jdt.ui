@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.folding;
 
+
 import java.util.List;
 
 import org.junit.After;
