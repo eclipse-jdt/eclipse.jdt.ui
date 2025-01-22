@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2024 IBM Corporation and others.
+ * Copyright (c) 2005, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
  */
 public final class CreateStubsAction implements IObjectActionDelegate {
 
-	private static final String[] DEFAULT_PACKAGES= new String[] {
+	private static final String[] DEFAULT_PACKAGES= {
 			"java.beans",
 			"java.io",
 			"java.lang",
@@ -128,11 +128,10 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 	@Override
 	public void run(IAction action) {
 		ISelection selection= fTargetPart.getSite().getSelectionProvider().getSelection();
-		if (!(selection instanceof IStructuredSelection)) {
+		if (!(selection instanceof IStructuredSelection structuredSelection)) {
 			fail("Select packages to create stubs."); //$NON-NLS-1$
 			return;
 		}
-		final IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 
 		Shell shell= fTargetPart.getSite().getShell();
 		String initialValue= JavaTestPlugin.getDefault().getDialogSettings().get(SETTINGS_ID_STUBS_PROJECT);
@@ -140,7 +139,7 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			initialValue = "stubs"; //$NON-NLS-1$
 		final InputDialog inputDialog= new InputDialog(shell, CREATE_STUBS_DIALOG_TITLE, "Target project name:", initialValue, newText -> {
 			IStatus status = ResourcesPlugin.getWorkspace().validateName(newText, IResource.PROJECT);
-			return status.isOK() ? null : (String) status.getMessage();
+			return status.isOK() ? null : status.getMessage();
 		});
 		if (inputDialog.open() != Window.OK)
 			return;
@@ -161,10 +160,9 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 
 					boolean checkCompletionOfDefaultPackages= false;
 					for (Object sel : structuredSelection.toList()) {
-						if (sel instanceof IPackageFragment) {
-							packageFragments.add((IPackageFragment) sel);
-						} else if (sel instanceof IPackageFragmentRoot) {
-							IPackageFragmentRoot root = (IPackageFragmentRoot) sel;
+						if (sel instanceof IPackageFragment packageFragment) {
+							packageFragments.add(packageFragment);
+						} else if (sel instanceof IPackageFragmentRoot root) {
 							for (Iterator<String> iter= defaultPackages.iterator(); iter.hasNext();) {
 								String packName= iter.next();
 								IPackageFragment packageFragment = root.getPackageFragment(packName);
@@ -195,10 +193,8 @@ public final class CreateStubsAction implements IObjectActionDelegate {
 			MessageDialog.openInformation(fTargetPart.getSite().getShell(), CREATE_STUBS_DIALOG_TITLE, message.toString());
 		} catch (InterruptedException e) {
 			// Do not log
-		} catch (InvocationTargetException e) {
+		} catch (InvocationTargetException|CoreException e) {
 			JavaTestPlugin.log(e);
-		} catch (CoreException exception) {
-			JavaTestPlugin.log(exception);
 		}
 	}
 
