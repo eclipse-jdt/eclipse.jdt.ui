@@ -46,9 +46,6 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 		fTextEditor= textEditor;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getReconciler(org.eclipse.jface.text.source.ISourceViewer)
-	 */
 	@Override
 	public IReconciler getReconciler(ISourceViewer sourceViewer) {
 		IReconcilingStrategy reconcilingStrategy= new JspReconcilingStrategy(sourceViewer, fTextEditor);
@@ -57,17 +54,11 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 		return reconciler;
 	}
 
-	/*
-	 * @see SourceViewerConfiguration#getAnnotationHover(ISourceViewer)
-	 */
 	@Override
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 		return new DefaultAnnotationHover();
 	}
 
-	/*
-	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String)
-	 */
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
 		return new DefaultTextHover(sourceViewer);
