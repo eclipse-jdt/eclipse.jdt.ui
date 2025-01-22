@@ -76,9 +76,6 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		super();
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 
@@ -184,17 +181,11 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#dispose()
-	 */
 	@Override
 	public void dispose() {
 		// empty implementation
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(ILaunchConfiguration)
-	 */
 	@Override
 	public boolean isValid(ILaunchConfiguration config) {
 		setErrorMessage(null);
@@ -233,9 +224,6 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		return true;
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
-	 */
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "${catalina_home}"); //$NON-NLS-1$
@@ -243,9 +231,6 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap"); //$NON-NLS-1$
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(ILaunchConfiguration)
-	 */
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
@@ -279,9 +264,6 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
-	 */
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, getAttributeValueFrom(fTomcatDir));
@@ -303,17 +285,11 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		return null;
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
-	 */
 	@Override
 	public String getName() {
 		return LaunchingMessages.TomcatTab_7;
 	}
 
-	/**
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getImage()
-	 */
 	@Override
 	public Image getImage() {
 		return JspPluginImages.getImage(JspPluginImages.IMG_OBJ_TOMCAT);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2020 IBM Corporation and others.
+ * Copyright (c) 2003, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,12 @@
  *******************************************************************************/
 package org.eclipse.jsp;
 
-import java.io.*;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class Util {
 
@@ -29,17 +33,7 @@ public class Util {
 	static char[] getFileCharContent(File file, String encoding) throws IOException {
 		System.out.println("****jdt.internal.compiler.util.Util.getFileCharContent: " + file + " " + encoding); //$NON-NLS-1$ //$NON-NLS-2$
 		try (InputStream stream= new BufferedInputStream(new FileInputStream(file))) {
-			try {
-				return Util.getInputStreamAsCharArray(stream, (int) file.length(), encoding);
-			} finally {
-				if (stream != null) {
-					try {
-						stream.close();
-					} catch (IOException e) {
-						// ignore
-					}
-				}
-			}
+			return Util.getInputStreamAsCharArray(stream, (int) file.length(), encoding);
 		}
 	}
 
