@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -67,8 +68,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
-
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
 
 public class AddUnimplementedMethodsTest {
 	@Rule
@@ -296,7 +295,7 @@ public class AddUnimplementedMethodsTest {
 
 		String str= """
 			package p;
-			
+
 			public abstract class B  {
 				public abstract void foo() {
 				}
@@ -306,22 +305,22 @@ public class AddUnimplementedMethodsTest {
 
 		String originalContent= """
 			package p;
-			
+
 			public class A extends B {
 			    int x;
-			
+
 			    A() {
 			    }
-			
+
 			    void bar() {
 			    }
-			
+
 			    {
 			    }
-			
+
 			    static {
 			    }
-			
+
 			    class Inner {
 			    }
 			}""";
@@ -383,35 +382,8 @@ public class AddUnimplementedMethodsTest {
 		checkMethods(new String[] { "method2" }, methods);
 	}
 
-	/**
-	 * @deprecated tests deprecated API
-	 */
-	@Deprecated
-	@Test
-	public void jLS3() throws Exception {
-		doTestOldAstLevel(ASTHelper.JLS3);
-	}
-
-	/**
-	 * @deprecated tests deprecated API
-	 */
-	@Deprecated
-	@Test
-	public void jLS4() throws Exception {
-		doTestOldAstLevel(ASTHelper.JLS4);
-	}
-
 	@Test
 	public void jLS8() throws Exception {
-		doTestOldAstLevel(ASTHelper.JLS8);
-	}
-
-	/**
-	 * @param astLevel AST.JLS*
-	 * @deprecated tests deprecated API
-	 */
-	@Deprecated
-	public void doTestOldAstLevel(int astLevel) throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType(
 				  """
@@ -424,7 +396,8 @@ public class AddUnimplementedMethodsTest {
 					""", null, true, null);
 		cu.createImport("java.util.ArrayList", null, null);
 
-		RefactoringASTParser parser= new RefactoringASTParser(astLevel);
+		@SuppressWarnings("deprecation")
+		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS8);
 		CompilationUnit unit= parser.parse(cu, true);
 		AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declaration node", declaration);
