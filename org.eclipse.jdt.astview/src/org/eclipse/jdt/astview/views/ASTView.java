@@ -153,9 +153,6 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private static final int JLS10= ASTHelper.JLS10;
 	private static final int JLS9= ASTHelper.JLS9;
 	private static final int JLS8= ASTHelper.JLS8;
-	private static final int JLS4= ASTHelper.JLS4;
-	private static final int JLS3= ASTHelper.JLS3;
-	private static final int JLS2= ASTHelper.JLS2;
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {
 		ListenerList<ISelectionChangedListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
@@ -1112,10 +1109,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 
 		fASTVersionToggleActions= new ASTLevelToggle[] {
-				new ASTLevelToggle("AST Level &2 (1.2)", JLS2), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &3 (1.5)", JLS3), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &4 (1.7)", JLS4), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &8 (1.8)", JLS8), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &8 (8)", JLS8), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level &9 (9)", JLS9), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&0 (10)", JLS10), //$NON-NLS-1$
 				new ASTLevelToggle("AST Level 1&1 (11)", JLS11), //$NON-NLS-1$
