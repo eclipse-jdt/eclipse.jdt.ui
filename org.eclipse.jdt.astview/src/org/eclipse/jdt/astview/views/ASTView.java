@@ -132,27 +132,8 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.util.ASTHelper;
-
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
-
-	private static final int JLS23= ASTHelper.JLS23;
-	private static final int JLS22= ASTHelper.JLS22;
-	private static final int JLS21= ASTHelper.JLS21;
-	private static final int JLS20= ASTHelper.JLS20;
-	private static final int JLS19= ASTHelper.JLS19;
-	private static final int JLS18= ASTHelper.JLS18;
-	private static final int JLS17= ASTHelper.JLS17;
-	private static final int JLS16= ASTHelper.JLS16;
-	private static final int JLS15= ASTHelper.JLS15;
-	private static final int JLS14= ASTHelper.JLS14;
-	private static final int JLS13= ASTHelper.JLS13;
-	private static final int JLS12= ASTHelper.JLS12;
-	private static final int JLS11= ASTHelper.JLS11;
-	private static final int JLS10= ASTHelper.JLS10;
-	private static final int JLS9= ASTHelper.JLS9;
-	private static final int JLS8= ASTHelper.JLS8;
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {
 		ListenerList<ISelectionChangedListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
@@ -456,7 +437,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 	private Action fAddToTrayAction;
 	private Action fDeleteAction;
 
-	private ASTLevelToggle[] fASTVersionToggleActions;
+	private List<ASTLevelToggle> fASTVersionToggleActions = new ArrayList<>();
 	private int fCurrentASTLevel;
 
 	private ASTInputKindAction[] fASTInputKindActions;
@@ -948,6 +929,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fRefreshAction.setEnabled(!isuptoDate && fTypeRoot != null);
 	}
 
+	@SuppressWarnings("boxing")
 	private void makeActions() {
 		fRefreshAction = new Action() {
 			@Override
@@ -1106,24 +1088,9 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		fLinkWithEditor.setActionDefinitionId(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR);
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 
-		fASTVersionToggleActions= new ASTLevelToggle[] {
-				new ASTLevelToggle("AST Level &8 (8)", JLS8), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level &9 (9)", JLS9), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&0 (10)", JLS10), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&1 (11)", JLS11), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&2 (12)", JLS12), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&3 (13)", JLS13), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&4 (14)", JLS14), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&5 (15)", JLS15), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&6 (16)", JLS16), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&7 (17)", JLS17), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&8 (18)", JLS18), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 1&9 (19)", JLS19), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 2&0 (20)", JLS20), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 2&1 (21)", JLS21), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 2&2 (22)", JLS22), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 2&3 (23)", JLS23), //$NON-NLS-1$
-		};
+		for (Integer version : AST.getAllSupportedVersions()) {
+			fASTVersionToggleActions.add(new ASTLevelToggle("AST Level "+version, version));
+		}
 
 		fAddToTrayAction= new Action() {
 			@Override
