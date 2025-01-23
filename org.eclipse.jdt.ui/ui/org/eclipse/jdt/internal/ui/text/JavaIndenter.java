@@ -805,8 +805,11 @@ public final class JavaIndenter {
 								fAlign= JavaHeuristicScanner.NOT_FOUND;
 								fIndent= fPrefs.prefContinuationIndent;
 							} else {
-								int previousLineOffset= fDocument.getLineOffset(fDocument.getLineOfOffset(offset) - 1);
-								fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(previousLineOffset, JavaHeuristicScanner.UNBOUND);
+								int lineOfOffset= fDocument.getLineOfOffset(offset);
+								if (lineOfOffset != 0) {
+									int previousLineOffset= fDocument.getLineOffset(lineOfOffset - 1);
+									fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(previousLineOffset, JavaHeuristicScanner.UNBOUND);
+								}
 							}
 							return fPosition;
 						}
@@ -1127,8 +1130,11 @@ public final class JavaIndenter {
 							fAlign= JavaHeuristicScanner.NOT_FOUND;
 							fIndent= fPrefs.prefContinuationIndent;
 						} else {
-							int previousLineOffset= fDocument.getLineOffset(fDocument.getLineOfOffset(offset) - 1);
-							fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(previousLineOffset, JavaHeuristicScanner.UNBOUND);
+							int lineOfOffset= fDocument.getLineOfOffset(offset);
+							if (lineOfOffset != 0) {
+								int previousLineOffset= fDocument.getLineOffset(lineOfOffset - 1);
+								fAlign= fScanner.findNonWhitespaceForwardInAnyPartition(previousLineOffset, JavaHeuristicScanner.UNBOUND);
+							}
 						}
 					} catch (BadLocationException e) {
 						JavaPlugin.log(e);
