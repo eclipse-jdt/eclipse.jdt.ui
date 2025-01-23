@@ -82,6 +82,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.keys.IBindingService;
@@ -111,7 +112,11 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 			viewer.addTextListener(this);
 			viewer.addViewportListener(this);
 			fPopup.addDisposeListener(e -> {
-				fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(PopupVisibilityManager.this);
+				IWorkbenchWindow workbenchWindow= fEditor.getSite().getWorkbenchWindow();
+				if (workbenchWindow == null) {
+					return; // happens on eclipse restart
+				}
+				workbenchWindow.getPartService().removePartListener(PopupVisibilityManager.this);
 				if (! textWidget.isDisposed()) {
 					textWidget.removeControlListener(PopupVisibilityManager.this);
 					textWidget.removeMouseListener(PopupVisibilityManager.this);
