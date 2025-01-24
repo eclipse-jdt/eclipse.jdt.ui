@@ -236,7 +236,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 				fPositions= newPositions;
 			}
 		} catch (BadPositionCategoryException | BadLocationException e) {
-			// Should not happen
+			// happens when document content was changed meanwhile
 			JavaPlugin.log(e);
 		}
 //		checkOrdering("new positions: ", fPositions); //$NON-NLS-1$

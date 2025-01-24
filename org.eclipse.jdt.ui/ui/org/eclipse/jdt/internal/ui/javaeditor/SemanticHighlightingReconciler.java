@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextPresentation;
@@ -660,10 +661,17 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 			return;
 
 		IDocument document= fSourceViewer.getDocument();
+		String contents= document.get();
 		display.asyncExec(() -> {
-			// check Editor not reused otherwise meanwhile
-			if (fSourceViewer != null && document == fSourceViewer.getDocument()) {
-				runnable.run();
+			// check Editor not reused for other document or document changed meanwhile
+			if (fSourceViewer != null && document == fSourceViewer.getDocument() &&  Objects.equals(contents, document.get())) {
+				if (document instanceof ISynchronizable s && s.getLockObject() instanceof Object lockObject) {
+					synchronized (lockObject) {
+						runnable.run();
+					}
+				} else {
+					runnable.run();
+				}
 			}
 		});
 	}
