@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -102,6 +101,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.FoldingPreferencePage;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 
 /**
@@ -1012,12 +1012,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private ProjectionListener fProjectionListener;
 	private IJavaElement fInput;
 	private IElementChangedListener fElementListener;
-	private IPropertyChangeListener fPropertyChangeListener = new IPropertyChangeListener() {
-	    @Override
-	    public void propertyChange(PropertyChangeEvent event) {
-	        initializePreferences();
-	        initialize();
-	    }
+	private final IPropertyChangeListener fPropertyChangeListener = event -> {
+	    initializePreferences();
+	    initialize();
 	};
 
 	/* preferences */
@@ -1077,8 +1074,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (editor instanceof JavaEditor) {
 			fProjectionListener= new ProjectionListener(viewer);
 			fEditor= (JavaEditor)editor;
-			IPreferenceStore store = JavaPlugin.getDefault().getPreferenceStore();
-	        store.addPropertyChangeListener(fPropertyChangeListener);
+			for (IPreferenceStore store : FoldingPreferencePage.getAllFoldingPreferenceStores(fEditor)) {
+				store.addPropertyChangeListener(fPropertyChangeListener);
+			}
 		}
 	}
 
@@ -1102,10 +1100,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			fProjectionListener.dispose();
 			fProjectionListener= null;
 			fEditor= null;
-			IPreferenceStore store = JavaPlugin.getDefault().getPreferenceStore();
-	        if (store != null && fPropertyChangeListener != null) {
-	            store.removePropertyChangeListener(fPropertyChangeListener);
-	        }
+			for (IPreferenceStore store : FoldingPreferencePage.getAllFoldingPreferenceStores(fEditor)) {
+				store.removePropertyChangeListener(fPropertyChangeListener);
+			}
 		}
 	}
 
@@ -1203,7 +1200,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private void initializePreferences() {
-	    IPreferenceStore store = JavaPlugin.getDefault().getPreferenceStore();
+		IPreferenceStore store= FoldingPreferencePage.getFoldingPreferenceStore(fEditor);
 	    fCollapseInnerTypes = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
 	    fCollapseImportContainer = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_IMPORTS);
 	    fCollapseJavadoc = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
