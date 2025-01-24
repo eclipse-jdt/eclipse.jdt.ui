@@ -167,6 +167,80 @@ public class CleanUpTest21 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
 	}
 
+	@Test
+	public void testPatternInstanceofToSwitch3() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E {
+				public int square(int x) {
+					return x * x;
+				}
+				public int foo(Object x, Object y) {
+					int i, j;
+					double d;
+					boolean b;
+					if (y instanceof Integer xint) {
+						return 7;
+					} else if (y instanceof final Double xdouble) {
+						return square(8); // square
+					} else if (y instanceof final Boolean xboolean) {
+						throw new NullPointerException();
+					} else {
+						i = 0;
+						d = 0.0D;
+						b = false;
+						if (x instanceof Integer) {
+							return 10;
+						}
+						return 11;
+					}
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_SWITCH_FOR_INSTANCEOF_PATTERN);
+		sample= """
+				package test1;
+
+				public class E {
+					public int square(int x) {
+						return x * x;
+					}
+					public int foo(Object x, Object y) {
+						int i, j;
+						double d;
+						boolean b;
+						switch (y) {
+							case Integer xint -> {
+								return 7;
+							}
+							case Double xdouble -> {
+								return square(8); // square
+							}
+							case Boolean xboolean -> throw new NullPointerException();
+							case null, default -> {
+								i = 0;
+								d = 0.0D;
+								b = false;
+								if (x instanceof Integer) {
+									return 10;
+								}
+								return 11;
+							}
+						}
+					}
+				}
+				""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
 
 	@Test
 	public void testPatternInstanceofToSwitchExpression1() throws Exception {
@@ -329,46 +403,5 @@ public class CleanUpTest21 extends CleanUpTestCase {
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
 	}
 
-	@Test
-	public void testNoPatternInstanceofToSwitchExpression2() throws Exception {
-		Hashtable<String, String> options= JavaCore.getOptions();
-		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
-		JavaCore.setOptions(options);
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String sample= """
-			package test1;
-
-			public class E {
-				public int square(int x) {
-					return x * x;
-				}
-				public int foo(Object x, Object y) {
-					int i, j;
-					double d;
-					boolean b;
-					if (y instanceof Integer xint) {
-						return 7;
-					} else if (y instanceof final Double xdouble) {
-						return square(8); // square
-					} else if (y instanceof final Boolean xboolean) {
-						throw new NullPointerException();
-					} else {
-						i = 0;
-						d = 0.0D;
-						b = false;
-						if (x instanceof Integer) {
-							return 10;
-						}
-						return 11;
-					}
-				}
-			}
-			""";
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
-
-		enable(CleanUpConstants.USE_SWITCH_FOR_INSTANCEOF_PATTERN);
-
-		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
-	}
 
 }

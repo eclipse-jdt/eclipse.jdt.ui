@@ -164,11 +164,10 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 			private boolean maybeReplaceWithSwitchStatement(final List<IfStatement> ifStatements, final Expression switchExpression,
 					final List<SwitchCaseSection> cases, final Statement remainingStatement) {
 				if (switchExpression != null && cases.size() > 2) {
-					List<SwitchCaseSection> returnList= new ArrayList<>();
-					PatternToSwitchExpressionOperation op= getOperation(ifStatements, switchExpression, cases, remainingStatement, returnList);
+					PatternToSwitchExpressionOperation op= getOperation(ifStatements, switchExpression, cases, remainingStatement);
 					if (op != null) {
 						fResult.add(op);
-					} else if (returnList.isEmpty()){
+					} else {
 						fResult.add(new PatternToSwitchOperation(ifStatements, switchExpression,
 								cases, remainingStatement));
 					}
@@ -191,9 +190,10 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 			}
 
 			private PatternToSwitchExpressionOperation getOperation(List<IfStatement> ifStatements, Expression switchExpression,
-					List<SwitchCaseSection> cases, Statement remainingStatement, List<SwitchCaseSection> returnList) {
+					List<SwitchCaseSection> cases, Statement remainingStatement) {
 				List<SwitchCaseSection> throwList= new ArrayList<>();
 				List<Assignment> assignmentList= new ArrayList<>();
+				List<SwitchCaseSection> returnList= new ArrayList<>();
 				String assignmentName= null;
 				IVariableBinding assignmentBinding= null;
 				if (remainingStatement == null || ASTNodes.asList(remainingStatement).size() == 0) {
@@ -381,7 +381,7 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 				final TypePattern caseValueOrNullForDefault,
 				final List<Statement> innerStatements) {
 			List<Statement> switchStatements= switchStatement.statements();
-			boolean needBlock= innerStatements.size() > 1;
+			boolean needBlock= innerStatements.size() > 1 || (innerStatements.size() == 1 && innerStatements.get(0) instanceof ReturnStatement);
 
 			// Add the case statement(s)
 			if (caseValueOrNullForDefault != null) {
