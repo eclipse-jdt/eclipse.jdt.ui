@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 IBM Corporation and others.
+ * Copyright (c) 2020, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,7 @@ import org.junit.platform.suite.api.Suite;
 	CleanUpTest14.class,
 	CleanUpTest15.class,
 	CleanUpTest16.class,
+	CleanUpTest21.class,
 	CleanUpTest22.class,
 	CleanUpAnnotationTest.class,
 	SaveParticipantTest.class,
