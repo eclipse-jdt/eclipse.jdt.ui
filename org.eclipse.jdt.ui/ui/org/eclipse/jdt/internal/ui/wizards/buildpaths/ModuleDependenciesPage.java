@@ -346,13 +346,9 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 						}
 						try {
 							if (fCurrJProject.getModuleDescription() == null) { // cache default roots when compiling the unnamed module:
-								String release = fCurrJProject.getOption(JavaCore.COMPILER_RELEASE, true);
-								if (release == null) {
-									release = fCurrJProject.getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true);
-								}
-								if (release == null) {
-									release = JavaCore.latestSupportedJavaVersion();
-								}
+								String release = JavaCore.ENABLED.equals(fCurrJProject.getOption(JavaCore.COMPILER_RELEASE, true))
+										? fCurrJProject.getOption(JavaCore.COMPILER_COMPLIANCE, true) : null;
+
 								fAllDefaultSystemModules= closure(JavaCore.defaultRootModules(Arrays.asList(fAllSystemRoots), release));
 							}
 						} catch (JavaModelException e) {
