@@ -167,6 +167,7 @@ import org.eclipse.jdt.internal.corext.fix.InvertEqualsExpressionFixCore;
 import org.eclipse.jdt.internal.corext.fix.JoinVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
+import org.eclipse.jdt.internal.corext.fix.PatternInstanceofToSwitchFixCore;
 import org.eclipse.jdt.internal.corext.fix.RemoveVarOrInferredLambdaParameterTypesFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
@@ -207,6 +208,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
@@ -343,6 +345,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getAddStaticMemberFavoritesProposals(coveringNode, null)
 					|| getSplitSwitchLabelProposal(context, coveringNode, null)
 					|| getSplitTryResourceProposal(context, coveringNode, null)
+					|| getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null);
 		}
 		return false;
@@ -421,6 +424,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getDoWhileRatherThanWhileProposal(context, coveringNode, resultingCollections);
 				getStringConcatToTextBlockProposal(context, coveringNode, resultingCollections);
 				getSplitTryResourceProposal(context, coveringNode, resultingCollections);
+				getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -770,6 +774,30 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			proposals.add(proposal);
 		}
 		return false;
+	}
+
+	private static boolean getConvertPatternInstanceofIfStmtToSwitchProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(covering, IfStatement.class, MethodDeclaration.class, TypeDeclaration.class);
+		if (!(ancestor instanceof IfStatement ifStmt)) {
+			return false;
+		}
+		while (ifStmt.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+			ifStmt= (IfStatement) ifStmt.getParent();
+		}
+		IProposableFix fix= PatternInstanceofToSwitchFixCore.createPatternInstanceofToSwitchFix(ifStmt);
+		if (fix == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		// add correction proposal
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Map<String, String> options= new Hashtable<>();
+		options.put(CleanUpConstants.USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpOptions.TRUE);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new PatternInstanceofToSwitchCleanUpCore(options), IProposalRelevance.CONVERT_PATTERN_INSTANCEOF_TO_SWITCH, image, context);
+		resultingCollections.add(proposal);
+		return true;
 	}
 
 	private static boolean getConvertAnonymousClassCreationsToLambdaProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {

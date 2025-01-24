@@ -620,6 +620,27 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 		return new PatternInstanceofToSwitchFixCore(FixMessages.SwitchFix_convert_if_to_switch, compilationUnit, ops);
 	}
 
+	public static PatternInstanceofToSwitchFixCore createPatternInstanceofToSwitchFix(IfStatement ifStmt) {
+		CompilationUnit compilationUnit= (CompilationUnit) ifStmt.getRoot();
+		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+
+		if (cu == null || !JavaModelUtil.is21OrHigher(cu.getJavaProject())) {
+			return null;
+		}
+
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
+		SwitchStatementsFinder finder= new SwitchStatementsFinder(operations);
+		SwitchStatementsFinder.SeveralIfVisitor visitor= finder.new SeveralIfVisitor();
+		ifStmt.accept(visitor);
+
+		if (operations.isEmpty()) {
+			return null;
+		}
+
+		CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[0]);
+		return new PatternInstanceofToSwitchFixCore(FixMessages.PatternInstanceof_convert_if_to_switch, compilationUnit, ops);
+	}
+
 	protected PatternInstanceofToSwitchFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
