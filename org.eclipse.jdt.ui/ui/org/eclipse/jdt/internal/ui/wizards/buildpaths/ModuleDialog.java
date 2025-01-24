@@ -803,13 +803,9 @@ public class ModuleDialog extends StatusDialog {
 					roots.add(el);
 				}
 			}
-			String release = fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_RELEASE, true);
-			if (release == null) {
-				release = fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, true);
-			}
-			if (release == null) {
-				release = JavaCore.latestSupportedJavaVersion();
-			}
+			String release = JavaCore.ENABLED.equals(fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_RELEASE, true))
+					? fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true) : null;
+
 			return JavaCore.defaultRootModules(roots, release);
 		}
 		return Collections.emptyList();
