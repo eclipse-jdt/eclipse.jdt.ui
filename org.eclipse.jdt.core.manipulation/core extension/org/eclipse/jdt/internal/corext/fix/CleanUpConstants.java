@@ -656,6 +656,17 @@ public class CleanUpConstants {
 	public static final String USE_SWITCH= "cleanup.switch"; //$NON-NLS-1$
 
 	/**
+	 * Replaces {@code if x instanceof Type t1}/{@code else if x instanceof Type t2}/{@code else} blocks to use {@code switch} where possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.35
+	 */
+	public static final String USE_SWITCH_FOR_INSTANCEOF_PATTERN= "cleanup.switch_for_instanceof_pattern"; //$NON-NLS-1$
+
+	/**
 	 * Convert switch statements to switch expressions.<br>
 	 * <p>
 	 * Example:

@@ -505,7 +505,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			}
 		}
 
-		private Statement getNewStatementFromReturn(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ReturnStatement oldStatement) throws JavaModelException {
+		public static Statement getNewStatementFromReturn(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ReturnStatement oldStatement) throws JavaModelException {
 			Statement newStatement;
 			Expression exp= oldStatement.getExpression();
 			// Ugly hack to tack on trailing comments
@@ -528,7 +528,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			return newStatement;
 		}
 
-		private Statement getNewStatementForCase(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, Statement oldStatement) throws JavaModelException {
+		public static Statement getNewStatementForCase(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, Statement oldStatement) throws JavaModelException {
 			Statement newStatement;
 			ExpressionStatement oldExpStatement= (ExpressionStatement)oldStatement;
 			Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
@@ -553,7 +553,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			return newStatement;
 		}
 
-		private YieldStatement getNewYieldStatement(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ExpressionStatement oldExpStatement) throws JavaModelException {
+		public static YieldStatement getNewYieldStatement(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ExpressionStatement oldExpStatement) throws JavaModelException {
 			Assignment oldAssignment= (Assignment)oldExpStatement.getExpression();
 			Expression rhs= oldAssignment.getRightHandSide();
 			IBuffer buffer= cuRewrite.getCu().getBuffer();
@@ -575,7 +575,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			return newYield;
 		}
 
-		private YieldStatement getNewYieldStatementFromReturn(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ReturnStatement oldStatement) throws JavaModelException {
+		public static YieldStatement getNewYieldStatementFromReturn(CompilationUnitRewrite cuRewrite, final ASTRewrite rewrite, ReturnStatement oldStatement) throws JavaModelException {
 			Expression exp= oldStatement.getExpression();
 			IBuffer buffer= cuRewrite.getCu().getBuffer();
 			StringBuilder b= new StringBuilder();
@@ -596,7 +596,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			return newYield;
 		}
 
-		private void replaceWithLeadingComments(CompilationUnitRewrite cuRewrite, ListRewrite listRewrite,
+		public static void replaceWithLeadingComments(CompilationUnitRewrite cuRewrite, ListRewrite listRewrite,
 				ASTNode oldNode, TextEditGroup group, ASTNode newNode) throws JavaModelException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			List<Comment> comments= ASTNodes.getLeadingComments(oldNode);

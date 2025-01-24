@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -78,6 +78,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleCleanUp_numberSuffix_description;
 	public static String CodeStyleCleanUp_QualifyNonStaticMethod_description;
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;
+	public static String CodeStyleCleanUp_PatternInstanceOfToSwitch_description;
 	public static String CodeStyleCleanUp_removeFieldThis_description;
 	public static String CodeStyleCleanUp_removeMethodThis_description;
 	public static String CodeStyleCleanUp_Switch_description;
