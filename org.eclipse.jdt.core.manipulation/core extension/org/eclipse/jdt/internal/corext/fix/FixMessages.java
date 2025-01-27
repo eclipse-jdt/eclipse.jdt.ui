@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -160,6 +160,7 @@ public final class FixMessages extends NLS {
 	public static String LambdaExpressionsFix_convert_to_anonymous_class_creation;
 	public static String LambdaExpressionsFix_convert_to_lambda_expression;
 	public static String LambdaExpressionsFix_convert_to_lambda_expression_removes_annotations;
+	public static String PatternInstanceof_convert_if_to_switch;
 	public static String PatternMatchingForInstanceofFix_refactor;
 	public static String SwitchExpressionsFix_convert_to_switch_expression;
 	public static String SwitchFix_convert_if_to_switch;
