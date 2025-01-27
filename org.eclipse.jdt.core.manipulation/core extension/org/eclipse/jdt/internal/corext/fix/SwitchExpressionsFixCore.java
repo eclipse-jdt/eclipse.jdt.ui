@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -326,6 +326,7 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 			}
 
 			// build switch expression
+			boolean defaultFallThrough= false;
 			for (Map.Entry<SwitchCase, List<Statement>> entry : caseMap.entrySet()) {
 				SwitchCase oldSwitchCase= entry.getKey();
 				List<Statement> oldStatements= entry.getValue();
@@ -335,15 +336,23 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						newSwitchExpression.statements().add(newSwitchCase);
 					} else {
 						// fall-through, want all fall-through labels in single case
-						if (lastSwitchCase == null) {
-							lastSwitchCase= ast.newSwitchCase();
-							lastSwitchCase.setSwitchLabeledRule(true);
-							newSwitchExpression.statements().add(lastSwitchCase);
+						if (oldSwitchCase.expressions().isEmpty()) {
+							// default falls through but we can't add default with other labels
+							// so defer until we have finished the fallthrough case and then
+							// duplicate statements for default case
+							defaultFallThrough= true;
 						}
-						for (Object obj : oldSwitchCase.expressions()) {
-							Expression oldExpression= (Expression)obj;
-							Expression newExpression= (Expression)rewrite.createCopyTarget(oldExpression);
-							lastSwitchCase.expressions().add(newExpression);
+						else {
+							if (lastSwitchCase == null) {
+								lastSwitchCase= ast.newSwitchCase();
+								lastSwitchCase.setSwitchLabeledRule(true);
+								newSwitchExpression.statements().add(lastSwitchCase);
+							}
+							for (Object obj : oldSwitchCase.expressions()) {
+								Expression oldExpression= (Expression)obj;
+								Expression newExpression= (Expression)rewrite.createCopyTarget(oldExpression);
+								lastSwitchCase.expressions().add(newExpression);
+							}
 						}
 					}
 					continue;
@@ -385,21 +394,38 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 					if (oldStatements.size() == 1) {
 						Statement oldStatement= oldStatements.get(0);
 						Statement newStatement= null;
+						Statement newStatement2= null;
 						if (oldStatement instanceof ThrowStatement) {
 							ThrowStatement throwStatement= (ThrowStatement)oldStatement;
 							newStatement= (Statement)rewrite.createCopyTarget(throwStatement);
+							if (defaultFallThrough) {
+								newStatement2= (Statement)rewrite.createCopyTarget(throwStatement);
+							}
 						} else if (oldStatement instanceof ReturnStatement && createReturnStatement) {
 							if (forceOldStyle) {
 								newStatement= getNewYieldStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
 							} else {
 								newStatement= getNewStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+								if (defaultFallThrough) {
+									newStatement2= getNewStatementFromReturn(cuRewrite, rewrite, (ReturnStatement)oldStatement);
+								}
 							}
 						} else if (forceOldStyle) {
 							newStatement= getNewYieldStatement(cuRewrite, rewrite, (ExpressionStatement)oldStatement);
 						} else {
 							newStatement= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+							if (defaultFallThrough) {
+								newStatement2= getNewStatementForCase(cuRewrite, rewrite, oldStatement);
+							}
 						}
 						newSwitchExpression.statements().add(newStatement);
+						if (defaultFallThrough) {
+							SwitchCase newSwitchCase= ast.newSwitchCase();
+							newSwitchCase.setSwitchLabeledRule(true);
+							newSwitchExpression.statements().add(newSwitchCase);
+							newSwitchExpression.statements().add(newStatement2);
+							defaultFallThrough= false;
+						}
 					} else {
 						Block newBlock= ast.newBlock();
 						int statementsLen= oldStatements.size();
@@ -419,6 +445,13 @@ public class SwitchExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 						}
 						newBlock.statements().add(newStatement);
 						newSwitchExpression.statements().add(newBlock);
+						if (defaultFallThrough) {
+							SwitchCase newSwitchCase= ast.newSwitchCase();
+							newSwitchCase.setSwitchLabeledRule(true);
+							newSwitchCase.expressions().add(ast.newCaseDefaultExpression());
+							newSwitchExpression.statements().add(newSwitchCase);
+							newSwitchExpression.statements().add(newBlock);
+						}
 					}
 					if (needDuplicateDefault) {
 						needDuplicateDefault= false;
