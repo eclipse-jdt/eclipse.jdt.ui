@@ -20503,6 +20503,57 @@ public class CleanUpTest extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testAddParenthesesIssue1951() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+			public class E {
+			    void foo(int i) {
+			        if (i == 0 || i == 1 /* i is 0 or 1 */)
+			            System.out.println(i); // if comment
+			       \s
+			        while (i > 0 && i < 10 /* i gt 0 and lt 10 */)
+			            System.out.println(1); // while comment
+			       \s
+			        boolean b= i != -1 && i > 10 && i < 100 || i > 20;
+			       \s
+			        do
+				        ++i; // do comment
+			        while (i > 5 && b || i < 100 && i > 90);
+			    }
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+
+		sample= """
+			package test1;
+			public class E {
+			    void foo(int i) {
+			        if (i == 0 || i == 1 /* i is 0 or 1 */) {
+			            System.out.println(i); // if comment
+			        }
+			       \s
+			        while (i > 0 && i < 10 /* i gt 0 and lt 10 */) {
+			            System.out.println(1); // while comment
+			        }
+			       \s
+			        boolean b= i != -1 && i > 10 && i < 100 || i > 20;
+			       \s
+			        do {
+			            ++i; // do comment
+			        } while (i > 5 && b || i < 100 && i > 90);
+			    }
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
+	}
+
+	@Test
 	public void testRemoveParentheses01() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
