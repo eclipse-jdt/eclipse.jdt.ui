@@ -79,12 +79,14 @@ public final class FoldingTestUtils {
 						", actual regions: " + projectionRanges
 		);
 	}
+
 	private static int getLengthIfNotFound(String input, int startLineEnd) {
 		if (startLineEnd == -1) {
 			startLineEnd= input.length();
 		}
 		return startLineEnd;
 	}
+
 	private static int findLineStartIndex(String input, int lineNumber) {
 		int currentInputIndex= 0;
 		for (int i= 0; i < lineNumber; i++) {
@@ -95,6 +97,7 @@ public final class FoldingTestUtils {
 		}
 		return currentInputIndex;
 	}
+
 	private static int findNextLineStart(String input, int currentInputIndex) {
 		return input.indexOf('\n', currentInputIndex + 1);
 	}

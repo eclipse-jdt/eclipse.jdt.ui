@@ -3413,6 +3413,16 @@ public class PreferenceConstants {
 	public static final String EDITOR_FOLDING_ENABLED= "editor_folding_enabled"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether the new or the old folding is used.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_NEW_FOLDING_ENABLED= "editor_new_folding_enabled"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the configured folding provider.
 	 * <p>
 	 * Value is of type <code>String</code>.
@@ -4387,6 +4397,8 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG, true);
+
+		store.setDefault(EDITOR_NEW_FOLDING_ENABLED, false);
 
 		// Javadoc hover & view
 		JavaElementLinks.initDefaultPreferences(store);
