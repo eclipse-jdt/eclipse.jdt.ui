@@ -312,7 +312,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Extract the class name from a String in VA/Java style
 			     */
 			    public String extractClassName(final String className) {
-			        if (className.startsWith("Default package for")) { // $NON-NLS-1$
+			        if (className.startsWith("Default package for")) { //$NON-NLS-1$
 			            return className.substring(className.lastIndexOf(".") + 1); //$NON-NLS-1$
 			        }
 			        return className;
