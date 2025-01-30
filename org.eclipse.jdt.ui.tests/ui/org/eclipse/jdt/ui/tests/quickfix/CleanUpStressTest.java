@@ -3114,7 +3114,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }
 
-			        if (testCase.equals("")) { // $NON-NLS-1$
+			        if (testCase.equals("")) { //$NON-NLS-1$
 			            throw new Exception(
 			                    "Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class"); //$NON-NLS-1$
 			        }
