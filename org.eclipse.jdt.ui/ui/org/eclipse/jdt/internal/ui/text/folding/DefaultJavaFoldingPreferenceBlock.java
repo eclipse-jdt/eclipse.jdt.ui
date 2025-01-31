@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,10 +29,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
+import org.eclipse.core.runtime.preferences.IScopeContext;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
+import org.eclipse.jdt.ui.text.folding.IScopedJavaFoldingPreferenceBlock;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore;
@@ -44,7 +49,7 @@ import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey
  *
  * @since 3.0
  */
-public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
+public class DefaultJavaFoldingPreferenceBlock implements IScopedJavaFoldingPreferenceBlock {
 
 	private IPreferenceStore fStore;
 	private OverlayPreferenceStore fOverlayStore;
@@ -65,6 +70,16 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	public DefaultJavaFoldingPreferenceBlock() {
 		fStore= JavaPlugin.getDefault().getPreferenceStore();
 		fKeys= createKeys();
+		fOverlayStore= new OverlayPreferenceStore(fStore, fKeys);
+	}
+
+	@Override
+	public void setScopeContext(IScopeContext context) {
+		if(context == null) {
+			fStore = JavaPlugin.getDefault().getPreferenceStore();
+		} else {
+			fStore= new ScopedPreferenceStore(context, JavaUI.ID_PLUGIN);
+		}
 		fOverlayStore= new OverlayPreferenceStore(fStore, fKeys);
 	}
 
