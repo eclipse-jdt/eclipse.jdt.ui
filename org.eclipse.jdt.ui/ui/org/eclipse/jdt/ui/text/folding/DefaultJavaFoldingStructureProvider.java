@@ -353,8 +353,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		@Override
 		public boolean visit(TypeDeclaration node) {
-			boolean isInnerClass= node.isMemberTypeDeclaration();
-			if (isInnerClass) {
+			if (node.isMemberTypeDeclaration() || node.isLocalTypeDeclaration()) {
 				int start= node.getName().getStartPosition();
 				int end= node.getStartPosition() + node.getLength();
 				createFoldingRegion(start, end - start, ctx.collapseMembers());
@@ -1496,7 +1495,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				includelastLine= true;
 				IRegion normalized= alignRegion(regions[i], ctx);
 				if (normalized != null) {
-					includelastLine= true;
 					Position position= createCommentPosition(normalized);
 					if (position != null) {
 						boolean commentCollapse;

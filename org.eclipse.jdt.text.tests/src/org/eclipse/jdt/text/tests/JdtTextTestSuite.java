@@ -21,6 +21,7 @@ import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
 import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.folding.FoldingTest;
+import org.eclipse.jdt.text.tests.folding.FoldingTestNew;
 import org.eclipse.jdt.text.tests.semantictokens.SemanticTokensProviderTest;
 import org.eclipse.jdt.text.tests.spelling.SpellCheckEngineTestCase;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
@@ -71,6 +72,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	JavaElementPrefixPatternMatcherTest.class,
 	CodeMiningTriggerTest.class,
 	ParameterNamesCodeMiningTest.class,
+	FoldingTestNew.class,
 	FoldingTest.class,
 })
 public class JdtTextTestSuite {
