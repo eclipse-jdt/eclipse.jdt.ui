@@ -57,11 +57,13 @@ public class FoldingTest {
 		packageFragment= sourceFolder.createPackageFragment("org.example.test", false, null);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED, true);
-		}
+	}
 
 	@After
 	public void tearDown() throws CoreException {
 		JavaProjectHelper.delete(jProject);
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setToDefault(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
 	@Test
