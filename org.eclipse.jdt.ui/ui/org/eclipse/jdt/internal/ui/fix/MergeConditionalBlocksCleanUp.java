@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypePattern;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -157,12 +158,23 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		private class PatternNameVisitor extends ASTVisitor {
 			private Set<String> patternNames= new HashSet<>();
 
+			@SuppressWarnings("null")
 			@Override
 			public boolean visit(PatternInstanceofExpression node) {
 				Pattern p= node.getPattern();
 				if (p instanceof TypePattern typePattern) {
-					SingleVariableDeclaration patternVariable= typePattern.getPatternVariable();
-					patternNames.add(patternVariable.getName().getFullyQualifiedName());
+					final boolean isBeforeJLS22 = node.getAST().apiLevel() < AST.JLS22;
+
+					final SingleVariableDeclaration patternVariable = isBeforeJLS22
+					        ? typePattern.getPatternVariable()
+					        : null;
+				    final VariableDeclaration patternVariable2 = isBeforeJLS22
+				        ? null
+				        : typePattern.getPatternVariable2();
+
+				    patternNames.add(isBeforeJLS22
+				        ? patternVariable.getName().getFullyQualifiedName()
+				        : patternVariable2.getName().getFullyQualifiedName());
 				}
 				return true;
 			}

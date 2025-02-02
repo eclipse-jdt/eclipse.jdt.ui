@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypePattern;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -193,6 +194,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			this.expressionToMove= expressionToMove;
 		}
 
+		@SuppressWarnings("removal")
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -220,7 +222,9 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			}
 			if ((ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled()) || ast.apiLevel() > AST.JLS20) {
 				TypePattern newTypePattern= ast.newTypePattern();
-				newTypePattern.setPatternVariable(newSVDecl);
+
+				newTypePattern.setPatternVariable(ast.apiLevel() > AST.JLS22 ? (VariableDeclaration) newSVDecl : newSVDecl);
+
 				newInstanceof.setPattern(newTypePattern);
 			} else {
 				newInstanceof.setRightOperand(newSVDecl);
