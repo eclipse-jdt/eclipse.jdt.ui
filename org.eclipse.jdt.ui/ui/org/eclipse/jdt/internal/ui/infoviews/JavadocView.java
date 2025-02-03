@@ -232,7 +232,7 @@ public class JavadocView extends AbstractInfoView {
 
 		public ForthAction() {
 			setText(InfoViewMessages.JavadocView_action_forward_name);
-			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
+			ISharedImages images= ISharedImages.get();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD_DISABLED));
 
@@ -266,7 +266,7 @@ public class JavadocView extends AbstractInfoView {
 
 		public BackAction() {
 			setText(InfoViewMessages.JavadocView_action_back_name);
-			ISharedImages images= PlatformUI.getWorkbench().getSharedImages();
+			ISharedImages images= ISharedImages.get();
 			setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
 			setDisabledImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK_DISABLED));
 
@@ -792,7 +792,7 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		IWorkbenchPart part= null;
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page= window.getActivePage();
 			if (page != null) {

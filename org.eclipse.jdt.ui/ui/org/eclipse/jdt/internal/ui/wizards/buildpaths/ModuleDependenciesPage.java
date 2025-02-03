@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 GK Software SE, and others.
+ * Copyright (c) 2019, 2025 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,8 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import java.text.MessageFormat;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -347,7 +346,10 @@ public class ModuleDependenciesPage extends BuildPathBasePage {
 						}
 						try {
 							if (fCurrJProject.getModuleDescription() == null) { // cache default roots when compiling the unnamed module:
-								fAllDefaultSystemModules= closure(JavaCore.defaultRootModules(Arrays.asList(fAllSystemRoots)));
+								String release = JavaCore.ENABLED.equals(fCurrJProject.getOption(JavaCore.COMPILER_RELEASE, true))
+										? fCurrJProject.getOption(JavaCore.COMPILER_COMPLIANCE, true) : null;
+
+								fAllDefaultSystemModules= closure(JavaCore.defaultRootModules(Arrays.asList(fAllSystemRoots), release));
 							}
 						} catch (JavaModelException e) {
 							JavaPlugin.log(e);

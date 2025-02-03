@@ -46,11 +46,7 @@ public class JspPluginImages {
 	static {
 		String pathSuffix = "icons/full/"; //$NON-NLS-1$
 
-		try {
-			ICON_BASE_URL= new URL(JspUIPlugin.getDefault().getBundle().getEntry("/"), pathSuffix); //$NON-NLS-1$
-		} catch (MalformedURLException e) {
-			// do nothing
-		}
+		ICON_BASE_URL= JspUIPlugin.getDefault().getBundle().getEntry("/"+ pathSuffix); //$NON-NLS-1$
 	}
 
 	// Use IPath and toOSString to build the names to ensure they have the slashes correct

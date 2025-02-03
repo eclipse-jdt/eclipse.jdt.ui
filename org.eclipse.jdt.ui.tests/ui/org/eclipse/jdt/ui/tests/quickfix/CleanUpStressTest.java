@@ -312,7 +312,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			     * Extract the class name from a String in VA/Java style
 			     */
 			    public String extractClassName(final String className) {
-			        if (className.startsWith("Default package for")) { // $NON-NLS-1$
+			        if (className.startsWith("Default package for")) { //$NON-NLS-1$
 			            return className.substring(className.lastIndexOf(".") + 1); //$NON-NLS-1$
 			        }
 			        return className;
@@ -3114,7 +3114,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            }
 			        }
 
-			        if (testCase.equals("")) { // $NON-NLS-1$
+			        if (testCase.equals("")) { //$NON-NLS-1$
 			            throw new Exception(
 			                    "Usage: TestRunner [-wait] testCaseName, where name is the name of the TestCase class"); //$NON-NLS-1$
 			        }

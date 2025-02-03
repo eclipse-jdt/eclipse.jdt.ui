@@ -14,11 +14,15 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.Hashtable;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -45,7 +49,13 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
+@RunWith(Parameterized.class)
 public class SaveParticipantTest extends CleanUpTestCase {
+	@Parameters(name= "{0}")
+	public static Object[][] retry() {
+		return new Object[2][0];
+	}
+
 	@Rule
     public ProjectTestSetup projectSetup = new ProjectTestSetup();
 
@@ -109,8 +119,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -148,8 +157,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -188,8 +196,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -233,8 +240,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -274,8 +280,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -284,14 +289,14 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
 		String fileOnDisk= """
 			package test1;
-			
+
 			public class E1 {
 			    /**
 			     * adsfdas
 			     * dafs
 			     */
 			    int a = 2;
-			
+
 			    /**
 			     * adsfasd\s
 			     * asd
@@ -303,14 +308,14 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		String fileOnEditor= """
 			package test1;
-			
+
 			public class E1 {
 			    /**
 			     * adsfdas
 			     * dafs\s
 			     */
 			    int a = 2;
-			
+
 			    /**
 			     * adsfasd\s
 			     * asd
@@ -321,13 +326,13 @@ public class SaveParticipantTest extends CleanUpTestCase {
 
 		String expected1= """
 			package test1;
-			
+
 			public class E1 {
 			    /**
 			     * adsfdas dafs
 			     */
 			    int a = 2;
-			
+
 			    /**
 			     * adsfasd\s
 			     * asd
@@ -342,8 +347,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -390,8 +394,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -421,7 +424,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			package test1;
 			public class E1 {
 			    public int i = 10;
-			
+
 			    public int j = 10;
 			}
 			""";
@@ -433,8 +436,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -445,7 +447,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			package test1;
 			public class E1 {
 			    public int i = 10;   \s
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
@@ -454,7 +456,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			package test1;
 			public class E1 {
 			    public  int i= 10;   \s
-			
+
 			}
 			""";
 
@@ -462,7 +464,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			package test1;
 			public class E1 {
 			    public int i = 10;
-			
+
 			}
 			""";
 
@@ -472,8 +474,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -483,7 +484,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
 			}
 			""";
@@ -500,7 +501,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
 			}
 			""";
@@ -511,8 +512,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -522,9 +522,9 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
@@ -532,7 +532,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
 			\s
 			}
@@ -541,9 +541,9 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
-			
+
 			}
 			""";
 
@@ -554,8 +554,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -565,7 +564,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
 			}
 			""";
@@ -582,7 +581,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
 			}
 			""";
@@ -594,8 +593,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -605,9 +603,9 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
@@ -615,7 +613,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
 			\s
 			}
@@ -624,9 +622,9 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    public int field;
-			
+
 			}
 			""";
 
@@ -638,8 +636,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -686,8 +683,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -697,12 +693,12 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    /**
 			     * A Java comment on
 			     * two lines
 			     */
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
@@ -710,23 +706,23 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    /**
 			     * A Java comment on
 			     *  two lines
 			     */
-			
+
 			}
 			""";
 
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    /**
 			     * A Java comment on two lines
 			     */
-			
+
 			}
 			""";
 
@@ -736,8 +732,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -747,12 +742,12 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    /*
 			     * A block comment on
 			     * two lines
 			     */
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
@@ -760,23 +755,23 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    /*
 			     * A block comment on
 			     *  two lines
 			     */
-			
+
 			}
 			""";
 
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    /*
 			     * A block comment on two lines
 			     */
-			
+
 			}
 			""";
 
@@ -786,8 +781,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -797,9 +791,9 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    //long long long long long long long long long long long long long long long long
-			
+
 			}
 			""";
 		ICompilationUnit cu1= pack2.createCompilationUnit("E1.java", fileOnDisk, false, null);
@@ -807,19 +801,19 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    // long long long long long long long long long long long long long long long long
-			
+
 			}
 			""";
 
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    // long long long long long long long long long long long long long long
 			    // long long
-			
+
 			}
 			""";
 
@@ -829,8 +823,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -893,8 +886,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			// When
 			editCUInEditor(cu1, fileOnEditor);
 
-			// Then
-			assertEquals(expected1, cu1.getBuffer().getContents());
+			assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 		} finally {
 			JavaCore.setOptions(oldOptions);
 		}
@@ -963,10 +955,21 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			editCUInEditor(cu1, fileOnEditor);
 
 			// Then
-			assertEquals(expected1, cu1.getBuffer().getContents());
+			assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 		} finally {
 			JavaCore.setOptions(oldOptions);
 		}
+	}
+
+	private void assertChangedFromTo(ICompilationUnit cu, String from, String fileOnEditor, String expected) throws JavaModelException {
+		String contents= cu.getBuffer().getContents();
+		if (!expected.equals(from)) {
+			assertNotEquals("contents was not changed", from, contents);
+		}
+		if (!expected.equals(fileOnEditor)) {
+			assertNotEquals("contents was not formated", fileOnEditor, contents);
+		}
+		assertEquals("contents was wrong formated", expected, contents);
 	}
 
 	@Test
@@ -1031,13 +1034,11 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			// When
 			editCUInEditor(cu1, fileOnEditor);
 
-			// Then
-			assertEquals(expected1, cu1.getBuffer().getContents());
+			assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 		} finally {
 			JavaCore.setOptions(oldOptions);
 		}
 	}
-
 	@Test
 	public void testFormatChangeBug561164() throws Exception {
 		Hashtable<String, String> oldOptions= JavaCore.getOptions();
@@ -1101,8 +1102,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 			// When
 			editCUInEditor(cu1, fileOnEditor);
 
-			// Then
-			assertEquals(expected1, cu1.getBuffer().getContents());
+			assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 		} finally {
 			JavaCore.setOptions(oldOptions);
 		}
@@ -1165,8 +1165,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -1176,7 +1175,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    private void m1(Object p1) {
 			    }
 			}
@@ -1187,7 +1186,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    private void m1(Object p1) {
 			    }
 			}
@@ -1196,7 +1195,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    private void m1() {
 			    }
 			}
@@ -1207,8 +1206,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 
 	@Test
@@ -1218,7 +1216,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnDisk= """
 			package test1;
 			public class E1 {
-			
+
 			    private void m1(Object p1) {
 			    }
 			}
@@ -1229,7 +1227,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String fileOnEditor= """
 			package test1;
 			public class E1 {
-			
+
 			    private void m1(Object p1) {
 			    }
 			}
@@ -1238,7 +1236,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		String expected1= """
 			package test1;
 			public class E1 {
-			
+
 			    private void m1(Object p1) {
 			    }
 			}
@@ -1247,7 +1245,6 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		// When
 		editCUInEditor(cu1, fileOnEditor);
 
-		// Then
-		assertEquals(expected1, cu1.getBuffer().getContents());
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
 	}
 }

@@ -27,18 +27,12 @@ public class Jsp2JavaTagHandlerFactory implements ITagHandlerFactory {
 
 	private final ITagHandler fTagHandler= new Jsp2JavaTagHandler();
 
-	/*
-	 * @see org.eclipse.jface.text.source.IHandlerFactory#getHandler(java.lang.String)
-	 */
 	@Override
 	public ITagHandler getHandler(String tag) {
 		fTagHandler.reset(tag);
 		return fTagHandler;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.source.IHandlerFactory#findHandler(java.lang.String)
-	 */
 	@Override
 	public ITagHandler findHandler(String text) {
 		return fTagHandler;

@@ -60,7 +60,6 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
@@ -894,7 +893,7 @@ public class JavadocConfigurationBlock {
 		private final Image IMG_JAR=
 			JavaUI.getSharedImages().getImage(org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_JAR);
 		private final Image IMG_FOLDER=
-			PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+			ISharedImages.get().getImage(ISharedImages.IMG_OBJ_FOLDER);
 
 		private ZipFileStructureProvider fProvider;
 

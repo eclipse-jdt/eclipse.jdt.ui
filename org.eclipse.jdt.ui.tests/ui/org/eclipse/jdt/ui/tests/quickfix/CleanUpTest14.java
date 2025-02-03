@@ -51,7 +51,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public int foo(int j) {
 			        // return value
@@ -78,7 +78,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class E {
 			    public int foo(int j) {
 			        // return value
@@ -105,7 +105,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    private int i;
 			    public void foo(int j) {
@@ -130,7 +130,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class E {
 			    private int i;
 			    public void foo(int j) {
@@ -211,7 +211,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E {
 			    public enum Day {
 			        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
@@ -245,7 +245,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			public class E {
 			    public enum Day {
 			        MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY;
@@ -273,9 +273,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) {
 			        // comment 1
@@ -300,9 +300,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) {
 			        // comment 1
@@ -325,9 +325,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) throws Exception {
 			        boolean isWhiteSpace;
@@ -360,9 +360,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) throws Exception {
 			        boolean isWhiteSpace = switch (args[0].charAt(0)) {
@@ -395,9 +395,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) throws Exception {
 			        boolean isWhiteSpace;
@@ -425,9 +425,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) throws Exception {
 			        boolean isWhiteSpace = switch (args[0].charAt(0)) {
@@ -450,9 +450,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) throws Exception {
 			        boolean isWhiteSpace;
@@ -483,9 +483,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public void foo(String[] args) throws Exception {
 			        boolean isWhiteSpace = switch (args[0].charAt(0)) {
@@ -514,9 +514,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public enum InnerEnum {
 			        A, B, C, D;
@@ -547,9 +547,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public enum InnerEnum {
 			        A, B, C, D;
@@ -578,9 +578,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public enum InnerEnum {
 			        A, B, C, D;
@@ -607,9 +607,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 
 		sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public enum InnerEnum {
 			        A, B, C, D;
@@ -640,7 +640,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			public class E {
 			    public void bar() {
 			    }
-			
+
 			    public int foo(int i) {
 			        switch (i) {
 			        case 0:
@@ -662,7 +662,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			public class E {
 			    public void bar() {
 			    }
-			
+
 			    public int foo(int i) {
 			        return switch (i) {
 			            case 0 -> 0;
@@ -687,7 +687,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			public class E {
 			    public void bar() {
 			    }
-			
+
 			    public int foo(int i) {
 			        switch (i) {
 			        case 0: // comment
@@ -708,7 +708,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 			public class E {
 			    public void bar() {
 			    }
-			
+
 			    public int foo(int i) {
 			        return switch (i) {
 			            case 0: // comment
@@ -725,13 +725,106 @@ public class CleanUpTest14 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToSwitchExpressionIssue1983_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E {
+
+				public void foo() {
+					int delimiter = 5;
+					String d;
+					switch (delimiter) {
+					case 0: d = " "; break;
+					default:
+					case 1: d = ","; break;
+					case 2: d = ";"; break;
+					}
+				}
+
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= """
+			package test1;
+
+			public class E {
+
+				public void foo() {
+					int delimiter = 5;
+					String d = switch (delimiter) {
+			            case 0 -> " ";
+			            case 1 -> ",";
+			            default -> ",";
+			            case 2 -> ";";
+			        };
+				}
+
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
+	public void testConvertToSwitchExpressionIssue1983_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E {
+
+				public void foo() {
+					int delimiter = 5;
+					String d;
+					switch (delimiter) {
+					case 0: d = " "; break;
+					case 1:
+					default:
+					case 2: d = ";"; break;
+					}
+				}
+
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS);
+
+		sample= """
+			package test1;
+
+			public class E {
+
+				public void foo() {
+					int delimiter = 5;
+					String d = switch (delimiter) {
+			            case 0 -> " ";
+			            case 1, 2 -> ";";
+			            default -> ";";
+			        };
+				}
+
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+
+	@Test
 	public void testDoNotConvertToReturnSwitchExpressionIssue104_1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public enum InnerEnum {
 			        A, B, C, D;
@@ -768,9 +861,9 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			import java.io.File;
-			
+
 			public class E {
 			    public enum InnerEnum {
 			        A, B, C, D;
@@ -810,7 +903,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j) {
 			        // return value
@@ -841,7 +934,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j) {
 			        // return value
@@ -872,7 +965,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j) {
 			        // return value
@@ -904,7 +997,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j) {
 			        // return value
@@ -937,7 +1030,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j, int k) {
 			        // return value
@@ -973,7 +1066,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j, int k) {
 			        // return value
@@ -1009,7 +1102,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public int foo(int j) {
 			        // return value
@@ -1040,7 +1133,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public static void main(String[] args) {
 			        boolean rulesOK = true;
@@ -1076,7 +1169,7 @@ public class CleanUpTest14 extends CleanUpTestCase {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
 			package test1;
-			
+
 			public class E1 {
 			    public void f(int i) {
 			        switch (i) {

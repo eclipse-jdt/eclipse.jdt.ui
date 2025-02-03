@@ -137,6 +137,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/typehierarchy/HierarchyInformationControl.java" type="org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl">
+        <filter id="571519004">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl.createTreeViewer(Composite, int)"/>
+                <message_argument value="TreeViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/viewsupport/ProblemTableViewer.java" type="org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer">
         <filter id="571473929">
             <message_arguments>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.action.Action;
@@ -3412,6 +3413,16 @@ public class PreferenceConstants {
 	public static final String EDITOR_FOLDING_ENABLED= "editor_folding_enabled"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether the new or the old folding is used.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_NEW_FOLDING_ENABLED= "editor_new_folding_enabled"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that stores the configured folding provider.
 	 * <p>
 	 * Value is of type <code>String</code>.
@@ -3776,7 +3787,7 @@ public class PreferenceConstants {
 	 * Value is an XML encoded version of the history.
 	 * </p>
 	 *
-	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory#load(org.eclipse.core.runtime.Preferences, String)
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory#load(IEclipsePreferences, String)
 	 * @since 3.2
 	 */
 	public static final String CODEASSIST_LRU_HISTORY= "content_assist_lru_history"; //$NON-NLS-1$
@@ -4386,6 +4397,8 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_FILTER_IMPLIED_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG, true);
+
+		store.setDefault(EDITOR_NEW_FOLDING_ENABLED, false);
 
 		// Javadoc hover & view
 		JavaElementLinks.initDefaultPreferences(store);

@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 
 /**
@@ -159,18 +160,22 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 			if (hover == null)
 				continue;
 
-			if (hover instanceof ITextHoverExtension2) {
-				Object info= ((ITextHoverExtension2) hover).getHoverInfo2(textViewer, hoverRegion);
-				if (info != null && (!forInformationProvider || (getInformationPresenterControlCreator(hover) != null))) {
-					fBestHover= hover;
-					return info;
+			try {
+				if (hover instanceof ITextHoverExtension2) {
+					Object info= ((ITextHoverExtension2) hover).getHoverInfo2(textViewer, hoverRegion);
+					if (info != null && (!forInformationProvider || (getInformationPresenterControlCreator(hover) != null))) {
+						fBestHover= hover;
+						return info;
+					}
+				} else {
+					String s= hover.getHoverInfo(textViewer, hoverRegion);
+					if (s != null && s.trim().length() > 0) {
+						fBestHover= hover;
+						return s;
+					}
 				}
-			} else {
-				String s= hover.getHoverInfo(textViewer, hoverRegion);
-				if (s != null && s.trim().length() > 0) {
-					fBestHover= hover;
-					return s;
-				}
+			} catch (RuntimeException e) {
+				SelectionUtil.logException("computing hover information", e, getEditor().getTitle(), textViewer.getDocument(), hoverRegion.getOffset()); //$NON-NLS-1$
 			}
 		}
 

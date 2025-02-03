@@ -37,11 +37,8 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 		super(parent, new TraditionalHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
 
-	/*
-	 * @see TypeHierarchyViewer#updateContent
-	 */
 	@Override
-	public void updateContent(boolean expand) {
+	protected void hookUpdateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
 

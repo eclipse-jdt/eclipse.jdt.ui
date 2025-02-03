@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 GK Software SE, and others.
+ * Copyright (c) 2017, 2025 GK Software SE, and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -60,6 +60,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
@@ -485,7 +486,7 @@ public class ModuleDialog extends StatusDialog {
 	}
 
 	private void createHorizontalButtons(Composite parent) {
-		org.eclipse.ui.ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
+		org.eclipse.ui.ISharedImages sharedImages= ISharedImages.get();
 
 		Composite box= new Composite(parent, SWT.NONE);
 		box.setLayout(new GridLayout(1, true));
@@ -798,11 +799,14 @@ public class ModuleDialog extends StatusDialog {
 		if (fJavaElements != null) {
 			List<IPackageFragmentRoot> roots= new ArrayList<>();
 			for (IJavaElement element : fJavaElements) {
-				if (element instanceof IPackageFragmentRoot) {
-					roots.add((IPackageFragmentRoot) element);
+				if (element instanceof IPackageFragmentRoot el) {
+					roots.add(el);
 				}
 			}
-			return JavaCore.defaultRootModules(roots);
+			String release = JavaCore.ENABLED.equals(fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_RELEASE, true))
+					? fJavaElements[0].getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true) : null;
+
+			return JavaCore.defaultRootModules(roots, release);
 		}
 		return Collections.emptyList();
 	}

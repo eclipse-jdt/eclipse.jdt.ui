@@ -32,11 +32,8 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 		super(parent, new SubTypeHierarchyContentProvider(lifeCycle), lifeCycle);
 	}
 
-	/*
-	 * @see TypeHierarchyViewer#updateContent
-	 */
 	@Override
-	public void updateContent(boolean expand) {
+	protected void hookUpdateContent(boolean expand) {
 		getTree().setRedraw(false);
 		refresh();
 

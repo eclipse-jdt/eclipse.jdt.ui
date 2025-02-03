@@ -87,7 +87,7 @@ public class StorageLabelProvider extends LabelProvider {
 	 */
 	private Image getImageForJarEntry(IStorage element) {
 		if (element instanceof IJarEntryResource && !((IJarEntryResource) element).isFile()) {
-			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+			return ISharedImages.get().getImage(ISharedImages.IMG_OBJ_FOLDER);
 		}
 
 		if (fJarImageMap == null)
@@ -133,7 +133,7 @@ public class StorageLabelProvider extends LabelProvider {
 
 	private Image getDefaultImage() {
 		if (fDefaultImage == null)
-			fDefaultImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
+			fDefaultImage= ISharedImages.get().getImage(ISharedImages.IMG_OBJ_FILE);
 		return fDefaultImage;
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation and others.
+ * Copyright (c) 2020, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.fix.JoinCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.MultiCatchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ObjectsEqualsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PatternMatchingForInstanceofCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
@@ -59,14 +60,18 @@ public final class JavaFeatureTabPage extends AbstractCleanUpTabPage {
 				new ConvertLoopCleanUp(values),
 				new AutoboxingCleanUp(values),
 				new UnboxingCleanUp(values),
+				new PatternInstanceofToSwitchCleanUpCore(values),
 				new ConstantsForSystemPropertyCleanUp(values)
 		};
 	}
 
 	@Override
 	protected void doCreatePreferences(final Composite composite, final int numColumns) {
-		Group java16Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java16);
+		Group java21Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java21);
+		CheckboxPreference patternInstanceofToSwitch= createCheckboxPref(java21Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_PatternInstanceofToSwitch, CleanUpConstants.USE_SWITCH_FOR_INSTANCEOF_PATTERN, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(patternInstanceofToSwitch);
 
+		Group java16Group= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Java16);
 		CheckboxPreference patternMatchingForInstanceof= createCheckboxPref(java16Group, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_PatternMatchingForInstanceof, CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(patternMatchingForInstanceof);
 

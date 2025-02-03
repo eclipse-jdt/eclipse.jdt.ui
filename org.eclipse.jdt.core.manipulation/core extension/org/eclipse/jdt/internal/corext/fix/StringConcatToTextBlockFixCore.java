@@ -752,6 +752,9 @@ public class StringConcatToTextBlockFixCore extends CompilationUnitRewriteOperat
 			if (!checkValidityVisitor.isValid()) {
 				return failure();
 			} else if (checkValidityVisitor.isPassedAsArgument()) {
+				if (fLiterals.size() < 3) {
+					return failure();
+				}
 				List<Statement> statements= new ArrayList<>(statementList);
 				List<StringLiteral> literals= new ArrayList<>(fLiterals);
 				ModifyStringBufferToUseTextBlock operation= new ModifyStringBufferToUseTextBlock(node, statements,

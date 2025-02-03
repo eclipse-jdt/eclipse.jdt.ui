@@ -143,7 +143,7 @@ public class PreviewFeaturesSubProcessor {
 			@Override
 			public void apply(IDocument document) {
 
-				Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				Shell shell= JavaPlugin.getActiveWorkbenchShell();
 				boolean usePropertyPage;
 
 				if (!hasProjectSpecificOptions) {

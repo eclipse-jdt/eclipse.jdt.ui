@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.osgi.util.NLS;
 
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -97,11 +97,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
 
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
 		fJProject1= projectSetup.getProject();
 
@@ -233,9 +233,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
-		corePrefs.setValue(JavaCore.CODEASSIST_LOCAL_PREFIXES, "_");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.put(JavaCore.CODEASSIST_LOCAL_PREFIXES, "_");
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -358,10 +358,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
-		corePrefs.setValue(JavaCore.CODEASSIST_LOCAL_PREFIXES, "_");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+		corePrefs.put(JavaCore.CODEASSIST_LOCAL_PREFIXES, "_");
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1280,8 +1280,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testAssignParamToField2() throws Exception {
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1322,8 +1322,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testAssignParamToField3() throws Exception {
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "fg");
 
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, true);
@@ -1718,8 +1718,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testAssignParamToFieldInGeneric() throws Exception {
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -7400,10 +7400,10 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Test
 	public void testConvertAnonymousToNested2() throws Exception {
-		Preferences corePrefs= JavaPlugin.getJavaCorePluginPreferences();
-		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
-		corePrefs.setValue(JavaCore.CODEASSIST_LOCAL_PREFIXES, "l");
-		corePrefs.setValue(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, "p");
+		IEclipsePreferences corePrefs= JavaPlugin.getJavaCorePluginPreferencesNew();
+		corePrefs.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
+		corePrefs.put(JavaCore.CODEASSIST_LOCAL_PREFIXES, "l");
+		corePrefs.put(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, "p");
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2021, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -415,6 +415,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			        buf12.append("ijkl\\n");
 			        buf12.append("mnopq\\n");
 			        bufFunc(buf12);
+			        StringBuffer buf13 = new StringBuffer();
+			        bufFunc(buf13);
+			        StringBuffer buf14 = new StringBuffer("abcd\\n");
+			        bufFunc(buf14);
+			        StringBuffer buf15 = new StringBuffer("abcd\\n");
+			        buf15.append("efg");
+			        bufFunc(buf15);
 			    }
 			    private void write(CharSequence c) {
 			        System.out.println(c);
@@ -554,6 +561,13 @@ public class CleanUpTest15 extends CleanUpTestCase {
 			            mnopq
 			            \""");
 			        bufFunc(buf12);
+			        StringBuffer buf13 = new StringBuffer();
+			        bufFunc(buf13);
+			        StringBuffer buf14 = new StringBuffer("abcd\\n");
+			        bufFunc(buf14);
+			        StringBuffer buf15 = new StringBuffer("abcd\\n");
+			        buf15.append("efg");
+			        bufFunc(buf15);
 			    }
 			    private void write(CharSequence c) {
 			        System.out.println(c);

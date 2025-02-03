@@ -22,7 +22,6 @@ Export-Package:
  org.eclipse.jdt.ui.tests.browsing;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.buildpath;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.callhierarchy;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
- org.eclipse.jdt.ui.tests.chkpii;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.core;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.core.rules;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",
  org.eclipse.jdt.ui.tests.core.source;x-friends:="org.eclipse.jdt.ui.tests.refactoring, org.eclipse.jdt.text.tests",

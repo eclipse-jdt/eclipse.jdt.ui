@@ -17,7 +17,6 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 import java.util.ArrayList;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -85,7 +84,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 
 
 	public RemoveDeclarationCorrectionProposal(ICompilationUnit cu, SimpleName name, int relevance) {
-		super("", cu, null, relevance, PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE), new RemoveDeclarationCorrectionProposalCore(cu, name, relevance)); //$NON-NLS-1$
+		super("", cu, null, relevance, ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE), new RemoveDeclarationCorrectionProposalCore(cu, name, relevance)); //$NON-NLS-1$
 		super.getDisplayString();
 	}
 }

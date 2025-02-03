@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -14,11 +14,12 @@
 package org.eclipse.core.indexsearch;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
  * An IndeyQuery is used to perform a query against the indexing framework.

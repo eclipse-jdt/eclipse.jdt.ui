@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -284,11 +284,18 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	public static IWorkbenchPage getActivePage() {
-		return getDefault().internalGetActivePage();
+		IWorkbenchWindow window= getActiveWorkbenchWindow();
+		if (window != null) {
+			return window.getActivePage();
+		}
+		return null;
 	}
 
 	public static IWorkbenchWindow getActiveWorkbenchWindow() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (PlatformUI.isWorkbenchRunning()) {
+			return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		}
+		return null;
 	}
 
 	public static Shell getActiveWorkbenchShell() {
@@ -493,7 +500,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			}
 
 			if (fContentAssistHistory != null) {
-				ContentAssistHistory.store(fContentAssistHistory, getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
+				ContentAssistHistory.store(fContentAssistHistory, InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId()), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				fContentAssistHistory= null;
 			}
 
@@ -542,13 +549,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		} finally {
 			super.stop(context);
 		}
-	}
-
-	private IWorkbenchPage internalGetActivePage() {
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window == null)
-			return null;
-		return window.getActivePage();
 	}
 
 	/**
@@ -655,12 +655,18 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 *
 	 * @return the Java Core plug-in preferences
 	 * @since 3.7
-	 * deprecated use getJavaCorePluginPreferencesNew
+	 * @deprecated Use {@link #getJavaCorePluginPreferencesNew()} instead.
 	 */
+	@Deprecated(forRemoval= true, since="2025-03")
 	public static org.eclipse.core.runtime.Preferences getJavaCorePluginPreferences() {
 		return JavaCore.getPlugin().getPluginPreferences();
 	}
 
+	/**
+	 * Returns the Java Core plug-in preferences.
+	 *
+	 * @return the Java Core plug-in preferences
+	 */
 	public static IEclipsePreferences getJavaCorePluginPreferencesNew() {
 		return InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 	}
@@ -1039,7 +1045,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					return fContentAssistHistory;
 				}
 				try {
-					fContentAssistHistory= ContentAssistHistory.load(getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
+					fContentAssistHistory= ContentAssistHistory.load(InstanceScope.INSTANCE.getNode(JavaPlugin.getPluginId()), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				} catch (CoreException x) {
 					log(x);
 				}

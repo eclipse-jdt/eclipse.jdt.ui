@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.util.Collection;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -49,6 +48,9 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
 			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new SuppressWarningsProposalCore(warningToken, label, cu, node, property, relevance));
 		}
+		public SuppressWarningsProposalCore getCoreDelegate() {
+			return (SuppressWarningsProposalCore) this.getDelegate();
+		}
 	}
 
 	public static void addUnknownSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -72,7 +74,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		if(relevance == IProposalRelevance.FIX_SUPPRESS_TOKEN) {
 			image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		} else if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
-			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			image = ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		return new ASTRewriteCorrectionProposal(name, cu, rewrite, relevance, image);
 	}
@@ -82,7 +84,7 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 		// Initialize as default image, though it should always trigger one of the two if statements below
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		if (relevance == IProposalRelevance.REMOVE_ANNOTATION) {
-			image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			image = ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, relevance, image, context);
 		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
@@ -90,6 +92,17 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 	}
 
 	SuppressWarningsSubProcessor() {
+	}
+
+
+	@Override
+	protected boolean alreadyHasProposal(Collection<ICommandAccess> proposals, String warningToken) {
+		for (ICommandAccess element : proposals) {
+			if (element instanceof SuppressWarningsProposal swp && warningToken.equals(swp.getCoreDelegate().getWarningToken())) {
+				return true; // only one at a time
+			}
+		}
+		return false;
 	}
 
 }

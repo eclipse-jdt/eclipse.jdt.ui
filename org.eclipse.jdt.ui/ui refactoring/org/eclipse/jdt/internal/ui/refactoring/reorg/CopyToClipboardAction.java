@@ -90,7 +90,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	}
 
 	private static ISharedImages getWorkbenchSharedImages() {
-		return PlatformUI.getWorkbench().getSharedImages();
+		return ISharedImages.get();
 	}
 
 	@Override

@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+import org.eclipse.jsp.JspTranslator;
+
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -26,12 +28,10 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.AbstractReconcileStep;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.reconciler.IReconcileStep;
-import org.eclipse.jface.text.reconciler.IReconcileResult;
 import org.eclipse.jface.text.reconciler.IReconcilableModel;
+import org.eclipse.jface.text.reconciler.IReconcileResult;
+import org.eclipse.jface.text.reconciler.IReconcileStep;
 import org.eclipse.jface.text.source.translation.ITranslator;
-
-import org.eclipse.jsp.JspTranslator;
 
 /**
  * This reconcile step has a JSP source document as
@@ -66,9 +66,6 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 		fJspTranslator.setTagHandlerFactory(new Jsp2JavaTagHandlerFactory());
 	}
 
-	/*
-	 * @see AbstractReconcileStep#reconcileModel(DirtyRegion, IRegion)
-	 */
 	@Override
 	protected IReconcileResult[] reconcileModel(DirtyRegion dirtyRegion, IRegion subRegion) {
 		Assert.isTrue(getInputModel() instanceof DocumentAdapter, "wrong model"); //$NON-NLS-1$
@@ -88,17 +85,11 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 		return null;
 	}
 
-	/*
-	 * @see AbstractReconcileStep#getModel()
-	 */
 	@Override
 	public IReconcilableModel getModel() {
 		return fModel;
 	}
 
-	/*
-	 * @see AbstractReconcileStep#convertToInputModel(IReconcileResult[])
-	 */
 	@Override
 	protected IReconcileResult[] convertToInputModel(IReconcileResult[] inputResults) {
 

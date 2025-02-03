@@ -23,7 +23,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
@@ -88,7 +87,7 @@ public class UnresolvedElementsSubProcessor extends UnresolvedElementsBaseSubPro
 			case EnhancedForWithoutTypeProposal1:
 				return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			case NewVariableProposal3:
-				return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+				return ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 			case NewFieldForTypeProposal1:
 			case NewFieldForTypeProposal3:
 			case NewFieldForTypeProposal5:

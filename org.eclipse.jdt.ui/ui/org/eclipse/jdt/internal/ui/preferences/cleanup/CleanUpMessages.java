@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -191,6 +191,9 @@ public class CleanUpMessages extends NLS {
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantFallingThroughBlockEnd;
 	public static String DuplicateCodeTabPage_CheckboxName_RedundantIfCondition;
 	public static String DuplicateCodeTabPage_CheckboxName_PullOutIfFromIfElse;
+
+	public static String JavaFeatureTabPage_GroupName_Java21;
+	public static String JavaFeatureTabPage_CheckboxName_PatternInstanceofToSwitch;
 
 	public static String JavaFeatureTabPage_GroupName_Java16;
 	public static String JavaFeatureTabPage_CheckboxName_PatternMatchingForInstanceof;

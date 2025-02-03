@@ -43,7 +43,7 @@ public class CutAction extends SelectionDispatchAction{
 		setText(ReorgMessages.CutAction_text);
 		fCopyToClipboardAction= new CopyToClipboardAction(site);
 
-		ISharedImages workbenchImages= PlatformUI.getWorkbench().getSharedImages();
+		ISharedImages workbenchImages= ISharedImages.get();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT));
 		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_CUT));

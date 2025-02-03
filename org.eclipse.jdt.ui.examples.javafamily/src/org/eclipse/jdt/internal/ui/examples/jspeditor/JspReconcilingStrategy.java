@@ -17,9 +17,10 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -27,8 +28,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.reconciler.IReconcileStep;
 import org.eclipse.jface.text.reconciler.IReconcileResult;
+import org.eclipse.jface.text.reconciler.IReconcileStep;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
 import org.eclipse.jface.text.source.Annotation;
@@ -38,6 +39,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
@@ -57,35 +59,23 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 		fFirstStep= new Jsp2JavaReconcileStep(javaReconcileStep);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
-	 */
 	@Override
 	public void setDocument(IDocument document) {
 		fFirstStep.setInputModel(new DocumentAdapter(document));
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
-	 */
 	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		removeTemporaryAnnotations();
 		process(fFirstStep.reconcile(dirtyRegion, subRegion));
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
-	 */
 	@Override
 	public void reconcile(IRegion partition) {
 		removeTemporaryAnnotations();
 		process(fFirstStep.reconcile(partition));
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		fFirstStep.setProgressMonitor(monitor);
@@ -93,9 +83,6 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
-	 */
 	@Override
 	public void initialReconcile() {
 		fFirstStep.reconcile(null);
@@ -108,9 +95,6 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 			return;
 
 		IRunnableWithProgress runnable= new WorkspaceModifyOperation(null) 	 {
-			/*
-			 * @see org.eclipse.ui.actions.WorkspaceModifyOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
-			 */
 			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 				for (IReconcileResult r : results) {
@@ -156,9 +140,9 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 
 	private IFile getFile() {
 		IEditorInput input= fTextEditor.getEditorInput();
-		if (!(input instanceof IFileEditorInput))
+		if (!(input instanceof IFileEditorInput fileInput))
 			return null;
 
-		return ((IFileEditorInput)input).getFile();
+		return fileInput.getFile();
 	}
 }

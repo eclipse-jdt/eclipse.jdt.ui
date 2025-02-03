@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2023 IBM Corporation and others.
+ * Copyright (c) 2013, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3061,4 +3061,111 @@ public class QuickFixTest1d8 extends QuickFixTest {
 				""";
 		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
 	}
+
+	@Test
+	public void testIssue1935() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+			package test1;
+			@Deprecated
+			public class E1 {
+			}
+			""";
+		pack2.createCompilationUnit("E1.java", str, false, null);
+
+		String str1= """
+			package test1;
+
+			class E {
+			    public void foo() {
+			        Object e1 = new E1();
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String expected1= """
+			package test1;
+
+			class E {
+			    public void foo() {
+			        @SuppressWarnings("deprecation") Object e1 = new E1();
+			    }
+			}
+			""";
+
+		String expected2= """
+				package test1;
+
+				class E {
+				    @SuppressWarnings("deprecation")
+				    public void foo() {
+				        Object e1 = new E1();
+				    }
+				}
+				""";
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
+	}
+
+	@Test
+	public void testIssue1940() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, CompilerOptions.WARNING);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str1= """
+			package test1;
+
+			public class E {
+
+			 private static class A {
+			  void foo() {
+			  }
+			 }
+
+			 private static class B extends A {
+			  void foo() {
+			  }
+			 }
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, null);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String expected1= """
+			package test1;
+
+			public class E {
+
+			 private static class A {
+			  void foo() {
+			  }
+			 }
+
+			 private static class B extends A {
+			  @Override
+			  void foo() {
+			  }
+			 }
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
 }

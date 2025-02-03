@@ -7482,9 +7482,14 @@
             runAfter="org.eclipse.jdt.ui.pull_out_if_from_if_else">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.PatternInstanceofToSwitchCleanUpCore"
+            id="org.eclipse.jdt.ui.cleanup.pattern_instanceof_to_switch"
+            runAfter="org.eclipse.jdt.ui.cleanup.pattern_matching">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.switch_expressions"
-            runAfter="org.eclipse.jdt.ui.cleanup.pattern_matching">
+            runAfter="org.eclipse.jdt.ui.cleanup.pattern_instanceof_to_switch">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VarCleanUpCore"

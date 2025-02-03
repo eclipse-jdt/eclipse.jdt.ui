@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2020 IBM Corporation and others.
+ * Copyright (c) 2005, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,7 +25,8 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -228,14 +229,14 @@ public class ContentAssistHistoryTest {
 	}
 
 	@Test
-	public void testLoadStore() throws Exception {
+	public void testLoadStoreIEclipsePreferences() throws Exception {
 		ContentAssistHistory history= new ContentAssistHistory();
 
 		history.remember(fgListT, fgArrayListT);
 		history.remember(fgCharSequenceT, fgStringT);
 
 
-		Preferences prefs= new Preferences();
+		IEclipsePreferences prefs= InstanceScope.INSTANCE.getNode("org.eclipse.jdt.text.testsa");
 		String key= "myKey";
 		ContentAssistHistory.store(history, prefs, key);
 		ContentAssistHistory loaded= ContentAssistHistory.load(prefs, key);
