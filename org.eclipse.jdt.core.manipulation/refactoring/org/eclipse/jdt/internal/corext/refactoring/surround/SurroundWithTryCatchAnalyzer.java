@@ -101,7 +101,7 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 				if (ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) {
 					Pattern p= node.getPattern();
 					if (p instanceof TypePattern typePattern) {
-						svd= typePattern.getPatternVariable();
+						svd=  (ast.apiLevel() < AST.JLS22) ? typePattern.getPatternVariable() : (SingleVariableDeclaration)typePattern.getPatternVariable2();
 					} else {
 						return false;
 					}
