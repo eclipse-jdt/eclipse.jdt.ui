@@ -14,11 +14,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import java.text.Collator;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -346,8 +345,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 
 	private TypeNameMatch[] doChooseImports(TypeNameMatch[][] openChoices, final ISourceRange[] ranges, final JavaEditor editor) {
-		List<TypeNameMatch> result= new ArrayList<>();
-		Display.getDefault().syncExec(() -> {
+		return Display.getDefault().syncCall(() -> {
+			List<TypeNameMatch> result= new ArrayList<>();
 			// remember selection
 			ISelection sel= editor.getSelectionProvider().getSelection();
 			ILabelProvider labelProvider= new TypeNameMatchLabelProvider(TypeNameMatchLabelProvider.SHOW_FULLYQUALIFIED);
@@ -366,23 +365,22 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			dialog.setElements(openChoices);
 			dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
 			if (dialog.open() == Window.OK) {
-				Object[] res= dialog.getResult();
-				for (int i= 0; i < res.length; i++) {
-					Object[] array= (Object[]) res[i];
+				for (Object o : dialog.getResult()) {
+					Object[] array= (Object[]) o;
 					if (array.length > 0) {
-						result.add((TypeNameMatch) array[0]);
-						QualifiedTypeNameHistory.remember(result.get(i).getFullyQualifiedName());
+						TypeNameMatch match= (TypeNameMatch) array[0];
+						result.add(match);
+						QualifiedTypeNameHistory.remember(match.getFullyQualifiedName());
 					}
 				}
 			}
 			// restore selection
-			if (sel instanceof ITextSelection) {
-				ITextSelection textSelection= (ITextSelection) sel;
+			if (sel instanceof ITextSelection textSelection) {
 				editor.selectAndReveal(textSelection.getOffset(), textSelection.getLength());
 			}
 			fIsQueryShowing= false;
-		});
-		return result.toArray(new TypeNameMatch[0]);
+			return result;
+		}).toArray(TypeNameMatch[]::new);
 	}
 
 	private void doListSelectionChanged(int page, ISourceRange[] ranges, JavaEditor editor) {
