@@ -194,6 +194,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			this.expressionToMove= expressionToMove;
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
