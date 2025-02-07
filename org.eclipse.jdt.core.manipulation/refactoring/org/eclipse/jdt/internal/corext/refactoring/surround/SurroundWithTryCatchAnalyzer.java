@@ -30,8 +30,8 @@ import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypePattern;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -96,17 +96,17 @@ public class SurroundWithTryCatchAnalyzer extends SurroundWithAnalyzer {
 
 			@Override
 			public boolean visit(PatternInstanceofExpression node) {
-				SingleVariableDeclaration svd= node.getRightOperand();
+				VariableDeclaration vd= node.getRightOperand();
 				AST ast= node.getAST();
 				if (ast.apiLevel() == AST.JLS20 && ast.isPreviewEnabled() || ast.apiLevel() > AST.JLS20) {
 					Pattern p= node.getPattern();
 					if (p instanceof TypePattern typePattern) {
-						svd= typePattern.getPatternVariable();
+						vd= ast.apiLevel() < AST.JLS22 ? typePattern.getPatternVariable() : typePattern.getPatternVariable2();
 					} else {
 						return false;
 					}
 				}
-				SimpleName name= svd.getName();
+				SimpleName name= vd.getName();
 				IBinding binding= name.resolveBinding();
 				if (binding instanceof IVariableBinding) {
 					variableBindings.put(name, (IVariableBinding) binding);
