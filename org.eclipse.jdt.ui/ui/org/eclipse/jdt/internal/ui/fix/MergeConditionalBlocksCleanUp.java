@@ -35,9 +35,9 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypePattern;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -161,7 +161,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 			public boolean visit(PatternInstanceofExpression node) {
 				Pattern p= node.getPattern();
 				if (p instanceof TypePattern typePattern) {
-					SingleVariableDeclaration patternVariable= typePattern.getPatternVariable();
+					final VariableDeclaration patternVariable= node.getAST().apiLevel() < AST.JLS22 ? typePattern.getPatternVariable() : typePattern.getPatternVariable2();
 					patternNames.add(patternVariable.getName().getFullyQualifiedName());
 				}
 				return true;
