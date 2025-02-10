@@ -138,9 +138,23 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 
 			@Override
 			protected void inputChanged(Object input, Object oldInput) {
-				visited= new HashSet<>();
-				super.inputChanged(input, oldInput);
-				visited= null;
+				runWithVisited(() -> super.inputChanged(input, oldInput));
+			}
+
+
+			@Override
+			public void expandToLevel(Object elementOrTreePath, int level, boolean disableRedraw) {
+				runWithVisited(
+						() -> super.expandToLevel(elementOrTreePath, level, disableRedraw));
+			}
+
+			private void runWithVisited(Runnable r) {
+				try {
+					visited= new HashSet<>();
+					r.run();
+				} finally {
+					visited= null;
+				}
 			}
 
 			@Override
@@ -156,7 +170,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					return false;
 				}
 				Object data= widget.getData();
-				return data == null || visited.add(data);
+				return data == null || visited == null || visited.add(data);
 			}
 		};
 		treeViewer.addFilter(new ViewerFilter() {
