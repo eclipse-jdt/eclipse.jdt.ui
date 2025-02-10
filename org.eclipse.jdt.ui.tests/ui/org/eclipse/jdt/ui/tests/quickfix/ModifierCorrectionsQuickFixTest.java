@@ -257,7 +257,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 			public class E {
 			    public void foo() {
 			         X x = new X();
-			        x.xoo();
+			         x.xoo();
 			    }
 			}
 			""";

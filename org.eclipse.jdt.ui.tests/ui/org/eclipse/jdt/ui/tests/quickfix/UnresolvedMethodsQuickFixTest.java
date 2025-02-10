@@ -3074,8 +3074,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 
-			    private void foo() {
-			    }
+			      private void foo() {
+			      }
 			    }
 			}
 			""";
@@ -3147,8 +3147,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 
-			    private void foo() {
-			    }
+			      private void foo() {
+			      }
 			    }
 			}
 			""";
@@ -3188,7 +3188,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 			        foo ();
 			      }
 
-			    protected abstract void foo();
+			      protected abstract void foo();
 			    }
 			}
 			""";

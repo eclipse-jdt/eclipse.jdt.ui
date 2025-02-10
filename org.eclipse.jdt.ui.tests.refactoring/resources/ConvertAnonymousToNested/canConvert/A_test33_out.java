@@ -10,7 +10,7 @@ class Z{
 		public <T> void a(){}
 	}
 
-void m(){
+   void m(){
       A a = new AImpl();
    }
 }
