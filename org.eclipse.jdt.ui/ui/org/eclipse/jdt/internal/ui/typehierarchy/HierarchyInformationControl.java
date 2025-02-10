@@ -137,18 +137,19 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			private Set<Object> visited;
 
 			@Override
-			protected void inputChanged(Object input, Object oldInput) {
-				visited= new HashSet<>();
-				super.inputChanged(input, oldInput);
-				visited= null;
-			}
-
-			@Override
 			protected void internalExpandToLevel(Widget node, int level) {
+				boolean reset = false;
+				if (visited == null) {
+					reset = true;
+					visited = new HashSet<>();
+				}
 				if (!shouldExpand(node))
 					return;
 
 				super.internalExpandToLevel(node, level);
+				if (reset) {
+					visited = null;
+				}
 			}
 
 			private boolean shouldExpand(Widget widget) {
