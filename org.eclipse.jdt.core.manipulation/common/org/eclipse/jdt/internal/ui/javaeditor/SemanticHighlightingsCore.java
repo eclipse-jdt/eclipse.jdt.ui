@@ -112,6 +112,11 @@ public class SemanticHighlightingsCore {
 	public static final String CLASS="class"; //$NON-NLS-1$
 
 	/**
+	 * A named preference part that controls the highlighting of records.
+	 */
+	public static final String RECORD="record"; //$NON-NLS-1$
+
+	/**
 	 * A named preference part that controls the highlighting of enums.
 	 *
 	 * @since 3.2
