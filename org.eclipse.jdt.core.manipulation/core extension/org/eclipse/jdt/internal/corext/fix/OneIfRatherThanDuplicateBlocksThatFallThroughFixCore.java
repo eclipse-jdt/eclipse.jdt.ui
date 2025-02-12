@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,8 +33,8 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Pattern;
 import org.eclipse.jdt.core.dom.PatternInstanceofExpression;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypePattern;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 
@@ -106,8 +106,8 @@ public class OneIfRatherThanDuplicateBlocksThatFallThroughFixCore extends Compil
 				public boolean visit(PatternInstanceofExpression node) {
 					Pattern p= node.getPattern();
 					if (p instanceof TypePattern typePattern) {
-						SingleVariableDeclaration patternVariable= typePattern.getPatternVariable();
-						patternNames.add(patternVariable.getName().getFullyQualifiedName());
+						VariableDeclaration patternVariable= node.getAST().apiLevel() < AST.JLS22 ? typePattern.getPatternVariable() : typePattern.getPatternVariable2();
+					    patternNames.add(patternVariable.getName().getFullyQualifiedName());
 					}
 					return true;
 				}

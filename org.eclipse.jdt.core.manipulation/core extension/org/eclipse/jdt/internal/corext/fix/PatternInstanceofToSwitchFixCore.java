@@ -596,7 +596,9 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 			} else {
 				rewrite.replace(ifStatements.get(0), newExpressionStatement, group);
 			}
-
+			for (int i= 1; i< ifStatements.size(); ++i) {
+				rewrite.remove(ifStatements.get(i), group);
+			}
 		}
 
 	}
