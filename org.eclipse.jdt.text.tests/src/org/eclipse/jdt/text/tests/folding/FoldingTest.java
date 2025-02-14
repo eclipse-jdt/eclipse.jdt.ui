@@ -288,18 +288,21 @@ public class FoldingTest {
 	public void testMethodDeclarationFoldingWithSameLineStart() throws Exception {
 		String str= """
 				package org.example.test;
-				public class Q {
-				    void a() {
-				  		int i = 0;
-				    }void b() {
+				class X {
+					/*				//here should be an annotation
+					 * a b
+					 */
+					void a() {		//here should be an annotation
 
-				    }
+					} void b() {	//here should be an annotation
+					}
 				}
 				""";
-		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 3);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 5); // 2. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // JavaDoc
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 7); // 2. Method
 	}
 
 	@Test
