@@ -13,12 +13,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.folding;
 
+import static org.junit.Assume.assumeTrue;
+
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -37,6 +43,7 @@ import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+@RunWith(Parameterized.class)
 public class FoldingTest {
 	@Rule
 	public ProjectTestSetup projectSetup= new ProjectTestSetup();
@@ -47,6 +54,14 @@ public class FoldingTest {
 
 	private IPackageFragment packageFragment;
 
+	@Parameters(name = "New folding active: {0}")
+	public static Object[] data() {
+		return new Object[] { true, false };
+	}
+
+	@Parameter
+	public boolean newFoldingActive;
+
 	@Before
 	public void setUp() throws CoreException {
 		jProject= projectSetup.getProject();
@@ -56,12 +71,13 @@ public class FoldingTest {
 		}
 		packageFragment= sourceFolder.createPackageFragment("org.example.test", false, null);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED, true);
-		}
+		store.setValue(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED, newFoldingActive);
+	}
 
 	@After
 	public void tearDown() throws CoreException {
 		JavaProjectHelper.delete(jProject);
+		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
 	@Test
@@ -242,7 +258,7 @@ public class FoldingTest {
 				    }
 				}
 				""";
-		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 6);
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, newFoldingActive ? 6 : 5);
 
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 1, 3); // 1. Javadoc
@@ -250,7 +266,9 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 9); // 3. Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 12, 14); // 4. Javadoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 15, 19); // Methode b()
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 16, 18); // 5. Javadoc
+		if (newFoldingActive) {
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 16, 18); // 5. Javadoc
+		}
 	}
 
 	@Test
@@ -286,6 +304,7 @@ public class FoldingTest {
 
 	@Test
 	public void testIfStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class D {
@@ -303,6 +322,7 @@ public class FoldingTest {
 
 	@Test
 	public void testTryStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class E {
@@ -324,6 +344,7 @@ public class FoldingTest {
 
 	@Test
 	public void testWhileStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class F {
@@ -341,6 +362,7 @@ public class FoldingTest {
 
 	@Test
 	public void testForStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class G {
@@ -358,6 +380,7 @@ public class FoldingTest {
 
 	@Test
 	public void testEnhancedForStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class H {
@@ -375,6 +398,7 @@ public class FoldingTest {
 
 	@Test
 	public void testDoStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class I {
@@ -393,6 +417,7 @@ public class FoldingTest {
 
 	@Test
 	public void testSynchronizedStatementFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class K {
@@ -410,6 +435,7 @@ public class FoldingTest {
 
 	@Test
 	public void testLambdaExpressionFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				import java.util.function.Supplier;
@@ -429,6 +455,8 @@ public class FoldingTest {
 
 	@Test
 	public void testAnonymousClassDeclarationFolding() throws Exception {
+		// FIXME this test should work for both foldings. See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2022
+		assumeTrue("Currently broken for the 'old' folding. See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2022", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class M {
@@ -447,6 +475,7 @@ public class FoldingTest {
 
 	@Test
 	public void testEnumDeclarationFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public enum N {					//here should be an annotation
@@ -475,6 +504,7 @@ public class FoldingTest {
 
 	@Test
 	public void testNestedFolding() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class P {
