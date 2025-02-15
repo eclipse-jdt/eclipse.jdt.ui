@@ -204,7 +204,7 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 			private boolean processIfStatement(final IfStatement visited, ReduceIndentationElseOperation currentOp) {
 				// The parsing crashes when there are two embedded lone ifs with an end of line comment at the right of the statement
 				// So we disable the rule on double lone if
-				if (!(visited.getElseStatement() instanceof Block)
+				if (currentOp == null && !(visited.getElseStatement() instanceof Block)
 						&& !ASTNodes.canHaveSiblings(visited)) {
 					return true;
 				}
