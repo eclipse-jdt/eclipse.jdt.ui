@@ -7053,4 +7053,52 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 
 	}
+
+	@Test
+	public void testConvertToLambdaIssue1999() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					void setRunnable(Runnable r) {
+					}
+					void test1() {
+						setRunnable(new Runnable() {
+							@Override
+							public void run() {
+								System.out.println("abc"); //$NON-NLS-1$
+							}
+						});
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		String expected= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					void setRunnable(Runnable r) {
+					}
+					void test1() {
+						setRunnable(() -> {
+				        	System.out.println("abc"); //$NON-NLS-1$
+				        });
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+
+	}
 }

@@ -717,12 +717,19 @@ public class LambdaExpressionsFixCore extends CompilationUnitRewriteOperationsFi
 				if (statements.size() == 1) {
 					// use short form with just an expression body if possible
 					Statement statement= statements.get(0);
-					if (statement instanceof ExpressionStatement) {
-						lambdaBody= ((ExpressionStatement) statement).getExpression();
-					} else if (statement instanceof ReturnStatement) {
-						Expression returnExpression= ((ReturnStatement) statement).getExpression();
-						if (returnExpression != null) {
-							lambdaBody= returnExpression;
+					CompilationUnit root= cuRewrite.getRoot();
+					int extendedStart= root.getExtendedStartPosition(statement);
+					int extendedLength= root.getExtendedLength(statement);
+					// verify no line comment exists at the end of the node in which case
+					// we can use short form - otherwise use original block with comments
+					if (extendedStart + extendedLength <= statement.getStartPosition() + statement.getLength()) {
+						if (statement instanceof ExpressionStatement) {
+							lambdaBody= ((ExpressionStatement) statement).getExpression();
+						} else if (statement instanceof ReturnStatement) {
+							Expression returnExpression= ((ReturnStatement) statement).getExpression();
+							if (returnExpression != null) {
+								lambdaBody= returnExpression;
+							}
 						}
 					}
 				}

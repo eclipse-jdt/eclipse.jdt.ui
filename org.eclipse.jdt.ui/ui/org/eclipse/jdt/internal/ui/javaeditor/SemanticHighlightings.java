@@ -157,6 +157,11 @@ public class SemanticHighlightings {
 	public static final String CLASS= SemanticHighlightingsCore.CLASS;
 
 	/**
+	 * A named preference part that controls the highlighting of records.
+	 */
+	public static final String RECORD= SemanticHighlightingsCore.RECORD;
+
+	/**
 	 * A named preference part that controls the highlighting of enums.
 	 *
 	 * @since 3.2
@@ -1400,6 +1405,68 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for records.
+	 */
+	private static final class RecordHighlighting extends SemanticHighlighting {
+
+
+		@Override
+		public String getPreferenceKey() {
+			return RECORD;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(145, 65, 172);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_records;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.THIS_EXPRESSION
+					&& nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.QUALIFIED_NAME
+					&& nodeType != ASTNode.RECORD_DECLARATION
+					&& nodeType != ASTNode.TYPE_DECLARATION && nodeType != ASTNode.METHOD_INVOCATION) {
+				return false;
+			}
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
+
+			// 2: match classes
+			IBinding binding= token.getBinding();
+			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isRecord();
+		}
+	}
+
+	/**
 	 * Semantic highlighting for enums.
 	 * @since 3.2
 	 */
@@ -2074,6 +2141,7 @@ public class SemanticHighlightings {
 				new TypeArgumentHighlighting(), // before other types
 				new AbstractClassHighlighting(), // before classes
 				new ClassHighlighting(),
+				new RecordHighlighting(),
 				new EnumHighlighting(),
 				new AnnotationHighlighting(), // before interfaces
 				new InterfaceHighlighting(),

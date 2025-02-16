@@ -498,4 +498,22 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // while
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 6, 6); // do
 	}
+
+	@Test
+	public void testLocalClass() throws Exception {
+		String str= """
+				package org.example.test;
+				class Outer {
+					void a() {						//here should be an annotation
+						class Inner2{				//here should be an annotation
+
+						}
+					}
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // inner class
+	}
 }
