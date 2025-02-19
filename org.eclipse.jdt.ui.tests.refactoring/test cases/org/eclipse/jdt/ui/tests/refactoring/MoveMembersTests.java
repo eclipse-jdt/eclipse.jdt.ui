@@ -583,9 +583,9 @@ public class MoveMembersTests extends GenericRefactoringTest {
 			IPackageFragment p2= getRoot().createPackageFragment("p2", false, null);
 			IPackageFragment p2b= getRoot().createPackageFragment("p2.b", false, null);
 			ICompilationUnit cuA= createCUfromTestFile(p1, "A");
-			ICompilationUnit cuT1= createCUfromTestFile(p1a, "T", "a/");
+			createCUfromTestFile(p1a, "T", "a/");
 			ICompilationUnit cuB= createCUfromTestFile(p2, "B");
-			ICompilationUnit cuT2= createCUfromTestFile(p2b, "T", "b/");
+			createCUfromTestFile(p2b, "T", "b/");
 			IType typeA= getType(cuA, "A");
 			IType typeB= getType(cuB, "B");
 			IMethod[] methods= getMethods(typeA, new String[] {"m"}, new String[][] { new String[0]});
