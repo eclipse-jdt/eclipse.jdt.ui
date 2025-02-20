@@ -541,6 +541,116 @@ public class CleanUpTest16 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testDeeperMatches() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given= """
+			package test1;
+
+			public class E {
+			    public int matchPatternInDeeperLevels(Object object, boolean valid) {
+			        // Keep this comment
+			        if (object instanceof String) {
+			            if (valid) {
+			                // Keep this comment too
+			                String s = (String) object;
+			                return s.length();
+			            }
+			        }
+			        return 0;
+			    }
+			    public int matchPatternInDeeperLevels2(Object object, boolean valid) {
+			        // Keep this comment
+			        if (object instanceof String && valid) {
+			            System.out.println(valid);
+			            // Keep this comment too
+			            String s = (String) object;
+			            return s.length();
+			        }
+			        return 0;
+			    }
+			    public double calculateLucky(Object target, String operation) {
+			         if (target instanceof Double) {
+			              if (name.equals("double")) {
+			                  Double number= (Double) target;
+			                  return number * 2.0;
+			              } else if (name.equals("sqr")) {
+			                  Double number= (Double) target;
+			                  return number * number;
+			              }
+			        }
+			        return 0;
+			    }
+			    public double calculateUnLucky(Object target, String operation) {
+			         if (target instanceof Double) {
+			              if (name.equals("double")) {
+			                  Double number= (Double) target;
+			                  return number * 2.0;
+			              } else if (name.equals("sqr")) {
+			                  Double number2= (Double) target;
+			                  return number2 * number2;
+			              }
+			        }
+			        return 0;
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+
+		enable(CleanUpConstants.USE_PATTERN_MATCHING_FOR_INSTANCEOF);
+		String expected= """
+			package test1;
+
+			public class E {
+			    public int matchPatternInDeeperLevels(Object object, boolean valid) {
+			        // Keep this comment
+			        if (object instanceof String s) {
+			            if (valid) {
+			                // Keep this comment too
+			                return s.length();
+			            }
+			        }
+			        return 0;
+			    }
+			    public int matchPatternInDeeperLevels2(Object object, boolean valid) {
+			        // Keep this comment
+			        if (object instanceof String s && valid) {
+			            System.out.println(valid);
+			            // Keep this comment too
+			            return s.length();
+			        }
+			        return 0;
+			    }
+			    public double calculateLucky(Object target, String operation) {
+			         if (target instanceof Double number) {
+			              if (name.equals("double")) {
+			                  return number * 2.0;
+			              } else if (name.equals("sqr")) {
+			                  return number * number;
+			              }
+			        }
+			        return 0;
+			    }
+			    public double calculateUnLucky(Object target, String operation) {
+			         if (target instanceof Double number) {
+			              if (name.equals("double")) {
+			                  return number * 2.0;
+			              } else if (name.equals("sqr")) {
+			                  Double number2= (Double) target;
+			                  return number2 * number2;
+			              }
+			        }
+			        return 0;
+			    }
+			}
+			""";
+
+		assertNotEquals("The class must be changed", expected, given);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
+				new HashSet<>(Arrays.asList(MultiFixMessages.PatternMatchingForInstanceofCleanup_description)));
+
+	}
+
+	@Test
 	public void testDoNotAddFinalForRecordComponent() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
