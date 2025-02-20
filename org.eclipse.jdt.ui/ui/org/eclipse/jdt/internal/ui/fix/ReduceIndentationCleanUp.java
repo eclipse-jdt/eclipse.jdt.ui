@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -32,6 +37,7 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
@@ -192,9 +198,13 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 		unit.accept(new ASTVisitor() {
 			@Override
 			public boolean visit(final IfStatement visited) {
+				return processIfStatement(visited, null);
+			}
+
+			private boolean processIfStatement(final IfStatement visited, ReduceIndentationElseOperation currentOp) {
 				// The parsing crashes when there are two embedded lone ifs with an end of line comment at the right of the statement
 				// So we disable the rule on double lone if
-				if (!(visited.getElseStatement() instanceof Block)
+				if (currentOp == null && !(visited.getElseStatement() instanceof Block)
 						&& !ASTNodes.canHaveSiblings(visited)) {
 					return true;
 				}
@@ -205,7 +215,7 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 					}
 				}
 
-				if (visited.getElseStatement() != null && !ASTNodes.isInElse(visited)) {
+				if (visited.getElseStatement() != null && (currentOp != null || !ASTNodes.isInElse(visited))) {
 					if (ASTNodes.fallsThrough(visited.getThenStatement())) {
 						if (ASTNodes.fallsThrough(visited.getElseStatement())) {
 							if (ASTNodes.getNextSiblings(visited).isEmpty()) {
@@ -213,7 +223,15 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 								int elseIndentation= getIndentation(visited.getElseStatement());
 
 								if (thenIndentation <= elseIndentation || visited.getElseStatement() instanceof IfStatement) {
-									rewriteOperations.add(new ReduceIndentationElseOperation(visited));
+									if (currentOp != null) {
+										currentOp.addNewIfStmt(visited);
+									} else {
+										currentOp= new ReduceIndentationElseOperation(visited);
+										rewriteOperations.add(currentOp);
+									}
+									if (visited.getElseStatement() instanceof IfStatement innerIf) {
+										processIfStatement(innerIf, currentOp);
+									}
 								} else {
 									rewriteOperations.add(new ReduceIndentationThenOperation(visited));
 								}
@@ -302,10 +320,14 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 	}
 
 	private static class ReduceIndentationElseOperation extends CompilationUnitRewriteOperationWithSourceRange {
-		private final IfStatement visited;
+		private final List<IfStatement> ifStmtList= new ArrayList<>();
 
 		public ReduceIndentationElseOperation(final IfStatement visited) {
-			this.visited= visited;
+			this.ifStmtList.add(visited);
+		}
+
+		public void addNewIfStmt(final IfStatement visited) {
+			ifStmtList.add(visited);
 		}
 
 		@Override
@@ -314,30 +336,87 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 			AST ast= cuRewrite.getRoot().getAST();
 			TextEditGroup group= createTextEditGroup(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description, cuRewrite);
 
-			List<Statement> statementsToMove= ASTNodes.asList(visited.getElseStatement());
+			if (ifStmtList.size() == 1) {
+				IfStatement visited= ifStmtList.get(0);
+				List<Statement> statementsToMove= ASTNodes.asList(visited.getElseStatement());
 
-			ASTNode moveTarget= null;
-			if (statementsToMove.size() == 1) {
-				moveTarget= ASTNodes.createMoveTarget(rewrite, statementsToMove.get(0));
-			} else if (!statementsToMove.isEmpty()) {
-				ListRewrite listRewrite= rewrite.getListRewrite(statementsToMove.get(0).getParent(), (ChildListPropertyDescriptor) statementsToMove.get(0).getLocationInParent());
-				moveTarget= listRewrite.createMoveTarget(statementsToMove.get(0), statementsToMove.get(statementsToMove.size() - 1));
-			}
+				ASTNode moveTarget= null;
+				if (statementsToMove.size() == 1) {
+					moveTarget= ASTNodes.createMoveTarget(rewrite, statementsToMove.get(0));
+				} else if (!statementsToMove.isEmpty()) {
+					ListRewrite listRewrite= rewrite.getListRewrite(statementsToMove.get(0).getParent(), (ChildListPropertyDescriptor) statementsToMove.get(0).getLocationInParent());
+					moveTarget= listRewrite.createMoveTarget(statementsToMove.get(0), statementsToMove.get(statementsToMove.size() - 1));
+				}
 
-			if (!statementsToMove.isEmpty()) {
-				if (ASTNodes.canHaveSiblings(visited)) {
-					ListRewrite targetListRewrite= rewrite.getListRewrite(visited.getParent(), (ChildListPropertyDescriptor) visited.getLocationInParent());
-					targetListRewrite.insertAfter(moveTarget, visited, group);
+				if (!statementsToMove.isEmpty()) {
+					if (ASTNodes.canHaveSiblings(visited)) {
+						ListRewrite targetListRewrite= rewrite.getListRewrite(visited.getParent(), (ChildListPropertyDescriptor) visited.getLocationInParent());
+						targetListRewrite.insertAfter(moveTarget, visited, group);
+					} else {
+						Block newBlock= ast.newBlock();
+						newBlock.statements().add(ASTNodes.createMoveTarget(rewrite, visited));
+						newBlock.statements().add(moveTarget);
+
+						ASTNodes.replaceButKeepComment(rewrite, visited, newBlock, group);
+					}
+				}
+
+				rewrite.remove(visited.getElseStatement(), group);
+			} else {
+				Block block= null;
+				ListRewrite listRewrite= null;
+				IfStatement originalIf= ifStmtList.get(0);
+				int index= 0;
+				if (ifStmtList.get(0).getLocationInParent() != Block.STATEMENTS_PROPERTY) {
+					block= ast.newBlock();
+					listRewrite= rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 				} else {
-					Block newBlock= ast.newBlock();
-					newBlock.statements().add(ASTNodes.createMoveTarget(rewrite, visited));
-					newBlock.statements().add(moveTarget);
+					listRewrite= rewrite.getListRewrite(originalIf.getParent(), Block.STATEMENTS_PROPERTY);
+					List<Statement> originalList= listRewrite.getOriginalList();
+					for (int i= 0; i < originalList.size(); ++i) {
+						if (originalList.get(i).equals(originalIf)) {
+							index= i + 1;
+							break;
+						}
+					}
+				}
 
-					ASTNodes.replaceButKeepComment(rewrite, visited, newBlock, group);
+				for (IfStatement ifStmt : ifStmtList) {
+					IfStatement newIfStmt= ast.newIfStatement();
+					newIfStmt.setExpression((Expression) rewrite.createCopyTarget(ifStmt.getExpression()));
+					newIfStmt.setThenStatement((Statement) rewrite.createCopyTarget(ifStmt.getThenStatement()));
+					listRewrite.insertAt(newIfStmt, index++, group);
+				}
+				IfStatement lastIfStatement= ifStmtList.get(ifStmtList.size() - 1);
+				Statement lastStatement= lastIfStatement.getElseStatement();
+				List<Statement> lastStatements= null;
+				if (lastStatement instanceof Block b) {
+					lastStatements= b.statements();
+				} else {
+					lastStatements= new ArrayList<>();
+					lastStatements.add(lastStatement);
+				}
+				for (Statement stmt : lastStatements) {
+					Statement copy= (Statement) rewrite.createCopyTarget(stmt);
+					listRewrite.insertAt(copy, index++, group);
+				}
+
+				if (block != null) {
+					ASTNodes.replaceButKeepComment(rewrite, ifStmtList.get(0), block, group);
+				} else {
+					ASTNodes.removeButKeepComment(rewrite, ifStmtList.get(0), group);
 				}
 			}
+			final IDocument document= new Document(cuRewrite.getCu().getBuffer().getContents());
 
-			rewrite.remove(visited.getElseStatement(), group);
+			try {
+				TextEdit t = rewrite.rewriteAST(document, null);
+				t.apply(document);
+				System.out.println(document.get(0, document.getLength()));
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 }
