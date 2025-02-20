@@ -3403,6 +3403,16 @@ public class PreferenceConstants {
 	public static final String CODEASSIST_CATEGORY_ORDER= "content_assist_category_order"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether project specific settings are enabled for folding.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.34
+	 */
+	public static final String EDITOR_FOLDING_PROJECT_SPECIFIC_SETTINGS_ENABLED= "editor_folding_project_settings_enabled"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether folding is enabled in the Java editor.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
