@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,12 @@ final class FoldingMessages extends NLS {
 	public static String DefaultJavaFoldingPreferenceBlock_imports;
 	public static String DefaultJavaFoldingPreferenceBlock_New;
 	public static String DefaultJavaFoldingPreferenceBlock_headers;
+	public static String DefaultJavaFoldingPreferenceBlock_customRegions;
+
+	public static String DefaultJavaFoldingPreferenceBlock_custom_region_title;
+	public static String DefaultJavaFoldingPreferenceBlock_customRegionsEnabled;
+	public static String DefaultJavaFoldingPreferenceBlock_customRegionStart;
+	public static String defaultJavaFoldingPreferenceBlock_customRegionEnd;
 	public static String EmptyJavaFoldingPreferenceBlock_emptyCaption;
 	public static String JavaFoldingStructureProviderRegistry_warning_providerNotFound_resetToDefault;
 	public static String DefaultJavaFoldingPreferenceBlock_New_Setting_Title;
