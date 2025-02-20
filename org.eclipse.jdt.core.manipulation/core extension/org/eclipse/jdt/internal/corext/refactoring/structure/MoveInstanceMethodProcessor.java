@@ -2517,8 +2517,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			list.insertLast(node, null);
 		}
 		IMethodBinding method= declaration.resolveBinding();
-		if (method != null) {
+		if (method != null && method.getJavaElement() != null) {
+			Set<String> importedTypeNames=
+					MoveStaticMembersProcessor.getImportedTypeNames((ICompilationUnit) method.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT),
+							getTargetType().getCompilationUnit());
 			Type returnType= rewriter.getImportRewrite().addImport(method.getReturnType(), rewriter.getRoot().getAST(), context, TypeLocation.RETURN_TYPE);
+			if (returnType.isSimpleType() && importedTypeNames.contains(method.getReturnType().getName())) {
+				returnType= ast.newSimpleType(ast.newName(method.getReturnType().getQualifiedName()));
+			}
 			rewrite.set(declaration, MethodDeclaration.RETURN_TYPE2_PROPERTY, returnType, null);
 		}
 	}

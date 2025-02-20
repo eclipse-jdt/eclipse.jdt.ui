@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -66,6 +67,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -85,9 +87,12 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -976,6 +981,30 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return result;
 	}
 
+	private class MethodTypeVisitor extends ASTVisitor {
+
+		final ASTRewrite fASTRewrite;
+		final Set<String> fImportedTypeNames;
+		public MethodTypeVisitor(final ASTRewrite astRewrite, final Set<String> importedTypeNames) {
+			this.fASTRewrite= astRewrite;
+			this.fImportedTypeNames= importedTypeNames;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			if (fImportedTypeNames.contains(node.getFullyQualifiedName())) {
+				if (node.getLocationInParent() == SimpleType.NAME_PROPERTY) {
+					ITypeBinding typeBinding= node.resolveTypeBinding();
+					if (typeBinding != null && !typeBinding.isLocal()) {
+						AST ast= fASTRewrite.getAST();
+						Type newType= ast.newSimpleType(ast.newName(typeBinding.getQualifiedName()));
+						fASTRewrite.set(node.getParent(), node.getLocationInParent(), newType, null);
+					}
+				}
+			}
+			return super.visit(node);
+		}
+	}
 	private String[] getUpdatedMemberSource(RefactoringStatus status, BodyDeclaration[] members, ITypeBinding target) throws CoreException, BadLocationException {
 		List<IBinding> typeRefs= new ArrayList<>();
 		boolean targetNeedsSourceImport= false;
@@ -1030,6 +1059,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					}
 				}
 			}
+
+			if (declaration instanceof MethodDeclaration methodDecl) {
+				Set<String> importedTypeNames= getImportedTypeNames(fSource.getCu(), fTarget.getCu());
+				MethodTypeVisitor visitor= new MethodTypeVisitor(fSource.getASTRewrite(), importedTypeNames);
+				methodDecl.accept(visitor);
+			}
+
 			if (fDestinationType.isInterface()) {
 				int modifiers= declaration.getModifiers();
 				modifiers= JdtFlags.clearAccessModifiers(modifiers);
@@ -1064,6 +1100,31 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 		fSource.clearASTRewrite();
 		return updatedMemberSources;
+	}
+
+	public static Set<String> getImportedTypeNames(ICompilationUnit sourceCu, ICompilationUnit targetCu) throws JavaModelException {
+		IImportDeclaration[] targetImports= targetCu.getImports();
+		Set<String> targetImportNames= new HashSet<>();
+		for (IImportDeclaration importDecl : targetImports) {
+			targetImportNames.add(importDecl.getElementName());
+		}
+		IImportDeclaration[] sourceImports= sourceCu.getImports();
+		for (IImportDeclaration importDecl : sourceImports) {
+			String name= importDecl.getElementName();
+			if (targetImportNames.contains(name)) {
+				targetImportNames.remove(name);
+			}
+		}
+		Set<String> importedTypeNames= new HashSet<>();
+		for (String targetImportName : targetImportNames) {
+			int index= targetImportName.lastIndexOf("."); //$NON-NLS-1$
+			if (index > 0) {
+				importedTypeNames.add(targetImportName.substring(index + 1));
+			} else {
+				importedTypeNames.add(targetImportName);
+			}
+		}
+		return importedTypeNames;
 	}
 
 	private String getUpdatedMember(IDocument document, BodyDeclaration declaration) throws BadLocationException {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -91,7 +91,13 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		ICompilationUnit[] cus= new ICompilationUnit[qualifiedNames.length];
 		for (int i= 0; i < qualifiedNames.length; i++) {
 			Assert.isNotNull(qualifiedNames[i]);
-			cus[i]= createCUfromTestFile(getRoot().createPackageFragment(getQualifier(qualifiedNames[i]), true, null), getSimpleName(qualifiedNames[i]));
+			String qualifier= getQualifier(qualifiedNames[i]);
+			String[] sections= qualifier.split("[.]");
+			if (sections.length == 2) {
+				cus[i]= createCUfromTestFile(getRoot().createPackageFragment(getQualifier(qualifiedNames[i]), true, null), getSimpleName(qualifiedNames[i]), sections[1] + "/");
+			} else {
+				cus[i]= createCUfromTestFile(getRoot().createPackageFragment(getQualifier(qualifiedNames[i]), true, null), getSimpleName(qualifiedNames[i]));
+			}
 		}
 		return cus;
 	}
@@ -200,8 +206,16 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		performChange(ref, false);
 
 		for (int i= 0; i < cus.length; i++) {
-			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));
-			assertEqualLines("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());
+			String cuName= cuQNames[i];
+			String[] sections= cuName.split("[.]");
+
+			if (sections.length == 3) {
+				String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]), sections[1] + "/");
+				assertEqualLines("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());
+			} else {
+				String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));
+				assertEqualLines("Incorrect inline in " + outputTestFileName, getFileContents(outputTestFileName), cus[i].getSource());
+			}
 		}
 	}
 
@@ -714,6 +728,11 @@ public class MoveInstanceMethodTests extends GenericRefactoringTest {
 		helper1(new String[] { "A" }, "A", 6, 10, 6, 16, FIELD, "b", true, true);
 	}
 
+	// Issue 2030
+	@Test
+	public void test81() throws Exception {
+		helper1(new String[] { "p1.A", "p1.a.T", "p2.B", "p2.b.T"}, "p1.A", 15, 14, 15, 17, FIELD, "fB", true, true);
+	}
 
 	// Move mA1 to field fB, do not inline delegator
 	@Test
