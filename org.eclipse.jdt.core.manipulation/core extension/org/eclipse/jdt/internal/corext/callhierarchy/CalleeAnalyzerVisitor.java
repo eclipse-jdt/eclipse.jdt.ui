@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -168,6 +169,27 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
      */
     @Override
 	public boolean visit(MethodInvocation node) {
+        progressMonitorWorked(1);
+        if (!isFurtherTraversalNecessary(node)) {
+            return false;
+        }
+
+        if (isNodeWithinMethod(node)) {
+            addMethodCall(node.resolveMethodBinding(), node);
+        }
+
+        return true;
+    }
+
+    /**
+     * Find all method invocations from the called method. Since we only traverse into
+     * the AST on the wanted method declaration, this method should not hit on more
+     * method invocations than those in the wanted method.
+     *
+     * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
+     */
+    @Override
+	public boolean visit(MethodReference node) {
         progressMonitorWorked(1);
         if (!isFurtherTraversalNecessary(node)) {
             return false;

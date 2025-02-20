@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -273,6 +273,24 @@ public class CallHierarchyContentProviderTest {
 		assertEquals(
 				6, thirdLevelChildren.length, "Wrong number of third level children");
 	}
+
+	/*
+     * Tests getChildren and hasChildren on a callee tree with lambda method reference.
+     */
+    @Test
+    public void testLambdaCalleesWithMethodReference() throws Exception {
+		helper.createClassWithLambdaCalls();
+
+        TreeRoot root= wrapCalleeRoot(helper.getMethod3());
+        Object[] children= fProvider.getChildren(root);
+        assertEquals(1, children.length, "Wrong number of children");
+        helper.assertCalls(new IMember[] { helper.getMethod3()}, children);
+        assertEquals(helper.getMethod3(), ((MethodWrapper) children[0]).getMember(), "Wrong method");
+        assertTrue(fProvider.hasChildren(root), "root's hasChildren");
+
+        Object[] secondLevelChildren= fProvider.getChildren(children[0]);
+        assertNotNull(helper.findMethodWrapper(helper.getMethod2(), secondLevelChildren), "Did not find transform call");
+    }
 
     private void assertCalleeMethodWrapperChildren(Object[] children) {
     	for (Object child : children) {

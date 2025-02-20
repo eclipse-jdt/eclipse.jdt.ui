@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -300,23 +300,23 @@ public class CallHierarchyTestHelper {
 			public class Snippet {
 				static Function<? super String, ? extends String> mapper1 = y -> transform(y);
 				Function<? super String, ? extends String> mapper2 = y -> transform(y);
-			
+
 				static {
 					 mapper1 = y -> transform(y);
 				}
-			
+
 				public Snippet() {
 					mapper2 = y -> transform(y);
 				}
-			
+
 				public static void main(String[] args) {
-					mapper1 = y -> transform(y);
+					mapper1 = Snippet::transform;
 				}
-			
+
 				Object[] funcCall() {
-					return List.of("aaa").stream().map(y -> transform(y)).toArray();
+					return List.of("aaa").stream().map(Snippet::transform).toArray();
 				}
-			
+
 				static String transform(String s) {
 			     x();
 					return s.toUpperCase();
@@ -332,8 +332,10 @@ public class CallHierarchyTestHelper {
 		cu.createImport("java.util.function.Function", fType1, null);
 		fMethod1= fType1.getMethod("x", EMPTY);
 		fMethod2= fType1.getMethod("transform", new String[] { "QString;" });
+		fMethod3= fType1.getMethod("funcCall", EMPTY);
 		Assertions.assertNotNull(fMethod1);
 		Assertions.assertNotNull(fMethod2);
+		Assertions.assertNotNull(fMethod3);
 		assertBuildWithoutErrors(fPack1);
 	}
 
@@ -460,14 +462,14 @@ public class CallHierarchyTestHelper {
 						public class P {
 						  private A handler;
 						  private Abs absHandler;
-						
+
 						  public void callFoo() {
 						     handler.foo();
 						  }
 						  public void callAbsFoo() {
 						     absHandler.absFoo();
 						  }
-						
+
 						}""",
                     null,
                     true,
