@@ -1637,7 +1637,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		boolean collapse= false;
 		boolean collapseCode= true;
 		switch (element.getElementType()) {
-
 			case IJavaElement.IMPORT_CONTAINER:
 				collapse= ctx.collapseImportContainer();
 				includelastLine= true;
@@ -1646,8 +1645,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				collapseCode= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
 				collapse= ctx.collapseInnerTypes() && collapseCode;
 				break;
-			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
+				if (containsAnonymousChild(element)) {
+					return;
+				}
+				collapse= ctx.collapseMembers();
+				break;
+			case IJavaElement.METHOD:
 			case IJavaElement.INITIALIZER:
 				collapse= ctx.collapseMembers();
 				break;
@@ -1694,6 +1698,23 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				}
 			}
 		}
+	}
+
+	private boolean containsAnonymousChild(IJavaElement element) {
+		if (!(element instanceof IParent parent)) {
+			return false;
+		}
+
+		try {
+			for (IJavaElement child : parent.getChildren()) {
+				if (child instanceof IType t && t.isAnonymous()) {
+					return true;
+				}
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
 	}
 
 	/**
