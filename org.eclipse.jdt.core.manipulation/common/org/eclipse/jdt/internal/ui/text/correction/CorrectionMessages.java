@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -460,6 +460,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_create_new_interface_impl;
 	public static String QuickAssistProcessor_create_new_interface_impl_desc;
 	public static String SuppressWarningsSubProcessor_suppress_warnings_label;
+	public static String SuppressWarningsSubProcessor_suppress_all_warnings_label;
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_description;
 	public static String ReorgCorrectionsSubProcessor_project_seup_fix_info;

@@ -16,6 +16,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,14 @@ import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -52,6 +55,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.SuppressWarningsFixCore;
 import org.eclipse.jdt.internal.corext.fix.UnusedSuppressWarningsFixCore;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -60,6 +64,7 @@ import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.fix.SuppressWarningsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedSuppressWarningsCleanUp;
 
 public abstract class SuppressWarningsBaseSubProcessor<T> {
@@ -104,24 +109,27 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		ASTNode target= node;
 		int relevance= IProposalRelevance.ADD_SUPPRESSWARNINGS;
 		do {
-			relevance= addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, relevance, proposals);
+			relevance= addSuppressWarningsProposalIfPossible(context, target, warningToken, relevance, proposals);
 			if (relevance == 0)
-				return;
+				break;
 			target= target.getParent();
 		} while (target != null);
 
-		ASTNode importStatement= ASTNodes.getParent(node, ImportDeclaration.class);
-		if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
-			target= (ASTNode) context.getASTRoot().types().get(0);
-			if (target != null) {
-				addSuppressWarningsProposalIfPossible(context.getCompilationUnit(), target, warningToken, IProposalRelevance.ADD_SUPPRESSWARNINGS, proposals);
+		if (target == null) {
+			ASTNode importStatement= ASTNodes.getParent(node, ImportDeclaration.class);
+			if (importStatement != null && !context.getASTRoot().types().isEmpty()) {
+				target= (ASTNode) context.getASTRoot().types().get(0);
+				if (target != null) {
+					addSuppressWarningsProposalIfPossible(context, target, warningToken, IProposalRelevance.ADD_SUPPRESSWARNINGS, proposals);
+				}
 			}
 		}
+
+		addAllSuppressWarningsProposalIfPossible(context, target, warningToken, IProposalRelevance.ADD_SUPPRESSWARNINGS - 1, proposals);
 		return;
 	}
 
-	private int addSuppressWarningsProposalIfPossible(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection<T> proposals) {
-
+	private int addSuppressWarningsProposalIfPossible(IInvocationContext context, ASTNode node, String warningToken, int relevance, Collection<T> proposals) {
 		ChildListPropertyDescriptor property;
 		String name;
 		boolean isLocalVariable= false;
@@ -180,11 +188,52 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 				return relevance;
 		}
 
-		String label= Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, new String[] { warningToken, BasicElementLabels.getJavaElementName(name) });
-		T proposal = createSuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
-
-		proposals.add(proposal);
+		IProposableFix fix= SuppressWarningsFixCore.createFix(context.getASTRoot(), node, property, warningToken, BasicElementLabels.getJavaElementName(name));
+		if (fix != null) {
+			Map<String, String> options= new Hashtable<>();
+			options.put(CleanUpConstants.ADD_NECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+			SuppressWarningsCleanUp cleanUp= new SuppressWarningsCleanUp(options);
+			cleanUp.setWarningToken(warningToken);
+			T proposal= createSuppressWarningsProposal(fix, cleanUp, IProposalRelevance.ADD_SUPPRESSWARNINGS - 1, context);
+			proposals.add(proposal);
+		}
 		return isLocalVariable ? relevance - 1 : 0;
+	}
+
+	private void addAllSuppressWarningsProposalIfPossible(IInvocationContext context, ASTNode node, String warningToken, int relevance, Collection<T> proposals) {
+		CompilationUnit compilationUnit= (CompilationUnit) node.getRoot();
+		IProblem[] problems= compilationUnit.getProblems();
+		Map<ASTNode, ChildListPropertyDescriptor> nodeMap= new HashMap<>();
+		for (int i= 0; i < problems.length; i++) {
+			IProblemLocation location= new ProblemLocation(problems[i]);
+			if (warningToken.equals(CorrectionEngine.getWarningToken(location.getProblemId()))) {
+				ASTNode coveringNode= location.getCoveringNode(compilationUnit);
+				ASTNode target= coveringNode;
+				ChildListPropertyDescriptor property= null;
+				do {
+					property= SuppressWarningsFixCore.getChildListPropertyDescriptor(target, warningToken);
+					if (property != null) {
+						break;
+					}
+					target= target.getParent();
+				} while (target != null);
+				if (target != null) {
+					nodeMap.put(target, property);
+				}
+			}
+		}
+
+		if (nodeMap.size() > 1) {
+			IProposableFix fix= SuppressWarningsFixCore.createAllFix(context.getASTRoot(), nodeMap, warningToken);
+			if (fix != null) {
+				Map<String, String> options= new Hashtable<>();
+				options.put(CleanUpConstants.ADD_NECESSARY_SUPPRESS_WARNINGS, CleanUpOptions.TRUE);
+				SuppressWarningsCleanUp cleanUp= new SuppressWarningsCleanUp(options);
+				cleanUp.setWarningToken(warningToken);
+				T proposal= createSuppressWarningsProposal(fix, cleanUp, relevance - 1, context);
+				proposals.add(proposal);
+			}
+		}
 	}
 
 	private static String getFirstFragmentName(List<VariableDeclarationFragment> fragments) {
@@ -253,7 +302,7 @@ public abstract class SuppressWarningsBaseSubProcessor<T> {
 		}
 	}
 
-	protected abstract T createSuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance);
+	protected abstract T createSuppressWarningsProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context);
 
 	protected abstract T createASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance);
 

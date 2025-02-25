@@ -3168,4 +3168,91 @@ public class QuickFixTest1d8 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 
+	@Test
+	public void testIssue1967() throws Exception {
+		Hashtable<String, String> options = JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, CompilerOptions.ENABLED);
+		options.put(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str= """
+				package test1;
+				import java.util.List;
+				import java.util.ArrayList;
+				public class E {
+					public void foo1() {
+						List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+
+					public void foo2() {
+						List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+				}
+				""";
+
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(4, problems);
+		List<IJavaCompletionProposal> proposals= collectCorrectionsNoCheck(cu, problems[0], null);
+		assertCorrectLabels(proposals);
+
+		String expected1= """
+				package test1;
+				import java.util.List;
+				import java.util.ArrayList;
+				public class E {
+					public void foo1() {
+						@SuppressWarnings("rawtypes") List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+
+					public void foo2() {
+						List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+				}
+				""";
+
+		String expected2= """
+				package test1;
+				import java.util.List;
+				import java.util.ArrayList;
+				public class E {
+					@SuppressWarnings("rawtypes")
+				    public void foo1() {
+						List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+
+					public void foo2() {
+						List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+				}
+				""";
+
+		String expected3= """
+				package test1;
+				import java.util.List;
+				import java.util.ArrayList;
+				public class E {
+					public void foo1() {
+						@SuppressWarnings("rawtypes") List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+
+					public void foo2() {
+						@SuppressWarnings("rawtypes") List l = new ArrayList();
+						System.out.println("l is " + l);
+					}
+				}
+				""";
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
+	}
 }
