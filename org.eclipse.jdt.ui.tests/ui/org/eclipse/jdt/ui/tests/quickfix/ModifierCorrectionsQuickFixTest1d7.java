@@ -267,7 +267,7 @@ public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		expected[0]= """
@@ -313,7 +313,7 @@ public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		expected[0]= """
@@ -407,7 +407,7 @@ public class ModifierCorrectionsQuickFixTest1d7 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		expected[0]= """
