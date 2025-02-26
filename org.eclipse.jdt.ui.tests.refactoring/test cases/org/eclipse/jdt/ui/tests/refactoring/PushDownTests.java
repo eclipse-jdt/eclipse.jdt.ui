@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1267,6 +1267,25 @@ public class PushDownTests extends GenericRefactoringTest {
 
 	@Test
 	public void testFail15() throws Exception {
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= { new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= selectedFieldNames;
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+
+		failInputHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				namesOfMethodsToPushDown, signaturesOfMethodsToPushDown,
+				namesOfFieldsToPushDown,
+				namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract,
+				RefactoringStatus.ERROR);
+	}
+
+	@Test
+	public void testFail16() throws Exception { // https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2041
 		String[] selectedMethodNames= {"m"};
 		String[][] selectedMethodSignatures= { new String[0]};
 		String[] selectedFieldNames= {};

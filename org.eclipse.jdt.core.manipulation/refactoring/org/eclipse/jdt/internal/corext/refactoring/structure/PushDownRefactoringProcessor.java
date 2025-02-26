@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2024 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -375,14 +375,80 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		return result.toArray(new IJavaElement[result.size()]);
 	}
 
+	private static IJavaElement[] getReferencingElementsFromProject(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(member);
+		SearchPattern pattern= SearchPattern.createPattern(member,
+				IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return new IJavaElement[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
+		engine.setFiltering(true, true);
+		IType declaringType= member.getDeclaringType();
+		engine.setScope(SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getJavaProject() }));
+		engine.setStatus(status);
+		engine.searchPattern(pm);
+		Set<IJavaElement> result= new HashSet<>(3);
+		ICompilationUnit cu= member.getCompilationUnit();
+		String source= cu.getSource();
+		CompilationUnit cuRoot= null;
+		for (SearchResultGroup group : (SearchResultGroup[]) engine.getResults()) {
+			for (SearchMatch searchResult : group.getSearchResults()) {
+				if (source.charAt(searchResult.getOffset() - 1) == '.') {
+					if (cuRoot == null) {
+						cuRoot= getCompilationUnitRoot(cu, source);
+					}
+					if (cuRoot != null) {
+						ASTNode node= NodeFinder.perform(cuRoot, searchResult.getOffset(), searchResult.getLength());
+						if (node != null && node instanceof MethodInvocation) {
+							MethodInvocation methodInvocation= (MethodInvocation)node;
+							TypeDeclaration nodeTypeDecl= ASTNodes.getFirstAncestorOrNull(node, TypeDeclaration.class);
+							if (nodeTypeDecl == null) {
+								continue;
+							}
+							ITypeBinding nodeTypeDeclBinding= nodeTypeDecl.resolveBinding();
+							if (nodeTypeDeclBinding != null) {
+								if (nodeTypeDeclBinding.getQualifiedName().equals(declaringType.getFullyQualifiedName())) {
+									continue;
+								}
+							}
+							Expression expression= methodInvocation.getExpression();
+							if (expression != null && !(expression instanceof ThisExpression)) {
+								if (expression instanceof ClassInstanceCreation) {
+									ClassInstanceCreation cic= (ClassInstanceCreation)expression;
+									Type t= cic.getType();
+									if (t.isSimpleType() && !((SimpleType)t).getName().getFullyQualifiedName().equals(declaringType.getElementName())) {
+										continue;
+									}
+								} else if (expression instanceof SimpleName) {
+									IBinding binding= ((SimpleName)expression).resolveBinding();
+									if (binding instanceof IVariableBinding varBinding) {
+										if (!varBinding.getType().getQualifiedName().equals(declaringType.getFullyQualifiedName())) {
+											continue;
+										}
+									} else {
+										continue;
+									}
+								}
+							}
+							result.add(SearchUtils.getEnclosingJavaElement(searchResult));
+						}
+					}
+				}
+			}
+		}
+		return result.toArray(new IJavaElement[result.size()]);
+	}
+
 	private static CompilationUnit getCompilationUnitRoot(ICompilationUnit cu, String source) {
 		Map<String, String> options = cu.getJavaProject().getOptions(true);
 		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(false);
+		parser.setResolveBindings(true);
 		parser.setSource(source.toCharArray());
 		parser.setCompilerOptions(options);
 		parser.setProject(cu.getJavaProject());
+		parser.setUnitName(cu.getElementName());
 		CompilationUnit selectionCURoot= (CompilationUnit) parser.createAST(null);
 		return selectionCURoot;
 	}
@@ -624,6 +690,12 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		SubMonitor subMon= SubMonitor.convert(monitor, RefactoringCoreMessages.PushDownRefactoring_check_references, membersToPush.length);
 		for (IMember member : membersToPush) {
 			String label= createLabel(member);
+			for (IJavaElement element : getReferencingElementsFromProject(member, subMon.newChild(1), result)) {
+				IMember referencingMember= (IMember) element;
+				Object[] keys= { label, createLabel(referencingMember) };
+				String msg= Messages.format(RefactoringCoreMessages.PushDownRefactoring_referenced, keys);
+				result.addError(msg, JavaStatusContext.create(referencingMember));
+			}
 			for (IJavaElement element : getReferencingElementsFromSameClass(member, subMon.newChild(1), result)) {
 				if (movedMembers.contains(element))
 					continue;
