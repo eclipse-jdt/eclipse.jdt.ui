@@ -22,11 +22,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.SuppressWarningsFixCore;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -44,12 +43,16 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 	}
 
 
-	private static class SuppressWarningsProposal extends ASTRewriteCorrectionProposal {
-		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
-			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), new SuppressWarningsProposalCore(warningToken, label, cu, node, property, relevance));
+	private static class SuppressWarningsProposal extends FixCorrectionProposal {
+
+		private final IProposableFix fix;
+
+		public SuppressWarningsProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
+			super(fix, cleanUp, relevance, image, context);
+			this.fix= fix;
 		}
-		public SuppressWarningsProposalCore getCoreDelegate() {
-			return (SuppressWarningsProposalCore) this.getDelegate();
+		public SuppressWarningsFixCore getCoreDelegate() {
+			return (SuppressWarningsFixCore) this.fix;
 		}
 	}
 
@@ -60,11 +63,6 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 
 	public static void addRemoveUnusedSuppressWarningProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new SuppressWarningsSubProcessor().getRemoveUnusedSuppressWarningProposals(context, problem, proposals);
-	}
-
-	@Override
-	protected ICommandAccess createSuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
-		return new SuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
 	}
 
 	@Override
@@ -87,6 +85,15 @@ public class SuppressWarningsSubProcessor extends SuppressWarningsBaseSubProcess
 			image = ISharedImages.get().getImage(ISharedImages.IMG_TOOL_DELETE);
 		}
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, relevance, image, context);
+		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
+		return proposal;
+	}
+
+	@Override
+	protected ICommandAccess createSuppressWarningsProposal(IProposableFix fix, ICleanUp cleanUp, int relevance, IInvocationContext context) {
+		// Initialize as default image, though it should always trigger one of the two if statements below
+		Image image = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG);
+		FixCorrectionProposal proposal= new SuppressWarningsProposal(fix, cleanUp, relevance, image, context);
 		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
 		return proposal;
 	}
