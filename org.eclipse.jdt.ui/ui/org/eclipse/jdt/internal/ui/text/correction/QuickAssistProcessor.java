@@ -143,6 +143,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
@@ -3470,6 +3471,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
+		// check if there is some other unqualified reference to the simple name in a similar context
+		// in which case we cannot make the change
+		CompilationUnit cu= (CompilationUnit) name.getRoot();
+		if (cu.getJavaElement() instanceof ICompilationUnit icu) {
+			try {
+				QuickAssistProcessorUtil.UnqualifiedReferencesFinder visitor= new QuickAssistProcessorUtil.UnqualifiedReferencesFinder(name.getFullyQualifiedName(), icu, binding);
+				cu.accept(visitor);
+			} catch (JavaModelException e) {
+				// do nothing
+			} catch (AbortSearchException e) {
+				// this indicates an unqualified reference to the name is found
+				return false;
+			}
+		}
 		try {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getCompilationUnit(), true);
 			ASTRewrite astRewrite= ASTRewrite.create(node.getAST());
