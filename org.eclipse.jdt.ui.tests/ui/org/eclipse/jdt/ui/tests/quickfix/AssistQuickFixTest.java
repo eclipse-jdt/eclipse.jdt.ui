@@ -10426,6 +10426,36 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	@Test
+	public void testConvertToStaticImportShouldNotBeOffered() throws Exception { // Issue 2045
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.Currency;
+			public class T {
+				public void foo() {
+				    if (Currency.getAvailableCurrencies() != null) {
+					    System.out.println("available currencies");
+					}
+				}
+				private int getAvailableCurrencies() {
+					return 3;
+				}
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("T.java", str, false, null);
+
+		String selection= "getAvailableCurrencies";
+		int offset= str.lastIndexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	@Test
 	public void testConvertToStaticImportDoesRemoveUnusedImport() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """

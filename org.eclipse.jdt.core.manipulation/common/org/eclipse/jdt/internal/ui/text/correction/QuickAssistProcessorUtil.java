@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -83,6 +85,36 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 
 public class QuickAssistProcessorUtil {
+
+	/**
+	 * Utility class to find if there is an unqualified reference to a name made that doesn't match
+	 * a specified binding.  Used to verify that adding a static import won't cause a logic change in the
+	 * Compilation Unit.
+	 */
+	public static class UnqualifiedReferencesFinder extends ASTVisitor {
+		private final String fName;
+		private final IBuffer fBuffer;
+		private final IBinding fBinding;
+
+		public UnqualifiedReferencesFinder(String name, ICompilationUnit icu, IBinding binding) throws JavaModelException {
+			fName= name;
+			fBuffer= icu.getBuffer();
+			fBinding= binding;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			if (node.getFullyQualifiedName().equals(fName)) {
+				if (node.getStartPosition() > 0 && fBuffer.getChar(node.getStartPosition() - 1) != '.') {
+					IBinding binding= node.resolveBinding();
+					if (binding != null && binding.getKind() == fBinding.getKind() && !binding.isEqualTo(fBinding)) {
+						throw new AbortSearchException();
+					}
+				}
+			}
+			return false;
+		}
+	}
 
 	/**
 	 * Returns the functional interface method being implemented by the given method reference.
