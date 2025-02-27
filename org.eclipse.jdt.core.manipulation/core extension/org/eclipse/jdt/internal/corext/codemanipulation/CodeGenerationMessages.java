@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ public final class CodeGenerationMessages extends NLS {
 	public static String AddImportsOperation_error_not_visible_class;
 	public static String AddImportsOperation_error_notresolved_message;
 	public static String AddImportsOperation_error_importclash;
+	public static String AddImportsOperation_error_name_collision;
 	public static String AddImportsOperation_error_invalid_selection;
 	public static String AddUnimplementedMethodsOperation_description;
 	public static String AddCustomConstructorOperation_description;
