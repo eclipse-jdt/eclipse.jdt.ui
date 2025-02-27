@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -199,6 +201,29 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return fResultingEdit;
 	}
 
+	private class ReferenceVisitor extends ASTVisitor {
+		private final String fName;
+		private final IBuffer fCuBuffer;
+		private final IBinding fBinding;
+		public ReferenceVisitor(String name, ICompilationUnit icu, IBinding binding) throws JavaModelException {
+			this.fName= name;
+			this.fCuBuffer= icu.getBuffer();
+			this.fBinding= binding;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			if (node.getFullyQualifiedName().equals(fName)) {
+				if (node.getStartPosition() > 1 && fCuBuffer.getChar(node.getStartPosition() - 1) != '.') {
+					IBinding nameBinding= node.resolveBinding();
+					if (nameBinding != null && nameBinding.getKind() == fBinding.getKind() && !nameBinding.isEqualTo(fBinding)) {
+						throw new AbortSearchException();
+					}
+				}
+			}
+			return false;
+		}
+	}
 	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws JavaModelException {
 		SubMonitor subMonitor= SubMonitor.convert(monitor, 1);
 		SimpleName nameNode= null;
@@ -253,6 +278,18 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 			IBinding binding= nameNode.resolveBinding();
 			if (binding != null && !binding.isRecovered()) {
+				CompilationUnit cu= (CompilationUnit) nameNode.getRoot();
+				if (cu.getJavaElement() instanceof ICompilationUnit icu) {
+					ReferenceVisitor visitor= new ReferenceVisitor(simpleName, icu, binding);
+					try {
+						cu.accept(visitor);
+					} catch (AbortSearchException e) {
+						fStatus= JavaUIStatus.createError(IStatus.ERROR,
+								Messages.format(CodeGenerationMessages.AddImportsOperation_error_name_collision, simpleName),
+								null);
+						return null;
+					}
+				}
 				if (binding instanceof ITypeBinding) {
 					ITypeBinding typeBinding= ((ITypeBinding) binding).getTypeDeclaration();
 					String qualifiedBindingName= typeBinding.getQualifiedName();
