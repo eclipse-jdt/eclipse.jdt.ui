@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2020 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2014, 2025 GK Software AG, IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -63,12 +64,14 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaLambdaCompletionProposal;
 
 /**
@@ -95,6 +98,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
 		store.setValue(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, false);
+		store.setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/* (non-Javadoc)\n * ${see_to_overridden}\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, "/* (non-Javadoc)\n * ${see_to_target}\n */", null);
@@ -112,6 +116,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS);
+		store.setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		closeAllEditors();
 		JavaProjectHelper.clear(fJProject1, j18s.getDefaultClasspath());
 	}
@@ -411,7 +416,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface I1 {
 			    equals
 			}
@@ -433,7 +438,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface I1 {
 			    /* (non-Javadoc)
 			     * @see java.lang.Object#equals(java.lang.Object)
@@ -451,7 +456,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface I2 {
 			    hashCode
 			}
@@ -473,7 +478,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface I2 {
 			    /* (non-Javadoc)
 			     * @see java.lang.Object#hashCode()
@@ -491,7 +496,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface I3 {
 			    toString
 			}
@@ -513,7 +518,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface I3 {
 			    /* (non-Javadoc)
 			     * @see java.lang.Object#toString()
@@ -531,7 +536,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface I4 {
 			    clone
 			}
@@ -553,7 +558,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface I4 {
 			    /* (non-Javadoc)
 			     * @see java.lang.Object#clone()
@@ -570,7 +575,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface I5 {
 			    finalize
 			}
@@ -592,7 +597,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface I5 {
 			    /* (non-Javadoc)
 			     * @see java.lang.Object#finalize()
@@ -609,11 +614,11 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String str1= """
 			package test1;
-			
+
 			public interface I6 extends A {
 			    myAbs
 			}
-			
+
 			interface A {
 			    void myAbstractM();
 			}
@@ -635,7 +640,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 		String str2= """
 			package test1;
-			
+
 			public interface I6 extends A {
 			    /* (non-Javadoc)
 			     * @see test1.A#myAbstractM()
@@ -646,7 +651,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			       \s
 			    }
 			}
-			
+
 			interface A {
 			    void myAbstractM();
 			}
@@ -660,7 +665,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
 		String str1= """
 			package pp;
-			
+
 			public class CC implements I2 {
 			    dispose
 			}
@@ -686,7 +691,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		proposals[0].apply(doc);
 		String str2= """
 			package pp;
-			
+
 			public class CC implements I2 {
 			    /* (non-Javadoc)
 			     * @see pp.I2#dispose2()
@@ -711,7 +716,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
 		String str1= """
 			package pp;
-			
+
 			public class CC extends S1 {
 			    dispose
 			}
@@ -737,7 +742,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		proposals[0].apply(doc);
 		String str2= """
 			package pp;
-			
+
 			public class CC extends S1 {
 			    /* (non-Javadoc)
 			     * @see pp.S1#dispose1()
@@ -762,7 +767,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
 		String str1= """
 			package pp;
-			
+
 			public class CC extends S1 {
 			    dispose
 			}
@@ -792,7 +797,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		proposals[1].apply(doc);
 		String str2= """
 			package pp;
-			
+
 			public class CC extends S1 {
 			    /* (non-Javadoc)
 			     * @see pp.I1#dispose()
@@ -826,14 +831,14 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 			IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 			String contents= """
 				package test1;
-				
+
 				import annots.NonNull;
 				import annots.NonNullByDefault;
-				
+
 				interface A {
 				    @NonNull String m();
 				}
-				
+
 				@NonNullByDefault
 				public class Test {
 				    void f() {
@@ -863,14 +868,14 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import annots.NonNull;
 				import annots.NonNullByDefault;
-				
+
 				interface A {
 				    @NonNull String m();
 				}
-				
+
 				@NonNullByDefault
 				public class Test {
 				    void f() {
@@ -898,9 +903,9 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.util.function.Consumer;
-			
+
 			public class A {
 			    public void foo() {
 			        Runnable r = () -> {
@@ -938,9 +943,9 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.util.function.Consumer;
-				
+
 				public class A {
 				    public void foo() {
 				        Runnable r = () -> {
@@ -957,13 +962,67 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 	}
 
 	@Test
+	public void testBug532562() throws Exception {
+		class ProposalsHolder {
+			public ICompletionProposal[] proposals;
+		}
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= """
+			@
+			package test1;
+			""";
+
+		ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", contents, false, null);
+
+		JavaEditor part= (JavaEditor) JavaUI.openInEditor(cu);
+		try {
+			String str= "@";
+
+			int offset= contents.indexOf(str) + str.length();
+			ContentAssistant assistant= new ContentAssistant();
+			assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
+			JavaCompletionProcessor javaProcessor= new JavaCompletionProcessor(part, assistant, getContentType());
+			final ProposalsHolder holder= new ProposalsHolder();
+			Thread thread = new Thread(() -> {
+				try {
+					holder.proposals= javaProcessor.computeCompletionProposals(part.getViewer(), offset);
+					// a popup can be shown and block the thread in case of error
+				} catch (Exception e) {
+					// ignore
+				}
+			});
+			thread.start();
+			thread.join();
+
+			for (ICompletionProposal iJavaCompletionProposal : holder.proposals) {
+				System.out.println(iJavaCompletionProposal);
+			}
+
+			IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			ICompletionProposal proposal= holder.proposals[0];
+			assertTrue("valid proposal", ((ICompletionProposalExtension2)proposal).validate(doc, offset, null));
+			proposal.apply(doc);
+
+			String str1= """
+				@Deprecated
+				package test1;
+				""";
+			assertEquals(str1, doc.get());
+		} finally {
+			part.getSite().getPage().closeAllEditors(false);
+		}
+	}
+
+	@Test
 	public void testBug575377() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			class Strong {}
 			public class A {
 			    void lambda(Object o) {
@@ -998,7 +1057,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				class Strong {}
 				public class A {
 				    void lambda(Object o) {
@@ -1019,7 +1078,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.util.function.Consumer;
 			public class Bug443091 {
 				void foo(Consumer<Integer> c){}
@@ -1053,7 +1112,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.util.function.Consumer;
 				public class Bug443091 {
 					void foo(Consumer<Integer> c){}
@@ -1075,7 +1134,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.util.function.Consumer;
 			public class Bug443091 {
 			    void test() {
@@ -1108,7 +1167,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.util.function.Consumer;
 				public class Bug443091 {
 				    void test() {
@@ -1129,7 +1188,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			public class Bug443091 {
 			    void test() {
 			        Runnable run =
@@ -1161,7 +1220,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				public class Bug443091 {
 				    void test() {
 				        Runnable run =() ->\s
@@ -1180,7 +1239,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		String contents= """
 			package test1;
-			
+
 			import java.util.function.BiConsumer;
 			public class Bug443091 {
 			    void test() {
@@ -1213,7 +1272,7 @@ public class CodeCompletionTest1d8 extends AbstractCompletionTest {
 
 			String str1= """
 				package test1;
-				
+
 				import java.util.function.BiConsumer;
 				public class Bug443091 {
 				    void test() {

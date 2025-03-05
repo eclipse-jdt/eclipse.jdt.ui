@@ -103,9 +103,12 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 		String qualifiedTypeName= getQualifiedTypeName();
 
-		// Type in package info must be fully qualified.
-		if (fCompilationUnit != null && JavaModelUtil.isPackageInfo(fCompilationUnit))
+		// Type in package info must be fully qualified unless completing an annotation
+		if (fCompilationUnit != null && JavaModelUtil.isPackageInfo(fCompilationUnit) &&
+				((fProposal.getFlags() & /* ClassFileConstants.AccAnnotation */ 8192) == 0 ||
+				(fProposal.getFlags() & /* ClassFileConstants.Accinterface */ 512) == 0)) {
 			return qualifiedTypeName;
+		}
 
 		if (qualifiedTypeName.indexOf('.') == -1 && replacement.length() > 0)
  			// default package - no imports needed
