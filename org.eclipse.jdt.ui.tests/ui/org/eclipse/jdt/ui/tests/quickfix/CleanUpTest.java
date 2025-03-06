@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20572,6 +20572,43 @@ public class CleanUpTest extends CleanUpTestCase {
 			            ++i; // do comment
 			        } while (i > 5 && b || i < 100 && i > 90);
 			    }
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
+	}
+
+	@Test
+	public void testAddParenthesesIssue2057() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+			public class E {
+				public void foo(String x) {
+					if (x.equals("abc")) //$NON-NLS-1$
+						System.out.println(x);
+					else
+						System.out.println("def"); //$NON-NLS-1$
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS);
+		enable(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS_ALWAYS);
+
+		sample= """
+			package test1;
+			public class E {
+				public void foo(String x) {
+					if (x.equals("abc")) { //$NON-NLS-1$
+			        	System.out.println(x);
+			        } else {
+			            System.out.println("def"); //$NON-NLS-1$
+			        }
+				}
 			}
 			""";
 		String expected1= sample;

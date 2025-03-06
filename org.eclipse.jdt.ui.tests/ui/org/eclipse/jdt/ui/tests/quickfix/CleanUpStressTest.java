@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3109,7 +3109,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			            } else if (args[i].equals("-v")) { //$NON-NLS-1$
 			                System.err.println("JUnit " + Version.id() //$NON-NLS-1$
 			                        + " by Kent Beck and Erich Gamma"); //$NON-NLS-1$
-			            } else { // $NON-NLS-1$
+			            } else {
 			                testCase = args[i];
 			            }
 			        }

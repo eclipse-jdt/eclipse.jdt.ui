@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc.- refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -44,7 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 
-public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
+public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCore {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
 
@@ -187,6 +188,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			String label;
 			ASTNode expression= null;
 			int statementType= -1;
+			int defaultStartPosition= fControlStatement.getStartPosition();
 			if (fBodyProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeIfToBlock_desription;
 				expression= ((IfStatement)fControlStatement).getExpression();
@@ -195,7 +197,8 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 				}
 			} else if (fBodyProperty == IfStatement.ELSE_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeElseToBlock_description;
-				expression= ((IfStatement)fControlStatement).getExpression();
+				Statement thenStatement= ((IfStatement)fControlStatement).getThenStatement();
+				defaultStartPosition= thenStatement.getStartPosition() + thenStatement.getLength();
 			} else {
 				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
 				if (fBodyProperty == WhileStatement.BODY_PROPERTY) {
@@ -218,7 +221,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			// If single body statement is on next line, we need to preserve any comments pertaining to the
 			// control statement (e.g. NLS comment for if expression)
 			if (controlStatementLine != bodyLine) {
-				int startPosition= expression == null ? fControlStatement.getStartPosition() : (expression.getStartPosition() + cuRoot.getExtendedLength(expression));
+				int startPosition= expression == null ? defaultStartPosition : (expression.getStartPosition() + cuRoot.getExtendedLength(expression));
 				List<Comment> comments= cuRoot.getCommentList();
 				for (Comment comment : comments) {
 					int commentLine= cuRoot.getLineNumber(comment.getStartPosition());
