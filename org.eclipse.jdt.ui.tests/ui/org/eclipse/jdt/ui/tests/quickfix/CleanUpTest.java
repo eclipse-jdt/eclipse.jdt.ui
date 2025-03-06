@@ -19900,6 +19900,19 @@ public class CleanUpTest extends CleanUpTestCase {
 			        }
 			        return;
 			    }
+
+				public int refactorIfChain(boolean a, boolean b) {
+					// comment 1
+					if (a) {
+						return 1;
+					} else if (b) {
+						// comment 2
+						return 2;
+					} else {
+						System.out.println("abc");
+						return 3;
+					}
+				}
 			}
 			""";
 
@@ -20217,6 +20230,19 @@ public class CleanUpTest extends CleanUpTestCase {
 			        System.out.println("null args: we should not be here");
 			        return;
 			    }
+
+				public int refactorIfChain(boolean a, boolean b) {
+					// comment 1
+					if (a) {
+						return 1;
+					}
+			        if (b) {
+						// comment 2
+						return 2;
+					}
+			        System.out.println("abc");
+			        return 3;
+				}
 			}
 			""";
 
