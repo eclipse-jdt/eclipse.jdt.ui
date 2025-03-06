@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -575,6 +575,49 @@ public class MoveMembersTests extends GenericRefactoringTest {
 		methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] });
 	}
 
+	@Test
+	public void test64() throws Exception { // test for Issue 2030
+			ParticipantTesting.reset();
+			IPackageFragment p1= getRoot().createPackageFragment("p1", false, null);
+			IPackageFragment p1a= getRoot().createPackageFragment("p1.a", false, null);
+			IPackageFragment p2= getRoot().createPackageFragment("p2", false, null);
+			IPackageFragment p2b= getRoot().createPackageFragment("p2.b", false, null);
+			ICompilationUnit cuA= createCUfromTestFile(p1, "A");
+			createCUfromTestFile(p1a, "T", "a/");
+			ICompilationUnit cuB= createCUfromTestFile(p2, "B");
+			createCUfromTestFile(p2b, "T", "b/");
+			IType typeA= getType(cuA, "A");
+			IType typeB= getType(cuB, "B");
+			IMethod[] methods= getMethods(typeA, new String[] {"m"}, new String[][] { new String[0]});
+
+			IType destinationType= typeB;
+			IMember[] members= merge(methods, new IMember[0], new IMember[0]);
+			String[] handles= ParticipantTesting.createHandles(members);
+			MoveArguments[] args= new MoveArguments[handles.length];
+			for (int i = 0; i < args.length; i++) {
+				args[i]= new MoveArguments(destinationType, true);
+			}
+			MoveRefactoring ref= createRefactoring(members, destinationType);
+
+			IDelegateUpdating delUp= ref.getProcessor().getAdapter(IDelegateUpdating.class);
+			delUp.setDelegateUpdating(false);
+
+			RefactoringStatus result= performRefactoringWithStatus(ref);
+			assertTrue("precondition was supposed to pass", result.getSeverity() <= RefactoringStatus.WARNING);
+			ParticipantTesting.testMove(handles, args);
+
+			String expected;
+			String actual;
+
+			expected= getFileContents(getOutputTestFileName("A"));
+			actual= cuA.getSource();
+			assertEqualLines("incorrect modification of  A", expected, actual);
+
+			expected= getFileContents(getOutputTestFileName("B"));
+			actual= cuB.getSource();
+			assertEqualLines("incorrect modification of  B", expected, actual);
+			//tearDown() deletes resources and does performDummySearch();
+	}
 	//---
 	@Test
 	public void testFail0() throws Exception{
