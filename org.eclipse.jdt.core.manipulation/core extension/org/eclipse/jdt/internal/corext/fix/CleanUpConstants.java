@@ -2074,6 +2074,18 @@ public class CleanUpConstants {
 	public static final String ADD_MISSING_SERIAL_VERSION_ID_GENERATED= "cleanup.add_generated_serial_version_id"; //$NON-NLS-1$
 
 	/**
+	 * Add necessary SuppressWarnings specifiers.
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.36
+	 */
+	public static final String ADD_NECESSARY_SUPPRESS_WARNINGS= "cleanup.add_necessary_suppress_warnings"; //$NON-NLS-1$
+
+	/**
 	 * Adds a default serial version it to subtypes of java.io.Serializable and
 	 * java.io.Externalizable
 	 *
