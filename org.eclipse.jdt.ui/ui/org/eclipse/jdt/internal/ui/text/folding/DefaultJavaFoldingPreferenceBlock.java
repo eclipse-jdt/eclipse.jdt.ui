@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -66,6 +67,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		Text text = (Text)e.widget;
 		fOverlayStore.setValue(fStringInputs.get(text), text.getText());
 	};
+	private List<SelectionListener> fMasterSlaveListeners= new ArrayList<>();
 
 
 
@@ -118,7 +120,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_innerTypes, PreferenceConstants.EDITOR_FOLDING_INNERTYPES, 0);
 		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_methods, PreferenceConstants.EDITOR_FOLDING_METHODS, 0);
 		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_imports, PreferenceConstants.EDITOR_FOLDING_IMPORTS, 0);
-		addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegions, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, 0);
+		Button initiallyFoldCustomRegions= addCheckBox(initialFoldingGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegions, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, 0);
 
 		Group extendedFoldingGroup= new Group(outer, SWT.NONE);
 		GridLayout extendedFoldingLayout= new GridLayout(1, false);
@@ -141,11 +143,29 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		customRegionGroup.setLayout(customRegionLayout);
 		customRegionGroup.setText(FoldingMessages.DefaultJavaFoldingPreferenceBlock_custom_region_title);
 
-		addCheckBox(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegionsEnabled, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, 0, 2);
-		addStringInput(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegionStart, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
-		addStringInput(customRegionGroup, FoldingMessages.defaultJavaFoldingPreferenceBlock_customRegionEnd, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
+		Button customRegionsEnabled= addCheckBox(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegionsEnabled, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, 0, 2);
+		Text customRegionTextStart= addStringInput(customRegionGroup, FoldingMessages.DefaultJavaFoldingPreferenceBlock_customRegionStart, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START);
+		Text customRegionTextEnd= addStringInput(customRegionGroup, FoldingMessages.defaultJavaFoldingPreferenceBlock_customRegionEnd, PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END);
+		addDependency(customRegionsEnabled, initiallyFoldCustomRegions);
+		addDependency(customRegionsEnabled, customRegionTextStart);
+		addDependency(customRegionsEnabled, customRegionTextEnd);
 
 		return outer;
+	}
+
+	private void addDependency(Button master, Control slave) {
+		slave.setEnabled(fOverlayStore.getBoolean(fCheckBoxes.get(master)));
+		SelectionListener listener= new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				slave.setEnabled(master.getSelection());
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		};
+		master.addSelectionListener(listener);
+		fMasterSlaveListeners.add(listener);
 	}
 
 	private Button addCheckBox(Composite parent, String label, String key, int indentation) {
@@ -167,7 +187,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		return checkBox;
 	}
 
-	private void addStringInput(Composite parent, String label, String key) {
+	private Text addStringInput(Composite parent, String label, String key) {
 		Label labelElement = new Label(parent, SWT.LEFT);
 		labelElement.setText(label);
 		GridData labelGridData= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -185,11 +205,13 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 		textInput.setLayoutData(textGridData);
 
 		fStringInputs.put(textInput, key);
+		return textInput;
 	}
 
 	private void initializeFields() {
 		fCheckBoxes.forEach((b, key) -> b.setSelection(fOverlayStore.getBoolean(key)));
 		fStringInputs.forEach((text, key) -> text.setText(fOverlayStore.getString(key)));
+		fMasterSlaveListeners.forEach(listener -> listener.widgetSelected(null));
 	}
 
 	/*
