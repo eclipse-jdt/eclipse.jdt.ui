@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
@@ -46,8 +47,10 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
+import org.eclipse.jdt.ui.text.folding.IScopedJavaFoldingPreferenceBlock;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.OverlayPreferenceStore.OverlayKey;
@@ -61,7 +64,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  *
  * @since 3.0
  */
-class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
+class FoldingConfigurationBlock implements IPreferenceAndPropertyConfigurationBlock {
 
 	private static class ErrorPreferences implements IJavaFoldingPreferenceBlock {
 		private String fMessage;
@@ -117,14 +120,20 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 	private final Map<String, IJavaFoldingPreferenceBlock> fProviderPreferences;
 	private final Map<String, Control> fProviderControls;
 
+	private IScopeContext fContext;
 
-	public FoldingConfigurationBlock(OverlayPreferenceStore store) {
+	private boolean fIsProjectPreferencePage;
+
+
+	public FoldingConfigurationBlock(OverlayPreferenceStore store, IScopeContext context, boolean isProjectPreferencePage) {
 		Assert.isNotNull(store);
 		fStore= store;
 		fStore.addKeys(createOverlayStoreKeys());
 		fProviderDescriptors= createListModel();
 		fProviderPreferences= new HashMap<>();
 		fProviderControls= new HashMap<>();
+		this.fContext= context;
+		this.fIsProjectPreferencePage= isProjectPreferencePage;
 	}
 
 	private Map<String, JavaFoldingStructureProviderDescriptor> createListModel() {
@@ -289,6 +298,14 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			if (prefs == null) {
 				try {
 					prefs= desc.createPreferences();
+					if (fIsProjectPreferencePage) {
+						if (prefs instanceof IScopedJavaFoldingPreferenceBlock scopedPrefs) {
+							scopedPrefs.setScopeContext(fContext);
+						} else {
+							String message= Messages.format(PreferencesMessages.FoldingConfigurationBlock_error_project_prefs_not_supported, desc.getName());
+							prefs= new ErrorPreferences(message);
+						}
+					}
 					fProviderPreferences.put(id, prefs);
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
@@ -368,5 +385,20 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			updateListDependencies();
 		else
 			fProviderViewer.setSelection(new StructuredSelection(provider), true);
+	}
+
+	@Override
+	public void disableProjectSettings() {
+		if(fContext != null) {
+			fContext.getNode(JavaUI.ID_PLUGIN).remove(PreferenceConstants.EDITOR_FOLDING_PROJECT_SPECIFIC_SETTINGS_ENABLED);
+		}
+	}
+
+	@Override
+	public void enableProjectSettings() {
+		if(fContext != null) {
+			fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(PreferenceConstants.EDITOR_FOLDING_PROJECT_SPECIFIC_SETTINGS_ENABLED, true);
+		}
+
 	}
 }
