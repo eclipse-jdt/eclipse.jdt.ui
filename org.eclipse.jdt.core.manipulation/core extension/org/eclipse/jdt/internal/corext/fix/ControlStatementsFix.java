@@ -16,24 +16,32 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -186,9 +194,10 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String label;
-			ASTNode expression= null;
+			Expression expression= null;
 			int statementType= -1;
 			int defaultStartPosition= fControlStatement.getStartPosition();
+			CompilationUnit cuRoot= cuRewrite.getRoot();
 			if (fBodyProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeIfToBlock_desription;
 				expression= ((IfStatement)fControlStatement).getExpression();
@@ -198,7 +207,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 			} else if (fBodyProperty == IfStatement.ELSE_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeElseToBlock_description;
 				Statement thenStatement= ((IfStatement)fControlStatement).getThenStatement();
-				defaultStartPosition= thenStatement.getStartPosition() + thenStatement.getLength();
+				defaultStartPosition= cuRoot.getExtendedStartPosition(thenStatement) + cuRoot.getExtendedLength(thenStatement);
 			} else {
 				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
 				if (fBodyProperty == WhileStatement.BODY_PROPERTY) {
@@ -215,9 +224,14 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 
 			TextEditGroup group= createTextEditGroup(label, cuRewrite);
 			List<Comment> commentsToPreserve= new ArrayList<>();
-			CompilationUnit cuRoot= cuRewrite.getRoot();
 			int controlStatementLine= cuRoot.getLineNumber(fControlStatement.getStartPosition());
 			int bodyLine= cuRoot.getLineNumber(fBody.getStartPosition());
+			IBuffer cuBuffer= cuRewrite.getCu().getBuffer();
+			// Get extended body text and convert multiple indent tabs to be just one tab as they will be relative to control statement
+			String bodyString= cuBuffer.getText(cuRoot.getExtendedStartPosition(fBody), cuRoot.getExtendedLength(fBody))
+					.replaceAll("\\r\\n|\\r|\\n(\\t|\\s)*", System.lineSeparator() + "\t"); //$NON-NLS-1$ //$NON-NLS-2$
+			String commentString= ""; //$NON-NLS-1$
+			boolean needToManuallyAddNLS= false;
 			// If single body statement is on next line, we need to preserve any comments pertaining to the
 			// control statement (e.g. NLS comment for if expression)
 			if (controlStatementLine != bodyLine) {
@@ -228,31 +242,75 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 					if (commentLine == controlStatementLine && comment.getStartPosition() > startPosition &&
 							comment.getStartPosition() < fBody.getStartPosition()) {
 						commentsToPreserve.add(comment);
+						String commentText= cuBuffer.getText(comment.getStartPosition(), comment.getLength());
+						commentString += " " + commentText; //$NON-NLS-1$
+					}
+				}
+			} else {
+				// single body statement is on same line...we might have to keep an NLS comment on same line
+				if (expression != null) {
+					List<String> nlsList= fBodyProperty == IfStatement.ELSE_STATEMENT_PROPERTY ?
+							getLineNLSComments(defaultStartPosition, expression) :
+								getLineNLSComments(expression.getStartPosition() + expression.getLength(), expression);
+					if (!nlsList.isEmpty()) {
+						needToManuallyAddNLS= true;
+						class Counter {
+							public int count= 0;
+						}
+						final Counter counter= new Counter();
+						ASTVisitor literalVisitor= new ASTVisitor() {
+							@Override
+							public boolean visit(StringLiteral node) {
+								counter.count++;
+								return false;
+							}
+						};
+						expression.accept(literalVisitor);
+						bodyString= cuBuffer.getText(cuRoot.getExtendedStartPosition(fBody),
+								fBody.getStartPosition() - cuRoot.getExtendedStartPosition(fBody) + fBody.getLength());
+						int lastNLSIndex= 0;
+						for (String nlsString : nlsList) {
+							int start= nlsString.indexOf("$NON-NLS-") + 9; //$NON-NLS-1$
+							int index= start;
+							while (Character.isDigit(nlsString.charAt(index))) {
+								++index;
+							}
+							int nlsIndex= Integer.parseInt(nlsString.substring(start, index));
+							if (nlsIndex <= counter.count) {
+								commentString += " " + nlsString; //$NON-NLS-1$
+								lastNLSIndex= nlsIndex;
+							} else {
+								bodyString += " " + "//$NON-NLS-" + (nlsIndex - lastNLSIndex) + "$"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							}
+						}
 					}
 				}
 			}
-			String blockString= "{"; //$NON-NLS-1$
-			IBuffer cuBuffer= cuRewrite.getCu().getBuffer();
 			Block replacingBody= null;
 			String blockPosition= JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK);
 			boolean blockEndOfLine= blockPosition.equals(DefaultCodeFormatterConstants.END_OF_LINE);
-			if (!commentsToPreserve.isEmpty()) {
-				// Get extended body text and convert multiple indent tabs to be just one tab as they will be relative to control statement
-				String bodyString= cuBuffer.getText(cuRoot.getExtendedStartPosition(fBody), cuRoot.getExtendedLength(fBody))
-						.replaceAll("\\r\\n|\\r|\\n(\\t|\\s)*", System.lineSeparator() + "\t"); //$NON-NLS-1$ //$NON-NLS-2$
+			String blockString= "{"; //$NON-NLS-1$
+			if (!commentsToPreserve.isEmpty() || needToManuallyAddNLS) {
 				if (blockEndOfLine || statementType == -1) {
-					// To ensure the comments to preserve end up on same line as the control statement, we need
-					// to build the block manually as a string and then create a Block placeholder from it
-					for (Comment comment : commentsToPreserve) {
-						String commentString= cuBuffer.getText(comment.getStartPosition(), comment.getLength());
-						blockString += " " + commentString; //$NON-NLS-1$
+					if (statementType == -1 && !blockEndOfLine) {
+						if (commentString.contains("$NON-NLS-")) { //$NON-NLS-1$
+							return; // we cannot handle non-block-end-of-line and NLS comment on if
+						}
+						blockString= commentString.trim() + System.lineSeparator() + blockString + System.lineSeparator() + "\t" + bodyString + System.lineSeparator() + "}";  //$NON-NLS-1$ //$NON-NLS-2$
+					} else {
+						blockString += commentString + System.lineSeparator() + "\t" + bodyString + System.lineSeparator() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					blockString += System.lineSeparator() + "\t" + bodyString + System.lineSeparator() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 					replacingBody= (Block)rewrite.createStringPlaceholder(blockString, ASTNode.BLOCK);
 				} else {
-					Comment lastComment= commentsToPreserve.get(commentsToPreserve.size()-1);
-					String newControlStatement= cuBuffer.getText(cuRoot.getExtendedStartPosition(fControlStatement),
-							lastComment.getStartPosition() + lastComment.getLength() - cuRoot.getExtendedStartPosition(fControlStatement));
+					String newControlStatement= ""; //$NON-NLS-1$
+					if (needToManuallyAddNLS) {
+						newControlStatement= cuBuffer.getText(cuRoot.getExtendedStartPosition(fControlStatement),
+								fBody.getStartPosition() - cuRoot.getExtendedStartPosition(fControlStatement)) + commentString;
+					} else {
+						Comment lastComment= commentsToPreserve.get(commentsToPreserve.size()-1);
+						newControlStatement= cuBuffer.getText(cuRoot.getExtendedStartPosition(fControlStatement),
+								lastComment.getStartPosition() + lastComment.getLength() - cuRoot.getExtendedStartPosition(fControlStatement));
+					}
 					newControlStatement += System.lineSeparator() + "{" + System.lineSeparator(); //$NON-NLS-1$
 					newControlStatement += "\t" + bodyString + System.lineSeparator() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 					Statement newStatement= (Statement)rewrite.createStringPlaceholder(newControlStatement, statementType);
@@ -265,6 +323,31 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 				replacingBody.statements().add(moveTarget);
 			}
 			rewrite.set(fControlStatement, fBodyProperty, replacingBody, group);
+		}
+
+		private static Pattern nlsPattern= Pattern.compile("//\\s*\\$NON-NLS-(\\d+)\\$"); //$NON-NLS-1$
+		private List<String> getLineNLSComments(int start, ASTNode node) {
+			ASTNode root= node.getRoot();
+			List<String> nlsList= new ArrayList<>();
+			if (root instanceof CompilationUnit) {
+				CompilationUnit unit= (CompilationUnit)root;
+				int line= unit.getLineNumber(start);
+				int endPosition= unit.getPosition(line + 1, 0);
+				int length= endPosition - start;
+				IJavaElement element= unit.getJavaElement();
+				if (element != null && element instanceof ICompilationUnit icu) {
+					try {
+						String statement= icu.getBuffer().getText(start, length);
+						Matcher m= nlsPattern.matcher(statement);
+						while (m.find()) {
+							nlsList.add(m.group());
+						}
+					} catch (IndexOutOfBoundsException | JavaModelException e) {
+						// do nothing
+					}
+				}
+			}
+			return nlsList;
 		}
 
 	}
