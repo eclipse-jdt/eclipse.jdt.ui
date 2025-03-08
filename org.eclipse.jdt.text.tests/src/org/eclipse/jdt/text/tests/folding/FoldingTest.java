@@ -458,8 +458,6 @@ public class FoldingTest {
 
 	@Test
 	public void testAnonymousClassDeclarationFolding() throws Exception {
-		// FIXME this test should work for both foldings. See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2022
-		assumeTrue("Currently broken for the 'old' folding. See https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/2022", newFoldingActive);
 		String str= """
 				package org.example.test;
 				public class M {
