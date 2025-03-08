@@ -224,7 +224,8 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 
 			TextEditGroup group= createTextEditGroup(label, cuRewrite);
 			List<Comment> commentsToPreserve= new ArrayList<>();
-			int controlStatementLine= cuRoot.getLineNumber(fControlStatement.getStartPosition());
+			int startPosition= expression == null ? defaultStartPosition : (expression.getStartPosition() + cuRoot.getExtendedLength(expression));
+			int controlStatementLine= cuRoot.getLineNumber(startPosition);
 			int bodyLine= cuRoot.getLineNumber(fBody.getStartPosition());
 			IBuffer cuBuffer= cuRewrite.getCu().getBuffer();
 			// Get extended body text and convert multiple indent tabs to be just one tab as they will be relative to control statement
@@ -235,7 +236,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFixCor
 			// If single body statement is on next line, we need to preserve any comments pertaining to the
 			// control statement (e.g. NLS comment for if expression)
 			if (controlStatementLine != bodyLine) {
-				int startPosition= expression == null ? defaultStartPosition : (expression.getStartPosition() + cuRoot.getExtendedLength(expression));
 				List<Comment> comments= cuRoot.getCommentList();
 				for (Comment comment : comments) {
 					int commentLine= cuRoot.getLineNumber(comment.getStartPosition());
