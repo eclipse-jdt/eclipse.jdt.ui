@@ -62,7 +62,7 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 
 	@Override
 	protected void handleLink(List<? extends ASTNode> fragments) {
-		if (fragments.size() == 2 && fragments.get(0) instanceof TextElement) {
+		if (fragments.size() == 2 && fragments.get(0) instanceof TextElement && !(fragments.get(1) instanceof TextElement)) {
 			// super method expects the reference as first fragment, optional label as second fragment
 			fragments= Arrays.asList(fragments.get(1), fragments.get(0));
 		}
