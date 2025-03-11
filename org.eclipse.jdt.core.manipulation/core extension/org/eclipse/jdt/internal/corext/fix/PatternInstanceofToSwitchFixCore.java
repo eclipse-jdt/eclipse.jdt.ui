@@ -437,7 +437,8 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 				final boolean isNameUsed,
 				final List<Statement> innerStatements) {
 			List<Statement> switchStatements= switchStatement.statements();
-			boolean needBlock= innerStatements.size() > 1 || (innerStatements.size() == 1 && innerStatements.get(0) instanceof ReturnStatement);
+			boolean needBlock= innerStatements.size() == 0 || innerStatements.size() > 1 || (innerStatements.size() == 1
+					&& !(innerStatements.get(0) instanceof ExpressionStatement) && !(innerStatements.get(0) instanceof ThrowStatement));
 
 			// Add the case statement(s)
 			if (caseValueOrNullForDefault != null) {
