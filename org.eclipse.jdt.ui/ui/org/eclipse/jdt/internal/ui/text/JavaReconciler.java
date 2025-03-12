@@ -22,13 +22,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -223,22 +226,51 @@ public class JavaReconciler extends MonoReconciler {
 		 */
 		@Override
 		public void resourceChanged(IResourceChangeEvent e) {
-			if (isRunningInReconcilerThread())
+			boolean reconcilerThread= isRunningInReconcilerThread();
+			if (reconcilerThread)
 				return;
 
 			IResourceDelta delta= e.getDelta();
-			IResource resource= getResource();
-			if (delta != null && resource != null) {
-				IResourceDelta child= delta.findMember(resource.getFullPath());
-				if (child != null) {
-					IMarkerDelta[] deltas= child.getMarkerDeltas();
-					int i= deltas.length;
-					while (--i >= 0) {
-						if (deltas[i].isSubtypeOf(IMarker.PROBLEM)) {
-							forceReconciling();
-							return;
+			if (delta != null) {
+				IResource resource= getResource();
+				if (resource != null) {
+					IResourceDelta child= delta.findMember(resource.getFullPath());
+					if (child != null) {
+						IMarkerDelta[] deltas= child.getMarkerDeltas();
+						int i= deltas.length;
+						while (--i >= 0) {
+							if (deltas[i].isSubtypeOf(IMarker.PROBLEM)) {
+								forceReconciling();
+								return;
+							}
 						}
 					}
+				}
+				//JDT uses a "touch" of the project to inform about classpath container changes,
+				//as this can change anything we need to force an unconditional reconciling if we found such project in the delta
+				try {
+					delta.accept(new IResourceDeltaVisitor() {
+
+						private boolean reconciled;
+
+						@Override
+						public boolean visit(IResourceDelta d) throws CoreException {
+							if (reconciled) {
+								return false;
+							}
+							if (d.getResource() instanceof IProject p) {
+								int flags= d.getFlags();
+								if ((flags & IResourceDelta.DESCRIPTION) != 0 && p.hasNature(JavaCore.NATURE_ID)) {
+									reconciled= true;
+									forceReconciling();
+									return false;
+								}
+							}
+							return true;
+						}
+					});
+				} catch (CoreException e1) {
+					// nothing much we can do or care here...
 				}
 			}
 		}
