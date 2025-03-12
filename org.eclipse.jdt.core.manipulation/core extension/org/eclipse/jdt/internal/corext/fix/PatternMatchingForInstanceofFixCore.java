@@ -165,13 +165,14 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				final InstanceofExpression visited;
 				SimpleName variableName;
 				final List<VariableDeclarationStatement> statementsToRemove = new ArrayList<>();
+				final List<VariableDeclarationStatement> statementsToConvert = new ArrayList<>();
 
 				ResultCollector(InstanceofExpression visited) {
 					this.visited = visited;
 				}
 
 				public PatternMatchingForInstanceofFixOperation build() {
-					return new PatternMatchingForInstanceofFixOperation(visited, statementsToRemove, variableName);
+					return new PatternMatchingForInstanceofFixOperation(visited, statementsToRemove, statementsToConvert, variableName);
 				}
 
 				private String getIdentifierName(Expression expression) {
@@ -185,23 +186,40 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 					return variableName != null && !statementsToRemove.isEmpty();
 				}
 
-				void addMatching(final VariableDeclarationStatement statementToRemove, final SimpleName expressionToMove) {
+				void addMatching(final VariableDeclarationStatement statementToRemove, final SimpleName expressionToMove, boolean toConvert) {
 					if (this.variableName == null || this.variableName.getIdentifier().equals(expressionToMove.getIdentifier())) {
 						this.variableName = expressionToMove;
-						this.statementsToRemove.add(statementToRemove);
+						if (toConvert) {
+							this.statementsToConvert.add(statementToRemove);
+						} else {
+							this.statementsToRemove.add(statementToRemove);
+						}
 					}
 				}
 
-				void collect(final Statement conditionalStatements) {
+				boolean collect(final Statement conditionalStatements) {
 					List<Statement> statements= ASTNodes.asList(conditionalStatements);
+					boolean convertToAssignment = false;
 
 					if (!statements.isEmpty()) {
 						for (Statement statement : statements) {
 							if (statement instanceof ExpressionStatement expressionStatement) {
 								Assignment assignment = ASTNodes.as(expressionStatement.getExpression(), Assignment.class);
-								if (assignment != null && Objects.equals(getIdentifierName(visited.getLeftOperand()), getIdentifierName(assignment.getLeftHandSide()))) {
-									// The same variable is assigned, this can't be handled further.
-									return;
+								if (assignment != null) {
+									if (Objects.equals(getIdentifierName(visited.getLeftOperand()), getIdentifierName(assignment.getLeftHandSide()))) {
+										// The same variable is assigned, this can't be handled further, something like this:
+										// if (x instanceof T) {
+										//      x = ...
+										//
+										return true;
+									}
+									if (Objects.equals(getIdentifierName(variableName), getIdentifierName(assignment.getLeftHandSide()))) {
+										// The same variable is assigned, this can't be handled further, something like this:
+										// if (x instanceof T y) {
+										//      y = ...
+										//
+										return true;
+									}
 								}
 							}
 							if (statement instanceof VariableDeclarationStatement variableDeclarationExpression) {
@@ -214,18 +232,23 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 											&& Objects.equals(visited.getRightOperand().resolveBinding(), castExpression.getType().resolveBinding())
 											&& ASTNodes.match(visited.getLeftOperand(), castExpression.getExpression())
 											&& ASTNodes.isPassive(visited.getLeftOperand())) {
-										addMatching(variableDeclarationExpression, variableDeclarationFragment.getName());
+										addMatching(variableDeclarationExpression, variableDeclarationFragment.getName(), convertToAssignment);
 									}
 								}
 							}
 							if (statement instanceof IfStatement innerIf) {
-								collect(innerIf.getThenStatement());
+								if (collect(innerIf.getThenStatement())) {
+									convertToAssignment = true;
+								}
 								if (innerIf.getElseStatement() != null) {
-									collect(innerIf.getElseStatement());
+									if (collect(innerIf.getElseStatement())) {
+										convertToAssignment = true;
+									}
 								}
 							}
 						}
 					}
+					return false;
 				}
 
 			}
@@ -236,11 +259,13 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 	public static class PatternMatchingForInstanceofFixOperation extends CompilationUnitRewriteOperation {
 		private final InstanceofExpression nodeToComplete;
 		private final List<VariableDeclarationStatement> statementsToRemove;
+		private final List<VariableDeclarationStatement> statementsToConvert;
 		private final SimpleName expressionToMove;
 
-		public PatternMatchingForInstanceofFixOperation(final InstanceofExpression nodeToComplete, final List<VariableDeclarationStatement> statementsToRemove, final SimpleName expressionToMove) {
+		public PatternMatchingForInstanceofFixOperation(final InstanceofExpression nodeToComplete, final List<VariableDeclarationStatement> statementsToRemove, final List<VariableDeclarationStatement> statementsToConvert, final SimpleName expressionToMove) {
 			this.nodeToComplete= nodeToComplete;
 			this.statementsToRemove= statementsToRemove;
+			this.statementsToConvert= statementsToConvert;
 			this.expressionToMove= expressionToMove;
 		}
 
@@ -286,6 +311,14 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 					ASTNodes.replaceButKeepComment(rewrite, statementToRemove, ast.newBlock(), group);
 				}
 				importRemover.registerRemovedNode(statementToRemove);
+			}
+			for (var statementToConvert: statementsToConvert) {
+				VariableDeclarationFragment fragment = ASTNodes.getUniqueFragment(statementToConvert);
+				var assignment = ast.newAssignment();
+				assignment.setLeftHandSide((Expression) ASTNode.copySubtree(ast, fragment.getName()));
+				assignment.setRightHandSide((Expression) ASTNode.copySubtree(ast, fragment.getInitializer()));
+				var replacement = ast.newExpressionStatement(assignment);
+				ASTNodes.replaceButKeepComment(rewrite, statementToConvert, replacement, group);
 			}
 		}
 	}
