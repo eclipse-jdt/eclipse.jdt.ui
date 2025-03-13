@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -342,6 +344,7 @@ public class NullAnnotationsRewriteOperations {
 		public void rewriteASTInternal(CompilationUnitRewrite cuRewrite, LinkedProposalModelCore linkedModel) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation, cuRewrite);
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			ImportRemover remover= cuRewrite.getImportRemover();
 
 			CompilationUnit astRoot= fCompilationUnit;
 			ASTNode selectedNode= fProblem.getCoveringNode(astRoot);
@@ -357,6 +360,8 @@ public class NullAnnotationsRewriteOperations {
 				} else if (selectedNode instanceof MethodDeclaration) {
 					MethodDeclaration methodDeclaration= (MethodDeclaration) selectedNode;
 					modifiers= methodDeclaration.modifiers();
+				} else if (selectedNode instanceof AnnotatableType annotatableType) {
+					modifiers= annotatableType.annotations();
 				} else {
 					return;
 				}
@@ -368,6 +373,7 @@ public class NullAnnotationsRewriteOperations {
 						String name= annotationBinding.getName();
 						if (name.equals(NullAnnotationsFix.getNonNullAnnotationName(fCompilationUnit.getJavaElement(), true))) {
 							astRewrite.remove(annotation, group);
+							remover.registerRemovedNode(annotation);
 						}
 					}
 				}
