@@ -1226,8 +1226,8 @@ public class PullUpTests extends GenericRefactoringTest {
 		RefactoringStatus result= performRefactoring(ref);
 		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
 
-		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
 	}
 
 	@Test
