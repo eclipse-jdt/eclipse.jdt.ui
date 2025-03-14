@@ -2210,16 +2210,16 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"\r\n" +
 				"	 int[][][] a = new int[][][] {{null}};\r\n" +
 				"	 int[][][] b = new int[][][] {{null}};\r\n" +
-				"	@Override\r\n" +
-				"	public int hashCode() {\r\n" +
+				"	 @Override\r\n" +
+				"	 public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(a);\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(b);\r\n" +
 				"		return result;\r\n" +
-				"	}\r\n" +
-				"	@Override\r\n" +
-				"	public boolean equals(Object obj) {\r\n" +
+				"	 }\r\n" +
+				"	 @Override\r\n" +
+				"	 public boolean equals(Object obj) {\r\n" +
 				"		if (this == obj)\r\n" +
 				"			return true;\r\n" +
 				"		if (obj == null)\r\n" +
@@ -2232,7 +2232,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		if (!Arrays.deepEquals(b, other.b))\r\n" +
 				"			return false;\r\n" +
 				"		return true;\r\n" +
-				"	}\r\n" +
+				"	 }\r\n" +
 				"\r\n" +
 				"}" +
 				"";
