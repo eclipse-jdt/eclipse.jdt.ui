@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -229,6 +229,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHi
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.preferences.FoldingPreferencePage;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
@@ -3082,7 +3083,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	boolean isFoldingEnabled() {
-		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
+		return FoldingPreferencePage.getFoldingPreferenceStore(this).getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 	}
 
 	/*
