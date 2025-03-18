@@ -186,13 +186,13 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 					return variableName != null && !statementsToRemove.isEmpty();
 				}
 
-				void addMatching(final VariableDeclarationStatement statementToRemove, final SimpleName expressionToMove, boolean toConvert) {
-					if (this.variableName == null || this.variableName.getIdentifier().equals(expressionToMove.getIdentifier())) {
-						this.variableName = expressionToMove;
+				void addMatching(final VariableDeclarationStatement statement, final SimpleName name, boolean toConvert) {
+					if (this.variableName == null || this.variableName.getIdentifier().equals(name.getIdentifier())) {
+						this.variableName = name;
 						if (toConvert) {
-							this.statementsToConvert.add(statementToRemove);
+							this.statementsToConvert.add(statement);
 						} else {
-							this.statementsToRemove.add(statementToRemove);
+							this.statementsToRemove.add(statement);
 						}
 					}
 				}

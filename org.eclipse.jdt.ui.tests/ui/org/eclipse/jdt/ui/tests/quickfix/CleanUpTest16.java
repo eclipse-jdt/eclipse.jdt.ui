@@ -591,6 +591,18 @@ public class CleanUpTest16 extends CleanUpTestCase {
 						System.out.println(s);
 					}
 				}
+				public void foo4(Object o, Object p) {
+					if (o instanceof String && p instanceof Integer) {
+						if (o != p) {
+							String s = (String) o;
+							Integer i = (Integer) p;
+							System.out.println(s.trim() + i.toString());
+							i = 3;
+						}
+						Integer i = (Integer) p;
+						i = 7;
+					}
+				}
 			}
 			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
@@ -636,6 +648,16 @@ public class CleanUpTest16 extends CleanUpTestCase {
 								System.out.println(s.length() + k);
 							}
 							System.out.println(s);
+						}
+					}
+					public void foo4(Object o, Object p) {
+						if (o instanceof String s && p instanceof Integer i) {
+							if (o != p) {
+								System.out.println(s.trim() + i.toString());
+								i = 3;
+							}
+							i = (Integer) p;
+							i = 7;
 						}
 					}
 				}
