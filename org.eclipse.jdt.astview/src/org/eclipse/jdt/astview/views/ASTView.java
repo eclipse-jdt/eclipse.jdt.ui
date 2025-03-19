@@ -132,7 +132,6 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {

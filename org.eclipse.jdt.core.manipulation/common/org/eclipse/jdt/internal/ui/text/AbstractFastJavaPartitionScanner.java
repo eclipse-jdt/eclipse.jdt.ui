@@ -353,10 +353,6 @@ public abstract class AbstractFastJavaPartitionScanner implements IPartitionToke
 					case '\r':
 					case '\n':
 						return postFix(MARKDOWN_COMMENT);
-					case '/':
-						fTokenLength++;
-						fLast= SLASH_SLASH_SLASH;
-						break;
 					default:
 						consume();
 						break;
