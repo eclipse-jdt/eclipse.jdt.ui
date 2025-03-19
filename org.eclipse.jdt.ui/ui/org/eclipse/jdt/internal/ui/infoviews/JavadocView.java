@@ -1159,7 +1159,7 @@ public class JavadocView extends AbstractInfoView {
 			try {
 				int offset= textSel.getOffset();
 				String partition= ((IDocumentExtension3)document).getContentType(IJavaPartitions.JAVA_PARTITIONING, offset, false);
-				return !IJavaPartitions.JAVA_DOC.equals(partition);
+				return !IJavaPartitions.JAVA_DOC.equals(partition) && !IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(partition);
 			} catch (BadPartitioningException | BadLocationException ex) {
 				return false;
 			}
@@ -1199,7 +1199,8 @@ public class JavadocView extends AbstractInfoView {
 
 						if (document != null) {
 							ITypedRegion typedRegion= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, textSelection.getOffset(), false);
-							if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())){
+							if (IJavaPartitions.JAVA_DOC.equals(typedRegion.getType())
+									|| IJavaPartitions.JAVA_MARKDOWN_COMMENT.equals(typedRegion.getType())){
 								element= TextSelectionConverter.getElementAtOffset((JavaEditor) part, textSelection);
 							}
 							else if (editorInput instanceof IFileEditorInput fei) {

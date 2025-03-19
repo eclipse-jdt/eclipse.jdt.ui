@@ -983,4 +983,44 @@ public class MarkdownCommentTests extends CoreTests {
 				""";
 		assertHtmlContent(expectedContent, actualHtmlContent);
 	}
+
+	@Test
+	public void testArrayReferenceInCode() throws CoreException {
+		String source= """
+				/// In the following indented code block, `[i]` is program text,
+				/// and not a hyper link:
+				///
+				///     int i = 3;
+				///     int[] d = new int[i];
+				///
+				/// Likewise, in the following fenced code block, `[i]` is program text,
+				/// and not a hyper link:
+				///
+				/// ```
+				/// int i = 3;
+				/// int[] d = new int[i];
+				/// ```
+				public class ArrayInCode {
+				}
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/ArrayInCode.java", source, null);
+		assertNotNull("ArrayInCode.java", cu);
+
+		String expectedContent= """
+				<p>In the following indented code block, <code>[i]</code> is program text,
+				and not a hyper link:</p>
+				<pre><code>int i = 3;
+				int[] d = new int[i];
+				</code></pre>
+				<p>Likewise, in the following fenced code block, <code>[i]</code> is program text,
+				and not a hyper link:</p>
+				<pre><code>int i = 3;
+				int[] d = new int[i];
+				</code></pre>
+				""";
+		IType type= cu.getType("ArrayInCode");
+		String actualHtmlContent= getHoverHtmlContent(cu, type);
+		assertHtmlContent(expectedContent, actualHtmlContent);
+	}
+
 }
