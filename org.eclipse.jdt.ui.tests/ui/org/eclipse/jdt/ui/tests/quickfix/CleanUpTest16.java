@@ -591,7 +591,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 						System.out.println(s);
 					}
 				}
-				public void foo4(Object o, Object p) {
+				public int foo4(Object o, Object p) {
 					if (o instanceof String && p instanceof Integer) {
 						if (o != p) {
 							String s = (String) o;
@@ -602,6 +602,20 @@ public class CleanUpTest16 extends CleanUpTestCase {
 						Integer i = (Integer) p;
 						i = 7;
 					}
+					return o instanceof String ? ((String)o).length() : i;
+				}
+				public int foo5(Object o, Object p) {
+					if (o instanceof String && p instanceof Integer) {
+						if (o != p) {
+							String s = (String) o;
+							Integer i = (Integer) p;
+							System.out.println(s.trim() + i.toString());
+							i = 3;
+						}
+						Integer i = (Integer) p;
+						i = 7;
+					}
+					return !(o instanceof String) ? i : ((String)o).length();
 				}
 			}
 			""";
@@ -650,7 +664,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							System.out.println(s);
 						}
 					}
-					public void foo4(Object o, Object p) {
+					public int foo4(Object o, Object p) {
 						if (o instanceof String s && p instanceof Integer i) {
 							if (o != p) {
 								System.out.println(s.trim() + i.toString());
@@ -659,6 +673,18 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							i = (Integer) p;
 							i = 7;
 						}
+						return o instanceof String s2 ? s2.length() : i;
+					}
+					public int foo5(Object o, Object p) {
+						if (o instanceof String s && p instanceof Integer i) {
+							if (o != p) {
+								System.out.println(s.trim() + i.toString());
+								i = 3;
+							}
+							i = (Integer) p;
+							i = 7;
+						}
+						return !(o instanceof String s2) ? i : s2.length();
 					}
 				}
 				""";
