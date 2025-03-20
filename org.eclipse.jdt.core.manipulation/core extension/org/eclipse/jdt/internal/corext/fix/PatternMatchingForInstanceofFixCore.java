@@ -207,13 +207,6 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 					return new PatternMatchingForConditionalInstanceofFixOperation(visited, expressionsToReplace, replacementName);
 				}
 
-				private String getIdentifierName(Expression expression) {
-					if (expression instanceof SimpleName simpleName) {
-						return simpleName.getIdentifier();
-					}
-					return null;
-				}
-
 				boolean hasResult() {
 					return replacementName != null && !expressionsToReplace.isEmpty();
 				}
