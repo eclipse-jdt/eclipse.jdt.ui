@@ -547,4 +547,52 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // inner class
 	}
+
+	@Test
+	public void testSwitchExpression() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
+		String str= """
+				package org.example.test;
+				class Outer {
+					void a() {						//here should be an annotation
+						int b = 0;
+						int c = switch (b) {		//here should be an annotation
+							case 1 -> 1;			//here should be an annotation
+							default -> 0;			//here should be an annotation
+						};
+					}
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 4);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 7); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 6); // switch
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 5); // case
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 6, 6); // default
+	}
+
+	@Test
+	public void testSwitchStatment() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
+		String str= """
+				package org.example.test;
+				class Outer {
+					void a() {						//here should be an annotation
+						int b = 0;
+						switch (b) {				//here should be an annotation
+					        case 0:					//here should be an annotation
+					            break;
+					        default:				//here should be an annotation
+					            break;
+						}
+					}
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 4);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 9); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 8); // switch
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // case
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 8); // default
+	}
 }
