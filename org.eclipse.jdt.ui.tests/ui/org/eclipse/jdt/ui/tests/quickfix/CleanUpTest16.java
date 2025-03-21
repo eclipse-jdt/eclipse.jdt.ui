@@ -617,6 +617,20 @@ public class CleanUpTest16 extends CleanUpTestCase {
 					}
 					return !(o instanceof String) ? i : ((String)o).length();
 				}
+				public int foo6(Object o) {
+					if (o instanceof String && ((String)o).length() > 3) {
+						String s = (String) o;
+						return s.length - 3();
+					}
+					return !(o instanceof String) ? 0 : ((String)o).length();
+				}
+				public int foo7(Object o) {
+					if (!(o instanceof String) || ((String)o).length() > 3) {
+						return -1;
+					}
+					String s = (String)o;
+					return !(o instanceof String) ? 0 : ((String)o).length();
+				}
 			}
 			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
@@ -685,6 +699,18 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							i = 7;
 						}
 						return !(o instanceof String s2) ? i : s2.length();
+					}
+					public int foo6(Object o) {
+						if (o instanceof String s && s.length() > 3) {
+							return s.length - 3();
+						}
+						return !(o instanceof String s2) ? 0 : s2.length();
+					}
+					public int foo7(Object o) {
+						if (!(o instanceof String s) || s.length() > 3) {
+							return -1;
+						}
+						return !(o instanceof String s2) ? 0 : s2.length();
 					}
 				}
 				""";

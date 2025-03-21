@@ -83,7 +83,9 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 		final class InstanceofVisitor extends ASTVisitor {
 			private final Block startNode;
+
 			private boolean result= true;
+
 			private final Set<String> excludedNames= new HashSet<>();
 
 			public InstanceofVisitor(final Block startNode) {
@@ -117,9 +119,9 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				}
 				while (currentNode.getParent() != null
 						&& (!(currentNode.getParent() instanceof IfStatement)
-						|| currentNode.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY)
+								|| currentNode.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY)
 						&& (!(currentNode.getParent() instanceof ConditionalExpression)
-						|| currentNode.getLocationInParent() != ConditionalExpression.EXPRESSION_PROPERTY)) {
+								|| currentNode.getLocationInParent() != ConditionalExpression.EXPRESSION_PROPERTY)) {
 					switch (currentNode.getParent().getNodeType()) {
 						case ASTNode.PARENTHESIZED_EXPRESSION:
 							break;
@@ -135,7 +137,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 						case ASTNode.INFIX_EXPRESSION:
 							if (isPositiveCaseToAnalyze
 									? !ASTNodes.hasOperator((InfixExpression) currentNode.getParent(), InfixExpression.Operator.CONDITIONAL_AND, InfixExpression.Operator.AND)
-											: !ASTNodes.hasOperator((InfixExpression) currentNode.getParent(), InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.OR)) {
+									: !ASTNodes.hasOperator((InfixExpression) currentNode.getParent(), InfixExpression.Operator.CONDITIONAL_OR, InfixExpression.Operator.OR)) {
 								return true;
 							}
 
@@ -183,6 +185,39 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 						collector.collect(ASTNodes.getNextSibling(ifStatement));
 					}
 
+					final boolean isPositiveCaseToAnalyzeFinal= isPositiveCaseToAnalyze;
+					ASTVisitor expressionVisitor= new ASTVisitor() {
+						@Override
+						public boolean visit(CastExpression node) {
+							if (node.getStartPosition() > visited.getStartPosition()) {
+								if (Objects.equals(getIdentifierName(node.getExpression()), getIdentifierName(visited.getLeftOperand()))) {
+									ITypeBinding nodeBinding= node.resolveTypeBinding();
+									if (nodeBinding != null && nodeBinding.isEqualTo(visited.getRightOperand().resolveBinding())) {
+										Expression exp= node;
+										InfixExpression infixExp= ASTNodes.getFirstAncestorOrNull(exp, InfixExpression.class);
+										InfixExpression originalInfixExp= ASTNodes.getFirstAncestorOrNull(visited, InfixExpression.class);
+										while (infixExp != null && infixExp != originalInfixExp) {
+											infixExp= ASTNodes.getFirstAncestorOrNull(infixExp, InfixExpression.class);
+										}
+										if (infixExp != null) {
+											if ((isPositiveCaseToAnalyzeFinal && infixExp.getOperator() != InfixExpression.Operator.CONDITIONAL_AND) ||
+													(!isPositiveCaseToAnalyzeFinal && infixExp.getOperator() != InfixExpression.Operator.CONDITIONAL_OR)) {
+												return true;
+											}
+										}
+										while (exp.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+											exp= (Expression) node.getParent();
+										}
+										collector.addExpressionToReplace(exp);
+									}
+								}
+							}
+							return true;
+						}
+					};
+
+					ifStatement.getExpression().accept(expressionVisitor);
+
 					if (collector.hasResult()) {
 						fResult.add(collector.build());
 						return false;
@@ -191,17 +226,29 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				return true;
 			}
 
+			private static String getIdentifierName(Expression expression) {
+				if (expression instanceof SimpleName simpleName) {
+					return simpleName.getIdentifier();
+				}
+				return null;
+			}
+
 			static class ConditionalCollector extends ASTVisitor {
 				final InstanceofExpression visited;
+
 				final Set<String> excludedNames;
+
 				final SimpleName variableName;
+
 				String replacementName= null;
-				final List<Expression> expressionsToReplace = new ArrayList<>();
+
+				final List<Expression> expressionsToReplace= new ArrayList<>();
 
 				ConditionalCollector(InstanceofExpression visited, SimpleName name, Set<String> excludedNames) {
-					this.visited = visited;
+					this.visited= visited;
 					this.excludedNames= excludedNames;
-					this.variableName= name;				}
+					this.variableName= name;
+				}
 
 				public PatternMatchingForConditionalInstanceofFixOperation build() {
 					return new PatternMatchingForConditionalInstanceofFixOperation(visited, expressionsToReplace, replacementName);
@@ -235,7 +282,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				private String proposeLocalName(String baseName, CompilationUnit root, IJavaProject javaProject, MethodDeclaration methodDecl, String[] usedNames) {
 					// don't propose names that are already in use:
 					Collection<String> variableNames= new ScopeAnalyzer(root).getUsedVariableNames(methodDecl.getStartPosition(), methodDecl.getLength());
-					String[] names = new String[variableNames.size() + usedNames.length];
+					String[] names= new String[variableNames.size() + usedNames.length];
 					variableNames.toArray(names);
 					System.arraycopy(usedNames, 0, names, variableNames.size(), usedNames.length);
 					return StubUtility.getLocalNameSuggestions(javaProject, baseName, 0, names)[0];
@@ -244,7 +291,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				@Override
 				public boolean visit(SimpleName node) {
 					if (node.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY) {
-						addMatching((CastExpression)node.getParent(), node);
+						addMatching((CastExpression) node.getParent(), node);
 					}
 					return false;
 				}
@@ -253,23 +300,25 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 			static class ResultCollector {
 				final InstanceofExpression visited;
+
 				SimpleName variableName;
-				final List<VariableDeclarationStatement> statementsToRemove = new ArrayList<>();
-				final List<VariableDeclarationStatement> statementsToConvert = new ArrayList<>();
+
+				final List<VariableDeclarationStatement> statementsToRemove= new ArrayList<>();
+
+				final List<VariableDeclarationStatement> statementsToConvert= new ArrayList<>();
+
+				final List<Expression> expressionsToReplace= new ArrayList<>();
 
 				ResultCollector(InstanceofExpression visited) {
-					this.visited = visited;
+					this.visited= visited;
 				}
 
 				public PatternMatchingForInstanceofFixOperation build() {
-					return new PatternMatchingForInstanceofFixOperation(visited, statementsToRemove, statementsToConvert, variableName);
+					return new PatternMatchingForInstanceofFixOperation(visited, statementsToRemove, statementsToConvert, expressionsToReplace, variableName);
 				}
 
-				private String getIdentifierName(Expression expression) {
-					if (expression instanceof SimpleName simpleName) {
-						return simpleName.getIdentifier();
-					}
-					return null;
+				public void addExpressionToReplace(Expression exp) {
+					expressionsToReplace.add(exp);
 				}
 
 				boolean hasResult() {
@@ -278,7 +327,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 				void addMatching(final VariableDeclarationStatement statement, final SimpleName name, boolean toConvert) {
 					if (this.variableName == null || this.variableName.getIdentifier().equals(name.getIdentifier())) {
-						this.variableName = name;
+						this.variableName= name;
 						if (toConvert) {
 							this.statementsToConvert.add(statement);
 						} else {
@@ -289,12 +338,12 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 				boolean collect(final Statement conditionalStatements) {
 					List<Statement> statements= ASTNodes.asList(conditionalStatements);
-					boolean convertToAssignment = false;
+					boolean convertToAssignment= false;
 
 					if (!statements.isEmpty()) {
 						for (Statement statement : statements) {
 							if (statement instanceof ExpressionStatement expressionStatement) {
-								Assignment assignment = ASTNodes.as(expressionStatement.getExpression(), Assignment.class);
+								Assignment assignment= ASTNodes.as(expressionStatement.getExpression(), Assignment.class);
 								if (assignment != null) {
 									if (Objects.equals(getIdentifierName(visited.getLeftOperand()), getIdentifierName(assignment.getLeftHandSide()))) {
 										// The same variable is assigned, this can't be handled further, something like this:
@@ -328,11 +377,11 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 							}
 							if (statement instanceof IfStatement innerIf) {
 								if (collect(innerIf.getThenStatement())) {
-									convertToAssignment = true;
+									convertToAssignment= true;
 								}
 								if (innerIf.getElseStatement() != null) {
 									if (collect(innerIf.getElseStatement())) {
-										convertToAssignment = true;
+										convertToAssignment= true;
 									}
 								}
 							}
@@ -348,7 +397,9 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 	public static class PatternMatchingForConditionalInstanceofFixOperation extends CompilationUnitRewriteOperation {
 		private final InstanceofExpression nodeToComplete;
+
 		private final List<Expression> expressionsToReplace;
+
 		private final String replacementName;
 
 		public PatternMatchingForConditionalInstanceofFixOperation(final InstanceofExpression nodeToComplete, final List<Expression> expressionsToReplace, final String replacementName) {
@@ -388,14 +439,21 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 	public static class PatternMatchingForInstanceofFixOperation extends CompilationUnitRewriteOperation {
 		private final InstanceofExpression nodeToComplete;
+
 		private final List<VariableDeclarationStatement> statementsToRemove;
+
 		private final List<VariableDeclarationStatement> statementsToConvert;
+
+		private final List<Expression> expressionsToReplace;
+
 		private final SimpleName expressionToMove;
 
-		public PatternMatchingForInstanceofFixOperation(final InstanceofExpression nodeToComplete, final List<VariableDeclarationStatement> statementsToRemove, final List<VariableDeclarationStatement> statementsToConvert, final SimpleName expressionToMove) {
+		public PatternMatchingForInstanceofFixOperation(final InstanceofExpression nodeToComplete, final List<VariableDeclarationStatement> statementsToRemove,
+				final List<VariableDeclarationStatement> statementsToConvert, final List<Expression> expressionsToReplace, final SimpleName expressionToMove) {
 			this.nodeToComplete= nodeToComplete;
 			this.statementsToRemove= statementsToRemove;
 			this.statementsToConvert= statementsToConvert;
+			this.expressionsToReplace= expressionsToReplace;
 			this.expressionToMove= expressionToMove;
 		}
 
@@ -442,12 +500,18 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				}
 				importRemover.registerRemovedNode(statementToRemove);
 			}
-			for (var statementToConvert: statementsToConvert) {
-				VariableDeclarationFragment fragment = ASTNodes.getUniqueFragment(statementToConvert);
-				var assignment = ast.newAssignment();
+
+			for (var expressionToReplace : expressionsToReplace) {
+				var newName= rewrite.createCopyTarget(expressionToMove);
+				rewrite.replace(expressionToReplace, newName, group);
+			}
+
+			for (var statementToConvert : statementsToConvert) {
+				VariableDeclarationFragment fragment= ASTNodes.getUniqueFragment(statementToConvert);
+				var assignment= ast.newAssignment();
 				assignment.setLeftHandSide((Expression) ASTNode.copySubtree(ast, fragment.getName()));
 				assignment.setRightHandSide((Expression) ASTNode.copySubtree(ast, fragment.getInitializer()));
-				var replacement = ast.newExpressionStatement(assignment);
+				var replacement= ast.newExpressionStatement(assignment);
 				ASTNodes.replaceButKeepComment(rewrite, statementToConvert, replacement, group);
 			}
 		}
@@ -467,7 +531,8 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 		return new PatternMatchingForInstanceofFixCore(FixMessages.PatternMatchingForInstanceofFix_refactor, compilationUnit, ops);
 	}
 
-	protected PatternMatchingForInstanceofFixCore(final String name, final CompilationUnit compilationUnit, final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
+	protected PatternMatchingForInstanceofFixCore(final String name, final CompilationUnit compilationUnit,
+			final CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 }
