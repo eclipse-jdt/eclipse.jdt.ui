@@ -631,6 +631,29 @@ public class CleanUpTest16 extends CleanUpTestCase {
 					String s = (String)o;
 					return !(o instanceof String) ? 0 : ((String)o).length();
 				}
+				public int foo8(Object x, Object y, boolean b) {
+					if (b || !(x instanceof String) || ((String)x).length() > 3) {
+						if (y instanceof Double) {
+							Double d = (Double)y;
+							System.out.println(d.isNaN());
+						}
+						return 7;
+					}
+					String s = (String)x;
+					return s.length();
+				}
+				public int foo9(Object x, Object y, boolean b) {
+					if (b || !(x instanceof String) || ((String)x).length() > 3) {
+						if (!(y instanceof Double)) {
+							return 6;
+						}
+						Double d = (Double)y;
+						System.out.println(d.isNaN());
+						return 7;
+					}
+					String s = (String)x;
+					return s.length();
+				}
 			}
 			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
@@ -711,6 +734,25 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							return -1;
 						}
 						return !(o instanceof String s2) ? 0 : s2.length();
+					}
+					public int foo8(Object x, Object y, boolean b) {
+						if (b || !(x instanceof String s) || s.length() > 3) {
+							if (y instanceof Double d) {
+								System.out.println(d.isNaN());
+							}
+							return 7;
+						}
+						return s.length();
+					}
+					public int foo9(Object x, Object y, boolean b) {
+						if (b || !(x instanceof String s) || s.length() > 3) {
+							if (!(y instanceof Double d)) {
+								return 6;
+							}
+							System.out.println(d.isNaN());
+							return 7;
+						}
+						return s.length();
 					}
 				}
 				""";
