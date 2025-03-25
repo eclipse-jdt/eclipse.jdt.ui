@@ -220,7 +220,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 
 					if (collector.hasResult()) {
 						fResult.add(collector.build());
-						return false;
+						return true;
 					}
 				}
 				return true;
