@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -60,7 +59,8 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
+		// ask for fresh AST as we are setting all default options on and we run as last cleanup
+		return new CleanUpRequirements(requireAST, requireAST, false, requiredOptions);
 	}
 
 	private boolean requireAST() {
@@ -72,8 +72,8 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		ICleanUpFix coreFix= UnusedSuppressWarningsFixCore.createAllFix(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
-				fLiteral);
+		ICleanUpFix coreFix= fLiteral != null ? UnusedSuppressWarningsFixCore.createAllFix(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
+				fLiteral) : UnusedSuppressWarningsFixCore.createAllFix(compilationUnit);
 		return coreFix;
 	}
 
@@ -87,11 +87,15 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 	}
 
 	private Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<>();
+		// This cleanup is run last and can require using all default options to maximize
+		// chance of finding an unused suppress warnings annotation.
+		// We ask for a fresh AST so all other cleanups are complete before we do this
+		Map<String, String> result= JavaCore.getOptions();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS)) {
 			result.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.ENABLED);
-			result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.WARNING);
+			result.put(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
+			result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR); // do not change to WARNING
 		}
 
 		return result;
@@ -99,13 +103,28 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String[] getStepDescriptions() {
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS)) {
+			return new String[] { MultiFixMessages.UnusedSuppressWarningsCleanup_description };
+		}
+
 		return new String[0];
 	}
 
 	@Override
 	public String getPreview() {
-		// not used as traditional cleanup
-		return ""; //$NON-NLS-1$
+		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS)) {
+			return """
+				int x = 3;
+				System.out.println(x);
+
+				"""; //$NON-NLS-1$
+		}
+
+		return """
+			@SuppressWarnings("unused")
+			int x = 3;
+			System.out.println(x);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override

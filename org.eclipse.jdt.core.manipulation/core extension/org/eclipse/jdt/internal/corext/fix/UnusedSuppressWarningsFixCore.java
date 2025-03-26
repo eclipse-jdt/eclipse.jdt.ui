@@ -50,6 +50,14 @@ public class UnusedSuppressWarningsFixCore extends CompilationUnitRewriteOperati
 	}
 
 	public static IProposableFix createAllFix(CompilationUnit compilationUnit, StringLiteral origLiteral) {
+		return createAllFix(compilationUnit, origLiteral, true);
+	}
+
+	public static IProposableFix createAllFix(CompilationUnit compilationUnit) {
+		return createAllFix(compilationUnit, null, false);
+	}
+
+	private static IProposableFix createAllFix(CompilationUnit compilationUnit, StringLiteral origLiteral, boolean isQuickFix) {
 		IProblem[] problems= compilationUnit.getProblems();
 		List<IProblemLocation> locationsList= new ArrayList<>();
 		Set<String> tokens= new HashSet<>();
@@ -66,10 +74,15 @@ public class UnusedSuppressWarningsFixCore extends CompilationUnitRewriteOperati
 			}
 		}
 		IProblemLocation[] locations= locationsList.toArray(new IProblemLocation[0]);
-		if (locations.length > 1 && (origLiteral != null || tokens.size() > 1)) {
-			String label= origLiteral == null
-					? CorrectionMessages.SuppressWarningsSubProcessor_remove_any_unused_annotations_label
-					: Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_all_annotations_label, origLiteral.getLiteralValue());
+		if (isQuickFix) {
+			if (locations.length > 1 && (origLiteral != null || tokens.size() > 1)) {
+				String label= origLiteral == null
+						? CorrectionMessages.SuppressWarningsSubProcessor_remove_any_unused_annotations_label
+								: Messages.format(CorrectionMessages.SuppressWarningsSubProcessor_remove_all_annotations_label, origLiteral.getLiteralValue());
+				return createFix(label, compilationUnit, locations);
+			}
+		} else if (locations.length > 0){
+			String label= CorrectionMessages.SuppressWarningsSubProcessor_remove_any_unused_annotations_label;
 			return createFix(label, compilationUnit, locations);
 		}
 		return null;
