@@ -68,7 +68,7 @@ public class JavaMultiLineStringAutoIndentStrategy extends JavaStringAutoIndentS
 				if (isCloseStringsPreferenceSet(fProject)) {
 					command.caretOffset= command.offset + command.text.length();
 					command.shiftsCaret= false;
-					command.text= command.text + System.lineSeparator() + IndentAction.getTextBlockIndentationString(document, offset, command.offset, 0, fProject) + IndentAction.TEXT_BLOCK_STR;
+					command.text= command.text + delimiter + IndentAction.getTextBlockIndentationString(document, offset, command.offset, 0, fProject) + IndentAction.TEXT_BLOCK_STR;
 				}
 			}
 		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
