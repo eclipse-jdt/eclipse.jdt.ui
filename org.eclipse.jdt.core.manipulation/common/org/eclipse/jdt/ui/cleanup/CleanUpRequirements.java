@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2019 IBM Corporation and others.
+ * Copyright (c) 2008, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,8 +55,12 @@ public final class CleanUpRequirements {
 
 		fCompilerOptions= compilerOptions;
 		// Make sure that compile warnings are not suppressed since some clean ups work on reported warnings
-		if (fCompilerOptions != null)
-			fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
+		if (fCompilerOptions != null) {
+			// This should not occur when we are performing a unused suppress warnings cleanup so check
+			// for an option which indicates we are doing this.
+			if (!JavaCore.ERROR.equals(fCompilerOptions.get(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN)))
+				fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
+		}
 	}
 
 	/**

@@ -7101,4 +7101,56 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 
 	}
+
+	@Test
+	public void testRemoveSuppressWarnings() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+				package test1;
+
+				public class E {
+					@SuppressWarnings({ "unused" })
+					private int foo(Object x, Object y, boolean b) {
+						if (b || !(x instanceof String)) {
+							if (!(y instanceof Double)) {
+								return 6;
+							}
+							@SuppressWarnings("unchecked")
+							Double d = (Double)y;
+							System.out.println(d.isNaN());
+							return 7;
+						}
+						@SuppressWarnings("unchecked")
+						String s = (String)x;
+						return s.length();
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS);
+
+		String expected= """
+				package test1;
+
+				public class E {
+					@SuppressWarnings({ "unused" })
+					private int foo(Object x, Object y, boolean b) {
+						if (b || !(x instanceof String)) {
+							if (!(y instanceof Double)) {
+								return 6;
+							}
+							Double d = (Double)y;
+							System.out.println(d.isNaN());
+							return 7;
+						}
+						String s = (String)x;
+						return s.length();
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnreachableBlockCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UnusedSuppressWarningsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UselessContinueCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UselessReturnCleanUp;
 
@@ -57,6 +58,7 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 		return new AbstractCleanUp[] {
 				new UnusedCodeCleanUpCore(values),
 				new UnnecessaryCodeCleanUpCore(values),
+				new UnusedSuppressWarningsCleanUp(values),
 				new SubstringCleanUpCore(values),
 				new StringCleanUp(values),
 				new ArraysFillCleanUp(values),
@@ -112,6 +114,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
     	CheckboxPreference nls= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessaryNLSTags, CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpModifyDialog.FALSE_TRUE);
     	registerPreference(nls);
+
+    	CheckboxPreference suppressWarnings= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_UnnecessarySuppressWarnings, CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS, CleanUpModifyDialog.FALSE_TRUE);
+    	registerPreference(suppressWarnings);
 
 		CheckboxPreference substring= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_Substring, CleanUpConstants.SUBSTRING, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(substring);

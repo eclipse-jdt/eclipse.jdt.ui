@@ -134,6 +134,7 @@ public class CleanUpMessages extends NLS {
 
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryCasts;
 	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessaryNLSTags;
+	public static String UnnecessaryCodeTabPage_CheckboxName_UnnecessarySuppressWarnings;
 	public static String UnnecessaryCodeTabPage_CheckboxName_Substring;
 	public static String UnnecessaryCodeTabPage_CheckboxName_ArraysFill;
 	public static String UnnecessaryCodeTabPage_CheckboxName_EvaluateNullable;
