@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageDataProvider;
+import org.eclipse.swt.graphics.ImageGcDrawer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
@@ -104,16 +105,22 @@ class BreadcrumbItemDropDown {
 			Display display= fParentComposite.getDisplay();
 
 			ImageDataProvider imageProvider= zoom -> {
-				Image image= new Image(display, ARROW_SIZE, ARROW_SIZE * 2);
+				ImageGcDrawer drawer = new ImageGcDrawer() {
+				    @Override
+				    public void drawOn(GC gc, int iWidth, int iHeight) {
+				    		gc.setAntialias(SWT.ON);
+						Color triangleColor= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 20, display);
+						gc.setBackground(triangleColor);
+						gc.fillPolygon(new int[] { 0, 0, ARROW_SIZE, ARROW_SIZE, 0, ARROW_SIZE * 2 });
+						triangleColor.dispose();
+				    }
 
-				GC gc= new GC(image, fLTR ? SWT.LEFT_TO_RIGHT : SWT.RIGHT_TO_LEFT);
-				gc.setAntialias(SWT.ON);
-
-				Color triangleColor= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 20, display);
-				gc.setBackground(triangleColor);
-				gc.fillPolygon(new int[] { 0, 0, ARROW_SIZE, ARROW_SIZE, 0, ARROW_SIZE * 2 });
-				gc.dispose();
-				triangleColor.dispose();
+				    @Override
+				    public int getGcStyle() {
+				        return fLTR ? SWT.LEFT_TO_RIGHT : SWT.RIGHT_TO_LEFT;
+				    }
+				};
+				Image image= new Image(display, drawer, ARROW_SIZE, ARROW_SIZE * 2);
 
 				ImageData imageData= image.getImageData(zoom);
 				image.dispose();
