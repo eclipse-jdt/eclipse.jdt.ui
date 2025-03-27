@@ -26,6 +26,7 @@ import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
@@ -155,15 +156,16 @@ public class AddTextBlockAction extends SelectionDispatchAction {
 				//do nothing
 			}
 		}
+		String delimiter= TextUtilities.getDefaultLineDelimiter(document);
 		cmd.offset= selection.getOffset();
 		cmd.length= selection.getLength();
-		cmd.text= IndentAction.TEXT_BLOCK_STR + System.lineSeparator() + indentStr;
+		cmd.text= IndentAction.TEXT_BLOCK_STR + delimiter + indentStr;
 		cmd.doit= true;
 		cmd.shiftsCaret= true;
 		cmd.caretOffset= selection.getOffset() + selection.getLength() + cmd.text.length();
 		cmd.text+= selection.getText();
 		if (JavaMultiLineStringAutoIndentStrategy.isCloseStringsPreferenceSet(javaProject)) {
-			cmd.text+= System.lineSeparator() + indentStr + IndentAction.TEXT_BLOCK_STR;
+			cmd.text+= delimiter + indentStr + IndentAction.TEXT_BLOCK_STR;
 		}
 
 		return cmd;
