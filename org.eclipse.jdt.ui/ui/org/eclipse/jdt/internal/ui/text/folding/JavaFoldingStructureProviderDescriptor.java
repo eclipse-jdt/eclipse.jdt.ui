@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,10 @@ package org.eclipse.jdt.internal.ui.text.folding;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
@@ -115,5 +118,9 @@ public final class JavaFoldingStructureProviderDescriptor {
 	 */
 	public String getName() {
 		return fName;
+	}
+
+	public boolean hasProjectSpecificOptions(IScopeContext context) {
+		return context.getNode(JavaUI.ID_PLUGIN).getBoolean(PreferenceConstants.EDITOR_FOLDING_PROJECT_SPECIFIC_SETTINGS_ENABLED, false);
 	}
 }

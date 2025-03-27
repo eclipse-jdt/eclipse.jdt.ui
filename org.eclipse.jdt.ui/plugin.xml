@@ -1056,6 +1056,17 @@
       </page>
 
       <page
+            name="%editorFoldingPage"
+            class="org.eclipse.jdt.internal.ui.preferences.FoldingPreferencePage"
+            category="org.eclipse.jdt.ui.propertyPages.JavaEditorPropertyPage"
+            id="org.eclipse.jdt.ui.propertyPages.FoldingPreferencePage">
+         <enabledWhen>
+		     <adapt type="org.eclipse.core.resources.IProject">
+		          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature"/>
+		     </adapt>
+         </enabledWhen>
+      </page>
+      <page
             name="%classpathContainerPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ClasspathContainerPreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.ClasspathContainerPreferencePage">

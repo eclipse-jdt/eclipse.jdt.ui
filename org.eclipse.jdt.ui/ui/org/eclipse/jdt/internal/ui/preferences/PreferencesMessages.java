@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -773,6 +773,7 @@ public final class PreferencesMessages extends NLS {
 	public static String FoldingConfigurationBlock_combo_caption;
 	public static String FoldingConfigurationBlock_info_no_preferences;
 	public static String FoldingConfigurationBlock_error_not_exist;
+	public static String FoldingConfigurationBlock_error_project_prefs_not_supported;
 	public static String FoldingConfigurationBlock_warning_providerNotFound_resetToDefault;
 	public static String PropertiesFileEditorPreferencePage_key;
 	public static String PropertiesFileEditorPreferencePage_value;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -87,6 +88,17 @@ public class JavaFoldingStructureProviderRegistry {
 	 * @return the current provider according to the preferences
 	 */
 	public IJavaFoldingStructureProvider getCurrentFoldingProvider() {
+		JavaFoldingStructureProviderDescriptor desc= getCurrentFoldingStructureProviderDescriptor();
+
+		try {
+			return desc.createProvider();
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
+	}
+
+	private JavaFoldingStructureProviderDescriptor getCurrentFoldingStructureProviderDescriptor() {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String currentProviderId= preferenceStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		JavaFoldingStructureProviderDescriptor desc= getFoldingProviderDescriptor(currentProviderId);
@@ -103,13 +115,7 @@ public class JavaFoldingStructureProviderRegistry {
 
 			preferenceStore.setToDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		}
-
-		try {
-			return desc.createProvider();
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-			return null;
-		}
+		return desc;
 	}
 
 	/**
@@ -142,4 +148,11 @@ public class JavaFoldingStructureProviderRegistry {
 		}
 	}
 
+	public synchronized boolean hasProjectSpecificOptions(IScopeContext context) {
+		synchronized(this) {
+			ensureRegistered();
+		}
+
+		return getCurrentFoldingStructureProviderDescriptor().hasProjectSpecificOptions(context);
+    }
 }
