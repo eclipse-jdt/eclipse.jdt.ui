@@ -256,9 +256,11 @@ public class SourceProvider {
 
 	public boolean isSimpleFunction() {
 		List<Statement> statements= fDeclaration.getBody().statements();
-		if (statements.size() != 1)
+		if (statements.size() > 1)
 			return false;
-		return statements.get(0) instanceof ReturnStatement;
+		if (statements.size() == 1)
+			return statements.get(0) instanceof ReturnStatement;
+		return true;
 	}
 
 	public boolean isLastStatementReturn() {
