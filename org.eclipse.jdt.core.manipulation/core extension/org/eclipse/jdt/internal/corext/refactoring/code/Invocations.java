@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -52,7 +54,11 @@ public class Invocations {
 				return ((ClassInstanceCreation)invocation).arguments();
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return ((EnumConstantDeclaration)invocation).arguments();
-
+			case ASTNode.EXPRESSION_METHOD_REFERENCE:
+			case ASTNode.TYPE_METHOD_REFERENCE:
+			case ASTNode.SUPER_METHOD_REFERENCE:
+			case ASTNode.CREATION_REFERENCE:
+				return Collections.EMPTY_LIST;
 			default:
 				throw new IllegalArgumentException(invocation.toString());
 		}
@@ -95,6 +101,12 @@ public class Invocations {
 			case ASTNode.CLASS_INSTANCE_CREATION:
 				return ((ClassInstanceCreation)invocation).getExpression();
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
+				return null;
+
+			case ASTNode.CREATION_REFERENCE:
+			case ASTNode.EXPRESSION_METHOD_REFERENCE:
+			case ASTNode.SUPER_METHOD_REFERENCE:
+			case ASTNode.TYPE_METHOD_REFERENCE:
 				return null;
 
 			default:
@@ -141,6 +153,12 @@ public class Invocations {
 				return ((ClassInstanceCreation)invocation).resolveConstructorBinding();
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
 				return ((EnumConstantDeclaration)invocation).resolveConstructorBinding();
+
+			case ASTNode.CREATION_REFERENCE:
+			case ASTNode.EXPRESSION_METHOD_REFERENCE:
+			case ASTNode.SUPER_METHOD_REFERENCE:
+			case ASTNode.TYPE_METHOD_REFERENCE:
+				return ((MethodReference)invocation).resolveMethodBinding();
 
 			default:
 				throw new IllegalArgumentException(invocation.toString());
