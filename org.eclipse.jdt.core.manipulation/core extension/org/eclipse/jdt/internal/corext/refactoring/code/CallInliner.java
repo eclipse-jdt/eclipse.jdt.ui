@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -656,7 +657,12 @@ public class CallInliner {
 			if (fNeedsStatement) {
 				fRewrite.replace(fTargetNode, fTargetNode.getAST().newEmptyStatement(), textEditGroup);
 			} else {
-				fRewrite.remove(fTargetNode, textEditGroup);
+				if (fTargetNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+					ASTNode newNode= fRewrite.createStringPlaceholder("{}", ASTNode.BLOCK); //$NON-NLS-1$
+					fRewrite.replace(fTargetNode, newNode, textEditGroup);
+				} else {
+					fRewrite.remove(fTargetNode, textEditGroup);
+				}
 			}
 		} else {
 			ASTNode node= null;
