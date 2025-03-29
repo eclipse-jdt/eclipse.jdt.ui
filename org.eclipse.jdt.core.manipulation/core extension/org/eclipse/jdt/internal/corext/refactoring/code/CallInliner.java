@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
@@ -660,6 +661,20 @@ public class CallInliner {
 				if (fTargetNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
 					ASTNode newNode= fRewrite.createStringPlaceholder("{}", ASTNode.BLOCK); //$NON-NLS-1$
 					fRewrite.replace(fTargetNode, newNode, textEditGroup);
+				} else if (fTargetNode instanceof MethodReference methodRef) {
+					IMethodBinding binding= methodRef.resolveMethodBinding();
+					if (binding != null) {
+						StringBuilder builder= new StringBuilder("("); //$NON-NLS-1$
+						String[] parmNames= binding.getParameterNames();
+						String separator= ""; //$NON-NLS-1$
+						for (String parmName : parmNames) {
+							builder.append(separator + parmName);
+							separator= ", "; //$NON-NLS-1$
+						}
+						builder.append(") -> {}"); //$NON-NLS-1$
+					ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.LAMBDA_EXPRESSION);
+					fRewrite.replace(fTargetNode, newNode, textEditGroup);
+					}
 				} else {
 					fRewrite.remove(fTargetNode, textEditGroup);
 				}

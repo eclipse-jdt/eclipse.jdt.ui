@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,8 +44,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -53,8 +55,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -260,6 +265,28 @@ public abstract class TargetProvider {
 
 		@Override
 		public boolean visit(MethodInvocation node) {
+			if (node.resolveTypeBinding() != null && matches(node.resolveMethodBinding()) && fCurrent != null) {
+				fCurrent.addInvocation(node);
+			}
+			return true;
+		}
+		@Override
+		public boolean visit(ExpressionMethodReference node) {
+			return handle(node);
+		}
+		@Override
+		public boolean visit(CreationReference node) {
+			return handle(node);
+		}
+		@Override
+		public boolean visit(SuperMethodReference node) {
+			return handle(node);
+		}
+		@Override
+		public boolean visit(TypeMethodReference node) {
+			return handle(node);
+		}
+		private boolean handle(MethodReference node) {
 			if (node.resolveTypeBinding() != null && matches(node.resolveMethodBinding()) && fCurrent != null) {
 				fCurrent.addInvocation(node);
 			}
