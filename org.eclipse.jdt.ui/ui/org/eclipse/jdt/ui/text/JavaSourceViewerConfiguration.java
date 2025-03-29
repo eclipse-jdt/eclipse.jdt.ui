@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
@@ -441,7 +442,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 		if (getEditor() != null) {
-			ContentAssistant assistant= new ContentAssistant((sourceViewer instanceof JavaSourceViewer) && ((JavaSourceViewer) sourceViewer).isAsyncCompletionActive());
+			ContentAssistant assistant= new JavaContentAssistant((sourceViewer instanceof JavaSourceViewer) && ((JavaSourceViewer) sourceViewer).isAsyncCompletionActive());
 			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
 
 			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
@@ -986,4 +987,29 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		return targets;
 	}
 
+	/**
+	 * Custom extension of the content assistant to exclude key events with the
+	 * control and command state-mask, as they might conflict with the triggers
+	 * specified by the user (e.g. Ctrl+S).
+	 */
+	private static class JavaContentAssistant extends ContentAssistant {
+		public JavaContentAssistant(boolean asynchronous) {
+			super(asynchronous);
+		}
+
+		@Override
+		protected AutoAssistListener createAutoAssistListener() {
+			return new JavaAutoAssistListener();
+		}
+
+		protected class JavaAutoAssistListener extends AutoAssistListener {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.character != 0 && (e.stateMask == SWT.CONTROL || e.stateMask == SWT.COMMAND)) {
+					return;
+				}
+				super.keyPressed(e);
+			}
+		}
+	}
 }
