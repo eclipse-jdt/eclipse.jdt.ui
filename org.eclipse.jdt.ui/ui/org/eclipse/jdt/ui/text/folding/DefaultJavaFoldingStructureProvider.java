@@ -90,6 +90,9 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -486,6 +489,44 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		public boolean visit(Initializer node) {
 			createFoldingRegion(node, ctx.collapseMembers());
 			return true;
+		}
+
+		@Override
+		public boolean visit(SwitchStatement node) {
+			createFoldingRegionForStatement(node);
+			foldingSwitch(node, node.statements());
+			return false;
+		}
+
+		@Override
+		public boolean visit(SwitchExpression node) {
+			createFoldingRegionForStatement(node);
+			foldingSwitch(node, node.statements());
+			return false;
+		}
+
+		private void foldingSwitch(ASTNode node, List<?> statements) {
+			for (int i= 0; i < statements.size(); i++) {
+				Object stmt= statements.get(i);
+				if (stmt instanceof SwitchCase) {
+					SwitchCase switchCase= (SwitchCase) stmt;
+					int start= switchCase.getStartPosition();
+					int end= 0;
+					boolean foundNextCase= false;
+					for (int j= i + 1; j < statements.size(); j++) {
+						if (statements.get(j) instanceof SwitchCase) {
+							end= ((SwitchCase) statements.get(j)).getStartPosition();
+							foundNextCase= true;
+							break;
+						}
+					}
+					if (!foundNextCase) {
+						end= node.getStartPosition() + node.getLength();
+					}
+					int length= end - start;
+					createFoldingRegion(start, length, ctx.collapseMembers());
+				}
+			}
 		}
 
 		private void createFoldingRegion(ASTNode node, boolean collapse) {
