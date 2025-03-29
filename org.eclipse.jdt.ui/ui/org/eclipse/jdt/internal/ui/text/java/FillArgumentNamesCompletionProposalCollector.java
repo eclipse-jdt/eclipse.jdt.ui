@@ -66,7 +66,7 @@ public final class FillArgumentNamesCompletionProposalCollector extends Completi
 	}
 
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
-		String completion= String.valueOf(methodProposal.getCompletion());
+		String completion= String.valueOf(methodProposal.getDisplayString());
 		// super class' behavior if this is not a normal completion or has no
 		// parameters
 		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0 || getContext().isInJavadoc())
