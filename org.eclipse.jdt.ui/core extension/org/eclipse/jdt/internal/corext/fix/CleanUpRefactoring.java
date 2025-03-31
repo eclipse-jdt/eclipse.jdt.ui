@@ -84,13 +84,13 @@ import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.util.Progress;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
@@ -329,6 +329,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 		private final Hashtable<ICompilationUnit, List<CleanUpChange>> fSolutions;
 		private final Hashtable<ICompilationUnit, ICompilationUnit> fWorkingCopies; // map from primary to working copy
 		private final Map<String, String> fCleanUpOptions;
+		private final Map<String, String> fSeparateOptions;
 		private final int fSize;
 		private int fIndex;
 
@@ -344,9 +345,12 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 			fCleanUpOptions= new Hashtable<>();
 			for (ICleanUp cleanUp : cleanUps) {
 				Map<String, String> currentCleanUpOption= cleanUp.getRequirements().getCompilerOptions();
-				if (currentCleanUpOption != null)
+				boolean needsSeparateOptions= cleanUp.getRequirements().requiresSeparateOptions();
+				if (currentCleanUpOption != null && !needsSeparateOptions)
 					fCleanUpOptions.putAll(currentCleanUpOption);
 			}
+
+			fSeparateOptions= new Hashtable<>();
 
 			fSize= targets.length;
 			fIndex= 1;
@@ -390,7 +394,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 							result.setProject(project);
 
 							Map<String, String> options= RefactoringASTParser.getCompilerOptions(project);
-							options.putAll(fCleanUpOptions);
+							if (!fSeparateOptions.isEmpty()) {
+								options.putAll(fSeparateOptions);
+							} else {
+								options.putAll(fCleanUpOptions);
+							}
 							result.setCompilerOptions(options);
 							return result;
 						}
@@ -403,6 +411,8 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 					}
 				}
 
+				fSeparateOptions.clear();
+
 				for (ICompilationUnit cu : sourceList) {
 					monitor.worked(1);
 
@@ -413,6 +423,19 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				}
 
 				fParseList= requestor.getUndoneElements();
+				// undone elements will start with a cleanup that needs a fresh AST so
+				// check if it requires separate options in which case, set up special options.
+				fCleanUpOptions.clear();
+				if (!fParseList.isEmpty()) {
+					ParseListElement element= fParseList.get(0);
+					if (element.getCleanUps() != null && element.getCleanUps().length > 0) {
+						ICleanUp cleanUp= element.getCleanUps()[0];
+						if (cleanUp.getRequirements().requiresSeparateOptions()) {
+							fSeparateOptions.putAll(cleanUp.getRequirements().getCompilerOptions());
+						}
+					}
+				}
+
 				fIndex= cuMonitor.getIndex();
 			} finally {
 			}
