@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -1787,5 +1788,59 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 			""";
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	@Test
+	public void testIssue2119() throws Exception {
+		IPackageFragment other = fSourceFolder.createPackageFragment("other", false, null);
+		String source1 = """
+				package other;
+				public interface IPath {}
+				""";
+		String source2 = """
+				package other;
+				public class Path implements IPath {}
+				""";
+		other.createCompilationUnit("IPath.java", source1, false, null);
+		other.createCompilationUnit("Path.java", source2, false, null);
+		IPackageFragment test= fSourceFolder.createPackageFragment("test", false, null);
+		String source = """
+				package test;
+				class Test {
+					private IPath p = new Path();
+				}
+				""";
+		ICompilationUnit cu = test.createCompilationUnit("Test.java", source, false, null);
+		CompilationUnit astRoot = getASTRoot(cu);
+
+		// import java.util.List
+		List<IJavaCompletionProposal> proposals1 = collectCorrections(cu, astRoot, 2, 0);
+		assertCorrectLabels(proposals1);
+		String[] expected1 = new String[1];
+		expected1[0] = """
+				package test;
+
+				import other.IPath;
+
+				class Test {
+					private IPath p = new Path();
+				}
+				""";
+		assertExpectedExistInProposals(proposals1, expected1);
+
+		// import java.util.ArrayList
+		List<IJavaCompletionProposal> proposals2 = collectCorrections(cu, astRoot, 2, 1);
+		assertCorrectLabels(proposals2);
+		String[] expected2 = new String[1];
+		expected2[0] = """
+				package test;
+
+				import other.Path;
+
+				class Test {
+					private IPath p = new Path();
+				}
+				""";
+		assertExpectedExistInProposals(proposals2, expected2);
 	}
 }

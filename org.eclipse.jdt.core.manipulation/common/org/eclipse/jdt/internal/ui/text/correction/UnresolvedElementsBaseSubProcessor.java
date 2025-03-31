@@ -1007,7 +1007,7 @@ public abstract class UnresolvedElementsBaseSubProcessor<T> {
 			if ((elem.getKind() & TypeKinds.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
-					if (simpleBinding != null && !simpleBinding.isPrimitive()) {
+					if (simpleBinding != null && !simpleBinding.isPrimitive() && !simpleBinding.isRecovered()) {
 						// If we have an expected type, we should verify that any classes we suggest to import
 						// inherit directly or indirectly from the type
 						ITypeBinding qualifiedTypeBinding= null;
