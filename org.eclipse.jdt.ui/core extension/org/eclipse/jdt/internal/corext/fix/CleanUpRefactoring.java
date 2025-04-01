@@ -395,6 +395,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 							Map<String, String> options= RefactoringASTParser.getCompilerOptions(project);
 							if (!fSeparateOptions.isEmpty()) {
+								System.out.println("separate options"); //$NON-NLS-1$
 								options.putAll(fSeparateOptions);
 							} else {
 								options.putAll(fCleanUpOptions);
@@ -426,7 +427,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				// undone elements will start with a cleanup that needs a fresh AST so
 				// check if it requires separate options in which case, set up special options.
 				fCleanUpOptions.clear();
-				if (!fParseList.isEmpty()) {
+				if (fParseList != null && !fParseList.isEmpty()) {
 					ParseListElement element= fParseList.get(0);
 					if (element.getCleanUps() != null && element.getCleanUps().length > 0) {
 						ICleanUp cleanUp= element.getCleanUps()[0];

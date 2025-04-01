@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -69,7 +70,7 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
-		if (compilationUnit == null)
+		if (compilationUnit == null || !isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS))
 			return null;
 
 		ICleanUpFix coreFix= fLiteral != null ? UnusedSuppressWarningsFixCore.createAllFix(fSavedCompilationUnit == null ? compilationUnit : fSavedCompilationUnit,
@@ -79,7 +80,7 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
-		if (compilationUnit == null)
+		if (compilationUnit == null || !isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS))
 			return null;
 
 		ICleanUpFix coreFix= UnusedSuppressWarningsFixCore.createAllFix(compilationUnit, fLiteral);
@@ -87,10 +88,7 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 	}
 
 	private Map<String, String> getRequiredOptions() {
-		// This cleanup is run last and can require using all default options to maximize
-		// chance of finding an unused suppress warnings annotation.
-		// We ask for a fresh AST so all other cleanups are complete before we do this
-		Map<String, String> result= JavaCore.getOptions();
+		Map<String, String> result= new Hashtable<>();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS)) {
 			result.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.ENABLED);
