@@ -60,7 +60,7 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 		boolean requireAST= requireAST();
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
 		// ask for fresh AST as we are setting all default options on and we run as last cleanup
-		return new CleanUpRequirements(requireAST, requireAST, false, true, requiredOptions);
+		return new CleanUpRequirements(requireAST, requireAST, false, requireAST, requiredOptions);
 	}
 
 	private boolean requireAST() {
