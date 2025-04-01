@@ -59,7 +59,7 @@ public final class CleanUpRequirements {
 	 * @param requiresChangedRegions <code>true</code> if changed regions are required
 	 * @param requiresSeparateOptions <code>true</code> if clean up has options that should not be shared
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
-	 * @since 1.22
+	 * @since 1.23
 	 */
 	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions,
 			boolean requiresSeparateOptions, Map<String, String> compilerOptions) {
@@ -109,7 +109,7 @@ public final class CleanUpRequirements {
 	 * other cleanups.
 	 *
 	 * @return <code>true</code> if the cleanup has its own options.
-	 * @since 1.22
+	 * @since 1.23
 	 */
 	public boolean requiresSeparateOptions() {
 		return fRequiresSeparateOptions;
