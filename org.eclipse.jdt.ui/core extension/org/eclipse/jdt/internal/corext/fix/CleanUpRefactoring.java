@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.cleanup.CleanUpContext;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -344,8 +345,9 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 			fCleanUpOptions= new Hashtable<>();
 			for (ICleanUp cleanUp : cleanUps) {
-				Map<String, String> currentCleanUpOption= cleanUp.getRequirements().getCompilerOptions();
-				boolean needsSeparateOptions= cleanUp.getRequirements().requiresSeparateOptions();
+				CleanUpRequirements requirements= cleanUp.getRequirements();
+				Map<String, String> currentCleanUpOption= requirements.getCompilerOptions();
+				boolean needsSeparateOptions= requirements.requiresSeparateOptions();
 				if (currentCleanUpOption != null && !needsSeparateOptions)
 					fCleanUpOptions.putAll(currentCleanUpOption);
 			}
@@ -395,7 +397,6 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 
 							Map<String, String> options= RefactoringASTParser.getCompilerOptions(project);
 							if (!fSeparateOptions.isEmpty()) {
-								System.out.println("separate options"); //$NON-NLS-1$
 								options.putAll(fSeparateOptions);
 							} else {
 								options.putAll(fCleanUpOptions);
@@ -424,9 +425,7 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 				}
 
 				fParseList= requestor.getUndoneElements();
-				// undone elements will start with a cleanup that needs a fresh AST so
-				// check if it requires separate options in which case, set up special options.
-				fCleanUpOptions.clear();
+				// check if undone cleanup requires separate options in which case, set up special options.
 				if (fParseList != null && !fParseList.isEmpty()) {
 					ParseListElement element= fParseList.get(0);
 					if (element.getCleanUps() != null && element.getCleanUps().length > 0) {

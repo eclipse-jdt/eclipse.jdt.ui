@@ -91,6 +91,7 @@ public class UnusedSuppressWarningsCleanUp extends AbstractMultiFix {
 		Map<String, String> result= new Hashtable<>();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS)) {
+			result.putAll(JavaCore.getDefaultOptions());
 			result.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.ENABLED);
 			result.put(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
 			result.put(JavaCore.COMPILER_PB_UNUSED_WARNING_TOKEN, JavaCore.ERROR); // do not change to WARNING
