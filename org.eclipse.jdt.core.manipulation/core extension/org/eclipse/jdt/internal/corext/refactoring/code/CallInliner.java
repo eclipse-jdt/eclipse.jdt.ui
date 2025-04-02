@@ -376,9 +376,9 @@ public class CallInliner {
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
 				return;
 			}
-			if (isAssignment(parent) || isSingleDeclaration(parent)) {
-				// we support inlining expression in assigment and initializers as
-				// long as the execution flow isn't interrupted.
+			if (isAssignment(parent) || isSingleDeclaration(parent) || isLambda(parent)) {
+				// we support inlining expression in assignment and initializers as
+				// long as the execution flow isn't interrupted.  we also aupport lambda bodies.
 				return;
 			} else {
 				boolean isFieldDeclaration= ASTNodes.getParent(fInvocation, FieldDeclaration.class) != null;
@@ -445,6 +445,13 @@ public class CallInliner {
 				return vs.fragments().size() == 1;
 			}
 		}
+		return false;
+	}
+
+	private static boolean isLambda(ASTNode node) {
+		int type= node.getNodeType();
+		if (type == ASTNode.LAMBDA_EXPRESSION)
+			return true;
 		return false;
 	}
 
@@ -672,13 +679,61 @@ public class CallInliner {
 							separator= ", "; //$NON-NLS-1$
 						}
 						builder.append(") -> {}"); //$NON-NLS-1$
-					ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.LAMBDA_EXPRESSION);
-					fRewrite.replace(fTargetNode, newNode, textEditGroup);
+						ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.LAMBDA_EXPRESSION);
+						fRewrite.replace(fTargetNode, newNode, textEditGroup);
 					}
 				} else {
 					fRewrite.remove(fTargetNode, textEditGroup);
 				}
 			}
+		} else if (fTargetNode instanceof MethodReference methodRef) {
+			IMethodBinding binding= methodRef.resolveMethodBinding();
+			if (binding == null) {
+				status.addError(RefactoringCoreMessages.CallInliner_unexpected_model_exception,
+						JavaStatusContext.create(fCUnit, fInvocation));
+				return;
+			}
+			StringBuilder builder= new StringBuilder("("); //$NON-NLS-1$
+			String[] parmNames= binding.getParameterNames();
+			String separator= ""; //$NON-NLS-1$
+			for (String parmName : parmNames) {
+				builder.append(separator + parmName);
+				separator= ", "; //$NON-NLS-1$
+			}
+			builder.append(") -> {"); //$NON-NLS-1$
+			String allblocks= ""; //$NON-NLS-1$
+			for (int i= 0; i < blocks.length; ++i) {
+				allblocks += blocks[i];
+			}
+			String[] lines= allblocks.split("\n"); //$NON-NLS-1$
+			separator= lines.length == 1 ? "" : "\n\t"; //$NON-NLS-1$ //$NON-NLS-2$
+			for (int i= 0; i < lines.length; ++i) {
+				builder.append(separator);
+				builder.append(lines[i]);
+				separator= "\n\t"; //$NON-NLS-1$
+			}
+			separator= lines.length == 1 ? "" : "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			builder.append(separator + "}"); //$NON-NLS-1$
+			ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.LAMBDA_EXPRESSION);
+			fRewrite.replace(fTargetNode, newNode, textEditGroup);
+		} else if (fTargetNode != null && fTargetNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+			String allblocks= ""; //$NON-NLS-1$
+			for (int i= 0; i < blocks.length; ++i) {
+				allblocks += blocks[i];
+			}
+			StringBuilder builder= new StringBuilder();
+			builder.append("{"); //$NON-NLS-1$
+			String[] lines= allblocks.split("\n"); //$NON-NLS-1$
+			String separator= lines.length == 1 ? "" : "\n\t"; //$NON-NLS-1$ //$NON-NLS-2$
+			for (int i= 0; i < lines.length; ++i) {
+				builder.append(separator);
+				builder.append(lines[i]);
+				separator= "\n\t"; //$NON-NLS-1$
+			}
+			separator= lines.length == 1 ? "" : "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			builder.append(separator + "}"); //$NON-NLS-1$
+			ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.BLOCK);
+			fRewrite.replace(fTargetNode, newNode, textEditGroup);
 		} else {
 			ASTNode node= null;
 			boolean needsMethodInvocation= true;
