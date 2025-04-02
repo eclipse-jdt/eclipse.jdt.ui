@@ -716,7 +716,7 @@ public class CallInliner {
 			builder.append(separator + "}"); //$NON-NLS-1$
 			ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.LAMBDA_EXPRESSION);
 			fRewrite.replace(fTargetNode, newNode, textEditGroup);
-		} else if (fTargetNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+		} else if (fTargetNode != null && fTargetNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
 			String allblocks= ""; //$NON-NLS-1$
 			for (int i= 0; i < blocks.length; ++i) {
 				allblocks += blocks[i];
