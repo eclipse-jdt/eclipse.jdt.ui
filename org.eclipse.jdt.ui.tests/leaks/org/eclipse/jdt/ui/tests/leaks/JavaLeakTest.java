@@ -95,12 +95,12 @@ public class JavaLeakTest extends LeakTestCase {
 	public void testTextEditorCloseOneOfTwo() throws Exception {
 		IFile file1= createTestFile("Test1");
 		IEditorPart editor1= EditorUtility.openInEditor(file1);
-		assertEquals(editor1.getClass(), TextEditor.class);
+		assertEquals(TextEditor.class, editor1.getClass());
 		assertInstanceCount(TextEditor.class, 1);
 
 		IFile file2= createTestFile("Test2");
 		IEditorPart editor2= EditorUtility.openInEditor(file2);
-		assertEquals(editor2.getClass(), TextEditor.class);
+		assertEquals(TextEditor.class, editor2.getClass());
 		assertInstanceCount(TextEditor.class, 2);
 
 		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
@@ -130,12 +130,12 @@ public class JavaLeakTest extends LeakTestCase {
 	public void testPropertiesEditorCloseOneOfTwo() throws Exception {
 		IFile file1= createTestFile("Test1.properties");
 		IEditorPart editor1= EditorUtility.openInEditor(file1);
-		assertEquals(editor1.getClass(), PropertiesFileEditor.class);
+		assertEquals(PropertiesFileEditor.class, editor1.getClass());
 		assertInstanceCount(PropertiesFileEditor.class, 1);
 
 		IFile file2= createTestFile("Test2.properties");
 		IEditorPart editor2= EditorUtility.openInEditor(file2);
-		assertEquals(editor2.getClass(), PropertiesFileEditor.class);
+		assertEquals(PropertiesFileEditor.class, editor2.getClass());
 		assertInstanceCount(PropertiesFileEditor.class, 2);
 
 		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
@@ -165,12 +165,12 @@ public class JavaLeakTest extends LeakTestCase {
 	public void testJavaEditorCloseOneOfTwo() throws Exception {
 		ICompilationUnit cu1= createTestCU("Test1");
 		IEditorPart editor1= EditorUtility.openInEditor(cu1);
-		assertEquals(editor1.getClass(), CompilationUnitEditor.class);
+		assertEquals(CompilationUnitEditor.class, editor1.getClass());
 		assertInstanceCount(CompilationUnitEditor.class, 1);
 
 		ICompilationUnit cu2= createTestCU("Test2");
 		IEditorPart editor2= EditorUtility.openInEditor(cu2);
-		assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+		assertEquals(CompilationUnitEditor.class, editor2.getClass());
 		assertInstanceCount(CompilationUnitEditor.class, 2);
 
 		assertTrue("Could not close editor", JavaPlugin.getActivePage().closeEditor(editor2, false));
@@ -218,13 +218,13 @@ public class JavaLeakTest extends LeakTestCase {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
 			ICompilationUnit cu1= createTestCU("Test1");
 			IEditorPart editor1= EditorUtility.openInEditor(cu1);
-			assertEquals(editor1.getClass(), CompilationUnitEditor.class);
+			assertEquals(CompilationUnitEditor.class, editor1.getClass());
 			activateBreadcrumb((JavaEditor) editor1);
 			assertInstanceCount(CompilationUnitEditor.class, 1);
 
 			ICompilationUnit cu2= createTestCU("Test2");
 			IEditorPart editor2= EditorUtility.openInEditor(cu2);
-			assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+			assertEquals(CompilationUnitEditor.class, editor2.getClass());
 			activateBreadcrumb((JavaEditor) editor2);
 			assertInstanceCount(CompilationUnitEditor.class, 2);
 
@@ -248,12 +248,12 @@ public class JavaLeakTest extends LeakTestCase {
 			JavaPlugin.getDefault().getPreferenceStore().setValue(getBreadcrumbPreferenceKey(), true);
 			ICompilationUnit cu1= createTestCU("Test1");
 			IEditorPart editor1= EditorUtility.openInEditor(cu1);
-			assertEquals(editor1.getClass(), CompilationUnitEditor.class);
+			assertEquals(CompilationUnitEditor.class, editor1.getClass());
 			assertInstanceCount(CompilationUnitEditor.class, 1);
 
 			ICompilationUnit cu2= createTestCU("Test2");
 			IEditorPart editor2= EditorUtility.openInEditor(cu2);
-			assertEquals(editor2.getClass(), CompilationUnitEditor.class);
+			assertEquals(CompilationUnitEditor.class, editor2.getClass());
 			activateBreadcrumb((JavaEditor) editor2);
 			assertInstanceCount(CompilationUnitEditor.class, 2);
 
@@ -381,7 +381,7 @@ public class JavaLeakTest extends LeakTestCase {
 		IEditorPart part= EditorUtility.openInEditor(objectToOpen);
 
 		// make sure the received instance has the type we're expecting
-		assertEquals(part.getClass(), clazz);
+		assertEquals(clazz, part.getClass());
 
 		// verify that the editor instance is there
 		assertInstanceCount(clazz, 1);
