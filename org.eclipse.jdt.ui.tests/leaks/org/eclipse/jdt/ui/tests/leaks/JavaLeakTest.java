@@ -87,18 +87,18 @@ public class JavaLeakTest extends LeakTestCase {
 
 	@Test
 	public void testTextEditorClose() throws Exception {
-		IFile file= createTestFile("Test.txt");
+		IFile file= createTestFile("Test");
 		internalTestEditorClose(file, TextEditor.class, false);
 	}
 
 	@Test
 	public void testTextEditorCloseOneOfTwo() throws Exception {
-		IFile file1= createTestFile("Test1.txt");
+		IFile file1= createTestFile("Test1");
 		IEditorPart editor1= EditorUtility.openInEditor(file1);
 		assertEquals(editor1.getClass(), TextEditor.class);
 		assertInstanceCount(TextEditor.class, 1);
 
-		IFile file2= createTestFile("Test2.txt");
+		IFile file2= createTestFile("Test2");
 		IEditorPart editor2= EditorUtility.openInEditor(file2);
 		assertEquals(editor2.getClass(), TextEditor.class);
 		assertInstanceCount(TextEditor.class, 2);
@@ -116,7 +116,7 @@ public class JavaLeakTest extends LeakTestCase {
 
 	@Test
 	public void testTextEditorCloseAll() throws Exception {
-		IFile file= createTestFile("Test.txt");
+		IFile file= createTestFile("Test");
 		internalTestEditorClose(file, TextEditor.class, true);
 	}
 
