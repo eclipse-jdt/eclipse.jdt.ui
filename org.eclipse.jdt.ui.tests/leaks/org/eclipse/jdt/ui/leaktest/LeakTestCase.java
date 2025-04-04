@@ -53,7 +53,11 @@ public class LeakTestCase {
 	}
 
 	private InstancesOfTypeCollector collect(String requestedTypeName) {
-		InstancesOfTypeCollector requestor= new InstancesOfTypeCollector(requestedTypeName, false);
+		return collect(requestedTypeName, false);
+	}
+
+	private InstancesOfTypeCollector collect(String requestedTypeName, boolean includeSubtypes) {
+		InstancesOfTypeCollector requestor= new InstancesOfTypeCollector(requestedTypeName, includeSubtypes);
 		calmDown();
 		new ReferenceTracker(requestor).start(getClass().getClassLoader());
 		return requestor;
@@ -129,6 +133,26 @@ public class LeakTestCase {
 			assertNotEquals("Expected instance count: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), 0, numTries);
   		}
 	}
+
+  	/**
+  	 * Asserts that the instance count of the given class is as expected.
+  	 *
+  	 * @param clazz the class of the instances to count
+  	 * @param includeSubtypes true to include subtypes
+  	 * @param expected the expected instance count
+  	 */
+  	public void assertInstanceCount(final Class<?> clazz, boolean includeSubtypes, final int expected) {
+  		int numTries= 2;
+  		while (true) {
+  			InstancesOfTypeCollector requestor= collect(clazz.getName(), includeSubtypes);
+  			int actual= requestor.getNumberOfResults();
+  			if (expected == actual) {
+  				return;
+  			}
+  			numTries--;
+  			assertNotEquals("Expected instance count: " + expected + ", actual: " + actual + "\n" + requestor.getResultString(), 0, numTries);
+  		}
+  	}
 
 
   	/**

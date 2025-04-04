@@ -70,7 +70,7 @@ public class SearchLeakTest extends LeakTestCase {
 
 	@Test
 	public void testSearchResultEditorClose() throws Exception {
-		assertInstanceCount(TextEditor.class, 0);
+		assertInstanceCount(TextEditor.class, true, 0);
 
 		FileTextSearchScope scope= FileTextSearchScope.newWorkspaceScope(null, false);
 		FileSearchQuery query= new FileSearchQuery("projectDescription", false, false, scope);
@@ -81,11 +81,11 @@ public class SearchLeakTest extends LeakTestCase {
 		DisplayHelper.sleep(Display.getDefault(), 2000);
 		page.gotoNextMatch();
 
-		assertInstanceCount(TextEditor.class, 1);
+		assertInstanceCount(TextEditor.class, true, 1);
 
 		assertTrue(JavaPlugin.getActivePage().closeAllEditors(false));
 
-		assertInstanceCount(TextEditor.class, 0);
+		assertInstanceCount(TextEditor.class, true, 0);
 
 		NewSearchUI.removeQuery(query);
 	}
