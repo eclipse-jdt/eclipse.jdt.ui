@@ -53,28 +53,28 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 		fRenderer= HtmlRenderer.builder().extensions(extensions).build();
 	}
 
-	final static Pattern UnicodePattern= Pattern.compile("(\\\\u000[d,D]\\\\u000[a,A]|\\\\u000[a,A]|\\\\u000[d,D])[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
+//	final static Pattern UnicodePattern= Pattern.compile("(\\\\u000[d,D]\\\\u000[a,A]|\\\\u000[a,A]|\\\\u000[d,D])[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
 	final static Pattern Pattern1= Pattern.compile("(\\r\\n?|\\n)[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
 
 	@Override
 	protected String removeDocLineIntros(String textWithSlashes) {
 		// in the markdown case relevant leading whitespace is contained in TextElements, no need to preserve blanks *between* elements
 		String content= Pattern1.matcher(textWithSlashes).replaceAll(r -> "$1"); //$NON-NLS-1$
-		String newContent= content;
-		// handle unicode
-		content= UnicodePattern.matcher(content).replaceAll(r -> {
-				return switch(r.group(1)) {
-				case "\\u000a", "\\u000A" -> "\n"; //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
-				case "\\u000d", "\\u000D" -> "\r"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				default -> "\r\n"; //$NON-NLS-1$
-				};
-			});
-		if (!content.equals(newContent)) {
-			System.err.println("comparison failure"); //$NON-NLS-1$
-			System.err.println(content);
-			System.err.println(newContent);
-			throw new NullPointerException();
-		}
+//		String newContent= content;
+//		// handle unicode
+//		content= UnicodePattern.matcher(content).replaceAll(r -> {
+//				return switch(r.group(1)) {
+//				case "\\u000a", "\\u000A" -> "\n"; //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
+//				case "\\u000d", "\\u000D" -> "\r"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//				default -> "\r\n"; //$NON-NLS-1$
+//				};
+//			});
+//		if (!content.equals(newContent)) {
+//			System.err.println("comparison failure"); //$NON-NLS-1$
+//			System.err.println(content);
+//			System.err.println(newContent);
+//			throw new NullPointerException();
+//		}
 		return content;
 	}
 
