@@ -14,6 +14,7 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -217,6 +218,49 @@ public class CodeCompletionTest23 extends AbstractCompletionTest {
 			}
 			""";
 		assertEquals(expectedContents, doc.get());
+	}
+	@Test
+	public void testMarkdown_Escaped() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("javadoc", false, null);
+		String contents=
+			"""
+				///
+				/// see method [#ma
+				///
+				public class X {
+					public static void main(String[] args) {}
+				}""";
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", contents, false, null);
+
+
+		String str= "[#ma";
+
+		int offset= contents.indexOf(str) + str.length() - 1;
+
+		JavaTypeCompletionProposalComputer comp= new JavaAllCompletionProposalComputer();
+
+		List<ICompletionProposal> proposals= comp.computeCompletionProposals(createContext(offset, cu), null);
+		ICompletionProposal proposal = proposals.get(0);
+
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		if (proposal != null) {
+			proposal.apply(doc);
+		}
+
+		String expectedContents=
+				"""
+			///
+			/// see method [#main(String\\[\\])
+			///
+			public class X {
+				public static void main(String[] args) {}
+			}""";
+		assertEquals(expectedContents, doc.get());
+		assertNotNull("Proposal is null", proposal);
+		assertEquals("Incorrect display string", "main(String[]) - X", proposal.getDisplayString());
 	}
 
 }
