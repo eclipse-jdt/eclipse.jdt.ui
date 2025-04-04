@@ -19,10 +19,10 @@ import java.util.function.Function;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageDataProvider;
+import org.eclipse.swt.graphics.ImageGcDrawer;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -54,16 +54,14 @@ class SignatureStylingColorPreferenceMenuItem extends Action implements ImageDat
 
 	@Override
 	public ImageData getImageData(int zoom) {
-		Image image= new Image(shell.getDisplay(), 16, 16);
-		GC gc= new GC(image);
-
-		gc.setForeground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
-		gc.setBackground(new Color(shell.getDisplay(), getCurrentColor()));
-		gc.fillRectangle(image.getBounds());
-		gc.setLineWidth(2);
-		gc.drawRectangle(image.getBounds());
-		gc.dispose();
-
+		final ImageGcDrawer imageGcDrawer = (gc, width, height) -> {
+			gc.setForeground(shell.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BORDER));
+			gc.setBackground(new Color(shell.getDisplay(), getCurrentColor()));
+			gc.fillRectangle(0, 0, width, height);
+			gc.setLineWidth(2);
+			gc.drawRectangle(0, 0, width, height);
+		};
+		Image image= new Image(shell.getDisplay(), imageGcDrawer, 16, 16);
 		ImageData data= image.getImageData(zoom);
 		image.dispose();
 		return data;
