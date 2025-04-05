@@ -59,7 +59,7 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 	@Override
 	protected String removeDocLineIntros(String textWithSlashes) {
 		// in the markdown case relevant leading whitespace is contained in TextElements, no need to preserve blanks *between* elements
-		String content= Pattern1.matcher(textWithSlashes).replaceAll(r -> "$1"); //$NON-NLS-1$
+//		String content= Pattern1.matcher(textWithSlashes).replaceAll(r -> "$1"); //$NON-NLS-1$
 //		String newContent= content;
 //		// handle unicode
 //		content= UnicodePattern.matcher(content).replaceAll(r -> {
@@ -75,7 +75,11 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 //			System.err.println(newContent);
 //			throw new NullPointerException();
 //		}
-		return content;
+		String lineBreakGroup= "(\\r\\n?|\\n)"; //$NON-NLS-1$
+		String noBreakSpace= "[^\r\n&&\\s]"; //$NON-NLS-1$
+		// in the markdown case relevant leading whitespace is contained in TextElements, no need to preserve blanks *between* elements
+		return textWithSlashes.replaceAll(lineBreakGroup + noBreakSpace + "*///" + noBreakSpace + '*', "$1"); //$NON-NLS-1$ //$NON-NLS-2$
+//		return content;
 	}
 
 	@Override
