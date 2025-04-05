@@ -16,7 +16,6 @@ package org.eclipse.jdt.core.manipulation.internal.javadoc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
@@ -54,7 +53,7 @@ public class CoreMarkdownAccessImpl extends CoreJavadocAccessImpl {
 	}
 
 //	final static Pattern UnicodePattern= Pattern.compile("(\\\\u000[d,D]\\\\u000[a,A]|\\\\u000[a,A]|\\\\u000[d,D])[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
-	final static Pattern Pattern1= Pattern.compile("(\\r\\n?|\\n)[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
+//	final static Pattern Pattern1= Pattern.compile("(\\r\\n?|\\n)[^\r\n&&\\s]*///[^\r\n&&\\s]*"); //$NON-NLS-1$
 
 	@Override
 	protected String removeDocLineIntros(String textWithSlashes) {
