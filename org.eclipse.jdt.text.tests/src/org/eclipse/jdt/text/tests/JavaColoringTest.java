@@ -13,13 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Iterator;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swt.custom.StyleRange;
 
@@ -47,7 +47,7 @@ public class JavaColoringTest {
 	protected IDocument fDocument;
 	protected JavaTextTools fTextTools;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		IPreferenceStore store= new PreferenceStore();
 		fTextTools= new JavaTextTools(store);
@@ -69,7 +69,7 @@ public class JavaColoringTest {
 		System.out.print("------ next ---------\n");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;

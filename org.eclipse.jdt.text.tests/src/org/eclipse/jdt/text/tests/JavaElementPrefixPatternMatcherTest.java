@@ -16,7 +16,7 @@ package org.eclipse.jdt.text.tests;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
 

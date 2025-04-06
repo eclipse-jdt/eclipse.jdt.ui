@@ -14,9 +14,9 @@
 
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -69,7 +69,7 @@ public class JavaStringDoubleClickStrategyTest {
 		IDocument document= new Document(text);
 		TestStrategy strategy= new TestStrategy(partition, delimiterLength);
 		IRegion selection= strategy.findWord(document, offset);
-		assertEquals("Click at " + offset + " in: " + text, expected, selection);
+		assertEquals(expected, selection, "Click at " + offset + " in: " + text);
 	}
 
 	private void assertDoubleClick(String text, int offset, IRegion expected, String version) {
@@ -77,7 +77,7 @@ public class JavaStringDoubleClickStrategyTest {
 		TestStrategy strategy= new TestStrategy(null, 1);
 		strategy.setSourceVersion(version);
 		IRegion selection= strategy.findWord(document, offset);
-		assertEquals("Click at " + offset + " in: " + text, expected, selection);
+		assertEquals(expected, selection, "Click at " + offset + " in: " + text);
 	}
 
 	@Test
