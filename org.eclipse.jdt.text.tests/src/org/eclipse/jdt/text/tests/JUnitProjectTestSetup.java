@@ -13,9 +13,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,7 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
  *
  * @since 3.1
  */
-public class JUnitProjectTestSetup extends ExternalResource {
+public class JUnitProjectTestSetup implements BeforeEachCallback, AfterEachCallback {
 
 	private static IJavaProject fgProject;
 
@@ -44,13 +46,13 @@ public class JUnitProjectTestSetup extends ExternalResource {
 	}
 
 	@Override
-	public void before() throws Exception {
+	public void beforeEach(ExtensionContext context) throws Exception {
 		String projectName= "JUnit_" + System.currentTimeMillis();
 		fgProject= JavaProjectHelper.createJavaProjectWithJUnitSource(projectName, "src", "bin");
 	}
 
 	@Override
-	public void after() {
+	public void afterEach(ExtensionContext context) {
 		if (fgProject != null) {
 			try {
 				JavaProjectHelper.delete(fgProject);

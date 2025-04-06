@@ -13,20 +13,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
@@ -183,11 +184,11 @@ public class PluginsNotLoadedTest {
 
 	private JavaEditor fEditor;
 
-	@Rule
+	@RegisterExtension
 	public JUnitProjectTestSetup jpts=new JUnitProjectTestSetup() {
 			@Override
-			public void before() throws Exception {
-				super.before();
+			public void beforeEach(ExtensionContext context) throws Exception {
+				super.beforeEach(context);
 				/* Since https://bugs.eclipse.org/484795 in EGit 4.2, org.eclipse.egit.ui/plugin.xml contributes:
 				 * <extension point="org.eclipse.ui.services">
 				 *   <sourceProvider provider="org.eclipse.egit.ui.internal.selection.RepositorySourceProvider">
@@ -222,7 +223,7 @@ public class PluginsNotLoadedTest {
 		NOT_LOADED_BUNDLES= l;
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
@@ -230,7 +231,7 @@ public class PluginsNotLoadedTest {
 		assertNotNull(fEditor);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 		fEditor= null;
@@ -247,7 +248,7 @@ public class PluginsNotLoadedTest {
 		}
 	}
 
-	@Ignore("Author: Dani Megert <dmegert> 2007-11-07 16:13:14 - Test more plug-ins.")
+	@Disabled("Author: Dani Megert <dmegert> 2007-11-07 16:13:14 - Test more plug-ins.")
 	@Test
 	public void printNotLoaded() {
 		Bundle bundle= Platform.getBundle("org.eclipse.jdt.text.tests");
@@ -275,6 +276,6 @@ public class PluginsNotLoadedTest {
 				buf.append('\n');
 			}
 		}
-		assertEquals("Wrong bundles loaded:\n" + buf, 0, buf.length());
+		assertEquals(0, buf.length(), "Wrong bundles loaded:\n" + buf);
 	}
 }

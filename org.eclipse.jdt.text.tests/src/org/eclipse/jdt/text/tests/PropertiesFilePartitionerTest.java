@@ -13,14 +13,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jface.preference.PreferenceStore;
 
@@ -42,7 +42,7 @@ public class PropertiesFilePartitionerTest {
 	private Document fDocument;
 	protected boolean fDocumentPartitioningChanged;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 
 		fTextTools= new JavaTextTools(new PreferenceStore());
@@ -56,7 +56,7 @@ public class PropertiesFilePartitionerTest {
 		fDocument.addDocumentPartitioningListener(document -> fDocumentPartitioningChanged= true);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;
@@ -72,12 +72,12 @@ public class PropertiesFilePartitionerTest {
 
 	protected void checkPartitioning(ITypedRegion[] expectation, ITypedRegion[] result) {
 
-		assertEquals("invalid number of partitions:", expectation.length, result.length);
+		assertEquals(expectation.length, result.length, "invalid number of partitions:");
 
 		for (int i= 0; i < expectation.length; i++) {
 			ITypedRegion e= expectation[i];
 			ITypedRegion r= result[i];
-			assertEquals("was: "+ print(r) + ", expected: " + print(e), r, e);
+			assertEquals(r, e, "was: " + print(r) + ", expected: " + print(e));
 		}
 
 	}

@@ -11,8 +11,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.semantictokens;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jdt.text.tests.AbstractSemanticHighlightingTest;
 
@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class SemanticTokensProviderTest extends AbstractSemanticHighlightingTest {
 
-	@Rule
+	@RegisterExtension
 	public SemanticHighlightingTestSetup shts= new SemanticHighlightingTestSetup( "/SHTest/src/STTest.java");
 
 	@Test

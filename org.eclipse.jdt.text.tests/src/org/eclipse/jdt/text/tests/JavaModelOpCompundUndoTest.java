@@ -13,17 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
@@ -65,8 +64,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * @since 3.5
  */
 public class JavaModelOpCompundUndoTest {
-	@Rule
-	public TestName tn= new TestName();
+	private String testName;
+
+	@BeforeEach
+	void init(TestInfo testInfo) {
+		this.testName= testInfo.getDisplayName();
+	}
 
 	private static final String SRC= "src";
 	private static final String SEP= "/";
@@ -95,21 +98,21 @@ public class JavaModelOpCompundUndoTest {
 	private IUndoManager fUndoManager;
 
 	private void setUpProject() throws CoreException, JavaModelException {
-		fProject= JavaProjectHelper.createJavaProject(tn.getMethodName(), "bin");
+		fProject= JavaProjectHelper.createJavaProject(testName, "bin");
 		fProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 		JavaProjectHelper.addSourceContainer(fProject, SRC);
-		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + tn.getMethodName() + SEP + SRC));
+		IPackageFragment fragment= fProject.findPackageFragment(new Path(SEP + testName + SEP + SRC));
 		fCompilationUnit= fragment.createCompilationUnit(CU_NAME, CU_CONTENTS, true, new NullProgressMonitor());
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		setUpProject();
 		setUpEditor();
 	}
 
 	private void setUpEditor() {
-		fEditor= openJavaEditor(new Path(SEP + tn.getMethodName() + SEP + SRC + SEP + CU_NAME));
+		fEditor= openJavaEditor(new Path(SEP + testName + SEP + SRC + SEP + CU_NAME));
 		assertNotNull(fEditor);
 		fUndoManager= ((ITextViewerExtension6)fEditor.getViewer()).getUndoManager();
 		assertNotNull(fUndoManager);
@@ -130,7 +133,7 @@ public class JavaModelOpCompundUndoTest {
 		}
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
 		fEditor= null;

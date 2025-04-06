@@ -15,15 +15,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
-	@Rule
+	@RegisterExtension
 	public SemanticHighlightingTestSetup shts= new SemanticHighlightingTestSetup( "/SHTest/src/SHTest.java");
 
 	@Test

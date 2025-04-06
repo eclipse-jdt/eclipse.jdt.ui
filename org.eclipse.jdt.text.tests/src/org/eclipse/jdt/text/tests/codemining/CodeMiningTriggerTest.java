@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.codemining;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,9 +20,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
@@ -109,7 +109,7 @@ public class CodeMiningTriggerTest {
 		}
 	}
 
-	@Before
+	@BeforeEach
 	public void setUp() throws CoreException {
 		fPreferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		this.wasCodeMiningEnabled = fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_CODEMINING_ENABLED);
@@ -122,7 +122,7 @@ public class CodeMiningTriggerTest {
 		TestCodeMiningProvider.isOn = true;
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		TestCodeMiningProvider.isOn = false;
 		this.fPreferenceStore.setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, wasCodeMiningEnabled);
@@ -158,36 +158,34 @@ public class CodeMiningTriggerTest {
 	}
 
 	private void assertCodeMiningAnnotation(ISourceViewer viewer, String message, int timeout) throws Exception {
-		assertTrue("Cannot find CodeMining header line annotation with text `" + message + "`",
-			new DisplayHelper() {
-				@SuppressWarnings("restriction")
-				@Override
-				protected boolean condition() {
-					for (Iterator<Annotation> itr = viewer.getAnnotationModel().getAnnotationIterator(); itr.hasNext();) {
-						Annotation a = itr.next();
-						if (a instanceof org.eclipse.jface.internal.text.codemining.CodeMiningLineHeaderAnnotation) {
-							Field f;
-							try {
-								f= org.eclipse.jface.internal.text.codemining.CodeMiningLineHeaderAnnotation.class.getDeclaredField("fMinings");
-								f.setAccessible(true);
-								List<ICodeMining> minings = (List<ICodeMining>)f.get(a);
-								for (ICodeMining m : minings) {
-									if (m instanceof TestCodeMining) {
-										if (message.equals(m.getLabel())) {
-											return true;
-										}
+		assertTrue(new DisplayHelper() {
+			@SuppressWarnings("restriction")
+			@Override
+			protected boolean condition() {
+				for (Iterator<Annotation> itr= viewer.getAnnotationModel().getAnnotationIterator(); itr.hasNext();) {
+					Annotation a= itr.next();
+					if (a instanceof org.eclipse.jface.internal.text.codemining.CodeMiningLineHeaderAnnotation) {
+						Field f;
+						try {
+							f= org.eclipse.jface.internal.text.codemining.CodeMiningLineHeaderAnnotation.class.getDeclaredField("fMinings");
+							f.setAccessible(true);
+							List<ICodeMining> minings= (List<ICodeMining>) f.get(a);
+							for (ICodeMining m : minings) {
+								if (m instanceof TestCodeMining) {
+									if (message.equals(m.getLabel())) {
+										return true;
 									}
 								}
-							} catch (Exception e) {
-								ILog.of(Platform.getBundle("org.eclipse.jdt.text.tests")).log(
-									new Status(IStatus.ERROR, "org.eclipse.jdt.text.tests", e.getMessage(), e)
-								);
-								return false;
 							}
+						} catch (Exception e) {
+							ILog.of(Platform.getBundle("org.eclipse.jdt.text.tests")).log(new Status(IStatus.ERROR, "org.eclipse.jdt.text.tests", e.getMessage(), e));
+							return false;
 						}
 					}
-					return false;
 				}
-		}.waitForCondition(Display.getDefault(), timeout));
+				return false;
+			}
+		}.waitForCondition(Display.getDefault(), timeout),
+			"Cannot find CodeMining header line annotation with text `" + message + "`");
 	}
 }

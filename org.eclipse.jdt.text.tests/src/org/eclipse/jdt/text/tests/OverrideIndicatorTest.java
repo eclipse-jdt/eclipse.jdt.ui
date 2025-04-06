@@ -14,18 +14,18 @@
 
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * @since 3.1
  */
 public class OverrideIndicatorTest {
-	@Rule
+	@RegisterExtension
 	public JUnitProjectTestSetup jpts= new JUnitProjectTestSetup();
 
 	private static final String OVERRIDE_INDICATOR_ANNOTATION= "org.eclipse.jdt.ui.overrideIndicator";
@@ -64,7 +64,7 @@ public class OverrideIndicatorTest {
 	private StyledText fTextWidget;
 	private Annotation[] fOverrideAnnotations;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
@@ -75,7 +75,7 @@ public class OverrideIndicatorTest {
 		fAnnotationModel= fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 	}

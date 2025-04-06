@@ -14,17 +14,17 @@
 
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Iterator;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
@@ -89,10 +89,10 @@ public class MarkOccurrenceTest {
 	private IRegion fMatch;
 	private StyledText fTextWidget;
 
-	@Rule
+	@RegisterExtension
 	public JUnitProjectTestSetup jpts=new JUnitProjectTestSetup();
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		assertNotNull(fgHighlightRGB);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
@@ -137,7 +137,7 @@ public class MarkOccurrenceTest {
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fSelWASTListener);
 		EditorTestHelper.closeAllEditors();
