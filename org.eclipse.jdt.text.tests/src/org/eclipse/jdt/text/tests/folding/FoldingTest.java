@@ -295,6 +295,7 @@ public class FoldingTest {
 					void a() {		//here should be an annotation
 
 					} void b() {	//here should be an annotation
+
 					}
 				}
 				""";
@@ -302,7 +303,7 @@ public class FoldingTest {
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // JavaDoc
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 7); // 2. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 7, 8); // 2. Method
 	}
 
 	@Test
@@ -313,14 +314,15 @@ public class FoldingTest {
 				public class D {
 				    void x() {			//here should be an annotation
 				        if (true) {		//here should be an annotation
+
 				        }
 				    }
 				}
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 3); // if
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // if
 	}
 
 	@Test
@@ -353,14 +355,15 @@ public class FoldingTest {
 				public class F {
 				    void x() {				//here should be an annotation
 				        while (true) {		//here should be an annotation
+
 				        }
 				    }
 				}
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 3); // while
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // while
 	}
 
 	@Test
@@ -371,14 +374,15 @@ public class FoldingTest {
 				public class G {
 				    void x() {					//here should be an annotation
 				        for(int i=0;i<1;i++){	//here should be an annotation
+
 				        }
 				    }
 				}
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 3); // for
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // for
 	}
 
 	@Test
@@ -389,14 +393,15 @@ public class FoldingTest {
 				public class H {
 				    void x() {							//here should be an annotation
 				        for(String s: new String[0]){	//here should be an annotation
+
 				        }
 				    }
 				}
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 3); // for
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // for
 	}
 
 	@Test
@@ -426,14 +431,15 @@ public class FoldingTest {
 				public class K {
 				    void x() {					//here should be an annotation
 				        synchronized(this) {	//here should be an annotation
+
 				        }
 				    }
 				}
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 4); // 1. Method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 3); // synchronized
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // 1. Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // synchronized
 	}
 
 	@Test
@@ -495,12 +501,13 @@ public class FoldingTest {
 				package org.example.test;
 				public class O {
 				    static {					//here should be an annotation
+
 				    }
 				}
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 2); // static
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3); // static
 	}
 
 	@Test
@@ -514,6 +521,7 @@ public class FoldingTest {
 				            for(int i=0;i<1;i++){		//here should be an annotation
 				                while(true) {			//here should be an annotation
 				                    do {				//here should be an annotation
+
 				                    } while(false);
 				                }
 				            }
@@ -523,11 +531,11 @@ public class FoldingTest {
 				""";
 		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 5);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 10); // method
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 9); // if
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 8); // for
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 7); // while
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 6, 6); // do
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 11); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 10); // if
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 9); // for
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 8); // while
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 6, 7); // do
 	}
 
 	@Test
@@ -546,5 +554,34 @@ public class FoldingTest {
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 5); // method
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4); // inner class
+	}
+
+
+	@Test
+	public void testSingleLiner() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
+		String str= """
+				package org.example.test;
+				public class I {
+				    void x() {				//here should be an annotation
+				        do {				//here should not be an annotation
+				        } while(false);
+						for(int i=0;i<1;i++){	//here should not be an annotation
+				        }
+				        synchronized(this) {	//here should not be an annotation
+				        }
+				        if (true) {		//here should not be an annotation
+				        }
+				        try {						//here should not be an annotation
+				        } catch (Exception e) {		//here should not be an annotation
+				        }
+				    }
+				    public void bar() {					//here should not be an annotation
+				    }
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 13); // Method
 	}
 }
