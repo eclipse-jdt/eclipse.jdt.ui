@@ -510,7 +510,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				IDocument document= ctx.getDocument();
 				int startLine= document.getLineOfOffset(region.getOffset());
 				int endLine= document.getLineOfOffset(region.getOffset() + region.getLength());
-				return endLine > startLine;
+				return endLine > startLine + 1;
 			} catch (BadLocationException e) {
 				return false;
 			}
