@@ -1005,11 +1005,11 @@ public class MoveTest extends GenericRefactoringTest {
 
 		String str= """
 			package p;
-			
+
 			import q.Class1;
 			import q.Class3;
 			import q.Class3.InnerClass3;
-			
+
 			public class Class2 {
 			    Class1 c;
 			    Class3 c3;
@@ -1048,9 +1048,9 @@ public class MoveTest extends GenericRefactoringTest {
 
 		String str3= """
 			package q;
-			
+
 			import q.Class3.InnerClass3;
-			
+
 			public class Class2 {
 			    Class1 c;
 			    Class3 c3;
@@ -1073,9 +1073,9 @@ public class MoveTest extends GenericRefactoringTest {
 
 		String str= """
 			package p;
-			
+
 			import q.*;
-			
+
 			public class Class2 {
 			    Class1 c;
 			    Class3 c3;
@@ -1114,7 +1114,7 @@ public class MoveTest extends GenericRefactoringTest {
 
 		String str3= """
 			package q;
-			
+
 			public class Class2 {
 			    Class1 c;
 			    Class3 c3;
@@ -1206,9 +1206,9 @@ public class MoveTest extends GenericRefactoringTest {
 
 		String str2= """
 			package p2;
-			
+
 			import p.Class1;
-			
+
 			public class Class2 {
 			    Class1 c;
 			}
@@ -1258,63 +1258,13 @@ public class MoveTest extends GenericRefactoringTest {
 	}
 
 	@Test
-	public void testDestination_yes_cuFromRoot() throws Exception {
-		ParticipantTesting.reset();
-
-		//import statement with type from default package - only <= java 1.3
-		IJavaProject javaProject= getRoot().getJavaProject();
-		Map<String, String> originalOptions= javaProject.getOptions(false);
-		Map<String, String> newOptions= javaProject.getOptions(false);
-		newOptions.put(JavaCore.COMPILER_COMPLIANCE, "1.3");
-		newOptions.put(JavaCore.COMPILER_SOURCE, "1.3");
-		javaProject.setOptions(newOptions);
-
-		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
-		String oldRef= "package org.test;import Default;public class Reference{Default d;}";
-		String newD= "package org;\nimport org.test.Reference;public class Default {Reference ref;}";
-		String newRef= "package org.test;import org.Default;public class Reference{Default d;}";
-		ICompilationUnit cuD= getRoot().getPackageFragment("").createCompilationUnit("Default.java", oldD, false, new NullProgressMonitor());
-		IPackageFragment orgTest= getRoot().createPackageFragment("org.test", false, new NullProgressMonitor());
-		ICompilationUnit cuRef= orgTest.createCompilationUnit("Reference.java", oldRef, false, new NullProgressMonitor());
-		IPackageFragment org= getRoot().getPackageFragment("org");
-		ICompilationUnit newCuD= org.getCompilationUnit(cuD.getElementName());
-		try{
-			IJavaElement[] javaElements= { cuD };
-			IResource[] resources= {};
-			String[] handles= ParticipantTesting.createHandles(new Object[] {cuD, cuD.getTypes()[0], cuD.getResource()});
-			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
-
-			verifyValidDestination(ref, org);
-
-			assertTrue("source file Default.java does not exist before moving", cuD.exists());
-			assertTrue("source file Reference.java does not exist before moving", cuRef.exists());
-			RefactoringStatus status= performRefactoring(ref, true);
-			assertNull(status);
-			assertFalse("source file Default.java exists after moving", cuD.exists());
-			assertTrue("new file Default.java does not exist after moving", newCuD.exists());
-			assertTrue("source file Reference.java does not exist after moving", cuRef.exists());
-			assertEqualLines("Default.java differs", newD, newCuD.getSource());
-			assertEqualLines("Reference.java differs", newRef, cuRef.getSource());
-
-			ParticipantTesting.testMove(
-					handles,
-					new MoveArguments[] {
-							new MoveArguments(org, ref.getUpdateReferences()),
-							new MoveArguments(org, ref.getUpdateReferences()),
-							new MoveArguments(org.getResource(), ref.getUpdateReferences())});
-		}finally{
-			javaProject.setOptions(originalOptions);
-		}
-	}
-
-	@Test
 	public void testDestination_no_cuFromRoot() throws Exception {
 		//import statement with type from default package - only <= java 1.3
 		IJavaProject javaProject= getRoot().getJavaProject();
 		Map<String, String> originalOptions= javaProject.getOptions(false);
 		Map<String, String> newOptions= javaProject.getOptions(false);
-		newOptions.put(JavaCore.COMPILER_COMPLIANCE, "1.4"); //will cause error (potential match)
-		newOptions.put(JavaCore.COMPILER_SOURCE, "1.4"); //will cause error (potential match)
+		newOptions.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8); //will cause error (potential match)
+		newOptions.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8); //will cause error (potential match)
 		javaProject.setOptions(newOptions);
 
 		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
