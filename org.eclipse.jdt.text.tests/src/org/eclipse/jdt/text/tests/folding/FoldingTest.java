@@ -575,13 +575,94 @@ public class FoldingTest {
 				        try {						//here should not be an annotation
 				        } catch (Exception e) {		//here should not be an annotation
 				        }
+				        int zaehler = 0;
+						switch (zaehler) {			//here should be an annotation
+				        case 0:						//here should not be an annotation
+				            break;
+				        default:					//here should not be an annotation
+				            break;
+				    	}
 				    }
 				    public void bar() {					//here should not be an annotation
 				    }
 				}
 				""";
-		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 1);
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 2);
 		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 13); // Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 20); // Method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 15, 19); // switch
+	}
+
+	@Test
+	public void testSwitchExpression() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
+		String str= """
+				package org.example.test;
+				class Outer {
+					void a() {						//here should be an annotation
+						int b = 0;
+						int c = switch (b) {		//here should be an annotation
+							case 1 -> 				//here should be an annotation
+
+							1;
+							case 2 -> 				//here should not be an annotation
+							1;
+							case 3 -> 				//here should be an annotation
+
+							break;
+							1;
+							case 4 -> {				//here should be an annotation
+								b = 2;
+								yield 3;
+							}
+							case 5 -> {				//here should not be an annotation
+								yield 3;
+							}
+							default -> 				//here should be an annotation
+
+							0;
+						};
+					}
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 6);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 24); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 23); // switch
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // 1. case
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 10, 11); // 3. case
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 14, 15); // 4. case
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 21, 22); // default
+	}
+
+	@Test
+	public void testSwitchStatment() throws Exception {
+		assumeTrue("Only doable with the new folding", newFoldingActive);
+		String str= """
+				package org.example.test;
+				class Outer {
+					void a() {						//here should be an annotation
+						int b = 0;
+						switch (b) {				//here should be an annotation
+					        case 0:					//here should be an annotation
+
+					            break;
+					            b = 1;
+					        case 1:					//here should not be an annotation
+					            break;
+
+					        default:				//here should be an annotation
+
+					          	break;
+						}
+					}
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 4);
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "TestFolding.java", str);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 15); // method
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 14); // switch
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // case
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 12, 13); // default
 	}
 }

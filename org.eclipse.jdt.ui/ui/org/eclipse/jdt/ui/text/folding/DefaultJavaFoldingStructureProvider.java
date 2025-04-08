@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -90,10 +91,14 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchExpression;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.YieldStatement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -486,6 +491,65 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		public boolean visit(Initializer node) {
 			createFoldingRegion(node, ctx.collapseMembers());
 			return true;
+		}
+
+		@Override
+		public boolean visit(SwitchStatement node) {
+			createFoldingRegionForStatement(node);
+			createFoldingRegionForSwitch(node, node.statements());
+			return false;
+		}
+
+		@Override
+		public boolean visit(SwitchExpression node) {
+			createFoldingRegionForStatement(node);
+			createFoldingRegionForSwitch(node, node.statements());
+			return false;
+		}
+
+		private void createFoldingRegionForSwitch(ASTNode switchNode, List<?> statements) {
+			SwitchCase previousCase= null;
+
+			for (Object obj : statements) {
+				Statement stmt= (Statement) obj;
+
+				if (stmt instanceof SwitchCase currentCase) {
+					if (previousCase != null) {
+						int start= previousCase.getStartPosition();
+						int end= currentCase.getStartPosition();
+						createFoldingRegion(start, end - start, ctx.collapseMembers());
+					}
+					previousCase= currentCase;
+
+				} else if (stmt instanceof BreakStatement || stmt instanceof YieldStatement) {
+					if (previousCase != null) {
+						int start= previousCase.getStartPosition();
+						int end= stmt.getStartPosition();
+						createFoldingRegion(start, end - start, ctx.collapseMembers());
+						previousCase= null;
+					}
+				} else if (stmt instanceof Block block) {
+					List<?> innerStatements= block.statements();
+					for (Object innerObj : innerStatements) {
+						Statement innerStmt= (Statement) innerObj;
+
+						if (innerStmt instanceof BreakStatement || innerStmt instanceof YieldStatement) {
+							if (previousCase != null) {
+								int start= previousCase.getStartPosition();
+								int end= innerStmt.getStartPosition();
+								createFoldingRegion(start, end - start, ctx.collapseMembers());
+								previousCase= null;
+							}
+						}
+					}
+				}
+			}
+
+			if (previousCase != null) {
+				int start= previousCase.getStartPosition();
+				int end= switchNode.getStartPosition() + switchNode.getLength();
+				createFoldingRegion(start, end - start, ctx.collapseMembers());
+			}
 		}
 
 		private void createFoldingRegion(ASTNode node, boolean collapse) {
