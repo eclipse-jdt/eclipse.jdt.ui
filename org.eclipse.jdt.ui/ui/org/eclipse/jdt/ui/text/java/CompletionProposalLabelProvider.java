@@ -319,7 +319,7 @@ public class CompletionProposalLabelProvider {
 		StyledString nameBuffer= new StyledString();
 
 		// method name
-		nameBuffer.append(methodProposal.getCompletion());
+		nameBuffer.append(methodProposal.getDisplayString());
 
 		// declaring type
 		nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
