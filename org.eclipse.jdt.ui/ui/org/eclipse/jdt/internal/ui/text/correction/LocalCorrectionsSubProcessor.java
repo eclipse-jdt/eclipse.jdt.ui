@@ -1274,13 +1274,6 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 		}
 	}
 
-	public static void getConvertLambdaToAnonymousClassCreationsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
-		if (coveringNode != null) {
-			QuickAssistProcessor.getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, proposals);
-		}
-	}
-
 	public static void addOverrideDefaultMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		new LocalCorrectionsSubProcessor().getOverrideDefaultMethodProposal(context, problem, proposals);
 	}

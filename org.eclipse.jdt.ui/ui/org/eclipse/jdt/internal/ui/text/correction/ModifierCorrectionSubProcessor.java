@@ -428,9 +428,6 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= Modifier.VOLATILE;
 					label= CorrectionMessages.ModifierCorrectionSubProcessor_removevolatile_description;
 					break;
-				case IProblem.IllegalModifierForInterfaceMethod:
-					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT);
-					break;
 				case IProblem.IllegalModifierForInterfaceMethod18:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.STRICTFP | Modifier.DEFAULT | Modifier.STATIC);
 					if (Modifier.isAbstract(binding.getModifiers())) {
