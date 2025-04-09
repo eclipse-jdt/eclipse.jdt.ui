@@ -116,7 +116,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.EnumConstantMustImplementAbstractMethod:
 			case IProblem.ShouldImplementHashcode:
 			case IProblem.BodyForNativeMethod:
-			case IProblem.OuterLocalMustBeFinal:
+			case IProblem.OuterLocalMustBeEffectivelyFinal:
 			case IProblem.UninitializedLocalVariable:
 			case IProblem.UninitializedLocalVariableHintMissingDefault:
 			case IProblem.UndefinedConstructorInDefaultConstructor:
@@ -193,7 +193,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateTypeVariable:
 			case IProblem.DuplicateNestedType:
 			case IProblem.IllegalQualifiedEnumConstantLabel:
-			case IProblem.IllegalModifierForInterfaceMethod:
 			case IProblem.IllegalModifierForInterfaceMethod18:
 			case IProblem.IllegalModifierForInterface:
 			case IProblem.IllegalModifierForClass:
@@ -226,14 +225,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RedefinedArgument:
 			case IProblem.CodeCannotBeReached:
 			case IProblem.DeadCode:
-			case IProblem.InvalidUsageOfTypeParameters:
-			case IProblem.InvalidUsageOfStaticImports:
-			case IProblem.InvalidUsageOfForeachStatements:
-			case IProblem.InvalidUsageOfTypeArguments:
-			case IProblem.InvalidUsageOfEnumDeclarations:
-			case IProblem.InvalidUsageOfVarargs:
-			case IProblem.InvalidUsageOfAnnotations:
-			case IProblem.InvalidUsageOfAnnotationDeclarations:
 			case IProblem.FieldMissingDeprecatedAnnotation:
 			case IProblem.OverridingDeprecatedMethod:
 			case IProblem.OverridingDeprecatedSinceVersionMethod:
@@ -276,13 +267,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnusedObjectAllocation:
 			case IProblem.MethodCanBeStatic:
 			case IProblem.MethodCanBePotentiallyStatic:
-			case IProblem.AutoManagedResourceNotBelow17:
-			case IProblem.MultiCatchNotBelow17:
-			case IProblem.PolymorphicMethodNotBelow17:
-			case IProblem.BinaryLiteralNotBelow17:
-			case IProblem.UnderscoresInLiteralsNotBelow17:
-			case IProblem.SwitchOnStringsNotBelow17:
-			case IProblem.DiamondNotBelow17:
 			case IProblem.PotentialHeapPollutionFromVararg :
 			case IProblem.UnsafeGenericArrayForVarargs:
 			case IProblem.SafeVarargsOnFixedArityMethod :
@@ -304,13 +288,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullableFieldReference:
 			case IProblem.ConflictingNullAnnotations:
 			case IProblem.ConflictingInheritedNullAnnotations:
-			case IProblem.ExplicitThisParameterNotBelow18:
-			case IProblem.DefaultMethodNotBelow18:
-			case IProblem.StaticInterfaceMethodNotBelow18:
-			case IProblem.LambdaExpressionNotBelow18:
-			case IProblem.MethodReferenceNotBelow18:
-			case IProblem.ConstructorReferenceNotBelow18:
-			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
 			case IProblem.MultiConstantCaseLabelsNotSupported:
 			case IProblem.DuplicateInheritedDefaultMethods:
@@ -550,7 +527,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				ModifierCorrectionSubProcessor.addChangeOverriddenModifierProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC);
 				break;
 			case IProblem.CannotHideAnInstanceMethodWithAStaticMethod:
-			case IProblem.IllegalModifierForInterfaceMethod:
 			case IProblem.IllegalModifierForInterface:
 			case IProblem.IllegalModifierForClass:
 			case IProblem.IllegalModifierForInterfaceField:
@@ -608,7 +584,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodRequiresBody:
 				ModifierCorrectionSubProcessor.addMethodRequiresBodyProposals(context, problem, proposals);
 				break;
-			case IProblem.OuterLocalMustBeFinal:
+			case IProblem.OuterLocalMustBeEffectivelyFinal:
 				ModifierCorrectionSubProcessor.addNonFinalLocalProposal(context, problem, proposals);
 				break;
 			case IProblem.UninitializedLocalVariable:
@@ -717,36 +693,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DeadCode:
 				LocalCorrectionsSubProcessor.getUnreachableCodeProposals(context, problem, proposals);
 				break;
-			case IProblem.InvalidUsageOfTypeParameters:
-			case IProblem.InvalidUsageOfStaticImports:
-			case IProblem.InvalidUsageOfForeachStatements:
-			case IProblem.InvalidUsageOfTypeArguments:
-			case IProblem.InvalidUsageOfEnumDeclarations:
-			case IProblem.InvalidUsageOfVarargs:
-			case IProblem.InvalidUsageOfAnnotations:
-			case IProblem.InvalidUsageOfAnnotationDeclarations:
-				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_5);
-				break;
-			case IProblem.DiamondNotBelow17:
-				TypeArgumentMismatchSubProcessor.getInferDiamondArgumentsProposal(context, problem, proposals);
-				//$FALL-THROUGH$
-			case IProblem.AutoManagedResourceNotBelow17:
-			case IProblem.MultiCatchNotBelow17:
-			case IProblem.PolymorphicMethodNotBelow17:
-			case IProblem.BinaryLiteralNotBelow17:
-			case IProblem.UnderscoresInLiteralsNotBelow17:
-			case IProblem.SwitchOnStringsNotBelow17:
-				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
-				break;
-			case IProblem.LambdaExpressionNotBelow18:
-				LocalCorrectionsSubProcessor.getConvertLambdaToAnonymousClassCreationsProposals(context, problem, proposals);
-				//$FALL-THROUGH$
-			case IProblem.ExplicitThisParameterNotBelow18:
-			case IProblem.DefaultMethodNotBelow18:
-			case IProblem.StaticInterfaceMethodNotBelow18:
-			case IProblem.MethodReferenceNotBelow18:
-			case IProblem.ConstructorReferenceNotBelow18:
-			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_8);
 				break;
