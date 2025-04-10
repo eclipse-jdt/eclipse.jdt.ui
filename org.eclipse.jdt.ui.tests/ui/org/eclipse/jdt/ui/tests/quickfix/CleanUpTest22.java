@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2020, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -239,6 +239,65 @@ public class CleanUpTest22 extends CleanUpTestCase {
 							b = false;
 							yield 11;
 						}
+					};
+				}
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+	}
+	@Test
+	public void testPatternInstanceofToSwitchExpression2() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
+		JavaCore.setOptions(options);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			public class E {
+				int i;
+				double d;
+				boolean b;
+
+				public int square(int x) {
+					return x*x;
+				}
+				public int foo(Object y) {
+					if (y instanceof final Integer xint) {
+						return xint;
+					}
+					if (y instanceof final Double xdouble) {
+						return square(8); // square
+					} else if (y instanceof final Boolean xboolean) {
+						throw new NullPointerException();
+					}
+					return 11;
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", sample, false, null);
+
+		enable(CleanUpConstants.USE_SWITCH_FOR_INSTANCEOF_PATTERN);
+
+		sample= """
+			package test1;
+
+			public class E {
+				int i;
+				double d;
+				boolean b;
+
+				public int square(int x) {
+					return x*x;
+				}
+				public int foo(Object y) {
+					return switch (y) {
+						case Integer xint -> xint;
+						case Double _ -> square(8); // square
+						case Boolean _ -> throw new NullPointerException();
+						case null, default -> 11;
 					};
 				}
 			}
