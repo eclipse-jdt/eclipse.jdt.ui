@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -405,11 +407,20 @@ public abstract class BuildPathBasePage {
 			JavaPlugin.logErrorMessage("Page does not support tab switching: "+this.getClass()); //$NON-NLS-1$
 			return null;
 		}
-		TabFolder tabFolder= (TabFolder) fSWTControl.getParent();
-		for (TabItem tabItem : tabFolder.getItems()) {
-			if (tabClass.isInstance(tabItem.getData())) {
-				tabFolder.setSelection(tabItem);
-				return (BuildPathBasePage) tabItem.getData();
+		if(fSWTControl.getParent() instanceof TabFolder tabFolder) {
+			for (TabItem tabItem : tabFolder.getItems()) {
+				if (tabClass.isInstance(tabItem.getData())) {
+					tabFolder.setSelection(tabItem);
+					return (BuildPathBasePage) tabItem.getData();
+				}
+			}
+		}
+		if(fSWTControl.getParent() instanceof CTabFolder cTabFolder) {
+			for (CTabItem ctabItem : cTabFolder.getItems()) {
+				if (tabClass.isInstance(ctabItem.getData())) {
+					cTabFolder.setSelection(ctabItem);
+					return (BuildPathBasePage) ctabItem.getData();
+				}
 			}
 		}
 		return null;
