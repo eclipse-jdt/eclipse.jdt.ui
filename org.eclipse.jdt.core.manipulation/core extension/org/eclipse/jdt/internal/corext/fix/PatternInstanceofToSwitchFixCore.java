@@ -231,6 +231,15 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 				List<SwitchCaseSection> returnList= new ArrayList<>();
 				String assignmentName= null;
 				IVariableBinding assignmentBinding= null;
+				Statement addedSibling= null;
+				if (remainingStatement == null) {
+					IfStatement lastIfStatement= ifStatements.get(ifStatements.size() - 1);
+					Statement sibling= ASTNodes.getNextSibling(lastIfStatement);
+					if (sibling instanceof ReturnStatement || sibling instanceof ThrowStatement) {
+						remainingStatement= sibling;
+						addedSibling= sibling;
+					}
+				}
 				if (remainingStatement == null || ASTNodes.asList(remainingStatement).size() == 0) {
 					return null;
 				}
@@ -322,10 +331,10 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 				}
 				if (returnList.size() + throwList.size() == extendedCases.size()) {
 					return new PatternToSwitchExpressionOperation(ifStatements, switchExpression, extendedCases,
-							true, null, null);
+							addedSibling, true, null, null);
 				} else if (assignmentList.size() == extendedCases.size()) {
 					return new PatternToSwitchExpressionOperation(ifStatements, switchExpression, extendedCases,
-							false, assignmentName, assignmentBinding);
+							addedSibling, false, assignmentName, assignmentBinding);
 				}
 				return null;
 			}
@@ -554,16 +563,18 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 		private List<IfStatement> ifStatements;
 		private Expression switchExpression;
 		private List<SwitchCaseSection> cases;
+		private Statement addedSibling;
 		private boolean createReturnStatement;
 		private String varName;
 		private IVariableBinding assignmentBinding;
 
 		public PatternToSwitchExpressionOperation(final List<IfStatement> ifStatements, final Expression switchExpression,
-				final List<SwitchCaseSection> cases, final boolean createReturnStatement,
+				final List<SwitchCaseSection> cases, final Statement addedSibling, final boolean createReturnStatement,
 				final String varName, final IVariableBinding assignmentBinding) {
 			this.ifStatements= ifStatements;
 			this.switchExpression= switchExpression;
 			this.cases= cases;
+			this.addedSibling= addedSibling;
 			this.createReturnStatement= createReturnStatement;
 			this.varName= varName;
 			this.assignmentBinding= assignmentBinding;
@@ -731,6 +742,9 @@ public class PatternInstanceofToSwitchFixCore extends CompilationUnitRewriteOper
 				if (ifStatements.get(i).getLocationInParent() != IfStatement.ELSE_STATEMENT_PROPERTY) {
 					rewrite.remove(ifStatements.get(i), group);
 				}
+			}
+			if (addedSibling != null) {
+				rewrite.remove(addedSibling, group);
 			}
 		}
 
