@@ -69,4 +69,4 @@ License
 [Eclipse Public License (EPL) v2.0][2]
 
 [1]: https://wiki.eclipse.org/JDT_UI/How_to_Contribute
-[2]: https://wiki.eclipse.org/Eclipse_Public_License
+[2]: https://www.eclipse.org/legal/epl-2.0/
