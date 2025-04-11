@@ -900,6 +900,30 @@ public class MarkdownCommentTests extends CoreTests {
 		assertHtmlContent(expectedContent, actualHtmlContent);
 	}
 	@Test
+	public void testGH1787() throws CoreException {
+		String source= """
+				package p;
+
+				public class E {
+				    /// Unicode in markdown \u000A///\u000D///\u000D\u000A///here
+				    public void m() {}
+				}
+
+				""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/E.java", source, null);
+		assertNotNull("E.java", cu);
+
+		IType type= cu.getType("E");
+
+		IMethod method= type.getMethods()[0];
+		String actualHtmlContent= getHoverHtmlContent(cu, method);
+		assertHtmlContent("""
+				<p>Unicode in markdown</p>
+				<p>here</p>
+				""",
+				actualHtmlContent);
+	}
+	@Test
 	public void testFenceLenFour_1() throws CoreException {
 		String source= """
 				/// ````
