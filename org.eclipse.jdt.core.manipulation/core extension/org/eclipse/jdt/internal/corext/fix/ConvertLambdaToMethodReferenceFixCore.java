@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation and others.
+ * Copyright (c) 2023, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,8 +29,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -216,11 +218,36 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 	}
 
 	public static boolean isValidLambdaReferenceToMethod(Expression expression) {
-		return expression instanceof ClassInstanceCreation
+		if (expression instanceof ClassInstanceCreation
 				|| expression instanceof ArrayCreation
 				|| expression instanceof SuperMethodInvocation
-				|| expression instanceof MethodInvocation
-				|| expression instanceof InstanceofExpression;
+				|| expression instanceof InstanceofExpression) {
+			return true;
+		}
+		if (expression instanceof MethodInvocation m) {
+			Expression methodExp= m.getExpression();
+			if (methodExp == null) {
+				return true;
+			}
+			if (methodExp instanceof SimpleName name) {
+				if (name.resolveBinding() instanceof IVariableBinding varBinding) {
+					if (varBinding.isParameter()) {
+						LambdaExpression lambdaExpression= ASTNodes.getFirstAncestorOrNull(expression, LambdaExpression.class);
+						if (lambdaExpression != null) {
+							List<VariableDeclaration> parms= lambdaExpression.parameters();
+							for (VariableDeclaration parm : parms) {
+								IBinding parmBinding= parm.resolveBinding();
+								if (varBinding.isEqualTo(parmBinding)) {
+									return false;
+								}
+							}
+						}
+					}
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private static class ConvertLambdaToMethodReferenceProposalOperation extends CompilationUnitRewriteOperation {
