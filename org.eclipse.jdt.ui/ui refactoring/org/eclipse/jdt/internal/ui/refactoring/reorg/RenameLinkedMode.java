@@ -387,7 +387,7 @@ public class RenameLinkedMode {
 					Point size;
 					try {
 						size= composite.getSize();
-						image= new Image(gc.getDevice(), size.x, size.y);
+						image= new Image(gc.getDevice(), (iGc, width, height) -> {}, size.x, size.y) ;
 						gc.copyArea(image, 0, 0);
 					} finally {
 						gc.dispose();
