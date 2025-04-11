@@ -4453,7 +4453,7 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_DEFAULT_FILTER_FOR_PARAMETER_NAMES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAME_SINGLE_ARG, true);
 
-		store.setDefault(EDITOR_NEW_FOLDING_ENABLED, false);
+		store.setDefault(EDITOR_NEW_FOLDING_ENABLED, true);
 
 		// Javadoc hover & view
 		JavaElementLinks.initDefaultPreferences(store);
