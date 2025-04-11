@@ -13,9 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.codemining;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -24,9 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongSupplier;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -74,7 +74,7 @@ public class ParameterNamesCodeMiningTest {
 	private JavaMethodParameterCodeMiningProvider fParameterNameCodeMiningProvider;
 	private boolean wasCodeMiningEnabled;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		if(!welcomeClosed) {
 			closeIntro(PlatformUI.getWorkbench());
@@ -93,7 +93,7 @@ public class ParameterNamesCodeMiningTest {
 		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, true);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.EDITOR_CODEMINING_ENABLED, wasCodeMiningEnabled);
 		IWorkbenchPage workbenchPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -103,12 +103,12 @@ public class ParameterNamesCodeMiningTest {
 	}
 
 	private void waitReconciled(JavaSourceViewer viewer) {
-		assertTrue("Editor not reconciled", new DisplayHelper() {
+		assertTrue(new DisplayHelper() {
 			@Override
 			protected boolean condition() {
 				return JavaCodeMiningReconciler.isReconciled(viewer);
 			}
-		}.waitForCondition(viewer.getTextWidget().getDisplay(), 2000));
+		}.waitForCondition(viewer.getTextWidget().getDisplay(), 2000), "Editor not reconciled");
 	}
 
 	@Test
@@ -258,29 +258,27 @@ public class ParameterNamesCodeMiningTest {
 		//
 		StyledText widget= viewer.getTextWidget();
 		int charWidth= widget.getTextBounds(0, 1).width;
-		assertTrue("Code mining not available on expected chars", new DisplayHelper() {
+		assertTrue(new DisplayHelper() {
 			@Override
 			protected boolean condition() {
-				return Arrays.stream(widget.getStyleRanges(widget.getText().indexOf(", 2"), 3)).anyMatch(style ->
-						style.metrics != null && style.metrics.width > charWidth);
+				return Arrays.stream(widget.getStyleRanges(widget.getText().indexOf(", 2"), 3)).anyMatch(style -> style.metrics != null && style.metrics.width > charWidth);
 			}
-		}.waitForCondition(widget.getDisplay(), 2000));
+		}.waitForCondition(widget.getDisplay(), 2000), "Code mining not available on expected chars");
 		//
 		viewer.doOperation(ProjectionViewer.COLLAPSE_ALL);
-		assertTrue("Code mining not available on expected chars after collapsing", new DisplayHelper() {
+		assertTrue(new DisplayHelper() {
 			@Override
 			protected boolean condition() {
-				return Arrays.stream(widget.getStyleRanges(widget.getText().indexOf(", 2"), 3)).anyMatch(style ->
-						style.metrics != null && style.metrics.width > charWidth);
+				return Arrays.stream(widget.getStyleRanges(widget.getText().indexOf(", 2"), 3)).anyMatch(style -> style.metrics != null && style.metrics.width > charWidth);
 			}
-		}.waitForCondition(widget.getDisplay(), 2000));
+		}.waitForCondition(widget.getDisplay(), 2000), "Code mining not available on expected chars after collapsing");
 		//
 		viewer.setSelectedRange(viewer.getDocument().get().indexOf("divideUnsigned") + 1, 0);
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		boolean initial= preferenceStore.getBoolean(PreferenceConstants.EDITOR_MARK_OCCURRENCES);
 		try {
 			preferenceStore.setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
-			assertTrue("Occurence annotation not added", new org.eclipse.jdt.text.tests.performance.DisplayHelper() {
+			assertTrue(new org.eclipse.jdt.text.tests.performance.DisplayHelper() {
 				@Override
 				protected boolean condition() {
 					AtomicInteger annotationCount= new AtomicInteger();
@@ -291,18 +289,16 @@ public class ParameterNamesCodeMiningTest {
 					});
 					return annotationCount.get() != 0;
 				}
-			}.waitForCondition(widget.getDisplay(), 2000));
-			assertTrue("Code mining space at undesired offset after collapsing", new DisplayHelper() {
+			}.waitForCondition(widget.getDisplay(), 2000), "Occurence annotation not added");
+			assertTrue(new DisplayHelper() {
 				@Override
 				protected boolean condition() {
-					return Arrays.stream(widget.getStyleRanges())
-							.filter(range -> range.metrics != null && range.metrics.width > charWidth)
-							.allMatch(style -> {
-								char c= widget.getText().charAt(style.start + 1);
-								return c == '1' || c == '2';
-							});
+					return Arrays.stream(widget.getStyleRanges()).filter(range -> range.metrics != null && range.metrics.width > charWidth).allMatch(style -> {
+						char c= widget.getText().charAt(style.start + 1);
+						return c == '1' || c == '2';
+					});
 				}
-			}.waitForCondition(widget.getDisplay(), 2000));
+			}.waitForCondition(widget.getDisplay(), 2000), "Code mining space at undesired offset after collapsing");
 		} finally {
 			preferenceStore.setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, initial);
 		}

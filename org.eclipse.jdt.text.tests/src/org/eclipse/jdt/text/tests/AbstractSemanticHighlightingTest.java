@@ -13,11 +13,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.rules.ExternalResource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
@@ -49,7 +51,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class AbstractSemanticHighlightingTest {
 
-	protected static class SemanticHighlightingTestSetup extends ExternalResource {
+	protected static class SemanticHighlightingTestSetup implements BeforeEachCallback, AfterEachCallback {
 
 		private IJavaProject fJavaProject;
 		private final String fTestFilename;
@@ -59,7 +61,7 @@ public class AbstractSemanticHighlightingTest {
 		}
 
 		@Override
-		public void before() throws Exception {
+		public void beforeEach(ExtensionContext context) throws Exception {
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
 
 			disableAllSemanticHighlightings();
@@ -82,7 +84,7 @@ public class AbstractSemanticHighlightingTest {
 		}
 
 		@Override
-		public void after() {
+		public void afterEach(ExtensionContext context) {
 			EditorTestHelper.closeEditor(fEditor);
 			fEditor= null;
 			fSourceViewer= null;
@@ -113,7 +115,7 @@ public class AbstractSemanticHighlightingTest {
 
 	private static SourceViewer fSourceViewer;
 
-	@Before
+	@BeforeEach
 	public void before() throws Exception {
 		disableAllSemanticHighlightings();
 	}

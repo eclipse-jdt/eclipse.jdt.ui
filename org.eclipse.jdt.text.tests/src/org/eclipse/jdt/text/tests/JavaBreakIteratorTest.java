@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.internal.ui.text.JavaBreakIterator;
 
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.text.JavaBreakIterator;
  */
 public class JavaBreakIteratorTest extends BreakIteratorTest {
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fBreakIterator= new JavaBreakIterator();
 	}
