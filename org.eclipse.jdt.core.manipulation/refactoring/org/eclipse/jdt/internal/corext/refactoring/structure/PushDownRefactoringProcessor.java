@@ -393,6 +393,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		String source= cu.getSource();
 		CompilationUnit cuRoot= null;
 		for (SearchResultGroup group : (SearchResultGroup[]) engine.getResults()) {
+			source= group.getCompilationUnit().getSource();
 			for (SearchMatch searchResult : group.getSearchResults()) {
 				if (source.charAt(searchResult.getOffset() - 1) == '.') {
 					if (cuRoot == null) {
