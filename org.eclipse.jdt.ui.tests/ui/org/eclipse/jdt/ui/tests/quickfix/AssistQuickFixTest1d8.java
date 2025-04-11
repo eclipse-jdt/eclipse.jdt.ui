@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2024 IBM Corporation and others.
+ * Copyright (c) 2013, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -5036,6 +5036,35 @@ public class AssistQuickFixTest1d8 extends QuickFixTest {
 			}
 			""";
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	@Test
+	public void testConvertLambdaToMethodReference7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String str= """
+			package test1;
+			import java.util.function.Function;
+
+			public class E7 {
+				 public static void main(String[] args) {
+				     f(s -> s.m(s));
+				 }
+
+				 static void f(Function<X, X> f) {}
+
+				 interface X {
+				     X m(X x);
+				 }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E7.java", str, false, null);
+
+		int offset= str.indexOf("s ->");
+		AssistContext context= getCorrectionContext(cu, offset, 4);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 	}
 
 	@Test
