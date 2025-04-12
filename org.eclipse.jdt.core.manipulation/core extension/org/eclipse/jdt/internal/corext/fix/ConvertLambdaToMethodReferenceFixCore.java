@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 IBM Corporation and others.
+ * Copyright (c) 2023, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -216,11 +216,37 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 	}
 
 	public static boolean isValidLambdaReferenceToMethod(Expression expression) {
-		return expression instanceof ClassInstanceCreation
+		if (expression instanceof ClassInstanceCreation
 				|| expression instanceof ArrayCreation
 				|| expression instanceof SuperMethodInvocation
-				|| expression instanceof MethodInvocation
-				|| expression instanceof InstanceofExpression;
+				|| expression instanceof InstanceofExpression) {
+			return true;
+		}
+		if (expression instanceof MethodInvocation methodInvocation) {
+			// Bug546645 - prevent bad code when there is a lambda method invocation body
+			// inside a static method invocation where the lambda method invocation is non-static
+			// in an interface (can't make a non-static method reference to the interface and
+			// can't instantiate the interface via new to reference it)
+			LambdaExpression lambda= ASTNodes.getFirstAncestorOrNull(expression, LambdaExpression.class);
+			if (lambda != null) {
+				MethodInvocation outer= ASTNodes.getFirstAncestorOrNull(lambda, MethodInvocation.class);
+				if (outer == null) {
+					return true;
+				}
+				IMethodBinding outerBinding= outer.resolveMethodBinding();
+				if (!Modifier.isStatic(outerBinding.getModifiers())) {
+					return true;
+				}
+				IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+				if (methodBinding != null) {
+					ITypeBinding typeBinding= methodBinding.getDeclaringClass();
+					if (typeBinding != null) {
+						return !typeBinding.isInterface() || Modifier.isStatic(methodBinding.getModifiers());
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private static class ConvertLambdaToMethodReferenceProposalOperation extends CompilationUnitRewriteOperation {
