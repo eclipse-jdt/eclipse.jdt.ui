@@ -1617,6 +1617,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 							if (buffer.hasUnsavedChanges())
 								buffer.save(getSubProgressMonitor(monitor, 1), true);
 
+							if (stamp != unit.getResource().getModificationStamp()) {
+								unit.updateTimeStamp();
+							}
 						} catch (CoreException ex) {
 							handleException(ex);
 						} finally {
