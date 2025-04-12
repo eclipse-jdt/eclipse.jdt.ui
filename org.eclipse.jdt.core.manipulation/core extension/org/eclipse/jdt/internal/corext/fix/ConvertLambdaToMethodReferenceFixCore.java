@@ -29,10 +29,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -224,28 +222,29 @@ public class ConvertLambdaToMethodReferenceFixCore extends CompilationUnitRewrit
 				|| expression instanceof InstanceofExpression) {
 			return true;
 		}
-		if (expression instanceof MethodInvocation m) {
-			Expression methodExp= m.getExpression();
-			if (methodExp == null) {
-				return true;
-			}
-			if (methodExp instanceof SimpleName name) {
-				if (name.resolveBinding() instanceof IVariableBinding varBinding) {
-					if (varBinding.isParameter()) {
-						LambdaExpression lambdaExpression= ASTNodes.getFirstAncestorOrNull(expression, LambdaExpression.class);
-						if (lambdaExpression != null) {
-							List<VariableDeclaration> parms= lambdaExpression.parameters();
-							for (VariableDeclaration parm : parms) {
-								IBinding parmBinding= parm.resolveBinding();
-								if (varBinding.isEqualTo(parmBinding)) {
-									return false;
-								}
-							}
-						}
+		if (expression instanceof MethodInvocation methodInvocation) {
+			// Bug546645 - prevent bad code when there is a lambda method invocation body
+			// inside a static method invocation where the lambda method invocation is non-static
+			// in an interface (can't make a non-static method reference to the interface and
+			// can't instantiate the interface via new to reference it)
+			LambdaExpression lambda= ASTNodes.getFirstAncestorOrNull(expression, LambdaExpression.class);
+			if (lambda != null) {
+				MethodInvocation outer= ASTNodes.getFirstAncestorOrNull(lambda, MethodInvocation.class);
+				if (outer == null) {
+					return true;
+				}
+				IMethodBinding outerBinding= outer.resolveMethodBinding();
+				if (!Modifier.isStatic(outerBinding.getModifiers())) {
+					return true;
+				}
+				IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+				if (methodBinding != null) {
+					ITypeBinding typeBinding= methodBinding.getDeclaringClass();
+					if (typeBinding != null) {
+						return !typeBinding.isInterface() || Modifier.isStatic(methodBinding.getModifiers());
 					}
 				}
 			}
-			return true;
 		}
 		return false;
 	}
