@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc - separate core logic from UI images
+ *     Nikifor Fedorov (ArSysOp) - eclipse-jdt/eclipse.jdt.ui#2157 Select proposal description considering type
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
@@ -23,9 +24,10 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 	public InitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, IVariableBinding variableBinding, int relevance) {
@@ -34,11 +36,16 @@ public class InitializeFinalFieldProposal extends LinkedCorrectionProposal {
 	}
 
 	public InitializeFinalFieldProposal(IProblemLocation problem, ICompilationUnit cu, ASTNode astNode, int relevance, int updateType) {
-		super(Messages.format(CorrectionMessages.InitializeFieldInConstructorCorrectionProposal_description, problem.getProblemArguments()[0]), cu, null, relevance,
+		super(Messages.format(
+				updateType == InitializeFinalFieldProposalCore.UPDATE_CONSTRUCTOR_NEW_PARAMETER
+						? CorrectionMessages.InitializeFieldWithConstructorParameterCorrectionProposal_description
+						: CorrectionMessages.InitializeFieldInConstructorCorrectionProposal_description,
+				problem.getProblemArguments()[0]), cu, null, relevance,
 				JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE), new InitializeFinalFieldProposalCore(problem, cu, astNode, relevance, updateType));
 	}
 
 	public boolean hasProposal() throws CoreException {
 		return ((InitializeFinalFieldProposalCore) getDelegate()).getRewrite() != null;
 	}
+
 }
