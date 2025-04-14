@@ -1,72 +1,45 @@
-Contributing to JDT UI - Java development tools UI
-============================================
+# JDT UI
 
-Thanks for your interest in this project.
+This is the UI part of Eclipse's Java development tools, the user interface for the Java IDE. 
+This includes views like Package Explorer and JUnit, the Java and properties files editors, Java search, and refactorings.
 
-Project description:
---------------------
+For more information and important links, refer to the [JDT wiki page](https://github.com/eclipse-jdt/eclipse.jdt.core/wiki) or the [JDT project overview page](https://projects.eclipse.org/projects/eclipse.jdt).
 
-The JDT UI implements the user interface for the Java IDE. This includes views like Package Explorer and JUnit, the Java and properties files editors, Java search, and refactorings.
-Website: <http://www.eclipse.org/jdt/ui/>
 
-- <https://projects.eclipse.org/projects/eclipse.jdt.ui>
+## How to contribute:
 
-How to contribute:
---------------------
-Contributions to JDT UI are most welcome. There are many ways to contribute, 
-from entering high quality bug reports, to contributing code or documentation changes. 
-For a complete guide, see the [How to Contribute] [1] page on the team wiki.
+[Contributions are most welcome!](https://github.com/eclipse-jdt/.github/blob/main/CONTRIBUTING.md)
+There are many ways to contribute, from entering high quality bug reports, to contributing code or documentation changes. 
+
+Please bear in mind that this project is almost entirely developed by volunteers.
+If you do not provide the implementation yourself (or pay someone to do it for you), the bug might never get fixed.
+If it is a serious bug, other people than you might care enough to provide a fix.
 
 [![Create Eclipse Development Environment for JDT UI](https://download.eclipse.org/oomph/www/setups/svg/JDT_UI.svg)](
 https://www.eclipse.org/setups/installer/?url=https://raw.githubusercontent.com/eclipse-jdt/eclipse.jdt.ui/master/org.eclipse.jdt.ui.setup/JdtUIConfiguration.setup&show=true
 "Click to open Eclipse-Installer Auto Launch or drag into your running installer")
 
-Developer resources:
---------------------
 
-Information regarding source code management, builds, coding standards, and more.
-
-- <https://projects.eclipse.org/projects/eclipse.jdt.ui/developer>
-
-Contributor License Agreement:
-------------------------------
+## Contributor License Agreement
 
 Before your contribution can be accepted by the project, you need to create and electronically sign the Eclipse Foundation Contributor License Agreement (CLA).
 
 - <http://www.eclipse.org/legal/CLA.php>
 
-Forum:
-------
 
-Public forum for Eclipse JDT users.
-
-- <http://www.eclipse.org/forums/eclipse.tools.jdt>
-
-Search for bugs/issues:
-----------------
-
-This project uses Github issues to track ongoing development and issues.
-
-- [https://github.com/eclipse-jdt/eclipse.jdt.ui/issues](https://github.com/eclipse-jdt/eclipse.jdt.ui/issues)
-
-Create a new bug/issue:
------------------
-
-Be sure to search for existing issue before you create another one. Remember that contributions are always welcome!
-
-- [https://github.com/eclipse-jdt/eclipse.jdt.ui/issues](https://github.com/eclipse-jdt/eclipse.jdt.ui/issues)
-
-Contact:
---------
+## Contact:
 
 Contact the project developers via the project's "dev" list.
 
 - <https://dev.eclipse.org/mailman/listinfo/jdt-dev>
 
-License
--------
+## License
 
-[Eclipse Public License (EPL) v2.0][2]
+[Eclipse Public License (EPL) v2.0](https://www.eclipse.org/legal/epl-2.0/)
 
-[1]: https://wiki.eclipse.org/JDT_UI/How_to_Contribute
-[2]: https://www.eclipse.org/legal/epl-2.0/
+## Links
+
+- https://github.com/eclipse-jdt/eclipse.jdt.core/wiki
+- https://github.com/eclipse-jdt/.github/blob/main/CONTRIBUTING.md
+- https://projects.eclipse.org/projects/eclipse.jdt
+
