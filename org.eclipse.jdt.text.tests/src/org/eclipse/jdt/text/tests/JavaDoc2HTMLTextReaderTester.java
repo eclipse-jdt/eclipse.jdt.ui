@@ -15,13 +15,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -37,8 +37,12 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 public class JavaDoc2HTMLTextReaderTester {
-	@Rule
-	public TestName tn= new TestName();
+	private String testName;
+
+	@BeforeEach
+	void init(TestInfo testInfo) {
+		this.testName= testInfo.getDisplayName();
+	}
 
 	private static final boolean DEBUG= false;
 
@@ -112,7 +116,7 @@ public class JavaDoc2HTMLTextReaderTester {
 	@Test
 	public void test7(){
 		if (DEBUG) {
-			System.out.println(getClass().getName()+"::" + tn.getMethodName() +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println(getClass().getName()+"::" + testName +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@see.org</a>*/"; //$NON-NLS-1$
@@ -123,7 +127,7 @@ public class JavaDoc2HTMLTextReaderTester {
 	@Test
 	public void test8(){
 		if (DEBUG) {
-			System.out.println(getClass().getName()+"::" + tn.getMethodName() +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println(getClass().getName()+"::" + testName +" disabled(corner case - @see tag inside <a> tag)"); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		String string= "/**@author Foo Bar<a href=\"mailto:foobar@see.org\">foobar@eclipse.org</a>*/"; //$NON-NLS-1$

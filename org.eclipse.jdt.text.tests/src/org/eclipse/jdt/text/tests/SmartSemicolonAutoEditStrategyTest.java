@@ -13,10 +13,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -96,7 +96,7 @@ public class SmartSemicolonAutoEditStrategyTest {
 		verifySemicolonPosition(5, 20);
 	}
 
-	@Ignore("testGoToExisting disabled - unwanted functionality")
+	@Disabled("testGoToExisting disabled - unwanted functionality")
 	@Test
 	public void testGoToExisting() throws BadLocationException {
 		fDocument.set("public void; foobar()");
@@ -121,7 +121,7 @@ public class SmartSemicolonAutoEditStrategyTest {
 		verifySemicolonPosition(12, 21);
 	}
 
-	@Ignore("testWithExistingAtInsertPosition disabled - existing characters handled by framework")
+	@Disabled("testWithExistingAtInsertPosition disabled - existing characters handled by framework")
 	@Test
 	public void testWithExistingAtInsertPosition() throws BadLocationException {
 		fDocument.set("public void foobar(); // comment\r\n");
