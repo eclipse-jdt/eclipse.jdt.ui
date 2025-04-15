@@ -407,15 +407,15 @@ public abstract class BuildPathBasePage {
 			JavaPlugin.logErrorMessage("Page does not support tab switching: "+this.getClass()); //$NON-NLS-1$
 			return null;
 		}
-		if(fSWTControl.getParent() instanceof TabFolder tabFolder) {
+		Composite parent= fSWTControl.getParent();
+		if(parent instanceof TabFolder tabFolder) {
 			for (TabItem tabItem : tabFolder.getItems()) {
 				if (tabClass.isInstance(tabItem.getData())) {
 					tabFolder.setSelection(tabItem);
 					return (BuildPathBasePage) tabItem.getData();
 				}
 			}
-		}
-		if(fSWTControl.getParent() instanceof CTabFolder cTabFolder) {
+		} else if(parent instanceof CTabFolder cTabFolder) {
 			for (CTabItem ctabItem : cTabFolder.getItems()) {
 				if (tabClass.isInstance(ctabItem.getData())) {
 					cTabFolder.setSelection(ctabItem);
