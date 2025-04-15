@@ -15,8 +15,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 import org.eclipse.osgi.util.NLS;
@@ -70,6 +76,9 @@ import org.eclipse.ui.contentassist.ContentAssistHandler;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IMemberValuePair;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -560,9 +569,117 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				fOtherNullableAnnotationsDialogField.removeAllElements();
 				fOtherNonNullAnnotationsDialogField.removeAllElements();
 				fOtherNonNullByDefaultAnnotationsDialogField.removeAllElements();
+			} else if (buttonId == IDialogConstants.OK_ID) {
+				Map<AnnotationTarget,List<String>> namesPerTarget= new HashMap<>();
+				detectedAnnotationTargets(fNullableAnnotationDialogField, fOtherNullableAnnotationsDialogField, namesPerTarget);
+				detectedAnnotationTargets(fNonNullAnnotationDialogField, fOtherNonNullAnnotationsDialogField, namesPerTarget);
+				if (namesPerTarget.size() > 1) {
+					if (warnIncompatibleAnnotations(namesPerTarget) != 0) {
+						return;
+					}
+				}
+				okPressed();
 			} else {
 				super.buttonPressed(buttonId);
 			}
+		}
+
+		enum AnnotationTarget { NONE, DECLARATIONS, TYPE_USE, BOTH;
+			static AnnotationTarget forMemberValuePairs(IMemberValuePair[] pairs) {
+				AnnotationTarget result= NONE;
+				for (IMemberValuePair pair : pairs) {
+					int kind= pair.getValueKind();
+					if (kind == IMemberValuePair.K_QUALIFIED_NAME || kind == IMemberValuePair.K_SIMPLE_NAME) {
+						for (Object val : (Object[]) pair.getValue()) {
+							AnnotationTarget current= forName((String) val);
+							if (result == NONE)
+								result= current;
+							else if (current != result)
+								return BOTH;
+						}
+					}
+				}
+				return result;
+			}
+			private static AnnotationTarget forName(String name) {
+				if (name.equals(ElementType.TYPE_USE.name()) || name.equals(ElementType.class.getName()+'.'+ElementType.TYPE_USE.name()))
+					return AnnotationTarget.TYPE_USE;
+				else
+					return AnnotationTarget.DECLARATIONS;
+			}
+			String displayString() {
+				return switch (this) {
+					case NONE -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetUnspecified;
+					case TYPE_USE -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetTypeuse;
+					case DECLARATIONS -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetDeclarations;
+					case BOTH -> PreferencesMessages.NullAnnotationsConfigurationDialog_targetBoth;
+				};
+			}
+		}
+		private void detectedAnnotationTargets(AnnotationDialogField field, AnnotationListDialogField list, Map<AnnotationTarget, List<String>> namesPerTarget) {
+			String name1= field.getText();
+			AnnotationTarget target1= getAnnotationKind(name1);
+			List<String> perTarget= namesPerTarget.computeIfAbsent(target1, k -> new ArrayList<>());
+			perTarget.add(name1);
+			for (AnnotationWrapper otherWrapper : list.getElements()) {
+				String otherName= otherWrapper.annotationName;
+				if (otherName.isBlank()) continue;
+				AnnotationTarget other= getAnnotationKind(otherName);
+				perTarget= namesPerTarget.computeIfAbsent(other, k -> new ArrayList<>());
+				perTarget.add(otherName);
+			}
+		}
+		private AnnotationTarget getAnnotationKind(String name) {
+			try {
+				IType annotationType= JavaCore.create(fProject).findType(name);
+				if (annotationType != null && annotationType.exists()) {
+					for (IAnnotation metaAnn : annotationType.getAnnotations()) {
+						if (isTargetMetaAnnotation(metaAnn, annotationType)) {
+							return AnnotationTarget.forMemberValuePairs(metaAnn.getMemberValuePairs());
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				// fall through
+			}
+			return AnnotationTarget.NONE;
+		}
+		private boolean isTargetMetaAnnotation(IAnnotation metaAnn, IType context) {
+			String name= metaAnn.getElementName();
+			if (Target.class.getName().equals(name)) {
+				return true;
+			} else if (Target.class.getSimpleName().equals(name)) {
+				try {
+					String[][] resolved= context.resolveType(name);
+					if (resolved.length == 1 && resolved[0].length == 2) {
+						return Target.class.getPackageName().equals(resolved[0][0]);
+					}
+				} catch (JavaModelException e) {
+					return false;
+				}
+			}
+			return false;
+		}
+		private int warnIncompatibleAnnotations(Map<AnnotationTarget,List<String>> namesPerTarget) {
+			StringBuilder message= new StringBuilder(PreferencesMessages.NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogMessage);
+			for (Entry<AnnotationTarget, List<String>> entry : namesPerTarget.entrySet()) {
+				message.append("\n\n\t").append(entry.getKey().displayString()).append(':'); //$NON-NLS-1$
+				for (String name : entry.getValue()) {
+					message.append("\n\t\t").append(name); //$NON-NLS-1$
+				}
+			}
+			MessageDialog messageDialog= new MessageDialog(
+					getShell(),
+					PreferencesMessages.NullAnnotationsConfigurationDialog_incompatibleAnnotations_dialogTitle,
+					null,
+					message.toString(),
+					MessageDialog.QUESTION,
+					new String[] { IDialogConstants.YES_LABEL, IDialogConstants.CANCEL_LABEL },
+					0);
+			messageDialog.create();
+			Shell messageShell= messageDialog.getShell();
+			messageShell.setLocation(messageShell.getLocation().x, getShell().getLocation().y + 40);
+			return messageDialog.open();
 		}
 
 		public String[] getResult() {
