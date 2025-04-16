@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2023 IBM Corporation and others.
+ * Copyright (c) 2019, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -524,6 +525,12 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 	public static VariableDeclarationFixCore createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
 		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<>();
+		IProblem[] problems= compilationUnit.getProblems();
+		for (IProblem problem : problems) {
+			if (problem.isError()) {
+				return null;
+			}
+		}
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
 		compilationUnit.accept(finder);
 		List<ModifierChangeOperation> ops= new ArrayList<>();
@@ -554,6 +561,12 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		if (!addFinalFields && !addFinalParameters && !addFinalLocals)
 			return null;
 
+		IProblem[] problems= compilationUnit.getProblems();
+		for (IProblem problem : problems) {
+			if (problem.isError()) {
+				return null;
+			}
+		}
 		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<>();
 		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
 		compilationUnit.accept(finder);
