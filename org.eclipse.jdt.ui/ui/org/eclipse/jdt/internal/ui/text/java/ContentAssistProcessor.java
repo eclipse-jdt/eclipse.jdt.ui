@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -325,21 +326,42 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @return the list of proposals
 	 */
 	private List<ICompletionProposal> collectProposals(ITextViewer viewer, int offset, IProgressMonitor monitor, ContentAssistInvocationContext context) {
-		boolean needsSortingAfterFiltering= false;
-		List<ICompletionProposal> proposals= new ArrayList<>();
+		List<ICompletionProposal> proposals= Collections.synchronizedList(new ArrayList<>());
 		List<CompletionProposalCategory> providers= getCategories();
+		List<Thread> threads= new ArrayList<>();
+		AtomicBoolean needsSortingAfterFiltering= new AtomicBoolean(false);
+
 		for (CompletionProposalCategory cat : providers) {
-			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, Progress.subMonitor(monitor, 1));
-			proposals.addAll(computed);
-			needsSortingAfterFiltering= needsSortingAfterFiltering || (cat.isSortingAfterFilteringNeeded() && !computed.isEmpty());
-			if (fErrorMessage == null) {
-				fErrorMessage= cat.getErrorMessage();
+			Thread t= new Thread(new Runnable() {
+				@Override
+				public void run() {
+					List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, Progress.subMonitor(monitor, 1));
+					proposals.addAll(computed);
+					if (cat.isSortingAfterFilteringNeeded() && !computed.isEmpty()) {
+						needsSortingAfterFiltering.set(true);
+					}
+					synchronized (this) {
+						if (fErrorMessage == null) {
+							fErrorMessage= cat.getErrorMessage();
+						}
+					}
+				}
+			});
+			t.start();
+			threads.add(t);
+		}
+		for (Thread t : threads) {
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 		}
-		if (fNeedsSortingAfterFiltering && !needsSortingAfterFiltering) {
+		if (fNeedsSortingAfterFiltering && !needsSortingAfterFiltering.get()) {
 			fAssistant.setSorter(null);
 		}
-		fNeedsSortingAfterFiltering= needsSortingAfterFiltering;
+		fNeedsSortingAfterFiltering= needsSortingAfterFiltering.get();
+
 		return proposals;
 	}
 
