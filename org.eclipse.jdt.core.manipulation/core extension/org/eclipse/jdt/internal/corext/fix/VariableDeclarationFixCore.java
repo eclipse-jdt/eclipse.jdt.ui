@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -67,9 +66,11 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 	public static class WrittenNamesFinder extends GenericVisitor {
 
 		private final HashMap<IBinding, List<SimpleName>> fResult;
+		private final HashSet<String> fUnresolved;
 
-		public WrittenNamesFinder(HashMap<IBinding, List<SimpleName>> result) {
+		public WrittenNamesFinder(HashMap<IBinding, List<SimpleName>> result, HashSet<String> unresolved) {
 			fResult= result;
+			fUnresolved= unresolved;
 		}
 
 		@Override
@@ -80,6 +81,11 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 				return super.visit(node);
 
 			IBinding binding= node.resolveBinding();
+			if (binding == null) {
+				fUnresolved.add(node.getFullyQualifiedName());
+			} else 	if (binding.isRecovered()) {
+				throw new AbortSearchException();
+			}
 			if (!(binding instanceof IVariableBinding))
 				return super.visit(node);
 
@@ -112,6 +118,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 		private final List<ModifierChangeOperation> fResult;
 		private final HashMap<IBinding, List<SimpleName>> fWrittenVariables;
+		private final HashSet<String> fUnresolved;
 		private final boolean fAddFinalFields;
 		private final boolean fAddFinalParameters;
 		private final boolean fAddFinalLocals;
@@ -119,7 +126,8 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		public VariableDeclarationFinder(boolean addFinalFields,
 				boolean addFinalParameters,
 				boolean addFinalLocals,
-				final List<ModifierChangeOperation> result, final HashMap<IBinding, List<SimpleName>> writtenNames) {
+				final List<ModifierChangeOperation> result, final HashMap<IBinding, List<SimpleName>> writtenNames,
+				final HashSet<String> unresolved) {
 
 			super();
 			fAddFinalFields= addFinalFields;
@@ -127,6 +135,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			fAddFinalLocals= addFinalLocals;
 			fResult= result;
 			fWrittenVariables= writtenNames;
+			fUnresolved= unresolved;
 		}
 
 		@Override
@@ -213,7 +222,7 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 			if (Modifier.isStatic(((FieldDeclaration)fragment.getParent()).getModifiers()))
 				return false;
 
-			if (!fWrittenVariables.containsKey(binding)) {
+			if (!fWrittenVariables.containsKey(binding) && !fUnresolved.contains(binding.getName())) {
 				//variable is not written
 				if (fragment.getInitializer() == null) {//variable is not initialized
 					return false;
@@ -525,16 +534,15 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 
 	public static VariableDeclarationFixCore createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
 		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<>();
-		IProblem[] problems= compilationUnit.getProblems();
-		for (IProblem problem : problems) {
-			if (problem.isError()) {
-				return null;
-			}
+		HashSet<String> unresolved= new HashSet<>();
+		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames, unresolved);
+		try {
+			compilationUnit.accept(finder);
+		} catch (AbortSearchException e) {
+			return null;
 		}
-		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
-		compilationUnit.accept(finder);
 		List<ModifierChangeOperation> ops= new ArrayList<>();
-		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, ops, writtenNames);
+		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, ops, writtenNames, unresolved);
 		if (selectedNodes.length == 1) {
 			selectedNodes[0].accept(visitor);
 		} else {
@@ -561,18 +569,18 @@ public class VariableDeclarationFixCore extends CompilationUnitRewriteOperations
 		if (!addFinalFields && !addFinalParameters && !addFinalLocals)
 			return null;
 
-		IProblem[] problems= compilationUnit.getProblems();
-		for (IProblem problem : problems) {
-			if (problem.isError()) {
-				return null;
-			}
-		}
 		HashMap<IBinding, List<SimpleName>> writtenNames= new HashMap<>();
-		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
-		compilationUnit.accept(finder);
+		HashSet<String> unresolved= new HashSet<>();
+		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames, unresolved);
+		try {
+			compilationUnit.accept(finder);
+		} catch (AbortSearchException e) {
+			return null;
+		}
 
 		List<ModifierChangeOperation> operations= new ArrayList<>();
-		VariableDeclarationFinder visitor= new VariableDeclarationFinder(addFinalFields, addFinalParameters, addFinalLocals, operations, writtenNames);
+		VariableDeclarationFinder visitor= new VariableDeclarationFinder(addFinalFields, addFinalParameters, addFinalLocals, operations,
+				writtenNames, unresolved);
 		compilationUnit.accept(visitor);
 
 		if (operations.isEmpty())

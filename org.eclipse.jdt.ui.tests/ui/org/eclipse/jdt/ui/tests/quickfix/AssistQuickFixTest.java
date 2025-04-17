@@ -6723,7 +6723,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private final int i= 0;
 			    private void foo() {
@@ -6749,7 +6749,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal03() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public int i= 0;
 			    private void foo() {
@@ -6767,7 +6767,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
 
 		String expected1= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    private void foo() {
@@ -6788,7 +6788,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal04() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private void foo() {
 			        int i= 0, j= 0;
@@ -6808,7 +6808,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String str1= """
-			package test;
+			package test1;
 			public class E {
 			    private void foo() {
 			        final int i= 0;
@@ -6825,7 +6825,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private void foo(int i, int j) {
 			        System.out.println(i);
@@ -6844,7 +6844,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String str1= """
-			package test;
+			package test1;
 			public class E {
 			    private void foo(final int i, int j) {
 			        System.out.println(i);
@@ -6859,7 +6859,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal06() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 0;
@@ -6885,7 +6885,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal07() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    public void foo() {
@@ -6911,7 +6911,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal08() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    public void foo() {
@@ -6939,7 +6939,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal09() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    public void foo() {
@@ -6967,7 +6967,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal10() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    public void foo() {
@@ -6995,7 +6995,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal11() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        for (int j= 0, i= 0; j < (new int[0]).length; j++) {
@@ -7021,7 +7021,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal12() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1, j= i + 1, h= j + 1;
@@ -7042,7 +7042,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String str1= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        final int i= 1;
@@ -7060,7 +7060,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal13() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1, j= i + 1, h= j + 1;
@@ -7081,7 +7081,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String ex1= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1;
@@ -7095,7 +7095,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			""";
 
 		String ex2= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1, j, h= j + 1;
@@ -7114,7 +7114,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal14() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1, j= i + 1, h= j + 1;
@@ -7135,7 +7135,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String ex1= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1, j= i + 1;
@@ -7148,7 +7148,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			""";
 
 		String ex2= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 1, j= i + 1, h;
@@ -7167,7 +7167,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal15() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			import java.io.Serializable;
 			public class E {
 			    public void foo() {
@@ -7193,7 +7193,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String expected1= """
-			package test;
+			package test1;
 			import java.io.Serializable;
 			public class E {
 			    public void foo() {
@@ -7218,7 +7218,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal16() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo() {
 			        int i= 0;
@@ -7241,7 +7241,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal17() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    private void foo() {
@@ -7259,7 +7259,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
 
 		String str1= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    private void foo() {
@@ -7280,7 +7280,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal18() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private int i= 0;
 			    private void foo() {
@@ -7305,7 +7305,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinal19() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    private void foo() {
 			        int i= 0;
@@ -7328,7 +7328,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	public void testMakeFinalBug148373() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo(Integer i) {
 			    }
@@ -7345,7 +7345,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String str1= """
-			package test;
+			package test1;
 			public class E {
 			    public void foo(final Integer i) {
 			    }
