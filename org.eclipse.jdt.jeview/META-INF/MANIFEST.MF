@@ -22,3 +22,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.jdt.jeview;x-internal:=true,
  org.eclipse.jdt.jeview.properties;x-internal:=true,
  org.eclipse.jdt.jeview.views;x-internal:=true
+Require-Capability: eclipse.swt;filter:="(image.format=svg)"
