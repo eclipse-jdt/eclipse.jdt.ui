@@ -393,7 +393,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			setToolTipText(TextMessages.JavaOutlineInformationControl_GoIntoTopLevelType_tooltip);
 			setDescription(TextMessages.JavaOutlineInformationControl_GoIntoTopLevelType_description);
 
-			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.svg"); //$NON-NLS-1$
 
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
 
@@ -476,7 +476,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			setToolTipText(TextMessages.JavaOutlineInformationControl_LexicalSortingAction_tooltip);
 			setDescription(TextMessages.JavaOutlineInformationControl_LexicalSortingAction_description);
 
-			JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.svg"); //$NON-NLS-1$
 
 			fOutlineViewer= outlineViewer;
 
@@ -516,7 +516,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			setDescription(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_description);
 			setToolTipText(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_tooltip);
 
-			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.svg"); //$NON-NLS-1$
 
 			fOutlineViewer= outlineViewer;
 

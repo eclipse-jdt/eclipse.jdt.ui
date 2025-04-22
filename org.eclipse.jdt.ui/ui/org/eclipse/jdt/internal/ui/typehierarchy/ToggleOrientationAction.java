@@ -39,25 +39,25 @@ public class ToggleOrientationAction extends Action {
 			setText(TypeHierarchyMessages.ToggleOrientationAction_horizontal_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_horizontal_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_horizontal_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "th_horizontal.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "th_horizontal.svg"); //$NON-NLS-1$
 			break;
 		case ITypeHierarchyViewPart.VIEW_LAYOUT_VERTICAL:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_vertical_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_vertical_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_vertical_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.svg"); //$NON-NLS-1$
 			break;
 		case ITypeHierarchyViewPart.VIEW_LAYOUT_AUTOMATIC:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_automatic_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_automatic_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_automatic_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "th_automatic.svg"); //$NON-NLS-1$
 			break;
 		case ITypeHierarchyViewPart.VIEW_LAYOUT_SINGLE:
 			setText(TypeHierarchyMessages.ToggleOrientationAction_single_label);
 			setDescription(TypeHierarchyMessages.ToggleOrientationAction_single_description);
 			setToolTipText(TypeHierarchyMessages.ToggleOrientationAction_single_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "th_single.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "th_single.svg"); //$NON-NLS-1$
 			break;
 		default:
 			Assert.isTrue(false);

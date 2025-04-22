@@ -51,7 +51,7 @@ public class FilterTextControl {
 	 * Image descriptor for enabled clear button.
 	 */
 	private static Optional<ImageDescriptor> fgClearIconDescriptor= ResourceLocator
-			.imageDescriptorFromBundle(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.png"); //$NON-NLS-1$
+			.imageDescriptorFromBundle(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.svg"); //$NON-NLS-1$
 
 	/**
 	 * Image descriptor for disabled clear button.
