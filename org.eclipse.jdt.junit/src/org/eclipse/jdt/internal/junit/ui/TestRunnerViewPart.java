@@ -264,11 +264,11 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fTestRunningIcon;
 	final Image fTestIgnoredIcon;
 
-	final ImageDescriptor fSuiteIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuite.png"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteOkIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteok.png"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteErrorIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteerror.png"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteFailIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuitefail.png"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteRunningIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiterun.png"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuite.svg"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteOkIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteok.svg"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteErrorIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteerror.svg"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteFailIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuitefail.svg"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteRunningIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiterun.svg"); //$NON-NLS-1$
 
 	final Image fSuiteIcon;
 	final Image fSuiteOkIcon;
@@ -386,7 +386,7 @@ public class TestRunnerViewPart extends ViewPart {
 		@Override
 		public void configureHistoryDropDownAction(IAction action) {
 			action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
-			JUnitPlugin.setLocalImageDescriptors(action, "history_list.png"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(action, "history_list.svg"); //$NON-NLS-1$
 		}
 
 		@Override
@@ -501,7 +501,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ImportTestRunSessionAction(Shell shell) {
 			super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_name);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/import_wiz.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/import_wiz.svg")); //$NON-NLS-1$
 			fShell= shell;
 		}
 
@@ -647,7 +647,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ExportTestRunSessionAction(Shell shell, TestRunSession testRunSession) {
 			super(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_name);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/export_wiz.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/export_wiz.svg")); //$NON-NLS-1$
 			fShell= shell;
 			fTestRunSession= testRunSession;
 		}
@@ -913,7 +913,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ClearAction extends Action {
 		public ClearAction() {
 			setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/rem_all_co.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/rem_all_co.svg")); //$NON-NLS-1$
 
 			boolean enabled= false;
 			List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
@@ -949,7 +949,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public StopAction() {
 			setText(JUnitMessages.TestRunnerViewPart_stopaction_text);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_stopaction_tooltip);
-			JUnitPlugin.setLocalImageDescriptors(this, "stop.png"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "stop.svg"); //$NON-NLS-1$
 		}
 
 		@Override
@@ -963,7 +963,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public RerunLastAction() {
 			setText(JUnitMessages.TestRunnerViewPart_rerunaction_label);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip);
-			JUnitPlugin.setLocalImageDescriptors(this, "relaunch.png"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "relaunch.svg"); //$NON-NLS-1$
 			setEnabled(false);
 			setActionDefinitionId(RERUN_LAST_COMMAND);
 		}
@@ -978,7 +978,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public RerunLastFailedFirstAction() {
 			setText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_label);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);
-			JUnitPlugin.setLocalImageDescriptors(this, "relaunchf.png"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "relaunchf.svg"); //$NON-NLS-1$
 			setEnabled(false);
 			setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
 		}
@@ -997,15 +997,15 @@ public class TestRunnerViewPart extends ViewPart {
 			switch (orientation) {
 			case TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL:
 				setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label);
-				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.png")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.svg")); //$NON-NLS-1$
 				break;
 			case TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL:
 				setText(JUnitMessages.TestRunnerViewPart_toggle_vertical_label);
-				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.png")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.svg")); //$NON-NLS-1$
 				break;
 			case TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC:
 				setText(JUnitMessages.TestRunnerViewPart_toggle_automatic_label);
-				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.png")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.svg")); //$NON-NLS-1$
 				break;
 			default:
 				break;
@@ -1035,15 +1035,15 @@ public class TestRunnerViewPart extends ViewPart {
 			switch (sortingCriterion) {
 				case SORT_BY_NAME:
 					setText(JUnitMessages.TestRunnerViewPart_toggle_name_label);
-					setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/alphab_sort_co.png")); //$NON-NLS-1$
+					setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/alphab_sort_co.svg")); //$NON-NLS-1$
 					break;
 				case SORT_BY_EXECUTION_ORDER:
 					setText(JUnitMessages.TestRunnerViewPart_toggle_execution_order_label);
-					setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/stckframe_running_obj.png")); //$NON-NLS-1$
+					setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/stckframe_running_obj.svg")); //$NON-NLS-1$
 					break;
 				case SORT_BY_EXECUTION_TIME:
 					setText(JUnitMessages.TestRunnerViewPart_toggle_execution_time_label);
-					setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/time_obj.png")); //$NON-NLS-1$
+					setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/time_obj.svg")); //$NON-NLS-1$
 					break;
 				default:
 					break;
@@ -1133,7 +1133,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public FailuresOnlyFilterAction() {
 			super(JUnitMessages.TestRunnerViewPart_show_failures_only, AS_CHECK_BOX);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_show_failures_only);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.svg")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -1146,7 +1146,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public IgnoredOnlyFilterAction() {
 			super(JUnitMessages.TestRunnerViewPart_show_ignored_only, AS_CHECK_BOX);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_show_ignored_only);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/testignored.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/testignored.svg")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -1171,7 +1171,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ShowTestHierarchyAction() {
 			super(JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.svg")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -1184,7 +1184,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ActivateOnErrorAction extends Action {
 		public ActivateOnErrorAction() {
 			super(JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
-			//setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.png")); //$NON-NLS-1$
+			//setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.svg")); //$NON-NLS-1$
 			update();
 		}
 		public void update() {
@@ -1201,19 +1201,19 @@ public class TestRunnerViewPart extends ViewPart {
 	public TestRunnerViewPart() {
 		fImagesToDispose= new ArrayList<>();
 
-		fStackViewIcon= createManagedImage("eview16/stackframe.png");//$NON-NLS-1$
-		fTestRunOKIcon= createManagedImage("eview16/junitsucc.png"); //$NON-NLS-1$
-		fTestRunFailIcon= createManagedImage("eview16/juniterr.png"); //$NON-NLS-1$
-		fTestRunOKDirtyIcon= createManagedImage("eview16/junitsuccq.png"); //$NON-NLS-1$
-		fTestRunFailDirtyIcon= createManagedImage("eview16/juniterrq.png"); //$NON-NLS-1$
+		fStackViewIcon= createManagedImage("eview16/stackframe.svg");//$NON-NLS-1$
+		fTestRunOKIcon= createManagedImage("eview16/junitsucc.svg"); //$NON-NLS-1$
+		fTestRunFailIcon= createManagedImage("eview16/juniterr.svg"); //$NON-NLS-1$
+		fTestRunOKDirtyIcon= createManagedImage("eview16/junitsuccq.svg"); //$NON-NLS-1$
+		fTestRunFailDirtyIcon= createManagedImage("eview16/juniterrq.svg"); //$NON-NLS-1$
 
-		fTestIcon= createManagedImage("obj16/test.png"); //$NON-NLS-1$
-		fTestOkIcon= createManagedImage("obj16/testok.png"); //$NON-NLS-1$
-		fTestErrorIcon= createManagedImage("obj16/testerr.png"); //$NON-NLS-1$
-		fTestFailIcon= createManagedImage("obj16/testfail.png"); //$NON-NLS-1$
-		fTestRunningIcon= createManagedImage("obj16/testrun.png"); //$NON-NLS-1$
-		fTestIgnoredIcon= createManagedImage("obj16/testignored.png"); //$NON-NLS-1$
-		fTestAssumptionFailureIcon = createManagedImage("obj16/testassumptionfailed.png"); //$NON-NLS-1$
+		fTestIcon= createManagedImage("obj16/test.svg"); //$NON-NLS-1$
+		fTestOkIcon= createManagedImage("obj16/testok.svg"); //$NON-NLS-1$
+		fTestErrorIcon= createManagedImage("obj16/testerr.svg"); //$NON-NLS-1$
+		fTestFailIcon= createManagedImage("obj16/testfail.svg"); //$NON-NLS-1$
+		fTestRunningIcon= createManagedImage("obj16/testrun.svg"); //$NON-NLS-1$
+		fTestIgnoredIcon= createManagedImage("obj16/testignored.svg"); //$NON-NLS-1$
+		fTestAssumptionFailureIcon = createManagedImage("obj16/testassumptionfailed.svg"); //$NON-NLS-1$
 
 		fSuiteIcon= createManagedImage(fSuiteIconDescriptor);
 		fSuiteOkIcon= createManagedImage(fSuiteOkIconDescriptor);

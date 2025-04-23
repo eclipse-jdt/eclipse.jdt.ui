@@ -54,9 +54,9 @@ public class RerunAction extends Action {
 		fUniqueId= uniqueId;
 		fLaunchMode= launchMode;
 		if (ILaunchManager.RUN_MODE == launchMode) {
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/run_exc.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/run_exc.svg")); //$NON-NLS-1$
 		} else if (ILaunchManager.DEBUG_MODE == launchMode) {
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/debug_exc.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/debug_exc.svg")); //$NON-NLS-1$
 		}
 	}
 
