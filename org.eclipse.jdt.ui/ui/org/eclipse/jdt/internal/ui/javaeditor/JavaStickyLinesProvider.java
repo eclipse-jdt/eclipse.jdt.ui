@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -104,7 +105,7 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 					unit= typeRoot.getWorkingCopy(workingCopyOwner, null);
 					if (unit != null) {
 						CompilationUnit cu= convertICompilationUnitToCompilationUnit(unit);
-						node= getASTNode(cu, textWidgetLineNumber+1, line);
+						node= getASTNode(cu, mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber)+1, line);
 						while (node == null && textWidgetLineNumber > 0) {
 							line= textWidget.getLine(--textWidgetLineNumber);
 							startIndentation= getIndentation(line);
@@ -113,9 +114,9 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 								startIndentation= getIndentation(line);
 							}
 							if (textWidgetLineNumber > 0) {
-								int position= cu.getPosition(textWidgetLineNumber + 1, startIndentation);
+								int position= cu.getPosition(mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber) + 1, startIndentation);
 								if (position >= 0) {
-									node= getASTNode(cu, textWidgetLineNumber+1, line);
+									node= getASTNode(cu, mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber)+1, line);
 								}
 							}
 						}
@@ -131,6 +132,11 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 										addStickyLine= true;
 										ASTNode name= ((AbstractTypeDeclaration)node).getName();
 										nodeLineNumber= cu.getLineNumber(name.getStartPosition());
+										break;
+									case ASTNode.TYPE_DECLARATION_STATEMENT:
+										addStickyLine= true;
+										ASTNode typeDeclStmtName= ((TypeDeclarationStatement)node).getDeclaration().getName();
+										nodeLineNumber= cu.getLineNumber(typeDeclStmtName.getStartPosition());
 										break;
 									case ASTNode.METHOD_DECLARATION:
 										addStickyLine= true;
@@ -160,14 +166,14 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 										Statement elseStmt= ifStmt.getElseStatement();
 										if (elseStmt != null) {
 											int elseLine= cu.getLineNumber(elseStmt.getStartPosition());
-											if (elseLine <= textWidgetLineNumber + 1) {
+											if (elseLine <= mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber + 1)) {
 												Pattern p= ELSE_PATTERN;
 												nodeLineNumber= elseLine;
-												String stmtLine= textWidget.getLine(nodeLineNumber - 1);
+												String stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
 												Matcher m= p.matcher(stmtLine);
 												while (!m.find() && nodeLineNumber > 1) {
 													nodeLineNumber--;
-													stmtLine= textWidget.getLine(nodeLineNumber - 1);
+													stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
 													m= p.matcher(stmtLine);
 												}
 												node= node.getParent();
@@ -219,11 +225,11 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 										}
 										if (bodyProperty != null && pattern != null) {
 											nodeLineNumber= cu.getLineNumber(bodyProperty.getStartPosition());
-											String stmtLine= textWidget.getLine(nodeLineNumber - 1);
+											String stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
 											Matcher m= pattern.matcher(stmtLine);
 											while (!m.find() && nodeLineNumber > 1) {
 												nodeLineNumber--;
-												stmtLine= textWidget.getLine(nodeLineNumber - 1);
+												stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
 												m= pattern.matcher(stmtLine);
 											}
 										}
@@ -237,20 +243,20 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 									default:
 										break;
 								}
-								if (addStickyLine) {
-									stickyLines.addFirst(new StickyLine(mapWidgetToLineNumber(sourceViewer, nodeLineNumber - 1), sourceViewer));
+								if (addStickyLine && nodeLineNumber <= lineNumber) {
+									stickyLines.addFirst(new StickyLine(nodeLineNumber - 1, sourceViewer));
 								}
 								if (node.getNodeType() == ASTNode.MODIFIER) {
 									Modifier modifier= (Modifier)node;
 									startIndentation+= modifier.getLength();
-									node= getASTNode(cu, textWidgetLineNumber+1, line);
+									node= getASTNode(cu, mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber+1), line);
 								} else {
 									node= node.getParent();
 								}
 							}
 						}
 					}
-					if (unit != null) {
+					if (unit != null && !typeRoot.isReadOnly()) {
 						unit.discardWorkingCopy();
 					}
 				} catch (JavaModelException e) {
