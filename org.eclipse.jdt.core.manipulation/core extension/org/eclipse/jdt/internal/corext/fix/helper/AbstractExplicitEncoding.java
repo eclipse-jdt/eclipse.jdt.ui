@@ -18,19 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jface.text.BadLocationException;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -53,9 +46,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.common.ReferenceHolder;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.UseExplicitEncodingFixCore;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 /**
@@ -212,87 +202,4 @@ public abstract class AbstractExplicitEncoding<T extends ASTNode> {
 		}
 	}
 
-	protected void removeNLSComment(CompilationUnitRewrite cuRewrite, ASTNode node, TextEditGroup group) {
-		CompilationUnit unit= cuRewrite.getRoot();
-		ICompilationUnit icu= (ICompilationUnit) cuRewrite.getRoot().getJavaElement();
-
-		if (icu == null) {
-			System.err.println("ICompilationUnit is null."); //$NON-NLS-1$
-			return;
-		}
-
-		String source= null;
-		try {
-			source= icu.getSource();
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-
-		if (source == null) {
-			System.err.println("Source code is null."); //$NON-NLS-1$
-			return;
-		}
-
-		int startLine= unit.getLineNumber(node.getStartPosition());
-		int endOfLine= unit.getPosition(startLine + 1, 0);
-		String lineText= source.substring(node.getStartPosition(), endOfLine);
-
-		try {
-			NLSLine[] lines= NLSScanner.scan(lineText);
-
-			for (NLSLine nlsLine : lines) {
-				if (nlsLine != null && isConsistent(nlsLine, true)) {
-					for (NLSElement element : nlsLine.getElements()) {
-						if (element.hasTag()) {
-							Comment comment= findCommentNode(unit, element.getTagText());
-							if (comment != null) {
-								// Jetzt entfernen wir den Kommentar als ReplaceEdit.
-								ReplaceEdit edit= new ReplaceEdit(comment.getStartPosition(), comment.getLength(), ""); //$NON-NLS-1$
-								group.addTextEdit(edit); // Die Bearbeitung zur TextEditGroup hinzufügen
-								System.out.println("Removed NLS comment: " + comment.getStartPosition()); //$NON-NLS-1$
-							}
-						}
-					}
-				}
-			}
-		} catch (InvalidInputException | BadLocationException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private boolean isConsistent(NLSLine nlsLine, boolean isTagged) {
-		NLSElement[] elements= nlsLine.getElements();
-		for (NLSElement element : elements) {
-			if (element.hasTag() != isTagged) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private Comment findCommentNode(CompilationUnit unit, String commentContent) {
-		List<Comment> commentList= unit.getCommentList();
-		for (Comment comment : commentList) {
-			String content= getCommentContent(comment, unit);
-			if (content != null && content.equals(commentContent)) {
-				return comment;
-			}
-		}
-		return null;
-	}
-
-	private String getCommentContent(Comment comment, CompilationUnit unit) {
-		try {
-			// Holen des ICompilationUnit-Objekts aus dem CompilationUnit
-			ICompilationUnit cu= (ICompilationUnit) unit.getJavaElement();
-			if (cu != null) {
-				// Abrufen des Quelltextes des gesamten ICompilationUnit
-				String source= cu.getSource();
-				return source.substring(comment.getStartPosition(), comment.getStartPosition() + comment.getLength());
-			}
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 }
