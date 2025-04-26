@@ -552,6 +552,9 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 			case K_ANNOTATION:
 				buf.append("@interface <b>"); //$NON-NLS-1$
 				break;
+			case K_RECORD:
+				buf.append("record <b>"); //$NON-NLS-1$
+				break;
 		}
 		if (fTypeNameWithParameters != null) {
 			nameToHTML(fTypeNameWithParameters, buf);
