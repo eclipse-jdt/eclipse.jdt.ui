@@ -85,13 +85,11 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 		fRetargetContentAssist= new RetargetAction(JdtActionConstants.CONTENT_ASSIST,  JavaEditorMessages.ContentAssistProposal_label);
 		fRetargetContentAssist.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		fRetargetContentAssist.setImageDescriptor(JavaPluginImages.DESC_ELCL_CODE_ASSIST);
-		fRetargetContentAssist.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CODE_ASSIST);
 		markAsPartListener(fRetargetContentAssist);
 
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal."); //$NON-NLS-1$
 		fContentAssist.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		fContentAssist.setImageDescriptor(JavaPluginImages.DESC_ELCL_CODE_ASSIST);
-		fContentAssist.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CODE_ASSIST);
 
 		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistContextInformation."); //$NON-NLS-1$
 		fContextInformation.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);

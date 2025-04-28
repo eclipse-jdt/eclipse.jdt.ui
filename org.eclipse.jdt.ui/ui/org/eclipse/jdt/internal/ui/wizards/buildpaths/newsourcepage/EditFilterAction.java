@@ -70,7 +70,6 @@ public class EditFilterAction extends BuildpathModifierAction {
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip);
 		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_Edit);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS);
 	}
 
 	@Override

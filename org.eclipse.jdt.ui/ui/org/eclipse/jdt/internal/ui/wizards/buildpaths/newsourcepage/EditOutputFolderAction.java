@@ -81,7 +81,6 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_OUTPUT_FOLDER);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_EditOutput_tooltip);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER);
 	}
 
 	@Override

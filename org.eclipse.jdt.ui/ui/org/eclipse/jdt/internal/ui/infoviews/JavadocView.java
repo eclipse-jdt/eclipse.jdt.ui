@@ -650,7 +650,6 @@ public class JavadocView extends AbstractInfoView {
 		fOpenBrowserAction= new OpenInBrowserAction(getSite());
 		fOpenBrowserAction.setSpecialSelectionProvider(fInputSelectionProvider);
 		fOpenBrowserAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
-		fOpenBrowserAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
 		fOpenBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenBrowserAction);
 

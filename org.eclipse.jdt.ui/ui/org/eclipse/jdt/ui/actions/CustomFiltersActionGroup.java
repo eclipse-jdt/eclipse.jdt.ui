@@ -80,7 +80,6 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		ShowFilterDialogAction() {
 			setText(FilterMessages.OpenCustomFiltersDialogAction_text);
 			setImageDescriptor(JavaPluginImages.DESC_ELCL_FILTER);
-			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
 		}
 
 		@Override

@@ -29,7 +29,6 @@ public class ScrollLockAction extends Action {
 		super(JUnitMessages.ScrollLockAction_action_label);
 		fRunnerViewPart= viewer;
 		setToolTipText(JUnitMessages.ScrollLockAction_action_tooltip);
-		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/lock.png")); //$NON-NLS-1$
 		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/lock.svg")); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(
 			this,

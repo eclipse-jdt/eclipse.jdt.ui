@@ -148,10 +148,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	}
 
 	private static void setImageDescriptors(IAction action, String type, String relPath) {
-		ImageDescriptor id= createImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
-		if (id != null)
-			action.setDisabledImageDescriptor(id);
-
 		ImageDescriptor descriptor= createImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
 		action.setImageDescriptor(descriptor);
 	}

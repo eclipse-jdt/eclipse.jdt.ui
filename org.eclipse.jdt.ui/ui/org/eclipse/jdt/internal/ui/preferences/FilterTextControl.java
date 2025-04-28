@@ -56,14 +56,13 @@ public class FilterTextControl {
 	/**
 	 * Image descriptor for disabled clear button.
 	 */
-	private static Optional<ImageDescriptor> fgDisabledClearIconDescriptor= ResourceLocator.imageDescriptorFromBundle(
-			PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.png"); //$NON-NLS-1$
-
+	private static Optional<ImageDescriptor> fgDisabledClearIconDescriptor= fgClearIconDescriptor
+			.map(enabledDescriptor -> ImageDescriptor.createWithFlags(enabledDescriptor, SWT.IMAGE_DISABLE));
 
 	private static Boolean fgUseNativeSearchField;
 
 	private static boolean useNativeSearchField(Composite composite) {
-		if (fgUseNativeSearchField == null) {
+		if (fgUseNativeSearchField == null) {https://github.com/vi-eclipse/Eclipse-Platform/issues/178#issuecomment-2586992567
 			fgUseNativeSearchField= Boolean.FALSE;
 			Text testText= null;
 			try {
