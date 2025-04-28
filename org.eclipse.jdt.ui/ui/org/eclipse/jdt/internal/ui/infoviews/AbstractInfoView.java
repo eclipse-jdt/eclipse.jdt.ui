@@ -828,14 +828,14 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 *
 	 * @since 3.9
 	 */
-	private static final String SYNCED_GIF= "synced.png"; //$NON-NLS-1$
+	private static final String SYNCED_GIF= "synced.svg"; //$NON-NLS-1$
 
 	/**
 	 * Name of the link with selection icon when the view and selection is out of sync.
 	 *
 	 * @since 3.9
 	 */
-	private static final String SYNC_BROKEN_GIF= "sync_broken.png"; //$NON-NLS-1$
+	private static final String SYNC_BROKEN_GIF= "sync_broken.svg"; //$NON-NLS-1$
 
 
 	/**

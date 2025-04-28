@@ -142,7 +142,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 			MemberFilterAction hideFields= new MemberFilterAction(this, title, filterProperty, helpContext, filterEnabled);
 			hideFields.setDescription(ActionMessages.MemberFilterActionGroup_hide_fields_description);
 			hideFields.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_fields_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.svg"); //$NON-NLS-1$
 			actions.add(hideFields);
 		}
 
@@ -158,7 +158,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 			MemberFilterAction hideStatic= new MemberFilterAction(this, title, FILTER_STATIC, helpContext, filterEnabled);
 			hideStatic.setDescription(ActionMessages.MemberFilterActionGroup_hide_static_description);
 			hideStatic.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_static_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.svg"); //$NON-NLS-1$
 			actions.add(hideStatic);
 		}
 
@@ -174,7 +174,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 			MemberFilterAction hideNonPublic= new MemberFilterAction(this, title, filterProperty, helpContext, filterEnabled);
 			hideNonPublic.setDescription(ActionMessages.MemberFilterActionGroup_hide_nonpublic_description);
 			hideNonPublic.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_nonpublic_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.svg"); //$NON-NLS-1$
 			actions.add(hideNonPublic);
 		}
 
@@ -190,7 +190,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 			MemberFilterAction hideLocalTypes= new MemberFilterAction(this, title, filterProperty, helpContext, filterEnabled);
 			hideLocalTypes.setDescription(ActionMessages.MemberFilterActionGroup_hide_localtypes_description);
 			hideLocalTypes.setToolTipText(ActionMessages.MemberFilterActionGroup_hide_localtypes_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(hideLocalTypes, "localtypes_co.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(hideLocalTypes, "localtypes_co.svg"); //$NON-NLS-1$
 			actions.add(hideLocalTypes);
 		}
 

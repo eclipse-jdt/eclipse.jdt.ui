@@ -186,7 +186,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			setDescription(ActionMessages.CategoryFilterActionGroup_ShowCategoriesActionDescription);
 			setToolTipText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesToolTip);
 			setText(ActionMessages.CategoryFilterActionGroup_ShowCategoriesLabel);
-			JavaPluginImages.setLocalImageDescriptors(this, "category_menu.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "category_menu.svg"); //$NON-NLS-1$
 		}
 
 		@Override

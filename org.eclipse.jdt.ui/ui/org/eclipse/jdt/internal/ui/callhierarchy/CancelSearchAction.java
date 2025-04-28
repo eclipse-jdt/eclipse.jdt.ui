@@ -32,7 +32,7 @@ public class CancelSearchAction extends Action {
 		super(CallHierarchyMessages.CancelSearchAction_label);
 		fView= view;
 		setToolTipText(CallHierarchyMessages.CancelSearchAction_tooltip);
-        JavaPluginImages.setLocalImageDescriptors(this, "ch_cancel.png"); //$NON-NLS-1$
+        JavaPluginImages.setLocalImageDescriptors(this, "ch_cancel.svg"); //$NON-NLS-1$
 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_CANCEL_SEARCH_ACTION);
 }

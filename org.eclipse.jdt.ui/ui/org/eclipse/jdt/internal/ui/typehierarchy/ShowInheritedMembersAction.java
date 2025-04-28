@@ -40,7 +40,7 @@ public class ShowInheritedMembersAction extends Action {
 		setDescription(TypeHierarchyMessages.ShowInheritedMembersAction_description);
 		setToolTipText(TypeHierarchyMessages.ShowInheritedMembersAction_tooltip);
 
-		JavaPluginImages.setLocalImageDescriptors(this, "inher_co.png"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "inher_co.svg"); //$NON-NLS-1$
 
 		fMethodsViewer= viewer;
 

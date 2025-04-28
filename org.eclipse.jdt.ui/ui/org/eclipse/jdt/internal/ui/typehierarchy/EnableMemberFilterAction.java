@@ -36,7 +36,7 @@ public class EnableMemberFilterAction extends Action {
 		setDescription(TypeHierarchyMessages.EnableMemberFilterAction_description);
 		setToolTipText(TypeHierarchyMessages.EnableMemberFilterAction_tooltip);
 
-		JavaPluginImages.setLocalImageDescriptors(this, "impl_co.png"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "impl_co.svg"); //$NON-NLS-1$
 
 		fView= v;
 		setChecked(initValue);

@@ -145,7 +145,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	private Button fSearchButton;
 
-	private final Image fTestIcon = createImage("obj16/test.png"); //$NON-NLS-1$
+	private final Image fTestIcon = createImage("obj16/test.svg"); //$NON-NLS-1$
 
 	private String fOriginalTestMethodName;
 

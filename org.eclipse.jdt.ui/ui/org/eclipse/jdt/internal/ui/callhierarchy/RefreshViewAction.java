@@ -28,7 +28,7 @@ class RefreshViewAction extends Action {
 		fPart= part;
 		setText(CallHierarchyMessages.RefreshViewAction_text);
 		setToolTipText(CallHierarchyMessages.RefreshViewAction_tooltip);
-		JavaPluginImages.setLocalImageDescriptors(this, "refresh.png");//$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh.svg");//$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_VIEW_ACTION);
 		setEnabled(false);
 	}
