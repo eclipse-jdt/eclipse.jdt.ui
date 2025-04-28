@@ -32,8 +32,8 @@ public class CompareResultsAction extends Action {
 		setToolTipText(JUnitMessages.CompareResultsAction_tooltip);
 
 		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/compare.png"));  //$NON-NLS-1$
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.png"));  //$NON-NLS-1$
-		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.png"));  //$NON-NLS-1$
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.svg"));  //$NON-NLS-1$
+		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/compare.svg"));  //$NON-NLS-1$
 		//PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.ENABLEFILTER_ACTION);
 		fView= view;
 	}

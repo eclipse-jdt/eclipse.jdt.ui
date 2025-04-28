@@ -174,7 +174,7 @@ public class TestViewer {
 		public ExpandAllAction() {
 			setText(JUnitMessages.ExpandAllAction_text);
 			setToolTipText(JUnitMessages.ExpandAllAction_tooltip);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/expandall.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/expandall.svg")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -187,7 +187,7 @@ public class TestViewer {
 		public CollapseAllAction() {
 			setText(JUnitMessages.CollapseAllAction_text);
 			setToolTipText(JUnitMessages.CollapseAllAction_tooltip);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/collapseall.png")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/collapseall.svg")); //$NON-NLS-1$
 		}
 
 		@Override
