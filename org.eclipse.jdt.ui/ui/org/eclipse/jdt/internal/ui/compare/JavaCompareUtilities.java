@@ -355,7 +355,6 @@ public class JavaCompareUtilities {
 			id= JavaCompareUtilities.getImageDescriptor(ePath);
 			if (id != null) {
 				a.setImageDescriptor(id);
-				a.setHoverImageDescriptor(id);
 			}
 		}
 	}

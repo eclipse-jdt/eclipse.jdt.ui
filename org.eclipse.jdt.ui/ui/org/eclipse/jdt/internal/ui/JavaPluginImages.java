@@ -707,14 +707,7 @@ public class JavaPluginImages {
 		if (id != null)
 			action.setDisabledImageDescriptor(id);
 
-		/*
-		 * id= create("c" + type, relPath, false); //$NON-NLS-1$
-		 * if (id != null)
-		 * 		action.setHoverImageDescriptor(id);
-		 */
-
 		ImageDescriptor descriptor= create("e" + type, relPath, true); //$NON-NLS-1$
-		action.setHoverImageDescriptor(descriptor);
 		action.setImageDescriptor(descriptor);
 	}
 
