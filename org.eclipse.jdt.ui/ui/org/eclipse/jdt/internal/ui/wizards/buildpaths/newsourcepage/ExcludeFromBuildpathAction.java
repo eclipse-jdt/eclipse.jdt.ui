@@ -72,7 +72,6 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_EXCLUDE_FROM_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Exclude_tooltip);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH);
 	}
 
 	@Override

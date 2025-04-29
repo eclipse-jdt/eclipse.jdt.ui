@@ -77,7 +77,6 @@ public class ConfigureProblemSeverityAction extends Action {
 		fPreferencePage= preferencePage;
 		fInfoControl= infoControl;
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES);
 		setToolTipText(JavaHoverMessages.ProblemHover_action_configureProblemSeverity);
 	}
 

@@ -59,7 +59,6 @@ public class ResetAllAction extends BuildpathModifierAction {
 		fContext= context;
 
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CLEAR);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CLEAR);
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_label);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip);
 		setEnabled(false);

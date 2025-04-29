@@ -355,18 +355,16 @@ public class FilteredPreferenceTree {
 
 		ToolBar toolbar= new ToolBar(composite, SWT.FLAT);
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		fExpandAllItem= createExpansionItem(toolbar, true, JavaPluginImages.DESC_ELCL_EXPANDALL, JavaPluginImages.DESC_DLCL_EXPANDALL,
+		fExpandAllItem= createExpansionItem(toolbar, true, JavaPluginImages.DESC_ELCL_EXPANDALL,
 				PreferencesMessages.FilteredPreferencesTree_expandAll_tooltip);
-		fCollapseAllItem= createExpansionItem(toolbar, false, JavaPluginImages.DESC_ELCL_COLLAPSEALL, JavaPluginImages.DESC_DLCL_COLLAPSEALL,
+		fCollapseAllItem= createExpansionItem(toolbar, false, JavaPluginImages.DESC_ELCL_COLLAPSEALL,
 				PreferencesMessages.FilteredPreferencesTree_collapseAll_tooltip);
 	}
 
-	private ToolItem createExpansionItem(ToolBar toolBar, final boolean expand, ImageDescriptor image, ImageDescriptor disabledImage, String tooltip) {
+	private ToolItem createExpansionItem(ToolBar toolBar, final boolean expand, ImageDescriptor image, String tooltip) {
 		ToolItem item= new ToolItem(toolBar, SWT.PUSH);
 		final Image createdImage= image.createImage();
-		final Image createdDisabledImage= disabledImage.createImage();
 		item.setImage(createdImage);
-		item.setDisabledImage(createdDisabledImage);
 		item.setToolTipText(tooltip);
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -376,7 +374,6 @@ public class FilteredPreferenceTree {
 		});
 		item.addDisposeListener(e -> {
 			createdImage.dispose();
-			createdDisabledImage.dispose();
 		});
 		return item;
 	}

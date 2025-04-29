@@ -80,18 +80,18 @@ public class FormatterModifyDialog extends ModifyDialog {
 		private static final String DATA_IMAGE_DISABLED= "image_disabled"; //$NON-NLS-1$
 
 		private static final Object[][] WRAP_STYLE= {
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_do_not_split, JavaPluginImages.DESC_ELCL_WRAP_NOT, JavaPluginImages.DESC_DLCL_WRAP_NOT, DefaultCodeFormatterConstants.WRAP_NO_SPLIT },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_when_necessary, JavaPluginImages.DESC_ELCL_WRAP_NECESSARY, JavaPluginImages.DESC_DLCL_WRAP_NECESSARY, DefaultCodeFormatterConstants.WRAP_COMPACT },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_always_wrap_first_others_when_necessary, JavaPluginImages.DESC_ELCL_WRAP_FIRST_NECESSARY, JavaPluginImages.DESC_DLCL_WRAP_FIRST_NECESSARY, DefaultCodeFormatterConstants.WRAP_COMPACT_FIRST_BREAK },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always, JavaPluginImages.DESC_ELCL_WRAP_ALL, JavaPluginImages.DESC_DLCL_WRAP_ALL, DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always_indent_all_but_first, JavaPluginImages.DESC_ELCL_WRAP_ALL_INDENT, JavaPluginImages.DESC_DLCL_WRAP_ALL_INDENT, DefaultCodeFormatterConstants.WRAP_NEXT_SHIFTED },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always_except_first_only_if_necessary, JavaPluginImages.DESC_ELCL_WRAP_ALL_NOT_FIRST, JavaPluginImages.DESC_DLCL_WRAP_ALL_NOT_FIRST, DefaultCodeFormatterConstants.WRAP_NEXT_PER_LINE },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_do_not_split, JavaPluginImages.DESC_ELCL_WRAP_NOT, DefaultCodeFormatterConstants.WRAP_NO_SPLIT },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_when_necessary, JavaPluginImages.DESC_ELCL_WRAP_NECESSARY, DefaultCodeFormatterConstants.WRAP_COMPACT },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_always_wrap_first_others_when_necessary, JavaPluginImages.DESC_ELCL_WRAP_FIRST_NECESSARY, DefaultCodeFormatterConstants.WRAP_COMPACT_FIRST_BREAK },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always, JavaPluginImages.DESC_ELCL_WRAP_ALL, DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always_indent_all_but_first, JavaPluginImages.DESC_ELCL_WRAP_ALL_INDENT, DefaultCodeFormatterConstants.WRAP_NEXT_SHIFTED },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_always_except_first_only_if_necessary, JavaPluginImages.DESC_ELCL_WRAP_ALL_NOT_FIRST, DefaultCodeFormatterConstants.WRAP_NEXT_PER_LINE },
 		};
 
 		private static final Object[][] INDENT_STYLE= {
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_default, JavaPluginImages.DESC_ELCL_INDENT_DEFAULT, JavaPluginImages.DESC_DLCL_INDENT_DEFAULT, DefaultCodeFormatterConstants.INDENT_DEFAULT },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_by_one, JavaPluginImages.DESC_ELCL_INDENT_ONE, JavaPluginImages.DESC_DLCL_INDENT_ONE, DefaultCodeFormatterConstants.INDENT_BY_ONE },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_on_column, JavaPluginImages.DESC_ELCL_INDENT_COLUMN, JavaPluginImages.DESC_DLCL_INDENT_COLUMN, DefaultCodeFormatterConstants.INDENT_ON_COLUMN },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_default, JavaPluginImages.DESC_ELCL_INDENT_DEFAULT, DefaultCodeFormatterConstants.INDENT_DEFAULT },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_by_one, JavaPluginImages.DESC_ELCL_INDENT_ONE, DefaultCodeFormatterConstants.INDENT_BY_ONE },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_indentation_on_column, JavaPluginImages.DESC_ELCL_INDENT_COLUMN, DefaultCodeFormatterConstants.INDENT_ON_COLUMN },
 		};
 
 		private static final int VALUE_WRAP_BEFORE= 0;
@@ -101,8 +101,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 		private static final List<String> WRAP_BEFORE_PREF_VALUES= Arrays.asList(DefaultCodeFormatterConstants.TRUE, DefaultCodeFormatterConstants.FALSE);
 
 		private static final Object[][] WRAP_BEFORE_AFTER= {
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_before_operators, JavaPluginImages.DESC_ELCL_WRAP_BEFORE, JavaPluginImages.DESC_DLCL_WRAP_BEFORE, VALUE_WRAP_BEFORE },
-				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_after_operators, JavaPluginImages.DESC_ELCL_WRAP_AFTER, JavaPluginImages.DESC_DLCL_WRAP_AFTER, VALUE_WRAP_AFTER },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_before_operators, JavaPluginImages.DESC_ELCL_WRAP_BEFORE, VALUE_WRAP_BEFORE },
+				{ FormatterMessages.FormatterModifyDialog_lineWrap_val_wrap_after_operators, JavaPluginImages.DESC_ELCL_WRAP_AFTER, VALUE_WRAP_AFTER },
 		};
 
 		private static final ValueMatcher<ToolBar> VALUE_MATCHER= (node, matcher) -> ((LineWrapPreference) node).valueMatches(matcher);
@@ -149,7 +149,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 			fForceSplitItem= new ToolItem(toolBar, SWT.CHECK);
 			fForceSplitItem.setToolTipText(FormatterMessages.FormatterModifyDialog_lineWrap_val_force_split);
 			fForceSplitItem.setImage(images.get(JavaPluginImages.DESC_ELCL_WRAP_FORCE));
-			fForceSplitItem.setDisabledImage(images.get(JavaPluginImages.DESC_DLCL_WRAP_FORCE));
 			addSeparator(toolBar);
 
 			fIndentationDropDown= withIndent ? createDropDown(toolBar, INDENT_STYLE, fIndentationItems, images) : null;
@@ -179,8 +178,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				MenuItem menuItem= new MenuItem(menu, SWT.RADIO);
 				menuItem.setText((String) itemData[0]);
 				menuItem.setImage(images.get((ImageDescriptor) itemData[1]));
-				menuItem.setData(DATA_IMAGE_DISABLED, images.get((ImageDescriptor) itemData[2]));
-				menuItem.setData(itemData[3]);
+				menuItem.setData(itemData[2]);
 				outItems.add(menuItem);
 			}
 			return dropDown;
@@ -462,7 +460,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 			ToolItem item= new ToolItem(toolBar, SWT.CHECK);
 			item.setToolTipText(FormatterMessages.FormatterModifyDialog_blankLines_val_remove_extra_lines);
 			item.setImage(images.get(JavaPluginImages.DESC_ELCL_REMOVE_EXTRA_LINES));
-			item.setDisabledImage(images.get(JavaPluginImages.DESC_DLCL_REMOVE_EXTRA_LINES));
 
 			return new BlankLinesPreference(spinner, toolBar, label, key, preserveLinesPref);
 		}
@@ -547,7 +544,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 					ToolBar toolBar= new ToolBar(parent, SWT.FLAT);
 					fRemoveLinesItem= new ToolItem(toolBar, SWT.CHECK);
 					fRemoveLinesItem.setImage(images.get(JavaPluginImages.DESC_ELCL_REMOVE_EXTRA_LINES));
-					fRemoveLinesItem.setDisabledImage(images.get(JavaPluginImages.DESC_DLCL_REMOVE_EXTRA_LINES));
 					fRemoveLinesItem.addSelectionListener(new SelectionAdapter() {
 						@Override
 						public void widgetSelected(SelectionEvent e) {

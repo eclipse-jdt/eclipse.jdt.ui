@@ -2112,7 +2112,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		// Copy qualified name
 		action= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
-		action.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
 		action.setImageDescriptor(JavaPluginImages.DESC_ELCL_COPY_QUALIFIED_NAME);
 		if (menu.find(ITextEditorActionConstants.COPY) != null)
 			menu.insertAfter(ITextEditorActionConstants.COPY, action);
@@ -2121,7 +2120,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		// Raw Paste
 		action= getAction(IJavaEditorActionConstants.RAW_PASTE);
-		action.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
 		action.setImageDescriptor(JavaPluginImages.DESC_ELCL_COPY_QUALIFIED_NAME);
 		if (menu.find(ITextEditorActionConstants.PASTE) != null)
 			menu.insertAfter(ITextEditorActionConstants.PASTE, action);

@@ -26,6 +26,7 @@ import java.util.function.IntFunction;
 
 import org.osgi.framework.Bundle;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
@@ -57,9 +58,7 @@ public class JavaPluginImages {
 	private static final String T_OVR= "ovr16"; 		//$NON-NLS-1$
 	private static final String T_WIZBAN= "wizban"; 	//$NON-NLS-1$
 	private static final String T_ELCL= "elcl16"; 	//$NON-NLS-1$
-	private static final String T_DLCL= "dlcl16"; 	//$NON-NLS-1$
 	private static final String T_ETOOL= "etool16"; 	//$NON-NLS-1$
-	private static final String T_DTOOL= "dtool16"; 	//$NON-NLS-1$
 	private static final String T_EVIEW= "eview16"; //$NON-NLS-1$
 
 	/*
@@ -77,7 +76,6 @@ public class JavaPluginImages {
 	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.gif"; 		//$NON-NLS-1$
 
 	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.gif"; //$NON-NLS-1$
-	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.gif"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
@@ -213,13 +211,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_VIEW_JDKCOMPLIANCE_TAB= createUnManaged(T_EVIEW, "jdkcompliance_tab.svg"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_FILTER= createUnManaged(T_ELCL, "filter_ps.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_FILTER= createUnManaged(T_DLCL, "filter_ps.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_CODE_ASSIST= createUnManaged(T_ELCL, "metharg_obj.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_CODE_ASSIST= createUnManaged(T_DLCL, "metharg_obj.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_VIEW_MENU= createManaged(T_ELCL, "view_menu.svg", IMG_ELCL_VIEW_MENU); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_VIEW_MENU= createManaged(T_DLCL, "view_menu.png", IMG_DLCL_VIEW_MENU); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_MISC_PUBLIC= createManagedFromKey(T_OBJ, IMG_MISC_PUBLIC);
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManagedFromKey(T_OBJ, IMG_MISC_PROTECTED);
@@ -249,7 +244,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_CFILE= createManagedFromKey(T_OBJ, IMG_OBJS_CFILE);
 	public static final ImageDescriptor DESC_OBJS_CFILECLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CFILECLASS);
 	public static final ImageDescriptor DESC_ELCL_CLEAR= createUnManaged(T_ELCL, "clear_co.svg"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCL_CLEAR= createUnManaged(T_DLCL, "clear_co.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_CFILEINT= createManagedFromKey(T_OBJ, IMG_OBJS_CFILEINT);
 	public static final ImageDescriptor DESC_OBJS_PACKAGE= createManagedFromKey(T_OBJ, IMG_OBJS_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_LOGICAL_PACKAGE= createManagedFromKey(T_OBJ, IMG_OBJS_EMPTY_LOGICAL_PACKAGE);
@@ -383,45 +377,27 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_ELCL_INCLUSION= createUnManaged(T_ELCL, "inclusion_filter_attrib.svg"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUSION= createUnManaged(T_ELCL, "exclusion_filter_attrib.svg"); //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_ADD_TO_BP= createUnManaged(T_DLCL, "add_to_buildpath.png"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCL_REMOVE_FROM_BP= createUnManaged(T_DLCL, "remove_from_buildpath.png"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCL_INCLUSION= createUnManaged(T_DLCL, "inclusion_filter_attrib.png"); //$NON-NLS-1$
-    public static final ImageDescriptor DESC_DLCL_EXCLUSION= createUnManaged(T_DLCL, "exclusion_filter_attrib.png"); //$NON-NLS-1$
-
-    public static final ImageDescriptor DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH= createUnManaged(T_DLCL, "add_linked_source_to_buildpath.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH= createUnManaged(T_ELCL, "add_linked_source_to_buildpath.svg"); //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_CONFIGURE_BUILDPATH= createUnManaged(T_DLCL, "configure_build_path.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_BUILDPATH= createUnManaged(T_ELCL, "configure_build_path.svg"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_DLCL_CONFIGURE_ANNOTATIONS= createUnManaged(T_DLCL, "configure_annotations.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_CONFIGURE_ANNOTATIONS= createUnManaged(T_ELCL, "configure_annotations.svg"); //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS= createUnManaged(T_DLCL, "configure_buildpath_filters.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS= createUnManaged(T_ELCL, "configure_buildpath_filters.svg"); //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_CONFIGURE_OUTPUT_FOLDER= createUnManaged(T_DLCL, "configure_output_folder.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_OUTPUT_FOLDER= createUnManaged(T_ELCL, "configure_output_folder.svg"); //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_DLCL, "configure_problem_severity.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES= createManagedFromKey(T_ELCL, IMG_CONFIGURE_PROBLEM_SEVERITIES);
 
-    public static final ImageDescriptor DESC_DLCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_DLCL, "exclude_from_buildpath.png");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_ELCL, "exclude_from_buildpath.svg");  //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_INCLUDE_ON_BUILDPATH= createUnManaged(T_DLCL, "include_on_buildpath.png");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_INCLUDE_ON_BUILDPATH= createUnManaged(T_ELCL, "include_on_buildpath.svg");  //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_ADD_AS_SOURCE_FOLDER= createUnManaged(T_DLCL, "add_as_source_folder.png");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_ADD_AS_SOURCE_FOLDER= createUnManaged(T_ELCL, "add_as_source_folder.svg");  //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_REMOVE_AS_SOURCE_FOLDER= createUnManaged(T_DLCL, "remove_as_source_folder.png");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_REMOVE_AS_SOURCE_FOLDER= createUnManaged(T_ELCL, "remove_as_source_folder.svg");  //$NON-NLS-1$
 
-    public static final ImageDescriptor DESC_DLCL_COPY_QUALIFIED_NAME= createUnManaged(T_DLCL, "cpyqual_menu.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_COPY_QUALIFIED_NAME= createUnManaged(T_ELCL, "cpyqual_menu.svg"); //$NON-NLS-1$
-
-	public static final ImageDescriptor DESC_DLCL_OPEN_BROWSER= createUnManaged(T_DLCL, "open_browser.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_OPEN_BROWSER= createUnManaged(T_ELCL, "open_browser.svg"); //$NON-NLS-1$
 
@@ -516,43 +492,28 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= createUnManaged(T_OBJ, "cp_order_obj.svg"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_EXPANDALL= createUnManaged(T_ELCL, "expandall.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_EXPANDALL= createUnManaged(T_DLCL, "expandall.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= createUnManaged(T_ELCL, "collapseall.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_COLLAPSEALL= createUnManaged(T_DLCL, "collapseall.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_MODIFYALL= createUnManaged(T_ELCL, "modifyall.svg"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ELCL_REMOVE_EXTRA_LINES= createUnManaged(T_ELCL, "remove_extra_lines.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_REMOVE_EXTRA_LINES= createUnManaged(T_DLCL, "remove_extra_lines.png"); //$NON-NLS-1$
 
 	// Image descriptors used for formatter line wrapping preferences
 	public static final ImageDescriptor DESC_ELCL_INDENT_COLUMN= createUnManaged(T_ELCL, "indent_column.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_INDENT_COLUMN= createUnManaged(T_DLCL, "indent_column.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_INDENT_DEFAULT= createUnManaged(T_ELCL, "indent_default.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_INDENT_DEFAULT= createUnManaged(T_DLCL, "indent_default.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_INDENT_ONE= createUnManaged(T_ELCL, "indent_one.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_INDENT_ONE= createUnManaged(T_DLCL, "indent_one.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_AFTER= createUnManaged(T_ELCL, "wrap_after.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_AFTER= createUnManaged(T_DLCL, "wrap_after.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_ALL= createUnManaged(T_ELCL, "wrap_all.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_ALL= createUnManaged(T_DLCL, "wrap_all.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_ALL_INDENT= createUnManaged(T_ELCL, "wrap_all_indent.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_ALL_INDENT= createUnManaged(T_DLCL, "wrap_all_indent.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_ALL_NOT_FIRST= createUnManaged(T_ELCL, "wrap_all_not_first.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_ALL_NOT_FIRST= createUnManaged(T_DLCL, "wrap_all_not_first.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_BEFORE= createUnManaged(T_ELCL, "wrap_before.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_BEFORE= createUnManaged(T_DLCL, "wrap_before.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_FIRST_NECESSARY= createUnManaged(T_ELCL, "wrap_first_necessary.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_FIRST_NECESSARY= createUnManaged(T_DLCL, "wrap_first_necessary.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_FORCE= createUnManaged(T_ELCL, "wrap_force.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_FORCE= createUnManaged(T_DLCL, "wrap_force.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_NECESSARY= createUnManaged(T_ELCL, "wrap_necessary.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_NECESSARY= createUnManaged(T_DLCL, "wrap_necessary.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_WRAP_NOT= createUnManaged(T_ELCL, "wrap_not.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DLCL_WRAP_NOT= createUnManaged(T_DLCL, "wrap_not.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_ETOOL_JDOC_HOVER_EDIT= createUnManaged(T_ETOOL, "jdoc_hover_edit.svg"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_DTOOL_JDOC_HOVER_EDIT= createUnManaged(T_DTOOL, "jdoc_hover_edit.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DTOOL_JDOC_HOVER_EDIT= ImageDescriptor.createWithFlags(DESC_ETOOL_JDOC_HOVER_EDIT, SWT.IMAGE_DISABLE);
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no chance to dispose icons.

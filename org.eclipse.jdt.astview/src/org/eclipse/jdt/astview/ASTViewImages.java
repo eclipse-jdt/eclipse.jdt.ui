@@ -41,11 +41,7 @@ public class ASTViewImages {
 	//---- Helper methods to access icons on the file system --------------------------------------
 
 	public static void setImageDescriptors(IAction action, String type) {
-		ImageDescriptor id= create("d", type); //$NON-NLS-1$
-		if (id != null)
-			action.setDisabledImageDescriptor(id);
-
-		id= create("e", type); //$NON-NLS-1$
+		ImageDescriptor id= create("e", type); //$NON-NLS-1$
 		if (id != null) {
 			action.setImageDescriptor(id);
 		} else {

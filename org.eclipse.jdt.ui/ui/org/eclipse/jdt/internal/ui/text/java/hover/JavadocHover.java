@@ -356,7 +356,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					OpenAttachedJavadocAction openAttachedJavadocAction= new OpenAttachedJavadocAction(fSite);
 					openAttachedJavadocAction.setSpecialSelectionProvider(selectionProvider);
 					openAttachedJavadocAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
-					openAttachedJavadocAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
 					selectionProvider.addSelectionChangedListener(openAttachedJavadocAction);
 					selectionProvider.setSelection(new StructuredSelection());
 					tbm.add(openAttachedJavadocAction);

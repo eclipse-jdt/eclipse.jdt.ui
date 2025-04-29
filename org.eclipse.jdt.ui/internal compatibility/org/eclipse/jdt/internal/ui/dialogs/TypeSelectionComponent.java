@@ -352,7 +352,6 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		fToolBar.setLayoutData(data);
 
 		fToolItem.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
-		fToolItem.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
 		fToolItem.setToolTipText(JavaUIMessages.TypeSelectionComponent_menu);
 		fToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
