@@ -202,7 +202,7 @@ enum ExplicitEncodingPatterns {
 						    void method(String filename) {
 						        try {
 						            InputStreamReader is1=new InputStreamReader(new FileInputStream("file1.txt")); //$NON-NLS-1$
-						            InputStreamReader is2=new InputStreamReader(new FileInputStream("file2.txt"), "UTF-8"); //$NON-NLS-1$
+						            InputStreamReader is2=new InputStreamReader(new FileInputStream("file2.txt"), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
 						            } catch (FileNotFoundException e) {
 						            e.printStackTrace();
 						            }
@@ -249,7 +249,7 @@ enum ExplicitEncodingPatterns {
 						    void method(String filename) {
 						        try {
 						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream("")); //$NON-NLS-1$
-						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), "UTF-8"); //$NON-NLS-1$
+						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
 						            } catch (FileNotFoundException e) {
 						            e.printStackTrace();
 						            }
@@ -718,12 +718,12 @@ public class E4 {
 						        ByteArrayOutputStream ba=new ByteArrayOutputStream();
 						        String result=ba.toString();
 						        try {
-						            InputStreamReader is=new InputStreamReader(new FileInputStream(""), "UTF-8"); //$NON-NLS-1$
+						            InputStreamReader is=new InputStreamReader(new FileInputStream(""), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
 						            } catch (FileNotFoundException e) {
 						            e.printStackTrace();
 						            }
 						        try {
-						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), "UTF-8"); //$NON-NLS-1$
+						            OutputStreamWriter os=new OutputStreamWriter(new FileOutputStream(""), "UTF-8"); //$NON-NLS-1$ //$NON-NLS-2$
 						            } catch (FileNotFoundException e) {
 						            e.printStackTrace();
 						            }
@@ -753,7 +753,7 @@ public class E4 {
 						    void method(String filename) {
 						        String s="asdf"; //$NON-NLS-1$
 						        //byte[] bytes= s.getBytes(StandardCharsets.UTF_8);
-						        byte[] bytes= s.getBytes(StandardCharsets.UTF_8);
+								byte[] bytes= s.getBytes(StandardCharsets.UTF_8);
 						        System.out.println(bytes.length);
 						        ByteArrayOutputStream ba=new ByteArrayOutputStream();
 						        String result=ba.toString();
