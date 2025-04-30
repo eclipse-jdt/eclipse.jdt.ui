@@ -213,7 +213,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPLICITENCODING_CLEANUP, CleanUpOptions.FALSE);
 		options.setOption(EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpOptions.TRUE);
 		options.setOption(EXPLICITENCODING_INSERT_UTF8, CleanUpOptions.FALSE);
-		options.setOption(EXPLICITENCODING_AGGREGATE_TO_UTF8, CleanUpOptions.FALSE);
 	}
 
 	private static void setSaveParticipantSettings(CleanUpOptions options) {
@@ -407,7 +406,6 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(EXPLICITENCODING_CLEANUP, CleanUpOptions.FALSE);
 		options.setOption(EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpOptions.TRUE);
 		options.setOption(EXPLICITENCODING_INSERT_UTF8, CleanUpOptions.FALSE);
-		options.setOption(EXPLICITENCODING_AGGREGATE_TO_UTF8, CleanUpOptions.FALSE);
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
