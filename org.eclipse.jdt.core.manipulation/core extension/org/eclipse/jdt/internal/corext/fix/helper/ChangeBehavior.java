@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -68,68 +67,6 @@ public enum ChangeBehavior {
 		protected String computeCharsetforPreview() {
 			String insert= "StandardCharsets.UTF_8"; //$NON-NLS-1$
 			return insert;
-		}
-	},
-	ENFORCE_UTF8_AGGREGATE() {
-		@Override
-		protected Expression computeCharsetASTNode(final CompilationUnitRewrite cuRewrite, AST ast, String charset2, Map<String, QualifiedName> charsetConstants) {
-			String charset= charset2 == null ? "UTF_8" : charset2; //$NON-NLS-1$
-			// Generate a valid Java identifier for the charset name (e.g., UTF_8)
-		    String fieldName = charset.toUpperCase().replace('-', '_');
-
-		    // Check if this charset constant is already stored in the map
-		    if (charsetConstants.containsKey(fieldName)) {
-		        return charsetConstants.get(fieldName);
-		    }
-
-		    // Add import for StandardCharsets
-		    ImportRewrite importRewrite = cuRewrite.getImportRewrite();
-		    importRewrite.addImport(StandardCharsets.class.getCanonicalName());
-		    importRewrite.addImport(Charset.class.getCanonicalName());
-
-		    // Check if the static field already exists in the class
-		    TypeDeclaration enclosingType = (TypeDeclaration) cuRewrite.getRoot().types().get(0);
-		    FieldDeclaration existingField = findStaticCharsetField(enclosingType, fieldName);
-
-		    QualifiedName fieldReference;
-		    if (existingField == null) {
-		        // Create a new static field if it doesn't exist
-		        VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
-		        fragment.setName(ast.newSimpleName(fieldName));
-		        fragment.setInitializer(createCharsetAccessExpression(ast, charset));
-
-		        FieldDeclaration fieldDeclaration = ast.newFieldDeclaration(fragment);
-		        fieldDeclaration.setType(ast.newSimpleType(ast.newName("Charset"))); //$NON-NLS-1$
-		        fieldDeclaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD));
-		        fieldDeclaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.STATIC_KEYWORD));
-		        fieldDeclaration.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
-
-		        // Add the new field to the class
-		        cuRewrite.getASTRewrite().getListRewrite(enclosingType, TypeDeclaration.BODY_DECLARATIONS_PROPERTY)
-		            .insertFirst(fieldDeclaration, null);
-
-		        // Create a QualifiedName to refer to this new field
-		        fieldReference = ast.newQualifiedName(
-		        	    ast.newSimpleName(enclosingType.getName().getIdentifier()),
-		        	    ast.newSimpleName(fragment.getName().getIdentifier())
-		        	);
-		    } else {
-		        // If the field already exists, find its reference name
-		        VariableDeclarationFragment fragment = (VariableDeclarationFragment) existingField.fragments().get(0);
-		        fieldReference = ast.newQualifiedName(
-		            ast.newSimpleName(enclosingType.getName().getIdentifier()),
-		            fragment.getName()
-		        );
-		    }
-
-		    // Cache the field reference in the map and return it
-		    charsetConstants.put(fieldName, fieldReference);
-		    return fieldReference;
-		}
-
-		@Override
-		protected String computeCharsetforPreview() {
-			return "CharsetConstant"; //$NON-NLS-1$
 		}
 	};
 

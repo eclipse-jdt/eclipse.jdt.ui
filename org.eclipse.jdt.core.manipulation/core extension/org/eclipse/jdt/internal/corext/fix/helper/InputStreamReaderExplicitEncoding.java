@@ -115,9 +115,9 @@ public class InputStreamReaderExplicitEncoding extends AbstractExplicitEncoding<
 	@Override
 	public String getPreview(boolean afterRefactoring, ChangeBehavior cb) {
 		if (afterRefactoring) {
-			return "Reader r=new InputStreamReader(in, " + cb.computeCharsetforPreview() + ");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Reader r=new InputStreamReader(in);\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
 		}
-		return "Reader r=new InputStreamReader(in);\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), StandardCharsets.UTF_8);\n"; //$NON-NLS-1$
+		return "Reader r=new InputStreamReader(in, " + cb.computeCharsetforPreview() + ");\nInputStreamReader is=new InputStreamReader(new FileInputStream(\"\"), \"UTF-8\");\n"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override

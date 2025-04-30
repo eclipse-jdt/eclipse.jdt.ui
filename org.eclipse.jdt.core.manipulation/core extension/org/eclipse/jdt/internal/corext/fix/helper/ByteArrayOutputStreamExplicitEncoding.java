@@ -141,9 +141,6 @@ public class ByteArrayOutputStreamExplicitEncoding extends AbstractExplicitEncod
 			case KEEP_BEHAVIOR:
 				insert= "Charset.defaultCharset().displayName()"; //$NON-NLS-1$
 				break;
-			case ENFORCE_UTF8_AGGREGATE:
-				//				insert="charset_constant"; //$NON-NLS-1$
-				//$FALL-THROUGH$
 			case ENFORCE_UTF8:
 				insert= "StandardCharsets.UTF_8.displayName()"; //$NON-NLS-1$
 				break;
