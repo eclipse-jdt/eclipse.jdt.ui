@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.EXPLICITENCODING_AGGREGATE_TO_UTF8;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.EXPLICITENCODING_CLEANUP;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.EXPLICITENCODING_INSERT_UTF8;
 import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR;
@@ -27,7 +26,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -91,9 +89,6 @@ public class UseExplicitEncodingCleanUpCore extends AbstractCleanUp {
 		if(isEnabled(EXPLICITENCODING_INSERT_UTF8)) {
 			cb=ChangeBehavior.ENFORCE_UTF8;
 		}
-		if(isEnabled(EXPLICITENCODING_AGGREGATE_TO_UTF8)) {
-			cb=ChangeBehavior.ENFORCE_UTF8_AGGREGATE;
-		}
 		return cb;
 	}
 
@@ -102,7 +97,7 @@ public class UseExplicitEncodingCleanUpCore extends AbstractCleanUp {
 		List<String> result= new ArrayList<>();
 		if (isEnabled(EXPLICITENCODING_CLEANUP)) {
 			String with=computeRefactorDeepth().toString();
-			result.add(Messages.format(ExplicitEncodingCleanUp_description,new Object[] {String.join(",", computeFixSet().stream().map(UseExplicitEncodingFixCore::toString).collect(Collectors.toList())),with})); //$NON-NLS-1$
+			result.add(Messages.format(ExplicitEncodingCleanUp_description,new Object[] {with}));
 		}
 		return result.toArray(new String[0]);
 	}
