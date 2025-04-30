@@ -109,8 +109,6 @@ public class URLDecoderDecodeExplicitEncoding extends AbstractExplicitEncoding<M
 				case ENFORCE_UTF8:
 					nd.encoding= "UTF_8"; //$NON-NLS-1$
 					break;
-				case ENFORCE_UTF8_AGGREGATE:
-					break;
 			}
 			nd.replace= false;
 			nd.visited= visited;
