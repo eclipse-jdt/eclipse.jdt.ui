@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2024 IBM Corporation and others.
+ * Copyright (c) 2006, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -297,6 +297,27 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						String newArgument= fNewArgumentMap.get(fEnclosingMethod.getJavaElement());
 						final SimpleName ref= ast.newSimpleName(newArgument);
 						fRewrite.replace(node, ref, null);
+					}
+				} else if (node.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+					// we are calling a method with "this" as parameter, check what type it needs to be
+					MethodInvocation methodInvocation= (MethodInvocation)node.getParent();
+					IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+					if (methodBinding != null) {
+						ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+						List<Expression> args= methodInvocation.arguments();
+						int index= 0;
+						for (int i= 0; i < args.size(); ++i) {
+							if (args.get(i) == node) {
+								index= i;
+								break;
+							}
+						}
+						ITypeBinding thisRequiredType= parameterTypes[index];
+						if (thisRequiredType.isEqualTo(node.resolveTypeBinding())) {
+							String newArgument= fNewArgumentMap.get(fEnclosingMethod.getJavaElement());
+							final SimpleName ref= ast.newSimpleName(newArgument);
+							fRewrite.replace(node, ref, null);
+						}
 					}
 				}
 				return true;

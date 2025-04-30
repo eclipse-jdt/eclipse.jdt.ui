@@ -1493,6 +1493,41 @@ public class PullUpTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test63() throws Exception {
+		// test for bug 241035
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+
+		IType typeA= getType(cuA, "A");
+		IType typeB= getType(cuB, "B");
+		String[] methodNames= new String[] { "m" };
+		String[][] signatures= new String[][] { new String[0] };
+		IMethod[] methods= getMethods(typeB, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+		FussyProgressMonitor testMonitor= new FussyProgressMonitor();
+		assertTrue("activation", ref.checkInitialConditions(testMonitor).isOK());
+		testMonitor.assertUsedUp();
+		testMonitor.prepare();
+
+		setTargetClass(processor, 0);
+		processor.setDestinationType(typeA);
+		processor.setMembersToMove(methods);
+		processor.setDeletedMethods(methods);
+		processor.setReplace(true);
+
+		assertTrue("final", ref.checkFinalConditions(testMonitor).isOK());
+		testMonitor.assertUsedUp();
+		testMonitor.prepare();
+
+		performChange(ref, false);
+
+		assertEqualLines("A", getFileContents(getOutputTestFileName("A")), cuA.getSource());
+		assertEqualLines("B", getFileContents(getOutputTestFileName("B")), cuB.getSource());
+	}
+
+	@Test
 	public void testFail0() throws Exception {
 //		printTestDisabledMessage("6538: searchDeclarationsOf* incorrect");
 		helper2(new String[] { "m" }, new String[][] { new String[0] }, true, false, 0);
