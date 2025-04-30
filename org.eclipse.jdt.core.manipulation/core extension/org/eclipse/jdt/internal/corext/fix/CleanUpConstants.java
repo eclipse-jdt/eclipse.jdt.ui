@@ -2373,6 +2373,13 @@ public class CleanUpConstants {
 	public final static String DEFAULT_SAVE_PARTICIPANT_PROFILE= SAVE_PARTICIPANT_PROFILE;
 
 	/**
+	 * Changes code to specify explicit charset encodings.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.36
 	 *
 	 */
 	public static final String EXPLICITENCODING_CLEANUP= "cleanup.explicit_encoding"; //$NON-NLS-1$
@@ -2400,18 +2407,4 @@ public class CleanUpConstants {
 	 *
 	 */
 	public static final String EXPLICITENCODING_INSERT_UTF8= "cleanup.explicit_encoding_insert_utf8"; //$NON-NLS-1$
-
-	/**
-	 * Set all uses of platform encoding explicitly to UTF-8 - This changes behavior of the resulting code!
-	 * At the same time try to have a single constant per project for this encoding that is referenced whenever
-	 * code is changed to use this charset. That way later it is easy to change the default.
-	 * <p>
-	 * Possible values: {TRUE, FALSE}
-	 * <p>
-	 *
-	 * @see CleanUpOptionsCore#TRUE
-	 * @see CleanUpOptionsCore#FALSE
-	 *
-	 */
-	public static final String EXPLICITENCODING_AGGREGATE_TO_UTF8= "cleanup.explicit_encoding_aggregate_to_utf8"; //$NON-NLS-1$
 }
