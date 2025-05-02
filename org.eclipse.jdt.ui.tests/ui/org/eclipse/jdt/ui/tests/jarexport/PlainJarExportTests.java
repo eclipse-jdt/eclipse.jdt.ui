@@ -28,6 +28,7 @@ import java.util.zip.ZipFile;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -51,17 +52,20 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
 public class PlainJarExportTests {
 	@Rule
-	public ProjectTestSetup pts= new Java1d8ProjectTestSetup();
+	public ProjectTestSetup pts= new ProjectTestSetup();
 
 	@Rule
 	public TestName tn= new TestName();
+
+	@BeforeClass
+	public static void setUpTest() {
+	}
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fMainRoot;

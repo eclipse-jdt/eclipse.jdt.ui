@@ -36,6 +36,7 @@ import javax.xml.parsers.DocumentBuilder;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -88,7 +89,6 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.tests.core.rules.Java1d8ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -104,21 +104,17 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 public class FatJarExportTests {
 
-	private static final String TEST_SETUP_PROJECT= "TestSetupProject1d8";
-	private static final String TEST_SETUP_PROJECT_MYLIB_STDOUT_JAR= TEST_SETUP_PROJECT+"/mylib_stdout.jar";
-	private static final String TEST_SETUP_PROJECT_OTHEROUT= TEST_SETUP_PROJECT+"/otherout";
-	private static final String TEST_SETUP_PROJECT_MYLIB_SIG_JAR= TEST_SETUP_PROJECT+"/mylib_sig.jar";
-	private static final String TEST_SETUP_PROJECT_CF= TEST_SETUP_PROJECT+"/cf";
-	private static final String CREATE_RUNNABLE_JAR_FOR_PROJECT_TEST_SETUP_PROJECT= "Create Runnable Jar for Project TestSetupProject1d8";
-	private static final String TEST_SETUP_PROJECT_BIN= TEST_SETUP_PROJECT+"/bin";
-
 	@Rule
-	public ProjectTestSetup pts=new Java1d8ProjectTestSetup();
+	public ProjectTestSetup pts=new ProjectTestSetup();
 
 	@Rule
 	public TestName tn=new TestName();
 
 	private static final int JAVA_RUN_TIMEOUT= 300; // 10th of a second
+
+	@BeforeClass
+	public static void setUpTest() {
+	}
 
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fMainRoot;
@@ -469,7 +465,7 @@ public class FatJarExportTests {
 	private static void assertAntScriptCopy(String archiveName, IPath antScriptLocation, String[] filesets, String[] zipfilesets) throws Exception {
 		String subfolderName= archiveName.replaceFirst("^(.*)[.]jar$", "$1_lib"); //$NON-NLS-1$//$NON-NLS-2$
 
-		String projectNameValue= "Create Runnable Jar for Project TestSetupProject1d8"; //$NON-NLS-1$
+		String projectNameValue= "Create Runnable Jar for Project TestSetupProject"; //$NON-NLS-1$
 		projectNameValue+= " with libraries in sub-folder"; //$NON-NLS-1$
 
 		Element xmlProject= readXML(antScriptLocation);
@@ -533,7 +529,7 @@ public class FatJarExportTests {
 	}
 
 	private static void assertAntScriptPackage(String archiveName, IPath antScriptLocation, String[] filesets, String[] zipfilesets) throws Exception {
-		String projectNameValue= CREATE_RUNNABLE_JAR_FOR_PROJECT_TEST_SETUP_PROJECT; //$NON-NLS-1$
+		String projectNameValue= "Create Runnable Jar for Project TestSetupProject"; //$NON-NLS-1$
 		projectNameValue+= " with Jar-in-Jar Loader"; //$NON-NLS-1$
 
 		Element xmlProject= readXML(antScriptLocation);
@@ -601,7 +597,7 @@ public class FatJarExportTests {
 	}
 
 	private static void assertAntScriptExtract(String archiveName, IPath antScriptLocation, String[] filesets, String[] zipfilesets) throws Exception {
-		String projectNameValue= "Create Runnable Jar for Project TestSetupProject1d8"; //$NON-NLS-1$
+		String projectNameValue= "Create Runnable Jar for Project TestSetupProject"; //$NON-NLS-1$
 
 		Element xmlProject= readXML(antScriptLocation);
 		assertEquals("project", xmlProject.getNodeName()); //$NON-NLS-1$
@@ -670,6 +666,7 @@ public class FatJarExportTests {
 			DocumentBuilder parser= XmlProcessorFactoryJdtJunit.createDocumentBuilderFactoryWithErrorOnDOCTYPE().newDocumentBuilder();
 			parser.setErrorHandler(new DefaultHandler());
 			Element root= parser.parse(new InputSource(in)).getDocumentElement();
+			in.close();
 
 			return root;
 		}
@@ -687,21 +684,21 @@ public class FatJarExportTests {
 
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()), new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 		} finally {
 			pack.delete(true, null);
 		}
@@ -717,21 +714,21 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, TEST_SETUP_PROJECT_OTHEROUT },//$NON-NLS-1$  //$NON-NLS-2$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin", "TestSetupProject/otherout" },//$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, TEST_SETUP_PROJECT_OTHEROUT },//$NON-NLS-2$  //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin", "TestSetupProject/otherout" },//$NON-NLS-2$  //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { TEST_SETUP_PROJECT_BIN, TEST_SETUP_PROJECT_OTHEROUT },//$NON-NLS-2$  //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin", "TestSetupProject/otherout" },//$NON-NLS-2$  //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 		} finally {
 			JavaProjectHelper.removeSourceContainer(fProject, root.getElementName());
 		}
@@ -747,21 +744,21 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, new String[] { "rtstubs18.jar" }); //$NON-NLS-1$ //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, new String[] { "rtstubs15.jar" }); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
 					new CopyLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 		} finally {
 			JavaProjectHelper.removeSourceContainer(fProject, root.getElementName());
 		}
@@ -782,21 +779,21 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, "OtherProject/bin" }, new String[] { "rtstubs18.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin", "OtherProject/bin" }, new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, "OtherProject/bin" },//$NON-NLS-1$  //$NON-NLS-2$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin", "OtherProject/bin" },//$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
 					new CopyLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, "OtherProject/bin" },//$NON-NLS-1$  //$NON-NLS-2$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin", "OtherProject/bin" },//$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, otherProject.getProject().getFullPath());
 			JavaProjectHelper.delete(otherProject);
@@ -812,22 +809,22 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", TEST_SETUP_PROJECT_MYLIB_STDOUT_JAR }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "TestSetupProject/mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN },//$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" },//$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
 					new CopyLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN },//$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" },//$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
 		}
@@ -842,21 +839,21 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), false, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, new String[] { "rtstubs18.jar", TEST_SETUP_PROJECT_MYLIB_STDOUT_JAR }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin" }, new String[] { "rtstubs15.jar", "TestSetupProject/mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
 					new CopyLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
 		}
@@ -872,20 +869,20 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, new String[] { "rtstubs18.jar", "testresources/mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin" }, new String[] { "rtstubs15.jar", "testresources/mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { "TestSetupProject1d8/bin" }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
 		}
@@ -901,20 +898,20 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, TEST_SETUP_PROJECT_CF }, new String[] { "rtstubs18.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin", "TestSetupProject/cf" }, new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, TEST_SETUP_PROJECT_CF },//$NON-NLS-1$  //$NON-NLS-2$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin", "TestSetupProject/cf" },//$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { TEST_SETUP_PROJECT_BIN, TEST_SETUP_PROJECT_CF },//$NON-NLS-1$  //$NON-NLS-2$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin", "TestSetupProject/cf" },//$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
 		}
@@ -931,20 +928,20 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, new String[] { "rtstubs18.jar", "testresources/mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin" }, new String[] { "rtstubs15.jar", "testresources/mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_stdout.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, new Path("MYLIB")); //$NON-NLS-1$
 		}
@@ -960,20 +957,20 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, new String[] { "rtstubs18.jar", TEST_SETUP_PROJECT_MYLIB_SIG_JAR }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin" }, new String[] { "rtstubs15.jar", "TestSetupProject/mylib_sig.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_sig.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_sig.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { TEST_SETUP_PROJECT_BIN }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar", "mylib_sig.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar", "mylib_sig.jar" }); //$NON-NLS-1$  //$NON-NLS-2$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, root.getPath());
 		}
@@ -990,20 +987,20 @@ public class FatJarExportTests {
 			JarPackageData data= createAndRunFatJar(fProject, getName(), true, new ExtractLibraryHandler());
 			assertAntScript(data, antScriptLocation(getName()),
 					new ExtractLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, "testresources/externalClassFolder" }, new String[] { "rtstubs18.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
+					new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, new String[] { "rtstubs15.jar" }); //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 
 			// Jar-in-Jar loader
 			data= createAndRunFatJar(fProject, getName() + "_JiJ", true, new PackageLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_JiJ"), //$NON-NLS-1$
 					new PackageLibraryHandler(),
-					new String[] { TEST_SETUP_PROJECT_BIN, "testresources/externalClassFolder" }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 
 			// sub-folder libraries
 			data= createAndRunFatJar(fProject, getName() + "_SL", true, new CopyLibraryHandler()); //$NON-NLS-1$
 			assertAntScript(data, antScriptLocation(getName() + "_SL"), //$NON-NLS-1$
-					new CopyLibraryHandler(), new String[] { TEST_SETUP_PROJECT_BIN, "testresources/externalClassFolder" }, //$NON-NLS-1$
-					new String[] { "rtstubs18.jar" }); //$NON-NLS-1$
+					new CopyLibraryHandler(), new String[] { "TestSetupProject/bin", "testresources/externalClassFolder" }, //$NON-NLS-1$
+					new String[] { "rtstubs15.jar" }); //$NON-NLS-1$
 		} finally {
 			JavaProjectHelper.removeFromClasspath(fProject, externalRoot.getPath());
 		}
