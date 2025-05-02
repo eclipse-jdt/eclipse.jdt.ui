@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2025 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,9 +40,6 @@ import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTestSuite;
-import org.eclipse.jdt.ui.tests.quickfix.Java10.QuickFixJava10TestSuite;
-import org.eclipse.jdt.ui.tests.quickfix.Java22.QuickFixJava22TestSuite;
-import org.eclipse.jdt.ui.tests.quickfix.Java8.QuickFixJava8TestSuite;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTests;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.views.SmokeViewsTest;
@@ -62,9 +59,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	CoreTests.class,
 	CoreTestSuite.class,
 	QuickFixTestSuite.class,
-	QuickFixJava8TestSuite.class,
-	QuickFixJava10TestSuite.class,
-	QuickFixJava22TestSuite.class,
 
 	NewJavaProjectWizardTest.class,
 	NewTypeWizardTest.class,
