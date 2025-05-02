@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.ui.viewsupport.javadoc;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.eclipse.swt.widgets.Control;
@@ -27,17 +26,18 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
+
+import org.eclipse.jface.text.IInputChangedListener;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.IStylingConfigurationListener;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor.IBrowserContentChangeListener;
 
 /**
  * Toolbar item action for building &amp; presenting javadoc styling menu.
  */
-public class SignatureStylingMenuToolbarAction extends Action implements IMenuCreator, IBrowserContentChangeListener, IStylingConfigurationListener {
+public class SignatureStylingMenuToolbarAction extends Action implements IMenuCreator, IInputChangedListener, IStylingConfigurationListener {
 	private final Action[] noStylingActions= { new NoStylingEnhancementsAction() };
 	private final Action[] enabledActions;
 	private final Shell parent;
@@ -46,18 +46,20 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 	private Action[] actions;
 	protected Menu menu= null;
 	private boolean enhancementsEnabled= JavaElementLinks.getStylingEnabledPreference();
+	private String javadocContent;
 
-	public SignatureStylingMenuToolbarAction(Shell parent, BrowserTextAccessor browserAccessor, Supplier<String> javadocContentSupplier, Runnable enhancementsReconfiguredTask) {
+	public SignatureStylingMenuToolbarAction(Shell parent, JavadocContentInputAccessor contentInputAccessor, Runnable enhancementsReconfiguredTask) {
 		super(JavadocStylingMessages.JavadocStyling_enabledTooltip, IAction.AS_DROP_DOWN_MENU);
 		Objects.requireNonNull(parent);
+		Objects.requireNonNull(contentInputAccessor);
 		setImageDescriptor(JavaPluginImages.DESC_ETOOL_JDOC_HOVER_EDIT);
 		// SignatureStylingColorSubMenuItem requires top level shell to display native color picker
-		// JavadocView passes to level shell but JavadocHover passes hover's shell
+		// JavadocView passes top level shell but JavadocHover passes hover's shell
 		// (Display.getActiveShell() would not work since JavadocView is created when active shell is startup splash screen shell)
 		Shell topLevelShell = (parent.getParent() instanceof Shell parentShell) ? parentShell : parent;
 		enabledActions= new Action[] {
 				new ToggleSignatureTypeParametersColoringAction(),
-				new SignatureStylingColorSubMenuItem(topLevelShell, javadocContentSupplier)};
+				new SignatureStylingColorSubMenuItem(topLevelShell, () -> this.javadocContent)};
 		actions= noStylingActions;
 		setMenuCreator(this);
 		this.parent= parent;
@@ -65,17 +67,22 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		presentEnhancementsState();
 		setHoverImageDescriptor(null);
 		setId(SignatureStylingMenuToolbarAction.class.getSimpleName());
-		browserAccessor.addContentChangedListener(this); // remove not necessary since lifecycle of this action is the same as that of the browser widget
+		contentInputAccessor.addInputChangedListener(this);
 		JavaElementLinks.addStylingConfigurationListener(this);
 	}
 
 	@Override
-	public void browserContentChanged(Supplier<String> contentAccessor) {
+	public void inputChanged(Object newInput) {
+		javadocContent = null;
 		if (!enhancementsEnabled) {
 			return;
 		}
-		var content= contentAccessor.get();
-		if (content != null && !content.isBlank() && JavaElementLinks.isStylingPresent(content)) {
+		if (newInput instanceof String str) {
+			javadocContent = str;
+		} else if (newInput instanceof BrowserInformationControlInput bicInput) {
+			javadocContent = bicInput.getHtml();
+		}
+		if (javadocContent != null && !javadocContent.isBlank() && JavaElementLinks.isStylingPresent(javadocContent)) {
 			actions= enabledActions;
 		} else {
 			actions= noStylingActions;
@@ -127,7 +134,7 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 		parent.getDisplay().execute(() -> {
 			enhancementsEnabled= isEnabled;
 			presentEnhancementsState();
-			// even if enhancements switched from off to on, only browserContentChanged() sets enabledActions
+			// even if enhancements switched from off to on, only inputChanged() sets enabledActions
 			actions= noStylingActions;
 			runEnhancementsReconfiguredTask();
 		});
@@ -170,5 +177,9 @@ public class SignatureStylingMenuToolbarAction extends Action implements IMenuCr
 			JavaElementLinks.setPreferenceForTypeParamsColoring(isChecked()); // triggers call to parametersColoringStateChanged()
 		}
 
+	}
+
+	public interface JavadocContentInputAccessor {
+		void addInputChangedListener(IInputChangedListener changeListener);
 	}
 }
