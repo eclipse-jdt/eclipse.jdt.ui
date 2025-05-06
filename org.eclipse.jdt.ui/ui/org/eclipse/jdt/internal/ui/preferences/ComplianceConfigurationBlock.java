@@ -8,6 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jesper S Møller - Bug 529432 - Allow JDT UI to target Java 10
@@ -701,9 +705,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 
-	protected boolean isBetaVersion(@SuppressWarnings("unused") String compliance) {
-		return false;
-		// return JavaCore.VERSION_24.equals(compliance);
+	protected boolean isBetaVersion(String compliance) {
+		 return JavaCore.VERSION_25.equals(compliance);
 	}
 
 	private String addsExportToSystemModule() {
