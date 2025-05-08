@@ -114,9 +114,6 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 				boolean isPositiveCaseToAnalyze= true;
 				ASTNode currentNode= visited;
 
-				if (visited.getLocationInParent() == ConditionalExpression.EXPRESSION_PROPERTY) {
-
-				}
 				while (currentNode.getParent() != null
 						&& (!(currentNode.getParent() instanceof IfStatement)
 								|| currentNode.getLocationInParent() != IfStatement.EXPRESSION_PROPERTY)
@@ -173,9 +170,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 						fResult.add(collector.build());
 						return false;
 					}
-				} else {
-					IfStatement ifStatement= (IfStatement) currentNode.getParent();
-
+				} else if (currentNode.getParent() instanceof IfStatement ifStatement) {
 					ResultCollector collector= new ResultCollector(visited);
 					if (isPositiveCaseToAnalyze) {
 						collector.collect(ifStatement.getThenStatement());
@@ -457,6 +452,7 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 			this.expressionToMove= expressionToMove;
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void rewriteAST(final CompilationUnitRewrite cuRewrite, final LinkedProposalModelCore linkedModel) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
