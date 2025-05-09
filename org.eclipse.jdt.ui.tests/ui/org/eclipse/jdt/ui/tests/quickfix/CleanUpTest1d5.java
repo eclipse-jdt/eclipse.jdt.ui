@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 IBM Corporation and others.
+ * Copyright (c) 2019, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -3904,6 +3904,63 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 			        doError("a", "b", "c");
 			        doError("a", new Object[] {"b", "c", "d"});
 			    }
+			}
+			""";
+		String expected= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+	}
+
+	@Test
+	public void testUnnecessaryArrayIssue2202() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			import java.util.Arrays;
+			import java.util.List;
+
+			public class A {
+
+				public void foo1(String x, List<Object> y) {
+					// do nothing
+				}
+
+				public void foo() {
+					String a = "abc";
+					Integer b = 0;
+					Double c = 1.4;
+					foo1("abc", Arrays.asList(new Object[] {a, //$NON-NLS-1$
+							b, c}));
+				}
+
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= """
+			package test1;
+
+			import java.util.Arrays;
+			import java.util.List;
+
+			public class A {
+
+				public void foo1(String x, List<Object> y) {
+					// do nothing
+				}
+
+				public void foo() {
+					String a = "abc";
+					Integer b = 0;
+					Double c = 1.4;
+					foo1("abc", Arrays.asList(a, //$NON-NLS-1$
+			        				b, c));
+				}
+
 			}
 			""";
 		String expected= sample;

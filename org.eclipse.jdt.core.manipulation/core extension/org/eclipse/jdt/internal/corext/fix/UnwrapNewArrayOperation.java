@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 Red Hat Inc. and others.
+ * Copyright (c) 2019, 2025 Red Hat Inc. and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 /**
@@ -55,23 +55,30 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		List<Expression> expressionsInArray= node != null && node.getInitializer() != null && node.getInitializer().expressions() != null ?
 				node.getInitializer().expressions() : Collections.EMPTY_LIST;
-		boolean isTagged[]= new boolean[expressionsInArray.size()];
 		ICompilationUnit cu= cuRewrite.getCu();
+		CompilationUnit root= cuRewrite.getRoot();
 
 		boolean tagged= false;
-		for (int i= 0; i < expressionsInArray.size(); ++i) {
-			Expression operand= expressionsInArray.get(i);
-			NLSLine nlsLine= NLSUtil.scanCurrentLine(cu, operand.getStartPosition());
-			if (nlsLine != null) {
-				for (NLSElement element : nlsLine.getElements()) {
-					if (element.getPosition().getOffset() == operand.getStartPosition()) {
-						if (element.hasTag()) {
-							tagged= true;
-							isTagged[i]= true;
+		try {
+			for (int i= 0; i < expressionsInArray.size(); ++i) {
+				Expression operand= expressionsInArray.get(i);
+				int lineNo= root.getLineNumber(operand.getStartPosition());
+				for (NLSLine nlsLine : NLSScanner.scan(cu)) {
+					if (nlsLine.getLineNumber() == lineNo - 1) {
+						for (NLSElement element : nlsLine.getElements()) {
+							if (element.hasTag()) {
+								tagged= true;
+								break;
+							}
 						}
+					}
+					if (tagged) {
+						break;
 					}
 				}
 			}
+		} catch (Exception e) {
+			// do nothing
 		}
 
 		TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description, cuRewrite);

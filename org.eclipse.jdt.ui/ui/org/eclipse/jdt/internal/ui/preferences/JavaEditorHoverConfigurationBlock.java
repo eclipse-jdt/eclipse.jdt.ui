@@ -15,7 +15,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -398,9 +397,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	void initializeFields() {
 		fModifierEditor.setEnabled(false);
 
-		Iterator<Button> e= fCheckBoxes.keySet().iterator();
-		while (e.hasNext()) {
-			Button b= e.next();
+		for (Button b : fCheckBoxes.keySet()) {
 			String key= fCheckBoxes.get(b);
 			b.setSelection(fStore.getBoolean(key));
 		}

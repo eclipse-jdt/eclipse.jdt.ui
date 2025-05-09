@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -69,6 +70,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -104,6 +106,7 @@ import org.eclipse.jdt.internal.corext.CorextCore;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
@@ -518,6 +521,14 @@ public class CallInliner {
 		return fRewrite.rewriteAST(fBuffer.getDocument(), fCUnit.getOptions(true));
 	}
 
+
+	private class InstanceofChecker extends ASTVisitor {
+		@Override
+		public boolean visit(InstanceofExpression node) {
+			throw new AbortSearchException();
+		}
+	}
+
 	private void computeRealArguments() {
 		List<Expression> arguments= Invocations.getArguments(fInvocation);
 		Set<Expression> canNotInline= crossCheckArguments(arguments);
@@ -533,7 +544,36 @@ public class CallInliner {
 			} else {
 				String name= fInvocationScope.createName(parameter.getName(), true);
 				realArguments[i]= ast.newSimpleName(name);
-				VariableDeclarationStatement local= createLocalDeclaration(parameter.getTypeBinding(), name, (Expression) fRewrite.createCopyTarget(expression));
+				boolean needInstanceofCheck= false;
+				if (expression instanceof CastExpression) {
+					ASTNode ancestor= ASTNodes.getFirstAncestorOrNull(fInvocation, ConditionalExpression.class, Statement.class);
+					while (ancestor instanceof ConditionalExpression condExp) {
+						InstanceofChecker checker= new InstanceofChecker();
+						Expression posExp= condExp.getExpression();
+						try {
+							posExp.accept(checker);
+						} catch (AbortSearchException e) {
+							needInstanceofCheck= true;
+							break;
+						}
+					}
+				}
+				Expression newExp= null;
+				if (needInstanceofCheck) {
+					CastExpression castExp= (CastExpression)expression;
+					Type t= castExp.getType();
+					InstanceofExpression instExp= ast.newInstanceofExpression();
+					instExp.setRightOperand((Type) fRewrite.createCopyTarget(t));
+					instExp.setLeftOperand((Expression)fRewrite.createCopyTarget(castExp.getExpression()));
+					ConditionalExpression condExp= ast.newConditionalExpression();
+					condExp.setExpression(instExp);
+					condExp.setThenExpression((Expression)fRewrite.createCopyTarget(expression));
+					condExp.setElseExpression(ast.newNullLiteral());
+					newExp= condExp;
+				} else {
+					newExp= (Expression)fRewrite.createCopyTarget(expression);
+				}
+				VariableDeclarationStatement local= createLocalDeclaration(parameter.getTypeBinding(), name, newExp);
 				if (parameter.isFinal()) {
 					local.modifiers().add(fInvocation.getAST().newModifier(ModifierKeyword.FINAL_KEYWORD));
 				}

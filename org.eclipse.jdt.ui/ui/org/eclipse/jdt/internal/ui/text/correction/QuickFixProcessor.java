@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -317,6 +317,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.EnhancedSwitchMissingDefault:
 			case IProblem.IllegalTotalPatternWithDefault:
 			case IProblem.IllegalFallthroughToPattern:
+			case IProblem.ExpressionShouldBeAVariable:
 				return true;
 
 			default:
@@ -397,6 +398,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedField:
 			case IProblem.UndefinedName:
 				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
+				break;
+			case IProblem.ExpressionShouldBeAVariable:
+				LocalCorrectionsSubProcessor.getExpressionShouldBeAVariableProposals(context, problem, proposals);
 				break;
 			case IProblem.UnresolvedVariable:
 				CompilationUnit astRoot= context.getASTRoot();

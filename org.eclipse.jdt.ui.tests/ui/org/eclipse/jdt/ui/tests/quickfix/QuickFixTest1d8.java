@@ -3301,4 +3301,75 @@ public class QuickFixTest1d8 extends QuickFixTest {
 				""";
 		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
 	}
+
+	@Test
+	public void testIssue2200_1() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str1= """
+			package test1;
+
+			public class E {
+
+				public void foo(Integer x, String string) {
+					((long)x.intValue());
+				}
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String expected1= """
+			package test1;
+
+			public class E {
+
+				public void foo(Integer x, String string) {
+					long l = (long)x.intValue();
+				}
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
+	@Test
+	public void testIssue2200_2() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test1", false, null);
+
+		String str1= """
+			package test1;
+
+			public class E {
+
+				public void foo(Object x, String string) {
+					((String)x);
+				}
+			}
+			""";
+		ICompilationUnit cu= pack2.createCompilationUnit("E.java", str1, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, null);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String expected1= """
+			package test1;
+
+			public class E {
+
+				public void foo(Object x, String string) {
+					String string2 = (String)x;
+				}
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+	}
+
 }
