@@ -83,7 +83,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 	@Override
 	protected void initializeDefaultPageImageDescriptor() {
-		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.png")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.svg")); //$NON-NLS-1$
 	}
 
 	@Override

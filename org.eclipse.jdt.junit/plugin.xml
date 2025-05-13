@@ -8,7 +8,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%View.label"
-            icon="$nl$/icons/full/eview16/junit.png"
+            icon="$nl$/icons/full/eview16/junit.svg"
             category="org.eclipse.jdt.ui.java"
             fastViewWidthRatio="0.40"
             class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
@@ -79,7 +79,7 @@
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
-            icon="$nl$/icons/full/obj16/julaunch.png"
+            icon="$nl$/icons/full/obj16/julaunch.svg"
             configTypeID="org.eclipse.jdt.junit.launchconfig"
             id="org.eclipse.jdt.junit.launchimage">
       </launchConfigurationTypeImage>
@@ -111,7 +111,7 @@
       </category>
       <wizard
             name="%TestCaseWizard.name"
-            icon="$nl$/icons/full/etool16/new_testcase.png"
+            icon="$nl$/icons/full/etool16/new_testcase.svg"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          <class
@@ -129,7 +129,7 @@
       </wizard>
       <wizard
             name="%TestSuiteWizard.name"
-            icon="$nl$/icons/full/etool16/new_testsuite.png"
+            icon="$nl$/icons/full/etool16/new_testsuite.svg"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
             id="org.eclipse.jdt.junit.wizards.NewTestSuiteCreationWizard">
@@ -225,7 +225,7 @@
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             label="%JUnitShortcut.label"
-            icon="$nl$/icons/full/obj16/julaunch.png"
+            icon="$nl$/icons/full/obj16/julaunch.svg"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
             class="org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut"
             modes="run, debug"
@@ -423,7 +423,7 @@
       <editor
             default="false"
             id="org.eclipse.jdt.junit.JUnitResultEditor"
-            icon="$nl$/icons/full/obj16/testfile_obj.png"
+            icon="$nl$/icons/full/obj16/testfile_obj.svg"
             launcher="org.eclipse.jdt.internal.junit.ui.JUnitViewEditorLauncher"
             name="%JUnitView.editor.name">
          <contentTypeBinding

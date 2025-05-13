@@ -28,3 +28,4 @@ Require-Bundle:
  org.eclipse.jdt.core.manipulation;bundle-version="1.9.0",
  org.eclipse.jdt.junit;bundle-version="3.14.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Capability: eclipse.swt;filter:="(image.format=svg)"

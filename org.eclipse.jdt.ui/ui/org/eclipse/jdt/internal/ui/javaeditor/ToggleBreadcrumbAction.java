@@ -65,7 +65,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_BREADCRUMB_ACTION);
 		fPage= page;
 		if (!inContextMenu) {
-			JavaPluginImages.setToolImageDescriptors(this, "toggle_breadcrumb.png"); //$NON-NLS-1$
+			JavaPluginImages.setToolImageDescriptors(this, "toggle_breadcrumb.svg"); //$NON-NLS-1$
 			fPage.getWorkbenchWindow().addPerspectiveListener(this);
 		}
 		update();

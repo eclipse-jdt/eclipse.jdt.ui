@@ -72,6 +72,7 @@ import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
+import org.eclipse.jface.text.IInputChangedListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
@@ -155,7 +156,6 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.FallbackInformat
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLinkedLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolbarAction;
 
 
@@ -429,6 +429,12 @@ public class JavadocView extends AbstractInfoView {
 	private volatile boolean fIgnoringNewInputOverride;
 
 	/**
+	 * The listeners to be notified when the input changed.
+	 * @since 3.35
+	 */
+	private ListenerList<IInputChangedListener> fInputChangeListeners= new ListenerList<>(ListenerList.IDENTITY);
+
+	/**
 	 * The Javadoc view's select all action.
 	 */
 	private class SelectAllAction extends Action {
@@ -650,7 +656,6 @@ public class JavadocView extends AbstractInfoView {
 		fOpenBrowserAction= new OpenInBrowserAction(getSite());
 		fOpenBrowserAction.setSpecialSelectionProvider(fInputSelectionProvider);
 		fOpenBrowserAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
-		fOpenBrowserAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
 		fOpenBrowserAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_ATTACHED_JAVADOC);
 		fInputSelectionProvider.addSelectionChangedListener(fOpenBrowserAction);
 
@@ -682,13 +687,13 @@ public class JavadocView extends AbstractInfoView {
 		tbm.add(new Separator());
 
 		if (fIsUsingBrowserWidget) {
-			BrowserTextAccessor browserAccessor= new BrowserTextAccessor(fBrowser);
 			Runnable viewRefreshTask= () -> {
 				fIgnoringNewInputOverride= true;
 				setLinkingEnabled(isLinkingEnabled()); // triggers refresh of the view using last set selection
 			};
 			// toolbar widget is being re-created later so we need to do our setup then
-			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(), browserAccessor, () -> fOriginalInput, viewRefreshTask) {
+			var stylingMenuAction= new SignatureStylingMenuToolbarAction(fBrowser.getParent().getShell(),
+					fInputChangeListeners::add, viewRefreshTask) {
 				// we take advantage of this method being called after toolbar item creation (in ActionContributionItem.fill()) which happens when whole toolbar is being re-created to be displayed
 				@Override
 				public void addPropertyChangeListener(IPropertyChangeListener listener) {
@@ -931,6 +936,9 @@ public class JavadocView extends AbstractInfoView {
 			}
 			fText.setText(javadocHtml);
 			TextPresentation.applyTextPresentation(fPresentation, fText);
+		}
+		for (IInputChangedListener listener : fInputChangeListeners) {
+			listener.inputChanged(javadocHtml);
 		}
 	}
 

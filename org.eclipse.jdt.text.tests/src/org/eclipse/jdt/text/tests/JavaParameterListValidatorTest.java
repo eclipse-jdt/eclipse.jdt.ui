@@ -13,17 +13,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -42,14 +42,14 @@ public class JavaParameterListValidatorTest {
 	protected IDocument fDocument;
 	protected JavaParameterListValidator fValidator;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		fTextViewer= new TestTextViewer();
 		fDocument= new Document();
 		fValidator= new JavaParameterListValidator();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown () {
 		fTextViewer= null;
 		fDocument= null;
@@ -233,14 +233,14 @@ public class JavaParameterListValidatorTest {
 
 	private static void assertEquals(TextPresentation expected, TextPresentation actual) {
 		// check lengths
-		Assert.assertEquals(expected.getDenumerableRanges(), actual.getDenumerableRanges());
+		Assertions.assertEquals(expected.getDenumerableRanges(), actual.getDenumerableRanges());
 		// check default range
-		Assert.assertEquals(expected.getDefaultStyleRange(), actual.getDefaultStyleRange());
+		Assertions.assertEquals(expected.getDefaultStyleRange(), actual.getDefaultStyleRange());
 		// check rest
 		Iterator<StyleRange> e1= expected.getAllStyleRangeIterator();
 		Iterator<StyleRange> e2= actual.getAllStyleRangeIterator();
 		while (e1.hasNext())
-			Assert.assertEquals(e1.next(), e2.next());
+			Assertions.assertEquals(e1.next(), e2.next());
 	}
 
 	protected String print(TextPresentation presentation) {

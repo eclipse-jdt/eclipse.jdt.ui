@@ -103,9 +103,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class E {
 			    Vector vec;
 			}
@@ -113,25 +113,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class Vector1 {
-			
+
 			}
 			""";
 
 		String expected3= """
 			package test1;
-			
+
 			public interface Vector1 {
-			
+
 			}
 			""";
 
 		String expected4= """
 			package test1;
-			
+
 			public enum Vector1 {
-			
+
 			}
 			""";
 
@@ -164,9 +164,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class E {
 			    void foo(Vector[] vec) {
 			    }
@@ -175,25 +175,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class Vect1or {
-			
+
 			}
 			""";
 
 		String expected3= """
 			package test1;
-			
+
 			public interface Vect1or {
-			
+
 			}
 			""";
 
 		String expected4= """
 			package test1;
-			
+
 			public enum Vect1or {
-			
+
 			}
 			""";
 
@@ -235,9 +235,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class E {
 			    Vector[] foo() {
 			        return null;
@@ -247,25 +247,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class Vect1or {
-			
+
 			}
 			""";
 
 		String expected3= """
 			package test1;
-			
+
 			public interface Vect1or {
-			
+
 			}
 			""";
 
 		String expected4= """
 			package test1;
-			
+
 			public enum Vect1or {
-			
+
 			}
 			""";
 
@@ -308,9 +308,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			import java.io.IOException;
-			
+
 			public class E {
 			    void foo() throws IOException {
 			    }
@@ -319,9 +319,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class IOExcpetion extends Exception {
-			
+
 			}
 			""";
 
@@ -360,25 +360,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			public class XY {
-			
+
 			}
 			""";
 
 		String expected3= """
 			package test1;
-			
+
 			public interface XY {
-			
+
 			}
 			""";
 
 		String expected4= """
 			package test1;
-			
+
 			public enum XY {
-			
+
 			}
 			""";
 
@@ -435,11 +435,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected2= """
 			package test1;
-			
+
 			import java.util.ArrayList;
-			
+
 			public class ArrayListist extends ArrayList {
-			
+
 			}
 			""";
 
@@ -488,31 +488,31 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected3= """
 			package test1;
-			
+
 			import java.io.Serializable;
-			
+
 			public class ArrayListExtra implements Serializable {
-			
+
 			}
 			""";
 
 		String expected4= """
 			package test1;
-			
+
 			import java.io.Serializable;
-			
+
 			public interface ArrayListExtra extends Serializable {
-			
+
 			}
 			""";
 
 		String expected5= """
 			package test1;
-			
+
 			import java.io.Serializable;
-			
+
 			public enum ArrayListExtra implements Serializable {
-			
+
 			}
 			""";
 
@@ -558,25 +558,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test2;
-			
+
 			public class Test {
-			
+
 			}
 			""";
 
 		String expected2= """
 			package test2;
-			
+
 			public interface Test {
-			
+
 			}
 			""";
 
 		String expected3= """
 			package test2;
-			
+
 			public enum Test {
-			
+
 			}
 			""";
 
@@ -621,9 +621,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String expected2= """
 			package test1;
 			public class F {
-			
+
 			    public class Inner {
-			
+
 			    }
 			}
 			""";
@@ -631,9 +631,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String expected3= """
 			package test1;
 			public class F {
-			
+
 			    public interface Inner {
-			
+
 			    }
 			}
 			""";
@@ -662,9 +662,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			public class XXX extends Exception {
-			
+
 			}
 			""";
 
@@ -687,9 +687,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			public class XXX {
-			
+
 			}
 			""";
 
@@ -712,9 +712,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			public interface XXX {
-			
+
 			}
 			""";
 
@@ -738,9 +738,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected1= """
 			package test1;
-			
+
 			public @interface Xyz {
-			
+
 			}
 			""";
 
@@ -766,9 +766,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package scratch;
-			
+
 			public @interface Unimportant {
-			
+
 			}
 			""";
 
@@ -814,25 +814,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		String expected4= """
 			package test1;
-			
+
 			public class floot {
-			
+
 			}
 			""";
 
 		String expected5= """
 			package test1;
-			
+
 			public interface floot {
-			
+
 			}
 			""";
 
 		String expected6= """
 			package test1;
-			
+
 			public enum floot {
-			
+
 			}
 			""";
 
@@ -877,25 +877,25 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			public class XYX {
-			
+
 			}
 			""";
 
 		expected[2]= """
 			package test1;
-			
+
 			public interface XYX {
-			
+
 			}
 			""";
 
 		expected[3]= """
 			package test1;
-			
+
 			public enum XYX {
-			
+
 			}
 			""";
 
@@ -957,27 +957,27 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			import test1.E.SomeType;
-			
+
 			public class XYX extends SomeType {
-			
+
 			}
 			""";
 
 		expected[2]= """
 			package test1;
-			
+
 			public interface XYX {
-			
+
 			}
 			""";
 
 		expected[3]= """
 			package test1;
-			
+
 			public enum XYX {
-			
+
 			}
 			""";
 
@@ -1014,7 +1014,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    void foo(XXY<String> b) {
 			        b.foo();
@@ -1031,17 +1031,17 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[2];
 		expected[0]= """
 			package test1;
-			
+
 			public class XXY<T> {
-			
+
 			}
 			""";
 
 		expected[1]= """
 			package test1;
-			
+
 			public interface XXY<T> {
-			
+
 			}
 			""";
 
@@ -1086,19 +1086,19 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 		expected[1]= """
 			package test1;
-			
+
 			import test1.E.SomeType;
-			
+
 			public class XXY<T1, T2> extends SomeType<String, String> {
-			
+
 			}
 			""";
 
 		expected[2]= """
 			package test1;
-			
+
 			public interface XXY<T1, T2> {
-			
+
 			}
 			""";
 
@@ -1617,9 +1617,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			import java.util.*;
-			
+
 			public class E {
 			    public void foo(ArrayList<? extends HashSet<? super Integer>> list) {
 			        for (element: list) {
@@ -1638,12 +1638,53 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.*;
-			
+
 			public class E {
 			    public void foo(ArrayList<? extends HashSet<? super Integer>> list) {
 			        for (HashSet<? super Integer> element: list) {
+			        }
+			    }
+			}
+			""";
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	@Test
+	public void testIssue2180() throws Exception {  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=468454
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		String str= """
+			package pack;
+
+			import java.util.*;
+
+			public class E {
+			    public void foo(ArrayList<? extends HashSet<? super Integer>> list) {
+			        for (element: list) {
+				        System.out.println(element);
+			        }
+			    }
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", str, false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, 1);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		expected[0]= """
+			package pack;
+
+			import java.util.*;
+
+			public class E {
+			    public void foo(ArrayList<? extends HashSet<? super Integer>> list) {
+			        for (HashSet<? super Integer> element: list) {
+				        System.out.println(element);
 			        }
 			    }
 			}
@@ -1684,7 +1725,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			class E<T extends StaticInner> {
 			    public static class StaticInner {
 			    }
@@ -1700,7 +1741,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			class E<T extends pack.E.StaticInner> {
 			    public static class StaticInner {
 			    }
@@ -1715,7 +1756,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
 		String str= """
 			package pack;
-			
+
 			public class E {
 			    public void foo() {
 			        Date d1= new Date();
@@ -1734,9 +1775,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		expected[0]= """
 			package pack;
-			
+
 			import java.util.Date;
-			
+
 			public class E {
 			    public void foo() {
 			        Date d1= new Date();
@@ -1755,7 +1796,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String str= """
 			//Comment 1
 			//Comment 2
-			
+
 			public class E {
 			    public void foo() {
 			        Date d1= new Date();
@@ -1775,9 +1816,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		expected[0]= """
 			//Comment 1
 			//Comment 2
-			
+
 			import java.util.Date;
-			
+
 			public class E {
 			    public void foo() {
 			        Date d1= new Date();

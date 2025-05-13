@@ -46,7 +46,7 @@ public class LexicalSortingAction extends Action {
 		fDropSupport= dropSupport;
 		fPreferenceKey= "LexicalSortingAction." + id + ".isChecked"; //$NON-NLS-1$ //$NON-NLS-2$
 		setText(JavaBrowsingMessages.LexicalSortingAction_label);
-		JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.png"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.svg"); //$NON-NLS-1$
 		setToolTipText(JavaBrowsingMessages.LexicalSortingAction_tooltip);
 		setDescription(JavaBrowsingMessages.LexicalSortingAction_description);
 		boolean checked= JavaPlugin.getDefault().getPreferenceStore().getBoolean(fPreferenceKey);

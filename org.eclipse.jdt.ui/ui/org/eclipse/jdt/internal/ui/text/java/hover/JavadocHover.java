@@ -133,7 +133,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
-import org.eclipse.jdt.internal.ui.viewsupport.browser.BrowserTextAccessor;
 import org.eclipse.jdt.internal.ui.viewsupport.javadoc.SignatureStylingMenuToolbarAction;
 
 
@@ -282,7 +281,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public OpenDeclarationAction(BrowserInformationControl infoControl) {
 			fInfoControl= infoControl;
 			setText(JavaHoverMessages.JavadocHover_openDeclaration);
-			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.png"); //$NON-NLS-1$ //TODO: better images
+			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.svg"); //$NON-NLS-1$ //TODO: better images
 		}
 
 		/*
@@ -356,7 +355,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					OpenAttachedJavadocAction openAttachedJavadocAction= new OpenAttachedJavadocAction(fSite);
 					openAttachedJavadocAction.setSpecialSelectionProvider(selectionProvider);
 					openAttachedJavadocAction.setImageDescriptor(JavaPluginImages.DESC_ELCL_OPEN_BROWSER);
-					openAttachedJavadocAction.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_OPEN_BROWSER);
 					selectionProvider.addSelectionChangedListener(openAttachedJavadocAction);
 					selectionProvider.setSelection(new StructuredSelection());
 					tbm.add(openAttachedJavadocAction);
@@ -379,10 +377,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				};
 				ToolBarManager tbmSecondary= new ToolBarManager(SWT.FLAT);
 				tbmSecondary.createControl(toolbarComposite).setLayoutData(new GridData(SWT.END, SWT.BEGINNING, false, false));
-				BrowserTextAccessor browserAccessor= new BrowserTextAccessor(iControl);
-				var stylingMenuAction= new SignatureStylingMenuToolbarAction(iControl.getShell(), browserAccessor,
-						() -> iControl.getInput() == null ? null : iControl.getInput().getHtml(),
-						viewRefreshTask);
+				var stylingMenuAction= new SignatureStylingMenuToolbarAction(iControl.getShell(),
+						iControl::addInputChangeListener, viewRefreshTask);
 				tbmSecondary.add(stylingMenuAction);
 				tbmSecondary.update(true);
 				stylingMenuAction.setup(tbmSecondary.getControl());

@@ -38,7 +38,7 @@ class PinCallHierarchyViewAction extends Action {
 	public PinCallHierarchyViewAction(CallHierarchyViewPart view) {
 		super(CallHierarchyMessages.PinCallHierarchyViewAction_label, IAction.AS_CHECK_BOX);
 		setToolTipText(CallHierarchyMessages.PinCallHierarchyViewAction_tooltip);
-		JavaPluginImages.setLocalImageDescriptors(this, "pin_view.png"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "pin_view.svg"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_PIN_VIEW_ACTION);
 		fView= view;
 	}

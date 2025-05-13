@@ -512,6 +512,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuilder buf= new StringBuilder();
+		boolean noSpacingNeeded = false;
 		switch (fTypeKind) {
 			case K_CLASS:
 				buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_createclass_info);
@@ -525,9 +526,14 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 			case K_ANNOTATION:
 				buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_createannotation_info);
 				break;
+			default:
+				noSpacingNeeded = true;
 		}
-		buf.append("<br>"); //$NON-NLS-1$
-		buf.append("<br>"); //$NON-NLS-1$
+		// #2183: newlines at the start of the preview String mess with the formatting
+		if (!noSpacingNeeded) {
+			buf.append("<br>"); //$NON-NLS-1$
+			buf.append("<br>"); //$NON-NLS-1$
+		}
 		if (fTypeContainer instanceof IType) {
 			buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_tooltip_enclosingtype);
 		} else {
@@ -551,6 +557,9 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				break;
 			case K_ANNOTATION:
 				buf.append("@interface <b>"); //$NON-NLS-1$
+				break;
+			case K_RECORD:
+				buf.append("record <b>"); //$NON-NLS-1$
 				break;
 		}
 		if (fTypeNameWithParameters != null) {

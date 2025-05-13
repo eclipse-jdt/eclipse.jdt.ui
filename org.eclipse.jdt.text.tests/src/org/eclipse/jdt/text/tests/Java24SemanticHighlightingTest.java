@@ -13,9 +13,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.eclipse.jface.text.Position;
 
@@ -23,10 +23,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingsCore;
 
 public class Java24SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 
-	@Rule
+	@RegisterExtension
 	public SemanticHighlightingTestSetup shts= new SemanticHighlightingTestSetup( "/SHTest/src/Java24.java");
 
-	@Before
+	@BeforeEach
 	public void updateCompliance() {
 		shts.updateCompliance("24", true);
 	}

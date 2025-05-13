@@ -62,7 +62,6 @@ class RemoveFromViewAction extends Action{
 		ISharedImages workbenchImages= ISharedImages.get();
 		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE_DISABLED));
 		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
-		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_ELCL_REMOVE));
 	}
 
 	/**

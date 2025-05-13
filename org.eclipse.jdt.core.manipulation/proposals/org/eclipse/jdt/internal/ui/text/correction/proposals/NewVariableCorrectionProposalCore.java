@@ -416,7 +416,7 @@ public class NewVariableCorrectionProposalCore extends LinkedCorrectionProposalC
 			}
 		}
 		int parentKind= dominator.getParent().getNodeType();
-		if (parentKind != ASTNode.BLOCK && parentKind != ASTNode.FOR_STATEMENT) {
+		if (parentKind != ASTNode.BLOCK && parentKind != ASTNode.FOR_STATEMENT && parentKind != ASTNode.ENHANCED_FOR_STATEMENT) {
 			return dominator.getParent();
 		}
 		return dominator;

@@ -52,7 +52,6 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_tooltip);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 	}
 
 	@Override

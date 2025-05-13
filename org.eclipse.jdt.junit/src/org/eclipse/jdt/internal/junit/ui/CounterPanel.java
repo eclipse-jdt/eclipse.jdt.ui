@@ -37,8 +37,8 @@ public class CounterPanel extends Composite {
 	protected int fIgnoredCount;
 	protected int fAssumptionFailedCount;
 
-	private final Image fErrorIcon= JUnitPlugin.createImage("ovr16/error_ovr.png"); //$NON-NLS-1$
-	private final Image fFailureIcon= JUnitPlugin.createImage("ovr16/failed_ovr.png"); //$NON-NLS-1$
+	private final Image fErrorIcon= JUnitPlugin.createImage("ovr16/error_ovr.svg"); //$NON-NLS-1$
+	private final Image fFailureIcon= JUnitPlugin.createImage("ovr16/failed_ovr.svg"); //$NON-NLS-1$
 
 	public CounterPanel(Composite parent) {
 		super(parent, SWT.WRAP);

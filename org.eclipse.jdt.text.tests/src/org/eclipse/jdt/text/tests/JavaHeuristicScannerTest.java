@@ -13,16 +13,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Hashtable;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -47,7 +47,7 @@ public class JavaHeuristicScannerTest {
 	private JavaIndenter fScanner;
 	private JavaHeuristicScanner fHeuristicScanner;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		if (JavaCore.getPlugin() != null) {
 			Hashtable<String, String> options= JavaCore.getDefaultOptions();
@@ -78,7 +78,7 @@ public class JavaHeuristicScannerTest {
 		fScanner= new JavaIndenter(fDocument, fHeuristicScanner);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);
 		fPartitioner.disconnect();
@@ -904,7 +904,7 @@ public class JavaHeuristicScannerTest {
 	    	assertFalse(fHeuristicScanner.looksLikeClassInstanceCreationBackward(offset, JavaHeuristicScanner.UNBOUND));
     }
 
-	@Ignore("enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed")
+	@Disabled("enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed")
 	@Test
 	public void testConditional1() throws Exception {
     	fDocument.set(
@@ -919,7 +919,7 @@ public class JavaHeuristicScannerTest {
     	assertEquals("			                      ", indent);
     }
 
-	@Ignore("enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed")
+	@Disabled("enable when https://bugs.eclipse.org/bugs/show_bug.cgi?id=65463 is fixed")
 	@Test
 	public void testConditional2() throws Exception {
     	fDocument.set(

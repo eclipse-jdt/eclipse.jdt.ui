@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 
@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
  */
 public class JavaWordIteratorTest extends BreakIteratorTest {
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		fBreakIterator= new JavaWordIterator();
 	}

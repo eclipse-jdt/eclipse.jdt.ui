@@ -36,7 +36,7 @@ public abstract class AbstractToggleLinkingAction extends Action {
 		super(ActionMessages.ToggleLinkingAction_label);
 		setDescription(ActionMessages.ToggleLinkingAction_description);
 		setToolTipText(ActionMessages.ToggleLinkingAction_tooltip);
-		JavaPluginImages.setLocalImageDescriptors(this, "synced.png"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "synced.svg"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LINK_EDITOR_ACTION);
 		setChecked(false);
 	}

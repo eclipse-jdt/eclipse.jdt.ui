@@ -6,7 +6,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%je.view.name"
-            icon="icons/view.png"
+            icon="icons/view.svg"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.jeview.views.JavaElementView"
             id="org.eclipse.jdt.jeview.views.JavaElementView">

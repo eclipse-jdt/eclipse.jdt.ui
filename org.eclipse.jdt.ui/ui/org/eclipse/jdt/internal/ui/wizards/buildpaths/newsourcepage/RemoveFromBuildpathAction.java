@@ -73,7 +73,6 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		this(null, selectionTarget, context);
 
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_REMOVE_AS_SOURCE_FOLDER);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_REMOVE_AS_SOURCE_FOLDER);
     }
 
 	public RemoveFromBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {

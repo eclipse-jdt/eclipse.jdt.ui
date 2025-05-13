@@ -13,15 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -41,7 +41,7 @@ public class PartitionTokenScannerTest {
 	private IPartitionTokenScanner fReference;
 	private IPartitionTokenScanner fTestee;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		fReference= new JavaPartitionScanner();
 		fTestee= new FastJavaPartitionScanner(true);
@@ -182,12 +182,12 @@ public class PartitionTokenScannerTest {
 			final int testeeOffset= fTestee.getTokenOffset();
 			message.append(", offset = " + referenceOffset);
 			message.append(", " + extractString(document, referenceOffset));
-			assertEquals(message.toString(), referenceOffset, testeeOffset);
+			assertEquals(referenceOffset, testeeOffset, message.toString());
 
 			final int referenceLength= fReference.getTokenLength();
 			final int testeeLength= fTestee.getTokenLength();
 			message.append(", length = " + referenceLength);
-			assertEquals(message.toString(), referenceLength, testeeLength);
+			assertEquals(referenceLength, testeeLength, message.toString());
 
 			if (referenceToken.isEOF())
 				break;

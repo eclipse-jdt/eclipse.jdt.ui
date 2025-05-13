@@ -38,13 +38,13 @@ class ToggleCallModeAction extends Action {
 			setText(CallHierarchyMessages.ToggleCallModeAction_callers_label);
 			setDescription(CallHierarchyMessages.ToggleCallModeAction_callers_description);
 			setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callers_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "ch_callers.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "ch_callers.svg"); //$NON-NLS-1$
 			break;
 		case CallHierarchyViewPart.CALL_MODE_CALLEES:
 			setText(CallHierarchyMessages.ToggleCallModeAction_callees_label);
 			setDescription(CallHierarchyMessages.ToggleCallModeAction_callees_description);
 			setToolTipText(CallHierarchyMessages.ToggleCallModeAction_callees_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "ch_callees.png"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "ch_callees.svg"); //$NON-NLS-1$
 			break;
 		default:
 			Assert.isTrue(false);

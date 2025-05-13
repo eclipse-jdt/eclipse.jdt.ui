@@ -5,7 +5,7 @@ class A {
 	public void a(B b){}
 	protected void m(B b) {
 		foo2(b);
-		a(this);
+		a(b);
 	}
 	protected void foo2(B b) {
 		m(b);

@@ -29,7 +29,6 @@ class ShowCallHierarchyFilterDialogAction extends Action {
 
 		setText(CallHierarchyMessages.ShowFilterDialogAction_text);
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_FILTER);
-		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_FILTER);
 	}
 
 	@Override

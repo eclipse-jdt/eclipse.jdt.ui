@@ -14,12 +14,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import static org.eclipse.jdt.internal.corext.fix.CleanUpConstants.ORGANIZE_IMPORTS;
+import static org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtilCore.SAVE_PARTICIPANT_KEY_PREFIX;
+import static org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants.EDITOR_SAVE_PARTICIPANT_PREFIX;
+import static org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantPreferenceConfigurationConstants.POSTSAVELISTENER_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,12 +37,16 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -44,15 +55,27 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.MethodNameMatch;
+import org.eclipse.jdt.core.search.MethodNameMatchRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
+
+import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.jdt.internal.core.CompilationUnitElementInfo;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class ImportOrganizeTest extends CoreTests {
 
@@ -3879,6 +3902,158 @@ public class ImportOrganizeTest extends CoreTests {
 			}
 			""";
 		assertEqualString(cu1.getSource(), str2);
+	}
+	
+	@Test
+	public void testBug3918() throws Exception {
+		IEclipsePreferences prefs = InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
+		String postSaveActionsKey = EDITOR_SAVE_PARTICIPANT_PREFIX + POSTSAVELISTENER_ID;
+		String organizeImportsKey = SAVE_PARTICIPANT_KEY_PREFIX + ORGANIZE_IMPORTS;
+
+		final boolean orgImportsOrigState = prefs.getBoolean(organizeImportsKey, false);
+		final boolean postSaveActionsOrigState = prefs.getBoolean(postSaveActionsKey, false);
+
+		try {
+			prefs.putBoolean(postSaveActionsKey, true);
+			prefs.putBoolean(organizeImportsKey, true);
+
+			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+			IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
+			String original= """
+					package p;
+
+					import java.util.function.IntPredicate;
+					import java.util.Properties;
+
+					class UnusedStaticImport {
+					    boolean value = match(Character::isUpperCase, 'A');
+
+					    public static boolean match(IntPredicate matcher, int codePoint) {
+					        return matcher.test(codePoint);
+					    }
+					}
+					""";
+			CompilationUnit icu= (CompilationUnit) pack0.createCompilationUnit("Unusedmport.java", original, false, null);
+			IEditorPart editor= EditorUtility.openInEditor(icu);
+
+			long timeStamp= getElementInfoTimestamp(icu);
+			assertEquals("ICU modification stamp differs from resource stamp", icu.getResource().getModificationStamp(), timeStamp);
+
+			// On save "organize imports" participant modifies CU and the CU timestamp should change.
+			// Check that CU stamp is still in-sync with the underlined IFie stamp
+			editor.doSave(new NullProgressMonitor());
+
+			String fixed= """
+					package p;
+
+					import java.util.function.IntPredicate;
+
+					class UnusedStaticImport {
+					    boolean value = match(Character::isUpperCase, 'A');
+
+					    public static boolean match(IntPredicate matcher, int codePoint) {
+					        return matcher.test(codePoint);
+					    }
+					}
+					""";
+			assertEqualString(fixed, icu.getSource());
+
+			timeStamp= getElementInfoTimestamp(icu);
+			assertEquals("ICU modification stamp differs from resource stamp", icu.getResource().getModificationStamp(), timeStamp);
+		} finally {
+			prefs.putBoolean(postSaveActionsKey, postSaveActionsOrigState);
+			prefs.putBoolean(organizeImportsKey, orgImportsOrigState);
+		}
+	}
+
+	@Test
+	public void testBug3918_Search() throws Exception {
+		String postSaveActionsKey = EDITOR_SAVE_PARTICIPANT_PREFIX	+ POSTSAVELISTENER_ID;
+		String organizeImportsKey= SAVE_PARTICIPANT_KEY_PREFIX + ORGANIZE_IMPORTS;
+		IEclipsePreferences jdtUiPreferences = InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN);
+		final boolean orgImportsOrigState= jdtUiPreferences.getBoolean(organizeImportsKey, false);
+		final boolean postSaveActionsOrigState = jdtUiPreferences.getBoolean(postSaveActionsKey, false);
+
+		try {
+			jdtUiPreferences.putBoolean(postSaveActionsKey, true);
+			jdtUiPreferences.putBoolean(organizeImportsKey, true);
+
+			IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+			IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
+			String original= """
+					package p;
+
+					import java.util.function.IntPredicate;
+					import java.util.Properties;
+
+					class UnusedStaticImport {
+					    boolean value = match(Character::isUpperCase, 'A');
+
+					    public static boolean match(IntPredicate matcher, int codePoint) {
+					        return matcher.test(codePoint);
+					    }
+					}
+					""";
+			ICompilationUnit icu= pack0.createCompilationUnit("Unusedmport.java", original, false, null);
+			IEditorPart editor= EditorUtility.openInEditor(icu);
+			class Collector extends MethodNameMatchRequestor {
+				List<MethodNameMatch> matches = new ArrayList<>();
+				@Override
+				public void acceptMethodNameMatch(MethodNameMatch match) {
+					this.matches.add(match);
+				}
+			}
+			IJavaSearchScope scope = SearchEngine.createHierarchyScope(icu.getType("UnusedStaticImport"));
+			Collector collector = new Collector();
+			new SearchEngine().searchAllMethodNames(
+					null, SearchPattern.R_PREFIX_MATCH, //package
+					null, SearchPattern.R_PREFIX_MATCH,  // declaring Qualification
+					null, SearchPattern.R_PREFIX_MATCH, // declaring SimpleType
+					"match".toCharArray(), SearchPattern.R_PREFIX_MATCH,
+					scope, collector,
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+
+			assertEquals("Should find one method, but found: " + collector.matches, 1, collector.matches.size());
+			MethodNameMatch actual= collector.matches.get(0);
+			assertEquals("Unexpected method found", "match", actual.getMethod().getElementName());
+
+			// On save "organize imports" participant modifies CU so the CU stamp should be properly updated.
+			// That has impact on search results: we don't see matches if CU stamp is out of sync with IFile stamp.
+			editor.doSave(new NullProgressMonitor());
+
+			collector = new Collector();
+			new SearchEngine().searchAllMethodNames(
+					null, SearchPattern.R_PREFIX_MATCH, //package
+					null, SearchPattern.R_PREFIX_MATCH,  // declaring Qualification
+					null, SearchPattern.R_PREFIX_MATCH, // declaring SimpleType
+					"match".toCharArray(), SearchPattern.R_PREFIX_MATCH,
+					scope, collector,
+					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
+
+			assertEquals("Should find one method, but found: " + collector.matches, 1, collector.matches.size());
+			actual= collector.matches.get(0);
+			assertEquals("Unexpected method found", "match", actual.getMethod().getElementName());
+
+		} finally {
+			jdtUiPreferences.putBoolean(postSaveActionsKey, postSaveActionsOrigState);
+			jdtUiPreferences.putBoolean(organizeImportsKey, orgImportsOrigState);
+		}
+	}
+
+	private long getElementInfoTimestamp(CompilationUnit icu) throws NoSuchFieldException, IllegalAccessException, JavaModelException {
+		CompilationUnitElementInfo elementInfo= (CompilationUnitElementInfo) icu.getElementInfo();
+
+		Field timestampField= CompilationUnitElementInfo.class.getDeclaredField("timestamp");
+		long timeStamp;
+		try {
+			timestampField.setAccessible(true);
+			timeStamp= (long) timestampField.get(elementInfo);
+		} finally {
+			timestampField.setAccessible(false);
+		}
+		return timeStamp;
 	}
 
 	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {

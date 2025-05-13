@@ -646,7 +646,6 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			fAnnotation= annotation;
 			fInfoControl= infoControl;
 			setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_ANNOTATIONS);
-			setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_ANNOTATIONS);
 			setToolTipText(JavaHoverMessages.AbstractAnnotationHover_action_configureAnnotationPreferences);
 		}
 

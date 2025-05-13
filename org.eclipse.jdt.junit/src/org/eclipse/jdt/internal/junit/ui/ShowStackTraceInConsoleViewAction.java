@@ -35,8 +35,7 @@ public class ShowStackTraceInConsoleViewAction extends Action {
 		setDescription(JUnitMessages.ShowStackTraceInConsoleViewAction_description);
 		setToolTipText(JUnitMessages.ShowStackTraceInConsoleViewAction_tooltip);
 
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/open_console.png")); //$NON-NLS-1$
-		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/open_console.png")); //$NON-NLS-1$
+		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/open_console.svg")); //$NON-NLS-1$
 
 		fView= view;
 	}
