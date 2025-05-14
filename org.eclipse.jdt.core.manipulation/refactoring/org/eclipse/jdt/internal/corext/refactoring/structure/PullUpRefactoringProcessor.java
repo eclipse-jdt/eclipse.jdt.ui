@@ -115,6 +115,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
@@ -1184,7 +1185,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	@Override
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		try {
-			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 14);
+			SubMonitor subMonitor= SubMonitor.convert(monitor, RefactoringCoreMessages.PullUpRefactoring_checking, 15);
 			clearCaches();
 
 			final RefactoringStatus result= new RefactoringStatus();
@@ -1202,6 +1203,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			result.merge(checkMembersInTypeAndAllSubtypes(subMonitor.newChild(2)));
 			result.merge(checkIfSkippingOverElements(subMonitor.newChild(1)));
 			result.merge(checkIfOverridingSuperClass(subMonitor.newChild(1)));
+			result.merge(checkIfHidingMethod(subMonitor.newChild(1)));
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();
 			if (!JdtFlags.isAbstract(getDestinationType()) && getAbstractMethods().length > 0)
@@ -1220,6 +1222,28 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		} finally {
 			monitor.done();
 		}
+	}
+
+	private RefactoringStatus checkIfHidingMethod(SubMonitor newChild) throws JavaModelException {
+		SearchResultGroup[] matches= findImplementors(fDestinationType, newChild);
+		for (SearchResultGroup match : matches) {
+			for (SearchMatch result : match.getSearchResults()) {
+				if (result instanceof TypeReferenceMatch typeMatch) {
+					IType type= (IType) typeMatch.getElement();
+					for (IMember member : fMembersToMove) {
+						if (member instanceof IMethod iMethod) {
+							final IMethod methodInType= JavaModelUtil.findMethod(iMethod.getElementName(), iMethod.getParameterTypes(), iMethod.isConstructor(), type);
+							if (Modifier.isStatic(iMethod.getFlags()) != Modifier.isStatic(methodInType.getFlags())) {
+								final String msg= Messages.format(RefactoringCoreMessages.PullUpRefactoring_will_hide_method, new Object[] { methodInType.getElementName(), type.getElementName() });
+								final RefactoringStatusContext context= JavaStatusContext.create(methodInType);
+								return RefactoringStatus.createErrorStatus(msg, context);
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	private class CheckInvalidOuterFieldAccess extends ASTVisitor {
@@ -2003,6 +2027,19 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		engine.setOwner(fOwner);
 		engine.setFiltering(true, true);
 		engine.setScope(RefactoringScopeFactory.create(member));
+		engine.searchPattern(monitor);
+		return (SearchResultGroup[]) engine.getResults();
+	}
+
+	private SearchResultGroup[] findImplementors(final IType type, final IProgressMonitor monitor) throws JavaModelException {
+		SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.IMPLEMENTORS, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) {
+			return new SearchResultGroup[0];
+		}
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(pattern);
+		engine.setOwner(fOwner);
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(type));
 		engine.searchPattern(monitor);
 		return (SearchResultGroup[]) engine.getResults();
 	}
