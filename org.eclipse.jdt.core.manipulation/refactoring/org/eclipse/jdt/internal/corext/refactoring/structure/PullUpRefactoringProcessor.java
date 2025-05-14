@@ -1233,7 +1233,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 					for (IMember member : fMembersToMove) {
 						if (member instanceof IMethod iMethod) {
 							final IMethod methodInType= JavaModelUtil.findMethod(iMethod.getElementName(), iMethod.getParameterTypes(), iMethod.isConstructor(), type);
-							if (Modifier.isStatic(iMethod.getFlags()) != Modifier.isStatic(methodInType.getFlags())) {
+							if (methodInType != null && Modifier.isStatic(iMethod.getFlags()) != Modifier.isStatic(methodInType.getFlags())) {
 								final String msg= Messages.format(RefactoringCoreMessages.PullUpRefactoring_will_hide_method, new Object[] { methodInType.getElementName(), type.getElementName() });
 								final RefactoringStatusContext context= JavaStatusContext.create(methodInType);
 								return RefactoringStatus.createErrorStatus(msg, context);
