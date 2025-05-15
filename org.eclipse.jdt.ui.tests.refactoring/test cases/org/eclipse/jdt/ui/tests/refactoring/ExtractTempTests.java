@@ -1114,6 +1114,12 @@ public class ExtractTempTests extends GenericRefactoringTest {
 	}
 
 	@Test
+	public void test162() throws Exception {
+		//test for https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1901
+		helper1(9, 13, 9, 17, true, false, "list2", "list2");
+	}
+
+	@Test
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
@@ -1272,11 +1278,7 @@ public class ExtractTempTests extends GenericRefactoringTest {
 		failHelper1(4, 15, 4, 20, false, false, "temp", RefactoringStatus.FATAL);
 	}
 
-	@Test
-	public void testFail27() throws Exception {
-//		printTestDisabledMessage("test for bug 29513");
-		failHelper1(7, 13, 7, 24, true, false, "temp", RefactoringStatus.WARNING);
-	}
+	// testFail27() available as it is no longer a failure case
 
 	@Test
 	public void testFail28() throws Exception {
