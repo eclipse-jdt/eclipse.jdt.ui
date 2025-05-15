@@ -75,6 +75,9 @@ import org.junit.platform.suite.api.Suite;
 	//-- generics
 	InferTypeArgumentsTests.class,
 
+	//-- compilation units
+	MoveCompilationUnitTests.class,
+
 	//--methods
 	RenameVirtualMethodInClassTests.class,
 	RenameMethodInInterfaceTests.class,
