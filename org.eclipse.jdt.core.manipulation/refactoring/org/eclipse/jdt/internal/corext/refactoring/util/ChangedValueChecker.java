@@ -99,8 +99,6 @@ public class ChangedValueChecker extends AbstractChecker {
 
 	private ASTNode fAssignmentExpressionToIgnore;
 
-	private boolean fIgnoreAssignmentUpdates;
-
 	public ChangedValueChecker(ASTNode selectedExpression, String enclosingMethodSignature) {
 		this.fEnclosingMethodSignature= enclosingMethodSignature;
 		analyzeSelectedExpression(selectedExpression);
@@ -109,7 +107,6 @@ public class ChangedValueChecker extends AbstractChecker {
 	public ChangedValueChecker(ASTNode selectedExpression, String enclosingMethodSignature, boolean ignoreAssignmentUpdates) {
 		this.fEnclosingMethodSignature= enclosingMethodSignature;
 		this.fAssignmentExpressionToIgnore= ignoreAssignmentUpdates ? selectedExpression : null;
-		this.fIgnoreAssignmentUpdates= ignoreAssignmentUpdates;
 		analyzeSelectedExpression(selectedExpression);
 	}
 
