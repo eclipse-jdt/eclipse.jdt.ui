@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/601
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Context-based Automated Name Recommendation For The Extract Local Variable Refactoring. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/655
  *     Taiming Wang <3120205503@bit.edu.cn> - [extract local] Extract Similar Expression in All Methods If End-Users Want. - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/785
+ *     Red Hat Inc. - add support to replace assignments with nested assignments (Issue 1901)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -368,11 +369,6 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private static boolean isLeftValue(ASTNode node) {
 		ASTNode parent= node.getParent();
-		if (parent instanceof Assignment) {
-			Assignment assignment= (Assignment) parent;
-			if (assignment.getLeftHandSide() == node)
-				return true;
-		}
 		if (parent instanceof PostfixExpression)
 			return true;
 		if (parent instanceof PrefixExpression) {
@@ -647,12 +643,21 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (!fSeen.add(fragment))
 				continue;
 
-			SimpleName tempName= fCURewrite.getAST().newSimpleName(fTempName);
+			ASTNode replacement= null;
+			ASTNode fragmentNode= fragment.getAssociatedNode();
+			if (fragmentNode.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				Assignment newAssignment= fCURewrite.getAST().newAssignment();
+				newAssignment.setLeftHandSide(fCURewrite.getAST().newSimpleName(fTempName));
+				newAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(fragmentNode));
+				replacement= newAssignment;
+			} else {
+			   replacement= fCURewrite.getAST().newSimpleName(fTempName);
+			}
 			TextEditGroup description= fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_replace);
 
-			fragment.replace(rewrite, tempName, description);
+			fragment.replace(rewrite, replacement, description);
 			if (fLinkedProposalModel != null)
-				fLinkedProposalModel.getPositionGroup(KEY_NAME, true).addPosition(rewrite.track(tempName), false);
+				fLinkedProposalModel.getPositionGroup(KEY_NAME, true).addPosition(rewrite.track(replacement), false);
 		}
 	}
 
@@ -859,11 +864,12 @@ public class ExtractTempRefactoring extends Refactoring {
 				|| retainOnlyReplacableMatches.length == 0) {
 			createTempDeclaration();
 			addReplaceExpressionWithTemp();
-			fTempName= newName + ++cnt;
-			while (usedNames.contains(fTempName)) {
-				fTempName= newName + ++cnt;
+			String oldTempName= fTempName;
+			String baseName= getBaseName(fTempName);
+			fTempName= baseName + ++cnt;
+			while (usedNames.contains(fTempName) || fTempName.equals(oldTempName)) {
+				fTempName= baseName + ++cnt;
 			}
-
 		}
 		while (replaceAllOccurrences() &&
 				retainOnlyReplacableMatches.length > fSeen.size()) {
@@ -885,9 +891,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			createTempDeclaration();
 			if (fStartPoint != -1 && fEndPoint != -1) {
 				addReplaceExpressionWithTemp();
-				fTempName= newName + ++cnt;
-				while (usedNames.contains(fTempName)) {
-					fTempName= newName + ++cnt;
+				String oldTempName= fTempName;
+				String baseName= getBaseName(fTempName);
+				fTempName= baseName + ++cnt;
+				while (usedNames.contains(fTempName) || fTempName.equals(oldTempName)) {
+					fTempName= baseName + ++cnt;
 				}
 			}
 		}
@@ -897,6 +905,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		fTempName= newName;
 
 	}
+
+	private String getBaseName(String tempName) {
+		int i= tempName.length() - 1;
+		while (i > 0 && Character.isDigit(tempName.charAt(i))) {
+			--i;
+		}
+		return tempName.substring(0, i + 1);
+	}
+
 
 	private void processOtherIdenticalExpressions() throws CoreException {
 		ASTNode associatedNode= getSelectedExpression().getAssociatedNode();
@@ -1240,7 +1257,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		int end= selectNumber;
 		int expandFlag= 2; // 2:backward 1:forward 0:break
 
-		ChangedValueChecker cvc= new ChangedValueChecker(getSelectedExpression().getAssociatedNode(), fEnclosingKey);
+		ChangedValueChecker cvc= new ChangedValueChecker(getSelectedExpression().getAssociatedNode(), fEnclosingKey, true);
 
 		while (expandFlag > 0 && start <= end) {
 			IASTFragment iASTFragment= retainOnlyReplacableMatches[start];
