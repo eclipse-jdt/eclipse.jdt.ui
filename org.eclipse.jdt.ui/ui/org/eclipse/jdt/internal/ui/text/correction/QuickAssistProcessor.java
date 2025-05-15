@@ -1085,6 +1085,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	@SuppressWarnings("removal")
 	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
 		// don't add if already added as quick fix
 		if (containsMatchingProblem(locations, IProblem.DiamondNotBelow17))
