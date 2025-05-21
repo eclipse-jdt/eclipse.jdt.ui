@@ -29182,6 +29182,7 @@ public class CleanUpTest extends CleanUpTestCase {
 			package test1;
 
 			import java.util.Comparator;
+			import java.util.Random;
 
 			public class E implements Comparator<Double> {
 			    public boolean doNotRefactorValidCases() {
@@ -29240,6 +29241,19 @@ public class CleanUpTest extends CleanUpTestCase {
 			    public int compare(Double o1, Double o2) {
 			        return Double.compare(o1, o2) + 100;
 			    }
+
+			    public void doNotRefactorIssue2221() {
+				    if (getVal().intValue() == 1)
+					    System.out.println("1");
+					if (getVal().intValue() == 2)
+						System.out.println("2");
+					if (getVal().intValue() == -1)
+						System.out.println("-1");
+				}
+
+				private Integer getVal() {
+					return new Random().nextInt();
+				}
 			}
 			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", sample, false, null);
