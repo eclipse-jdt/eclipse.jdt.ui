@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.folding;
 
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 import java.util.List;
@@ -664,5 +665,19 @@ public class FoldingTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 4, 14); // switch
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 5, 6); // case
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 12, 13); // default
+	}
+
+	@Test
+	public void testInnerClassWithAnnotation() throws Exception {
+		assumeFalse("Only doable with the old folding", newFoldingActive);
+		String str= """
+				package org.example.test;
+				class Outer {
+					@Deprecated //here should not be an annotation
+					class Inner{}
+
+				}
+				""";
+		FoldingTestUtils.assertCodeHasRegions(packageFragment, "TestFolding.java", str, 0);
 	}
 }

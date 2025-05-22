@@ -1754,7 +1754,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						position= createCommentPosition(normalized);
 					}
 
-					if (position != null)
+					if (position != null && isMultiline(normalized, ctx))
 						ctx.addProjectionRange(new JavaProjectionAnnotation(collapse, element, false), position);
 				}
 			}
