@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  * <pre>{@code
  *     <wizard
  *         name="My Type Wizard"
- *         icon="icons/wiz.png"
+ *         icon="icons/wiz.svg"
  *         category="mycategory"
  *         id="xx.MyWizard">
  *         <class class="org.xx.MyWizard">

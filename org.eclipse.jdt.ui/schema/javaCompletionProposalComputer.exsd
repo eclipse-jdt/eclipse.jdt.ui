@@ -202,7 +202,7 @@ If &quot;true&quot;, the completion proposal will run in UI Thread, freezing the
  &lt;extension point=&quot;org.eclipse.jdt.ui.javaCompletionProposalComputer&quot;
    id=&quot;textual_proposals&quot;
    name=&quot;Text Proposals&quot;&gt;
-   &lt;proposalCategory icon=&quot;icons/wordcompletions.png&quot;/&gt;
+   &lt;proposalCategory icon=&quot;icons/wordcompletions.svg&quot;/&gt;
  &lt;/extension&gt;
  &lt;extension point=&quot;org.eclipse.jdt.ui.javaCompletionProposalComputer&quot;
    id=&quot;WordCompletionProposalComputer&quot;
