@@ -5,7 +5,7 @@ import java.util.List;
 
 class A {
 	void foo() {
-		List<Super> list= new ArrayList<Super>();
+		List<Super> list= new ArrayList<>();
 		list.add(new Super());
 		List<Super> l= list;
 		l.add(new Sub());

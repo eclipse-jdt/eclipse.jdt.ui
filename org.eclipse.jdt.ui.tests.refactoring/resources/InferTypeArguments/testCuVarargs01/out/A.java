@@ -5,7 +5,7 @@ import java.util.List;
 
 class A {
 	{
-		ArrayList<Long> arrayList = new ArrayList<Long>();
+		ArrayList<Long> arrayList = new ArrayList<>();
 		arrayList.add(12L);
 		take("");
 		take("", arrayList);
