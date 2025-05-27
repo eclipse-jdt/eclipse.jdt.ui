@@ -12,14 +12,14 @@ class Cell<T> {
 
 class CellTest {
 	public static void main(String[] args) {
-		Cell<Number> c1= new Cell<Number>();
+		Cell<Number> c1= new Cell<>();
 		c1.setT(17);
 		c1.setT(17.3f);
 		Number n= c1.getT();
 		
 		Cell<Number> c2= null;
 		c2.setT(18);
-		Cell<Number> c3= new Cell<Number>();
+		Cell<Number> c3= new Cell<>();
 		c3.setT(Long.valueOf(23));
 		c2= c3;
 	}

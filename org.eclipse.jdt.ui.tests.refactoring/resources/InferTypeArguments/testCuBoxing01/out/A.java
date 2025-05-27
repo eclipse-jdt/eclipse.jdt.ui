@@ -12,14 +12,14 @@ class Cell<T> {
 
 class CellTest {
 	public static void main(String[] args) {
-		Cell<Integer> c1= new Cell<Integer>();
+		Cell<Integer> c1= new Cell<>();
 		c1.setT(17);
 		
-		Cell<Short> c2= new Cell<Short>();
+		Cell<Short> c2= new Cell<>();
 		c2.setT(new Short((short) 8));
 		short s= c2.getT();
 		
-		Cell<Byte> c3= new Cell<Byte>();
+		Cell<Byte> c3= new Cell<>();
 		byte bite= 1;
 		c3.setT(bite);
 		bite= c3.getT();

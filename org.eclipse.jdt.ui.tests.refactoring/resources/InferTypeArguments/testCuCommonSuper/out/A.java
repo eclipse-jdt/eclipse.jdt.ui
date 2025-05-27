@@ -5,7 +5,7 @@ import java.util.List;
 
 class A {
 	void foo() {
-		List<Number> list= new ArrayList<Number>();
+		List<Number> list= new ArrayList<>();
 		list.add(Double.valueOf(1.7));
 		list.add(Integer.valueOf(1));
 	}

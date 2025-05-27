@@ -10639,7 +10639,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import java.util.List;
 			public class E {
 			    public void foo() {
-			        List<E> l= new ArrayList<E>();\s
+			        List<E> l= new ArrayList<>();\s
 			    }
 			}
 			""";
@@ -10683,7 +10683,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import java.util.List;
 			public class E {
 			    public void foo() {
-			        List<List<Hashtable<Integer, HashSet<E>>>> l= new ArrayList<List<Hashtable<Integer, HashSet<E>>>>();\s
+			        List<List<Hashtable<Integer, HashSet<E>>>> l= new ArrayList<>();\s
 			    }
 			}
 			""";
@@ -11334,7 +11334,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			import java.util.ArrayList;
 			import java.util.List;
 			public class E {
-			    private List<String> l= new ArrayList<String>();
+			    private List<String> l= new ArrayList<>();
 			}
 			""";
 

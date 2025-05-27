@@ -8,7 +8,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 class A {
     {
-        Collection<Integer> c= new LinkedList<Integer>();
+        Collection<Integer> c= new LinkedList<>();
         c.add(42);
         Generic g= new Generic();
         List<Integer> list= g.toList(c);

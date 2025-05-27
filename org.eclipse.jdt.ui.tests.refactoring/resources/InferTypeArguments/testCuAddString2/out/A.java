@@ -5,7 +5,7 @@ import java.util.AbstractList;
 
 class A {
 	void foo() {
-		AbstractList<String> l= new ArrayList<String>();
+		AbstractList<String> l= new ArrayList<>();
 		l.add(new String());
 		l.add("");
 	}
