@@ -9,7 +9,7 @@ interface I {
 
 class A implements I {
 	public List<String> getList() {
-		List<String> list= new ArrayList<String>();
+		List<String> list= new ArrayList<>();
 		list.add("X");
 		return list;
 	}
