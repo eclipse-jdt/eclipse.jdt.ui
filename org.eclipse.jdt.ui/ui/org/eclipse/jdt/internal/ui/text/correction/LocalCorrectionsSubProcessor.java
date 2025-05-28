@@ -295,7 +295,7 @@ public class LocalCorrectionsSubProcessor extends LocalCorrectionsBaseSubProcess
 				proposals.add(proposal);
 			}
 		}
-		ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC, IProposalRelevance.REMOVE_STATIC_MODIFIER);
+		ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessorCore.TO_NON_STATIC, IProposalRelevance.REMOVE_STATIC_MODIFIER);
 	}
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
