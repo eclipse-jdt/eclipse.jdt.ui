@@ -570,6 +570,7 @@ public class CoreJavaDocLocations {
 			int code= status.getCode();
 			// See bug 120559, bug 400060 and bug 400062
 			if (code == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC_TIMEOUT
+					|| code == IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST
 					|| (code == IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC && (cause instanceof FileNotFoundException || cause instanceof SocketException
 							|| cause instanceof UnknownHostException
 							|| cause instanceof ProtocolException)))
