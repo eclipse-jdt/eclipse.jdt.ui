@@ -60,4 +60,9 @@ public class IntroduceIndirectionTests1d8 extends IntroduceIndirectionTests {
 	public void test18_06() throws Exception {
 		helperPass(new String[] { "p.Foo", "p.C" }, "d", "p.C", 5, 17, 5, 18);
 	}
+
+	@Test
+	public void test18_07() throws Exception {
+		helperPass(new String[] { "p.Foo", "p.C" }, "h", "p.Foo", 5, 10, 5, 11);
+	}
 }
