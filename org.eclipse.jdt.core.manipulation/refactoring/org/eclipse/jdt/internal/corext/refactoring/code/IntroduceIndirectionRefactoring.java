@@ -540,10 +540,19 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		IType actualTargetType= (IType) fIntermediaryFirstParameterType.getJavaElement();
 		if (!fTargetMethod.getDeclaringType().equals(actualTargetType)) {
-			IMethod actualTargetMethod= new MethodOverrideTester(actualTargetType, actualTargetType.newSupertypeHierarchy(null)).findOverriddenMethodInHierarchy(actualTargetType, fTargetMethod);
-			fTargetMethod= actualTargetMethod;
-			fTargetMethodBinding= findMethodBindingInHierarchy(fIntermediaryFirstParameterType, actualTargetMethod);
-			Assert.isNotNull(fTargetMethodBinding);
+			if (actualTargetType.getTypeParameters().length == 0) {
+				IMethod actualTargetMethod= new MethodOverrideTester(actualTargetType, actualTargetType.newSupertypeHierarchy(null)).findOverriddenMethodInHierarchy(actualTargetType, fTargetMethod);
+				fTargetMethod= actualTargetMethod;
+				fTargetMethodBinding= findMethodBindingInHierarchy(fIntermediaryFirstParameterType, actualTargetMethod);
+				Assert.isNotNull(fTargetMethodBinding);
+			} else {
+				if (fTargetMethod.getCompilationUnit() != null) {
+					// source method
+					CompilationUnit selectionCURoot= getCachedCURewrite(fTargetMethod.getCompilationUnit()).getRoot();
+					MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fTargetMethod, selectionCURoot);
+					fIntermediaryFirstParameterType= Bindings.getBindingOfParentType(declaration);
+				}
+			}
 		}
 
 		result.merge(checkCanCreateIntermediaryMethod());
@@ -1136,7 +1145,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private SearchResultGroup[] getReferences(IMethod[] methods, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(methods, IJavaSearchConstants.REFERENCES);
+		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(methods, IJavaSearchConstants.REFERENCES | SearchPattern.R_EXACT_MATCH);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fIntermediaryType, false);
 		return RefactoringSearchEngine.search(pattern, scope, pm, status);
 	}
