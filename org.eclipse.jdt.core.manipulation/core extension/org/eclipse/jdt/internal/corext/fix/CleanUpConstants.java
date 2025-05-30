@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1301,9 +1301,20 @@ public class CleanUpConstants {
 	 *
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
-	 * @since 4.30
+	 * @since 4.37
 	 */
 	public static final String REPLACE_DEPRECATED_CALLS= "cleanup.replace_deprecated_calls"; //$NON-NLS-1$
+
+	/**
+	 * Replace deprecated fields with specified replacement fields if possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.30
+	 */
+	public static final String REPLACE_DEPRECATED_FIELDS= "cleanup.replace_deprecated_fields"; //$NON-NLS-1$
 
 	/**
 	 * Replaces {@code String.replaceAll()} by {@code String.replace()}.

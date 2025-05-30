@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2024 IBM Corporation and others.
+ * Copyright (c) 2012, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@ public interface IProposalRelevance {
 	int CREATE_OPTIONAL= 9;
 	int CREATE_OPTIONAL_OF_NULLABLE= 9;
 	int INLINE_DEPRECATED_METHOD= 9;
+	int REPLACE_DEPRECATED_FIELD= 9;
 
 	int ADD_ABSTRACT_MODIFIER= 8;
 	int ADD_STATIC_MODIFIER= 8;
