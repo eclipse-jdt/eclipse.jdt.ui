@@ -17,12 +17,20 @@ package org.eclipse.jdt.bcoview.asm;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.bcoview.preferences.BCOConstants;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
+import org.objectweb.asm.tree.LocalVariableNode;
+import org.objectweb.asm.tree.LookupSwitchInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TableSwitchInsnNode;
 import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.TraceClassVisitor;
-
-import org.eclipse.jdt.bcoview.preferences.BCOConstants;
 
 public class DecompilerHelper {
 
