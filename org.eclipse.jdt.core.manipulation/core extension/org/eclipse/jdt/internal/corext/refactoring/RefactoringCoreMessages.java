@@ -1605,6 +1605,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_not_this_type;
 
+	public static String PullUpRefactoring_will_hide_method;
+
 	public static String PullUpRefactoring_Pull_Up;
 
 	public static String PullUpRefactoring_Type_declared_in_class;

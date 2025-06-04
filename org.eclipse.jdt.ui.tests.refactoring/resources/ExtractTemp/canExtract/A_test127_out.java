@@ -7,8 +7,8 @@ class A {
 			System.out.println(v2);
 		}
 		if (b instanceof C) {
-			int v22= ((C) b).getV2();
-			System.out.println(v22);
+			int v3= ((C) b).getV2();
+			System.out.println(v3);
 		}
 
 	}

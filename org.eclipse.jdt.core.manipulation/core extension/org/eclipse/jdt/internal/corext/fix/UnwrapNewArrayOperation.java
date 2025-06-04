@@ -23,6 +23,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 
 /**
  * Unwrap a new array with initializer used as input for varargs and replace with initializer elements.
@@ -55,8 +57,10 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		List<Expression> expressionsInArray= node != null && node.getInitializer() != null && node.getInitializer().expressions() != null ?
 				node.getInitializer().expressions() : Collections.EMPTY_LIST;
+		ArrayType arrayType= node != null ? node.getType() : null;
 		ICompilationUnit cu= cuRewrite.getCu();
 		CompilationUnit root= cuRewrite.getRoot();
+		ImportRemover remover= cuRewrite.getImportRemover();
 
 		boolean tagged= false;
 		try {
@@ -137,6 +141,9 @@ public class UnwrapNewArrayOperation extends CompilationUnitRewriteOperation {
 			}
 
 			rewrite.replace(call, replacementNode, group);
+		}
+		if (arrayType != null) {
+			remover.registerRemovedNode(arrayType);
 		}
 	}
 }

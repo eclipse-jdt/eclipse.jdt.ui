@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -55,29 +57,63 @@ public class StandardComparisonFixCore extends CompilationUnitRewriteOperationsF
 			if (orderedCondition != null
 					&& Arrays.asList(InfixExpression.Operator.EQUALS, InfixExpression.Operator.NOT_EQUALS).contains(orderedCondition.getOperator())) {
 				MethodInvocation comparisonMI= orderedCondition.getFirstOperand();
-				Long literalValue= ASTNodes.getIntegerLiteral(orderedCondition.getSecondOperand());
+				if (comparisonMI != null) {
+					IMethodBinding comparisonMethodBinding= comparisonMI.resolveMethodBinding();
+					if (comparisonMethodBinding != null) {
+						IMethodBinding methodDeclaration= comparisonMethodBinding.getMethodDeclaration();
+						ITypeBinding declaringClass= methodDeclaration.getDeclaringClass();
+						if (declaringClass != null) {
+							boolean knownComparison= false;
+							if (comparisonMethodBinding.getName().equals("compareTo") && isFromClass(declaringClass, "java.lang.Comparable") //$NON-NLS-1$ //$NON-NLS-2$
+									|| comparisonMethodBinding.getName().equals("compareToIgnoreCase") && isFromClass(declaringClass, "java.lang.String") //$NON-NLS-1$ //$NON-NLS-2$
+									|| comparisonMethodBinding.getName().equals("compare") && isFromClass(declaringClass, "java.util.Comparator")) { //$NON-NLS-1$ //$NON-NLS-2$
+								knownComparison= true;
+							}
+							if (knownComparison) {
+								Long literalValue= ASTNodes.getIntegerLiteral(orderedCondition.getSecondOperand());
 
-				if (literalValue != null
-						&& literalValue.compareTo(0L) != 0
-						&& comparisonMI.getExpression() != null
-						&& !ASTNodes.is(comparisonMI.getExpression(), ThisExpression.class)) {
-					if (literalValue.compareTo(0L) < 0) {
-						if (InfixExpression.Operator.EQUALS.equals(orderedCondition.getOperator())) {
-							fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.LESS));
-						} else {
-							fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.GREATER_EQUALS));
+								if (literalValue != null
+										&& literalValue.compareTo(0L) != 0
+										&& comparisonMI.getExpression() != null
+										&& !ASTNodes.is(comparisonMI.getExpression(), ThisExpression.class)) {
+									if (literalValue.compareTo(0L) < 0) {
+										if (InfixExpression.Operator.EQUALS.equals(orderedCondition.getOperator())) {
+											fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.LESS));
+										} else {
+											fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.GREATER_EQUALS));
+										}
+									} else if (InfixExpression.Operator.EQUALS.equals(orderedCondition.getOperator())) {
+										fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.GREATER));
+									} else {
+										fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.LESS_EQUALS));
+									}
+
+									return false;
+								}
+							}
 						}
-					} else if (InfixExpression.Operator.EQUALS.equals(orderedCondition.getOperator())) {
-						fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.GREATER));
-					} else {
-						fResult.add(new StandardComparisonFixOperation(visited, comparisonMI, InfixExpression.Operator.LESS_EQUALS));
 					}
-
-					return false;
 				}
 			}
 
 			return true;
+		}
+
+		private boolean isFromClass(ITypeBinding declaringClass, String name) {
+			if (declaringClass == null) {
+				return false;
+			}
+			if (declaringClass.getErasure().getQualifiedName().equals(name)) {
+				return true;
+			}
+			ITypeBinding[] interfaces= declaringClass.getInterfaces();
+			for (ITypeBinding anInterface : interfaces) {
+				if (isFromClass(anInterface, name)) {
+					return true;
+				}
+			}
+			ITypeBinding superClass= declaringClass.getSuperclass();
+			return isFromClass(superClass, name);
 		}
 	}
 

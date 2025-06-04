@@ -462,7 +462,8 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	private boolean isChild(Control child, Control parent) {
 		if (child == null)
 			return false;
-
+		if (child.isDisposed())
+			return false;
 		if (child == parent)
 			return true;
 

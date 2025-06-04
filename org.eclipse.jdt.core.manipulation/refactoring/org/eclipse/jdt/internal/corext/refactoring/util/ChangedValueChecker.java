@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -95,8 +97,16 @@ public class ChangedValueChecker extends AbstractChecker {
 
 	private String fEnclosingMethodSignature;
 
+	private ASTNode fAssignmentExpressionToIgnore;
+
 	public ChangedValueChecker(ASTNode selectedExpression, String enclosingMethodSignature) {
 		this.fEnclosingMethodSignature= enclosingMethodSignature;
+		analyzeSelectedExpression(selectedExpression);
+	}
+
+	public ChangedValueChecker(ASTNode selectedExpression, String enclosingMethodSignature, boolean ignoreAssignmentUpdates) {
+		this.fEnclosingMethodSignature= enclosingMethodSignature;
+		this.fAssignmentExpressionToIgnore= ignoreAssignmentUpdates ? selectedExpression : null;
 		analyzeSelectedExpression(selectedExpression);
 	}
 
@@ -134,7 +144,8 @@ public class ChangedValueChecker extends AbstractChecker {
 					Position pos= new Position(node.getStartPosition(), node.getLength());
 					if (fPosSet.add(pos)) {
 						threadPool.execute(() -> {
-							UpdateVisitor uv= new UpdateVisitor(fDependSet, true);
+							UpdateVisitor uv= new UpdateVisitor(fDependSet, true, (Expression) fAssignmentExpressionToIgnore);
+							System.out.println(node);
 							node.accept(uv);
 							if (uv.hasConflict()) {
 								fConflict= true;
@@ -555,9 +566,12 @@ public class ChangedValueChecker extends AbstractChecker {
 
 		private boolean visitMethodCall;
 
-		public UpdateVisitor(Set<Elem> dependSet, boolean visitMethodCall) {
+		private Expression ignoreAssignmentToExpression;
+
+		public UpdateVisitor(Set<Elem> dependSet, boolean visitMethodCall, Expression ignoreAssignmentToExpression) {
 			this.updateSet= new HashSet<>();
 			this.visitMethodCall= visitMethodCall;
+			this.ignoreAssignmentToExpression= ignoreAssignmentToExpression;
 			this.dependSet= dependSet;
 		}
 
@@ -579,6 +593,11 @@ public class ChangedValueChecker extends AbstractChecker {
 
 		@Override
 		public boolean visit(Assignment assignment) {
+			if (ignoreAssignmentToExpression != null) {
+				if (assignment.getLeftHandSide().subtreeMatch(new ASTMatcher(), ignoreAssignmentToExpression)) {
+					return super.visit(assignment);
+				}
+			}
 			ReadVisitor v= new ReadVisitor(visitMethodCall);
 			assignment.getLeftHandSide().accept(v);
 			for (Elem e : v.readSet) {
@@ -622,7 +641,7 @@ public class ChangedValueChecker extends AbstractChecker {
 			}
 			MethodDeclaration md= findFunctionDefinition(resolveMethodBinding.getDeclaringClass(), resolveMethodBinding);
 			if (md != null && md.getLength() < THRESHOLD) {
-				UpdateVisitor uv= new UpdateVisitor(dependSet, false);
+				UpdateVisitor uv= new UpdateVisitor(dependSet, false, ignoreAssignmentToExpression);
 				md.accept(uv);
 				for (Elem e : uv.updateSet) {
 					addToList(new Elem(methodInvocation, visitMethodCall, e));

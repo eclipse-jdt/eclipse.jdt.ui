@@ -3970,6 +3970,54 @@ public class CleanUpTest1d5 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testUnnecessaryArrayIssue2222() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+
+			import java.util.ArrayList;
+			import java.util.List;
+
+			public class A {
+				public void foo1(ArrayList<String> x) {
+					B.blah(new List<String>[] { x });
+				}
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", sample, false, null);
+
+		String sample2= """
+			package test1;
+
+			import java.util.List;
+
+			public class B {
+				static public void blah(List ... y) {
+				}
+			}
+			""";
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", sample2, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION);
+
+		sample= """
+			package test1;
+
+			import java.util.ArrayList;
+
+			public class A {
+				public void foo1(ArrayList<String> x) {
+					B.blah(x);
+				}
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, sample2 },
+				new HashSet<>(Arrays.asList(FixMessages.UnusedCodeFix_RemoveUnnecessaryArrayCreation_description)));
+	}
+
+	@Test
 	public void testKeepArrayWithSingleArrayElement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String sample= """
