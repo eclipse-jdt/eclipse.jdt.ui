@@ -760,7 +760,7 @@ public class QuickAssistProcessorUtil {
 					node= s.getParent();
 					binding= ((QualifiedName)node).resolveBinding();
 				} else {
-					binding= s.resolveBinding();;
+					binding= s.resolveBinding();
 				}
 				break;
 			case FieldAccess f:
