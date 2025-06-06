@@ -1703,7 +1703,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				includelastLine= true;
 				break;
 			case IJavaElement.TYPE:
-				collapseCode= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
+				collapseCode= includelastLine= isInnerType((IType) element) && !isAnonymousEnum((IType) element);
 				collapse= ctx.collapseInnerTypes() && collapseCode;
 				break;
 			case IJavaElement.FIELD:

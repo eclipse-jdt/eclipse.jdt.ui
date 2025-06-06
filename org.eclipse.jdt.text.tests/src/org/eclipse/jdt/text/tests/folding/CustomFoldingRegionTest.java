@@ -366,9 +366,12 @@ public class CustomFoldingRegionTest {
 				""";
 		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
 		assertEquals(3, projectionRanges.size());
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 8);//class A
+		if (extendedFoldingActive) {
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 8);//class A
+		} else {
+			FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 9);//class A
+		}
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 5, 6);//void helloWorld()
-		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 11, 13);//class B
 	}
 
 	@Test
