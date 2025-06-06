@@ -186,6 +186,7 @@ public final class FixMessages extends NLS {
 	public static String StringConcatToTextBlockFix_convert_msg;
 	public static String LambdaExpressionAndMethodRefFix_clean_up_expression_msg;
 	public static String InlineDeprecatedMethod_msg;
+	public static String ReplaceDeprecatedField_msg;
 
 	static {
 		// initialize resource bundle
