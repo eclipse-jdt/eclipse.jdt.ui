@@ -6,7 +6,7 @@ import java.util.List;
 
 class A {
 	void foo() {
-		List<String> l= new ArrayList<String>();
+		List<String> l= new ArrayList<>();
 		l.add("Eclipse");
 		bar(l);
 	}

@@ -18,7 +18,7 @@ interface TestCollector {
 
 class Collector implements TestCollector {
 	public Enumeration<String> collectTests() {
-		Vector<String> v= new Vector<String>();
+		Vector<String> v= new Vector<>();
 		v.add("Test1");
 		return v.elements();
 	}

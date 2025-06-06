@@ -13,7 +13,7 @@ class A {
 	}
 	
 	public List<String> getList() {
-		ArrayList<String> result= new ArrayList<String>();
+		ArrayList<String> result= new ArrayList<>();
 		result.add("Tom");
 		result.add("Jerry");
 		return result;

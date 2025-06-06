@@ -9,7 +9,7 @@ class A {
 		String min= Collections.min(getNames());
 	}
 	public List<String> getNames() {
-		ArrayList<String> result= new ArrayList<String>();
+		ArrayList<String> result= new ArrayList<>();
 		result.add("Zwyssig");
 		result.add("Abaecherli");
 		return result;
