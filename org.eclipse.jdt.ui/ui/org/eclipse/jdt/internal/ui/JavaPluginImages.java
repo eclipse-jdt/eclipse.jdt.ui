@@ -230,7 +230,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= createUnManaged(T_ETOOL, "shift_l_edit.svg"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_CLASSPATH_ROOT= createUnManaged(T_ETOOL, "classpath_obj.svg"); 	//$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_BUTTON_MOVE_UP= createUnManaged(T_ETOOL, "move_up.png"); 	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_BUTTON_MOVE_UP= createUnManaged(T_ETOOL, "move_up.svg"); 	//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManagedFromKey(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManagedFromKey(T_OBJ, IMG_OBJS_PACKDECL);
@@ -451,7 +451,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= createUnManaged(T_WIZBAN, "newclass_wiz.svg"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWINT= createUnManaged(T_WIZBAN, "newint_wiz.svg"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWENUM= createUnManaged(T_WIZBAN, "newenum_wiz.svg"); 				//$NON-NLS-1$
-	public static final ImageDescriptor DESC_WIZBAN_NEWRECORD= createUnManaged(T_WIZBAN, "newrecord_wiz.png"); 				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWRECORD= createUnManaged(T_WIZBAN, "newrecord_wiz.svg"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT= createUnManaged(T_WIZBAN, "newannotation_wiz.svg"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= createUnManaged(T_WIZBAN, "newjprj_wiz.svg"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= createUnManaged(T_WIZBAN, "newsrcfldr_wiz.svg"); 	//$NON-NLS-1$
