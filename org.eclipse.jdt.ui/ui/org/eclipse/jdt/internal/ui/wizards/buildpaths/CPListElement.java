@@ -70,6 +70,7 @@ public class CPListElement {
 	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
 	public static final String IGNORE_OPTIONAL_PROBLEMS= IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS;
 	public static final String TEST= IClasspathAttribute.TEST;
+	public static final String RELEASE= IClasspathAttribute.RELEASE;
 	public static final String WITHOUT_TEST_CODE= IClasspathAttribute.WITHOUT_TEST_CODE;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
 	public static final String MODULE= IClasspathAttribute.MODULE;
@@ -140,6 +141,7 @@ public class CPListElement {
 				createAttributeElement(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null, false);
 				createAttributeElement(IGNORE_OPTIONAL_PROBLEMS, null, false);
 				createAttributeElement(TEST, null, false);
+				createAttributeElement(RELEASE, null, false);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:

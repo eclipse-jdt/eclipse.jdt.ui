@@ -404,6 +404,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= createUnManaged(T_OBJ, "over_co.svg");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= createUnManaged(T_OBJ, "implm_co.svg");  				//$NON-NLS-1$
 
+	public static final ImageDescriptor DESC_OBJ_RELEASE= createUnManaged(T_OBJ, "release_option.svg");  				//$NON-NLS-1$
+
 	// Image descriptor used for default methods and annotation type elements with a default value
 	public static final ImageDescriptor DESC_OVR_ANNOTATION_DEFAULT_METHOD= createUnManagedCached(T_OVR, "default_co.svg"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_STATIC= createUnManagedCached(T_OVR, "static_co.svg"); 						//$NON-NLS-1$
