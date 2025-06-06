@@ -965,6 +965,13 @@ public final class NewWizardMessages extends NLS {
 	public static String NewModuleInfoWizardPage_warning_DiscouragedModuleName;
 	public static String NewModuleInfoWizardPage_error_EnterName;
 
+	public static String ReleaseAttributeConfiguration_defaultReleaseName;
+	public static String ReleaseAttributeConfiguration_dialogMessage;
+	public static String ReleaseAttributeConfiguration_dialogTitle;
+	public static String ReleaseAttributeConfiguration_errorInvalidNumber;
+	public static String ReleaseAttributeConfiguration_errorInvalidRelease;
+	public static String ReleaseAttributeConfiguration_nameLabel;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
 	}
