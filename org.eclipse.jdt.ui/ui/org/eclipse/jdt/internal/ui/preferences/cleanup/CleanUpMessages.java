@@ -180,6 +180,7 @@ public class CleanUpMessages extends NLS {
 	public static String SourceFixingTabPage_CheckboxName_StandardComparison;
 
 	public static String SourceFixingTabPage_CheckboxName_ReplaceDeprecatedMethodCall;
+	public static String SourceFixingTabPage_CheckboxName_ReplaceDeprecatedField;
 
 	public static String DuplicateCodeTabPage_GroupName_DuplicateCode;
 

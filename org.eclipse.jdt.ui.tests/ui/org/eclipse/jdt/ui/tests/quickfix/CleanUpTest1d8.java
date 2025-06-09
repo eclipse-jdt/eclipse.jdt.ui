@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2024 IBM Corporation and others.
+ * Copyright (c) 2020, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -6576,6 +6576,189 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1, cu2}, new String[] {sample1, expected1},
 				new HashSet<>(Arrays.asList(FixMessages.InlineDeprecatedMethod_msg)));
+	}
+
+	@Test
+	public void testDeprecatedFieldCleanup1() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		String sample2= """
+			package test2;
+
+			public interface K {
+				String field1= "abc";
+				String field2= "def";
+			}
+			""";
+		ICompilationUnit cu2= pack2.createCompilationUnit("K.java", sample2, false, null);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample1= """
+			package test1;
+
+			import test2.K;
+
+			public interface E1 {
+
+				/**
+				 * field to use
+				 *
+				 * @deprecated use {@link K#field2} instead
+				 */
+				@Deprecated	String field= "blah";
+			}
+			"""; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
+
+		String sample= """
+			package test1;
+
+			import test1.E1;
+
+			public class E {
+
+				/**
+				 * @deprecated use {@link #localField2} instead
+				 */
+				@Deprecated
+				public String localField1= "abc";
+
+				public String localField2= "def";
+
+				public void foo() {
+					String x = E1.field;
+				}
+
+				public E getThis() {
+					return this;
+				}
+
+				public void foo2() {
+					String y = E1.field;
+				}
+
+				public void foo3() {
+					String z = this.localField1;
+					String z2= localField1;
+					String z3= getThis().localField1;
+				}
+
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_FIELDS);
+
+		sample= """
+			package test1;
+
+			import test2.K;
+
+			public class E {
+
+				/**
+				 * @deprecated use {@link #localField2} instead
+				 */
+				@Deprecated
+				public String localField1= "abc";
+
+				public String localField2= "def";
+
+				public void foo() {
+					String x = K.field2;
+				}
+
+				public E getThis() {
+					return this;
+				}
+
+				public void foo2() {
+					String y = K.field2;
+				}
+
+				public void foo3() {
+					String z = this.localField2;
+					String z2= localField2;
+					String z3= getThis().localField2;
+				}
+
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu, cu1, cu2}, new String[] {sample1, sample2, expected1},
+				new HashSet<>(Arrays.asList(FixMessages.ReplaceDeprecatedField_msg)));
+	}
+
+	@Test
+	public void testDeprecatedFieldCleanup2() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		String sample2= """
+			package test2;
+
+			public interface K {
+				String field1= "abc";
+				String field2= "def";
+			}
+			""";
+		ICompilationUnit cu2= pack2.createCompilationUnit("K.java", sample2, false, null);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample1= """
+			package test1;
+
+			import test2.K;
+
+			public interface E1 {
+
+				/**
+				 * field to use
+				 *
+				 * @deprecated use {@link K#field2} instead
+				 */
+				@Deprecated	String field= "blah";
+			}
+			"""; //
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample1, false, null);
+
+		String sample= """
+			package test1;
+
+			import test1.E1;
+
+			public class E {
+
+				private class Z implements E1 {
+				}
+
+				public void foo() {
+					String x = new E1().field;
+				}
+
+			}
+			""";
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", sample, false, null);
+		enable(CleanUpConstants.REPLACE_DEPRECATED_FIELDS);
+
+		sample= """
+				package test1;
+
+				import test1.E1;
+				import test2.K;
+
+				public class E {
+
+					private class Z implements E1 {
+					}
+
+					public void foo() {
+						String x = K.field2;
+					}
+
+				}
+				""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu, cu1, cu2}, new String[] {sample1, sample2, expected1},
+				new HashSet<>(Arrays.asList(FixMessages.ReplaceDeprecatedField_msg)));
 	}
 
 	@Test
