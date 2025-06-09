@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -561,8 +561,8 @@ public class TestViewer {
 	}
 
 	private int compareName(Object o1, Object o2) {
-		String testName1= ((TestElement)o1).getTestName();
-		String testName2= ((TestElement)o2).getTestName();
+		String testName1= ((TestElement)o1).getDisplayName();
+		String testName2= ((TestElement)o2).getDisplayName();
 		return testName1.toLowerCase().compareTo(testName2.toLowerCase());
 	}
 
