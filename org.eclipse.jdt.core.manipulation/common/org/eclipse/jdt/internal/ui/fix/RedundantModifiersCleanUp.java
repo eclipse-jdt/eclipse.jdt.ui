@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2019 itemis AG (http://www.itemis.eu) and others.
+ * Copyright (c) 2018, 2025 itemis AG (http://www.itemis.eu) and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Karsten Thoms (itemis) - initial API and implementation
  *     Fabrice TIERCELIN - Remove redundant abstract modifier on interface
+ *     Red Hat Inc. - refactored to jdt.core.manipulation and renamed
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
@@ -37,7 +38,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -199,7 +200,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 		if (rewriteOperations.isEmpty()) {
 			return null;
 		}
-		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.RedundantModifiersCleanup_description, unit,
+		return new CompilationUnitRewriteOperationsFixCore(MultiFixMessages.RedundantModifiersCleanup_description, unit,
 				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[rewriteOperations.size()]));
 	}
 
