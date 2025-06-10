@@ -11,7 +11,7 @@
  * Contributors:
  *     Karsten Thoms (itemis) - initial API and implementation
  *     Fabrice TIERCELIN - Remove redundant abstract modifier on interface
- *     Red Hat Inc. - refactored to jdt.core.manipulation and renamed
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
