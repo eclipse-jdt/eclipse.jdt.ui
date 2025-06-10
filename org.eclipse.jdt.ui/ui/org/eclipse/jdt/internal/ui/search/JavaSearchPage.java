@@ -23,6 +23,7 @@ import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -41,6 +42,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -288,6 +290,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private Button[] fIncludeMasks;
 	private Group fLimitToGroup;
 	private Label fMessageLabel;
+	private Label fMessageImageLabel;
 
 	private int fMatchLocations;
 	private Link fMatchLocationsLink;
@@ -598,12 +601,19 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 
 	private Control createMessageLabel(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(1, false);
+		GridLayout layout= new GridLayout(2, false);
 		layout.marginWidth= 5;
 		layout.marginHeight= 5;
 		result.setLayout(layout);
 
-		fMessageLabel= new Label(result, SWT.NONE);
+		Image image= JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
+		fMessageImageLabel= new Label(result, SWT.NONE);
+		image.setBackground(fMessageImageLabel.getBackground());
+		fMessageImageLabel.setImage(image);
+		fMessageImageLabel.setLayoutData(new GridData(
+			GridData.HORIZONTAL_ALIGN_CENTER | GridData.VERTICAL_ALIGN_BEGINNING));
+
+		fMessageLabel= new Label(result, SWT.WRAP);
 		fMessageLabel.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
 		return result;
 	}
@@ -657,6 +667,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	final void updateOKStatus() {
 		boolean isValidPattern= isValidSearchPattern();
 		boolean isValidMask= getIncludeMask() != 0;
+		fMessageImageLabel.setVisible(false);
 		fMessageLabel.setText(""); //$NON-NLS-1$
 		if ((getIncludeMask() & JavaSearchScopeFactory.JRE) != 0) {
 			String release= JavaCore.getOption(JavaCore.COMPILER_RELEASE);
@@ -666,6 +677,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 					if (JavaRuntime.getVMInstall(JavaRuntime.newDefaultJREContainerPath()) instanceof IVMInstall2 jreInstall) {
 						if (JavaCore.compareJavaVersions(compliance, jreInstall.getJavaVersion()) < 0) {
 							fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_message, compliance, jreInstall.getJavaVersion()));
+							fMessageImageLabel.setVisible(true);
+							fMessageLabel.requestLayout();
 						}
 					}
 				}
