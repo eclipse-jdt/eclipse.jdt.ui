@@ -561,9 +561,11 @@ public class TestViewer {
 	}
 
 	private int compareName(Object o1, Object o2) {
-		String testName1= ((TestElement)o1).getDisplayName();
-		String testName2= ((TestElement)o2).getDisplayName();
-		return testName1.toLowerCase().compareTo(testName2.toLowerCase());
+		String testName1Display= ((TestElement)o1).getDisplayName();
+		String testName2Display= ((TestElement)o2).getDisplayName();
+		if (testName1Display != null && testName2Display != null)
+			return testName1Display.toLowerCase().compareTo(testName2Display.toLowerCase());
+		return ((TestElement)o1).getTestName().toLowerCase().compareTo(((TestElement)o2).getTestName().toLowerCase());
 	}
 
 	/**
