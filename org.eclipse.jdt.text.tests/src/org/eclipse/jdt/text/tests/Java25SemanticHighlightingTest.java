@@ -21,14 +21,14 @@ import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingsCore;
 
-public class Java24SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
+public class Java25SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 
 	@RegisterExtension
-	public SemanticHighlightingTestSetup shts= new SemanticHighlightingTestSetup( "/SHTest/src/Java24.java");
+	public SemanticHighlightingTestSetup shts= new SemanticHighlightingTestSetup( "/SHTest/src/Java25.java");
 
 	@BeforeEach
 	public void updateCompliance() {
-		shts.updateCompliance("24", true);
+		shts.updateCompliance("25", false);
 	}
 
 	@Test
