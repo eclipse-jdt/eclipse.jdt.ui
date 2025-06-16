@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CorrectPackageDeclarationFixCore;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
@@ -68,7 +69,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposalCore;
 
 public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
@@ -142,8 +142,9 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 		// correct package declaration
 		int relevance= cu.getPackageDeclarations().length == 0 ? IProposalRelevance.MISSING_PACKAGE_DECLARATION : IProposalRelevance.CORRECT_PACKAGE_DECLARATION; // bug 38357
-		if (CorrectPackageDeclarationProposalCore.isValidProposal(cu)) {
-			T p1= createCorrectPackageDeclarationProposal(cu, problem, relevance);
+		IProposableFix fix= CorrectPackageDeclarationFixCore.create(context.getASTRoot(), problem);
+		if (fix != null) {
+			T p1= createCorrectPackageDeclarationProposal(fix, context, relevance);
 			if (p1 != null)
 				proposals.add(p1);
 		}
@@ -347,7 +348,7 @@ public abstract class ReorgCorrectionsBaseSubProcessor<T> {
 
 	public abstract T createCorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String currTypeName, String newTypeName, int relevance);
 
-	protected abstract T createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocation problem, int relevance);
+	protected abstract T createCorrectPackageDeclarationProposal(IProposableFix fix, IInvocationContext context, int relevance);
 
 	protected abstract T createMoveToNewPackageProposal(String label, CompositeChange composite, int relevance);
 
