@@ -7134,10 +7134,15 @@
             id="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls"
             runAfter="org.eclipse.jdt.ui.cleanup.add_all">
       </cleanUp>
+       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ReplaceDeprecatedFieldCleanUpCore"
+            id="org.eclipse.jdt.ui.cleanup.replace_deprecated_fields"
+            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
+      </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.variables"
-            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
+            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_fields">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ElseIfCleanUpCore"
