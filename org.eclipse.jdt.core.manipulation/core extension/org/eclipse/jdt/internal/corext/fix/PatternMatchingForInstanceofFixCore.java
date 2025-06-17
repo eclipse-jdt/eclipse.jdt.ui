@@ -267,16 +267,16 @@ public class PatternMatchingForInstanceofFixCore extends CompilationUnitRewriteO
 							if (methodDecl != null) {
 								CompilationUnit cu= (CompilationUnit) name.getRoot();
 								IJavaProject project= cu.getJavaElement().getJavaProject();
-								replacementName= proposeLocalName(baseName, cu, project, methodDecl, excludedNames.toArray(new String[0]));
+								replacementName= proposeLocalName(baseName, cu, project, castExp, excludedNames.toArray(new String[0]));
 							}
 						}
 						this.expressionsToReplace.add(expressionToReplace);
 					}
 				}
 
-				private String proposeLocalName(String baseName, CompilationUnit root, IJavaProject javaProject, MethodDeclaration methodDecl, String[] usedNames) {
+				private String proposeLocalName(String baseName, CompilationUnit root, IJavaProject javaProject, ASTNode node, String[] usedNames) {
 					// don't propose names that are already in use:
-					Collection<String> variableNames= new ScopeAnalyzer(root).getUsedVariableNames(methodDecl.getStartPosition(), methodDecl.getLength());
+					Collection<String> variableNames= new ScopeAnalyzer(root).getUsedVariableNames(node.getStartPosition(), node.getLength());
 					String[] names= new String[variableNames.size() + usedNames.length];
 					variableNames.toArray(names);
 					System.arraycopy(usedNames, 0, names, variableNames.size(), usedNames.length);
