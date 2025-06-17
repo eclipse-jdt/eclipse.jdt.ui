@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2023 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2025 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -851,5 +851,70 @@ public class CleanUpTest10 extends CleanUpTestCase {
 		enable(CleanUpConstants.ARRAY_WITH_CURLY);
 
 		assertRefactoringHasNoChange(new ICompilationUnit[] { cu1 });
+	}
+
+	@Test
+	public void testRemoveSuppressWarnings() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String deprecatedForRemoval= """
+				package test1;
+
+				@Deprecated(forRemoval=true)
+				public class E1 {
+				}
+				""";
+		ICompilationUnit cu0= pack1.createCompilationUnit("E1.java", deprecatedForRemoval, false, null);
+
+		String original= """
+				package test1;
+
+				public class E {
+					@SuppressWarnings({ "preview", "null", "unused" })
+					private int foo(Object x, Object y, boolean b) {
+						@SuppressWarnings( { "removal" })
+						E1 e1 = new E1();
+						if (b || !(x instanceof String)) {
+							if (!(y instanceof Double)) {
+								return 6;
+							}
+							@SuppressWarnings("unchecked")
+							Double d = (Double)y;
+							System.out.println(d.isNaN());
+							return 7;
+						}
+						@SuppressWarnings("unchecked")
+						String s = (String)x;
+						return s.length();
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS);
+
+		String expected= """
+				package test1;
+
+				public class E {
+					@SuppressWarnings({ "unused" })
+					private int foo(Object x, Object y, boolean b) {
+						@SuppressWarnings( { "removal" })
+						E1 e1 = new E1();
+						if (b || !(x instanceof String)) {
+							if (!(y instanceof Double)) {
+								return 6;
+							}
+							Double d = (Double)y;
+							System.out.println(d.isNaN());
+							return 7;
+						}
+						String s = (String)x;
+						return s.length();
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu0, cu1 }, new String[] { deprecatedForRemoval, expected }, null);
+
 	}
 }
