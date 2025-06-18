@@ -654,6 +654,10 @@ public class CleanUpTest16 extends CleanUpTestCase {
 					String s = (String)x;
 					return s.length();
 				}
+				public String foo10(Object s) {
+					String string = s instanceof String ? (String) s : "";
+					return string;
+				}
 			}
 			""";
 		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
@@ -710,7 +714,7 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							i = (Integer) p;
 							i = 7;
 						}
-						return o instanceof String s2 ? s2.length() : i;
+						return o instanceof String s ? s.length() : i;
 					}
 					public int foo5(Object o, Object p) {
 						if (o instanceof String s && p instanceof Integer i) {
@@ -721,13 +725,13 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							i = (Integer) p;
 							i = 7;
 						}
-						return !(o instanceof String s2) ? i : s2.length();
+						return !(o instanceof String s) ? i : s.length();
 					}
 					public int foo6(Object o) {
 						if (o instanceof String s && s.length() > 3) {
 							return s.length - 3();
 						}
-						return !(o instanceof String s2) ? 0 : s2.length();
+						return !(o instanceof String s) ? 0 : s.length();
 					}
 					public int foo7(Object o) {
 						if (!(o instanceof String s) || s.length() > 3) {
@@ -753,6 +757,10 @@ public class CleanUpTest16 extends CleanUpTestCase {
 							return 7;
 						}
 						return s.length();
+					}
+					public String foo10(Object s) {
+						String string = s instanceof String s2 ? s2 : "";
+						return string;
 					}
 				}
 				""";
