@@ -75,7 +75,7 @@ public class JUnit5TestLoader implements ITestLoader {
 	}
 
 	private ITestReference createUnfilteredTest(Class<?> clazz, String[][] includeExcludeTags, String[] failureNames) {
-		LauncherDiscoveryRequestBuilder requestBuilder= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClass(clazz)).filters(getTagFilters(includeExcludeTags));
+		LauncherDiscoveryRequestBuilder requestBuilder= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClass(clazz.getName())).filters(getTagFilters(includeExcludeTags));
 		if (failureNames != null && failureNames.length > 0) {
 			String failureNamesString= ""; //$NON-NLS-1$
 			for (String failureName : failureNames) {

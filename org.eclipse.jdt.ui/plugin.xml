@@ -7134,10 +7134,15 @@
             id="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls"
             runAfter="org.eclipse.jdt.ui.cleanup.add_all">
       </cleanUp>
+       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.ReplaceDeprecatedFieldCleanUpCore"
+            id="org.eclipse.jdt.ui.cleanup.replace_deprecated_fields"
+            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
+      </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore"
             id="org.eclipse.jdt.ui.cleanup.variables"
-            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_calls">
+            runAfter="org.eclipse.jdt.ui.cleanup.replace_deprecated_fields">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.ElseIfCleanUpCore"
@@ -7847,5 +7852,19 @@
            content-type="org.eclipse.jdt.core.javaClass"
            file-extensions="class without source">
      </file-association>
+  </extension>
+  <extension
+        point="org.eclipse.ui.editors.stickyLinesProviders">
+     <stickyLinesProvider
+           class="org.eclipse.jdt.internal.ui.javaeditor.JavaStickyLinesProvider"
+           id="org.eclipse.jdt.internal.ui.StickyLinesProviderJava">
+        <enabledWhen>
+           <and>
+              <with variable="editor">
+                 <instanceof value="org.eclipse.jdt.internal.ui.javaeditor.JavaEditor"/>
+              </with>
+           </and>
+        </enabledWhen>
+     </stickyLinesProvider>
   </extension>
 </plugin>

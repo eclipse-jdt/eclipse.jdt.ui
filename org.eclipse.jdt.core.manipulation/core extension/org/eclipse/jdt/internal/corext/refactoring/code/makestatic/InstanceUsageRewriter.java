@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2025 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which accompanies this distribution, and is available at
@@ -143,13 +143,7 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 
 		Name qualifier= node.getQualifier();
 
-		if (qualifier != null) {
-			IBinding qualifierBinding= qualifier.resolveBinding();
-			ITypeBinding typeBinding= (ITypeBinding) qualifierBinding;
-			if (isAccessToAnonymousClass(node, typeBinding)) {
-				return super.visit(node);
-			}
-		} else {
+		if (qualifier == null) {
 			if (parentIsAnonymousClass(parentNode)) {
 				return super.visit(node);
 			}
@@ -201,7 +195,9 @@ public final class InstanceUsageRewriter extends ASTVisitor {
 
 	private void modifyFieldUsage(SimpleName node, IVariableBinding variableBinding) {
 		if (isAccessToAnonymousClass(node, variableBinding.getDeclaringClass())) {
-			return;
+			if (!variableBinding.isField() || !Modifier.isPrivate(variableBinding.getModifiers())) {
+				return;
+			}
 		}
 
 		if (variableBinding.isField() && !Modifier.isStatic(variableBinding.getModifiers())) {

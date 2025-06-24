@@ -12,7 +12,7 @@ class A {
 class Exposer {
 	private void foo() {
 		new Generic(getClass());
-		new Generic<Exposer>(Exposer.class);
+		new Generic<>(Exposer.class);
 	}
 }
 

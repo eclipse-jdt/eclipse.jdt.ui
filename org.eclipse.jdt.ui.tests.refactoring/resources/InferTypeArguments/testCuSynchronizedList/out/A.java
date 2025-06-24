@@ -3,9 +3,9 @@ package p;
 import java.util.*;
 
 class A {
-    private final List<?> _binPaths = Collections.synchronizedList(new ArrayList<Object>());
+    private final List<?> _binPaths = Collections.synchronizedList(new ArrayList<>());
     
     List<?> get() {
-        return new ArrayList<Object>(_binPaths);
+        return new ArrayList<>(_binPaths);
     }
 }

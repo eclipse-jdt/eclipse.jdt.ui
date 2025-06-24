@@ -7,6 +7,6 @@ public class A {
         class Local {
         	Local fSelf;
         }
-        new ArrayList<Local>().add(new Local().fSelf);
+        new ArrayList<>().add(new Local().fSelf);
     }
 }

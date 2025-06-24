@@ -10,7 +10,7 @@ class Qualified {
 }
 
 class Comparisons {
-	ArrayList<Qualified> fList= new ArrayList<Qualified>();
+	ArrayList<Qualified> fList= new ArrayList<>();
 	
 	void add(Qualified q) {
 		fList.add(q);
@@ -32,7 +32,7 @@ class Comparisons {
 }
 
 class Comparisons2 {
-	ArrayList<Qualified> fList= new ArrayList<Qualified>();
+	ArrayList<Qualified> fList= new ArrayList<>();
 	
 	void add(Qualified q) {
 		fList.add(q);

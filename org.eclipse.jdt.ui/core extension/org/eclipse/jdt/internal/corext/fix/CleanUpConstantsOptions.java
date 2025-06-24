@@ -171,6 +171,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 		options.setOption(REPLACE_DEPRECATED_CALLS, CleanUpOptions.FALSE);
+		options.setOption(REPLACE_DEPRECATED_FIELDS, CleanUpOptions.FALSE);
 
 		// Duplicate Code
 		options.setOption(OPERAND_FACTORIZATION, CleanUpOptions.FALSE);
@@ -361,6 +362,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(STANDARD_COMPARISON, CleanUpOptions.FALSE);
 		options.setOption(CHECK_SIGN_OF_BITWISE_OPERATION, CleanUpOptions.FALSE);
 		options.setOption(REPLACE_DEPRECATED_CALLS, CleanUpOptions.FALSE);
+		options.setOption(REPLACE_DEPRECATED_FIELDS, CleanUpOptions.FALSE);
 
 		// Duplicate Code
 		options.setOption(OPERAND_FACTORIZATION, CleanUpOptions.FALSE);
