@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2023, 2024 Vector Informatik GmbH and others.
+ * Copyright (c) 2023, 2025 Vector Informatik GmbH and others.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which accompanies this distribution, and is available at
@@ -384,6 +384,20 @@ public class MakeStaticRefactoringTests extends GenericRefactoringTest {
 	public void testInnerFieldAccessInAnonymousClass() throws Exception {
 		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
 		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 5, 10, 5, 13);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
+	public void testFieldAccessInAnonymousClassExtendingRefactoredClass() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 8, 10, 8, 24);
+		assertHasNoCommonErrors(status);
+	}
+
+	@Test
+	public void testFieldAccessInAnonymousClassExtendingRefactoredClass2() throws Exception {
+		//Method of anonymous class invokes another method of anonymous class -> Refactoring should ignore this invocation
+		RefactoringStatus status= performRefactoringAndMatchFiles(new String[] { "p.Foo" }, 8, 10, 8, 24);
 		assertHasNoCommonErrors(status);
 	}
 

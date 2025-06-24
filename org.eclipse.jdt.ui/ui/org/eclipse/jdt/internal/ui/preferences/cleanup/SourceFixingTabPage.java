@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2023 IBM Corporation and others.
+ * Copyright (c) 2021, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.BitwiseConditionalExpressionCleanup;
 import org.eclipse.jdt.internal.ui.fix.InlineDeprecatedMethodCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.InvertEqualsCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.ReplaceDeprecatedFieldCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StandardComparisonCleanUpCore;
 
 public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
@@ -40,7 +41,8 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 				new InvertEqualsCleanUpCore(values),
 				new StandardComparisonCleanUpCore(values),
 				new BitwiseConditionalExpressionCleanup(values),
-				new InlineDeprecatedMethodCleanUpCore(values)
+				new InlineDeprecatedMethodCleanUpCore(values),
+				new ReplaceDeprecatedFieldCleanUpCore(values)
 		};
 	}
 
@@ -66,5 +68,8 @@ public final class SourceFixingTabPage extends AbstractCleanUpTabPage {
 
 		final CheckboxPreference inlineDeprecatedMethodCallPref= createCheckboxPref(deprecatedCodeGroup, numColumns, CleanUpMessages.SourceFixingTabPage_CheckboxName_ReplaceDeprecatedMethodCall, CleanUpConstants.REPLACE_DEPRECATED_CALLS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(inlineDeprecatedMethodCallPref);
+
+		final CheckboxPreference replaceDeprecatedFieldsPref= createCheckboxPref(deprecatedCodeGroup, numColumns, CleanUpMessages.SourceFixingTabPage_CheckboxName_ReplaceDeprecatedField, CleanUpConstants.REPLACE_DEPRECATED_FIELDS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(replaceDeprecatedFieldsPref);
 	}
 }

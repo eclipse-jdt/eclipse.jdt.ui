@@ -115,6 +115,7 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchExpression;
@@ -170,6 +171,7 @@ import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.fix.PatternInstanceofToSwitchFixCore;
 import org.eclipse.jdt.internal.corext.fix.RemoveVarOrInferredLambdaParameterTypesFixCore;
+import org.eclipse.jdt.internal.corext.fix.ReplaceDeprecatedFieldFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitTryResourceFixCore;
 import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
@@ -347,6 +349,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getSplitSwitchLabelProposal(context, coveringNode, null)
 					|| getSplitTryResourceProposal(context, coveringNode, null)
 					|| getConvertPatternInstanceofIfStmtToSwitchProposals(context, coveringNode, null)
+					|| getDeprecatedFieldProposal(context, coveringNode, null, null)
 					|| getDeprecatedProposal(context, coveringNode, null, null);
 		}
 		return false;
@@ -374,6 +377,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getSplitSwitchLabelProposal(context, coveringNode, resultingCollections);
 			getAddMethodDeclaration(context, coveringNode, resultingCollections);
 			getDeprecatedProposal(context, coveringNode, locations, resultingCollections);
+			getDeprecatedFieldProposal(context, coveringNode, locations, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -725,6 +729,38 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return true;
+	}
+
+	private static boolean getDeprecatedFieldProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> proposals) {
+		// don't add if already added as quick fix
+		if (containsMatchingProblem(locations, IProblem.UsingDeprecatedField))
+			return false;
+
+		if (node != null && !(node instanceof QualifiedName)
+				&& !(node instanceof FieldAccess)
+				&& !(node instanceof SuperFieldAccess)) {
+			ASTNode originalNode= node;
+			node= ASTNodes.getFirstAncestorOrNull(node, QualifiedName.class,
+					FieldAccess.class, SuperFieldAccess.class);
+			if (node == null && originalNode instanceof SimpleName) {
+				node= originalNode;
+			}
+		}
+		if (node != null) {
+			String replacement= QuickAssistProcessorUtil.getDeprecatedFieldReplacement(node);
+			if (replacement != null) {
+				if (proposals != null) {
+					IProposableFix fix= ReplaceDeprecatedFieldFixCore.create(FixMessages.ReplaceDeprecatedField_msg,
+							replacement, (CompilationUnit)node.getRoot(), node);
+					if (fix != null) {
+						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+						proposals.add(new FixCorrectionProposal(fix, null, IProposalRelevance.REPLACE_DEPRECATED_FIELD, image, context));
+					}
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean getConvertAnonymousToNestedProposal(IInvocationContext context, final ASTNode node, Collection<ICommandAccess> proposals) throws CoreException {

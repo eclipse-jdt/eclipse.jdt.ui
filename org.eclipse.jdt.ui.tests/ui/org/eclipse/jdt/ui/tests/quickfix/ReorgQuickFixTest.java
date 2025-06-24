@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.ClasspathFixProcessorDescriptor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 public class ReorgQuickFixTest extends QuickFixTest {
 
@@ -153,7 +153,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 
 		String str1= """
-			
+
 			public class E {
 			}
 			""";
@@ -165,10 +165,10 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.util.Vector;
 			import java.net.*;
-			
+
 			public class E {
 			    Vector v;
 			}
@@ -190,9 +190,9 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.util.Vector;
-			
+
 			public class E {
 			    Vector v;
 			}
@@ -205,11 +205,11 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			import java.util.Date;
 			import java.sql.Date;
 			import java.util.Vector;
-			
+
 			public class E {
 			    Date d;
 			    Vector v;
@@ -232,10 +232,10 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		String str1= """
 			package test1;
-			
+
 			import java.util.Date;
 			import java.util.Vector;
-			
+
 			public class E {
 			    Date d;
 			    Vector v;
@@ -249,7 +249,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test2;
-			
+
 			public class E {
 			}
 			""";
@@ -264,7 +264,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		for (IJavaCompletionProposal proposal2 : proposals) {
 			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
-			if (curr instanceof CorrectPackageDeclarationProposal) {
+			if (curr instanceof FixCorrectionProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
 
@@ -272,7 +272,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				String preview= getPreviewContent(proposal);
 				String str1= """
 					package test1;
-					
+
 					public class E {
 					}
 					""";
@@ -287,7 +287,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				assertTrue("CU does not exist", cu2.exists());
 				String str2= """
 					package test2;
-					
+
 					public class E {
 					}
 					""";
@@ -301,7 +301,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test2;
-			
+
 			public enum E {
 			}
 			""";
@@ -316,7 +316,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		for (IJavaCompletionProposal proposal2 : proposals) {
 			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
-			if (curr instanceof CorrectPackageDeclarationProposal) {
+			if (curr instanceof FixCorrectionProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
 
@@ -324,7 +324,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				String preview= getPreviewContent(proposal);
 				String str1= """
 					package test1;
-					
+
 					public enum E {
 					}
 					""";
@@ -339,7 +339,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				assertTrue("CU does not exist", cu2.exists());
 				String str2= """
 					package test2;
-					
+
 					public enum E {
 					}
 					""";
@@ -353,7 +353,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("", false, null);
 		String str= """
 			package test2;
-			
+
 			public class E {
 			}
 			""";
@@ -368,15 +368,15 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		for (IJavaCompletionProposal proposal2 : proposals) {
 			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
-			if (curr instanceof CorrectPackageDeclarationProposal) {
+			if (curr instanceof FixCorrectionProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
 
 				CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
 				String preview= getPreviewContent(proposal);
 				String str1= """
-					
-					
+
+
 					public class E {
 					}
 					""";
@@ -391,7 +391,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				assertTrue("CU does not exist", cu2.exists());
 				String str2= """
 					package test2;
-					
+
 					public class E {
 					}
 					""";
@@ -418,7 +418,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 		for (IJavaCompletionProposal proposal2 : proposals) {
 			ChangeCorrectionProposal curr= (ChangeCorrectionProposal) proposal2;
-			if (curr instanceof CorrectPackageDeclarationProposal) {
+			if (curr instanceof FixCorrectionProposal) {
 				assertTrue("Duplicated proposal", hasRename);
 				hasRename= false;
 
@@ -426,7 +426,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				String preview= getPreviewContent(proposal);
 				String str1= """
 					package test2;
-					
+
 					public class E {
 					}
 					""";
@@ -474,7 +474,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			}
 			""";
@@ -486,7 +486,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			}
 			""";
@@ -509,7 +509,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				String preview= getPreviewContent(proposal);
 				String str1= """
 					package test1;
-					
+
 					public class X {
 					}
 					""";
@@ -523,7 +523,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 				assertTrue("CU does not exist", cu2.exists());
 				String str2= """
 					package test1;
-					
+
 					public class E {
 					}
 					""";
@@ -607,7 +607,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			}
 			""";
@@ -643,7 +643,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 		String str= """
 			package test1;
-			
+
 			public class E {
 			    public E() {
 			        E other;
@@ -682,7 +682,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 		String str= """
 			package test1;
-			
+
 			public enum E {
 			    A;
 			    E() {
@@ -718,7 +718,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String preview= getPreviewContent(proposal);
 		String str= """
 			package test1;
-			
+
 			public @interface E {
 			}
 			""";

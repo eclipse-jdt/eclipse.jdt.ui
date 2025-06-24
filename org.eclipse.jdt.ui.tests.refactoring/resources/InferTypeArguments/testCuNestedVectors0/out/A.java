@@ -5,9 +5,9 @@ import java.util.Vector;
 class A {
 
 	void k() {
-		Vector<Vector<String>> v1= new Vector<Vector<String>>();
-		Vector<Vector<String>> v2= new Vector<Vector<String>>();
-		Vector<String> v3= new Vector<String>();
+		Vector<Vector<String>> v1= new Vector<>();
+		Vector<Vector<String>> v2= new Vector<>();
+		Vector<String> v3= new Vector<>();
 
 		v3.add(new String("fff")); // String <= E[v3] --> String is
 												// not parametric --> nothing to unify

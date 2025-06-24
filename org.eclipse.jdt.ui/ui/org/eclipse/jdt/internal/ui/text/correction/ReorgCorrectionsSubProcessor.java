@@ -89,12 +89,12 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.fix.CorrectPackageDeclarationCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ClasspathVMUtil;
@@ -523,8 +523,8 @@ public class ReorgCorrectionsSubProcessor extends ReorgCorrectionsBaseSubProcess
 	}
 
 	@Override
-	protected ICommandAccess createCorrectPackageDeclarationProposal(ICompilationUnit cu, IProblemLocation problem, int relevance) {
-		return new CorrectPackageDeclarationProposal(cu, problem, relevance);
+	protected ICommandAccess createCorrectPackageDeclarationProposal(IProposableFix fix, IInvocationContext context, int relevance) {
+		return new FixCorrectionProposal(fix, new CorrectPackageDeclarationCleanUpCore(), relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL), context);
 	}
 
 	@Override

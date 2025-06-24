@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Philippe Ombredanne <pombredanne@nexb.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150989
  *     Anton Leherbauer (Wind River Systems) - [misc] Allow custom token for WhitespaceRule - https://bugs.eclipse.org/bugs/show_bug.cgi?id=251224
+ *     Nikifor Fedorov <nikifor.fedorov@arsysop.ru> - [#1953] Editor formats "record" as keyword - https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/1953
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -154,35 +155,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 				scanner.unread();
 				return Token.UNDEFINED;
 			}
-		}
-	}
-
-
-	private static class VersionedWordMatcher extends CombinedWordRule.WordMatcher implements ISourceVersionDependent {
-
-		private final IToken fDefaultToken;
-		private final String fVersion;
-		private boolean fIsVersionMatch;
-
-		public VersionedWordMatcher(IToken defaultToken, String version, String currentVersion) {
-			fDefaultToken= defaultToken;
-			fVersion= version;
-			setSourceVersion(currentVersion);
-		}
-
-		@Override
-		public void setSourceVersion(String version) {
-			fIsVersionMatch= JavaCore.compareJavaVersions(fVersion, version) <= 0;
-		}
-
-		@Override
-		public IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word) {
-			IToken token= super.evaluate(scanner, word);
-
-			if (fIsVersionMatch || token.isUndefined())
-				return token;
-
-			return fDefaultToken;
 		}
 	}
 
@@ -366,8 +338,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	private static final String INTERFACE= "interface";  //$NON-NLS-1$
 	private static final String RETURN= "return"; //$NON-NLS-1$
-	private static String[] fgJava14Keywords= { "record" }; //$NON-NLS-1$
-	private static String[] fgJava16Keywords= { "sealed", "permits" }; //$NON-NLS-1$ //$NON-NLS-2$
 	private static String[] fgJava9ModuleInfoKeywords= { "module", "requires", "exports", "to", "provides", "with", "uses", "open", "opens", "transitive", "import", "static" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$
 
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
@@ -449,26 +419,6 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for new keywords, see bug 4077
 		JavaWordDetector wordDetector= new JavaWordDetector();
 		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, defaultToken);
-
-		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_14, version);
-
-		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (String fgJava14Keyword : fgJava14Keywords) {
-			j14Matcher.addWord(fgJava14Keyword, token);
-		}
-
-		combinedWordRule.addWordMatcher(j14Matcher);
-		fVersionDependentRules.add(j14Matcher);
-
-		VersionedWordMatcher j16Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_16, version);
-
-		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (String fgJava16Keyword : fgJava16Keywords) {
-			j16Matcher.addWord(fgJava16Keyword, token);
-		}
-
-		combinedWordRule.addWordMatcher(j16Matcher);
-		fVersionDependentRules.add(j16Matcher);
 
 		// Add rule for operators
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);

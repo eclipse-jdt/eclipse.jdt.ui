@@ -6,7 +6,7 @@ import java.util.List;
 
 class A {
 	void foo() {
-		List<String> l= new ArrayList<String>();
+		List<String> l= new ArrayList<>();
 		l.add("Eclipse"); l.add("is"); l.add(new String("cool"));
 		for (Iterator<String> iter= l.iterator(); iter.hasNext();) {
 			String word= iter.next();

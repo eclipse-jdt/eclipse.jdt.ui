@@ -6,7 +6,7 @@ import java.util.List;
 
 class A {
 	void foo() {
-		AbstractList<String> l= new ArrayList<String>();
+		AbstractList<String> l= new ArrayList<>();
 		List<String> list= l;
 		list.add("Eclipse");
 	}

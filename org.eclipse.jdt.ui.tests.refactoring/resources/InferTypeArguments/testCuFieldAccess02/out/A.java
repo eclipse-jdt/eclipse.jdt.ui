@@ -14,10 +14,10 @@ class Cell<T> {
 
 class CellTest {
 	public static void main(String[] args) {
-		ArrayList<Boolean> booleanList= new ArrayList<Boolean>();
+		ArrayList<Boolean> booleanList= new ArrayList<>();
 		booleanList.add(Boolean.FALSE);
 		
-		Cell<Boolean> c1= new Cell<Boolean>();
+		Cell<Boolean> c1= new Cell<>();
 		c1.t= booleanList;
 		c1.setT(booleanList);
 		Iterable<Boolean> t= c1.t;
@@ -25,7 +25,7 @@ class CellTest {
 		Iterator<Boolean> iter2= c1.t.iterator();
 		boolean bool= c1.t.iterator().next();
 		
-		Cell<Boolean> c2= new Cell<Boolean>();
+		Cell<Boolean> c2= new Cell<>();
 		c2.t= booleanList;
 	}
 }

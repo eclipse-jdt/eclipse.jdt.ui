@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2024 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,8 +50,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1774,7 +1776,10 @@ public class SemanticHighlightings {
 
 			// 2: match type arguments
 			StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
-			if (locationInParent == ParameterizedType.TYPE_ARGUMENTS_PROPERTY)
+			if (locationInParent == ParameterizedType.TYPE_ARGUMENTS_PROPERTY ||
+					locationInParent == WildcardType.BOUND_PROPERTY ||
+					locationInParent == TypeParameter.TYPE_BOUNDS_PROPERTY ||
+					locationInParent == WildcardType.UPPER_BOUND_PROPERTY)
 				return true;
 
 			return false;

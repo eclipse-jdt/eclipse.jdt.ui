@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2024 IBM Corporation and others.
+ * Copyright (c) 2012, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,7 @@ public interface IProposalRelevance {
 	int CREATE_OPTIONAL= 9;
 	int CREATE_OPTIONAL_OF_NULLABLE= 9;
 	int INLINE_DEPRECATED_METHOD= 9;
+	int REPLACE_DEPRECATED_FIELD= 9;
 
 	int ADD_ABSTRACT_MODIFIER= 8;
 	int ADD_STATIC_MODIFIER= 8;
@@ -142,6 +143,7 @@ public interface IProposalRelevance {
 	int CONVERT_METHOD_REFERENCE_TO_LAMBDA= 6;
 	int CONVERT_TO_METHOD_REFERENCE= 6;
 	int CONVERT_PATTERN_INSTANCEOF_TO_SWITCH= 6;
+	int CORRECT_PACKAGE_DECLARATION= 6;
 	int CREATE_NEW_SUB_TYPE= 5;
 
 	int ADD_ALL_MISSING_TAGS= 5;
@@ -198,7 +200,6 @@ public interface IProposalRelevance {
 	int ADD_CONSTRUCTOR_FROM_SUPER_CLASS= 5;
 	int GETTER_SETTER_UNQUALIFIED_FIELD_ACCESS= 5;
 	int RENAME_TYPE= 5;
-	int CORRECT_PACKAGE_DECLARATION= 5;
 	int TYPE_ARGUMENTS_FROM_CONTEXT= 5;
 	int REMOVE_REDUNDANT_NULLNESS_ANNOTATION= 5;
 	int ADD_MISSING_NULLNESS_ANNOTATION= 5;
