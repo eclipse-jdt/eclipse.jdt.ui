@@ -15,6 +15,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 
@@ -63,6 +66,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -82,6 +86,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -89,6 +94,11 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposalCore;
 
 public class QuickAssistProcessorUtil {
 
@@ -871,6 +881,54 @@ public class QuickAssistProcessorUtil {
 		} else {
 			return rewrite.createCopyTarget(statement);
 		}
+	}
+
+	public static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection<Object> resultingCollections) throws CoreException {
+		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
+			return false;
+		}
+		MethodDeclaration decl= (MethodDeclaration) node.getParent();
+		if (decl.getName() != node || decl.resolveBinding() == null || Modifier.isPrivate(decl.getModifiers())) {
+			return false;
+		}
+
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+
+		IMethodBinding binding= decl.resolveBinding();
+		ITypeBinding[] paramTypes= binding.getParameterTypes();
+
+		ITypeBinding[] superTypes= Bindings.getAllSuperTypes(binding.getDeclaringClass());
+		if (resultingCollections == null) {
+			for (ITypeBinding curr : superTypes) {
+				if (curr.isFromSource() && Bindings.findOverriddenMethodInType(curr, binding) == null) {
+					return true;
+				}
+			}
+			return false;
+		}
+		List<SingleVariableDeclaration> params= decl.parameters();
+		String[] paramNames= new String[paramTypes.length];
+		for (int i= 0; i < params.size(); i++) {
+			SingleVariableDeclaration param= params.get(i);
+			paramNames[i]= param.getName().getIdentifier();
+		}
+
+		for (ITypeBinding curr : superTypes) {
+			if (curr.isFromSource()) {
+				IMethodBinding method= Bindings.findOverriddenMethodInType(curr, binding);
+				if (method == null) {
+					ITypeBinding typeDecl= curr.getTypeDeclaration();
+					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
+					if (targetCU != null) {
+						String label= Messages.format(CorrectionMessages.QuickAssistProcessor_createmethodinsuper_description,
+								new String[] { BasicElementLabels.getJavaElementName(curr.getName()), BasicElementLabels.getJavaElementName(binding.getName()) });
+						resultingCollections.add(new NewDefiningMethodProposalCore(label, targetCU, astRoot, typeDecl, binding, paramNames, IProposalRelevance.CREATE_METHOD_IN_SUPER));
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 }

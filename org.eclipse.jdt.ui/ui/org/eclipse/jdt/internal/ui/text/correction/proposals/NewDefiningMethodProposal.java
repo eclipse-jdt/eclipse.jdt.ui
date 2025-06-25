@@ -107,6 +107,10 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 		}
 	}
 
+	public boolean canAddOverridenAnnotation () {
+		return fAddOverrideAnnotation;
+	}
+
 	@Override
 	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
 		((NewDefiningMethodProposalCore) getDelegate()).addNewExceptions(rewrite, exceptions, context);
