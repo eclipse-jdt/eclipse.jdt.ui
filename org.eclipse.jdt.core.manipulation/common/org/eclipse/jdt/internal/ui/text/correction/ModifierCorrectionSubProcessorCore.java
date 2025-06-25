@@ -20,6 +20,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -75,6 +76,7 @@ import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -94,6 +96,7 @@ import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposalCore;
 
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposalCore;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposalCore;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposalCore;
 
 public abstract class ModifierCorrectionSubProcessorCore<T> {
 
@@ -114,8 +117,10 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 	public static final int MAKE_FINAL= 0x105;
 	private static final int REMOVE_INVALID_MODIFIERS= 0x200;
 	private static final int REMOVE_INVALID_FINAL_MODIFIER= 0x201;
-	private static final int INVALID_STATIC_MODIFIER= 0x202;
+	private static final int REMOVE_OVERRIDE_ANNOTATION= 0x202;
 	private static final int ADD_STATIC_TO_PARENT= 0x203;
+	private static final int CREATE_METHOD_IN_SUPER= 0x204;
+	private static final int INVALID_STATIC_MODIFIER= 0x204;
 	private static final int REMOVE_METHOD_BODY= 0x300;
 	private static final int CHANGE_TO_STATIC= 0x301;
 	private static final int CHANGE_TO_DEFAULT=0x302;
@@ -422,6 +427,37 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 		String label= CorrectionMessages.ModifierCorrectionSubProcessor_overrides_deprecated_description;
 		ASTRewriteCorrectionProposalCore proposal= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.OVERRIDES_DEPRECATED);
 		proposals.add(astRewriteCorrectionProposalToT(proposal, MAKE_DEPRECATED));
+	}
+
+	public void getRemoveOverrideAnnotationProposal (IInvocationContext context, IProblemLocation problem, Collection<T> proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
+		Annotation annot= StubUtility2Core.findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
+		if (annot != null) {
+			ASTRewrite rewrite= ASTRewrite.create(annot.getAST());
+			rewrite.remove(annot, null);
+			String label= CorrectionMessages.ModifierCorrectionSubProcessor_remove_override;
+			ASTRewriteCorrectionProposalCore proposal= new ASTRewriteCorrectionProposalCore(label, cu, rewrite, IProposalRelevance.REMOVE_OVERRIDE);
+			proposals.add(astRewriteCorrectionProposalToT(proposal, REMOVE_OVERRIDE_ANNOTATION));
+
+			getCreateInSuperClassProposals(context, methodDecl.getName(), proposals);
+		}
+	}
+
+	public boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection<T> resultingCollections) throws CoreException {
+		Collection<Object> newResults = new LinkedList<>();
+		boolean result = QuickAssistProcessorUtil.getCreateInSuperClassProposals(context, node, newResults);
+		for (Object res : newResults) {
+			if (res instanceof NewDefiningMethodProposalCore proposal) {
+				resultingCollections.add(newDefiningMethodProposalCoreToT(proposal, CREATE_METHOD_IN_SUPER));
+			}
+		}
+		return result;
 	}
 
 	public void getAddMethodModifierProposal(IInvocationContext context, IProblemLocation problem, Collection<T> proposals, int modifier, String label) {
@@ -1026,6 +1062,7 @@ public abstract class ModifierCorrectionSubProcessorCore<T> {
 	protected abstract T astRewriteCorrectionProposalToT(ASTRewriteCorrectionProposalCore core, int uid);
 	protected abstract T modifierChangeCorrectionProposalCoreToT(ModifierChangeCorrectionProposalCore core, int uid);
 	protected abstract T fixCorrectionProposalCoreToT(FixCorrectionProposalCore core, int uid);
+	protected abstract T newDefiningMethodProposalCoreToT(NewDefiningMethodProposalCore core, int uid);
 
 	protected abstract void collectConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<T> proposals);
 	protected abstract void getVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding bindingDecl, Collection<T> proposals);
