@@ -477,7 +477,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
-			createFoldingRegion(node, ctx.collapseMembers());
+			createFoldingRegion(node, ctx.collapseInnerTypes());
 			return true;
 		}
 
