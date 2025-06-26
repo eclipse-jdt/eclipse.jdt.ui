@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -40,6 +42,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -77,6 +80,9 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.launching.IVMInstall2;
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
@@ -283,6 +289,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private Button[] fLimitTo;
 	private Button[] fIncludeMasks;
 	private Group fLimitToGroup;
+	private Label fMessageLabel;
+	private Label fMessageImageLabel;
 
 	private int fMatchLocations;
 	private Link fMatchLocationsLink;
@@ -540,6 +548,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		Control includeMask= createIncludeMask(result);
 		includeMask.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
 
+		Control messageLabel= createMessageLabel(result);
+		messageLabel.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
+
 		//createParticipants(result);
 
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
@@ -587,6 +598,25 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		return selectParticipants;
 	}*/
 
+
+	private Control createMessageLabel(Composite parent) {
+		Composite result= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 5;
+		layout.marginHeight= 5;
+		result.setLayout(layout);
+
+		Image image= JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
+		fMessageImageLabel= new Label(result, SWT.NONE);
+		image.setBackground(fMessageImageLabel.getBackground());
+		fMessageImageLabel.setImage(image);
+		fMessageImageLabel.setLayoutData(new GridData(
+			GridData.HORIZONTAL_ALIGN_CENTER | GridData.VERTICAL_ALIGN_BEGINNING));
+
+		fMessageLabel= new Label(result, SWT.WRAP);
+		fMessageLabel.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1));
+		return result;
+	}
 
 	private Control createExpression(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
@@ -637,6 +667,23 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	final void updateOKStatus() {
 		boolean isValidPattern= isValidSearchPattern();
 		boolean isValidMask= getIncludeMask() != 0;
+		fMessageImageLabel.setVisible(false);
+		fMessageLabel.setText(""); //$NON-NLS-1$
+		if ((getIncludeMask() & JavaSearchScopeFactory.JRE) != 0) {
+			String release= JavaCore.getOption(JavaCore.COMPILER_RELEASE);
+			if (release.equals(JavaCore.ENABLED)) {
+				String compliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+				if (compliance != null) {
+					if (JavaRuntime.getVMInstall(JavaRuntime.newDefaultJREContainerPath()) instanceof IVMInstall2 jreInstall) {
+						if (JavaCore.compareJavaVersions(compliance, jreInstall.getJavaVersion()) < 0) {
+							fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_message, compliance, jreInstall.getJavaVersion()));
+							fMessageImageLabel.setVisible(true);
+							fMessageLabel.requestLayout();
+						}
+					}
+				}
+			}
+		}
 		getContainer().setPerformActionEnabled(isValidPattern && isValidMask);
 	}
 
