@@ -369,7 +369,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				ImportDeclaration lastImport= imports.get(imports.size() - 1);
 				int end= lastImport.getStartPosition() + lastImport.getLength();
 				includelastLine = true;
-				createFoldingRegion(start, end - start, ctx.collapseMembers());
+				createFoldingRegion(start, end - start, ctx.collapseImportContainer());
 			}
 			return super.visit(node);
 		}
