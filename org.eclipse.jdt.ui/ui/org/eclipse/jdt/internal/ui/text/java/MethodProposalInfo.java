@@ -72,7 +72,12 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 			}
 			boolean isConstructor= fProposal.isConstructor();
 
-			return findMethod(name, parameters, isConstructor, type);
+			IMethod method = findMethod(name, parameters, isConstructor, type);
+			if (method != null)
+				return method;
+			if (fProposal.isRecordComponentAccessor()) {
+				return type.getRecordComponent(name); // odd as it sounds returning a field from a MethodProposalInfo
+			}
 		}
 
 		return null;
