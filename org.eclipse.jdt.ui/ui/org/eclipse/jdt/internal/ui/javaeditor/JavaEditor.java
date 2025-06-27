@@ -219,6 +219,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
+import org.eclipse.jdt.internal.ui.actions.OpenMethod;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
@@ -2126,6 +2127,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		else
 			addAction(menu, ITextEditorActionConstants.GROUP_COPY, IJavaEditorActionConstants.RAW_PASTE);
 
+		action = getAction(IJavaEditorActionConstants.OPEN_METHOD);
+		menu.insertAfter(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);
 	}
 
 	/**
@@ -2281,8 +2284,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return;
 
 		ISelection selection= getSelectionProvider().getSelection();
-		if (selection instanceof ITextSelection) {
-			ITextSelection textSelection= (ITextSelection) selection;
+		if (selection instanceof ITextSelection textSelection) {
 			// PR 39995: [navigation] Forward history cleared after going back in navigation history:
 			// mark only in navigation history if the cursor is being moved (which it isn't if
 			// this is called from a PostSelectionEvent that should only update the magnet)
@@ -2780,6 +2782,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(CopyQualifiedNameAction.ACTION_DEFINITION_ID);
 		action.setImageDescriptor(null);
 		setAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME, action);
+
+		action= new OpenMethod(this);
+		action.setActionDefinitionId(OpenMethod.ACTION_DEFINITION_ID);
+		action.setImageDescriptor(null);
+		setAction(IJavaEditorActionConstants.OPEN_METHOD, action);
 	}
 
 	/**
