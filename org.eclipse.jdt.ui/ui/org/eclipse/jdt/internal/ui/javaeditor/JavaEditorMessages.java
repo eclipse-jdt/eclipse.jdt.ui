@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -174,6 +174,7 @@ final class JavaEditorMessages extends NLS {
 	public static String JavaElementSuperImplementationHyperlink_hyperlinkText;
 	public static String JavaElementSuperImplementationHyperlink_hyperlinkText_qualified;
 	public static String AnnotateClassFile_label;
+	public static String JavaElementOpenHyperlink_hyperlinkText;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaEditorMessages.class);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <!--
-     Copyright (c) 2000, 2021 IBM Corporation and others.
+     Copyright (c) 2000, 2026 IBM Corporation and others.
 
      This program and the accompanying materials
      are made available under the terms of the Eclipse Public License 2.0
@@ -1635,6 +1635,12 @@
             id="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector"
             name="%PropertyKeyHyperlinkDetector"
             targetId="org.eclipse.jdt.ui.PropertiesFileEditor">
+      </hyperlinkDetector>
+      <hyperlinkDetector
+	        class="org.eclipse.jdt.internal.ui.javaeditor.JavaElementOpenInNewHyperlinkDetector"
+            id="org.eclipse.jdt.internal.ui.javaeditor.JavaMethodHyperlinkImplementationDetector"
+            name="%JavaMethodHyperlinkImplementationDetector"
+            targetId="org.eclipse.jdt.ui.javaCode">
       </hyperlinkDetector>
    </extension>
 
