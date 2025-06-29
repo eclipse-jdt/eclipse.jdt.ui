@@ -54,7 +54,7 @@ public class FoldingTest {
 
 	private IPackageFragment packageFragment;
 
-	@Parameters(name = "New folding active: {0}")
+	@Parameters(name = "Extended folding active: {0}")
 	public static Object[] data() {
 		return new Object[] { true, false };
 	}
