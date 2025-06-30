@@ -157,11 +157,16 @@ public class CoreJavadocAccessImpl implements IJavadocAccess {
 	public String toHTML() {
 		fBuf= new StringBuffer();
 		fLiteralContent= 0;
-
-		if (fElement instanceof ILocalVariable || fElement instanceof ITypeParameter) {
-			parameterToHTML();
-		} else {
-			elementToHTML();
+		try {
+			if (fElement instanceof ILocalVariable
+					|| fElement instanceof ITypeParameter
+					|| (fElement instanceof IField field && field.isRecordComponent())) {
+				parameterToHTML();
+			} else {
+				elementToHTML();
+			}
+		} catch (JavaModelException e) {
+			// Ignore and move on
 		}
 
 		String result= fBuf.toString();

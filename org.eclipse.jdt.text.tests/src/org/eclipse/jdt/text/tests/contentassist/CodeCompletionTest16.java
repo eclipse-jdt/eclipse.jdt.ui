@@ -194,7 +194,7 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 		return null;
 	}
 	@Test
-	public void testRecordComponentJavadoc() throws CoreException {
+	public void testRecordComponentJavadoc1() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
@@ -232,17 +232,68 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 		ICompletionProposal proposal= findProposal(proposals, "foo() : String - FooBar");
 		assertNotNull("Proposal not found", proposal.getDisplayString());
 		String info= proposal.getAdditionalProposalInfo();
-		int idx = info.indexOf("A foo bar.<dl><dt>Parameters:</dt><dd><b>foo</b>  The foo.</dd><dd><b>bar</b>  The bar.");
+		int idx = info.indexOf("A foo bar.<dl><dt>Parameters:");
+		if (idx != -1) {
+			fail("Unexpected Javadoc found. Found instead: " + info);
+		}
+		idx = info.indexOf("The foo.");
 		if (idx == -1) {
 			fail("Expected Javadoc not found. Found instead: " + info);
 		}
 		proposal= findProposal(proposals, "toString() : String - Object");
 		assertNotNull("Proposal not found", proposal.getDisplayString());
-		// The following only works when the project is configured with a full jdk with source attachment.
-		//info= proposal.getAdditionalProposalInfo();
-		//idx = info.indexOf("A foo bar.<dl><dt>Parameters:</dt><dd><b>foo</b>  The foo.</dd><dd><b>bar</b>  The bar.");
-		//if (idx == -1) {
-		//	fail("Expected Javadoc not found. Found instead: " + info);
-		//}
+	}
+	@Test
+	public void testRecordComponentJavadoc2() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents=
+				"""
+					package test1;
+					/**
+					 * A foo bar.
+					 * @param foo The foo.
+					 * @param bar The bar.
+					 */
+					public record FooBar(String foo, String bar) {
+						public void abc() {
+							/* after this */fo
+						}
+					}
+					""";
+		ICompilationUnit cu= pack1.createCompilationUnit("FooBar.java", contents, false, null);
+
+
+		String str= "/* after this */fo";
+
+		int offset= contents.indexOf(str) + str.length() - 1;
+
+		JavaTypeCompletionProposalComputer comp= new JavaAllCompletionProposalComputer();
+
+		List<ICompletionProposal> proposals= comp.computeCompletionProposals(createContext(offset, cu), null);
+		ICompletionProposal proposal= findProposal(proposals, "foo() : String - FooBar");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+		String info= proposal.getAdditionalProposalInfo();
+		int idx = info.indexOf("A foo bar.<dl><dt>Parameters:");
+		if (idx != -1) {
+			fail("Unexpected Javadoc found. Found instead: " + info);
+		}
+		idx = info.indexOf("The foo.");
+		if (idx == -1) {
+			fail("Expected Javadoc not found. Found instead: " + info);
+		}
+
+		proposal= findProposal(proposals, "foo : String - FooBar");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+		info= proposal.getAdditionalProposalInfo();
+		idx = info.indexOf("A foo bar.<dl><dt>Parameters:");
+		if (idx != -1) {
+			fail("Unexpected Javadoc found. Found instead: " + info);
+		}
+		idx = info.indexOf("The foo.");
+		if (idx == -1) {
+			fail("Expected Javadoc not found. Found instead: " + info);
+		}
 	}
 }

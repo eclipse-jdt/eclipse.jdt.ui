@@ -348,13 +348,8 @@ public class JavadocHoverTests extends CoreTests {
 			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
 			String actualHtmlContent= hoverInfo.getHtml();
 
-			String expectedCodeSequence= """
-			 A foo bar.<dl><dt>Parameters:</dt><dd><b>foo</b>  """;
-
-			int index= actualHtmlContent.indexOf("A foo bar.");
-			assertNotEquals(-1, index);
-			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
-			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
+			int index= actualHtmlContent.indexOf(member.getElementName().equals("foo") ? "The foo." : "The bar.");
+			assertNotEquals("Expected HTML not found, instead found : " + actualHtmlContent,  -1, index);
 		}
 	}
 }
