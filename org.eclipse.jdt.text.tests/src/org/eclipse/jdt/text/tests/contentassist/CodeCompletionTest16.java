@@ -16,6 +16,9 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -183,5 +186,118 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 			""";
 		assertEquals(expectedContents, doc.get());
 	}
+	private ICompletionProposal findProposal(List<ICompletionProposal> proposals, String displayName) {
+		for (ICompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().equals(displayName)) {
+				return proposal;
+			}
+		}
+		return null;
+	}
+	@Test
+	public void testRecordComponentJavadoc1() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents=
+				"""
+					package test1;
+					/**
+					 * A foo bar.
+					 * @param foo The foo.
+					 * @param bar The bar.
+					 */
+					public record FooBar(String foo, String bar) {}
+					""";
+		ICompilationUnit cu= pack1.createCompilationUnit("FooBar.java", contents, false, null);
+
+		contents=
+				"""
+					package test1;
+					public class X1 {
+						public static void main(String[] args) {
+							FooBar fooBar = new FooBar("some foo", "some bar");
+							fooBar.f
+						}
+					}
+					""";
+		cu= pack1.createCompilationUnit("X1.java", contents, false, null);
+
+		String str= "fooBar.f";
+
+		int offset= contents.indexOf(str) + str.length() - 1;
+
+		JavaTypeCompletionProposalComputer comp= new JavaAllCompletionProposalComputer();
+
+		List<ICompletionProposal> proposals= comp.computeCompletionProposals(createContext(offset, cu), null);
+		ICompletionProposal proposal= findProposal(proposals, "foo() : String - FooBar");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+		String info= proposal.getAdditionalProposalInfo();
+		int idx = info.indexOf("A foo bar.<dl><dt>Parameters:");
+		if (idx != -1) {
+			fail("Unexpected Javadoc found. Found instead: " + info);
+		}
+		idx = info.indexOf("The foo.");
+		if (idx == -1) {
+			fail("Expected Javadoc not found. Found instead: " + info);
+		}
+		proposal= findProposal(proposals, "toString() : String - Object");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+
+		proposal= findProposal(proposals, "foo : String - FooBar");
+		assertNull("Record component should not be proposed", proposal);
+	}
+	@Test
+	public void testRecordComponentJavadoc2() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents=
+				"""
+					package test1;
+					/**
+					 * A foo bar.
+					 * @param foo The foo.
+					 * @param bar The bar.
+					 */
+					public record FooBar(String foo, String bar) {
+						public void abc() {
+							/* after this */fo
+						}
+					}
+					""";
+		ICompilationUnit cu= pack1.createCompilationUnit("FooBar.java", contents, false, null);
+
+
+		String str= "/* after this */fo";
+
+		int offset= contents.indexOf(str) + str.length() - 1;
+
+		JavaTypeCompletionProposalComputer comp= new JavaAllCompletionProposalComputer();
+
+		List<ICompletionProposal> proposals= comp.computeCompletionProposals(createContext(offset, cu), null);
+		ICompletionProposal proposal= findProposal(proposals, "foo() : String - FooBar");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+		String info= proposal.getAdditionalProposalInfo();
+		int idx = info.indexOf("A foo bar.<dl><dt>Parameters:");
+		if (idx != -1) {
+			fail("Unexpected Javadoc found. Found instead: " + info);
+		}
+		idx = info.indexOf("The foo.");
+		if (idx == -1) {
+			fail("Expected Javadoc not found. Found instead: " + info);
+		}
+
+		proposal= findProposal(proposals, "foo : String - FooBar");
+		assertNotNull("Proposal not found", proposal.getDisplayString());
+		info= proposal.getAdditionalProposalInfo();
+		idx = info.indexOf("A foo bar.<dl><dt>Parameters:");
+		if (idx != -1) {
+			fail("Unexpected Javadoc found. Found instead: " + info);
+		}
+		idx = info.indexOf("The foo.");
+		if (idx == -1) {
+			fail("Expected Javadoc not found. Found instead: " + info);
+		}
+	}
 }
