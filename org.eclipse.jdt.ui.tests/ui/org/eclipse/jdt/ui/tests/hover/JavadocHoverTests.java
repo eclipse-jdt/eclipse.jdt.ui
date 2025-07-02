@@ -327,6 +327,7 @@ public class JavadocHoverTests extends CoreTests {
 	}
 	@Test
 	public void testRecordComponentAccessor() throws Exception {
+		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/931
 		String source=
 				"""
 			package p;

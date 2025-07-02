@@ -16,6 +16,7 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -242,6 +243,9 @@ public class CodeCompletionTest16 extends AbstractCompletionTest {
 		}
 		proposal= findProposal(proposals, "toString() : String - Object");
 		assertNotNull("Proposal not found", proposal.getDisplayString());
+
+		proposal= findProposal(proposals, "foo : String - FooBar");
+		assertNull("Record component should not be proposed", proposal);
 	}
 	@Test
 	public void testRecordComponentJavadoc2() throws CoreException {
