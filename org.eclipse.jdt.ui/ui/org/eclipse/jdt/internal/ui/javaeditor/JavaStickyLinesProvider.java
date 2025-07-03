@@ -86,9 +86,13 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 		StyledText textWidget= sourceViewer.getTextWidget();
 		ICompilationUnit unit= null;
 		int textWidgetLineNumber= mapLineNumberToWidget(sourceViewer, lineNumber);
+		if (textWidgetLineNumber < 0) {
+			return stickyLines;
+		}
 		int startIndentation= 0;
-		String line= textWidget.getLine(textWidgetLineNumber);
+		String line = null;
 		try {
+			line = textWidget.getLine(textWidgetLineNumber);
 			startIndentation= getIndentation(line);
 			while (startIndentation == IGNORE_LINE_INDENTATION) {
 				textWidgetLineNumber--;
