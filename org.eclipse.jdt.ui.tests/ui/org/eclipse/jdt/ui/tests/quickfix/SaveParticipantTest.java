@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2023 IBM Corporation and others.
+ * Copyright (c) 2007, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1246,5 +1246,62 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		editCUInEditor(cu1, fileOnEditor);
 
 		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
+	}
+
+	@Test
+	public void testIssue2288() throws Exception {
+		// Given
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String fileOnDisk= """
+			package test1;
+			import java.util.List;
+			import java.util.ArrayList;
+
+			@SuppressWarnings("removal")
+			public class E1 {
+
+			    private void m1() {
+					List<String> myList = new ArrayList<String>();
+			    }
+			}
+			"""; //
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", fileOnDisk, false, null);
+
+		String fileOnEditor= """
+			package test1;
+			import java.util.List;
+			import java.util.ArrayList;
+
+			@SuppressWarnings("removal")
+			public class E1 {
+
+			    private void m1() {
+					List<String> myList = new ArrayList<String>();
+			    }
+			}
+			"""; //
+
+		String expected1= """
+			package test1;
+			import java.util.List;
+			import java.util.ArrayList;
+
+			public class E1 {
+
+			    private void m1() {
+					List<String> myList = new ArrayList<>();
+			    }
+			}
+			"""; //
+
+		enable(CleanUpConstants.REMOVE_UNNECESSARY_SUPPRESS_WARNINGS);
+		enable(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
+
+		// When
+		editCUInEditor(cu1, fileOnEditor);
+
+		assertChangedFromTo(cu1, fileOnDisk, fileOnEditor, expected1);
+
 	}
 }
