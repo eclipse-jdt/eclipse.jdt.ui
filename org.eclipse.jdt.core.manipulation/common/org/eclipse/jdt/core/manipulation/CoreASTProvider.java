@@ -14,6 +14,7 @@
 package org.eclipse.jdt.core.manipulation;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,13 +57,9 @@ public final class CoreASTProvider {
 
 	public static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
-	private volatile ITypeRoot fReconcilingJavaElement;
 	private ITypeRoot fActiveJavaElement;
 	private CompilationUnit fAST;
-	private Object fReconcileLock= new Object();
-	private Object fWaitLock= new Object();
-	private volatile boolean fIsReconciling;
-	private volatile Runnable fFinishReconciling;
+	private ReconcileState fReconcileState= new ReconcileState();
 
 	/**
 	 * Wait flag class.
@@ -155,25 +152,35 @@ public final class CoreASTProvider {
 		final boolean canReturnNull= waitFlag == CoreASTProvider.WAIT_NO || (waitFlag == CoreASTProvider.WAIT_ACTIVE_ONLY && (!isActiveElement || fAST != null));
 		boolean isReconciling= false;
 		final ITypeRoot activeElement;
+		Runnable finishReconciling;
 		if (isActiveElement) {
-			synchronized (fReconcileLock) {
-				activeElement= fReconcilingJavaElement;
-				isReconciling= isReconciling(input);
+			synchronized (fReconcileState) {
+				activeElement= fReconcileState.fReconcilingJavaElement;
+				isReconciling= fReconcileState.isReconciling(input);
+				finishReconciling = fReconcileState.fFinishReconciling;
 				if (!isReconciling && !canReturnNull)
 					aboutToBeReconciled(input);
 			}
-		} else
+		} else {
 			activeElement= null;
+			finishReconciling = null;
+		}
 
 		if (isReconciling) {
 			try {
-				notifyReconciler();
+				if (finishReconciling!=null) {
+					finishReconciling.run();
+				}
 				// Wait for AST
-				synchronized (fWaitLock) {
-					if (isReconciling(input)) {
-						if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
-							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
-						fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
+				synchronized (fReconcileState) {
+					long deadline = System.currentTimeMillis()+TimeUnit.SECONDS.toMillis(30);
+					if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
+					while (fReconcileState.isReconciling(input)) {
+						TimeUnit.SECONDS.timedWait(fReconcileState, 1);
+						if (System.currentTimeMillis()> deadline) {
+							ILog.get().error("Waited more than 30 seconds for reconcilation to complete! Proceed without waiting for completion!"); //$NON-NLS-1$
+						}
 					}
 				}
 
@@ -217,13 +224,6 @@ public final class CoreASTProvider {
 		return ast;
 	}
 
-	private void notifyReconciler() {
-		Runnable finishReconciling= fFinishReconciling;
-		if (finishReconciling!=null) {
-			finishReconciling.run();
-		}
-	}
-
 	/**
 	 * Informs that reconciling for the given element is about to be started.
 	 *
@@ -249,13 +249,13 @@ public final class CoreASTProvider {
 
 		if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
-
-		synchronized (fReconcileLock) {
-			fReconcilingJavaElement= javaElement;
-			fIsReconciling= true;
-			this.fFinishReconciling = finishReconciling;
+		synchronized (fReconcileState) {
+			fReconcileState.fReconcilingJavaElement= javaElement;
+			fReconcileState.fIsReconciling= true;
+			fReconcileState.fFinishReconciling = finishReconciling;
+			cache(null, javaElement);
+			fReconcileState.notifyAll();
 		}
-		cache(null, javaElement);
 	}
 
 	/**
@@ -321,34 +321,20 @@ public final class CoreASTProvider {
 	public void reconciled(CompilationUnit ast, ITypeRoot javaElement, IProgressMonitor progressMonitor) {
 		if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-		synchronized (fReconcileLock) {
-			fIsReconciling= false;
-			fFinishReconciling= null;
-			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
+		synchronized (fReconcileState) {
+			fReconcileState.fIsReconciling= false;
+			fReconcileState.fFinishReconciling= null;
+			if (javaElement == null || !javaElement.equals(fReconcileState.fReconcilingJavaElement)) {
 
 				if (JavaManipulationPlugin.DEBUG_AST_PROVIDER)
 					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$ //$NON-NLS-2$
 
-				// Signal - threads might wait for wrong element
-				synchronized (fWaitLock) {
-					fWaitLock.notifyAll();
-				}
+				fReconcileState.notifyAll();
 
 				return;
 			}
 			cache(ast, javaElement);
 		}
-	}
-
-	/**
-	 * Tells whether the given Java element is the one reported as currently being reconciled.
-	 *
-	 * @param javaElement the Java element
-	 * @return <code>true</code> if reported as currently being reconciled
-	 */
-	private boolean isReconciling(ITypeRoot javaElement) {
-		return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
 	}
 
 	/**
@@ -372,11 +358,6 @@ public final class CoreASTProvider {
 			disposeAST();
 
 		fAST= ast;
-
-		// Signal AST change
-		synchronized (fWaitLock) {
-			fWaitLock.notifyAll();
-		}
 	}
 
 	/**
@@ -473,14 +454,18 @@ public final class CoreASTProvider {
 	 * @return Whether the current java element is being reconciled.
 	 */
 	public boolean isReconciling () {
-		return fIsReconciling;
+		synchronized (fReconcileState) {
+			return fReconcileState.fIsReconciling;
+		}
 	}
 
 	/**
 	 * @return The java element currently being reconciled.
 	 */
 	public ITypeRoot getReconcilingJavaElement () {
-		return fReconcilingJavaElement;
+		synchronized (fReconcileState) {
+			return fReconcileState.fReconcilingJavaElement;
+		}
 	}
 
 	/**
@@ -509,8 +494,8 @@ public final class CoreASTProvider {
 	 * Notify all waiting threads that the AST has changed.
 	 */
 	public void waitLockNotifyAll () {
-		synchronized (fWaitLock) {
-			fWaitLock.notifyAll();
+		synchronized (fReconcileState) {
+			fReconcileState.notifyAll();
 		}
 	}
 
@@ -518,11 +503,27 @@ public final class CoreASTProvider {
 	 * Clear the reconciliation state.
 	 */
 	public void clearReconciliation () {
-		synchronized (fReconcileLock) {
-			fIsReconciling = false;
-			fReconcilingJavaElement = null;
-			fFinishReconciling = null;
+		synchronized (fReconcileState) {
+			fReconcileState.fIsReconciling = false;
+			fReconcileState.fReconcilingJavaElement = null;
+			fReconcileState.fFinishReconciling = null;
+			fReconcileState.notifyAll();
 		}
 	}
 
+	private static final class ReconcileState {
+		ITypeRoot fReconcilingJavaElement;
+		boolean fIsReconciling;
+		Runnable fFinishReconciling;
+
+		/**
+		 * Tells whether the given Java element is the one reported as currently being reconciled.
+		 *
+		 * @param javaElement the Java element
+		 * @return <code>true</code> if reported as currently being reconciled
+		 */
+		private boolean isReconciling(ITypeRoot javaElement) {
+			return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
+		}
+	}
 }
