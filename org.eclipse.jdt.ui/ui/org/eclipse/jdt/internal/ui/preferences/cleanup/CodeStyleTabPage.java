@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.fix.PullUpAssignmentCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ReduceIndentationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.SimplifyBooleanIfElseCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.SwitchCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UseExplicitEncodingCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 
 public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
@@ -53,7 +54,8 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 				new InstanceofCleanUp(values),
 				new VariableDeclarationCleanUpCore(values),
 				new SimplifyBooleanIfElseCleanUpCore(values),
-				new LambdaExpressionAndMethodRefCleanUp(values)
+				new LambdaExpressionAndMethodRefCleanUp(values),
+				new UseExplicitEncodingCleanUp(values)
 		};
 	}
 
@@ -122,5 +124,14 @@ public final class CodeStyleTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference simplifyLambdaExpressionAndMethodRef= createCheckboxPref(functionalInterfacesGroup, numColumns, CleanUpMessages.CodeStyleTabPage_CheckboxName_SimplifyLambdaExpressionAndMethodRefSyntax, CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(simplifyLambdaExpressionAndMethodRef);
+
+		Group encodingGroup= createGroup(numColumns, composite, CleanUpMessages.JavaFeatureTabPage_GroupName_Encoding);
+		createCheckboxPref(encodingGroup, numColumns, CleanUpMessages.JavaFeatureTabPage_CheckboxName_ExplicitEncoding, CleanUpConstants.EXPLICITENCODING_CLEANUP, CleanUpModifyDialog.FALSE_TRUE);
+		intent(encodingGroup);
+		createRadioPref(encodingGroup, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Keep_Behavior, CleanUpConstants.EXPLICITENCODING_KEEP_BEHAVIOR, CleanUpModifyDialog.FALSE_TRUE);
+		intent(encodingGroup);
+		createRadioPref(encodingGroup, numColumns - 1, CleanUpMessages.JavaFeatureTabPage_RadioName_Insert_UTF8, CleanUpConstants.EXPLICITENCODING_INSERT_UTF8, CleanUpModifyDialog.FALSE_TRUE);
+		intent(encodingGroup);
+
 	}
 }
