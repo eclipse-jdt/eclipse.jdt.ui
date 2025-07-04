@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -463,5 +463,11 @@ public final class ActionMessages extends NLS {
 	public static String GenerateToStringAction_tooltip;
 	public static String GenerateToStringAction_tostring;
 	public static String GenerateToStringAction_error_caption;
+
+	public static String OpenMethodAction_ToolTipText;
+	public static String OpenMethodAction_InfoDialogTitle;
+	public static String OpenMethodAction_ActionName;
+	public static String OpenMethodAction_NoElementToQualify;
+
 
 }
