@@ -471,7 +471,7 @@ public final class CoreASTProvider {
 	/**
 	 * @return The active java element.
 	 */
-	public ITypeRoot getActiveJavaElement () {
+	public synchronized ITypeRoot getActiveJavaElement () {
 		return fActiveJavaElement;
 	}
 
@@ -479,7 +479,7 @@ public final class CoreASTProvider {
 	 * Set the active java element that is currently active.
 	 * @param activeJavaElement the java element.
 	 */
-	public void setActiveJavaElement (ITypeRoot activeJavaElement) {
+	public synchronized void setActiveJavaElement (ITypeRoot activeJavaElement) {
 		fActiveJavaElement = activeJavaElement;
 	}
 
@@ -511,6 +511,19 @@ public final class CoreASTProvider {
 		}
 	}
 
+	/**
+	 * Check if the given java element needs to clear the reconciliation
+	 * @since 1.24
+	 */
+	public void clearReconciliation(ITypeRoot javaElement) {
+		synchronized (fReconcileState) {
+			if (fReconcileState.fIsReconciling && (fReconcileState.fReconcilingJavaElement == null || !fReconcileState.fReconcilingJavaElement.equals(javaElement))
+					|| javaElement == null) {
+				clearReconciliation();
+			}
+		}
+	}
+
 	private static final class ReconcileState {
 		ITypeRoot fReconcilingJavaElement;
 		boolean fIsReconciling;
@@ -526,4 +539,5 @@ public final class CoreASTProvider {
 			return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
 		}
 	}
+
 }

@@ -229,10 +229,7 @@ public final class ASTProvider implements IASTSharedValues {
 		if (JavaPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(CoreASTProvider.getThreadName() + " - " + CoreASTProvider.DEBUG_PREFIX + "active editor is: " + INSTANCE.toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
-		if (INSTANCE.isReconciling() && (INSTANCE.getReconcilingJavaElement() == null || !INSTANCE.getReconcilingJavaElement().equals(javaElement))
-				|| javaElement == null) {
-			INSTANCE.clearReconciliation();
-		}
+		INSTANCE.clearReconciliation(javaElement);
 	}
 
 	/**
