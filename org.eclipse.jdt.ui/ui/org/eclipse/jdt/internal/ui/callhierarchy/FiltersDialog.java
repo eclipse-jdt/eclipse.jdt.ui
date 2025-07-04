@@ -14,9 +14,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
+import java.util.Arrays;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,6 +39,8 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 class FiltersDialog extends StatusDialog {
+	private static final String METHOD_NAME_GLOB_PATTERN = "^[a-zA-Z0-9*?]*$"; //$NON-NLS-1$
+
     private Label fNamesHelpText;
     private Button fFilterOnNames;
     private Text fNames;
@@ -99,12 +104,15 @@ class FiltersDialog extends StatusDialog {
         fFilterOnNames = createCheckbox(parent,
                 CallHierarchyMessages.FiltersDialog_filterOnNames, true);
 
+        fFilterOnNames.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> validateInput()));
+//        fFilterOnNames.addListener(SWT.Modify, e -> validateInput());
+
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.setFont(parent.getFont());
         fNames.addModifyListener(e -> validateInput());
 
         GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-        gridData.widthHint = convertWidthInCharsToPixels(60);
+        gridData.widthHint = convertWidthInCharsToPixels(80);
         fNames.setLayoutData(gridData);
 
         fNamesHelpText= new Label(parent, SWT.LEFT);
@@ -205,7 +213,7 @@ class FiltersDialog extends StatusDialog {
 		fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
 
 		setSelection();
-		
+
 		updateEnabledState();
 	}
 
@@ -243,11 +251,40 @@ class FiltersDialog extends StatusDialog {
         }
     }
 
+	private boolean isFilterNamesValid() {
+		if (!fFilterOnNames.getSelection()) {
+			return true;
+		}
+		String namesGlob = fNames.getText().trim();
+
+		if (namesGlob.isEmpty()) {
+			return true;
+		}
+
+		// Split into several patterns separated by commas
+		String[] allPatterns= namesGlob.split(","); //$NON-NLS-1$
+
+		return Arrays.stream(allPatterns).map(String::trim).allMatch(this::isValidMethodNameGlob);
+	}
+
+	private boolean isValidMethodNameGlob(String input) {
+        return input != null && input.matches(METHOD_NAME_GLOB_PATTERN);
+    }
+
+
     private void validateInput() {
         StatusInfo status= new StatusInfo();
-        if (!isMaxCallDepthValid()) {
-            status.setError(CallHierarchyMessages.FiltersDialog_messageMaxCallDepthInvalid);
+        String errorMessage = ""; //$NON-NLS-1$
+        if (!isFilterNamesValid()) {
+			errorMessage+= CallHierarchyMessages.FiltersDialog_messageFilterNamesInvalid;
         }
+        if (!isMaxCallDepthValid()) {
+            errorMessage+= CallHierarchyMessages.FiltersDialog_messageMaxCallDepthInvalid;
+        }
+
+		if (!errorMessage.isEmpty()) {
+			status.setError(errorMessage);
+		}
         updateStatus(status);
     }
 }
