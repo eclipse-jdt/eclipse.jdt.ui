@@ -1,0 +1,157 @@
+/*******************************************************************************
+ * Copyright (c) 2025 Daniel Schmid and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     Daniel Schmid - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.text.tests.folding;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.rules.ProjectTestSetup;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public class FoldingWithShowSelectedElementTests {
+	@Rule
+	public ProjectTestSetup projectSetup= new ProjectTestSetup();
+
+	private IJavaProject jProject;
+
+	private IPackageFragmentRoot sourceFolder;
+
+	private IPackageFragment packageFragment;
+
+	@Before
+	public void setUp() throws CoreException {
+		jProject= projectSetup.getProject();
+		sourceFolder= jProject.findPackageFragmentRoot(jProject.getResource().getFullPath().append("src"));
+		if (sourceFolder == null) {
+			sourceFolder= JavaProjectHelper.addSourceContainer(jProject, "src");
+		}
+		packageFragment= sourceFolder.createPackageFragment("org.example.test", false, null);
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.EDITOR_SHOW_SEGMENTS, true);
+	}
+
+	@After
+	public void tearDown() throws CoreException {
+		JavaProjectHelper.delete(jProject);
+		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS);
+		JavaPlugin.getDefault().getPreferenceStore().setToDefault(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED);
+	}
+
+	@Test
+	public void testFoldingActive() throws Exception {
+		String str= """
+				package org.example.test;
+				public class A {
+					void someMethod() {
+						// this method should be folded
+					}
+				}
+				""";
+		List<IRegion> regions= FoldingTestUtils.getProjectionRangesOfFile(packageFragment, "B.java", str);
+		assertEquals(1, regions.size());
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 3);
+	}
+
+	@Test
+	public void testInsertText() throws Exception {
+		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED, true);
+		String str= """
+				package org.example.test;
+				public class A {
+					// region
+					void someMethod() {
+						// content here
+					}
+					// endregion
+				}
+				""";
+
+		ICompilationUnit cu= packageFragment.createCompilationUnit("A.java", str, true, null);
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+
+		editor.setSelection(cu.getElementAt(str.indexOf("someMethod")));
+
+		ProjectionAnnotationModel model= editor.getAdapter(ProjectionAnnotationModel.class);
+
+		List<IRegion> regions= extractRegions(model);
+
+		assertEquals(4, regions.size());
+
+		IDocument document= editor.getViewer().getDocument();
+		assertTrue(regions.contains(new Region(0, document.getLineOffset(2) + 1)));
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4);
+		int methodEnd= document.getLineOffset(6) + 1;
+		assertTrue(regions.contains(new Region(methodEnd, str.length()-methodEnd)));
+
+		document.replace(str.indexOf("content"), 0, "method ");
+
+		regions = extractRegions(model);
+		str = document.get();
+
+		assertEquals(4, regions.size());
+
+		assertTrue(regions.contains(new Region(0, document.getLineOffset(2) + 1)));
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 2, 6);
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(regions, str, 3, 4);
+		methodEnd= document.getLineOffset(6) + 1;
+		assertTrue(regions.contains(new Region(methodEnd, str.length()-methodEnd)));
+	}
+
+	private List<IRegion> extractRegions(ProjectionAnnotationModel model) {
+		List<IRegion> regions= new ArrayList<>();
+		Iterator<Annotation> it= model.getAnnotationIterator();
+		while (it.hasNext()) {
+			Annotation a= it.next();
+			if (a instanceof ProjectionAnnotation) {
+				Position p= model.getPosition(a);
+				regions.add(new Region(p.getOffset(), p.getLength()));
+			}
+		}
+		return regions;
+	}
+
+}
