@@ -644,6 +644,36 @@ public class CustomFoldingRegionTest {
 		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 12, 13);//second
 	}
 
+	@Test
+	public void testSameStartAndEndMarkerWithNestedFoldingRegionsAfterwards() throws Exception {
+		assumeTrue(extendedFoldingActive);
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.setValue(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_START, "reg");
+		store.setValue(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGION_END, "reg");
+
+		String str= """
+				package org.example.test;
+
+				public class Repro {
+
+					// reg a folding region should start here
+
+					public String test(boolean b) {
+						if (b)
+
+							return "a";
+						return "b";
+					}
+
+				}
+				""";
+		List<IRegion> projectionRanges= getProjectionRangesOfFile(str);
+		assertEquals(3, projectionRanges.size());
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 4, 11);//custom region
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 6, 10);//test
+		FoldingTestUtils.assertContainsRegionUsingStartAndEndLine(projectionRanges, str, 7, 8);//if
+	}
+
 	private List<IRegion> getProjectionRangesOfFile(String str) throws Exception {
 		return FoldingTestUtils.getProjectionRangesOfFile(fPackageFragment, "Test.java", str);
 	}

@@ -1427,6 +1427,16 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 							currentFoldingPositions, openCustomRegionStartPositions, nonCommentFoldingRegion.getOffset()
 					);
 					if (currentCommentIndex >= comments.size()) {
+						while(!openCustomRegionStartPositions.isEmpty()) {
+							Deque<Integer> activeFoldingRegions= openCustomRegionStartPositions.removeLast();
+							Position region= currentFoldingPositions.pollLast();
+							int endPosition = sourceArray.length - 1;
+							if (region != null) {
+								endPosition= region.getOffset() + region.getLength() - 1;
+							}
+							endAllActiveFoldingRegions(sourceArray, visitor, activeFoldingRegions, endPosition);
+						}
+
 						return;
 					}
 
