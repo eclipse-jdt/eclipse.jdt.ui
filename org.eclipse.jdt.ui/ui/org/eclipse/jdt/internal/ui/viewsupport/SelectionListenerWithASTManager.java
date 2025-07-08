@@ -150,7 +150,7 @@ public class SelectionListenerWithASTManager {
 					}
 				}
 			};
-			fCurrentJob.setPriority(Job.DECORATE);
+			fCurrentJob.setPriority(Job.INTERACTIVE);
 			fCurrentJob.setSystem(true);
 			fCurrentJob.schedule();
 		}
