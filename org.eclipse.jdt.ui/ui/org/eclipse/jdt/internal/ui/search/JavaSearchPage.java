@@ -38,10 +38,13 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IScopeChangeProvider;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -66,6 +69,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IModularClassFile;
 import org.eclipse.jdt.core.IModuleDescription;
@@ -670,16 +674,29 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fMessageImageLabel.setVisible(false);
 		fMessageLabel.setText(""); //$NON-NLS-1$
 		if ((getIncludeMask() & JavaSearchScopeFactory.JRE) != 0) {
-			String release= JavaCore.getOption(JavaCore.COMPILER_RELEASE);
-			if (release.equals(JavaCore.ENABLED)) {
-				String compliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
-				if (compliance != null) {
-					if (JavaRuntime.getVMInstall(JavaRuntime.newDefaultJREContainerPath()) instanceof IVMInstall2 jreInstall) {
-						if (JavaCore.compareJavaVersions(compliance, jreInstall.getJavaVersion()) < 0) {
-							fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_message, compliance, jreInstall.getJavaVersion()));
-							fMessageImageLabel.setVisible(true);
-							fMessageLabel.requestLayout();
-						}
+			String[] projectNames= getContainer().getSelectedProjectNames();
+			String compliance= null;
+			if (projectNames != null) {
+				IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+				IJavaProject project= JavaCore.create(root.getProject(projectNames[0]));
+				if (project.exists()) {
+					String release= project.getOption(JavaCore.COMPILER_RELEASE, true);
+					if (release.equals(JavaCore.ENABLED)) {
+						compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+					}
+				}
+			} else {
+				String release= JavaCore.getOption(JavaCore.COMPILER_RELEASE);
+				if (release.equals(JavaCore.ENABLED)) {
+					compliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+				}
+			}
+			if (compliance != null) {
+				if (JavaRuntime.getVMInstall(JavaRuntime.newDefaultJREContainerPath()) instanceof IVMInstall2 jreInstall) {
+					if (JavaCore.compareJavaVersions(compliance, jreInstall.getJavaVersion()) < 0) {
+						fMessageLabel.setText(MessageFormat.format(SearchMessages.JavaSearchPage_release_warning_message, compliance, jreInstall.getJavaVersion()));
+						fMessageImageLabel.setVisible(true);
+						fMessageLabel.requestLayout();
 					}
 				}
 			}
@@ -1122,6 +1139,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	@Override
 	public void setContainer(ISearchPageContainer container) {
 		fContainer= container;
+		if (container instanceof IScopeChangeProvider provider) {
+			provider.addScopeChangedListener((e) -> updateOKStatus());
+		}
 	}
 
 	/**
