@@ -270,6 +270,8 @@ public final class RefactoringMessages extends NLS {
 
 	public static String ExtractMethodInputPage_duplicates_single;
 
+	public static String ExtractMethodInputPage_final;
+
 	public static String ExtractMethodInputPage_generateJavadocComment;
 
 	public static String ExtractMethodInputPage_label_text;
@@ -283,6 +285,8 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractMethodInputPage_public;
 
 	public static String ExtractMethodInputPage_signature_preview;
+
+	public static String ExtractMethodInputPage_synchronized;
 
 	public static String ExtractMethodInputPage_throwRuntimeExceptions;
 

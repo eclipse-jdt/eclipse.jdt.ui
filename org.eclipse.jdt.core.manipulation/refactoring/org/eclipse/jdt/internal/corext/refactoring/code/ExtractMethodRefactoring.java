@@ -166,6 +166,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private static final String ATTRIBUTE_COMMENTS= "comments"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_EXCEPTIONS= "exceptions"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SYNCHRONIZED= "synchronized"; //$NON-NLS-1$
 
 	private ICompilationUnit fCUnit;
 	private CompilationUnit fRoot;
@@ -176,6 +178,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private ASTRewrite fRewriter;
 	private ExtractMethodAnalyzer fAnalyzer;
 	private int fVisibility;
+	private boolean fMakeFinal;
+	private boolean fMakeSynchronized;
 	private String fMethodName;
 	private boolean fThrowRuntimeExceptions;
 	private List<ParameterInfo> fParameterInfos;
@@ -283,6 +287,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
+		fMakeFinal= false;
+		fMakeSynchronized= false;
 		fFormatterOptions = formatterOptions;
 	}
 
@@ -403,12 +409,48 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	/**
+	 * Set whether or not to add final modifier
+	 *
+	 * @param isFinal a boolean value
+	 */
+	public void setFinal(boolean isFinal) {
+		fMakeFinal= isFinal;
+	}
+
+	/**
+	 * Set whether or not to add synchronized modifier.
+	 *
+	 * @param isSynchronized a boolean value
+	 */
+	public void setSynchronized(boolean isSynchronized) {
+		fMakeSynchronized= isSynchronized;
+	}
+
+	/**
 	 * Returns the visibility of the new method.
 	 *
 	 * @return the visibility of the new method
 	 */
 	public int getVisibility() {
 		return fVisibility;
+	}
+
+	/**
+	 * Returns whether the new method should be made final.
+	 *
+	 * @return whether to make new method final or not
+	 */
+	public boolean getMakeFinal() {
+		return fMakeFinal;
+	}
+
+	/**
+	 * Returns whether the new method should be made synchronized.
+	 *
+	 * @return whether to make new method synchronized or not
+	 */
+	public boolean getMakeSynchronized() {
+		return fMakeSynchronized;
 	}
 
 	/**
@@ -831,6 +873,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fMethodName);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.toString(fSelectionStart) + " " + Integer.toString(fSelectionLength)); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_VISIBILITY, Integer.toString(fVisibility));
+		arguments.put(ATTRIBUTE_FINAL, Boolean.toString(fMakeFinal));
+		arguments.put(ATTRIBUTE_SYNCHRONIZED, Boolean.toString(fMakeSynchronized));
 		arguments.put(ATTRIBUTE_DESTINATION, Integer.toString(fDestinationIndex));
 		arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.toString(fThrowRuntimeExceptions));
 		arguments.put(ATTRIBUTE_COMMENTS, Boolean.toString(fGenerateJavadoc));
@@ -1336,6 +1380,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 			modifiers|= Modifier.DEFAULT;
 		}
 
+		if (fMakeFinal && !isDestinationInterface) {
+			modifiers |= Modifier.FINAL;
+		}
+
+		if (fMakeSynchronized && !isDestinationInterface) {
+			modifiers |= Modifier.SYNCHRONIZED;
+		}
+
 		List<TypeParameter> typeParameters= result.typeParameters();
 		for (ITypeBinding typeVariable : computeLocalTypeVariables(modifiers)) {
 			TypeParameter parameter= fAST.newTypeParameter();
@@ -1648,6 +1700,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 
 		fReplaceDuplicates= Boolean.parseBoolean(replace);
+
+		final String makeFinal= arguments.getAttribute(ATTRIBUTE_FINAL);
+		if (makeFinal == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
+
+		fMakeFinal= Boolean.parseBoolean(makeFinal);
+
+		final String makeSynchronized= arguments.getAttribute(ATTRIBUTE_SYNCHRONIZED);
+		if (makeSynchronized == null)
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SYNCHRONIZED));
+
+		fMakeSynchronized= Boolean.parseBoolean(makeSynchronized);
 
 		final String comments= arguments.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comments == null)
