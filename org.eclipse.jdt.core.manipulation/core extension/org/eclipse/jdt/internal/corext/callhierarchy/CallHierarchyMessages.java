@@ -25,6 +25,10 @@ public final class CallHierarchyMessages extends NLS {
 
 	public static String CallerMethodWrapper_taskname;
 	public static String CalleeMethodWrapper_taskname;
+	public static String FiltersDialog_ShowAllCode;
+	public static String FiltersDialog_HideTestCode;
+	public static String FiltersDialog_TestCodeOnly;
+
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CallHierarchyMessages.class);
