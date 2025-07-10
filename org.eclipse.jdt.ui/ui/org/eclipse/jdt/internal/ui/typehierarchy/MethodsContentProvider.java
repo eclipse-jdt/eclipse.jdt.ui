@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -110,6 +110,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 					addAll(type.getMethods(), res);
 					addAll(type.getInitializers(), res);
 					addAll(type.getFields(), res);
+					addAll(type.getRecordComponents(), res);
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
