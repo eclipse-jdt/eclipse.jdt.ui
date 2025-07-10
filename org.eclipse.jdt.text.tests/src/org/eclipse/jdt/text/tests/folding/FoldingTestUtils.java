@@ -54,6 +54,7 @@ public final class FoldingTestUtils {
 				regions.add(new Region(p.getOffset(), p.getLength()));
 			}
 		}
+		editor.close(false);
 		return regions;
 	}
 
