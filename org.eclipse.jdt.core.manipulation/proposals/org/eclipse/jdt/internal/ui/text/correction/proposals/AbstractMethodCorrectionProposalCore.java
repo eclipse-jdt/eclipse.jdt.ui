@@ -66,14 +66,14 @@ public abstract class AbstractMethodCorrectionProposalCore extends LinkedCorrect
 		fSenderBinding= binding;
 	}
 
-	protected ASTNode getInvocationNode() {
+	public ASTNode getInvocationNode() {
 		return fNode;
 	}
 
 	/**
 	 * @return The binding of the type declaration (generic type)
 	 */
-	protected ITypeBinding getSenderBinding() {
+	public ITypeBinding getSenderBinding() {
 		return fSenderBinding;
 	}
 

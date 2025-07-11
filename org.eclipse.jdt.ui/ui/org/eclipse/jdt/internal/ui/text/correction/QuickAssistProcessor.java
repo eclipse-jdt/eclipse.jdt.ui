@@ -142,6 +142,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
@@ -2617,9 +2618,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-
 	public static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) throws CoreException {
-		return getCreateInSuperClassProposals(context, node, resultingCollections, true);
+		if (!(node instanceof SimpleName) || !(node.getParent() instanceof MethodDeclaration)) {
+			return false;
+		}
+		MethodDeclaration decl= (MethodDeclaration) node.getParent();
+		if (decl.getName() != node || decl.resolveBinding() == null || Modifier.isPrivate(decl.getModifiers())) {
+			return false;
+		}
+		boolean addOverride = StubUtility2Core.findAnnotation("java.lang.Override", decl.modifiers()) == null; //$NON-NLS-1$
+		return getCreateInSuperClassProposals(context, node, resultingCollections, addOverride);
 	}
 
 	public static boolean getCreateInSuperClassProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections, boolean addOverride) throws CoreException {
