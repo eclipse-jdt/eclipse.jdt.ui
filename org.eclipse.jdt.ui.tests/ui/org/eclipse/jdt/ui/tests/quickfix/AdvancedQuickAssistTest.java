@@ -6905,4 +6905,53 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 		assertProposalPreviewEquals(expected, CorrectionMessages.AssignToVariableAssistProposal_assignallparamstofields_description, proposals);
 	}
+
+	@Test
+	public void testCreateMethodInSuperType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer str= new StringBuffer();
+		str.append("package test1;\n"
+				+ "public class Base {\n"
+				+ "    public void foo() {\n"
+				+ "    }\n"
+				+ "}");
+		pack1.createCompilationUnit("Base.java", str.toString(), false, null);
+
+		str = new StringBuffer();
+		str.append("package test1;\n"
+				+ "public class Common extends Base {\n"
+				+ "}");
+		pack1.createCompilationUnit("Common.java", str.toString(), false, null);
+
+		str = new StringBuffer();
+		str.append("package test1;\n"
+				+ "public class Extended extends Common {\n"
+				+ "    public void foo() {\n"
+				+ "    }\n"
+				+ "}");
+		ICompilationUnit cu= pack1.createCompilationUnit("Extended.java", str.toString(), false, null);
+
+		String selection= "foo()";
+		int offset= str.indexOf(selection);
+
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[9];
+		StringBuffer buf= new StringBuffer();
+		buf.append(
+			 "package test1;\n"
+				+ "public class Common extends Base {\n\n"
+				+ "    public void foo() {\n"
+				+ "        //TODO\n"
+				+ "        \n"
+				+ "    }\n"
+				+ "}");
+		expected[0]= buf.toString();
+		assertExpectedExistInProposals(proposals, expected);
+	}
 }
