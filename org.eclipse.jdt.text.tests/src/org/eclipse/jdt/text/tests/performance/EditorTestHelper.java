@@ -387,7 +387,7 @@ public class EditorTestHelper {
 	}
 
 	private static Accessor getBackgroundThreadAccessor(AbstractReconciler reconciler) {
-		Object backgroundThread= new Accessor(reconciler, AbstractReconciler.class).get("fThread");
+		Object backgroundThread= new Accessor(reconciler, AbstractReconciler.class).get("fWorker");
 		return new Accessor(backgroundThread, backgroundThread.getClass());
 	}
 
