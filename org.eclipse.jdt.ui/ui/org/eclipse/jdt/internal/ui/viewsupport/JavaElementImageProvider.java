@@ -31,6 +31,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -223,6 +224,12 @@ public class JavaElementImageProvider {
 				case IJavaElement.FIELD: {
 					IMember member= (IMember) element;
 					IType declType= member.getDeclaringType();
+					if (declType.isRecord()) {
+						IField recordComponent= declType.getRecordComponent(member.getElementName());
+						if (recordComponent != null) {
+							return getFieldImageDescriptor(false, Flags.AccPrivate);
+						}
+					}
 					return getFieldImageDescriptor(JavaModelUtil.isInterfaceOrAnnotation(declType), member.getFlags());
 				}
 				case IJavaElement.LOCAL_VARIABLE:
@@ -397,7 +404,8 @@ public class JavaElementImageProvider {
 					int modifiers= member.getFlags();
 					if (confirmAbstract(member) && JdtFlags.isAbstract(member))
 						flags|= JavaElementImageDescriptor.ABSTRACT;
-					if (Flags.isFinal(modifiers) || isInterfaceOrAnnotationField(member) || isEnumConstant(member, modifiers))
+					if (Flags.isFinal(modifiers) || isInterfaceOrAnnotationField(member) || isEnumConstant(member, modifiers)
+							|| isRecordComponent(member))
 						flags|= JavaElementImageDescriptor.FINAL;
 					if (JdtFlags.isStatic(member) || isRecord(modifiers))
 						flags|= JavaElementImageDescriptor.STATIC;
@@ -449,6 +457,17 @@ public class JavaElementImageProvider {
 		return flags;
 	}
 
+
+	private boolean isRecordComponent(IMember member) throws JavaModelException {
+		IType type= member.getDeclaringType();
+		if (type != null && type.isRecord()) {
+			IField component= type.getRecordComponent(member.getElementName());
+			if (component != null) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private static boolean confirmAbstract(IMember element) throws JavaModelException {
 		// never show the abstract symbol on interfaces
