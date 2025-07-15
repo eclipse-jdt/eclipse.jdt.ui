@@ -356,6 +356,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private class FoldingVisitor extends ASTVisitor {
 
 		private FoldingStructureComputationContext ctx;
+		private List<Position> topLevelTypes = new ArrayList<>();
 
 		public FoldingVisitor(FoldingStructureComputationContext ctx) {
 			this.ctx= ctx;
@@ -369,7 +370,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				ImportDeclaration lastImport= imports.get(imports.size() - 1);
 				int end= lastImport.getStartPosition() + lastImport.getLength();
 				includelastLine = true;
-				createFoldingRegion(start, end - start, ctx.collapseMembers());
+				createFoldingRegion(start, end - start, ctx.collapseImportContainer());
 			}
 			return super.visit(node);
 		}
@@ -380,6 +381,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				int start= node.getName().getStartPosition();
 				int end= node.getStartPosition() + node.getLength();
 				createFoldingRegion(start, end - start, ctx.collapseMembers());
+			} else {
+				topLevelTypes.add(new Position(node.getStartPosition(), node.getLength()-1));
 			}
 			return true;
 		}
@@ -477,7 +480,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		@Override
 		public boolean visit(AnonymousClassDeclaration node) {
-			createFoldingRegion(node, ctx.collapseMembers());
+			createFoldingRegion(node, ctx.collapseInnerTypes());
 			return true;
 		}
 
@@ -1093,6 +1096,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private boolean fCustomFoldingRegionsEnabled;
 	private char[] fCustomFoldingRegionBegin;
 	private char[] fCustomFoldingRegionEnd;
+	private boolean fCustomFoldingRegionMarkersCanOverlap;
 
 	/* filters */
 	/** Member filter, matches nested members (but not top-level types). */
@@ -1276,8 +1280,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		fCustomFoldingRegionBegin=customFoldingRegionBegin.toCharArray();
 		fCustomFoldingRegionEnd=customFoldingRegionEnd.toCharArray();
 		fCustomFoldingRegionsEnabled = store.getBoolean(PreferenceConstants.EDITOR_FOLDING_CUSTOM_REGIONS_ENABLED) &&
-				!customFoldingRegionBegin.isEmpty() && !customFoldingRegionEnd.isEmpty() &&
-				!customFoldingRegionBegin.startsWith(customFoldingRegionEnd) && !customFoldingRegionEnd.startsWith(customFoldingRegionBegin);
+				!customFoldingRegionBegin.isEmpty() && !customFoldingRegionEnd.isEmpty();
+		// do not include the end region marker in the folded region if the start and end markers are not mutually exclusive
+		fCustomFoldingRegionMarkersCanOverlap = customFoldingRegionBegin.startsWith(customFoldingRegionEnd) || customFoldingRegionEnd.startsWith(customFoldingRegionBegin);
 		fNewFolding = store.getBoolean(PreferenceConstants.EDITOR_NEW_FOLDING_ENABLED);
 	}
 
@@ -1414,7 +1419,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				Deque<Deque<Integer>> openCustomRegionStartPositions= new ArrayDeque<>();
 				openCustomRegionStartPositions.add(new ArrayDeque<>());
 
-				for (Position nonCommentFoldingRegion : List.copyOf(ctx.fMap.values())) {
+				for (Position nonCommentFoldingRegion : merge(visitor.topLevelTypes, ctx.fMap.values())) {
 
 					// process regions depth-first until reaching the current region
 					currentCommentIndex= processFoldingRegionsForCustomCommentFolding(
@@ -1422,21 +1427,53 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 							currentFoldingPositions, openCustomRegionStartPositions, nonCommentFoldingRegion.getOffset()
 					);
 					if (currentCommentIndex >= comments.size()) {
+						while(!openCustomRegionStartPositions.isEmpty()) {
+							Deque<Integer> activeFoldingRegions= openCustomRegionStartPositions.removeLast();
+							Position region= currentFoldingPositions.pollLast();
+							int endPosition = sourceArray.length - 1;
+							if (region != null) {
+								endPosition= region.getOffset() + region.getLength() - 1;
+							}
+							endAllActiveFoldingRegions(sourceArray, visitor, activeFoldingRegions, endPosition);
+						}
+
 						return;
 					}
 
 					// process comments before current region starts
-					currentCommentIndex= checkCustomFoldingCommitsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, openCustomRegionStartPositions.peekLast(), nonCommentFoldingRegion.getOffset());
+					currentCommentIndex= checkCustomFoldingCommentsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, openCustomRegionStartPositions.peekLast(), nonCommentFoldingRegion.getOffset());
 
 					currentFoldingPositions.addLast(nonCommentFoldingRegion);
 					openCustomRegionStartPositions.addLast(new ArrayDeque<>());
 				}
 				// process all leftover comments at the end
 				currentCommentIndex= processFoldingRegionsForCustomCommentFolding(sourceArray, visitor, comments, currentCommentIndex, currentFoldingPositions, openCustomRegionStartPositions, Integer.MAX_VALUE);
-				checkCustomFoldingCommitsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, openCustomRegionStartPositions.peek(), Integer.MAX_VALUE);
+				checkCustomFoldingCommentsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, openCustomRegionStartPositions.peek(), Integer.MAX_VALUE);
+
+				for (Deque<Integer> activeFoldingRegions : openCustomRegionStartPositions) {
+					endAllActiveFoldingRegions(sourceArray, visitor, activeFoldingRegions, sourceArray.length - 1);
+				}
 			}
 		} catch (JavaModelException | IllegalStateException e) {
 		}
+	}
+
+	private List<Position> merge(List<Position> topLevelTypes, Collection<Position> nonCustomFoldingRegions) {
+		List<Position> merged = new ArrayList<>(topLevelTypes.size() + nonCustomFoldingRegions.size());
+
+		int topLevelIndex = 0;
+		for (Position region : nonCustomFoldingRegions) {
+			while (topLevelIndex < topLevelTypes.size() && topLevelTypes.get(topLevelIndex).getOffset() < region.getOffset()) {
+				merged.add(topLevelTypes.get(topLevelIndex++));
+			}
+			merged.add(region);
+		}
+
+		while (topLevelIndex < topLevelTypes.size()) {
+			merged.add(topLevelTypes.get(topLevelIndex++));
+		}
+
+		return merged;
 	}
 
 	/**
@@ -1459,15 +1496,37 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			currentFoldingPositions.removeLast();
 			Deque<Integer> innerOpenStartPositions= openCustomRegionStartPositions.removeLast();
 
-			currentCommentIndex= checkCustomFoldingCommitsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, innerOpenStartPositions, currentFoldingPosition.getOffset() + currentFoldingPosition.getLength());
+			int currentFoldingPositionEnd= currentFoldingPosition.getOffset() + currentFoldingPosition.getLength();
+			currentCommentIndex= checkCustomFoldingCommentsBeforePosition(sourceArray, visitor, comments, currentCommentIndex, innerOpenStartPositions, currentFoldingPositionEnd);
+
+			if (fCustomFoldingRegionMarkersCanOverlap) {
+				endAllActiveFoldingRegions(sourceArray, visitor, innerOpenStartPositions, currentFoldingPositionEnd);
+			}
 
 			if (currentCommentIndex >= comments.size()) {
+				if (fCustomFoldingRegionMarkersCanOverlap) {
+					// end all remaining custom folding regions of all remaining blocks if last comment reached
+					while (!currentFoldingPositions.isEmpty() && !openCustomRegionStartPositions.isEmpty()) {
+						currentFoldingPosition= currentFoldingPositions.removeLast();
+						innerOpenStartPositions= openCustomRegionStartPositions.removeLast();
+						endAllActiveFoldingRegions(sourceArray, visitor, innerOpenStartPositions, currentFoldingPosition.getOffset() + currentFoldingPosition.getLength());
+					}
+				}
 				return currentCommentIndex;
 			}
 
 			currentFoldingPosition= currentFoldingPositions.peekLast();
 		}
 		return currentCommentIndex;
+	}
+
+	private void endAllActiveFoldingRegions(char[] sourceArray, FoldingVisitor visitor, Deque<Integer> openRegionsToEnd, int foldingRegionEnd) {
+		if (fCustomFoldingRegionMarkersCanOverlap) {
+			for (Integer startPosition : openRegionsToEnd) {
+				IRegion region= new Region(startPosition, foldingRegionEnd - startPosition);
+				checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, region, false);
+			}
+		}
 	}
 
 
@@ -1482,7 +1541,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @param limit only regions before this position are scanned
 	 * @return the new index of the next comment to process (after limit)
 	 */
-	private int checkCustomFoldingCommitsBeforePosition(char[] sourceArray, FoldingVisitor visitor, List<Comment> comments, int currentCommentIndex,
+	private int checkCustomFoldingCommentsBeforePosition(char[] sourceArray, FoldingVisitor visitor, List<Comment> comments, int currentCommentIndex,
 			Deque<Integer> innerOpenStartPositions, int limit) {
 		while (currentCommentIndex < comments.size() && comments.get(currentCommentIndex).getStartPosition() < limit) {
 			Comment comment= comments.get(currentCommentIndex);
@@ -1503,14 +1562,19 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				comment.getStartPosition(), comment.getStartPosition() + comment.getLength()
 		);
 		if (customFoldingRegion != null) {
-			if (includeLastLineInCustomFoldingRegion(sourceArray, customFoldingRegion.getOffset() + customFoldingRegion.getLength())) {
-				includelastLine= true;
-			}
-			visitor.createFoldingRegion(customFoldingRegion.getOffset(), customFoldingRegion.getLength(), fCollapseCustomRegions);
+			checkIncludeLastLineAndCreateCustomFoldingRegion(sourceArray, visitor, customFoldingRegion, fCustomFoldingRegionMarkersCanOverlap);
 		}
 	}
 
-	private boolean includeLastLineInCustomFoldingRegion(char[] sourceArray, int regionEnd) {
+	private void checkIncludeLastLineAndCreateCustomFoldingRegion(char[] sourceArray, FoldingVisitor visitor, IRegion customFoldingRegion, boolean excludeEndregionComment) {
+		includelastLine = includeLastLineInCustomFoldingRegion(sourceArray, customFoldingRegion.getOffset() + customFoldingRegion.getLength(), excludeEndregionComment);
+		visitor.createFoldingRegion(customFoldingRegion.getOffset(), customFoldingRegion.getLength(), fCollapseCustomRegions);
+	}
+
+	private boolean includeLastLineInCustomFoldingRegion(char[] sourceArray, int regionEnd, boolean excludeEndregionComment) {
+		if (excludeEndregionComment) {
+			return false;
+		}
 		char firstCharacter = sourceArray[regionEnd];
 		if (firstCharacter == '\n' || firstCharacter == '\r') {
 			return true;
@@ -1631,7 +1695,11 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			int offset= document.getLineOffset(start);
 			int endOffset;
 			if (includelastLine) {
-				endOffset= document.getLineOffset(end + 1);
+				if (document.getNumberOfLines() == end + 1) {
+					endOffset = document.getLength() - 1;
+				} else {
+					endOffset= document.getLineOffset(end + 1);
+				}
 				includelastLine = false;
 			}
 			else {
@@ -1733,7 +1801,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 						boolean commentCollapse;
 						if (i == 0 && (regions.length > 2 || ctx.hasHeaderComment()) && element == ctx.getFirstType()) {
 							commentCollapse= ctx.collapseHeaderComments();
-						} else if(ctx.fCurrentCustomRegions.contains(region)) {
+						} else if (ctx.fCurrentCustomRegions.contains(region)) {
 							commentCollapse= ctx.collapseCustomRegions();
 						} else {
 							commentCollapse= ctx.collapseJavadoc();
@@ -1884,7 +1952,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				if (fCustomFoldingRegionsEnabled) {
 					if (reference instanceof IParent parent && !parent.hasChildren()) {
 						// if the element has no children, check content for custom folding region markers
-						checkCustomFoldingUntilScannerEnd(ctx, regions, new ArrayDeque<>(), scanner);
+						Deque<Integer> openCustomRegionStartPositions= new ArrayDeque<>();
+						checkCustomFoldingUntilScannerEnd(ctx, regions, openCustomRegionStartPositions, scanner);
+						addRemainingOpenCustomFoldingRegions(range, regions, ctx, openCustomRegionStartPositions, false);
 					}
 					ctx.fLastScannedIndex= scanner.getCurrentTokenEndPosition();
 					if (reference instanceof IJavaElement javaElement && javaElement.getParent() != null &&
@@ -1898,6 +1968,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 							int regionEnd= parentRange.getOffset() + parentRange.getLength();
 							scanner.resetTo(regionStart, regionEnd);
 							checkCustomFoldingUntilScannerEnd(ctx, regions, ctx.fOpenCustomRegionStartPositions, scanner);
+
+							addRemainingOpenCustomFoldingRegions(range, regions, ctx, ctx.fOpenCustomRegionStartPositions, true);
 						}
 					}
 				}
@@ -1910,9 +1982,19 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		return new IRegion[0];
 	}
 
+	private void addRemainingOpenCustomFoldingRegions(ISourceRange range, List<IRegion> regions, FoldingStructureComputationContext ctx, Deque<Integer> openCustomRegionStartPositions, boolean includeLastLine) {
+		if (fCustomFoldingRegionMarkersCanOverlap) {
+			for (Integer openRegion : openCustomRegionStartPositions) {
+				Region region= new Region(openRegion, range.getOffset() + range.getLength() - openRegion);
+				this.includelastLine= includeLastLine;
+				regions.add(Math.max(regions.size() - 1, 0), alignRegion(region, ctx));
+			}
+		}
+	}
+
 	private void checkCustomFoldingUntilScannerEnd(FoldingStructureComputationContext ctx, List<IRegion> regions, Deque<Integer> openCustomRegionStartPositions, IScanner scanner) throws InvalidInputException {
-		for(int token = scanner.getNextToken(); token != ITerminalSymbols.TokenNameEOF; token=scanner.getNextToken()) {
-			if(isCommentToken(token)) {
+		for (int token = scanner.getNextToken(); token != ITerminalSymbols.TokenNameEOF; token=scanner.getNextToken()) {
+			if (isCommentToken(token)) {
 				checkCustomFolding(ctx, regions, openCustomRegionStartPositions, scanner, token, Math.max(regions.size() - 1, 0));
 			}
 		}
@@ -1934,7 +2016,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		IRegion region= checkCustomFolding(openCustomRegionStartPositions, commentTextStart, source, currentTokenStartPosition, currentTokenEndPosition);
 		if (region != null) {
-			if (!includeLastLineInCustomFoldingRegion(source, currentTokenEndPosition)) {
+			if (!includeLastLineInCustomFoldingRegion(source, currentTokenEndPosition, fCustomFoldingRegionMarkersCanOverlap)) {
 				includelastLine= false;
 				region= alignRegion(region, ctx);
 			}
@@ -1946,17 +2028,17 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private Region checkCustomFolding(Deque<Integer> openCustomRegionStartPositions, int commentTextStart, char[] source, int currentTokenStartPosition, int currentTokenEndPosition) {
 		int currentTokenLengthStartingAtCommentTextStart= currentTokenEndPosition - commentTextStart;
 
-		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCustomFoldingRegionBegin)) {
-			openCustomRegionStartPositions.add(currentTokenStartPosition);
-		}
-
+		Region returnedRegion= null;
 		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCustomFoldingRegionEnd) && !openCustomRegionStartPositions.isEmpty()) {
 			int end= currentTokenEndPosition;
 			Integer regionStart= openCustomRegionStartPositions.removeLast();
-			return new Region(regionStart, end - regionStart);
-
+			returnedRegion= new Region(regionStart, end - regionStart);
 		}
-		return null;
+
+		if (startsWith(source, commentTextStart, currentTokenLengthStartingAtCommentTextStart, fCustomFoldingRegionBegin)) {
+			openCustomRegionStartPositions.add(currentTokenStartPosition);
+		}
+		return returnedRegion;
 	}
 
 	private int findPossibleRegionCommentStart(IScanner scanner, int token) {
@@ -1972,7 +2054,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private int skipLeadingWhitespace(char[] source, int start) {
-		while (Character.isWhitespace(source[start])) {
+		while (start < source.length && Character.isWhitespace(source[start])) {
 			start++;
 		}
 		return start;
@@ -1982,7 +2064,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (length < prefix.length) {
 			return false;
 		}
-		for(int i=0;i<prefix.length;i++) {
+		for (int i=0; i < prefix.length; i++) {
 			if (source[offset+i] != prefix[i]) {
 				return false;
 			}

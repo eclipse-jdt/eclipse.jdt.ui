@@ -40,12 +40,24 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 		performTest(fgTestSetup1d8.getDefaultMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "defaultMethods18_out", null, null, destination, visibility);
 	}
 
+	protected void defaultMethodsTest(int destination, int visibility, boolean makeFinal, boolean makeSynchronized) throws Exception {
+		performTest(fgTestSetup1d8.getDefaultMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "defaultMethods18_out", null, null, destination, visibility, makeFinal, makeSynchronized);
+	}
+
 	protected void staticMethodsTest(int destination, int visibility) throws Exception {
 		performTest(fgTestSetup1d8.getStaticMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "staticMethods18_out", null, null, destination, visibility);
 	}
 
+	protected void staticMethodsTest(int destination, int visibility, boolean makeFinal, boolean makeSynchronized) throws Exception {
+		performTest(fgTestSetup1d8.getStaticMethodsPackage(), "A", COMPARE_WITH_OUTPUT, "staticMethods18_out", null, null, destination, visibility, makeFinal, makeSynchronized);
+	}
+
 	protected void destinationTest(int destination, int visibility) throws Exception {
 		performTest(fgTestSetup1d8.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination18_out", null, null, destination, visibility);
+	}
+
+	protected void destinationTest(int destination, int visibility, boolean makeFinal, boolean makeSynchronized) throws Exception {
+		performTest(fgTestSetup1d8.getDestinationPackage(), "A", COMPARE_WITH_OUTPUT, "destination18_out", null, null, destination, visibility, makeFinal, makeSynchronized);
 	}
 
 	protected void lambdaExpressionTest(int destination, int visibility) throws Exception {
@@ -151,6 +163,18 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Override
+	@Test
+	public void test108() throws Exception {
+		staticMethodsTest(1, Modifier.PUBLIC, true, false);
+	}
+
+	@Override
+	@Test
+	public void test109() throws Exception {
+		staticMethodsTest(1, Modifier.PUBLIC, false, true);
+	}
+
 	//====================================================================================
 	// Testing Destination Types
 	//====================================================================================
@@ -171,6 +195,21 @@ public class ExtractMethodTests1d8 extends ExtractMethodTests {
 	@Test
 	public void test203() throws Exception {
 		destinationTest(1, Modifier.PROTECTED);
+	}
+
+	@Test
+	public void test203a() throws Exception {
+		destinationTest(1, Modifier.PROTECTED, true, false);
+	}
+
+	@Test
+	public void test203b() throws Exception {
+		destinationTest(1, Modifier.PROTECTED, false, true);
+	}
+
+	@Test
+	public void test203c() throws Exception {
+		destinationTest(1, Modifier.PROTECTED, true, true);
 	}
 
 	@Test

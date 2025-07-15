@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -361,12 +361,17 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					return;
 
     				Map<String, String> options= new HashMap<>();
-					for (ICleanUp cleanUp : cleanUps) {
-						Map<String, String> map= cleanUp.getRequirements().getCompilerOptions();
-						if (map != null) {
-							options.putAll(map);
-						}
-					}
+    				if (cleanUps[0].getRequirements().requiresSeparateOptions()) {
+    					options.putAll(cleanUps[0].getRequirements().getCompilerOptions());
+    				} else {
+    					for (ICleanUp cleanUp : cleanUps) {
+    						CleanUpRequirements requirements= cleanUp.getRequirements();
+    						Map<String, String> map= requirements.getCompilerOptions();
+    						if (map != null && !requirements.requiresSeparateOptions()) {
+    							options.putAll(map);
+    						}
+    					}
+    				}
 
     				CompilationUnit ast= null;
     				if (requiresAST(cleanUps)) {
