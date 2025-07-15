@@ -964,15 +964,28 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				if (name != null && !RenameUnusedVariableFixCore.canRenameToUnnamedVariable(compilationUnit, name)) {
 					IBinding binding= name.resolveBinding();
 					if (binding instanceof IVariableBinding && !isFormalParameterInEnhancedForStatement(name) && (!((IVariableBinding) binding).isField() || isSideEffectFree(name, compilationUnit))) {
-						VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
-						if (parent != null) {
-							ASTNode varDecl= parent.getParent();
-							if (!variableDeclarations.containsKey(varDecl)) {
-								variableDeclarations.put(varDecl, new ArrayList<>());
+						boolean foundJnaStructure= false;
+						if (((IVariableBinding)binding).isField()) {
+							ITypeBinding declaringClass= ((IVariableBinding)binding).getDeclaringClass();
+							while (declaringClass != null) {
+								if (declaringClass.getQualifiedName().equals("com.sun.jna.Structure")) { //$NON-NLS-1$
+									foundJnaStructure= true;
+									break;
+								}
+								declaringClass= declaringClass.getSuperclass();
 							}
-							variableDeclarations.get(varDecl).add(name);
-						} else {
-							result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+						}
+						if (!foundJnaStructure) {
+							VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
+							if (parent != null) {
+								ASTNode varDecl= parent.getParent();
+								if (!variableDeclarations.containsKey(varDecl)) {
+									variableDeclarations.put(varDecl, new ArrayList<>());
+								}
+								variableDeclarations.get(varDecl).add(name);
+							} else {
+								result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+							}
 						}
 					}
 				}
