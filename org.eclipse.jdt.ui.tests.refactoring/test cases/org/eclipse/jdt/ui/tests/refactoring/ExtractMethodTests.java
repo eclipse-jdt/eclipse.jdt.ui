@@ -92,11 +92,18 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	}
 
 	protected void performTest(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder, String[] newNames, int[] newOrder, int destination, int visibility) throws Exception {
+		performTest(packageFragment, id, mode, outputFolder, newNames, newOrder, destination, visibility, false, false);
+	}
+
+	protected void performTest(IPackageFragment packageFragment, String id, TestMode mode, String outputFolder, String[] newNames, int[] newOrder, int destination, int visibility,
+			boolean makeFinal, boolean makeSynchronized) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(unit, selection[0], selection[1]);
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(visibility);
+		refactoring.setFinal(makeFinal);
+		refactoring.setSynchronized(makeSynchronized);
 		TestModelProvider.clearDelta();
 		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 		switch (mode) {

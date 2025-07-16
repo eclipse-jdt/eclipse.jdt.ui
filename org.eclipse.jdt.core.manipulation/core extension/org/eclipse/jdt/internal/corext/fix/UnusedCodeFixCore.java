@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2024 IBM Corporation and others.
+ * Copyright (c) 2019, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -85,6 +86,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.AbortSearchException;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ReplaceRewrite;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
@@ -905,11 +907,42 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 		for (IProblemLocation problem : problems) {
 			int id= problem.getProblemId();
 
-			if (removeUnusedImports && (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
-					id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound)) {
+			if (removeUnusedImports && (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport)) {
 				ImportDeclaration node= UnusedCodeFixCore.getImportDeclaration(problem, compilationUnit);
 				if (node != null) {
 					result.add(new RemoveImportOperation(node));
+				}
+			}
+
+			if (removeUnusedImports && (id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound)) {
+				ImportDeclaration node= UnusedCodeFixCore.getImportDeclaration(problem, compilationUnit);
+				if (node != null && !node.isOnDemand()) {
+					Name name= node.getName();
+					String nameString= name.getFullyQualifiedName();
+					if (name.isQualifiedName()) {
+						int dotIndex= nameString.lastIndexOf('.');
+						if (dotIndex != -1) {
+							nameString= nameString.substring(dotIndex + 1);
+						}
+					}
+					final String nameToLookFor= nameString;
+					ASTVisitor nameVisitor= new ASTVisitor() {
+						@Override
+						public boolean visit(SimpleName nameNode) {
+							if (nameNode.getFullyQualifiedName().equals(nameToLookFor)) {
+								if (ASTNodes.getFirstAncestorOrNull(nameNode, ImportDeclaration.class) == null) {
+									throw new AbortSearchException();
+								}
+							}
+							return false;
+						}
+					};
+					try {
+						compilationUnit.accept(nameVisitor);
+						result.add(new RemoveImportOperation(node));
+					} catch (AbortSearchException e) {
+						// don't add remove import operation as name might be used
+					}
 				}
 			}
 
@@ -931,15 +964,28 @@ public class UnusedCodeFixCore extends CompilationUnitRewriteOperationsFixCore {
 				if (name != null && !RenameUnusedVariableFixCore.canRenameToUnnamedVariable(compilationUnit, name)) {
 					IBinding binding= name.resolveBinding();
 					if (binding instanceof IVariableBinding && !isFormalParameterInEnhancedForStatement(name) && (!((IVariableBinding) binding).isField() || isSideEffectFree(name, compilationUnit))) {
-						VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
-						if (parent != null) {
-							ASTNode varDecl= parent.getParent();
-							if (!variableDeclarations.containsKey(varDecl)) {
-								variableDeclarations.put(varDecl, new ArrayList<>());
+						boolean foundJnaStructure= false;
+						if (((IVariableBinding)binding).isField()) {
+							ITypeBinding declaringClass= ((IVariableBinding)binding).getDeclaringClass();
+							while (declaringClass != null) {
+								if (declaringClass.getQualifiedName().equals("com.sun.jna.Structure")) { //$NON-NLS-1$
+									foundJnaStructure= true;
+									break;
+								}
+								declaringClass= declaringClass.getSuperclass();
 							}
-							variableDeclarations.get(varDecl).add(name);
-						} else {
-							result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+						}
+						if (!foundJnaStructure) {
+							VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
+							if (parent != null) {
+								ASTNode varDecl= parent.getParent();
+								if (!variableDeclarations.containsKey(varDecl)) {
+									variableDeclarations.put(varDecl, new ArrayList<>());
+								}
+								variableDeclarations.get(varDecl).add(name);
+							} else {
+								result.add(new RemoveUnusedMemberOperation(new SimpleName[] { name }, false));
+							}
 						}
 					}
 				}

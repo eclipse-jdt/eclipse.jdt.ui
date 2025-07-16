@@ -86,9 +86,13 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 		StyledText textWidget= sourceViewer.getTextWidget();
 		ICompilationUnit unit= null;
 		int textWidgetLineNumber= mapLineNumberToWidget(sourceViewer, lineNumber);
+		if (textWidgetLineNumber < 0) {
+			return stickyLines;
+		}
 		int startIndentation= 0;
-		String line= textWidget.getLine(textWidgetLineNumber);
+		String line = null;
 		try {
+			line = textWidget.getLine(textWidgetLineNumber);
 			startIndentation= getIndentation(line);
 			while (startIndentation == IGNORE_LINE_INDENTATION) {
 				textWidgetLineNumber--;
@@ -193,11 +197,19 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 										if (elseLine <= mapWidgetToLineNumber(sourceViewer, textWidgetLineNumber + 1)) {
 											Pattern p= ELSE_PATTERN;
 											nodeLineNumber= elseLine;
-											String stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
+											int lineIndex = mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1);
+											if (lineIndex < 0) {
+												break;
+											}
+											String stmtLine= textWidget.getLine(lineIndex);
 											Matcher m= p.matcher(stmtLine);
 											while (!m.find() && nodeLineNumber > 1) {
 												nodeLineNumber--;
-												stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
+												lineIndex = mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1);
+												if (lineIndex < 0) {
+													continue;
+												}
+												stmtLine= textWidget.getLine(lineIndex );
 												m= p.matcher(stmtLine);
 											}
 											node= node.getParent();
@@ -254,11 +266,19 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 									}
 									if (bodyProperty != null && pattern != null) {
 										nodeLineNumber= cu.getLineNumber(bodyProperty.getStartPosition());
-										String stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
+										int lineIndex = mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1);
+										if (lineIndex < 0) {
+											break;
+										}
+										String stmtLine= textWidget.getLine(lineIndex);
 										Matcher m= pattern.matcher(stmtLine);
 										while (!m.find() && nodeLineNumber > 1) {
 											nodeLineNumber--;
-											stmtLine= textWidget.getLine(mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1));
+											lineIndex = mapLineNumberToWidget(sourceViewer, nodeLineNumber - 1);
+											if (lineIndex < 0) {
+												continue;
+											}
+											stmtLine= textWidget.getLine(lineIndex);
 											m= pattern.matcher(stmtLine);
 										}
 									}
@@ -321,6 +341,9 @@ public class JavaStickyLinesProvider implements IStickyLinesProvider {
 		return null;
 	}
 
+	/**
+	 * @return the line number in the widget, or -1 if the line number not found
+	 */
 	private int mapLineNumberToWidget(ISourceViewer sourceViewer, int line) {
 		if (sourceViewer instanceof ITextViewerExtension5 extension) {
 			return extension.modelLine2WidgetLine(line);

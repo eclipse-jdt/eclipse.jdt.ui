@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -71,12 +72,14 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private boolean fFirstTime;
 	private JavaSourceViewer fSignaturePreview;
 	private IDialogSettings fSettings;
-	private Composite accessModifiersGroup;
+	private Group accessModifiersGroup;
 
 	private static final String DESCRIPTION = RefactoringMessages.ExtractMethodInputPage_description;
 	private static final String THROW_RUNTIME_EXCEPTIONS= "ThrowRuntimeExceptions"; //$NON-NLS-1$
 	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 	private static final String ACCESS_MODIFIER= "AccessModifier"; //$NON-NLS-1$
+	private static final String MAKE_FINAL= "MakeFinal"; //$NON-NLS-1$
+	private static final String MAKE_SYNCHRONIZED= "MakeSynchronized"; //$NON-NLS-1$
 
 	public ExtractMethodInputPage() {
 		super(PAGE_NAME);
@@ -134,13 +137,20 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			});
 		}
 
-		label= new Label(result, SWT.NONE);
-		label.setText(RefactoringMessages.ExtractMethodInputPage_access_Modifiers);
+		Composite accessModifiersComposite= new Composite(result, SWT.NONE);
+		GridData gridData= new GridData();
+		gridData.grabExcessHorizontalSpace= true;
+		gridData.horizontalSpan= 2;
+		gridData.horizontalAlignment= GridData.FILL;
+		accessModifiersComposite.setLayoutData(gridData);
+		layout= new GridLayout();
+		accessModifiersComposite.setLayout(layout);
 
-		accessModifiersGroup= new Composite(result, SWT.NONE);
+		accessModifiersGroup= new Group(accessModifiersComposite, SWT.NONE);
+		accessModifiersGroup.setText(RefactoringMessages.ExtractMethodInputPage_access_Modifiers);
 		accessModifiersGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layout= new GridLayout();
-		layout.numColumns= 4; layout.marginWidth= 0;
+		layout.numColumns= 4; layout.marginWidth= 0;layout.makeColumnsEqualWidth= true;
 		accessModifiersGroup.setLayout(layout);
 
 		String[] labels= new String[] {
@@ -166,6 +176,27 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				}
 			});
 		}
+
+		Button finalButton= new Button(accessModifiersGroup, SWT.CHECK);
+		finalButton.setSelection(fSettings.getBoolean(MAKE_FINAL));
+		finalButton.setText(RefactoringMessages.ExtractMethodInputPage_final);
+		finalButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				setFinal(((Button)event.widget).getSelection());
+			}
+		});
+
+		Button synchronizedButton= new Button(accessModifiersGroup, SWT.CHECK);
+		synchronizedButton.setSelection(fSettings.getBoolean(MAKE_SYNCHRONIZED));
+		synchronizedButton.setText(RefactoringMessages.ExtractMethodInputPage_synchronized);
+		synchronizedButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				setSynchronized(((Button)event.widget).getSelection());
+			}
+		});
+
 		updateAccessModifiers();
 		layouter.perform(label, accessModifiersGroup, 1);
 
@@ -259,8 +290,12 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			fRefactoring.setVisibility(visibility);
 			for (Control radioButton : radioButtons) {
 				radioButton.setEnabled(false);
-				if (radioButton.getData().equals(visibility)) {
-					((Button) radioButton).setSelection(true);
+				if (radioButton.getData() != null) {
+					if (radioButton.getData().equals(visibility)) {
+						((Button) radioButton).setSelection(true);
+					} else {
+						((Button) radioButton).setSelection(false);
+					}
 				} else {
 					((Button) radioButton).setSelection(false);
 				}
@@ -270,11 +305,13 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			int visibility= accessModifier != null ? Integer.parseInt(accessModifier) : fRefactoring.getVisibility();
 			fRefactoring.setVisibility(visibility);
 			for (Control radioButton : radioButtons) {
-				radioButton.setEnabled(true);
-				if (radioButton.getData().equals(visibility)) {
-					((Button) radioButton).setSelection(true);
-				} else {
-					((Button) radioButton).setSelection(false);
+				if (radioButton instanceof Button button && button.getData() != null) {
+					radioButton.setEnabled(true);
+					if (radioButton.getData().equals(visibility)) {
+						((Button) radioButton).setSelection(true);
+					} else {
+						((Button) radioButton).setSelection(false);
+					}
 				}
 			}
 		}
@@ -316,6 +353,18 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 
 	private void setVisibility(Integer visibility) {
 		fRefactoring.setVisibility(visibility);
+		updatePreview(getText());
+	}
+
+	private void setFinal(boolean isEnabled) {
+		fSettings.put(MAKE_FINAL, isEnabled);
+		fRefactoring.setFinal(isEnabled);
+		updatePreview(getText());
+	}
+
+	private void setSynchronized(boolean isEnabled) {
+		fSettings.put(MAKE_SYNCHRONIZED, isEnabled);
+		fRefactoring.setSynchronized(isEnabled);
 		updatePreview(getText());
 	}
 

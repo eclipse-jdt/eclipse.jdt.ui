@@ -342,7 +342,11 @@ public class CoreJavadocAccess {
 		} else if (element instanceof ITypeParameter) {
 			member= ((ITypeParameter) element).getDeclaringMember();
 		} else if (element instanceof IMember) {
-			member= (IMember) element;
+			if (element instanceof IField field && field.isRecordComponent()) {
+				member= ((IField) element).getDeclaringType();
+			} else {
+				member= (IMember) element;
+			}
 		} else {
 			return null;
 		}

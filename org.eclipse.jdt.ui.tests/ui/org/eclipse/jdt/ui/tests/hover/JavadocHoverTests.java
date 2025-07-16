@@ -62,6 +62,7 @@ public class JavadocHoverTests extends CoreTests {
 	public void setUp() throws Exception {
 		fJProject1= pts.getProject();
 		JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		assertNotNull(JavaProjectHelper.addRTJar_16(fJProject1, false));
 	}
 
 	@After
@@ -321,9 +322,36 @@ public class JavadocHoverTests extends CoreTests {
 			int index= actualHtmlContent.indexOf("<pre><code>");
 			assertNotEquals(-1, index);
 			String actualSnippet= actualHtmlContent.substring(index, index + expectedCodeSequence.length());
-			assertEquals("sequence doesn't match", actualSnippet, expectedCodeSequence);
+			assertEquals("sequence doesn't match", expectedCodeSequence, actualSnippet);
 		}
 	}
+	@Test
+	public void testRecordComponentAccessor() throws Exception {
+		// https://github.com/eclipse-jdt/eclipse.jdt.ui/issues/931
+		String source=
+				"""
+			package p;
+			public class X {}
+			/**
+			 * A foo bar.
+			 * @param foo The foo.
+			 * @param bar The bar.
+			 */
+			record FooBar(String foo, String bar) {}
+			""";
+		ICompilationUnit cu= getWorkingCopy("/TestSetupProject/src/p/X.java", source, null);
+		assertNotNull("TestClass.java", cu);
 
+		IType type= cu.getType("FooBar");
+		for (IJavaElement member : type.getChildren()) {
+			IJavaElement[] elements= { member };
+			ISourceRange range= ((ISourceReference) member).getNameRange();
+			JavadocBrowserInformationControlInput hoverInfo= JavadocHover.getHoverInfo(elements, cu, new Region(range.getOffset(), range.getLength()), null);
+			String actualHtmlContent= hoverInfo.getHtml();
+
+			int index= actualHtmlContent.indexOf(member.getElementName().equals("foo") ? "The foo." : "The bar.");
+			assertNotEquals("Expected HTML not found, instead found : " + actualHtmlContent,  -1, index);
+		}
+	}
 }
 

@@ -30740,4 +30740,34 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
 	}
+
+	@Test
+	public void testUnusedCodeIssue2320() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String sample= """
+			package test1;
+			import foo.Bar;
+			public class E1 {
+			    public void foo() {
+				    Bar x = new Bar();
+			    }
+			}
+			""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", sample, false, null);
+
+		enable(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
+
+		sample= """
+			package test1;
+			import foo.Bar;
+			public class E1 {
+			    public void foo() {
+				    Bar x = new Bar();
+			    }
+			}
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] {cu1}, new String[] {expected1}, null);
+	}
 }
