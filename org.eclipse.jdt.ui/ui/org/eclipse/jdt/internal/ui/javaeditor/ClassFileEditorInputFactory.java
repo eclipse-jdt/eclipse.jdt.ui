@@ -14,8 +14,11 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.util.function.Supplier;
+
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
 
@@ -60,9 +63,17 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 				IJavaProject project= element.getJavaProject();
 				if (project != null) {
 					type= project.findType(type.getFullyQualifiedName());
-					if (type == null)
-						return null;
-					element= type.getParent();
+					if (type == null) {
+						if (!JavaCore.hasResolvedAllClasspathContainers(project)) {
+							return new DelayedEditorInput(project, (Supplier<IEditorInput>) () -> {
+								return (IEditorInput) createElement(memento);
+							});
+						} else {
+							return null;
+						}
+					} else {
+						element= type.getParent();
+					}
 				}
 			}
 			return EditorUtility.getEditorInput(element);

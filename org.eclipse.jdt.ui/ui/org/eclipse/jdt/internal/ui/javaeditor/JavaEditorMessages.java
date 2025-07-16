@@ -53,10 +53,15 @@ final class JavaEditorMessages extends NLS {
 	public static String AddImportOnSelection_dialog_title;
 	public static String AddImportOnSelection_dialog_message;
 	public static String ClassFileEditor_changeExternalAnnotations_caption;
+	public static String ClassFileEditor_Create_editor_ui;
 	public static String ClassFileEditor_error_classfile_not_on_classpath;
 	public static String ClassFileEditor_error_invalid_input_message;
 	public static String ClassFileEditor_error_title;
 	public static String ClassFileEditor_error_message;
+	public static String ClassFileEditor_Initialize_editor_content;
+	public static String ClassFileEditor_Initialize_in_progress;
+	public static String ClassFileEditor_Input_could_not_be_resolved;
+	public static String ClassFileEditor_Restore_editor_state;
 	public static String ClassFileEditor_SourceAttachmentForm_cannotconfigure;
 	public static String ClassFileEditor_SourceAttachmentForm_notsupported;
 	public static String ClassFileEditor_SourceAttachmentForm_readonly;
@@ -174,6 +179,9 @@ final class JavaEditorMessages extends NLS {
 	public static String JavaElementSuperImplementationHyperlink_hyperlinkText;
 	public static String JavaElementSuperImplementationHyperlink_hyperlinkText_qualified;
 	public static String AnnotateClassFile_label;
+
+	public static String DelayedEditorInput_delayed_editor_input;
+	public static String DelayedEditorInput_Waiting_for_classpath_containers_initialization;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaEditorMessages.class);

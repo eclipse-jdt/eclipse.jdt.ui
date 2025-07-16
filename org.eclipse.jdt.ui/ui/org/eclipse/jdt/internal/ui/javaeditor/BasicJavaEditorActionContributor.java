@@ -177,7 +177,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	 */
 	@Override
 	public void setActiveEditor(IEditorPart part) {
-
+		if (part != null && part.getEditorInput() instanceof DelayedEditorInput) {
+			return;
+		}
 		super.setActiveEditor(part);
 
 		ITextEditor textEditor= null;

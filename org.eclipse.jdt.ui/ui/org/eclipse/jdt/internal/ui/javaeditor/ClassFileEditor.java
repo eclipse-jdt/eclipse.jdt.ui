@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -47,6 +48,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
@@ -62,12 +65,14 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.navigator.ICommonMenuConstants;
+import org.eclipse.ui.progress.UIJob;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -509,6 +514,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @since 3.3
 	 */
 	private StyledText fNoSourceTextWidget;
+	private IEditorInput fInput;
 
 	/**
 	 * Default constructor.
@@ -652,6 +658,20 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	}
 
 	@Override
+	public IEditorInput getEditorInput() {
+		if (fInput == null) {
+			return super.getEditorInput();
+		} else if (fInput instanceof DelayedEditorInput delayedInput && delayedInput.delayIsFinished()) {
+			IEditorInput originalInput = delayedInput.getDelayedIEditorInput();
+			if(originalInput == null) {
+				return fInput;
+			}
+			return fInput = originalInput;
+		}
+		return fInput;
+	}
+
+	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		JavaCore.runReadOnly(() -> super.init(site, input));
 	}
@@ -660,6 +680,35 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
+		fInput= input;
+		if (input instanceof DelayedEditorInput delayedInput) {
+			delayedInput.executeDelayed(() -> {
+				if (getEditorInput() instanceof DelayedEditorInput) {
+					return;
+				}
+				new UIJob(JavaEditorMessages.ClassFileEditor_Initialize_editor_content) {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						try {
+							// revert the state after delay is finish, because input validation can't be executed in this state.
+							fParent = null;
+
+							JavaCore.runReadOnly(() -> doSetInputCached(delayedInput.getDelayedIEditorInput()));
+						} catch (CoreException e) {
+							ExceptionHandler.log(e, e.getMessage());
+						}
+						return Status.OK_STATUS;
+					}
+
+					@Override
+					public boolean belongsTo(Object family) {
+						return DelayedEditorInput.class == family;
+					}
+				}.schedule();
+			});
+			return;
+		}
 		JavaCore.runReadOnly(() -> doSetInputCached(input));
 	}
 	private void doSetInputCached(IEditorInput input) throws CoreException {
@@ -754,7 +803,47 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		JavaCore.runReadOnly(() -> createPartControlCached(parent));
+		fParent = parent;
+		if (fInput instanceof DelayedEditorInput delayedInput) {
+			Layout originalLayout = parent.getLayout();
+
+			GridLayoutFactory.fillDefaults().margins(15, 15).applyTo(parent);
+
+			Label lIcon= new Label(parent, SWT.WRAP);
+			GridDataFactory.fillDefaults().grab(false, false).applyTo(lIcon);
+			lIcon.setImage(Display.getDefault().getSystemImage(SWT.ICON_WORKING));
+
+			Label lHint= new Label(parent, SWT.WRAP);
+			GridDataFactory.fillDefaults().grab(true, false).applyTo(lHint);
+			lHint.setText(JavaEditorMessages.ClassFileEditor_Initialize_in_progress);
+
+			delayedInput.executeDelayed(() -> {
+				var job = new UIJob(JavaEditorMessages.ClassFileEditor_Create_editor_ui) {
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						if (getEditorInput() instanceof DelayedEditorInput) {
+							lIcon.setImage(Display.getDefault().getSystemImage(SWT.ICON_ERROR));
+							lHint.setText(JavaEditorMessages.ClassFileEditor_Input_could_not_be_resolved);
+						} else {
+							lIcon.dispose();
+							lHint.dispose();
+							parent.setLayout(originalLayout);
+							JavaCore.runReadOnly(() -> createPartControlCached(parent));
+						}
+						return Status.OK_STATUS;
+					}
+
+					@Override
+					public boolean belongsTo(Object family) {
+						return DelayedEditorInput.class == family;
+					}
+
+				};
+				job.schedule();
+			});
+		} else {
+			JavaCore.runReadOnly(() -> createPartControlCached(parent));
+		}
 	}
 
 	private void createPartControlCached(Composite parent) {
@@ -971,5 +1060,43 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (fSourceAttachmentForm != null && !fSourceAttachmentForm.isDisposed()) {
 			fSourceAttachmentForm.setFocus();
 		}
+	}
+
+	@Override
+	protected void doRestoreState(IMemento memento) {
+		if (getEditorInput() instanceof DelayedEditorInput delayedInput) {
+			delayedInput.executeDelayed(() -> {
+				if (getEditorInput() instanceof DelayedEditorInput) {
+					return;
+				}
+				new UIJob(JavaEditorMessages.ClassFileEditor_Restore_editor_state) {
+
+					@Override
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						ClassFileEditor.super.doRestoreState(memento);
+
+						return Status.OK_STATUS;
+					}
+
+					@Override
+					public boolean belongsTo(Object family) {
+						return DelayedEditorInput.class == family;
+					}
+				}.schedule();
+			});
+			return;
+		}
+		super.doRestoreState(memento);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> required) {
+		if (required == Composite.class) {
+			if (required.isAssignableFrom(fParent.getClass())) {
+				return (T) fParent;
+			}
+		}
+		return super.getAdapter(required);
 	}
 }
