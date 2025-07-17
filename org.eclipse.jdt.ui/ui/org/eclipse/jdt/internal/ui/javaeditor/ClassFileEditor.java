@@ -73,14 +73,18 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -509,6 +513,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 * @since 3.3
 	 */
 	private StyledText fNoSourceTextWidget;
+	private IElementChangedListener fIElementChangedListener;
 
 	/**
 	 * Default constructor.
@@ -675,24 +680,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					null));
 		}
 
-		JavaModelException e= probeInputForSource(input);
-		if (e != null) {
-			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
-			IClassFile file= classFileEditorInput.getClassFile();
-			IJavaProject javaProject= file.getJavaProject();
-			if (!javaProject.exists() || !javaProject.isOnClasspath(file)) {
-				throw new CoreException(JavaUIStatus.createError(
-						IJavaModelStatusConstants.INVALID_RESOURCE,
-						JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
-						null));
-			}
-			throw e;
-		}
-
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider instanceof ClassFileDocumentProvider) {
 			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
 		}
+		probeInputForSource((IClassFileEditorInput) input);
 
 		super.doSetInput(input);
 
@@ -779,21 +771,62 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 	}
 
-	private JavaModelException probeInputForSource(IEditorInput input) {
-		if (input == null) {
-			return null;
-		}
-
-		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
+	private boolean probeInputForSource(IClassFileEditorInput classFileEditorInput) throws CoreException {
 		IClassFile file= classFileEditorInput.getClassFile();
-
 		try {
 			file.getSourceRange();
 		} catch (JavaModelException e) {
-			return e;
-		}
+			IJavaProject javaProject= file.getJavaProject();
+			if (!javaProject.exists()) {
+				throw new CoreException(JavaUIStatus.createError(
+						IJavaModelStatusConstants.INVALID_RESOURCE,
+						JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
+						null));
+			}
+			if (!javaProject.isOnClasspath(file)) {
+				removeElementListener();
+				fIElementChangedListener= new IElementChangedListener() {
 
-		return null;
+					@Override
+					public void elementChanged(ElementChangedEvent event) {
+						if (javaProject.isOnClasspath(file)) {
+							try {
+								if (file instanceof IOrdinaryClassFile ocf) {
+									IType type= javaProject.findType(ocf.getType().getFullyQualifiedName());
+									if (type != null) {
+										IEditorInput editorInput= EditorUtility.getEditorInput(type.getParent());
+										if (editorInput!=null) {
+											JavaCore.removeElementChangedListener(this);
+											PlatformUI.getWorkbench().getDisplay().asyncExec(()->{
+												setInput(editorInput);
+											});
+											return;
+										}
+									}
+								} else {
+									JavaCore.removeElementChangedListener(this);
+									PlatformUI.getWorkbench().getDisplay().asyncExec(()->{
+										setInput(classFileEditorInput);
+									});
+								}
+							} catch (JavaModelException ignored) {
+								//seems still not possible...
+							}
+						}
+					}
+				};
+				JavaCore.addElementChangedListener(fIElementChangedListener);
+				return false;
+			}
+			throw e;
+		}
+		return true;
+	}
+
+	protected void removeElementListener() {
+		if (fIElementChangedListener != null) {
+			JavaCore.removeElementChangedListener(fIElementChangedListener);
+		}
 	}
 
 	/**
@@ -816,7 +849,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		boolean wasUsingSourceCopyAction= fSourceCopyAction == getAction(ITextEditorActionConstants.COPY);
 
 		// show source attachment form if no source found
-		if (file.getSourceRange() == null) {
+		if (!hasSource(file)) {
 			// dispose old source attachment form
 			if (fSourceAttachmentForm != null) {
 				fSourceAttachmentForm.dispose();
@@ -905,6 +938,14 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		}
 	}
 
+	private boolean hasSource(IClassFile file) {
+		try {
+			return file.getSourceRange() != null;
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
+
 	/*
 	 * @see ClassFileDocumentProvider.InputChangeListener#inputChanged(IClassFileEditorInput)
 	 */
@@ -953,6 +994,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	 */
 	@Override
 	public void dispose() {
+		removeElementListener();
 		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18510
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider instanceof ClassFileDocumentProvider) {
