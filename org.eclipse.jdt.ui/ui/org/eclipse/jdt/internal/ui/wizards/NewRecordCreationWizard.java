@@ -65,7 +65,7 @@ public class NewRecordCreationWizard extends NewElementWizard {
 
 	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
-		fPage.createType(monitor); // use the full progress monitor
+		fPage.createTypes(monitor); // use the full progress monitor
 	}
 
 	@Override
