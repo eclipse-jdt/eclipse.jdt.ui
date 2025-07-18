@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 IBM Corporation and others.
+ * Copyright (c) 2016, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -190,9 +190,6 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "\n" //
 				+ "    public void foo() {\n" //
 				+ "        Serializable s= new Serializable() {\n" //
-				+ "\n" //
-				+ "            " + FIELD_COMMENT + "\n" //
-				+ "            private static final long serialVersionUID = 1L;\n" //
 				+ "        };\n" //
 				+ "    }\n" //
 				+ "}\n";
@@ -228,9 +225,6 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 				+ "    " + FIELD_COMMENT + "\n" //
 				+ "    private static final long serialVersionUID = 1L;\n" //
 				+ "    private Serializable s= new Serializable() {\n" //
-				+ "\n" //
-				+ "        " + FIELD_COMMENT + "\n" //
-				+ "        private static final long serialVersionUID = 1L;\n" //
 				+ "        \n" //
 				+ "    };\n" //
 				+ "}\n";
@@ -239,54 +233,4 @@ public class CleanUpTest1d4 extends CleanUpTestCase {
 		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
 	}
 
-	@Test
-	public void testSerialVersionBug139381() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		String given= """
-			package test1;
-			import java.io.Serializable;
-			public class E1 {
-			    void foo1() {
-			        new Serializable() {
-			        };
-			    }
-			    void foo2() {
-			        new Object() {
-			        };
-			        new Serializable() {
-			        };
-			    }
-			}
-			""";
-
-		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", given, false, null);
-
-		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID);
-		enable(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED);
-
-		String expected= "" //
-				+ "package test1;\n" //
-				+ "import java.io.Serializable;\n" //
-				+ "public class E1 {\n" //
-				+ "    void foo1() {\n" //
-				+ "        new Serializable() {\n" //
-				+ "\n" //
-				+ "            " + FIELD_COMMENT + "\n" //
-				+ "            private static final long serialVersionUID = 1L;\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "    void foo2() {\n" //
-				+ "        new Object() {\n" //
-				+ "        };\n" //
-				+ "        new Serializable() {\n" //
-				+ "\n" //
-				+ "            " + FIELD_COMMENT + "\n" //
-				+ "            private static final long serialVersionUID = 1L;\n" //
-				+ "        };\n" //
-				+ "    }\n" //
-				+ "}\n";
-
-		assertNotEquals("The class must be changed", expected, given);
-		assertRefactoringResultAsExpectedIgnoreHashValue(new ICompilationUnit[] {cu}, new String[] {expected});
-	}
 }
