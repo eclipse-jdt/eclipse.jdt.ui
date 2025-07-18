@@ -768,9 +768,7 @@ public class CallInliner {
 				}
 			}
 			builder.append(statements[statements.length - 1]);
-			if (binding.getReturnType() != null && (!binding.getReturnType().isPrimitive() || !binding.getReturnType().getName().equals("void"))) { //$NON-NLS-1$
-				builder.append(";"); //$NON-NLS-1$
-			}
+			builder.append(";"); //$NON-NLS-1$
 			separator= lines.length == 1 ? "" : "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 			builder.append(separator + "}"); //$NON-NLS-1$
 			ASTNode newNode= fRewrite.createStringPlaceholder(builder.toString(), ASTNode.LAMBDA_EXPRESSION);
