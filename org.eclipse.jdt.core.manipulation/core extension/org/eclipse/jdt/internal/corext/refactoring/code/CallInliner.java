@@ -29,6 +29,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,6 +50,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -101,6 +103,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.CorextCore;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -765,6 +768,28 @@ public class CallInliner {
 				ITypeBinding functionMethodType= functionClassMethods[0].getReturnType();
 				if (functionMethodType != null && (!functionMethodType.isPrimitive() || !functionMethodType.getName().equals("void"))) { //$NON-NLS-1$
 					builder.append("return "); //$NON-NLS-1$
+				} else {
+					// we have a method that returns something but the functional interface is
+					// void so we will copy over the contents in case they modify something external
+					// and instead of a return statement, we will make an unused assignment at the end
+					builder.append("@SuppressWarnings(\"unused\") "); //$NON-NLS-1$
+					builder.append(binding.getReturnType().getName() + " "); //$NON-NLS-1$
+					Statement body= ASTNodes.getFirstAncestorOrNull(methodRef, Statement.class);
+					if (body != null) {
+						List<String> excludedNames= Arrays.asList(ASTResolving.getUsedVariableNames(body));
+						final List<String> sourceNames= new ArrayList<>();
+						ASTVisitor visitor= new ASTVisitor() {
+							@Override
+							public boolean visit(SimpleName node) {
+								sourceNames.add(node.getFullyQualifiedName());
+								return false;
+							}
+						};
+						fSourceProvider.getDeclaration().accept(visitor);
+						sourceNames.addAll(excludedNames);
+						String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, fImportRewrite.getCompilationUnit().getJavaProject(), functionMethodType, null, sourceNames);
+						builder.append(varNames[0] + " = "); //$NON-NLS-1$
+					}
 				}
 			}
 			builder.append(statements[statements.length - 1]);
