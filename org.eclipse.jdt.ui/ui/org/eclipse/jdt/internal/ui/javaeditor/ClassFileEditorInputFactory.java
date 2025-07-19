@@ -50,20 +50,22 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 		}
 		IJavaElement element= JavaCore.create(identifier);
 		try {
-			if (!element.exists() && element instanceof IOrdinaryClassFile) {
+			if (!element.exists() && element instanceof IOrdinaryClassFile cf) {
 				/*
 				 * Let's try to find the class file,
 				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83221
 				 */
-				IOrdinaryClassFile cf= (IOrdinaryClassFile)element;
 				IType type= cf.getType();
 				IJavaProject project= element.getJavaProject();
 				if (project != null) {
 					type= project.findType(type.getFullyQualifiedName());
-					if (type == null)
-						return null;
-					element= type.getParent();
+					if (type != null) {
+						return EditorUtility.getEditorInput(type.getParent());
+					}
 				}
+				//if not found on the project still return an input
+				//so it can be handled by the editor
+				return new InternalClassFileEditorInput(cf);
 			}
 			return EditorUtility.getEditorInput(element);
 		} catch (JavaModelException x) {
