@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.ui.IElementFactory;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
@@ -46,7 +47,18 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 	public IAdaptable createElement(IMemento memento) {
 		String identifier= memento.getString(KEY);
 		if (identifier == null) {
-			return null;
+			return new ExceptionalEditorInput("memento data", new IPersistableElement() { //$NON-NLS-1$
+
+				@Override
+				public void saveState(IMemento m) {
+					//nothing to save...
+				}
+
+				@Override
+				public String getFactoryId() {
+					return ID;
+				}
+			}, new IllegalStateException(String.format("No %s present in memento", KEY))); //$NON-NLS-1$
 		}
 		IJavaElement element= JavaCore.create(identifier);
 		try {
@@ -60,15 +72,27 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 				IJavaProject project= element.getJavaProject();
 				if (project != null) {
 					type= project.findType(type.getFullyQualifiedName());
-					if (type == null)
-						return null;
-					element= type.getParent();
+					if (type != null) {
+						return EditorUtility.getEditorInput(type.getParent());
+					}
 				}
+				return new OrdinaryClassFileEditorInput(cf);
 			}
 			return EditorUtility.getEditorInput(element);
 		} catch (JavaModelException x) {
-			// Don't report but simply return null
-			return null;
+			return new ExceptionalEditorInput(identifier, new IPersistableElement() {
+
+				@Override
+				public void saveState(IMemento m) {
+					m.putString(KEY, identifier);
+
+				}
+
+				@Override
+				public String getFactoryId() {
+					return ID;
+				}
+			}, x);
 		}
 	}
 
